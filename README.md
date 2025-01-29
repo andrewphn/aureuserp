@@ -71,7 +71,7 @@ That’s it! With just one command, your Aureus ERP environment is ready to use.
 
 ### License
 
-Aureus CRM is a truly opensource CRM framework which will always be free under the MIT.
+Aureus CRM is a truly opensource CRM framework which will always be free under the MIT License.
 
 ### Security Vulnerabilities
 
