@@ -1,8 +1,9 @@
 {
-    "name": "laravel/laravel",
+    "name": "aureuserp/aureuserp",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Open Source ERP Solution built on Laravel for Small and Medium Enterprises (SMEs) and large-scale enterprises.",
     "keywords": [
+        "erp",
         "laravel",
         "framework"
     ],
@@ -85,5 +86,11 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "support": {
+        "issues": "https://github.com/aureuserp/aureuserp/issues",
+        "forum": "https://forums.aureuserp.com",
+        "source": "https://github.com/aureuserp/aureuserp",
+        "docs": "https://devdocs.aureuserp.com"
+    }
 }
