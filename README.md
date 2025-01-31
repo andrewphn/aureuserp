@@ -1,3 +1,13 @@
+<p align="center">
+<a href="https://aureuserp.com"><img src="https://aureuserp.com/assets/images/logo.png" alt="Total Downloads"></a>
+</p>
+
+<p align="center">
+<a href="https://packagist.org/packages/aureuserp/aureuserp"><img src="https://poser.pugx.org/aureuserp/aureuserp/d/total.svg" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/aureuserp/aureuserp"><img src="https://poser.pugx.org/aureuserp/aureuserp/v/stable.svg" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/aureuserp/aureuserp"><img src="https://poser.pugx.org/aureuserp/aureuserp/license.svg" alt="License"></a>
+</p>
+
 ## Topics
 
 1. [Introduction](#introduction)
