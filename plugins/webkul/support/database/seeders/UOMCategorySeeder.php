@@ -16,35 +16,48 @@ class UOMCategorySeeder extends Seeder
     {
         $user = User::first();
 
+        DB::table('unit_of_measures')->delete();
+
         DB::table('unit_of_measure_categories')->delete();
 
         DB::table('unit_of_measure_categories')->insert([
             [
+                'id'         => 1,
                 'name'       => 'Unit',
                 'creator_id' => $user?->id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
+                'id'         => 2,
                 'name'       => 'Weight',
                 'creator_id' => $user?->id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
+                'id'         => 3,
                 'name'       => 'Working Time',
                 'creator_id' => $user?->id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
+                'id'         => 4,
                 'name'       => 'Length / Distance',
                 'creator_id' => $user?->id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
+                'id'         => 5,
                 'name'       => 'Surface',
                 'creator_id' => $user?->id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ], [
+            ],
+            [
+                'id'         => 6,
                 'name'       => 'Volume',
                 'creator_id' => $user?->id,
                 'created_at' => Carbon::now(),
