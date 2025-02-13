@@ -14,6 +14,7 @@ return [
     Webkul\Product\ProductServiceProvider::class,
     Webkul\Project\ProjectServiceProvider::class,
     Webkul\TableViews\TableViewsServiceProvider::class,
+    Webkul\Recruitment\RecruitmentServiceProvider::class,
     Webkul\Security\SecurityServiceProvider::class,
     Webkul\Timesheet\TimesheetServiceProvider::class,
 ];

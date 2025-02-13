@@ -47,7 +47,8 @@ class EmployeeServiceProvider extends PackageServiceProvider
                 $command
                     ->runsMigrations()
                     ->runsSeeders();
-            });
+            })
+            ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
     public function packageBooted(): void

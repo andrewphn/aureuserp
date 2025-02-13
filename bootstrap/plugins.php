@@ -8,6 +8,7 @@ return [
     // Webkul\Product\ProductPlugin::class,
     Webkul\Project\ProjectPlugin::class,
     Webkul\Support\SupportPlugin::class,
+    Webkul\Recruitment\RecruitmentPlugin::class,
     Webkul\Security\SecurityPlugin::class,
     Webkul\Field\FieldsPlugin::class,
     Webkul\Partner\PartnerPlugin::class,
