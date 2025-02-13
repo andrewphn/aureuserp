@@ -105,13 +105,13 @@ class InstallERP extends Command
             'email' => text(
                 'Email address',
                 required: true,
-                validate: fn ($email) => $this->validateAdminEmail($email, $userModel)
+                validate: fn($email) => $this->validateAdminEmail($email, $userModel)
             ),
             'password' => Hash::make(
                 password(
                     'Password',
                     required: true,
-                    validate: fn ($value) => $this->validateAdminPassword($value)
+                    validate: fn($value) => $this->validateAdminPassword($value)
                 )
             ),
             'resource_permission' => 'global',
@@ -178,7 +178,7 @@ class InstallERP extends Command
         if (PHP_OS_FAMILY == 'Windows') {
             exec("start {$repoUrl}");
         }
-        
+
         if (PHP_OS_FAMILY == 'Linux') {
             exec("xdg-open {$repoUrl}");
         }
