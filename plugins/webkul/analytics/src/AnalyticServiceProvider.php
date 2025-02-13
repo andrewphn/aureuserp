@@ -14,6 +14,7 @@ class AnalyticServiceProvider extends PackageServiceProvider
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
+            ->isCore()
             ->hasViews()
             ->hasTranslations()
             ->hasMigrations([

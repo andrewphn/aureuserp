@@ -18,9 +18,12 @@ class SupportServiceProvider extends PackageServiceProvider
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
+            ->isCore()
             ->hasViews()
             ->hasTranslations()
             ->hasMigrations([
+                '2024_11_05_105102_create_plugins_table',
+                '2024_11_05_105112_create_plugin_dependencies_table',
                 '2024_12_06_061927_create_currencies_table',
                 '2024_12_10_092651_create_countries_table',
                 '2024_12_10_092657_create_states_table',

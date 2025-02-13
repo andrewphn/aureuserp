@@ -162,4 +162,25 @@ class InstallERP extends Command
     {
         return strlen($password) >= 8 ? null : 'The password must be at least 8 characters long.';
     }
+
+    protected function askToStarGithubRepository(): void
+    {
+        if (! $this->confirm('Would you like to star our repo on GitHub?')) {
+            return;
+        }
+
+        $repoUrl = 'https://github.com/aureuserp/aureuserp';
+
+        if (PHP_OS_FAMILY == 'Darwin') {
+            exec("open {$repoUrl}");
+        }
+
+        if (PHP_OS_FAMILY == 'Windows') {
+            exec("start {$repoUrl}");
+        }
+        
+        if (PHP_OS_FAMILY == 'Linux') {
+            exec("xdg-open {$repoUrl}");
+        }
+    }
 }

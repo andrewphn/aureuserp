@@ -1,0 +1,166 @@
+<?php
+
+namespace Webkul\Purchase\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Field\Traits\HasCustomFields;
+use Webkul\Partner\Models\Address;
+use Webkul\Partner\Models\Partner;
+use Webkul\Purchase\Database\Factories\OrderFactory;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Currency;
+
+class Order extends Model
+{
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
+
+    /**
+     * Table name.
+     *
+     * @var string
+     */
+    protected $table = 'purchases_orders';
+
+    /**
+     * Fillable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'access_token',
+        'name',
+        'description',
+        'priority',
+        'origin',
+        'partner_reference',
+        'state',
+        'untaxed_amount',
+        'tax_amount',
+        'total_amount',
+        'total_cc_amount',
+        'currency_rate',
+        'mail_reminder_confirmed',
+        'mail_reception_confirmed',
+        'mail_reception_declined',
+        'invoice_count',
+        'ordered_at',
+        'approved_at',
+        'planned_at',
+        'calendar_start_at',
+        'incoterm_location',
+        'receipt_status',
+        'effective_date',
+        'report_grids',
+        'requisition_id',
+        'purchases_group_id',
+        'partner_id',
+        'partner_address_id',
+        'currency_id',
+        'fiscal_position_id', // Todo: add relationship
+        'payment_term_id', // Todo: add relationship
+        'incoterm_id', // Todo: add relationship
+        'user_id',
+        'company_id',
+        'creator_id',
+    ];
+
+    /**
+     * Table name.
+     *
+     * @var string
+     */
+    protected $casts = [
+        'mail_reminder_confirmed'  => 'boolean',
+        'mail_reception_confirmed' => 'boolean',
+        'mail_reception_declined'  => 'boolean',
+        'report_grids'             => 'boolean',
+        'ordered_at'               => 'datetime',
+        'approved_at'              => 'datetime',
+        'planned_at'               => 'datetime',
+        'calendar_start_at'        => 'datetime',
+        'effective_date'           => 'datetime',
+    ];
+
+    protected array $logAttributes = [
+    ];
+
+    public function requisition(): BelongsTo
+    {
+        return $this->belongsTo(Requisition::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(OrderGroup::class);
+    }
+
+    public function partner(): BelongsTo
+    {
+        return $this->belongsTo(Partner::class);
+    }
+
+    public function partnerAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function lines(): HasMany
+    {
+        return $this->hasMany(OrderLine::class);
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($order) {
+            $order->updateName();
+        });
+
+        static::created(function ($order) {
+            $order->update(['name' => $order->name]);
+        });
+    }
+
+    /**
+     * Update the full name without triggering additional events
+     */
+    public function updateName()
+    {
+        $this->name = 'PO/'.$this->id;
+    }
+
+    protected static function newFactory(): OrderFactory
+    {
+        return OrderFactory::new();
+    }
+}
