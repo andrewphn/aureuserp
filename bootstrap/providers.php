@@ -16,5 +16,6 @@ return [
     Webkul\TableViews\TableViewsServiceProvider::class,
     Webkul\Recruitment\RecruitmentServiceProvider::class,
     Webkul\Security\SecurityServiceProvider::class,
+    Webkul\TimeOff\TimeOffServiceProvider::class,
     Webkul\Timesheet\TimesheetServiceProvider::class,
 ];
