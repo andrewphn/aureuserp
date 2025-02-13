@@ -36,6 +36,7 @@ class TimeOffServiceProvider extends PackageServiceProvider
                     ->installDependencies()
                     ->runsMigrations()
                     ->runsSeeders();
-            });
+            })
+            ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 }
