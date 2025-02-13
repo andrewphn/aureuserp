@@ -3,18 +3,18 @@
 namespace Webkul\TimeOff\Filament\Widgets;
 
 use Carbon\Carbon;
-use Filament\Forms;
-use Illuminate\Database\Eloquent\Model;
-use Saade\FilamentFullCalendar\Actions;
-use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
-use Webkul\TimeOff\Models\Leave;
 use Filament\Actions\Action;
+use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Saade\FilamentFullCalendar\Actions;
+use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use Webkul\TimeOff\Enums\RequestDateFromPeriod;
 use Webkul\TimeOff\Enums\State;
+use Webkul\TimeOff\Models\Leave;
 
 class OverviewCalendarWidget extends FullCalendarWidget
 {
@@ -67,7 +67,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
                         $startDate = Carbon::parse($data['request_date_from']);
                         $endDate = $data['request_date_to'] ? Carbon::parse($data['request_date_to']) : $startDate;
 
-                        $data['duration_display'] = $startDate->diffInDays($endDate) + 1 . ' day(s)';
+                        $data['duration_display'] = $startDate->diffInDays($endDate) + 1 .' day(s)';
 
                         $data['number_of_days'] = $startDate->diffInDays($endDate) + 1;
                     }
@@ -88,7 +88,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
                         $newData = [
                             ...$leave->toArray(),
                             'request_date_from' => $arguments['event']['start'] ?? $leave->request_date_from,
-                            'request_date_to' => $arguments['event']['end'] ?? $leave->request_date_to,
+                            'request_date_to'   => $arguments['event']['end'] ?? $leave->request_date_to,
                         ];
 
                         $form->fill($newData);
@@ -159,7 +159,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
                         $startDate = Carbon::parse($data['request_date_from']);
                         $endDate = $data['request_date_to'] ? Carbon::parse($data['request_date_to']) : $startDate;
 
-                        $data['duration_display'] = $startDate->diffInDays($endDate) + 1 . ' day(s)';
+                        $data['duration_display'] = $startDate->diffInDays($endDate) + 1 .' day(s)';
 
                         $data['number_of_days'] = $startDate->diffInDays($endDate) + 1;
                     }
@@ -209,14 +209,14 @@ class OverviewCalendarWidget extends FullCalendarWidget
                         ->native(false)
                         ->label(__('time_off::filament/widgets/overview-calendar-widget.form.fields.request-date-to'))
                         ->default(now())
-                        ->hidden(fn(Get $get) => $get('request_unit_half'))
+                        ->hidden(fn (Get $get) => $get('request_unit_half'))
                         ->required(),
                     Forms\Components\Select::make('request_date_from_period')
                         ->label(__('time_off::filament/widgets/overview-calendar-widget.form.fields.period'))
                         ->options(RequestDateFromPeriod::class)
                         ->default(RequestDateFromPeriod::MORNING->value)
                         ->native(false)
-                        ->visible(fn(Get $get) => $get('request_unit_half'))
+                        ->visible(fn (Get $get) => $get('request_unit_half'))
                         ->required(),
                 ]),
             Forms\Components\Toggle::make('request_unit_half')
@@ -235,7 +235,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $startDate = Carbon::parse($get('request_date_from'));
                     $endDate = $get('request_date_to') ? Carbon::parse($get('request_date_to')) : $startDate;
 
-                    return $startDate->diffInDays($endDate) . ' day(s)';
+                    return $startDate->diffInDays($endDate).' day(s)';
                 }),
             Forms\Components\Textarea::make('private_name')
                 ->label(__('time_off::filament/widgets/overview-calendar-widget.form.fields.description')),
@@ -258,7 +258,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
                 ->icon('heroicon-o-calendar-days'),
             Infolists\Components\TextEntry::make('number_of_days')
                 ->label(__('time_off::filament/widgets/overview-calendar-widget.infolist.entries.duration'))
-                ->formatStateUsing(fn($state) => $state . ' day(s)')
+                ->formatStateUsing(fn ($state) => $state.' day(s)')
                 ->icon('heroicon-o-clock'),
             Infolists\Components\TextEntry::make('private_name')
                 ->label(__('time_off::filament/widgets/overview-calendar-widget.infolist.entries.description'))
@@ -267,8 +267,8 @@ class OverviewCalendarWidget extends FullCalendarWidget
             Infolists\Components\TextEntry::make('state')
                 ->placeholder(__('time_off::filament/widgets/overview-calendar-widget.infolist.entries.status'))
                 ->badge()
-                ->formatStateUsing(fn($state) => State::options()[$state])
-                ->icon('heroicon-o-check-circle')
+                ->formatStateUsing(fn ($state) => State::options()[$state])
+                ->icon('heroicon-o-check-circle'),
         ];
     }
 

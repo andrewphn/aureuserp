@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Product\Filament\Clusters\Products\Resources;
+namespace Webkul\Product\Filament\Resources;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
@@ -13,12 +13,11 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages\ManageProducts;
+use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Category;
 use Webkul\Product\Models\Product;
-use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
 
 class ProductResource extends Resource
@@ -216,7 +215,7 @@ class ProductResource extends Resource
             ->defaultSort('sort', 'desc')
             ->filters([
                 Tables\Filters\QueryBuilder::make()
-                    ->constraints(collect(static::mergeCustomTableQueryBuilderConstraints([
+                    ->constraints(collect([
                         Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('name')
                             ->label(__('products::filament/resources/product.table.filters.name')),
                         Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('reference')
@@ -293,7 +292,7 @@ class ProductResource extends Resource
                                     ->preload(),
                             )
                             ->icon('heroicon-o-user'),
-                    ]))->filter()->values()->all()),
+                    ])->filter()->values()->all()),
             ], layout: \Filament\Tables\Enums\FiltersLayout::Modal)
             ->filtersTriggerAction(
                 fn (Tables\Actions\Action $action) => $action

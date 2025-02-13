@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Product\Filament\Clusters\Configurations\Resources;
+namespace Webkul\Product\Filament\Resources;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
@@ -43,12 +43,6 @@ class PackagingResource extends Resource
                     ->required()
                     ->numeric()
                     ->minValue(0.00),
-                Forms\Components\Select::make('routes')
-                    ->label(__('products::filament/resources/packaging.form.routes'))
-                    ->relationship('routes', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->multiple(),
                 Forms\Components\Select::make('company_id')
                     ->label(__('products::filament/resources/packaging.form.company'))
                     ->relationship('company', 'name')

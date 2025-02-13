@@ -12,24 +12,6 @@ return [
                     'parent'           => 'Parent',
                 ],
             ],
-
-            'settings' => [
-                'title'  => 'Settings',
-
-                'fieldsets' => [
-                    'logistics' => [
-                        'title' => 'Logistics',
-
-                        'fields' => [
-                            'routes' => 'Routes',
-                        ],
-                    ],
-
-                    'inventory-valuation' => [
-                        'title' => 'Inventory Valuation',
-                    ],
-                ],
-            ],
         ],
     ],
 

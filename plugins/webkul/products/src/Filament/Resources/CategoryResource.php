@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Product\Filament\Clusters\Configurations\Resources;
+namespace Webkul\Product\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,7 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Product\Models\Category;
 
-class ProductCategoryResource extends Resource
+class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
@@ -46,23 +46,6 @@ class ProductCategoryResource extends Resource
 
                 Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\Section::make(__('products::filament/resources/category.form.sections.settings.title'))
-                            ->schema([
-                                Forms\Components\Fieldset::make(__('products::filament/resources/category.form.sections.settings.fieldsets.logistics.title'))
-                                    ->schema([
-                                        Forms\Components\Select::make('routes')
-                                            ->label(__('products::filament/resources/category.form.sections.settings.fieldsets.logistics.fields.routes'))
-                                            ->relationship('routes', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->multiple(),
-                                    ])
-                                    ->columns(1),
-
-                                // Forms\Components\Fieldset::make(__('products::filament/resources/category.form.sections.settings.fieldsets.inventory-valuation.title'))
-                                //     ->schema([
-                                //     ]),
-                            ]),
                     ])
                     ->columnSpan(['lg' => 1]),
             ])

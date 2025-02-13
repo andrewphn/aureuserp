@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Product\Filament\Clusters\Configurations\Resources;
+namespace Webkul\Product\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,10 +11,11 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Webkul\Product\Filament\Resources\AttributeResource\Pages;
 use Webkul\Product\Enums\AttributeType;
 use Webkul\Product\Models\Attribute;
 
-class ProductAttributeResource extends Resource
+class AttributeResource extends Resource
 {
     protected static ?string $model = Attribute::class;
 
@@ -208,5 +209,15 @@ class ProductAttributeResource extends Resource
                     ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => Pages\ListAttributes::route('/'),
+            'create' => Pages\CreateAttribute::route('/create'),
+            'view'   => Pages\ViewAttribute::route('/{record}'),
+            'edit'   => Pages\EditAttribute::route('/{record}/edit'),
+        ];
     }
 }

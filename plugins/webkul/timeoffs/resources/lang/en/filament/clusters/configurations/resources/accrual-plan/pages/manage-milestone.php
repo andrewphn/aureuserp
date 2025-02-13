@@ -3,5 +3,5 @@
 return [
     'navigation' => [
         'label' => 'Manage Milestone',
-    ]
+    ],
 ];

@@ -2,18 +2,18 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\Configurations\Resources;
 
-use Webkul\TimeOff\Filament\Clusters\Configurations;
-use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Employee\Models\CalendarLeaves;
+use Webkul\TimeOff\Filament\Clusters\Configurations;
+use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResource\Pages;
 
 class PublicHolidayResource extends Resource
 {
@@ -49,9 +49,9 @@ class PublicHolidayResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('time_off::filament/clusters/configurations/resources/public-holiday.global-search.name') => $record->name ?? '—',
+            __('time_off::filament/clusters/configurations/resources/public-holiday.global-search.name')      => $record->name ?? '—',
             __('time_off::filament/clusters/configurations/resources/public-holiday.global-search.date-from') => $record->date_from ?? '—',
-            __('time_off::filament/clusters/configurations/resources/public-holiday.global-search.date-to') => $record->date_to ?? '—',
+            __('time_off::filament/clusters/configurations/resources/public-holiday.global-search.date-to')   => $record->date_to ?? '—',
         ];
     }
 

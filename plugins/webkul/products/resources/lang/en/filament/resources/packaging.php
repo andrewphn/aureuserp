@@ -52,7 +52,7 @@ return [
             'print' => [
                 'label' => 'Print',
             ],
-            
+
             'delete' => [
                 'notification' => [
                     'title' => 'Packagings deleted',

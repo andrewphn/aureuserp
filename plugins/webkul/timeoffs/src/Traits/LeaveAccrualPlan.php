@@ -5,8 +5,8 @@ namespace Webkul\TimeOff\Traits;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder;
@@ -49,7 +49,7 @@ trait LeaveAccrualPlan
                                     ->live()
                                     ->default(Enums\Frequency::WEEKLY->value)
                                     ->required()
-                                    ->afterStateUpdated(fn(Forms\Set $set) => $set('week_day', null)),
+                                    ->afterStateUpdated(fn (Forms\Set $set) => $set('week_day', null)),
                                 Forms\Components\Grid::make()
                                     ->schema([
                                         Forms\Components\Group::make()
@@ -60,7 +60,7 @@ trait LeaveAccrualPlan
                                                     ->default(Week::MONDAY->value)
                                                     ->required(),
                                             ])
-                                            ->visible(fn(Get $get) => $get('frequency') === Enums\Frequency::WEEKLY->value),
+                                            ->visible(fn (Get $get) => $get('frequency') === Enums\Frequency::WEEKLY->value),
                                         Forms\Components\Group::make()
                                             ->schema([
                                                 Forms\Components\Select::make('monthly_day')
@@ -69,7 +69,7 @@ trait LeaveAccrualPlan
                                                     ->default(Enums\CarryoverDay::DAY_1->value)
                                                     ->required(),
                                             ])
-                                            ->visible(fn(Get $get) => $get('frequency') === Enums\Frequency::MONTHLY->value),
+                                            ->visible(fn (Get $get) => $get('frequency') === Enums\Frequency::MONTHLY->value),
                                         Forms\Components\Grid::make(2)
                                             ->schema([
                                                 Forms\Components\Select::make('first_day')
@@ -83,7 +83,7 @@ trait LeaveAccrualPlan
                                                     ->default(Enums\CarryoverDay::DAY_15->value)
                                                     ->required(),
                                             ])
-                                            ->visible(fn(Get $get) => $get('frequency') === Enums\Frequency::BIMONTHLY->value),
+                                            ->visible(fn (Get $get) => $get('frequency') === Enums\Frequency::BIMONTHLY->value),
                                         Forms\Components\Grid::make(2)
                                             ->schema([
                                                 Forms\Components\Group::make()
@@ -113,7 +113,7 @@ trait LeaveAccrualPlan
                                                             ->required(),
                                                     ]),
                                             ])
-                                            ->visible(fn(Get $get) => $get('frequency') === Enums\Frequency::BIYEARLY->value),
+                                            ->visible(fn (Get $get) => $get('frequency') === Enums\Frequency::BIYEARLY->value),
                                         Forms\Components\Grid::make(2)
                                             ->schema([
                                                 Forms\Components\Group::make()
@@ -130,7 +130,7 @@ trait LeaveAccrualPlan
                                                             ->required(),
                                                     ]),
                                             ])
-                                            ->visible(fn(Get $get) => $get('frequency') === Enums\Frequency::YEARLY->value),
+                                            ->visible(fn (Get $get) => $get('frequency') === Enums\Frequency::YEARLY->value),
                                     ]),
                             ]),
                         Forms\Components\Fieldset::make(__('time_off::traits/leave-accrual-plan.form.fields.cap-accrued-time'))
@@ -142,7 +142,7 @@ trait LeaveAccrualPlan
                                     ->label(__('time_off::traits/leave-accrual-plan.form.fields.cap-accrued-time')),
                                 Forms\Components\TextInput::make('maximum_leave')
                                     ->label(__('time_off::traits/leave-accrual-plan.form.fields.days'))
-                                    ->visible(fn(Get $get) => $get('cap_accrued_time') === true)
+                                    ->visible(fn (Get $get) => $get('cap_accrued_time') === true)
                                     ->numeric(),
                             ])->columns(4),
                         Forms\Components\Fieldset::make(__('time_off::traits/leave-accrual-plan.form.fields.start-count'))
@@ -171,12 +171,12 @@ trait LeaveAccrualPlan
                                         Forms\Components\Toggle::make('cap_accrued_time_yearly')
                                             ->inline(false)
                                             ->live()
-                                            ->visible(fn(Get $get) => $get('action_with_unused_accruals') == Enums\CarryOverUnusedAccruals::ALL_ACCRUED_TIME_CARRIED_OVER->value)
+                                            ->visible(fn (Get $get) => $get('action_with_unused_accruals') == Enums\CarryOverUnusedAccruals::ALL_ACCRUED_TIME_CARRIED_OVER->value)
                                             ->default(false)
                                             ->label(__('time_off::traits/leave-accrual-plan.form.fields.milestone-cap')),
                                         Forms\Components\TextInput::make('maximum_leave_yearly')
                                             ->numeric()
-                                            ->visible(fn(Get $get) => $get('cap_accrued_time_yearly'))
+                                            ->visible(fn (Get $get) => $get('cap_accrued_time_yearly'))
                                             ->label(__('time_off::traits/leave-accrual-plan.form.fields.maximum-leave-yearly')),
                                     ]),
                                 Forms\Components\Grid::make(2)
@@ -184,16 +184,16 @@ trait LeaveAccrualPlan
                                         Forms\Components\Toggle::make('accrual_validity')
                                             ->inline(false)
                                             ->live()
-                                            ->visible(fn(Get $get) => $get('action_with_unused_accruals') == Enums\CarryOverUnusedAccruals::ALL_ACCRUED_TIME_CARRIED_OVER->value)
+                                            ->visible(fn (Get $get) => $get('action_with_unused_accruals') == Enums\CarryOverUnusedAccruals::ALL_ACCRUED_TIME_CARRIED_OVER->value)
                                             ->default(false)
                                             ->label(__('time_off::traits/leave-accrual-plan.form.fields.accrual-validity')),
                                         Forms\Components\TextInput::make('accrual_validity_count')
                                             ->numeric()
-                                            ->visible(fn(Get $get) => $get('accrual_validity'))
+                                            ->visible(fn (Get $get) => $get('accrual_validity'))
                                             ->label(__('time_off::traits/leave-accrual-plan.form.fields.accrual-validity-count')),
                                         Forms\Components\Select::make('accrual_validity_type')
                                             ->required()
-                                            ->visible(fn(Get $get) => $get('accrual_validity'))
+                                            ->visible(fn (Get $get) => $get('accrual_validity'))
                                             ->options(Enums\AccrualValidityType::class)
                                             ->label(__('time_off::traits/leave-accrual-plan.form.fields.accrual-validity-type')),
                                     ]),
@@ -249,7 +249,7 @@ trait LeaveAccrualPlan
                         Forms\Components\Toggle::make('cap_accrued_time')
                             ->label(__('time_off::traits/leave-accrual-plan.table.filters.cap-accrued-time')),
                     ])
-                    ->query(fn($query, $data) => $query->where('cap_accrued_time', $data['cap_accrued_time']))
+                    ->query(fn ($query, $data) => $query->where('cap_accrued_time', $data['cap_accrued_time']))
                     ->label(__('time_off::traits/leave-accrual-plan.table.filters.cap-accrued-time')),
                 SelectFilter::make('action_with_unused_accruals')
                     ->options(\Webkul\TimeOff\Enums\CarryOverUnusedAccruals::class)
@@ -332,23 +332,23 @@ trait LeaveAccrualPlan
                                     ->icon('heroicon-o-currency-dollar'),
                                 Infolists\Components\TextEntry::make('added_value_type')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.accrual-value-type'))
-                                    ->formatStateUsing(fn($state) => Enums\AddedValueType::options()[$state] ?? $state)
+                                    ->formatStateUsing(fn ($state) => Enums\AddedValueType::options()[$state] ?? $state)
                                     ->icon('heroicon-o-adjustments-horizontal'),
                             ]),
                         Infolists\Components\TextEntry::make('frequency')
                             ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.accrual-frequency'))
-                            ->formatStateUsing(fn($state) => Enums\Frequency::options()[$state] ?? $state)
+                            ->formatStateUsing(fn ($state) => Enums\Frequency::options()[$state] ?? $state)
                             ->icon('heroicon-o-calendar'),
                         Infolists\Components\Group::make()
                             ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.accrual-frequency'))
                             ->schema([
                                 Infolists\Components\TextEntry::make('week_day')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.accrual-day'))
-                                    ->visible(fn($record) => $record->frequency === Enums\Frequency::WEEKLY->value)
+                                    ->visible(fn ($record) => $record->frequency === Enums\Frequency::WEEKLY->value)
                                     ->icon('heroicon-o-clock'),
                                 Infolists\Components\TextEntry::make('monthly_day')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.day-of-month'))
-                                    ->visible(fn($record) => $record->frequency === Enums\Frequency::MONTHLY->value)
+                                    ->visible(fn ($record) => $record->frequency === Enums\Frequency::MONTHLY->value)
                                     ->icon('heroicon-o-calendar-days'),
                                 Infolists\Components\Grid::make(2)
                                     ->schema([
@@ -359,7 +359,7 @@ trait LeaveAccrualPlan
                                             ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.second-day-of-month'))
                                             ->icon('heroicon-o-arrow-down-circle'),
                                     ])
-                                    ->visible(fn($record) => $record->frequency === Enums\Frequency::BIMONTHLY->value),
+                                    ->visible(fn ($record) => $record->frequency === Enums\Frequency::BIMONTHLY->value),
                                 Infolists\Components\Grid::make(2)
                                     ->schema([
                                         Infolists\Components\TextEntry::make('first_month')
@@ -369,15 +369,15 @@ trait LeaveAccrualPlan
                                             ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.second-period-month'))
                                             ->icon('heroicon-o-arrow-down-on-square'),
                                     ])
-                                    ->visible(fn($record) => $record->frequency === Enums\Frequency::BIYEARLY->value),
+                                    ->visible(fn ($record) => $record->frequency === Enums\Frequency::BIYEARLY->value),
                             ]),
                         Infolists\Components\IconEntry::make('cap_accrued_time')
                             ->boolean()
                             ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.cap-accrued-time'))
-                            ->icon(fn($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
+                            ->icon(fn ($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
                         Infolists\Components\TextEntry::make('maximum_leave')
                             ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.days'))
-                            ->visible(fn($record) => $record->cap_accrued_time)
+                            ->visible(fn ($record) => $record->cap_accrued_time)
                             ->icon('heroicon-o-scale'),
                         Infolists\Components\Grid::make(2)
                             ->schema([
@@ -386,7 +386,7 @@ trait LeaveAccrualPlan
                                     ->icon('heroicon-o-play-circle'),
                                 Infolists\Components\TextEntry::make('start_type')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.start-type'))
-                                    ->formatStateUsing(fn($state) => Enums\StartType::options()[$state] ?? $state)
+                                    ->formatStateUsing(fn ($state) => Enums\StartType::options()[$state] ?? $state)
                                     ->icon('heroicon-o-adjustments-vertical'),
                             ]),
                         Infolists\Components\Group::make()
@@ -394,20 +394,20 @@ trait LeaveAccrualPlan
                             ->schema([
                                 Infolists\Components\TextEntry::make('action_with_unused_accruals')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.action-with-unused-accruals'))
-                                    ->formatStateUsing(fn($state) => Enums\CarryOverUnusedAccruals::options()[$state] ?? $state)
+                                    ->formatStateUsing(fn ($state) => Enums\CarryOverUnusedAccruals::options()[$state] ?? $state)
                                     ->icon('heroicon-o-receipt-refund'),
                                 Infolists\Components\TextEntry::make('maximum_leave_yearly')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.maximum-leave-yearly'))
-                                    ->visible(fn($record) => $record->cap_accrued_time_yearly)
+                                    ->visible(fn ($record) => $record->cap_accrued_time_yearly)
                                     ->icon('heroicon-o-chart-pie'),
                                 Infolists\Components\TextEntry::make('accrual_validity_count')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.accrual-validity-count'))
-                                    ->visible(fn($record) => $record->accrual_validity)
+                                    ->visible(fn ($record) => $record->accrual_validity)
                                     ->icon('heroicon-o-clock'),
                                 Infolists\Components\TextEntry::make('accrual_validity_type')
                                     ->label(__('time_off::traits/leave-accrual-plan.infolist.entries.accrual-validity-type'))
-                                    ->formatStateUsing(fn($state) => Enums\AccrualValidityType::options()[$state] ?? $state)
-                                    ->visible(fn($record) => $record->accrual_validity)
+                                    ->formatStateUsing(fn ($state) => Enums\AccrualValidityType::options()[$state] ?? $state)
+                                    ->visible(fn ($record) => $record->accrual_validity)
                                     ->icon('heroicon-o-calendar-days'),
                             ]),
                     ]),

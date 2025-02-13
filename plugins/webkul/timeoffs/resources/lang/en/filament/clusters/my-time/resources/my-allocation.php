@@ -17,7 +17,7 @@ return [
 
     'form' => [
         'fields' => [
-            'name' => 'Name',
+            'name'                => 'Name',
             'name-placeholder'    => 'Time Off Type (From validity start to validity end/no limit)',
             'time-off-type'       => 'Time Off Type',
             'allocation-type'     => 'Allocation Type',
@@ -33,10 +33,10 @@ return [
 
     'table' => [
         'columns' => [
-            'time-off-type' => 'Time Off Type',
-            'amount' => 'Amount',
+            'time-off-type'   => 'Time Off Type',
+            'amount'          => 'Amount',
             'allocation-type' => 'Allocation Type',
-            'status' => 'Status',
+            'status'          => 'Status',
         ],
 
         'groups' => [
@@ -67,7 +67,7 @@ return [
             ],
 
             'refused' => [
-                'title' => 'Refuse',
+                'title'        => 'Refuse',
                 'notification' => [
                     'title' => 'Allocation refused',
                     'body'  => 'The allocation has been refused successfully.',
@@ -88,31 +88,31 @@ return [
     'infolist' => [
         'sections' => [
             'allocation-details' => [
-                'title' => 'Allocation Details',
+                'title'   => 'Allocation Details',
                 'entries' => [
-                    'name' => 'Name',
+                    'name'                => 'Name',
                     'time-off-type'       => 'Time Off Type',
                     'allocation-type'     => 'Allocation Type',
                 ],
             ],
 
             'validity-period' => [
-                'title' => 'Validity Period',
+                'title'   => 'Validity Period',
                 'entries' => [
                     'date-from' => 'Date From',
                     'date-to'   => 'Date To',
                     'reason'    => 'Reason',
-                ]
+                ],
             ],
             'allocation-status' => [
-                'title' => 'Allocation Status',
+                'title'   => 'Allocation Status',
                 'entries' => [
                     'date-to-placeholder' => 'No Limit',
                     'allocation'          => 'Number of Day(s)',
                     'allocation-value'    => ':days number of days',
-                    'state'               => 'State'
+                    'state'               => 'State',
                 ],
-            ]
+            ],
         ],
     ],
 ];
