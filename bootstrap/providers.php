@@ -6,6 +6,7 @@ return [
     Webkul\Analytic\AnalyticServiceProvider::class,
     Webkul\Chatter\ChatterServiceProvider::class,
     Webkul\Contact\ContactServiceProvider::class,
+    Webkul\Employee\EmployeeServiceProvider::class,
     Webkul\Support\SupportServiceProvider::class,
     Webkul\Field\FieldServiceProvider::class,
     Webkul\Inventory\InventoryServiceProvider::class,
@@ -13,6 +14,8 @@ return [
     Webkul\Product\ProductServiceProvider::class,
     Webkul\Project\ProjectServiceProvider::class,
     Webkul\TableViews\TableViewsServiceProvider::class,
+    Webkul\Recruitment\RecruitmentServiceProvider::class,
     Webkul\Security\SecurityServiceProvider::class,
+    Webkul\TimeOff\TimeOffServiceProvider::class,
     Webkul\Timesheet\TimesheetServiceProvider::class,
 ];
