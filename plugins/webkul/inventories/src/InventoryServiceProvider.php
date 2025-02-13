@@ -2,11 +2,11 @@
 
 namespace Webkul\Inventory;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Webkul\Support\PackageServiceProvider;
 
 class InventoryServiceProvider extends PackageServiceProvider

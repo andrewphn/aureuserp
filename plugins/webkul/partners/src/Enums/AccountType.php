@@ -2,7 +2,9 @@
 
 namespace Webkul\Partner\Enums;
 
-enum AccountType: string
+use Filament\Support\Contracts\HasLabel;
+
+enum AccountType: string implements HasLabel
 {
     case INDIVIDUAL = 'individual';
 
@@ -14,5 +16,13 @@ enum AccountType: string
             self::INDIVIDUAL->value => __('partners::enums/account-type.individual'),
             self::COMPANY->value    => __('partners::enums/account-type.company'),
         ];
+    }
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::INDIVIDUAL => __('partners::enums/account-type.individual'),
+            self::COMPANY    => __('partners::enums/account-type.company'),
+        };
     }
 }

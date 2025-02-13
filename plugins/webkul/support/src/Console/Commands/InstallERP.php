@@ -178,7 +178,7 @@ class InstallERP extends Command
         if (PHP_OS_FAMILY == 'Windows') {
             exec("start {$repoUrl}");
         }
-        
+
         if (PHP_OS_FAMILY == 'Linux') {
             exec("xdg-open {$repoUrl}");
         }

@@ -2,9 +2,9 @@
 
 namespace Webkul\Timesheet;
 
-use Webkul\Support\Package;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Webkul\Support\Package;
 
 class TimesheetPlugin implements Plugin
 {
@@ -23,7 +23,7 @@ class TimesheetPlugin implements Plugin
         if (! Package::isPluginInstalled($this->getId())) {
             return;
         }
-        
+
         $panel
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel->discoverResources(in: $this->getPluginBasePath('/Filament/Resources'), for: 'Webkul\\Timesheet\\Filament\\Resources')

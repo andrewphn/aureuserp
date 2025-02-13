@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Partner\Database\Factories\AddressFactory;
+use Webkul\Partner\Enums\AddressType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
@@ -39,6 +40,15 @@ class Address extends Model
         'country_id',
         'creator_id',
         'partner_id',
+    ];
+
+    /**
+     * Table name.
+     *
+     * @var string
+     */
+    protected $casts = [
+        'type' => AddressType::class,
     ];
 
     public function country(): BelongsTo

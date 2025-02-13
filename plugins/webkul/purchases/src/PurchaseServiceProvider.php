@@ -32,7 +32,7 @@ class PurchaseServiceProvider extends PackageServiceProvider
                 $command
                     ->askToRunMigrations()
                     ->copyAndRegisterServiceProviderInApp()
-                    ->startWith(function(InstallCommand $command) {
+                    ->startWith(function (InstallCommand $command) {
                         $command->call('products:install');
                     })
                     ->endWith(function (InstallCommand $command) {

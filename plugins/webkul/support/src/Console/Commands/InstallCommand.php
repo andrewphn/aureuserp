@@ -3,12 +3,11 @@
 namespace Webkul\Support\Console\Commands;
 
 use Closure;
-use Illuminate\Support\Str;
-use Webkul\Support\Package;
 use Illuminate\Console\Command;
-use Illuminate\Database\Migrations\Migrator;
-use Webkul\Support\Models\Plugin;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Webkul\Support\Models\Plugin;
+use Webkul\Support\Package;
 
 class InstallCommand extends Command
 {
@@ -40,9 +39,9 @@ class InstallCommand extends Command
 
     public function __construct(Package $package)
     {
-        $this->signature = $package->shortName() . ':install';
+        $this->signature = $package->shortName().':install';
 
-        $this->description = 'Install ' . $package->name;
+        $this->description = 'Install '.$package->name;
 
         $this->package = $package;
 
@@ -68,23 +67,23 @@ class InstallCommand extends Command
                 $this->newLine();
 
                 foreach ($this->package->dependencies as $dependency) {
-                    $this->comment('Installing <info>' . $dependency . '</info>...');
+                    $this->comment('Installing <info>'.$dependency.'</info>...');
 
                     $this->newLine();
-                    
-                    $this->call($dependency . ':install');
+
+                    $this->call($dependency.':install');
                 }
 
                 $this->newLine();
             } elseif ($choice === 'Show Dependencies') {
                 $this->info('This package requires the following dependencies:');
-                
+
                 foreach ($this->package->dependencies as $dependency) {
-                    $this->line('- <info>' . $dependency . '</info>');
+                    $this->line('- <info>'.$dependency.'</info>');
                 }
 
                 $this->newLine();
-                
+
                 return $this->handle();
             } else {
                 $this->error('Please install the dependencies first.');
@@ -97,11 +96,11 @@ class InstallCommand extends Command
             $this->newLine();
 
             foreach ($this->package->dependencies as $dependency) {
-                $this->comment('Installing <info>' . $dependency . '</info>...');
+                $this->comment('Installing <info>'.$dependency.'</info>...');
 
                 $this->newLine();
-                
-                $this->call($dependency . ':install');
+
+                $this->call($dependency.':install');
             }
 
             $this->newLine();
@@ -111,7 +110,7 @@ class InstallCommand extends Command
             $name = str_replace('-', ' ', $tag);
             $this->comment("Publishing {$name}...");
 
-            $this->callSilently("vendor:publish", [
+            $this->callSilently('vendor:publish', [
                 '--tag' => "{$this->package->shortName()}-{$tag}",
             ]);
         }
@@ -313,12 +312,12 @@ class InstallCommand extends Command
             if ($choice === 'Show Seeders') {
                 $this->newLine();
                 $this->info('This package includes the following seeders:');
-                
+
                 foreach ($this->package->seederClasses as $seeder) {
-                    $this->line('- <info>' . $seeder . '</info>');
+                    $this->line('- <info>'.$seeder.'</info>');
                 }
                 $this->newLine();
-                
+
                 return $this->runSeeders();
             }
         }
@@ -385,7 +384,7 @@ class InstallCommand extends Command
             return $this;
         }
 
-        $this->callSilent('vendor:publish', ['--tag' => $this->package->shortName() . '-provider']);
+        $this->callSilent('vendor:publish', ['--tag' => $this->package->shortName().'-provider']);
 
         $namespace = Str::replaceLast('\\', '', $this->laravel->getNamespace());
 
@@ -395,30 +394,30 @@ class InstallCommand extends Command
             $appConfig = file_get_contents(base_path('bootstrap/providers.php'));
         }
 
-        $class = '\\Providers\\' . Str::replace('/', '\\', $providerName) . '::class';
+        $class = '\\Providers\\'.Str::replace('/', '\\', $providerName).'::class';
 
-        if (Str::contains($appConfig, $namespace . $class)) {
+        if (Str::contains($appConfig, $namespace.$class)) {
             return $this;
         }
 
         if (intval(app()->version()) < 11 || ! file_exists(base_path('bootstrap/providers.php'))) {
             file_put_contents(config_path('app.php'), str_replace(
                 "{$namespace}\\Providers\\BroadcastServiceProvider::class,",
-                "{$namespace}\\Providers\\BroadcastServiceProvider::class," . PHP_EOL . "        {$namespace}{$class},",
+                "{$namespace}\\Providers\\BroadcastServiceProvider::class,".PHP_EOL."        {$namespace}{$class},",
                 $appConfig
             ));
         } else {
             file_put_contents(base_path('bootstrap/providers.php'), str_replace(
                 "{$namespace}\\Providers\\AppServiceProvider::class,",
-                "{$namespace}\\Providers\\AppServiceProvider::class," . PHP_EOL . "        {$namespace}{$class},",
+                "{$namespace}\\Providers\\AppServiceProvider::class,".PHP_EOL."        {$namespace}{$class},",
                 $appConfig
             ));
         }
 
-        file_put_contents(app_path('Providers/' . $providerName . '.php'), str_replace(
+        file_put_contents(app_path('Providers/'.$providerName.'.php'), str_replace(
             "namespace App\Providers;",
             "namespace {$namespace}\Providers;",
-            file_get_contents(app_path('Providers/' . $providerName . '.php'))
+            file_get_contents(app_path('Providers/'.$providerName.'.php'))
         ));
 
         return $this;

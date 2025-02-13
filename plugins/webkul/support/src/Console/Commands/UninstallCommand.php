@@ -21,9 +21,9 @@ class UninstallCommand extends Command
 
     public function __construct(Package $package)
     {
-        $this->signature = $package->shortName() . ':uninstall {--force : Force the operation to run without confirmation}';
+        $this->signature = $package->shortName().':uninstall {--force : Force the operation to run without confirmation}';
 
-        $this->description = 'Uninstall ' . $package->name;
+        $this->description = 'Uninstall '.$package->name;
 
         $this->package = $package;
 
@@ -39,7 +39,7 @@ class UninstallCommand extends Command
         }
 
         if (! $this->package->getPlugin()->dependents->isEmpty()) {
-            $this->error("Package {$this->package->shortName()} has dependents: <comment>" . $this->package->getPlugin()->dependents->pluck('name')->implode(', ')."</comment>. Please uninstall dependents first!");
+            $this->error("Package {$this->package->shortName()} has dependents: <comment>".$this->package->getPlugin()->dependents->pluck('name')->implode(', ').'</comment>. Please uninstall dependents first!');
 
             return;
         }
@@ -75,7 +75,7 @@ class UninstallCommand extends Command
 
         foreach ($migrations as $migration) {
             $migrationPath = str_replace(base_path().'/', '', $this->package->basePath("/../database/migrations/{$migration}.php"));
-            
+
             if (file_exists($migrationPath)) {
                 require_once $migrationPath;
 
@@ -93,7 +93,7 @@ class UninstallCommand extends Command
 
         foreach ($this->package->settingFileNames as $setting) {
             $migrationPath = str_replace(base_path().'/', '', $this->package->basePath("/../database/settings/{$setting}.php"));
-            
+
             if (file_exists($migrationPath)) {
                 require_once $migrationPath;
 
@@ -109,7 +109,7 @@ class UninstallCommand extends Command
             DB::table('migrations')->where('migration', $setting)->delete();
         }
 
-        $this->info("✅ Database tables dropped successfully.");
+        $this->info('✅ Database tables dropped successfully.');
 
         $this->newLine();
     }

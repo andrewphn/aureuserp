@@ -27,10 +27,7 @@ class PartnerResource extends Resource
                             ->hiddenLabel()
                             ->inline()
                             ->columnSpan(2)
-                            ->options([
-                                AccountType::INDIVIDUAL->value => AccountType::options()[AccountType::INDIVIDUAL->value],
-                                AccountType::COMPANY->value    => AccountType::options()[AccountType::COMPANY->value],
-                            ])
+                            ->options(AccountType::class)
                             ->default(AccountType::INDIVIDUAL->value)
                             ->live(),
                         Forms\Components\TextInput::make('name')

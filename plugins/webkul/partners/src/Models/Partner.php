@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Partner\Database\Factories\PartnerFactory;
+use Webkul\Partner\Enums\AccountType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
@@ -58,7 +59,8 @@ class Partner extends Model
      * @var string
      */
     protected $casts = [
-        'is_active' => 'boolean',
+        'account_type' => AccountType::class,
+        'is_active'    => 'boolean',
     ];
 
     public function parent(): BelongsTo
