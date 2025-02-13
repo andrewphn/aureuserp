@@ -3,6 +3,7 @@
 return [
     Webkul\Chatter\ChatterPlugin::class,
     Webkul\Contact\ContactPlugin::class,
+    Webkul\Employee\EmployeePlugin::class,
     Webkul\Inventory\InventoryPlugin::class,
     // Webkul\Product\ProductPlugin::class,
     Webkul\Project\ProjectPlugin::class,

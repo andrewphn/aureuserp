@@ -11,21 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activity_plans', function (Blueprint $table) {
+        Schema::create('employees_skill_types', function (Blueprint $table) {
             $table->id();
 
-            $table->string('plugin')->nullable()->comment('Plugin name');
-            $table->string('name')->comment('Name of the plan');
-            $table->boolean('is_active')->nullable()->default(false)->comment('Status');
+            $table->string('name')->comment('Name');
+            $table->string('color')->nullable()->comment('Color');
+            $table->boolean('is_active')->default(false)->comment('Active Status');
 
             $table->unsignedBigInteger('creator_id')->nullable()->comment('Created By');
-            $table->unsignedBigInteger('company_id')->nullable()->comment('Company');
-
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
 
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -34,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees_');
+        Schema::dropIfExists('employees_skill_types');
     }
 };

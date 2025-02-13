@@ -6,6 +6,7 @@ return [
     Webkul\Analytic\AnalyticServiceProvider::class,
     Webkul\Chatter\ChatterServiceProvider::class,
     Webkul\Contact\ContactServiceProvider::class,
+    Webkul\Employee\EmployeeServiceProvider::class,
     Webkul\Support\SupportServiceProvider::class,
     Webkul\Field\FieldServiceProvider::class,
     Webkul\Inventory\InventoryServiceProvider::class,

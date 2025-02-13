@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activity_plans', function (Blueprint $table) {
+        Schema::create('employees_calendars', function (Blueprint $table) {
             $table->id();
 
-            $table->string('plugin')->nullable()->comment('Plugin name');
-            $table->string('name')->comment('Name of the plan');
-            $table->boolean('is_active')->nullable()->default(false)->comment('Status');
+            $table->string('name')->comment('Name');
+            $table->string('timezone')->comment('Timezone');
+            $table->float('hours_per_day')->nullable()->comment('Average Hour per Day');
+            $table->boolean('is_active')->default(false)->comment('Status');
+            $table->boolean('two_weeks_calendar')->nullable()->default(false)->comment('Calendar in 2 weeks mode');
+            $table->boolean('flexible_hours')->nullable()->default(false)->comment('Flexible Hours');
+            $table->float('full_time_required_hours')->nullable()->comment('Company Full Time');
 
             $table->unsignedBigInteger('creator_id')->nullable()->comment('Created By');
             $table->unsignedBigInteger('company_id')->nullable()->comment('Company');
@@ -34,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees_');
+        Schema::dropIfExists('employees_calendars');
     }
 };
