@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Product\Database\Factories\ProductFactory;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Security\Models\User;
@@ -16,7 +18,7 @@ use Webkul\Support\Models\UOM;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasChatter, HasLogActivity, HasFactory, SoftDeletes;
 
     /**
      * Table name.
@@ -69,6 +71,29 @@ class Product extends Model
         'is_favorite'     => 'boolean',
         'is_configurable' => 'boolean',
         'images'          => 'array',
+    ];
+
+    protected array $logAttributes = [
+        'type',
+        'name',
+        'service_tracking',
+        'reference',
+        'barcode',
+        'price',
+        'cost',
+        'volume',
+        'weight',
+        'description',
+        'description_purchase',
+        'description_sale',
+        'enable_sales',
+        'enable_purchase',
+        'is_favorite',
+        'is_configurable',
+        'parent.name'   => 'Parent',
+        'category.name' => 'Category',
+        'company.name'  => 'Company',
+        'creator.name'  => 'Creator',
     ];
 
     public function parent(): BelongsTo

@@ -43,16 +43,18 @@ return new class extends Migration
             $table->index('partner_id');
 
             $table->foreignId('uom_id')
+                ->nullable()
                 ->constrained('unit_of_measures')
                 ->nullOnDelete();
 
             $table->foreignId('product_id')
+                ->nullable()
                 ->constrained('products_products')
                 ->nullOnDelete();
 
             $table->foreignId('product_packaging_id')
                 ->nullable()
-                ->constrained('inventories_product_packagings')
+                ->constrained('products_packagings')
                 ->nullOnDelete();
 
             $table->foreignId('order_id')
@@ -78,16 +80,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-
-            // $table->foreignId('final_location_id')
-            //     ->nullable()
-            //     ->constrained('stock_locations')
-            //     ->nullOnDelete();
-
-            // $table->foreignId('group_id')
-            //     ->nullable()
-            //     ->constrained('procurement_groups')
-            //     ->nullOnDelete();
         });
     }
 

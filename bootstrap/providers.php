@@ -16,6 +16,7 @@ return [
     Webkul\Payment\PaymentServiceProvider::class,
     Webkul\Product\ProductServiceProvider::class,
     Webkul\Project\ProjectServiceProvider::class,
+    Webkul\Purchase\PurchaseServiceProvider::class,
     Webkul\TableViews\TableViewsServiceProvider::class,
     Webkul\Recruitment\RecruitmentServiceProvider::class,
     Webkul\Sale\SaleServiceProvider::class,

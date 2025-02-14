@@ -32,6 +32,7 @@ use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Partner\Filament\Resources\PartnerResource;
+use Webkul\Product\Enums\ProductType;
 
 class ScrapResource extends Resource
 {
@@ -74,6 +75,11 @@ class ScrapResource extends Resource
                                         Forms\Components\Select::make('product_id')
                                             ->label(__('inventories::filament/clusters/operations/resources/scrap.form.sections.general.fields.product'))
                                             ->relationship(name: 'product', titleAttribute: 'name')
+                                            ->relationship(
+                                                'product',
+                                                'name',
+                                                fn ($query) => $query->where('type', ProductType::GOODS),
+                                            )
                                             ->searchable()
                                             ->preload()
                                             ->live()

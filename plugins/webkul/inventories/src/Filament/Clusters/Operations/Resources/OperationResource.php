@@ -28,6 +28,7 @@ use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
 use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
+use Webkul\Product\Enums\ProductType;
 use Webkul\TableViews\Filament\Components\PresetView;
 
 class OperationResource extends Resource
@@ -366,10 +367,10 @@ class OperationResource extends Resource
                 fn (Tables\Actions\Action $action) => $action
                     ->slideOver(),
             )
-            ->filtersFormColumns(2);
-        // ->checkIfRecordIsSelectableUsing(
-        //     fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\OperationState::DONE,
-        // );
+            ->filtersFormColumns(2)
+            ->checkIfRecordIsSelectableUsing(
+                fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\OperationState::DONE,
+            );
     }
 
     public static function infolist(Infolist $infolist): Infolist
@@ -534,6 +535,11 @@ class OperationResource extends Resource
                 Forms\Components\Select::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.product'))
                     ->relationship('product', 'name')
+                    ->relationship(
+                        'product',
+                        'name',
+                        fn ($query) => $query->where('type', ProductType::GOODS),
+                    )
                     ->required()
                     ->searchable()
                     ->preload()

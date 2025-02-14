@@ -2,7 +2,7 @@
 
 namespace Webkul\Purchase;
 
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
@@ -19,32 +19,23 @@ class PurchaseServiceProvider extends PackageServiceProvider
             ->hasTranslations()
             ->hasMigrations([
                 '2025_02_11_101100_create_purchases_order_groups_table',
-                '2025_02_11_101102_create_purchases_orders_table',
+                '2025_02_11_101101_create_purchases_requisitions_table',
+                '2025_02_11_101105_create_purchases_requisition_lines_table',
+                '2025_02_11_101110_create_purchases_orders_table',
                 '2025_02_11_101118_create_purchases_order_lines_table',
-                '2025_02_11_101152_create_purchases_requisitions_table',
-                '2025_02_11_101233_create_purchases_requisition_lines_table',
             ])
             ->runsMigrations()
             ->hasSettings([
+                '2025_01_11_094022_create_purchases_product_settings',
             ])
             ->runsSettings()
+            ->hasDependencies([
+                'products',
+            ])
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
-                    ->askToRunMigrations()
-                    ->copyAndRegisterServiceProviderInApp()
-                    ->startWith(function (InstallCommand $command) {
-                        $command->call('products:install');
-                    })
-                    ->endWith(function (InstallCommand $command) {
-                        if ($command->confirm('Would you like to seed the data now?')) {
-                            $command->comment('Seeding data...');
-
-                            $command->call('db:seed', [
-                                '--class' => 'Webkul\\Purchase\\Database\Seeders\\DatabaseSeeder',
-                            ]);
-                        }
-                    })
-                    ->askToStarRepoOnGitHub('aureuserp/purchases');
+                    ->installDependencies()
+                    ->runsMigrations();
             });
     }
 
