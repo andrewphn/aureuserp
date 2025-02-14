@@ -3,17 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
 
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
-use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use Webkul\Contact\Filament\Resources\PartnerResource\Pages\EditPartner as BaseEditCustomer;
 
-class EditCustomer extends EditRecord
+class EditCustomer extends BaseEditCustomer
 {
     protected static string $resource = CustomerResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
 }

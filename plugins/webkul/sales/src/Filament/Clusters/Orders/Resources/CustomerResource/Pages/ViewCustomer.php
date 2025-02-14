@@ -3,18 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
 
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
+use Webkul\Contact\Filament\Resources\PartnerResource\Pages\ViewPartner as BaseViewCustomer;
 
-class ViewCustomer extends ViewRecord
+class ViewCustomer extends BaseViewCustomer
 {
     protected static string $resource = CustomerResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-            Actions\DeleteAction::make(),
-        ];
-    }
 }
