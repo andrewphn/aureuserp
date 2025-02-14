@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('recruitments_applicants', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('source_id')->nullable()->constrained('recruitments_utm_sources')->nullOnDelete();
-            $table->foreignId('medium_id')->nullable()->constrained('recruitments_utm_mediums')->nullOnDelete();
+            $table->foreignId('source_id')->nullable()->constrained('utm_sources')->nullOnDelete();
+            $table->foreignId('medium_id')->nullable()->constrained('utm_mediums')->nullOnDelete();
             $table->foreignId('candidate_id')->constrained('recruitments_candidates')->restrictOnDelete();
             $table->foreignId('stage_id')->nullable()->constrained('recruitments_stages')->restrictOnDelete();
             $table->foreignId('last_stage_id')->nullable()->constrained('recruitments_stages')->nullOnDelete();

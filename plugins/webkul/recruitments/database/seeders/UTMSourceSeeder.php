@@ -9,7 +9,7 @@ class UTMSourceSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('recruitments_utm_sources')->delete();
+        DB::table('utm_sources')->delete();
 
         $sources = [
             'Search engine',
@@ -23,7 +23,7 @@ class UTMSourceSeeder extends Seeder
             'Craigslist',
         ];
 
-        DB::table('recruitments_utm_sources')->insert(collect($sources)->map(function ($medium) {
+        DB::table('utm_sources')->insert(collect($sources)->map(function ($medium) {
             return [
                 'name'       => $medium,
                 'creator_id' => 1,

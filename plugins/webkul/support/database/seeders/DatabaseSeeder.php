@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             ActivityPlanSeeder::class,
             UOMCategorySeeder::class,
             UOMSeeder::class,
+            UtmStageSeeder::class,
+            UtmCampaignSeeder::class,
         ]);
     }
 }

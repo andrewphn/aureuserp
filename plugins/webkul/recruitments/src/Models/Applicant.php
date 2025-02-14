@@ -14,6 +14,8 @@ use Webkul\Recruitment\Enums\ApplicationStatus;
 use Webkul\Recruitment\Traits\HasApplicationStatus;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Support\Models\UTMMedium;
+use Webkul\Support\Models\UTMSource;
 
 class Applicant extends Model
 {
