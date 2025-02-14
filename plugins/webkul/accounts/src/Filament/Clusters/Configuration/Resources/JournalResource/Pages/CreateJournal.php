@@ -2,10 +2,10 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
 
-use Filament\Notifications\Notification;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource;
-use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Models\Journal;

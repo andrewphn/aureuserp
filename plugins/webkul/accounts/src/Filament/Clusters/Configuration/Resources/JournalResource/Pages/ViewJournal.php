@@ -2,7 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;

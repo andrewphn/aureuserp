@@ -2,9 +2,8 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
-use Webkul\Account\Models\Journal;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -14,8 +13,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
+use Webkul\Account\Models\Journal;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Enums\JournalType;
