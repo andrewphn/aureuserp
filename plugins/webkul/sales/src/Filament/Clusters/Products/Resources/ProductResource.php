@@ -24,18 +24,21 @@ use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Tax;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Field\Filament\Traits\HasCustomFields;
+use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 use Webkul\Sale\Enums\InvoicePolicy;
 use Webkul\Support\Models\UOM;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages\ManageProducts;
 use Webkul\Sale\Models\ProductCategory;
 
-class ProductResource extends Resource
+class ProductResource extends BaseProductResource
 {
     use HasCustomFields;
 
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $cluster = Products::class;
 
@@ -48,216 +51,32 @@ class ProductResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Group::make()
-                    ->schema([
-                        Forms\Components\Section::make()
-                            ->schema([
-                                Forms\Components\Actions::make([
-                                    Forms\Components\Actions\Action::make('is_favorite')
-                                        ->hiddenLabel()
-                                        ->outlined(false)
-                                        ->icon(fn($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
-                                        ->color('warning')
-                                        ->iconButton()
-                                        ->size(ActionSize::Large->value)
-                                        ->action(fn($record) => $record?->update(['is_favorite' => ! $record->is_favorite,])),
-                                ]),
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.name'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->autofocus()
-                                    ->placeholder(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.name-placeholder'))
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;']),
-                                Forms\Components\Toggle::make('sales_ok')
-                                    ->live()
-                                    ->default(true)
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.sales')),
-                                Forms\Components\Toggle::make('purchase_ok')
-                                    ->default(true)
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.purchase')),
-                                Forms\Components\RichEditor::make('description')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.description')),
-                                Forms\Components\Select::make('tags')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.tags'))
-                                    ->relationship(name: 'tags', titleAttribute: 'name')
-                                    ->multiple()
-                                    ->searchable()
-                                    ->preload()
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label(__('sales::filament/clusters/products/resources/product.form.sections.general.fields.name'))
-                                            ->required()
-                                            ->unique('products_tags'),
-                                    ]),
-                            ]),
-                        Forms\Components\Section::make()
-                            ->visible(fn(Get $get) => $get('sales_ok'))
-                            ->schema([
-                                Forms\Components\Select::make('invoice_policy')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.title'))
-                                    ->options(InvoicePolicy::class)
-                                    ->live()
-                                    ->default(InvoicePolicy::ORDER->value),
-                                Forms\Components\Placeholder::make('invoice_policy_help')
-                                    ->hiddenLabel()
-                                    ->content(function (Get $get) {
-                                        if ($get('invoice_policy') === InvoicePolicy::ORDER->value) {
-                                            return __('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.ordered-policy');
-                                        } else if ($get('invoice_policy') === InvoicePolicy::DELIVERY->value) {
-                                            return __('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.delivered-policy');
-                                        }
-                                    }),
-                            ]),
-                        Forms\Components\Section::make(__('sales::filament/clusters/products/resources/product.form.sections.images.title'))
-                            ->schema([
-                                Forms\Components\FileUpload::make('images')
-                                    ->multiple()
-                                    ->storeFileNamesIn('products'),
-                            ]),
+        $form = BaseProductResource::form($form);
 
-                        Forms\Components\Section::make(__('sales::filament/clusters/products/resources/product.form.sections.additional.title'))
-                            ->visible(! empty($customFormFields = static::getCustomFormFields()))
-                            ->schema($customFormFields),
-                    ])
-                    ->columnSpan(['lg' => 2]),
+        $components = $form->getComponents();
 
-                Forms\Components\Group::make()
-                    ->schema([
-                        Forms\Components\Section::make(__('sales::filament/clusters/products/resources/product.form.sections.settings.title'))
-                            ->schema([
-                                Forms\Components\Radio::make('type')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.settings.fields.type'))
-                                    ->options(ProductType::class)
-                                    ->default(ProductType::GOODS->value)
-                                    ->live(),
-                                Forms\Components\TextInput::make('reference')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.settings.fields.reference'))
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('barcode')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.settings.fields.barcode'))
-                                    ->maxLength(255),
+        $firstGroupChildComponents = $components[0]->getChildComponents();
 
-                                Forms\Components\Select::make('company_id')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.settings.fields.company'))
-                                    ->relationship('company', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->default(Auth::user()->default_company_id),
-                            ]),
-                        Forms\Components\Section::make(__('sales::filament/clusters/products/resources/product.form.sections.category-and-tags.title'))
-                            ->schema([
-                                Forms\Components\Select::make('category_id')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.settings.fields.category'))
-                                    ->required()
-                                    ->relationship('category', 'full_name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->default(ProductCategory::first()?->id)
-                                    ->hiddenOn(ManageProducts::class),
-                            ]),
-                        Forms\Components\Section::make(__('sales::filament/clusters/products/resources/product.form.sections.pricing.title'))
-                            ->schema([
-                                Forms\Components\Select::make('accounts_product_taxes')
-                                    ->relationship(
-                                        'productTaxes',
-                                        'name',
-                                        fn($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
-                                    )
-                                    ->multiple()
-                                    ->live()
-                                    ->searchable()
-                                    ->preload(),
-                                Forms\Components\Placeholder::make('total_tax_inclusion')
-                                    ->hiddenLabel()
-                                    ->content(function (Get $get) {
-                                        $price = floatval($get('price'));
-                                        $selectedTaxIds = $get('accounts_product_taxes');
+        $secondChildComponents = $firstGroupChildComponents[0]->getChildComponents();
 
-                                        if (!$price || empty($selectedTaxIds)) {
-                                            return '';
-                                        }
+        $favoriteAction = Forms\Components\Actions::make([
+            Forms\Components\Actions\Action::make('is_favorite')
+                ->hiddenLabel()
+                ->outlined(false)
+                ->icon(fn($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
+                ->color('warning')
+                ->iconButton()
+                ->size(ActionSize::Large->value)
+                ->action(fn($record) => $record?->update(['is_favorite' => ! $record->is_favorite,])),
+        ]);
 
-                                        $taxes = Tax::whereIn('id', $selectedTaxIds)->get();
+        array_unshift($secondChildComponents, $favoriteAction);
 
-                                        $result = [
-                                            'total_excluded' => $price,
-                                            'total_included' => $price,
-                                            'taxes' => []
-                                        ];
+        $firstGroupChildComponents[0]->childComponents($secondChildComponents);
 
-                                        $totalTaxAmount = 0;
-                                        $basePrice = $price;
+        $form->components($components);
 
-                                        foreach ($taxes as $tax) {
-                                            $taxAmount = $basePrice * ($tax->amount / 100);
-                                            $totalTaxAmount += $taxAmount;
-
-                                            if ($tax->include_base_amount) {
-                                                $basePrice += $taxAmount;
-                                            }
-
-                                            $result['taxes'][] = [
-                                                'tax' => $tax,
-                                                'base' => $price,
-                                                'amount' => $taxAmount
-                                            ];
-                                        }
-
-                                        $result['total_excluded'] = $price;
-                                        $result['total_included'] = $price + $totalTaxAmount;
-
-                                        $parts = [];
-
-                                        if ($result['total_included'] != $price) {
-                                            $parts[] = sprintf(
-                                                '%s Incl. Taxes',
-                                                number_format($result['total_included'], 2)
-                                            );
-                                        }
-
-                                        if ($result['total_excluded'] != $price) {
-                                            $parts[] = sprintf(
-                                                '%s Excl. Taxes',
-                                                number_format($result['total_excluded'], 2)
-                                            );
-                                        }
-
-                                        return !empty($parts) ? '(= ' . implode(', ', $parts) . ')' : ' ';
-                                    }),
-                                Forms\Components\Select::make('accounts_product_supplier_taxes')
-                                    ->relationship(
-                                        'supplierTaxes',
-                                        'name',
-                                        fn($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
-                                    )
-                                    ->multiple()
-                                    ->live()
-                                    ->searchable()
-                                    ->preload(),
-                                Forms\Components\TextInput::make('price')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.pricing.fields.price'))
-                                    ->numeric()
-                                    ->required()
-                                    ->live()
-                                    ->default(0.00),
-                                Forms\Components\TextInput::make('cost')
-                                    ->label(__('sales::filament/clusters/products/resources/product.form.sections.pricing.fields.cost'))
-                                    ->numeric()
-                                    ->default(0.00),
-                                Forms\Components\Hidden::make('uom_id')
-                                    ->default(UOM::first()->id),
-                                Forms\Components\Hidden::make('uom_po_id')
-                                    ->default(UOM::first()->id),
-                                Forms\Components\Hidden::make('sale_line_warn')
-                                    ->default('no-message'),
-                            ]),
-                    ])
-                    ->columnSpan(['lg' => 1]),
-            ])
-            ->columns(3);
+        return $form;
     }
 
     public static function table(Table $table): Table
