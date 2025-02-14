@@ -6,7 +6,6 @@ use Filament\Actions;
 use Filament\Forms;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Enums;
-use Webkul\Product\Filament\Resources\ProductResource\Pages\EditProduct as BaseEditProduct;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Product;
@@ -15,6 +14,7 @@ use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\EditProduct as BaseEditProduct;
 
 class EditProduct extends BaseEditProduct
 {

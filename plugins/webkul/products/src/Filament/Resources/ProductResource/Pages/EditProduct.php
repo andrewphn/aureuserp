@@ -7,8 +7,8 @@ use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
+use Webkul\Product\Filament\Resources\ProductResource;
 
 class EditProduct extends EditRecord
 {
