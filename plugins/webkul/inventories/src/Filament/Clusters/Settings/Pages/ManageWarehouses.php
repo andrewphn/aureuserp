@@ -4,9 +4,9 @@ namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
-use Illuminate\Support\Facades\Route;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 use Webkul\Inventory\Models\OperationType;
@@ -56,7 +56,7 @@ class ManageWarehouses extends SettingsPage
                             $set('enable_multi_steps_routes', false);
                         }
                     })
-                    ->helperText(function() {
+                    ->helperText(function () {
                         $routeBaseName = LocationResource::getRouteBaseName();
 
                         $url = '#';

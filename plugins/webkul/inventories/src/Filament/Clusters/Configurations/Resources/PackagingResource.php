@@ -11,8 +11,8 @@ use Filament\Tables\Table;
 use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResource\Pages;
 use Webkul\Inventory\Models\Packaging;
-use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Inventory\Settings\OperationSettings;
+use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 

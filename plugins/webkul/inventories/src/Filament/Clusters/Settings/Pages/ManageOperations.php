@@ -3,10 +3,10 @@
 namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Illuminate\Support\Facades\Route;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Support\Filament\Clusters\Settings;
@@ -48,7 +48,7 @@ class ManageOperations extends SettingsPage
             ->schema([
                 Forms\Components\Toggle::make('enable_packages')
                     ->label(__('inventories::filament/clusters/settings/pages/manage-operations.form.enable-packages'))
-                    ->helperText(function() {
+                    ->helperText(function () {
                         $routeBaseName = PackageResource::getRouteBaseName();
 
                         $url = '#';

@@ -4,9 +4,9 @@ namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
-use Illuminate\Support\Facades\Route;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResource;
 use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Support\Filament\Clusters\Settings;
@@ -54,7 +54,7 @@ class ManageProducts extends SettingsPage
                 //     ->helperText(__('inventories::filament/clusters/settings/pages/manage-products.form.enable-uom-helper-text')),
                 Forms\Components\Toggle::make('enable_packagings')
                     ->label(__('inventories::filament/clusters/settings/pages/manage-products.form.enable-packagings'))
-                    ->helperText(function() {
+                    ->helperText(function () {
                         $routeBaseName = PackagingResource::getRouteBaseName();
 
                         $url = '#';

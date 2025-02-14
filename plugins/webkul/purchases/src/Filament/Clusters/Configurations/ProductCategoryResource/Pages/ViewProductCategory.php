@@ -2,8 +2,8 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
 
-use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductCategoryResource;
 use Webkul\Product\Filament\Resources\CategoryResource\Pages\ViewCategory;
+use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductCategoryResource;
 
 class ViewProductCategory extends ViewCategory
 {

@@ -11,8 +11,8 @@ use Filament\Resources\Pages\Page;
 use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
 use Webkul\Inventory\Models\Category;
-use Webkul\Product\Filament\Resources\CategoryResource;
 use Webkul\Inventory\Settings\WarehouseSettings;
+use Webkul\Product\Filament\Resources\CategoryResource;
 
 class ProductCategoryResource extends CategoryResource
 {

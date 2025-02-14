@@ -4,10 +4,10 @@ namespace Webkul\Purchase\Filament\Clusters\Configurations\Resources;
 
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
+use Webkul\Product\Filament\Resources\CategoryResource;
+use Webkul\Product\Models\Category;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
-use Webkul\Product\Models\Category;
-use Webkul\Product\Filament\Resources\CategoryResource;
 
 class ProductCategoryResource extends CategoryResource
 {

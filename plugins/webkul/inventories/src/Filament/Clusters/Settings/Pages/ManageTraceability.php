@@ -6,10 +6,10 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Support\Filament\Clusters\Settings;
-use Illuminate\Support\Facades\Route;
 
 class ManageTraceability extends SettingsPage
 {
@@ -48,7 +48,7 @@ class ManageTraceability extends SettingsPage
             ->schema([
                 Forms\Components\Toggle::make('enable_lots_serial_numbers')
                     ->label(__('inventories::filament/clusters/settings/pages/manage-traceability.form.enable-lots-serial-numbers'))
-                    ->helperText(function() {
+                    ->helperText(function () {
                         $routeBaseName = LotResource::getRouteBaseName();
 
                         $url = '#';

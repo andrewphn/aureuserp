@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Inventory\Enums;
-use Webkul\Product\Enums\ProductType;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
@@ -29,6 +28,7 @@ use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
 use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
+use Webkul\Product\Enums\ProductType;
 use Webkul\TableViews\Filament\Components\PresetView;
 
 class OperationResource extends Resource
@@ -368,9 +368,9 @@ class OperationResource extends Resource
                     ->slideOver(),
             )
             ->filtersFormColumns(2)
-        ->checkIfRecordIsSelectableUsing(
-            fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\OperationState::DONE,
-        );
+            ->checkIfRecordIsSelectableUsing(
+                fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\OperationState::DONE,
+            );
     }
 
     public static function infolist(Infolist $infolist): Infolist
