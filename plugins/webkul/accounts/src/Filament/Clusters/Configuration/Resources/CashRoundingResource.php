@@ -23,6 +23,8 @@ class CashRoundingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = Configuration::class;
 
     public static function getModelLabel(): string

@@ -3,17 +3,9 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages\ListCashRoundings as BaseListCashRoundings;
 
-class ListCashRoundings extends ListRecords
+class ListCashRoundings extends BaseListCashRoundings
 {
     protected static string $resource = CashRoundingResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
 }
