@@ -9,7 +9,7 @@ class UTMMediumSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('recruitments_utm_mediums')->delete();
+        DB::table('utm_mediums')->delete();
 
         $mediums = [
             'Phone',
@@ -23,7 +23,7 @@ class UTMMediumSeeder extends Seeder
             'Google',
         ];
 
-        DB::table('recruitments_utm_mediums')->insert(collect($mediums)->map(function ($medium) {
+        DB::table('utm_mediums')->insert(collect($mediums)->map(function ($medium) {
             return [
                 'name'       => $medium,
                 'creator_id' => 1,

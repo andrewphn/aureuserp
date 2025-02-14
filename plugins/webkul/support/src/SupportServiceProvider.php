@@ -42,6 +42,10 @@ class SupportServiceProvider extends PackageServiceProvider
                 '2025_01_03_105627_create_unit_of_measures_table',
                 '2025_01_07_131336_add_partner_address_id_column_company_addresses_table',
                 '2025_01_07_125015_add_partner_id_to_companies_table',
+                '2025_01_09_111545_create_utm_mediums_table',
+                '2025_01_09_114324_create_utm_sources_table',
+                '2025_02_07_094256_create_utm_stages_table',
+                '2025_02_07_094325_create_utm_campaigns_table',
             ])
             ->runsMigrations()
             ->hasCommands([
