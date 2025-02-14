@@ -21,6 +21,8 @@ class TaxGroupResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = Configuration::class;
 
     public static function getModelLabel(): string
