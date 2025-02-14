@@ -26,6 +26,8 @@ class TaxResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = Configuration::class;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
