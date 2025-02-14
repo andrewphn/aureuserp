@@ -12,6 +12,7 @@ use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
 use Webkul\Inventory\Models\Category;
 use Webkul\Product\Filament\Resources\CategoryResource;
+use Webkul\Inventory\Settings\WarehouseSettings;
 
 class ProductCategoryResource extends CategoryResource
 {
@@ -57,7 +58,8 @@ class ProductCategoryResource extends CategoryResource
                             ->multiple(),
                     ])
                     ->columns(1),
-            ]);
+            ])
+            ->visible(fn (WarehouseSettings $settings) => $settings->enable_multi_steps_routes);
 
         $components[1]->childComponents($childComponents);
 
@@ -89,7 +91,8 @@ class ProductCategoryResource extends CategoryResource
                     ])
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsible(),
-            ]);
+            ])
+            ->visible(fn (WarehouseSettings $settings) => $settings->enable_multi_steps_routes);
 
         $components[0]->childComponents($firstGroupChildComponents);
 

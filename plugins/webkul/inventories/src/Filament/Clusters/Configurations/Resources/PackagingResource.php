@@ -12,6 +12,8 @@ use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResource\Pages;
 use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Settings\ProductSettings;
+use Webkul\Inventory\Settings\OperationSettings;
+use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 
 class PackagingResource extends BasePackagingResource
@@ -57,14 +59,16 @@ class PackagingResource extends BasePackagingResource
             ->label(__('inventories::filament/clusters/configurations/resources/packaging.form.package-type'))
             ->relationship('packageType', 'name')
             ->searchable()
-            ->preload();
+            ->preload()
+            ->visible(fn (OperationSettings $settings) => $settings->enable_packages);
 
         $components[] = Forms\Components\Select::make('routes')
             ->label(__('inventories::filament/clusters/configurations/resources/packaging.form.routes'))
             ->relationship('routes', 'name')
             ->searchable()
             ->preload()
-            ->multiple();
+            ->multiple()
+            ->visible(fn (WarehouseSettings $settings) => $settings->enable_multi_steps_routes);
 
         $form->components($components);
 
@@ -82,13 +86,15 @@ class PackagingResource extends BasePackagingResource
         $columns[] = Tables\Columns\TextColumn::make('packageType.name')
             ->label(__('inventories::filament/clusters/configurations/resources/packaging.table.columns.package-type'))
             ->numeric()
-            ->sortable();
+            ->sortable()
+            ->visible(fn (OperationSettings $settings) => $settings->enable_packages);
 
         $filters[] = Tables\Filters\SelectFilter::make('packageType')
             ->label(__('inventories::filament/clusters/configurations/resources/packaging.table.filters.package-type'))
             ->relationship('packageType', 'name')
             ->searchable()
-            ->preload();
+            ->preload()
+            ->visible(fn (OperationSettings $settings) => $settings->enable_packages);
 
         $table->columns($columns);
 
@@ -108,7 +114,8 @@ class PackagingResource extends BasePackagingResource
         $firstSectionChildComponents[] = Infolists\Components\TextEntry::make('packageType.name')
             ->label(__('inventories::filament/clusters/configurations/resources/packaging.infolist.sections.general.entries.package_type'))
             ->icon('heroicon-o-archive-box')
-            ->placeholder('—');
+            ->placeholder('—')
+            ->visible(fn (OperationSettings $settings) => $settings->enable_packages);
 
         $components[0]->childComponents($firstSectionChildComponents);
 
@@ -125,7 +132,8 @@ class PackagingResource extends BasePackagingResource
                         ->placeholder('—')
                         ->columns(1),
                 ])
-                ->collapsible(),
+                ->collapsible()
+                ->visible(fn (WarehouseSettings $settings) => $settings->enable_multi_steps_routes),
         ]);
 
         $infolist->components($components);
