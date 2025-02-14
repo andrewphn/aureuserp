@@ -13,9 +13,9 @@ use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers;
 use Webkul\Account\Models\FiscalPosition;
 
 class FiscalPositionResource extends Resource

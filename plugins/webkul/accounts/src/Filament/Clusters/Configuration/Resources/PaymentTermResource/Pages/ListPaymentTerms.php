@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Webkul\Account\Models\PaymentTerm;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource;
 
 class ListPaymentTerms extends ListRecords
 {

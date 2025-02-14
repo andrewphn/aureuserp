@@ -2,9 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Account\Filament\Clusters\Configuration;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
-use Webkul\Account\Models\Tax;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
 use Filament\Forms;
@@ -16,9 +14,11 @@ use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\RelationManagers;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
+use Webkul\Account\Models\Tax;
 
 class TaxResource extends Resource
 {

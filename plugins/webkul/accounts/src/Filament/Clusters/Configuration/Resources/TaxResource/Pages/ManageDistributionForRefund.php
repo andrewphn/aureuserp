@@ -3,8 +3,8 @@
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
 
 use Filament\Pages\SubNavigationPosition;
-use Webkul\Account\Enums;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Webkul\Account\Enums;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 use Webkul\Account\Traits\TaxPartition;
 

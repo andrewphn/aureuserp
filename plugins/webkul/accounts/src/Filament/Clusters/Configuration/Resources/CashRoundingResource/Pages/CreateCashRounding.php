@@ -5,7 +5,7 @@ namespace Webkul\Account\Filament\Clusters\Configuration\Resources\CashRoundingR
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\CashRoundingResource;
 
 class CreateCashRounding extends CreateRecord
 {

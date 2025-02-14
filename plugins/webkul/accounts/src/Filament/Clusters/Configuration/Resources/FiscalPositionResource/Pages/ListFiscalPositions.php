@@ -4,7 +4,7 @@ namespace Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositio
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
 
 class ListFiscalPositions extends ListRecords
 {

@@ -5,7 +5,7 @@ namespace Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResour
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource;
 
 class EditAccount extends EditRecord
 {

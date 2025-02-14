@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountTagResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountTagResource;
 
 class ListAccountTags extends ListRecords
 {

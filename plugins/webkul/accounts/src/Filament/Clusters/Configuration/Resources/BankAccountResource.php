@@ -4,8 +4,8 @@ namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource\Pages;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\BankAccountResource\Pages;
 use Webkul\Contact\Filament\Clusters\Configurations\Resources\BankAccountResource as BaseBankAccountResource;
 
 class BankAccountResource extends BaseBankAccountResource

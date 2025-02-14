@@ -2,13 +2,13 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\TableViews\Filament\Components\PresetView;
-use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Enums;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 
 class ListTaxes extends ListRecords
 {

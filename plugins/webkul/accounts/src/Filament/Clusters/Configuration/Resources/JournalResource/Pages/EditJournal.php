@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Models\Journal;

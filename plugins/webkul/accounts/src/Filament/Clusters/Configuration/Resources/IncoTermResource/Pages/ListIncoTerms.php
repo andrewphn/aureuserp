@@ -2,7 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\IncoTermResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;

@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource;
 
 class ViewPaymentTerm extends ViewRecord
 {

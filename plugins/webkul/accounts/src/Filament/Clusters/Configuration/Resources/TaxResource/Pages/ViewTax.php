@@ -2,7 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
