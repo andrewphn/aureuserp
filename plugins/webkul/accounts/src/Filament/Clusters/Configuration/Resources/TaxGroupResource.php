@@ -2,8 +2,8 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
 use Webkul\Account\Models\TaxGroup;
 use Filament\Forms;
 use Filament\Forms\Form;

@@ -2,7 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;

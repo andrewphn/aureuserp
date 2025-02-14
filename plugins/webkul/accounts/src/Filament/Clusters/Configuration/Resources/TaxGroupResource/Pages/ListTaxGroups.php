@@ -2,7 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

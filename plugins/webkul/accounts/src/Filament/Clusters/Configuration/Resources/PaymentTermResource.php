@@ -2,8 +2,8 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
 use Filament\Forms\Form;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -17,7 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\EarlyPayDiscount;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource\RelationManagers;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\RelationManagers;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\HtmlString;
 use Webkul\Account\Models\PaymentTerm;

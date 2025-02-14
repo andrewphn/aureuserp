@@ -3,7 +3,7 @@
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\RelationManagers;
 
 use Filament\Resources\RelationManagers\RelationManager;
-use Webkul\Invoice\Traits\PaymentDueTerm;
+use Webkul\Account\Traits\PaymentDueTerm;
 
 class PaymentDueTermRelationManager extends RelationManager
 {
