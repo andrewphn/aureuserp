@@ -15,7 +15,7 @@ class ManageProducts extends SettingsPage
 {
     use HasPageShield;
 
-    protected static ?string $navigationIcon = 'Purchase-o-cube';
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
 
     protected static ?string $navigationGroup = 'Inventory';
 

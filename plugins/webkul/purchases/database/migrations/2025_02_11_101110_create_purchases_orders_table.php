@@ -59,23 +59,23 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->foreignId('currency_id')
-                ->constrained('res_currency')
+                ->constrained('currencies')
                 ->restrictOnDelete();
 
-            $table->foreignId('fiscal_position_id')
-                ->nullable()
-                ->constrained('account_fiscal_position')
-                ->nullOnDelete();
+            // $table->foreignId('fiscal_position_id')
+            //     ->nullable()
+            //     ->constrained('account_fiscal_position')
+            //     ->nullOnDelete();
 
-            $table->foreignId('payment_term_id')
-                ->nullable()
-                ->constrained('account_payment_term')
-                ->nullOnDelete();
+            // $table->foreignId('payment_term_id')
+            //     ->nullable()
+            //     ->constrained('account_payment_term')
+            //     ->nullOnDelete();
 
-            $table->foreignId('incoterm_id')
-                ->nullable()
-                ->constrained('account_incoterms')
-                ->nullOnDelete();
+            // $table->foreignId('incoterm_id')
+            //     ->nullable()
+            //     ->constrained('account_incoterms')
+            //     ->nullOnDelete();
 
             $table->foreignId('user_id')
                 ->nullable()
@@ -92,15 +92,6 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->timestamps();
-
-            // $table->foreignId('operation_type_id')
-            //     ->constrained('inventories_operation_types')
-            //     ->restrictOnDelete();
-
-            // $table->foreignId('group_id')
-            //     ->nullable()
-            //     ->constrained('procurement_groups')
-            //     ->nullOnDelete();
 
             // Indexes
             $table->index('name');

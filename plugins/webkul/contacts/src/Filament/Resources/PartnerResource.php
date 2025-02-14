@@ -10,7 +10,7 @@ use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Contact\Filament\Resources\PartnerResource\Pages;
-use Webkul\Contact\Filament\Resources\PartnerResource\RelationManagers;
+use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
 use Webkul\Partner\Filament\Resources\PartnerResource as BasePartnerResource;
 use Webkul\Partner\Models\Partner;
 

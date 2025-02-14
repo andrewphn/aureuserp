@@ -3,15 +3,12 @@
 namespace Webkul\Purchase\Filament\Clusters\Configurations\Resources;
 
 use Webkul\Product\Filament\Resources\AttributeResource;
-use Webkul\Product\Models\Attribute;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
 use Webkul\Purchase\Settings\ProductSettings;
 
 class ProductAttributeResource extends AttributeResource
 {
-    protected static ?string $model = Attribute::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-swatch';
 
     protected static bool $shouldRegisterNavigation = true;

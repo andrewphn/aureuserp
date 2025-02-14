@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Contact\Filament\Resources\PartnerResource\RelationManagers;
+namespace Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -8,7 +8,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Contact\Filament\Resources\PartnerResource;
+use Webkul\Partner\Filament\Resources\PartnerResource;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -26,7 +26,7 @@ class ContactsRelationManager extends RelationManager
             ->groups([])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label(__('contacts::filament/resources/partner/relation-managers/contacts.table.header-actions.create.label'))
+                    ->label(__('partners::filament/resources/partner/relation-managers/contacts.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['creator_id'] = Auth::id();
@@ -36,8 +36,8 @@ class ContactsRelationManager extends RelationManager
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('contacts::filament/resources/partner/relation-managers/contacts.table.header-actions.create.notification.title'))
-                            ->body(__('contacts::filament/resources/partner/relation-managers/contacts.table.header-actions.create.notification.body')),
+                            ->title(__('partners::filament/resources/partner/relation-managers/contacts.table.header-actions.create.notification.title'))
+                            ->body(__('partners::filament/resources/partner/relation-managers/contacts.table.header-actions.create.notification.body')),
                     ),
             ]);
     }

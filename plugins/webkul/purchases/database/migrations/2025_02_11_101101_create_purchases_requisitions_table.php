@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('description')->nullable();
 
             $table->foreignId('currency_id')
-                ->constrained('res_currency')
+                ->constrained('currencies')
                 ->restrictOnDelete();
 
             $table->foreignId('partner_id')

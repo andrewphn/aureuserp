@@ -8,28 +8,9 @@ use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Contact\Filament\Resources\PartnerResource;
+use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ViewPartner as BaseViewPartner;
 
-class ViewPartner extends ViewRecord
+class ViewPartner extends BaseViewPartner
 {
     protected static string $resource = PartnerResource::class;
-
-    public function getTitle(): string|Htmlable
-    {
-        return __('contacts::filament/resources/partner/pages/view-partner.title');
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ChatterAction::make()
-                ->setResource(static::$resource),
-            Actions\DeleteAction::make()
-                ->successNotification(
-                    Notification::make()
-                        ->success()
-                        ->title(__('contacts::filament/resources/partner/pages/view-partner.header-actions.delete.notification.title'))
-                        ->body(__('contacts::filament/resources/partner/pages/view-partner.header-actions.delete.notification.body')),
-                ),
-        ];
-    }
 }

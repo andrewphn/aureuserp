@@ -1,11 +1,11 @@
 <?php
 
-namespace Webkul\Contact\Filament\Resources\PartnerResource\RelationManagers;
+namespace Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
-use Webkul\Contact\Filament\Resources\AddressResource;
+use Webkul\Partner\Filament\Resources\AddressResource;
 
 class AddressesRelationManager extends RelationManager
 {

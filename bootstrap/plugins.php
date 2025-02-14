@@ -11,6 +11,7 @@ return [
     Webkul\Payment\PaymentPlugin::class,
     Webkul\Partner\PartnerPlugin::class,
     Webkul\Project\ProjectPlugin::class,
+    Webkul\Purchase\PurchasePlugin::class,
     Webkul\Support\SupportPlugin::class,
     Webkul\Recruitment\RecruitmentPlugin::class,
     Webkul\Sale\SalePlugin::class,

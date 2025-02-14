@@ -5,14 +5,11 @@ namespace Webkul\Purchase\Filament\Clusters\Configurations\Resources;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Webkul\Product\Filament\Resources\CategoryResource;
-use Webkul\Product\Models\Category;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
 
 class ProductCategoryResource extends CategoryResource
 {
-    protected static ?string $model = Category::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-folder';
 
     protected static bool $shouldRegisterNavigation = true;
@@ -25,12 +22,12 @@ class ProductCategoryResource extends CategoryResource
 
     public static function getNavigationGroup(): string
     {
-        return __('purcahses::filament/clusters/configurations/resources/product-category.navigation.group');
+        return __('purchases::filament/clusters/configurations/resources/product-category.navigation.group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('purcahses::filament/clusters/configurations/resources/product-category.navigation.title');
+        return __('purchases::filament/clusters/configurations/resources/product-category.navigation.title');
     }
 
     public static function getSubNavigationPosition(): SubNavigationPosition

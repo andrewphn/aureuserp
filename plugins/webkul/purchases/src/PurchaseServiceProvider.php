@@ -19,10 +19,10 @@ class PurchaseServiceProvider extends PackageServiceProvider
             ->hasTranslations()
             ->hasMigrations([
                 '2025_02_11_101100_create_purchases_order_groups_table',
-                '2025_02_11_101102_create_purchases_orders_table',
+                '2025_02_11_101101_create_purchases_requisitions_table',
+                '2025_02_11_101105_create_purchases_requisition_lines_table',
+                '2025_02_11_101110_create_purchases_orders_table',
                 '2025_02_11_101118_create_purchases_order_lines_table',
-                '2025_02_11_101152_create_purchases_requisitions_table',
-                '2025_02_11_101233_create_purchases_requisition_lines_table',
             ])
             ->runsMigrations()
             ->hasSettings([
