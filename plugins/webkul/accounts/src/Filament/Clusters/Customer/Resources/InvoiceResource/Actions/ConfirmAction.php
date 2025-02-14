@@ -6,8 +6,8 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 use Webkul\Account\Models\Move;
-use Webkul\Invoice\Enums\AutoPost;
-use Webkul\Invoice\Enums\MoveState;
+use Webkul\Account\Enums\AutoPost;
+use Webkul\Account\Enums\MoveState;
 
 class ConfirmAction extends Action
 {

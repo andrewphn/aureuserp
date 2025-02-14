@@ -8,8 +8,8 @@ use Filament\Forms;
 use Livewire\Component;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Models\Move;
-use Webkul\Invoice\Enums\MoveState;
-use Webkul\Invoice\Enums\MoveType;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\MoveType;
 
 class PayAction extends Action
 {

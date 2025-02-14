@@ -4,7 +4,7 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\R
 
 use Filament\Resources\RelationManagers\RelationManager;
 use Webkul\Account\Enums;
-use Webkul\Invoice\Traits\TaxPartition;
+use Webkul\Account\Traits\TaxPartition;
 
 class DistributionForRefundRelationManager extends RelationManager
 {

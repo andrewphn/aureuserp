@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
-use Webkul\Invoice\Enums;
+use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Actions\CancelAction;

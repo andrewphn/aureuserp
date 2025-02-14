@@ -9,7 +9,7 @@ use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
-use Webkul\Invoice\Enums;
+use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
 

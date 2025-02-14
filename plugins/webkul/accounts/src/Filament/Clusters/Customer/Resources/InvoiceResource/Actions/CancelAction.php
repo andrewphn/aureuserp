@@ -5,8 +5,8 @@ namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Ac
 use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Account\Models\Move;
-use Webkul\Invoice\Enums\MoveState;
-use Webkul\Invoice\Enums\MoveType;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\MoveType;
 
 class CancelAction extends Action
 {

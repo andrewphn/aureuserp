@@ -4,7 +4,7 @@ namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Ac
 
 use Filament\Actions\Action;
 use Webkul\Account\Models\Move;
-use Webkul\Invoice\Enums\MoveState;
+use Webkul\Account\Enums\MoveState;
 
 class SetAsCheckedAction extends Action
 {
