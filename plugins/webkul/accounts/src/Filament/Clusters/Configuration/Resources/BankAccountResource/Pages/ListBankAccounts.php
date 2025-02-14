@@ -2,26 +2,10 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\BankAccountResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource;
-use Filament\Actions;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\BankAccountResource;
+use Webkul\Contact\Filament\Clusters\Configurations\Resources\BankAccountResource\Pages\ManageBankAccounts as BaseManageBankAccounts;
 
-class ListBankAccounts extends ListRecords
+class ListBankAccounts extends BaseManageBankAccounts
 {
     protected static string $resource = BankAccountResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-                ->icon('heroicon-o-plus-circle')
-                ->successNotification(
-                    Notification::make()
-                        ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/bank-account/pages/list-bank-account.header-actions.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/bank-account/pages/list-bank-account.header-actions.notification.body'))
-                ),
-        ];
-    }
 }
