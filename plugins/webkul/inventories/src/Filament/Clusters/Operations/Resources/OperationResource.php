@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Inventory\Enums;
+use Webkul\Product\Enums\ProductType;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
@@ -366,10 +367,10 @@ class OperationResource extends Resource
                 fn (Tables\Actions\Action $action) => $action
                     ->slideOver(),
             )
-            ->filtersFormColumns(2);
-        // ->checkIfRecordIsSelectableUsing(
-        //     fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\OperationState::DONE,
-        // );
+            ->filtersFormColumns(2)
+        ->checkIfRecordIsSelectableUsing(
+            fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\OperationState::DONE,
+        );
     }
 
     public static function infolist(Infolist $infolist): Infolist
@@ -534,6 +535,11 @@ class OperationResource extends Resource
                 Forms\Components\Select::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.product'))
                     ->relationship('product', 'name')
+                    ->relationship(
+                        'product',
+                        'name',
+                        fn ($query) => $query->where('type', ProductType::GOODS),
+                    )
                     ->required()
                     ->searchable()
                     ->preload()

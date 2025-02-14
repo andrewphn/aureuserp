@@ -10,6 +10,7 @@ use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
+use Webkul\Product\Enums\ProductType;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
@@ -74,6 +75,11 @@ class ScrapResource extends Resource
                                         Forms\Components\Select::make('product_id')
                                             ->label(__('inventories::filament/clusters/operations/resources/scrap.form.sections.general.fields.product'))
                                             ->relationship(name: 'product', titleAttribute: 'name')
+                                            ->relationship(
+                                                'product',
+                                                'name',
+                                                fn ($query) => $query->where('type', ProductType::GOODS),
+                                            )
                                             ->searchable()
                                             ->preload()
                                             ->live()

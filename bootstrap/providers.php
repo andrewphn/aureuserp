@@ -13,6 +13,7 @@ return [
     Webkul\Partner\PartnerServiceProvider::class,
     Webkul\Product\ProductServiceProvider::class,
     Webkul\Project\ProjectServiceProvider::class,
+    Webkul\Purchase\PurchaseServiceProvider::class,
     Webkul\TableViews\TableViewsServiceProvider::class,
     Webkul\Recruitment\RecruitmentServiceProvider::class,
     Webkul\Security\SecurityServiceProvider::class,

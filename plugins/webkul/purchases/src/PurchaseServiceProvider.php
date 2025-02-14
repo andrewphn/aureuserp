@@ -2,7 +2,8 @@
 
 namespace Webkul\Purchase;
 
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
@@ -26,25 +27,16 @@ class PurchaseServiceProvider extends PackageServiceProvider
             ])
             ->runsMigrations()
             ->hasSettings([
+                '2025_01_11_094022_create_purchases_product_settings',
             ])
             ->runsSettings()
+            ->hasDependencies([
+                'products',
+            ])
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
-                    ->askToRunMigrations()
-                    ->copyAndRegisterServiceProviderInApp()
-                    ->startWith(function (InstallCommand $command) {
-                        $command->call('products:install');
-                    })
-                    ->endWith(function (InstallCommand $command) {
-                        if ($command->confirm('Would you like to seed the data now?')) {
-                            $command->comment('Seeding data...');
-
-                            $command->call('db:seed', [
-                                '--class' => 'Webkul\\Purchase\\Database\Seeders\\DatabaseSeeder',
-                            ]);
-                        }
-                    })
-                    ->askToStarRepoOnGitHub('aureuserp/purchases');
+                    ->installDependencies()
+                    ->runsMigrations();
             });
     }
 

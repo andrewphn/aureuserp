@@ -68,8 +68,7 @@ class InventoryServiceProvider extends PackageServiceProvider
                 $command
                     ->installDependencies()
                     ->runsMigrations()
-                    ->runsSeeders()
-                    ->copyAndRegisterServiceProviderInApp();
+                    ->runsSeeders();
             })
             ->hasUninstallCommand(function (UninstallCommand $command) {
                 $command->startWith(function (UninstallCommand $command) {
