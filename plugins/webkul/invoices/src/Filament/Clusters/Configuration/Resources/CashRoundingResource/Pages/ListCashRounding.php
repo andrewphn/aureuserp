@@ -3,9 +3,9 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages\ListCashRoundings as BaseListCashRoundings;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages\ListCashRounding as BaseListCashRounding;
 
-class ListCashRoundings extends BaseListCashRoundings
+class ListCashRounding extends BaseListCashRounding
 {
     protected static string $resource = CashRoundingResource::class;
 }

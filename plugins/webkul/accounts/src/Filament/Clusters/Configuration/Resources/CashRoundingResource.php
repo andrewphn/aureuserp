@@ -214,7 +214,7 @@ class CashRoundingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListCashRoundings::route('/'),
+            'index'  => Pages\ListCashRounding::route('/'),
             'create' => Pages\CreateCashRounding::route('/create'),
             'view'   => Pages\ViewCashRounding::route('/{record}'),
             'edit'   => Pages\EditCashRounding::route('/{record}/edit'),
