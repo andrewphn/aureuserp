@@ -29,15 +29,6 @@ class ProductAttributeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function isDiscovered(): bool
-    {
-        if (app()->runningInConsole()) {
-            return true;
-        }
-
-        return app(ProductSettings::class)->enable_variants;
-    }
-
     public static function getNavigationGroup(): string
     {
         return __('sales::filament/clusters/configurations/resources/product-attribute.navigation.group');
