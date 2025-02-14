@@ -2,14 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers;
 
-use Filament\Resources\RelationManagers\RelationManager;
-use Webkul\Invoice\Traits\FiscalPositionTax;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers\FiscalPositionTaxRelationManager as BaseFiscalPositionTaxRelationManager;
 
-class FiscalPositionTaxRelationManager extends RelationManager
+class FiscalPositionTaxRelationManager extends BaseFiscalPositionTaxRelationManager
 {
-    use FiscalPositionTax;
-
-    protected static string $relationship = 'fiscalPositionTaxes';
-
-    protected static ?string $title = 'Fiscal Position Taxes';
+    //
 }

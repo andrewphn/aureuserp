@@ -3,7 +3,7 @@
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers;
 
 use Filament\Resources\RelationManagers\RelationManager;
-use Webkul\Invoice\Traits\FiscalPositionTax;
+use Webkul\Account\Traits\FiscalPositionTax;
 
 class FiscalPositionTaxRelationManager extends RelationManager
 {

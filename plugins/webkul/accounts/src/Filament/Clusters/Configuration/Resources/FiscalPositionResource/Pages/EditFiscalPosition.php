@@ -2,12 +2,12 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
+use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Facades\Auth;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
 use Webkul\Account\Models\FiscalPosition;
 
 class EditFiscalPosition extends EditRecord

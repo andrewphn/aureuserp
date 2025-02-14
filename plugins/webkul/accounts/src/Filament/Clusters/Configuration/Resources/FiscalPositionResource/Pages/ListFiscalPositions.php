@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
 
 class ListFiscalPositions extends ListRecords
 {

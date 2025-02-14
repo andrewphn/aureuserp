@@ -4,8 +4,8 @@ namespace Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositio
 
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
-use Webkul\Invoice\Traits\FiscalPositionTax;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
+use Webkul\Account\Traits\FiscalPositionTax;
 
 class ManageFiscalPositionTax extends ManageRelatedRecords
 {

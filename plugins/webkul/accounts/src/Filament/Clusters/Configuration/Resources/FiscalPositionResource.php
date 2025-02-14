@@ -2,10 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers;
-use Webkul\Account\Models\FiscalPosition;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Form;
 use Filament\Forms;
 use Filament\Infolists\Infolist;
@@ -16,13 +13,18 @@ use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
+use Webkul\Invoice\Filament\Clusters\Configuration;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\RelationManagers;
+use Webkul\Account\Models\FiscalPosition;
 
 class FiscalPositionResource extends Resource
 {
     protected static ?string $model = FiscalPosition::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-uturn-left';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $cluster = Configuration::class;
 

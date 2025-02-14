@@ -2,8 +2,8 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
@@ -12,15 +12,17 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Models\Incoterm;
+use Webkul\Invoice\Filament\Clusters\Configuration;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages;
 
 class IncoTermResource extends Resource
 {
     protected static ?string $model = Incoterm::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $cluster = Configuration::class;
 
@@ -93,20 +95,21 @@ class IncoTermResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->successNotification(
                         Notification::make()
+                            ->success()
                             ->title(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.edit.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.edit.notification.title'))
+                            ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.edit.notification.body'))
                     ),
                 Tables\Actions\DeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->title(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.delete.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.delete.notification.title'))
+                            ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.delete.notification.body'))
                     ),
                 Tables\Actions\RestoreAction::make()
                     ->successNotification(
                         Notification::make()
                             ->title(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.restore.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.restore.notification.title'))
+                            ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.actions.restore.notification.body'))
                     ),
             ])
             ->bulkActions([
@@ -115,19 +118,19 @@ class IncoTermResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->title(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.delete.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.delete.notification.title'))
+                                ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.delete.notification.body'))
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->title(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.force-delete.notification.title'))
+                                ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.force-delete.notification.body'))
                         ),
                     Tables\Actions\RestoreBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->title(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.restore.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.restore.notification.title'))
+                                ->body(__('accounts::filament/clusters/configurations/resources/incoterm.table.bulk-actions.restore.notification.body'))
                         ),
                 ]),
             ]);

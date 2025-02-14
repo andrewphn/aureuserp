@@ -2,8 +2,8 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Account\Filament\Clusters\Configuration;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Filament\Forms\Form;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -15,11 +15,11 @@ use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Resources\Pages\Page;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
 use Webkul\Account\Enums\EarlyPayDiscount;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource\RelationManagers;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\HtmlString;
 use Webkul\Account\Models\PaymentTerm;
 
 class PaymentTermResource extends Resource

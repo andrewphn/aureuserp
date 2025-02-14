@@ -26,6 +26,8 @@ class JournalResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = Configuration::class;
 
     public static function getModelLabel(): string
