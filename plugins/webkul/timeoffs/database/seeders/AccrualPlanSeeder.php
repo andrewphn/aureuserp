@@ -18,16 +18,16 @@ class AccrualPlanSeeder extends Seeder
 
         $leaveAccrualPlans = [
             [
-                'company_id' => 1,
-                'creator_id' => 1,
-                'name' => 'Seniority Plan',
-                'transition_mode' => 'immediately',
+                'company_id'        => 1,
+                'creator_id'        => 1,
+                'name'              => 'Seniority Plan',
+                'transition_mode'   => 'immediately',
                 'accrued_gain_time' => 'end',
-                'carryover_date' => 'year_start',
-                'carryover_month' => 'jan',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'carryover_date'    => 'year_start',
+                'carryover_month'   => 'jan',
+                'is_active'         => true,
+                'created_at'        => now(),
+                'updated_at'        => now(),
             ],
         ];
 

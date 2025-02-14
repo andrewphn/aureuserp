@@ -6,6 +6,7 @@ return [
     Webkul\Employee\EmployeePlugin::class,
     Webkul\Inventory\InventoryPlugin::class,
     // Webkul\Product\ProductPlugin::class,
+    Webkul\Partner\PartnerPlugin::class,
     Webkul\Project\ProjectPlugin::class,
     Webkul\Support\SupportPlugin::class,
     Webkul\Recruitment\RecruitmentPlugin::class,

@@ -37,7 +37,7 @@ class LeaveMandatoryDay extends Seeder
                 'end_date'   => '2022-12-25',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ];
 
         DB::table('time_off_leave_mandatory_days')->insert($leaveMandatoryDays);

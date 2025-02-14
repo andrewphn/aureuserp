@@ -20,14 +20,14 @@ use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
-use Webkul\Inventory\Filament\Resources\PartnerAddressResource;
-use Webkul\Inventory\Filament\Resources\PartnerResource;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
+use Webkul\Partner\Filament\Resources\AddressResource;
+use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 
 class OperationResource extends Resource
@@ -73,7 +73,7 @@ class OperationResource extends Resource
                             ->relationship('partnerAddress', 'name')
                             ->searchable()
                             ->preload()
-                            ->createOptionForm(fn (Form $form): Form => PartnerAddressResource::form($form))
+                            ->createOptionForm(fn (Form $form): Form => AddressResource::form($form))
                             ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('operation_type_id')

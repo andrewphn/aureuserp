@@ -2,13 +2,13 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\Reporting\Resources;
 
-use Webkul\TimeOff\Filament\Clusters\Reporting;
-use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource\Pages;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource;
+use Webkul\TimeOff\Filament\Clusters\Reporting;
+use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource\Pages;
 use Webkul\TimeOff\Models\Leave;
 
 class ByEmployeeResource extends Resource
@@ -36,18 +36,18 @@ class ByEmployeeResource extends Resource
             'department.name',
             'holidayStatus.name',
             'request_date_from',
-            'request_date_to'
+            'request_date_to',
         ];
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.employee') => $record->name ?? '—',
-            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.department') => $record->manager?->name ?? '—',
-            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.time-off-type') => $record->company?->name ?? '—',
+            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.employee')          => $record->name ?? '—',
+            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.department')        => $record->manager?->name ?? '—',
+            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.time-off-type')     => $record->company?->name ?? '—',
             __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.request-date-from') => $record->request_date_from ?? '—',
-            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.request-date-to') => $record->request_date_to ?? '—',
+            __('time_Off::filament/clusters/reporting/resources/by-employee.global-search.request-date-to')   => $record->request_date_to ?? '—',
         ];
     }
 

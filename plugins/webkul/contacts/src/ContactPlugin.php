@@ -3,8 +3,8 @@
 namespace Webkul\Contact;
 
 use Filament\Contracts\Plugin;
-use Webkul\Support\Package;
 use Filament\Panel;
+use Webkul\Support\Package;
 
 class ContactPlugin implements Plugin
 {
@@ -23,7 +23,7 @@ class ContactPlugin implements Plugin
         if (! Package::isPluginInstalled('contacts')) {
             return;
         }
-        
+
         $panel
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel->discoverResources(in: $this->getPluginBasePath('/Filament/Resources'), for: 'Webkul\\Contact\\Filament\\Resources')

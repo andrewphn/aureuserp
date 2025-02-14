@@ -3,8 +3,8 @@
 namespace Webkul\Support\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\EloquentSortable\SortableTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\EloquentSortable\SortableTrait;
 
 class Plugin extends Model
 {

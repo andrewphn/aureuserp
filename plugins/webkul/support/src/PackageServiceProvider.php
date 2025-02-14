@@ -96,7 +96,7 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
                 if ($this->package->runsMigrations) {
                     if ($this->package->isCore) {
                         $this->loadMigrationsFrom($filePath);
-                    } elseif($this->package->isInstalled()) {
+                    } elseif ($this->package->isInstalled()) {
                         $this->loadMigrationsFrom($filePath);
                     }
                 }
@@ -119,7 +119,7 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
                 if ($this->package->runsSettings) {
                     if ($this->package->isCore) {
                         $this->loadMigrationsFrom($filePath);
-                    } elseif($this->package->isInstalled()) {
+                    } elseif ($this->package->isInstalled()) {
                         $this->loadMigrationsFrom($filePath);
                     }
                 }

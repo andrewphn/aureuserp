@@ -2,14 +2,11 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Forms;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Inventory\Enums;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\EditProduct as BaseEditProduct;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Product;
@@ -19,28 +16,13 @@ use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
-class EditProduct extends EditRecord
+class EditProduct extends BaseEditProduct
 {
     protected static string $resource = ProductResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
-    }
-
-    protected function getSavedNotification(): Notification
-    {
-        return Notification::make()
-            ->success()
-            ->title(__('inventories::filament/clusters/products/resources/product/pages/edit-product.notification.title'))
-            ->body(__('inventories::filament/clusters/products/resources/product/pages/edit-product.notification.body'));
-    }
-
     protected function getHeaderActions(): array
     {
-        return [
-            ChatterAction::make()
-                ->setResource(static::$resource),
+        return array_merge([
             Actions\Action::make('updateQuantity')
                 ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.label'))
                 ->modalHeading(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-heading'))
@@ -117,54 +99,6 @@ class EditProduct extends EditRecord
 
                     ProductResource::createMove($productQuantity, $currentQuantity, $sourceLocationId, $destinationLocationId);
                 }),
-            Actions\Action::make('print')
-                ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.label'))
-                ->color('gray')
-                ->icon('heroicon-o-printer')
-                ->form([
-                    Forms\Components\TextInput::make('quantity')
-                        ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.quantity'))
-                        ->required()
-                        ->numeric()
-                        ->minValue(1)
-                        ->maxValue(100),
-                    Forms\Components\Radio::make('format')
-                        ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format'))
-                        ->options([
-                            'dymo'       => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.dymo'),
-                            '2x7_price'  => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.2x7_price'),
-                            '4x7_price'  => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x7_price'),
-                            '4x12'       => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x12'),
-                            '4x12_price' => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x12_price'),
-                        ])
-                        ->default('2x7_price')
-                        ->required(),
-                ])
-                ->action(function (array $data, $record) {
-                    $pdf = PDF::loadView('inventories::filament.clusters.products.products.actions.print', [
-                        'records'  => collect([$record]),
-                        'quantity' => $data['quantity'],
-                        'format'   => $data['format'],
-                    ]);
-
-                    $paperSize = match ($data['format']) {
-                        'dymo'  => [0, 0, 252.2, 144],
-                        default => 'a4',
-                    };
-
-                    $pdf->setPaper($paperSize, 'portrait');
-
-                    return response()->streamDownload(function () use ($pdf) {
-                        echo $pdf->output();
-                    }, 'Product-'.$record->name.'.pdf');
-                }),
-            Actions\DeleteAction::make()
-                ->successNotification(
-                    Notification::make()
-                        ->success()
-                        ->title(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.delete.notification.body')),
-                ),
-        ];
+        ], parent::getHeaderActions());
     }
 }

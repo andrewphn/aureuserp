@@ -47,9 +47,9 @@ class MandatoryDayResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('time_off::filament/clusters/configurations/resources/mandatory-days.global-search.name') => $record->name ?? '—',
+            __('time_off::filament/clusters/configurations/resources/mandatory-days.global-search.name')       => $record->name ?? '—',
             __('time_off::filament/clusters/configurations/resources/mandatory-days.global-search.start-date') => $record->start_date ?? '—',
-            __('time_off::filament/clusters/configurations/resources/mandatory-days.global-search.end-date') => $record->end_date ?? '—',
+            __('time_off::filament/clusters/configurations/resources/mandatory-days.global-search.end-date')   => $record->end_date ?? '—',
         ];
     }
 

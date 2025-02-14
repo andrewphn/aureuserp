@@ -2,18 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
 
-use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource;
+use Webkul\Product\Filament\Resources\AttributeResource\Pages\ViewAttribute;
 
-class ViewProductAttribute extends ViewRecord
+class ViewProductAttribute extends ViewAttribute
 {
     protected static string $resource = ProductAttributeResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\EditAction::make(),
-        ];
-    }
 }

@@ -3,10 +3,10 @@
 namespace Webkul\Inventory;
 
 use Filament\Contracts\Plugin;
-use Webkul\Support\Package;
 use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Webkul\Inventory\Filament\Clusters\Settings\Pages\ManageOperations;
+use Webkul\Support\Package;
 
 class InventoryPlugin implements Plugin
 {
@@ -25,7 +25,7 @@ class InventoryPlugin implements Plugin
         if (! Package::isPluginInstalled($this->getId())) {
             return;
         }
-        
+
         $panel
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel

@@ -7,6 +7,6 @@ return [
                 'title' => 'Time Off deleted',
                 'body'  => 'The time off has been deleted successfully.',
             ],
-        ]
-    ]
+        ],
+    ],
 ];

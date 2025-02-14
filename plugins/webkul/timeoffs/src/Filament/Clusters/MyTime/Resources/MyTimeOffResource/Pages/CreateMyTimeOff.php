@@ -3,11 +3,11 @@
 namespace Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyTimeOffResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyTimeOffResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Enums\State;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyTimeOffResource;
 
 class CreateMyTimeOff extends CreateRecord
 {
@@ -29,7 +29,6 @@ class CreateMyTimeOff extends CreateRecord
             $data['department_id'] = $employee->department?->id;
         }
 
-
         if (isset($data['employee_id'])) {
             if ($employee->calendar) {
                 $data['calendar_id'] = $employee->calendar->id;
@@ -47,7 +46,6 @@ class CreateMyTimeOff extends CreateRecord
             }
         }
 
-
         if (isset($data['request_unit_half'])) {
             $data['duration_display'] = '0.5 day';
 
@@ -56,7 +54,7 @@ class CreateMyTimeOff extends CreateRecord
             $startDate = Carbon::parse($data['request_date_from']);
             $endDate = $data['request_date_to'] ? Carbon::parse($data['request_date_to']) : $startDate;
 
-            $data['duration_display'] = $startDate->diffInDays($endDate) + 1 . ' day(s)';
+            $data['duration_display'] = $startDate->diffInDays($endDate) + 1 .' day(s)';
 
             $data['number_of_days'] = $startDate->diffInDays($endDate) + 1;
         }

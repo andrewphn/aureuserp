@@ -3,9 +3,9 @@
 namespace Webkul\TimeOff;
 
 use Filament\Contracts\Plugin;
-use Webkul\Support\Package;
 use Filament\Panel;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
+use Webkul\Support\Package;
 
 class TimeOffPlugin implements Plugin
 {
@@ -49,6 +49,6 @@ class TimeOffPlugin implements Plugin
     {
         $reflector = new \ReflectionClass(get_class($this));
 
-        return dirname($reflector->getFileName()) . ($path ?? '');
+        return dirname($reflector->getFileName()).($path ?? '');
     }
 }

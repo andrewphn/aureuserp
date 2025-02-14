@@ -3,8 +3,8 @@
 namespace Webkul\Product;
 
 use Filament\Contracts\Plugin;
-use Webkul\Support\Package;
 use Filament\Panel;
+use Webkul\Support\Package;
 
 class ProductPlugin implements Plugin
 {
@@ -23,7 +23,7 @@ class ProductPlugin implements Plugin
         if (! Package::isPluginInstalled($this->getId())) {
             return;
         }
-        
+
         $panel
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel
