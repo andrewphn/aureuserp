@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\AccountTagResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountTagResource;
+use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Support\Facades\Auth;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountTagResource;
 
 class ListAccountTags extends ListRecords
 {

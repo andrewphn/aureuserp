@@ -3,18 +3,9 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource\Pages\ListAccounts as BaseListAccounts;
 
-class ListAccounts extends ListRecords
+class ListAccounts extends BaseListAccounts
 {
     protected static string $resource = AccountResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-                ->icon('heroicon-o-plus-circle'),
-        ];
-    }
 }

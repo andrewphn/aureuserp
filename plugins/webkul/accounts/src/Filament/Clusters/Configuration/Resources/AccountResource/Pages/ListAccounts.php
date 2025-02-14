@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
 
 class ListAccounts extends ListRecords
 {

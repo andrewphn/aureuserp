@@ -2,9 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
-use Webkul\Account\Models\Account;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Form;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -14,12 +12,16 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
+use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Models\Account;
 use Webkul\Account\Enums\AccountType;
 
 class AccountResource extends Resource
 {
     protected static ?string $model = Account::class;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 

@@ -3,8 +3,8 @@
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
 use Filament\Resources\Pages\CreateRecord;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
 
 class CreateAccount extends CreateRecord
 {
