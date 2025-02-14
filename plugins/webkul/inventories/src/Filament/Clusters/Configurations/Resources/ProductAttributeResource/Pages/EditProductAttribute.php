@@ -2,34 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
 
-use Filament\Actions;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource;
+use Webkul\Product\Filament\Resources\AttributeResource\Pages\EditAttribute;
 
-class EditProductAttribute extends EditRecord
+class EditProductAttribute extends EditAttribute
 {
     protected static string $resource = ProductAttributeResource::class;
-
-    protected function getSavedNotification(): Notification
-    {
-        return Notification::make()
-            ->success()
-            ->title(__('inventories::filament/clusters/configurations/resources/product-attribute/pages/edit-product-attribute.notification.title'))
-            ->body(__('inventories::filament/clusters/configurations/resources/product-attribute/pages/edit-product-attribute.notification.body'));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make()
-                ->successNotification(
-                    Notification::make()
-                        ->success()
-                        ->title(__('inventories::filament/clusters/configurations/resources/product-attribute/pages/edit-product-attribute.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/configurations/resources/product-attribute/pages/edit-product-attribute.header-actions.delete.notification.body')),
-                ),
-        ];
-    }
 }

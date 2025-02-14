@@ -9,6 +9,7 @@ return [
     Webkul\Invoice\InvoicePlugin::class,
     // Webkul\Product\ProductPlugin::class,
     Webkul\Payment\PaymentPlugin::class,
+    Webkul\Partner\PartnerPlugin::class,
     Webkul\Project\ProjectPlugin::class,
     Webkul\Support\SupportPlugin::class,
     Webkul\Recruitment\RecruitmentPlugin::class,

@@ -3,8 +3,8 @@
 namespace Webkul\Employee;
 
 use Filament\Contracts\Plugin;
-use Webkul\Support\Package;
 use Filament\Panel;
+use Webkul\Support\Package;
 
 class EmployeePlugin implements Plugin
 {
@@ -42,6 +42,6 @@ class EmployeePlugin implements Plugin
     {
         $reflector = new \ReflectionClass(get_class($this));
 
-        return dirname($reflector->getFileName()) . ($path ?? '');
+        return dirname($reflector->getFileName()).($path ?? '');
     }
 }

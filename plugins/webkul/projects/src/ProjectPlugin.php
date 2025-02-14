@@ -2,11 +2,11 @@
 
 namespace Webkul\Project;
 
-use Webkul\Support\Package;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Webkul\Project\Filament\Clusters\Settings\Pages\ManageTasks;
+use Webkul\Support\Package;
 
 class ProjectPlugin implements Plugin
 {
@@ -25,7 +25,7 @@ class ProjectPlugin implements Plugin
         if (! Package::isPluginInstalled($this->getId())) {
             return;
         }
-        
+
         $panel
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel

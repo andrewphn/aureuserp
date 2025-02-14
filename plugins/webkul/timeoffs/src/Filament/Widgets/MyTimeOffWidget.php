@@ -2,14 +2,14 @@
 
 namespace Webkul\TimeOff\Filament\Widgets;
 
+use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Webkul\TimeOff\Models\Leave;
 use Webkul\TimeOff\Models\LeaveAllocation;
 use Webkul\TimeOff\Models\LeaveType;
-use Filament\Support\Colors\Color;
-use Webkul\TimeOff\Models\Leave;
 
 class MyTimeOffWidget extends BaseWidget
 {
@@ -48,7 +48,7 @@ class MyTimeOffWidget extends BaseWidget
             ->first();
 
         return [
-            'days' => $allocation ? $allocation->number_of_days : 0
+            'days' => $allocation ? $allocation->number_of_days : 0,
         ];
     }
 

@@ -10,9 +10,9 @@ return [
     ],
 
     'global-search' => [
-        'time-off-type' => 'Time off Type',
+        'time-off-type'     => 'Time off Type',
         'request-date-from' => 'Request Date From',
-        'request-date-to' => 'Request Date To',
+        'request-date-to'   => 'Request Date To',
     ],
 
     'form' => [
@@ -74,7 +74,7 @@ return [
             ],
 
             'refused' => [
-                'title' => 'Refuse',
+                'title'        => 'Refuse',
                 'notification' => [
                     'title' => 'Time Off refused',
                     'body'  => 'The time off has been refused successfully.',

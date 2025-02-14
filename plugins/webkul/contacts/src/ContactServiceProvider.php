@@ -2,8 +2,8 @@
 
 namespace Webkul\Contact;
 
-use Webkul\Support\Package;
 use Webkul\Support\Console\Commands\InstallCommand;
+use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
 class ContactServiceProvider extends PackageServiceProvider

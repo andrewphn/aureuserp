@@ -5,9 +5,9 @@ namespace Webkul\TimeOff\Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\HtmlString;
 use Webkul\Employee\Models\CalendarLeaves;
 use Webkul\TimeOff\Models\LeaveMandatoryDay;
-use Illuminate\Support\HtmlString;
 
 class HolidayAction extends Action
 {

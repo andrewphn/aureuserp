@@ -27,7 +27,7 @@ return new class extends Migration
         Schema::table('products_packagings', function (Blueprint $table) {
             if (Schema::hasColumn('products_packagings', 'package_type_id')) {
                 $table->dropForeign(['package_type_id']);
-                
+
                 $table->dropColumn('package_type_id');
             }
         });

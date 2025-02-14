@@ -2,11 +2,11 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages;
 
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 
 class ViewMyAllocation extends ViewRecord
 {

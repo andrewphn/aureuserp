@@ -5,8 +5,8 @@ namespace Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResour
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
 
 class ViewAllocation extends ViewRecord
 {

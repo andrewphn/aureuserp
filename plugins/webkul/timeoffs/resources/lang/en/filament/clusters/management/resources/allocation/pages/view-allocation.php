@@ -5,8 +5,8 @@ return [
         'delete' => [
             'notification' => [
                 'title' => 'Allocation Deleted',
-                'body' => 'The allocation has been deleted successfully.',
-            ]
-        ]
-    ]
+                'body'  => 'The allocation has been deleted successfully.',
+            ],
+        ],
+    ],
 ];

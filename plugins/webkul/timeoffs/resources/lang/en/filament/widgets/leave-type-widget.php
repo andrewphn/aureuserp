@@ -13,5 +13,5 @@ return [
         'validated' => 'Validated',
         'refused'   => 'Refused',
         'cancelled' => 'Cancelled',
-    ]
+    ],
 ];

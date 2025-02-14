@@ -1,6 +1,6 @@
 <?php
 
-return  [
+return [
     'notification' => [
         'title' => 'Allocation updated',
         'body'  => 'The allocation has been updated successfully.',
@@ -10,8 +10,8 @@ return  [
         'delete' => [
             'notification' => [
                 'title' => 'Allocation deleted',
-                'body' => 'The allocation has been deleted successfully.'
-            ]
-        ]
-    ]
+                'body'  => 'The allocation has been deleted successfully.',
+            ],
+        ],
+    ],
 ];

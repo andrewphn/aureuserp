@@ -2,10 +2,10 @@
 
 return [
     'title' => 'Holidays',
-    'form' => [
+    'form'  => [
         'placeholders' => [
             'public-holiday'    => 'Public Holidays',
-            'mandatory-holiday' => 'Mandatory Holidays'
-        ]
-    ]
+            'mandatory-holiday' => 'Mandatory Holidays',
+        ],
+    ],
 ];

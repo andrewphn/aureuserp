@@ -2,9 +2,9 @@
 
 namespace Webkul\TimeOff\Filament\Widgets;
 
-use Webkul\TimeOff\Models\Leave;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
+use Webkul\TimeOff\Models\Leave;
 
 class LeaveTypeWidget extends ChartWidget
 {
@@ -68,7 +68,7 @@ class LeaveTypeWidget extends ChartWidget
                 [
                     'label'           => __('time_off::filament/widgets/leave-type-widget.label'),
                     'data'            => array_values($data),
-                    'backgroundColor' => array_map(fn($key) => match ($key) {
+                    'backgroundColor' => array_map(fn ($key) => match ($key) {
                         __('time_off::filament/widgets/leave-type-widget.types.draft')     => '#94a3b8',
                         __('time_off::filament/widgets/leave-type-widget.types.confirmed') => '#3b82f6',
                         __('time_off::filament/widgets/leave-type-widget.types.validated') => '#22c55e',

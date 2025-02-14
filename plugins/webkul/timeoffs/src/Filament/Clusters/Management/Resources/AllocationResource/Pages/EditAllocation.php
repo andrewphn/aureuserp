@@ -6,9 +6,9 @@ use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
-use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class EditAllocation extends EditRecord
 {
@@ -35,7 +35,7 @@ class EditAllocation extends EditRecord
             Action::make('approved')
                 ->label(__('time_off::filament/clusters/management/resources/allocation/pages/edit-allocation.header-actions.approved.title'))
                 ->color('gray')
-                ->hidden(fn($record) => $record->state !== State::CONFIRM->value)
+                ->hidden(fn ($record) => $record->state !== State::CONFIRM->value)
                 ->action(function ($record) {
                     $record->update(['state' => State::VALIDATE_TWO->value]);
 
@@ -50,7 +50,7 @@ class EditAllocation extends EditRecord
             Action::make('refuse')
                 ->label(__('time_off::filament/clusters/management/resources/allocation/pages/edit-allocation.header-actions.refuse.title'))
                 ->color('gray')
-                ->hidden(fn($record) => $record->state === State::REFUSE->value)
+                ->hidden(fn ($record) => $record->state === State::REFUSE->value)
                 ->action(function ($record) {
                     $record->update(['state' => State::REFUSE->value]);
 
@@ -65,7 +65,7 @@ class EditAllocation extends EditRecord
             Action::make('mark_as_ready_to_confirm')
                 ->label(__('time_off::filament/clusters/management/resources/allocation/pages/edit-allocation.header-actions.mark-as-ready-to-confirm.title'))
                 ->color('gray')
-                ->visible(fn($record) => $record->state === State::REFUSE->value)
+                ->visible(fn ($record) => $record->state === State::REFUSE->value)
                 ->action(function ($record) {
                     $record->update(['state' => State::CONFIRM->value]);
 
@@ -83,7 +83,7 @@ class EditAllocation extends EditRecord
                         ->success()
                         ->title(__('time_off::filament/clusters/management/resources/allocation/pages/edit-allocation.header-actions.delete.notification.title'))
                         ->body(__('time_off::filament/clusters/management/resources/allocation/pages/edit-allocation.header-actions.delete.notification.body'))
-                )
+                ),
         ];
     }
 }

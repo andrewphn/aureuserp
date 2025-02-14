@@ -2,9 +2,9 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages;
 
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 
 class ListMyAllocations extends ListRecords
 {

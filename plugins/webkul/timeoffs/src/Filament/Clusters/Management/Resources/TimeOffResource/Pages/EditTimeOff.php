@@ -7,10 +7,10 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Employee\Models\Employee;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource;
-use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class EditTimeOff extends EditRecord
 {
@@ -72,7 +72,6 @@ class EditTimeOff extends EditRecord
             }
         }
 
-
         if (isset($data['request_unit_half'])) {
             $data['duration_display'] = '0.5 day';
 
@@ -81,7 +80,7 @@ class EditTimeOff extends EditRecord
             $startDate = Carbon::parse($data['request_date_from']);
             $endDate = $data['request_date_to'] ? Carbon::parse($data['request_date_to']) : $startDate;
 
-            $data['duration_display'] = $startDate->diffInDays($endDate) + 1 . ' day(s)';
+            $data['duration_display'] = $startDate->diffInDays($endDate) + 1 .' day(s)';
 
             $data['number_of_days'] = $startDate->diffInDays($endDate) + 1;
         }

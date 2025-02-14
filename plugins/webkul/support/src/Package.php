@@ -2,15 +2,15 @@
 
 namespace Webkul\Support;
 
+use Illuminate\Support\Facades\Schema;
 use Spatie\LaravelPackageTools\Package as BasePackage;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Models\Plugin;
-use Illuminate\Support\Facades\Schema;
 
 class Package extends BasePackage
 {
-    public ?Plugin $plugin = NULL;
+    public ?Plugin $plugin = null;
 
     public bool $isCore = false;
 
@@ -122,7 +122,7 @@ class Package extends BasePackage
     {
         Plugin::where('name', $this->name)->delete();
 
-        $this->plugin = NULL;
+        $this->plugin = null;
     }
 
     public function updateOrCreate(): Plugin
@@ -130,14 +130,14 @@ class Package extends BasePackage
         return $this->plugin = Plugin::updateOrCreate([
             'name' => $this->name,
         ], [
-            'author' => $this->author ?? NULL,
-            'summary' => $this->summary ?? NULL,
-            'description' => $this->description ?? NULL,
-            'latest_version' => $this->version ?? NULL,
-            'license' => $this->license ?? NULL,
-            'sort' => $this->sort ?? NULL,
-            'is_active' => true,
-            'is_installed' => true,
+            'author'         => $this->author ?? null,
+            'summary'        => $this->summary ?? null,
+            'description'    => $this->description ?? null,
+            'latest_version' => $this->version ?? null,
+            'license'        => $this->license ?? null,
+            'sort'           => $this->sort ?? null,
+            'is_active'      => true,
+            'is_installed'   => true,
         ]);
     }
 

@@ -2,7 +2,9 @@
 
 namespace Webkul\Partner\Enums;
 
-enum AddressType: string
+use Filament\Support\Contracts\HasLabel;
+
+enum AddressType: string implements HasLabel
 {
     case PERMANENT = 'permanent';
 
@@ -14,14 +16,14 @@ enum AddressType: string
 
     case OTHER = 'other';
 
-    public static function options(): array
+    public function getLabel(): string
     {
-        return [
-            self::PERMANENT->value  => __('partners::enums/address-type.permanent'),
-            self::PRESENT->value    => __('partners::enums/address-type.present'),
-            self::INVOICE->value    => __('partners::enums/address-type.invoice'),
-            self::DELIVERY->value   => __('partners::enums/address-type.delivery'),
-            self::OTHER->value      => __('partners::enums/address-type.other'),
-        ];
+        return match ($this) {
+            self::PERMANENT  => __('partners::enums/address-type.permanent'),
+            self::PRESENT    => __('partners::enums/address-type.present'),
+            self::INVOICE    => __('partners::enums/address-type.invoice'),
+            self::DELIVERY   => __('partners::enums/address-type.delivery'),
+            self::OTHER      => __('partners::enums/address-type.other'),
+        };
     }
 }
