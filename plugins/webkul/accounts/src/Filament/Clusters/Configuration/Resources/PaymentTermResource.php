@@ -30,6 +30,8 @@ class PaymentTermResource extends Resource
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = Configuration::class;
 
     public static function getModelLabel(): string

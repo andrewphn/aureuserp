@@ -8,8 +8,6 @@ use Webkul\Invoice\Filament\Clusters\Configuration;
 
 class TaxResource extends BaseTaxResource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
-
     protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $cluster = Configuration::class;
