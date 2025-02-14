@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource\Pages;
+namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -9,7 +9,7 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 
 class ManageVariants extends ManageRelatedRecords
 {

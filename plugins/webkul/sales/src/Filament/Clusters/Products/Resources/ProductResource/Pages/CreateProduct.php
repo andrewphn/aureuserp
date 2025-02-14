@@ -1,8 +1,8 @@
 <?php
 
-namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource\Pages;
+namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;

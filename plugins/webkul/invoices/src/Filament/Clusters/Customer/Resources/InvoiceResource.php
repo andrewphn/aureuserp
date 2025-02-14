@@ -26,7 +26,7 @@ use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
 use Webkul\Sale\Models\Product;
 use Webkul\Security\Filament\Resources\UserResource;

@@ -27,7 +27,7 @@ use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Tax;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderDisplayType;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Sale\Models\SaleOrderLine;
 use Webkul\Sale\Models\OrderTemplate;
 use Webkul\Sale\Models\Product;

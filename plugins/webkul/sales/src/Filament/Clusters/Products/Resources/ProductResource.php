@@ -1,9 +1,9 @@
 <?php
 
-namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
+namespace Webkul\Sale\Filament\Clusters\Products\Resources;
 
 use Webkul\Sale\Filament\Clusters\Products;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource\Pages;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 use Webkul\Sale\Models\Product;
 use Filament\Forms\Form;
 use Filament\Forms;

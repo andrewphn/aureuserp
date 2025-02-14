@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource\Pages;
+namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Models\ProductAttribute;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 
 class ManageAttributes extends ManageRelatedRecords
 {

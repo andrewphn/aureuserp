@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductResource\Pages;
+namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
