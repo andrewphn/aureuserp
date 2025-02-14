@@ -14,9 +14,28 @@ return [
                 'fieldsets' => [
                     'logistics' => [
                         'title' => 'Logistics',
-                        
+
                         'fields' => [
                             'routes' => 'Routes',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+
+    'infolist' => [
+        'sections' => [
+            'inventory' => [
+                'title' => 'Inventory',
+
+                'subsections' => [
+                    'logistics' => [
+                        'title' => 'Logistics',
+
+                        'entries' => [
+                            'routes'     => 'Warehouse Routes',
+                            'route_name' => 'Route Name',
                         ],
                     ],
                 ],

@@ -18,6 +18,24 @@ return [
                 'title' => 'Images',
             ],
 
+            'inventory' => [
+                'title' => 'Inventory',
+
+                'fields' => [
+                ],
+
+                'fieldsets' => [
+                    'logistics' => [
+                        'title' => 'Logistics',
+
+                        'fields' => [
+                            'weight' => 'Weight',
+                            'volume' => 'Volume',
+                        ],
+                    ],
+                ],
+            ],
+
             'settings' => [
                 'title' => 'Settings',
 
@@ -113,6 +131,25 @@ return [
         ],
 
         'bulk-actions' => [
+            'print' => [
+                'label' => 'Print Labels',
+
+                'form' => [
+                    'fields' => [
+                        'quantity' => 'Number of Labels',
+                        'format'   => 'Format',
+
+                        'format-options' => [
+                            'dymo'       => 'Dymo',
+                            '2x7_price'  => '2x7 with price',
+                            '4x7_price'  => '4x7 with price',
+                            '4x12'       => '4x12',
+                            '4x12_price' => '4x12 with price',
+                        ],
+                    ],
+                ],
+            ],
+
             'restore' => [
                 'notification' => [
                     'title' => 'Products restored',
@@ -180,47 +217,13 @@ return [
             'inventory' => [
                 'title' => 'Inventory',
 
-                'entries' => [
-                ],
-
                 'fieldsets' => [
-                    'tracking' => [
-                        'title' => 'Tracking',
-
-                        'entries' => [
-                            'track-inventory' => 'Track Inventory',
-                            'track-by'        => 'Track By',
-                            'expiration-date' => 'Expiration Date',
-                        ],
-                    ],
-
-                    'operation' => [
-                        'title' => 'Operations',
-
-                        'entries' => [
-                            'routes' => 'Routes',
-                        ],
-                    ],
-
                     'logistics' => [
                         'title' => 'Logistics',
 
                         'entries' => [
-                            'responsible' => 'Responsible',
-                            'weight'      => 'Weight',
-                            'volume'      => 'Volume',
-                            'sale-delay'  => 'Customer Lead Time (Days)',
-                        ],
-                    ],
-
-                    'traceability' => [
-                        'title' => 'Traceability',
-
-                        'entries' => [
-                            'expiration-date'  => 'Expiration Date (Days)',
-                            'best-before-date' => 'Best Before Date (Days)',
-                            'removal-date'     => 'Removal Date (Days)',
-                            'alert-date'       => 'Alert Date (Days)',
+                            'weight' => 'Weight',
+                            'volume' => 'Volume',
                         ],
                     ],
                 ],

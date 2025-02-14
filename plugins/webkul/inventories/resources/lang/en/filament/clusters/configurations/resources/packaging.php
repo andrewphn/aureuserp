@@ -8,7 +8,7 @@ return [
 
     'form' => [
         'package-type' => 'Package Type',
-        'routes'  => 'Routes',
+        'routes'       => 'Routes',
     ],
 
     'table' => [

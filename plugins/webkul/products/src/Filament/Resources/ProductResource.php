@@ -57,12 +57,29 @@ class ProductResource extends Resource
                                             ->unique('products_tags'),
                                     ]),
                             ]),
+
                         Forms\Components\Section::make(__('products::filament/resources/product.form.sections.images.title'))
                             ->schema([
                                 Forms\Components\FileUpload::make('images')
                                     ->multiple()
                                     ->storeFileNamesIn('products'),
                             ]),
+
+                        Forms\Components\Section::make(__('products::filament/resources/product.form.sections.inventory.title'))
+                            ->schema([
+                                Forms\Components\Fieldset::make(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.title'))
+                                    ->schema([
+                                        Forms\Components\TextInput::make('weight')
+                                            ->label(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.fields.weight'))
+                                            ->numeric()
+                                            ->minValue(0),
+                                        Forms\Components\TextInput::make('volume')
+                                            ->label(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.fields.volume'))
+                                            ->numeric()
+                                            ->minValue(0),
+                                    ]),
+                            ])
+                            ->visible(fn (Forms\Get $get): bool => $get('type') == ProductType::GOODS->value),
                     ])
                     ->columnSpan(['lg' => 2]),
 
@@ -97,6 +114,7 @@ class ProductResource extends Resource
                                     ->preload()
                                     ->default(Auth::user()->default_company_id),
                             ]),
+
                         Forms\Components\Section::make(__('products::filament/resources/product.form.sections.pricing.title'))
                             ->schema([
                                 Forms\Components\TextInput::make('price')
@@ -353,7 +371,7 @@ class ProductResource extends Resource
                                 ->required(),
                         ])
                         ->action(function (array $data, $records) {
-                            $pdf = PDF::loadView('inventories::filament.clusters.products.products.actions.print', [
+                            $pdf = PDF::loadView('products::filament.resources.products.actions.print', [
                                 'records'  => $records,
                                 'quantity' => $data['quantity'],
                                 'format'   => $data['format'],
@@ -428,38 +446,10 @@ class ProductResource extends Resource
 
                         Infolists\Components\Section::make(__('products::filament/resources/product.infolist.sections.inventory.title'))
                             ->schema([
-                                Infolists\Components\Grid::make(3)
-                                    ->schema([
-                                        Infolists\Components\IconEntry::make('is_storable')
-                                            ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.tracking.entries.track-inventory'))
-                                            ->boolean(),
-
-                                        Infolists\Components\TextEntry::make('tracking')
-                                            ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.tracking.entries.track-by')),
-
-                                        Infolists\Components\IconEntry::make('use_expiration_date')
-                                            ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.tracking.entries.expiration-date'))
-                                            ->boolean(),
-                                    ]),
-
-                                Infolists\Components\Section::make(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.operation.title'))
-                                    ->schema([
-                                        Infolists\Components\TextEntry::make('routes.name')
-                                            ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.operation.entries.routes'))
-                                            ->icon('heroicon-o-arrow-path')
-                                            ->listWithLineBreaks()
-                                            ->placeholder('—'),
-                                    ]),
-
                                 Infolists\Components\Section::make(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.logistics.title'))
                                     ->schema([
                                         Infolists\Components\Grid::make(2)
                                             ->schema([
-                                                Infolists\Components\TextEntry::make('responsible.name')
-                                                    ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.logistics.entries.responsible'))
-                                                    ->placeholder('—')
-                                                    ->icon('heroicon-o-user'),
-
                                                 Infolists\Components\TextEntry::make('weight')
                                                     ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.logistics.entries.weight'))
                                                     ->placeholder('—')
@@ -469,39 +459,8 @@ class ProductResource extends Resource
                                                     ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.logistics.entries.volume'))
                                                     ->placeholder('—')
                                                     ->icon('heroicon-o-beaker'),
-
-                                                Infolists\Components\TextEntry::make('sale_delay')
-                                                    ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.logistics.entries.sale-delay'))
-                                                    ->placeholder('—'),
                                             ]),
                                     ]),
-
-                                Infolists\Components\Section::make(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.traceability.title'))
-                                    ->schema([
-                                        Infolists\Components\Grid::make(2)
-                                            ->schema([
-                                                Infolists\Components\TextEntry::make('expiration_time')
-                                                    ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.traceability.entries.expiration-date'))
-                                                    ->placeholder('—')
-                                                    ->icon('heroicon-o-clock'),
-
-                                                Infolists\Components\TextEntry::make('use_time')
-                                                    ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.traceability.entries.best-before-date'))
-                                                    ->placeholder('—')
-                                                    ->icon('heroicon-o-clock'),
-
-                                                Infolists\Components\TextEntry::make('removal_time')
-                                                    ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.traceability.entries.removal-date'))
-                                                    ->placeholder('—')
-                                                    ->icon('heroicon-o-clock'),
-
-                                                Infolists\Components\TextEntry::make('alert_time')
-                                                    ->label(__('products::filament/resources/product.infolist.sections.inventory.fieldsets.traceability.entries.alert-date'))
-                                                    ->placeholder('—')
-                                                    ->icon('heroicon-o-clock'),
-                                            ]),
-                                    ])
-                                    ->visible(fn ($record): bool => (bool) $record->use_expiration_date),
                             ])
                             ->visible(fn ($record): bool => $record->type == ProductType::GOODS),
                     ])

@@ -79,20 +79,10 @@ return [
                 'title' => 'General Information',
 
                 'entries' => [
-                    'name'         => 'Package Name',
-                    'barcode'      => 'Barcode',
-                    'product'      => 'Product',
-                    'qty'          => 'Quantity',
-                    'package_type' => 'Package Type',
-                ],
-            ],
-
-            'routing' => [
-                'title' => 'Routing Information',
-
-                'entries' => [
-                    'routes'     => 'Warehouse Routes',
-                    'route_name' => 'Route Name',
+                    'name'    => 'Package Name',
+                    'barcode' => 'Barcode',
+                    'product' => 'Product',
+                    'qty'     => 'Quantity',
                 ],
             ],
 

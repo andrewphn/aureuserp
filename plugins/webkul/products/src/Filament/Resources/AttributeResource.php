@@ -11,8 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Product\Filament\Resources\AttributeResource\Pages;
 use Webkul\Product\Enums\AttributeType;
+use Webkul\Product\Filament\Resources\AttributeResource\Pages;
 use Webkul\Product\Models\Attribute;
 
 class AttributeResource extends Resource

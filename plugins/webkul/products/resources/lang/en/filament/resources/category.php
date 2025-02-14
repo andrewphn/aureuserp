@@ -69,21 +69,6 @@ return [
                 ],
             ],
 
-            'settings' => [
-                'title' => 'Settings',
-
-                'subsections' => [
-                    'logistics' => [
-                        'title' => 'Logistics',
-
-                        'entries' => [
-                            'routes'     => 'Warehouse Routes',
-                            'route_name' => 'Route Name',
-                        ],
-                    ],
-                ],
-            ],
-
             'record-information' => [
                 'title' => 'Record Information',
 

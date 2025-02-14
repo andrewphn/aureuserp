@@ -4,12 +4,14 @@ namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Webkul\Product\Filament\Resources\CategoryResource;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
 use Webkul\Inventory\Models\Category;
+use Webkul\Product\Filament\Resources\CategoryResource;
 
 class ProductCategoryResource extends CategoryResource
 {
@@ -59,9 +61,41 @@ class ProductCategoryResource extends CategoryResource
 
         $components[1]->childComponents($childComponents);
 
-        $form->components($components); 
+        $form->components($components);
 
         return $form;
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        $infolist = CategoryResource::infolist($infolist);
+
+        $components = $infolist->getComponents();
+
+        $firstGroupChildComponents = $components[0]->getChildComponents();
+
+        $firstGroupChildComponents[] = Infolists\Components\Section::make(__('inventories::filament/clusters/configurations/resources/product-category.infolist.sections.inventory.title'))
+            ->schema([
+                Infolists\Components\Section::make(__('inventories::filament/clusters/configurations/resources/product-category.infolist.sections.inventory.subsections.logistics.title'))
+                    ->schema([
+                        Infolists\Components\RepeatableEntry::make('routes')
+                            ->label(__('inventories::filament/clusters/configurations/resources/product-category.infolist.sections.inventory.subsections.logistics.entries.routes'))
+                            ->schema([
+                                Infolists\Components\TextEntry::make('name')
+                                    ->label(__('inventories::filament/clusters/configurations/resources/product-category.infolist.sections.inventory.subsections.logistics.entries.route_name'))
+                                    ->icon('heroicon-o-truck'),
+                            ])
+                            ->columns(1),
+                    ])
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsible(),
+            ]);
+
+        $components[0]->childComponents($firstGroupChildComponents);
+
+        $infolist->components($components);
+
+        return $infolist;
     }
 
     public static function getSubNavigationPosition(): SubNavigationPosition

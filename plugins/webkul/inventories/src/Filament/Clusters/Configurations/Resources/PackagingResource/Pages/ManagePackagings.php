@@ -2,8 +2,8 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResource\Pages;
 
-use Webkul\Product\Filament\Resources\PackagingResource\Pages\ManagePackagings as BaseManagePackagings;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResource;
+use Webkul\Product\Filament\Resources\PackagingResource\Pages\ManagePackagings as BaseManagePackagings;
 
 class ManagePackagings extends BaseManagePackagings
 {

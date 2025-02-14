@@ -4,14 +4,15 @@ namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Tables;
-use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 use Filament\Tables\Table;
 use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResource\Pages;
 use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Settings\ProductSettings;
+use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 
 class PackagingResource extends BasePackagingResource
 {
@@ -65,7 +66,7 @@ class PackagingResource extends BasePackagingResource
             ->preload()
             ->multiple();
 
-        $form->components($components); 
+        $form->components($components);
 
         return $form;
     }
@@ -79,15 +80,15 @@ class PackagingResource extends BasePackagingResource
         $filters = $table->getFilters();
 
         $columns[] = Tables\Columns\TextColumn::make('packageType.name')
-                ->label(__('inventories::filament/clusters/configurations/resources/packaging.table.columns.package-type'))
-                ->numeric()
-                ->sortable();
+            ->label(__('inventories::filament/clusters/configurations/resources/packaging.table.columns.package-type'))
+            ->numeric()
+            ->sortable();
 
         $filters[] = Tables\Filters\SelectFilter::make('packageType')
-                ->label(__('inventories::filament/clusters/configurations/resources/packaging.table.filters.package-type'))
-                ->relationship('packageType', 'name')
-                ->searchable()
-                ->preload();
+            ->label(__('inventories::filament/clusters/configurations/resources/packaging.table.filters.package-type'))
+            ->relationship('packageType', 'name')
+            ->searchable()
+            ->preload();
 
         $table->columns($columns);
 
@@ -98,7 +99,38 @@ class PackagingResource extends BasePackagingResource
 
     public static function infolist(Infolist $infolist): Infolist
     {
-        return BasePackagingResource::infolist($infolist);
+        $infolist = BasePackagingResource::infolist($infolist);
+
+        $components = $infolist->getComponents();
+
+        $firstSectionChildComponents = $components[0]->getChildComponents();
+
+        $firstSectionChildComponents[] = Infolists\Components\TextEntry::make('packageType.name')
+            ->label(__('inventories::filament/clusters/configurations/resources/packaging.infolist.sections.general.entries.package_type'))
+            ->icon('heroicon-o-archive-box')
+            ->placeholder('—');
+
+        $components[0]->childComponents($firstSectionChildComponents);
+
+        array_splice($components, 1, 0, [
+            Infolists\Components\Section::make(__('inventories::filament/clusters/configurations/resources/packaging.infolist.sections.routing.title'))
+                ->schema([
+                    Infolists\Components\RepeatableEntry::make('routes')
+                        ->label(__('inventories::filament/clusters/configurations/resources/packaging.infolist.sections.routing.entries.routes'))
+                        ->schema([
+                            Infolists\Components\TextEntry::make('name')
+                                ->label(__('inventories::filament/clusters/configurations/resources/packaging.infolist.sections.routing.entries.route_name'))
+                                ->icon('heroicon-o-truck'),
+                        ])
+                        ->placeholder('—')
+                        ->columns(1),
+                ])
+                ->collapsible(),
+        ]);
+
+        $infolist->components($components);
+
+        return $infolist;
     }
 
     public static function getPages(): array

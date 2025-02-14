@@ -2,8 +2,8 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
 
-use Webkul\Product\Filament\Resources\AttributeResource\Pages\ViewAttribute;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource;
+use Webkul\Product\Filament\Resources\AttributeResource\Pages\ViewAttribute;
 
 class ViewProductAttribute extends ViewAttribute
 {

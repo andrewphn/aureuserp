@@ -127,7 +127,7 @@ class PackagingResource extends Resource
                         ->label(__('products::filament/resources/packaging.table.bulk-actions.print.label'))
                         ->icon('heroicon-o-printer')
                         ->action(function ($records) {
-                            $pdf = PDF::loadView('inventories::filament.clusters.configurations.packagings.actions.print', [
+                            $pdf = PDF::loadView('products::filament.resources.packagings.actions.print', [
                                 'records' => $records,
                             ]);
 
@@ -191,27 +191,8 @@ class PackagingResource extends Resource
                             ->label(__('products::filament/resources/packaging.infolist.sections.general.entries.qty'))
                             ->icon('heroicon-o-scale')
                             ->placeholder('—'),
-
-                        Infolists\Components\TextEntry::make('packageType.name')
-                            ->label(__('products::filament/resources/packaging.infolist.sections.general.entries.package_type'))
-                            ->icon('heroicon-o-archive-box')
-                            ->placeholder('—'),
                     ])
                     ->columns(2),
-
-                Infolists\Components\Section::make(__('products::filament/resources/packaging.infolist.sections.routing.title'))
-                    ->schema([
-                        Infolists\Components\RepeatableEntry::make('routes')
-                            ->label(__('products::filament/resources/packaging.infolist.sections.routing.entries.routes'))
-                            ->schema([
-                                Infolists\Components\TextEntry::make('name')
-                                    ->label(__('products::filament/resources/packaging.infolist.sections.routing.entries.route_name'))
-                                    ->icon('heroicon-o-truck'),
-                            ])
-                            ->placeholder('—')
-                            ->columns(1),
-                    ])
-                    ->collapsible(),
 
                 Infolists\Components\Section::make(__('products::filament/resources/packaging.infolist.sections.organization.title'))
                     ->schema([

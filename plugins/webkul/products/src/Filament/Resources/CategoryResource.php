@@ -161,23 +161,6 @@ class CategoryResource extends Resource
                                     ->icon('heroicon-o-arrows-right-left')
                                     ->placeholder('—'),
                             ]),
-
-                        Infolists\Components\Section::make(__('products::filament/resources/category.infolist.sections.settings.title'))
-                            ->schema([
-                                Infolists\Components\Section::make(__('products::filament/resources/category.infolist.sections.settings.subsections.logistics.title'))
-                                    ->schema([
-                                        Infolists\Components\RepeatableEntry::make('routes')
-                                            ->label(__('products::filament/resources/category.infolist.sections.settings.subsections.logistics.entries.routes'))
-                                            ->schema([
-                                                Infolists\Components\TextEntry::make('name')
-                                                    ->label(__('products::filament/resources/category.infolist.sections.settings.subsections.logistics.entries.route_name'))
-                                                    ->icon('heroicon-o-truck'),
-                                            ])
-                                            ->columns(1),
-                                    ])
-                                    ->icon('heroicon-o-cog-6-tooth')
-                                    ->collapsible(),
-                            ]),
                     ])
                     ->columnSpan(['lg' => 2]),
 
