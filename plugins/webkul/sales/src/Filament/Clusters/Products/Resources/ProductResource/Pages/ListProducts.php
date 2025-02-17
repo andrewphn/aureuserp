@@ -3,14 +3,13 @@
 namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ListProducts as BaseListProducts;
 
-class ListProducts extends ListRecords
+class ListProducts extends BaseListProducts
 {
     use HasTableViews;
 
@@ -18,7 +17,7 @@ class ListProducts extends ListRecords
 
     public function getPresetTableViews(): array
     {
-        return [
+        $presets = [
             'goods_products' => PresetView::make(__('sales::filament/clusters/products/resources/product/pages/list-products.tabs.goods'))
                 ->icon('heroicon-s-squares-plus')
                 ->favorite()
@@ -47,14 +46,10 @@ class ListProducts extends ListRecords
                     return $query->onlyTrashed();
                 }),
         ];
-    }
 
-    protected function getHeaderActions(): array
-    {
         return [
-            Actions\CreateAction::make()
-                ->label(__('sales::filament/clusters/products/resources/product/pages/list-products.header-actions.create.label'))
-                ->icon('heroicon-o-plus-circle'),
+            ...$presets,
+            ...parent::getPresetTableViews(),
         ];
     }
 }

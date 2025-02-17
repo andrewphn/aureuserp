@@ -2,32 +2,16 @@
 
 namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
+use Filament\Pages\SubNavigationPosition;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Auth;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\CreateProduct as BaseCreateProduct;
 
-class CreateProduct extends CreateRecord
+class CreateProduct extends BaseCreateProduct
 {
     protected static string $resource = ProductResource::class;
 
-    protected function getRedirectUrl(): string
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
-        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
-    }
-
-    protected function getCreatedNotification(): Notification
-    {
-        return Notification::make()
-            ->success()
-            ->title(__('sales::filament/clusters/products/resources/product/pages/create-product.notification.title'))
-            ->body(__('sales::filament/clusters/products/resources/product/pages/create-product.notification.body'));
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['creator_id'] = Auth::id();
-
-        return $data;
+        return SubNavigationPosition::Top;
     }
 }
