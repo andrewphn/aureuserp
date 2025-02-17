@@ -65,7 +65,7 @@
                     $grandTotal = 0;
 
                     foreach ($products as $product) {
-                        $quantity = floatval($product['quantity'] ?? 0);
+                        $quantity = floatval($product['product_uom_qty'] ?? 0);
                         $price = floatval($product['price_unit'] ?? 0);
                         $discount = floatval($product['discount'] ?? 0);
                         $taxIds = $product['tax'] ?? [];
@@ -143,7 +143,7 @@
                 @endif
 
                 <div class="divider"></div>
-                <div class="invoice-item font-bold">
+                <div class="font-bold invoice-item">
                     <span>Grand Total</span>
                     <span>{{ number_format($grandTotal, 2) }}</span>
                 </div>
