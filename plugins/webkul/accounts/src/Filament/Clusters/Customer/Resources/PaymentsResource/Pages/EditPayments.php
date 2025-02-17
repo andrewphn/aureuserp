@@ -1,0 +1,30 @@
+<?php
+
+namespace Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages;
+
+use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Actions as BaseActions;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
+
+
+class EditPayments extends EditRecord
+{
+    protected static string $resource = PaymentsResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ChatterActions\ChatterAction::make()
+                ->setResource(static::$resource),
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+            BaseActions\ConfirmAction::make(),
+            BaseActions\ResetToDraftAction::make(),
+            BaseActions\MarkAsSendAdnUnsentAction::make(),
+            BaseActions\CancelAction::make(),
+            BaseActions\RejectAction::make()
+        ];
+    }
+}
