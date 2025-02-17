@@ -65,7 +65,7 @@
                     $grandTotal = 0;
 
                     foreach ($products as $product) {
-                        $quantity = floatval($product['product_uom_qty'] ?? 0);
+                        $quantity = floatval(($product['product_uom_qty'] ?? $product['quantity'])  ?? 1);
                         $price = floatval($product['price_unit'] ?? 0);
                         $discount = floatval($product['discount'] ?? 0);
                         $taxIds = $product['tax'] ?? [];

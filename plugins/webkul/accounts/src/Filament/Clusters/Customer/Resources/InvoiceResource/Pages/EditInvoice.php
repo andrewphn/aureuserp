@@ -2,21 +2,16 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
+use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
-use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Actions\CancelAction;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Actions\ResetToDraftAction;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Actions\SetAsCheckedAction;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Actions\ConfirmAction;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Actions\PayAction;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Actions as BaseActions;
 
 class EditInvoice extends EditRecord
 {
@@ -27,11 +22,11 @@ class EditInvoice extends EditRecord
         return [
             Actions\ViewAction::make(),
             Actions\DeleteAction::make(),
-            PayAction::make(),
-            ConfirmAction::make(),
-            CancelAction::make(),
-            ResetToDraftAction::make(),
-            SetAsCheckedAction::make(),
+            BaseActions\PayAction::make(),
+            BaseActions\ConfirmAction::make(),
+            BaseActions\CancelAction::make(),
+            BaseActions\ResetToDraftAction::make(),
+            BaseActions\SetAsCheckedAction::make(),
         ];
     }
 

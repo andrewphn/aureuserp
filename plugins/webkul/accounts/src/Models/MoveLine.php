@@ -257,6 +257,55 @@ class MoveLine extends Model
         } elseif ($this->display_type === Enums\DisplayType::PAYMENT_TERM->value) {
             $this->calculatePaymentTermAmounts($data);
         }
+
+        $this->updateMoveAmounts();
+    }
+
+    /**
+     * Update related move's amounts
+     */
+    protected function updateMoveAmounts(): void
+    {
+        if (! $this->move_id) {
+            return;
+        }
+
+        $move = Move::find($this->move_id);
+        if (! $move) {
+            return;
+        }
+
+        $moveLines = self::where('move_id', $this->move_id)->get();
+
+        $amountUntaxed = $moveLines
+            ->where('display_type', Enums\DisplayType::PRODUCT->value)
+            ->sum('price_subtotal');
+
+        $amountTax = $moveLines
+            ->where('display_type', Enums\DisplayType::TAX->value)
+            ->sum('credit');
+
+        $amountTotal = $amountUntaxed + $amountTax;
+
+        $amountResidual = $moveLines
+            ->whereIn('display_type', [
+                Enums\DisplayType::PRODUCT->value,
+                Enums\DisplayType::TAX->value
+            ])
+            ->sum('amount_residual');
+
+        $move->update([
+            'amount_untaxed' => $amountUntaxed,
+            'amount_tax' => $amountTax,
+            'amount_total' => $amountTotal,
+            'amount_residual' => $amountResidual,
+            'amount_untaxed_signed' => $amountUntaxed,
+            'amount_untaxed_in_currency_signed' => $amountUntaxed,
+            'amount_tax_signed' => $amountTax,
+            'amount_total_signed' => $amountTotal,
+            'amount_total_in_currency_signed' => $amountTotal,
+            'amount_residual_signed' => $amountResidual,
+        ]);
     }
 
     /**
@@ -357,7 +406,13 @@ class MoveLine extends Model
      */
     public function save(array $options = [])
     {
-        return parent::save($options);
+        $result = parent::save($options);
+
+        if ($this->move_id) {
+            $this->updateMoveAmounts();
+        }
+
+        return $result;
     }
 
     protected static function boot()
@@ -366,6 +421,12 @@ class MoveLine extends Model
 
         static::creating(function ($moveLine) {
             $moveLine->sort = self::max('sort') + 1;
+        });
+
+        static::deleted(function ($moveLine) {
+            if ($moveLine->move_id) {
+                $moveLine->updateMoveAmounts();
+            }
         });
     }
 }
