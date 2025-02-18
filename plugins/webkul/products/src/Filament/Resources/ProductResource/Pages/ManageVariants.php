@@ -48,6 +48,8 @@ class ManageVariants extends ManageRelatedRecords
 
         $table->columns(Arr::except($table->getColumns(), ['variants_count']));
 
+        $table->modelLabel(__('products::filament/resources/product/pages/manage-variants.title'));
+
         return $table;
     }
 
