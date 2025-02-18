@@ -21,7 +21,7 @@ class GenerateVariantsAction extends Action
 
     public static function getDefaultName(): ?string
     {
-        return 'products.generate-variants';
+        return 'products.generate.variants';
     }
 
     protected function setUp(): void
@@ -29,13 +29,13 @@ class GenerateVariantsAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Generate Variants'))
+            ->icon('heroicon-o-cube')
+            ->label(__('products::filament/resources/product/actions/generate-variants.label'))
             ->color('primary')
-            ->requiresConfirmation()
-            ->modalHeading('Generate Product Variants')
-            ->modalDescription('This will generate all possible variants based on the product attributes. Existing variants will be preserved.')
             ->action(function (ManageAttributes $livewire) {
                 $this->record = $livewire->getRecord();
+
+                $this->record->variants()->delete();
 
                 $this->generateVariants();
             })
@@ -52,8 +52,8 @@ class GenerateVariantsAction extends Action
             if ($attributes->isEmpty()) {
                 Notification::make()
                     ->warning()
-                    ->title('No attributes found')
-                    ->body('Please add attributes to generate variants.')
+                    ->title(__('products::filament/resources/product/actions/generate-variants.notification.empty.title'))
+                    ->body(__('products::filament/resources/product/actions/generate-variants.notification.empty.body'))
                     ->send();
 
                 return;
@@ -65,14 +65,14 @@ class GenerateVariantsAction extends Action
 
             Notification::make()
                 ->success()
-                ->title('Variants generated successfully')
-                ->body('All product variants have been generated.')
+                ->title(__('products::filament/resources/product/actions/generate-variants.notification.success.title'))
+                ->body(__('products::filament/resources/product/actions/generate-variants.notification.success.body'))
                 ->send();
         } catch (\Exception $e) {
             Notification::make()
                 ->danger()
-                ->title('Error generating variants')
-                ->body($e->getMessage())
+                ->title(__('products::filament/resources/product/actions/generate-variants.notification.error.title'))
+                ->body(__('products::filament/resources/product/actions/generate-variants.notification.error.body'))
                 ->send();
         }
     }
@@ -150,6 +150,7 @@ class GenerateVariantsAction extends Action
                     'uom_po_id'            => $parentProduct->uom_po_id,
                     'category_id'          => $parentProduct->category_id,
                     'company_id'           => $parentProduct->company_id,
+                    'images'               => $parentProduct->images,
                     'creator_id'           => $user->id,
                 ]);
 

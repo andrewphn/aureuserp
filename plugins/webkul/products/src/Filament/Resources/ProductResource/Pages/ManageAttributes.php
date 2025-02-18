@@ -77,7 +77,7 @@ class ManageAttributes extends ManageRelatedRecords
 
                         return $data;
                     })
-                    ->after(function ($record) {
+                    ->after(function (ProductAttribute $record) {
                         $this->updateOrCreateVariants($record);
                     })
                     ->successNotification(
@@ -89,7 +89,7 @@ class ManageAttributes extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->after(function ($record) {
+                    ->after(function (ProductAttribute $record) {
                         $this->updateOrCreateVariants($record);
                     })
                     ->successNotification(
@@ -104,7 +104,10 @@ class ManageAttributes extends ManageRelatedRecords
                             ->success()
                             ->title(__('products::filament/resources/product/pages/manage-attributes.table.actions.delete.notification.title'))
                             ->body(__('products::filament/resources/product/pages/manage-attributes.table.actions.delete.notification.body')),
-                    ),
+                    )
+                    ->after(function (ProductAttribute $record) {
+                        $this->updateOrCreateVariants($record);
+                    }),
             ])
             ->paginated(false);
     }
@@ -119,18 +122,6 @@ class ManageAttributes extends ManageRelatedRecords
             ]);
         });
 
-        // foreach ($record->product->attributes as $productAttribute) {
-        //     $record->product->variants()->updateOrCreate([
-        //         'product_id' => $record->product_id,
-        //         'attribute_id' => $productAttribute->attribute_id,
-        //     ], [
-        //         'price' => $record->product->price,
-        //         'sku' => $record->product->sku,
-        //         'weight' => $record->product->weight,
-        //         'status' => $record->product->status,
-        //         'quantity' => $record->product->quantity,
-        //         'attribute_id' => $productAttribute->attribute_id,
-        //     ]);
-        // }
+        $this->replaceMountedTableAction('products.generate.variants');
     }
 }
