@@ -2,7 +2,6 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\PaymentState;
@@ -12,6 +11,7 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
 
 class CreateInvoice extends CreateRecord
 {

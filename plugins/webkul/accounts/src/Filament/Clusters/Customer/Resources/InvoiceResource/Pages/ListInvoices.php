@@ -2,12 +2,12 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\TableViews\Filament\Components\PresetView;
-use Illuminate\Database\Eloquent\Builder;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
@@ -37,10 +37,6 @@ class ListInvoices extends ListRecords
                 ->favorite()
                 ->icon('heroicon-s-shield-exclamation')
                 ->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('inalterable_hash')),
-            'move_type' => PresetView::make(__('Move Type'))
-                ->favorite()
-                ->icon('heroicon-s-banknotes')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', '!=', MoveType::IN_INVOICE->value)),
             'in_refund' => PresetView::make(__('Refund'))
                 ->icon('heroicon-s-receipt-refund')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
