@@ -13,7 +13,14 @@ class PriceListResource extends Resource
 {
     protected static ?string $model = PriceList::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Price Lists';
+    }
 
     public static function form(Form $form): Form
     {
