@@ -3,13 +3,13 @@
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
 use Webkul\Invoice\Filament\Clusters\Vendors;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource\Pages;
 use Filament\Tables\Table;
 use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
 
-class RefundResource extends BaseInvoiceResource
+class BillsResource extends BaseInvoiceResource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-refund';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     protected static bool $shouldRegisterNavigation = true;
 
@@ -22,12 +22,12 @@ class RefundResource extends BaseInvoiceResource
 
     public static function getModelLabel(): string
     {
-        return __('Refunds');
+        return __('Bills');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Refunds');
+        return __('Bills');
     }
 
     public static function table(Table $table): Table
@@ -38,9 +38,9 @@ class RefundResource extends BaseInvoiceResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRefunds::route('/'),
-            'create' => Pages\CreateRefund::route('/create'),
-            'edit' => Pages\EditRefund::route('/{record}/edit'),
+            'index'  => Pages\ListBills::route('/'),
+            'create' => Pages\CreateBills::route('/create'),
+            'edit'   => Pages\EditBills::route('/{record}/edit'),
         ];
     }
 }
