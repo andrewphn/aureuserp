@@ -99,21 +99,26 @@ class ManageAttributes extends ManageRelatedRecords
                             ->body(__('products::filament/resources/product/pages/manage-attributes.table.actions.edit.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
+                    ->after(function (ProductAttribute $record) {
+                        $this->updateOrCreateVariants($record);
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
                             ->title(__('products::filament/resources/product/pages/manage-attributes.table.actions.delete.notification.title'))
                             ->body(__('products::filament/resources/product/pages/manage-attributes.table.actions.delete.notification.body')),
-                    )
-                    ->after(function (ProductAttribute $record) {
-                        $this->updateOrCreateVariants($record);
-                    }),
+                    ),
             ])
             ->paginated(false);
     }
 
     protected function updateOrCreateVariants(ProductAttribute $record): void
     {
+        if ($record->product->attributes()->count() === 0) {
+            $record->product->variants()->delete();
+            return;
+        }
+
         $record->values->each(function ($value) use ($record) {
             $value->update([
                 'extra_price'  => $value->attributeOption->extra_price,
