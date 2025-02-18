@@ -380,9 +380,6 @@ class InvoiceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
@@ -567,7 +564,6 @@ class InvoiceResource extends Resource
 
     public static function getSectionRepeater($displayType): Forms\Components\Repeater
     {
-
         return Forms\Components\Repeater::make($displayType)
             ->relationship(
                 'moveLines',

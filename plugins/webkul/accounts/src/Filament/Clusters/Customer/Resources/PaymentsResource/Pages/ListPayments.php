@@ -8,7 +8,6 @@ use Filament\Resources\Pages\ListRecords;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\PaymentStatus;
 
 class ListPayments extends ListRecords
