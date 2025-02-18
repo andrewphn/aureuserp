@@ -2,12 +2,12 @@
 
 namespace Webkul\Product\Filament\Resources\ProductResource\Pages;
 
-use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Table;
+use Illuminate\Support\Arr;
 use Webkul\Product\Filament\Resources\ProductResource;
 
 class ManageVariants extends ManageRelatedRecords
@@ -25,62 +25,34 @@ class ManageVariants extends ManageRelatedRecords
 
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('type')
-                    ->default('projects'),
-                Forms\Components\DatePicker::make('date')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.form.date'))
-                    ->required()
-                    ->native(false),
-                Forms\Components\Select::make('user_id')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.form.employee'))
-                    ->required()
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->preload(),
-                Forms\Components\TextInput::make('name')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.form.description')),
-                Forms\Components\TextInput::make('unit_amount')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.form.time-spent'))
-                    ->numeric()
-                    ->required()
-                    ->minValue(0)
-                    ->helperText(__('products::filament/resources/product/pages/manage-variants.form.time-spent-helper-text')),
-            ])
-            ->columns(1);
+        return ProductResource::form($form);
     }
 
     public function table(Table $table): Table
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->columns([
-                Tables\Columns\TextColumn::make('date')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.table.columns.date'))
-                    ->date('Y-m-d'),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.table.columns.employee')),
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.table.columns.description')),
-                Tables\Columns\TextColumn::make('unit_amount')
-                    ->label(__('products::filament/resources/product/pages/manage-variants.table.columns.time-spent'))
-                    ->formatStateUsing(function ($state) {
-                        $hours = floor($state);
-                        $minutes = ($hours - $hours) * 60;
+        $table = ProductResource::table($table);
 
-                        return $hours.':'.$minutes;
-                    }),
-            ])
-            ->actions([
-                Tables\Actions\DeleteAction::make()
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('products::filament/resources/product/pages/manage-variants.table.actions.delete.notification.title'))
-                            ->body(__('products::filament/resources/product/pages/manage-variants.table.actions.delete.notification.body')),
-                    ),
-            ])
-            ->paginated(false);
+        [$actions] = $table->getActions();
+
+        $flatActions = $actions->getFlatActions();
+
+        if (isset($flatActions['edit'])) {
+            $flatActions['edit']
+                ->modalWidth(MaxWidth::SevenExtraLarge);
+        }
+
+        if (isset($flatActions['view'])) {
+            $flatActions['view']
+                ->modalWidth(MaxWidth::SevenExtraLarge);
+        }
+
+        $table->columns(Arr::except($table->getColumns(), ['variants_count']));
+
+        return $table;
+    }
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return ProductResource::infolist($infolist);
     }
 }

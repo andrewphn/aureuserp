@@ -161,6 +161,12 @@ class ProductResource extends Resource
                     ->label(__('products::filament/resources/product.table.columns.name'))
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('variants_count')
+                    ->label(__('products::filament/resources/product.table.columns.variants'))
+                    ->placeholder('—')
+                    ->searchable()
+                    ->counts('variants')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('reference')
                     ->label(__('products::filament/resources/product.table.columns.reference'))
                     ->placeholder('—')

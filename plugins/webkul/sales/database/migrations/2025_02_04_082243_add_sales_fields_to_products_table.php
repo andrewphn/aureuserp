@@ -26,9 +26,9 @@ return new class extends Migration
 
             $table->string('image')->nullable()->comment('Image');
             $table->string('service_type')->nullable()->comment('Service Type');
-            $table->string('sale_line_warn')->comment('Sale Line Warning');
+            $table->string('sale_line_warn')->nullable()->comment('Sale Line Warning');
             $table->text('expense_policy')->nullable()->comment('Expense Policy');
-            $table->text('invoice_policy')->comment('Invoicing Policy');
+            $table->text('invoice_policy')->nullable()->comment('Invoicing Policy');
             $table->boolean('sales_ok')->default(true)->comment('Can be Sold');
             $table->boolean('purchase_ok')->default(true)->comment('Can be Purchased');
             $table->string('sale_line_warn_msg')->nullable()->comment('Sale Line Warning Message');

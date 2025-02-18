@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\Product\Models\ProductAttribute;
+use Webkul\Product\Filament\Resources\ProductResource\Actions\GenerateVariantsAction;
 
 class ManageAttributes extends ManageRelatedRecords
 {
@@ -37,14 +38,15 @@ class ManageAttributes extends ManageRelatedRecords
                     ->relationship('attribute', 'name')
                     ->searchable()
                     ->preload()
-                    ->createOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form)),
+                    ->editOptionForm(fn(Forms\Form $form): Form => AttributeResource::form($form))
+                    ->createOptionForm(fn(Forms\Form $form): Form => AttributeResource::form($form)),
                 Forms\Components\Select::make('options')
                     ->label(__('products::filament/resources/product/pages/manage-attributes.form.values'))
                     ->required()
                     ->relationship(
                         name: 'options',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('products_attribute_options.attribute_id', $get('attribute_id')),
+                        modifyQueryUsing: fn(Forms\Get $get, Builder $query) => $query->where('products_attribute_options.attribute_id', $get('attribute_id')),
                     )
                     ->searchable()
                     ->preload()
@@ -66,6 +68,7 @@ class ManageAttributes extends ManageRelatedRecords
                     ->badge(),
             ])
             ->headerActions([
+                GenerateVariantsAction::make(),
                 Tables\Actions\CreateAction::make()
                     ->label(__('products::filament/resources/product/pages/manage-attributes.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
