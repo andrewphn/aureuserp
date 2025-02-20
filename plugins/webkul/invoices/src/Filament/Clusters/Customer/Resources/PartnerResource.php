@@ -19,17 +19,17 @@ class PartnerResource extends BasePartnerResource
 
     public static function getModelLabel(): string
     {
-        return __('Customers');
+        return __('invoices::filament/clusters/customers/resources/partners.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Customers');
+        return __('invoices::filament/clusters/customers/resources/partners.navigation.title');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Invoices');
+        return __('invoices::filament/clusters/customers/resources/partners.navigation.group');
     }
 
     public static function table(Table $table): Table

@@ -14,17 +14,17 @@ class ProductResource extends BaseProductResource
 
     public static function getModelLabel(): string
     {
-        return __('Products');
+        return __('invoices::filament/clusters/customers/resources/products.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Products');
+        return __('invoices::filament/clusters/customers/resources/products.navigation.title');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Invoices');
+        return __('invoices::filament/clusters/customers/resources/products.navigation.group');
     }
 
     public static function getPages(): array

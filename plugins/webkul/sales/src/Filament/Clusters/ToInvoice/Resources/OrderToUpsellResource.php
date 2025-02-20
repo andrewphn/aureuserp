@@ -22,12 +22,12 @@ class OrderToUpsellResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('Orders To Upsell');
+        return __('sales::filament/clusters/to-invoice/resources/order-to-upsell.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Orders To Upsell');
+        return __('sales::filament/clusters/to-invoice/resources/order-to-upsell.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -51,10 +51,7 @@ class OrderToUpsellResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrderToUpsells::route('/'),
-            'create' => Pages\CreateOrderToUpsell::route('/create'),
-            'view' => Pages\ViewOrderToUpsell::route('/{record}'),
-            'edit' => Pages\EditOrderToUpsell::route('/{record}/edit'),
+            'index'  => Pages\ListOrderToUpsells::route('/'),
         ];
     }
 }

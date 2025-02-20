@@ -21,12 +21,12 @@ class ReceiptsResource extends BaseInvoiceResource
 
     public static function getModelLabel(): string
     {
-        return __('Receipts');
+        return __('invoices::filament/clusters/customers/resources/receipts.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Receipts');
+        return __('invoices::filament/clusters/customers/resources/receipts.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -42,12 +42,12 @@ class ReceiptsResource extends BaseInvoiceResource
         $secondGroupComponents[1]->schema(array_merge([
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\Fieldset::make('Receipts')
+                    Forms\Components\Fieldset::make(__('invoices::filament/clusters/customers/resources/receipts.form.fieldset.title'))
                         ->schema([
                             Forms\Components\TextInput::make('reference')
-                                ->label('Reference'),
+                                ->label(__('invoices::filament/clusters/customers/resources/receipts.form.fieldset.fields.reference')),
                             Forms\Components\TextInput::make('payment_reference')
-                                ->label('Payment Reference'),
+                                ->label(__('invoices::filament/clusters/customers/resources/receipts.form.fieldset.fields.payment-reference')),
                         ])->columns(1)
                 ]),
         ], $nestedChildComponents));

@@ -22,12 +22,12 @@ class OrderToInvoiceResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('Orders To Invoice');
+        return __('sales::filament/clusters/to-invoice/resources/order-to-invoice.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Orders To Invoice');
+        return __('sales::filament/clusters/to-invoice/resources/order-to-invoice.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -52,9 +52,6 @@ class OrderToInvoiceResource extends Resource
     {
         return [
             'index'  => Pages\ListOrderToInvoices::route('/'),
-            'create' => Pages\CreateOrderToInvoice::route('/create'),
-            'view'   => Pages\ViewOrderToInvoice::route('/{record}'),
-            'edit'   => Pages\EditOrderToInvoice::route('/{record}/edit'),
         ];
     }
 }

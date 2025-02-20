@@ -11,7 +11,7 @@ class SaleTeamWidget extends ChartWidget
 {
     public function getHeading(): string|Htmlable|null
     {
-        return __('Sales Team Performance');
+        return __('sales::filament/widgets/sale-team.heading');
     }
 
     protected static ?int $sort = 2;
@@ -67,17 +67,17 @@ class SaleTeamWidget extends ChartWidget
             }
 
             $datasets[] = [
-                'label' => $teamName,
-                'data' => $weeklyValues,
+                'label'           => $teamName,
+                'data'            => $weeklyValues,
                 'backgroundColor' => $teamColor,
-                'borderColor' => $teamColor,
-                'borderWidth' => 1,
+                'borderColor'     => $teamColor,
+                'borderWidth'     => 1,
             ];
         }
 
         return [
             'datasets' => $datasets,
-            'labels' => $labels,
+            'labels'   => $labels,
         ];
     }
 
@@ -91,7 +91,7 @@ class SaleTeamWidget extends ChartWidget
         return [
             'plugins' => [
                 'legend' => [
-                    'display' => true,
+                    'display'  => true,
                     'position' => 'bottom',
                 ],
             ],
@@ -100,7 +100,7 @@ class SaleTeamWidget extends ChartWidget
                     'fill' => true,
                 ],
                 'point' => [
-                    'radius' => 4,
+                    'radius'      => 4,
                     'hoverRadius' => 6,
                 ],
             ],

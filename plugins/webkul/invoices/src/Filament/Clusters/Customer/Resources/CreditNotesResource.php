@@ -21,12 +21,12 @@ class CreditNotesResource extends BaseInvoiceResource
 
     public static function getModelLabel(): string
     {
-        return __('Credit Notes');
+        return __('invoices::filament/clusters/customers/resources/credit-note.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Credit Notes');
+        return __('invoices::filament/clusters/customers/resources/credit-note.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -42,11 +42,11 @@ class CreditNotesResource extends BaseInvoiceResource
         $secondGroupComponents[1]->schema(array_merge([
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\Fieldset::make('Credit Note')
+                    Forms\Components\Fieldset::make(__('invoices::filament/clusters/customers/resources/credit-note.form.fieldset.credit-note.title'))
                         ->schema([
                             Forms\Components\TextInput::make('name')
                                 ->placeholder('RINV/2025/00001')
-                                ->label('Customer Credit Note'),
+                                ->label(__('invoices::filament/clusters/customers/resources/credit-note.form.fieldset.credit-note.fields.customer-credit-note')),
                         ])->columns(1)
                 ]),
         ], $nestedChildComponents));
