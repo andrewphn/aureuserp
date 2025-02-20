@@ -19,7 +19,12 @@ class CustomerResource extends PartnerResource
 
     public static function getModelLabel(): string
     {
-        return __('Customers');
+        return __('sales::filament/clusters/orders/resources/customer.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('sales::filament/clusters/orders/resources/customer.navigation.title');
     }
 
     public static function table(Table $table): Table
@@ -33,18 +38,13 @@ class CustomerResource extends PartnerResource
             ]);
     }
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Customers');
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCustomers::route('/'),
+            'index'  => Pages\ListCustomers::route('/'),
             'create' => Pages\CreateCustomer::route('/create'),
-            'edit' => Pages\EditCustomer::route('/{record}/edit'),
-            'view' => Pages\ViewCustomer::route('/{record}'),
+            'edit'   => Pages\EditCustomer::route('/{record}/edit'),
+            'view'   => Pages\ViewCustomer::route('/{record}'),
         ];
     }
 }

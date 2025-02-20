@@ -3,20 +3,12 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource\Pages;
 
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource;
-use Filament\Resources\Pages\ViewRecord;
 use Webkul\Sale\Traits\HasSaleOrderActions;
-use Filament\Actions;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages\ViewQuotation as BaseViewOrders;
 
-class ViewOrders extends ViewRecord
+class ViewOrders extends BaseViewOrders
 {
     use HasSaleOrderActions;
 
     protected static string $resource = OrdersResource::class;
-
-    protected function getAdditionalHeaderActions(): array
-    {
-        return [
-            Actions\EditAction::make(),
-        ];
-    }
 }
