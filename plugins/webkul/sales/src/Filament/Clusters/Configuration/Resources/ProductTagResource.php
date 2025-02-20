@@ -6,6 +6,9 @@ use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductTagResource\Pages;
 use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -22,17 +25,17 @@ class ProductTagResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('Tags');
+        return __('sales::filament/clusters/configurations/resources/product-tag.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Tags');
+        return __('sales::filament/clusters/configurations/resources/product-tag.navigation.title');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Products');
+        return __('sales::filament/clusters/configurations/resources/product-tag.navigation.group');
     }
 
     public static function getGloballySearchableAttributes(): array
@@ -45,7 +48,7 @@ class ProductTagResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('Name') => $record->name ?? '—',
+            __('sales::filament/clusters/configurations/resources/product-tag.global-search.name') => $record->name ?? '—',
         ];
     }
 
@@ -54,13 +57,12 @@ class ProductTagResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label(__('Name'))
+                    ->label(__('sal\Infolist;es::filament/clusters/configurations/resources/product-tag.form.fields.name'))
                     ->required()
                     ->placeholder(__('Name')),
                 Forms\Components\ColorPicker::make('color')
-                    ->label(__('Color'))
-                    ->required()
-                    ->placeholder(__('Color')),
+                    ->label(__('sales::filament/clusters/configurations/resources/product-tag.form.fields.color'))
+                    ->required(),
             ]);
     }
 
@@ -71,20 +73,38 @@ class ProductTagResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->label(__('Name')),
+                    ->label(__('sales::filament/clusters/configurations/resources/product-tag.table.columns.name')),
                 Tables\Columns\ColorColumn::make('color')
-                    ->label(__('Color')),
+                    ->label(__('sales::filament/clusters/configurations/resources/product-tag.table.columns.color')),
                 Tables\Columns\TextColumn::make('createdBy.name')
-                    ->label(__('Created By')),
+                    ->label(__('sales::filament/clusters/configurations/resources/product-tag.table.columns.created-by')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title(__('sales::filament/clusters/configurations/resources/product-tag.table.actions.edit.notification.title'))
+                            ->body(__('sales::filament/clusters/configurations/resources/product-tag.table.actions.edit.notification.body'))
+                    ),
+                Tables\Actions\DeleteAction::make()
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title(__('sales::filament/clusters/configurations/resources/product-tag.table.actions.delete.notification.title'))
+                            ->body(__('sales::filament/clusters/configurations/resources/product-tag.table.actions.delete.notification.body'))
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('sales::filament/clusters/configurations/resources/product-tag.table.bulk-actions.delete.notification.title'))
+                                ->body(__('sales::filament/clusters/configurations/resources/product-tag.table.bulk-actions.delete.notification.body'))
+                        ),
                 ]),
             ]);
     }
@@ -94,5 +114,17 @@ class ProductTagResource extends Resource
         return [
             'index' => Pages\ListProductTags::route('/'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\TextEntry::make('name')
+                    ->label(__('sales::filament/clusters/configurations/resources/product-tag.infolist.entries.name'))
+                    ->placeholder('-'),
+                Infolists\Components\ColorEntry::make('color')
+                    ->label(__('sales::filament/clusters/configurations/resources/product-tag.infolist.entries.color')),
+            ]);
     }
 }
