@@ -28,20 +28,20 @@ class ListQuotations extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'my_quotations' => PresetView::make(__('My Quotations'))
+            'my_quotations' => PresetView::make(__('sales::filament/clusters/orders/resources/quotation/pages/list-quotation.tabs.my-quotations'))
                 ->icon('heroicon-s-user')
                 ->favorite()
                 ->default()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('user_id', Auth::id())),
-            'quotations' => PresetView::make(__('Quotations'))
+            'quotations' => PresetView::make(__('sales::filament/clusters/orders/resources/quotation/pages/list-quotation.tabs.quotations'))
                 ->icon('heroicon-s-receipt-percent')
                 ->favorite()
                 ->modifyQueryUsing(fn(Builder $query) => $query->whereIn('state', [OrderState::DRAFT->value, OrderState::SENT->value])),
-            'sale_orders' => PresetView::make(__('Sales Orders'))
+            'sale_orders' => PresetView::make(__('sales::filament/clusters/orders/resources/quotation/pages/list-quotation.tabs.sales-orders'))
                 ->icon('heroicon-s-shopping-bag')
                 ->favorite()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('state', OrderState::SALE->value)),
-            'archived' => PresetView::make(__('Archived'))
+            'archived' => PresetView::make(__('sales::filament/clusters/orders/resources/quotation/pages/list-quotation.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->favorite()
                 ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),
