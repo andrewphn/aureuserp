@@ -4,10 +4,6 @@ namespace Webkul\Sale\Filament\Clusters\Products\Resources;
 
 use Webkul\Sale\Filament\Clusters\Products;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductVariantsResource\Pages;
-use App\Models\ProductVariants;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource as BaseProductResource;
 
@@ -17,12 +13,12 @@ class ProductVariantsResource extends BaseProductResource
 
     public static function getModelLabel(): string
     {
-        return __('Product Variant');
+        return __('sales::filament/clusters/products/resources/product-variants.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Product Variants');
+        return __('sales::filament/clusters/products/resources/product-variants.navigation.title');
     }
 
     public static function table(Table $table): Table
@@ -36,9 +32,9 @@ class ProductVariantsResource extends BaseProductResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProductVariants::route('/'),
+            'index'  => Pages\ListProductVariants::route('/'),
             'create' => Pages\CreateProductVariants::route('/create'),
-            'edit' => Pages\EditProductVariants::route('/{record}/edit'),
+            'edit'   => Pages\EditProductVariants::route('/{record}/edit'),
         ];
     }
 }
