@@ -10,7 +10,7 @@ class ProductResource extends BaseProductResource
 {
     protected static ?string $cluster = Customer::class;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     public static function getModelLabel(): string
     {

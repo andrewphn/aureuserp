@@ -11,7 +11,7 @@ class PartnerResource extends BasePartnerResource
 {
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
