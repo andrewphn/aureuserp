@@ -11,6 +11,8 @@ class PartnerResource extends BasePartnerResource
 {
     protected static bool $shouldRegisterNavigation = true;
 
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $cluster = Customer::class;

@@ -10,6 +10,8 @@ class PaymentsResource extends BasePaymentsResource
 {
     protected static bool $shouldRegisterNavigation = true;
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $cluster = Customer::class;
 
     public static function getPages(): array

@@ -11,6 +11,8 @@ class RefundResource extends BaseInvoiceResource
 {
     protected static ?string $navigationIcon = 'heroicon-o-receipt-refund';
 
+    protected static ?int $navigationSort = 2;
+
     protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $cluster = Vendors::class;

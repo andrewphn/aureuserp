@@ -13,6 +13,8 @@ class BillsResource extends BaseInvoiceResource
 
     protected static bool $shouldRegisterNavigation = true;
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $cluster = Vendors::class;
 
     public static function getNavigationGroup(): ?string

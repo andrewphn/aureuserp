@@ -11,6 +11,8 @@ class ProductResource extends BaseProductResource
 {
     protected static ?string $cluster = Vendors::class;
 
+    protected static ?int $navigationSort = 4;
+
     public static function table(Table $table): Table
     {
         return BaseProductResource::table($table)

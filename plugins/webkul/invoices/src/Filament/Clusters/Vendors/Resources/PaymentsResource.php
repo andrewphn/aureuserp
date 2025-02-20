@@ -11,6 +11,8 @@ class PaymentsResource extends BasePaymentsResource
 {
     protected static bool $shouldRegisterNavigation = true;
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $cluster = Vendors::class;
 
     public static function getNavigationGroup(): ?string

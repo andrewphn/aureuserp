@@ -10,6 +10,8 @@ class InvoiceResource extends BaseInvoiceResource
 {
     protected static bool $shouldRegisterNavigation = true;
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $cluster = Customer::class;
 
     public static function getPages(): array
