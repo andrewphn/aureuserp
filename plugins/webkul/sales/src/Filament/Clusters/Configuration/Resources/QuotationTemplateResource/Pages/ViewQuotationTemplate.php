@@ -4,6 +4,7 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplat
 
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -20,6 +21,13 @@ class ViewQuotationTemplate extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title(__('sales::filament/clusters/configurations/resources/quotation-template/pages/view-quotation-template.header-actions.notification.delete.title'))
+                        ->body(__('sales::filament/clusters/configurations/resources/quotation-template/pages/view-quotation-template.header-actions.notification.delete.body'))
+                ),
         ];
     }
 }
