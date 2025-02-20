@@ -22,7 +22,7 @@ class ListRefunds extends BaseListInvoices
         return array_merge(
             $presets,
             [
-                'in_refund' => PresetView::make(__('Refund'))
+                'in_refund' => PresetView::make(__('invoices::filament/clusters/vendors/resources/refund/pages/list-refund.tabs.refund'))
                     ->icon('heroicon-s-receipt-refund')
                     ->default()
                     ->favorite()

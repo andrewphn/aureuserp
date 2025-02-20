@@ -17,7 +17,7 @@ class ListPayments extends BaseListPayments
 
         return [
             ...$presets,
-            'vendor_payments' => PresetView::make(__('Vendor Payments'))
+            'vendor_payments' => PresetView::make(__('invoices::filament/clusters/vendors/resources/payments/pages/list-payment.tabs.vendor-payments'))
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-banknotes')

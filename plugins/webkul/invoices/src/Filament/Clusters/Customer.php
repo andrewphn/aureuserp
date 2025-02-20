@@ -10,11 +10,11 @@ class Customer extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return __('Customers');
+        return __('invoices::filament/clusters/customers.navigation.title');
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('Invoices');
+        return __('invoices::filament/clusters/customers.navigation.group');
     }
 }

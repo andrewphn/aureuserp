@@ -19,7 +19,7 @@ class ListBills extends BaseListInvoices
         return array_merge(
             $presets,
             [
-                'bills' => PresetView::make(__('Bills'))
+                'bills' => PresetView::make(__('invoices::filament/clusters/vendors/resources/bill/pages/list-bill.tabs.bills'))
                     ->icon('heroicon-s-receipt-percent')
                     ->default()
                     ->favorite()

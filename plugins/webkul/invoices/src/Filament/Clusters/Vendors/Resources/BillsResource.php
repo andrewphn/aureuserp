@@ -26,12 +26,12 @@ class BillsResource extends BaseInvoiceResource
 
     public static function getModelLabel(): string
     {
-        return __('Bills');
+        return __('invoices::filament/clusters/vendors/resources/bill.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Bills');
+        return __('invoices::filament/clusters/vendors/resources/bill.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -47,14 +47,14 @@ class BillsResource extends BaseInvoiceResource
         $secondGroupComponents[1]->schema(array_merge([
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\Fieldset::make('Biller')
+                    Forms\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/bill.form.biller'))
                         ->schema([
                             Forms\Components\TextInput::make('reference')
-                                ->label('Reference'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/bill.form.reference')),
                             Forms\Components\TextInput::make('payment_reference')
-                                ->label('Payment Reference'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/bill.form.payment-reference')),
                             Forms\Components\TextInput::make('date')
-                                ->label('Accounting Date'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/bill.form.date')),
                         ])->columns(1)
                 ]),
         ], $nestedChildComponents));

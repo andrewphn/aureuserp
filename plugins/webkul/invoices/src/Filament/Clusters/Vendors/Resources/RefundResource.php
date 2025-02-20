@@ -26,12 +26,12 @@ class RefundResource extends BaseInvoiceResource
 
     public static function getModelLabel(): string
     {
-        return __('Refunds');
+        return __('invoices::filament/clusters/vendors/resources/refund.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Refunds');
+        return __('invoices::filament/clusters/vendors/resources/refund.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -47,17 +47,16 @@ class RefundResource extends BaseInvoiceResource
         $secondGroupComponents[1]->schema(array_merge([
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\Fieldset::make('Biller')
+                    Forms\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/refund.form.biller'))
                         ->schema([
                             Forms\Components\TextInput::make('name')
-                                ->placeholder('RBILL/2025/02/0001')
-                                ->label('Vendor Credit Note'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/refund.form.name')),
                             Forms\Components\TextInput::make('reference')
-                                ->label('Reference'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/refund.form.reference')),
                             Forms\Components\TextInput::make('payment_reference')
-                                ->label('Payment Reference'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/refund.form.payment-reference')),
                             Forms\Components\TextInput::make('date')
-                                ->label('Accounting Date'),
+                                ->label(__('invoices::filament/clusters/vendors/resources/refund.form.date')),
                         ])->columns(1)
                 ]),
         ], $nestedChildComponents));
@@ -73,9 +72,10 @@ class RefundResource extends BaseInvoiceResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRefunds::route('/'),
+            'index'  => Pages\ListRefunds::route('/'),
             'create' => Pages\CreateRefund::route('/create'),
-            'edit' => Pages\EditRefund::route('/{record}/edit'),
+            'edit'   => Pages\EditRefund::route('/{record}/edit'),
+            'view'   => Pages\ViewRefund::route('/{record}'),
         ];
     }
 }

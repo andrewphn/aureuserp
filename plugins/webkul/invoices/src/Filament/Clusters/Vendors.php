@@ -10,11 +10,11 @@ class Vendors extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return __('Vendors');
+        return __('invoices::filament/clusters/vendors.navigation.title');
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('Invoices');
+        return __('invoices::filament/clusters/vendors.navigation.group');
     }
 }
