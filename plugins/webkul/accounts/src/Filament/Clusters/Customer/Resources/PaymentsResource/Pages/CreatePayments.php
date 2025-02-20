@@ -2,6 +2,7 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages;
 
+use Filament\Notifications\Notification;
 use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -11,16 +12,24 @@ class CreatePayments extends CreateRecord
 {
     protected static string $resource = PaymentsResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title(__('accounts::filament/clusters/customers/resources/payment/pages/create-payment.notification.title'))
+            ->body(__('accounts::filament/clusters/customers/resources/payment/pages/create-payment.notification.body'));
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['state'] = PaymentStatus::DRAFT->value;
         $data['created_by'] = Auth::user()->id;
 
         return $data;
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
     }
 }

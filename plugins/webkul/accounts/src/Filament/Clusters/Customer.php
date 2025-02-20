@@ -8,14 +8,13 @@ class Customer extends Cluster
 {
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-
     public static function getNavigationLabel(): string
     {
-        return __('Customers');
+        return __('accounts::filament/clusters/customers.navigation.title');
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('accounts::filament/clusters/configurations.navigation.group');
+        return __('accounts::filament/clusters/customers.navigation.group');
     }
 }

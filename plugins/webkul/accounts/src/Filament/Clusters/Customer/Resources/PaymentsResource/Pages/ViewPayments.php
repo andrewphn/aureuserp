@@ -4,6 +4,7 @@ namespace Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\P
 
 use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Actions as BaseActions;
@@ -17,8 +18,14 @@ class ViewPayments extends ViewRecord
         return [
             ChatterActions\ChatterAction::make()
                 ->setResource(static::$resource),
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\EditAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title(__('accounts::filament/clusters/customers/resources/payment/pages/view-payment.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/clusters/customers/resources/payment/pages/view-payment.header-actions.delete.notification.body'))
+                ),
             BaseActions\ConfirmAction::make(),
             BaseActions\ResetToDraftAction::make(),
             BaseActions\MarkAsSendAdnUnsentAction::make(),
