@@ -8,7 +8,6 @@ use Filament\Forms\Form;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\InstallmentMode;
 use Webkul\Account\Enums\PaymentState;
@@ -34,7 +33,7 @@ class PayAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Pay'))
+            ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.title'))
             ->color('primary')
             ->form(function (Form $form) {
                 return $form->schema([
@@ -51,8 +50,10 @@ class PayAction extends Action
                                 })
                                 ->searchable()
                                 ->preload()
+                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.journal'))
                                 ->required(),
                             Forms\Components\TextInput::make('amount')
+                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.amount'))
                                 ->prefix(fn($record) => $record->currency->symbol ?? '')
                                 ->formatStateUsing(fn($record) => number_format($record->moveLines->sum('price_total'), 2, '.', ''))
                                 ->dehydrateStateUsing(fn($state) => (float) str_replace(',', '', $state))
@@ -62,6 +63,7 @@ class PayAction extends Action
                                     'paymentMethodLine',
                                     'name',
                                 )
+                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.payment-method-line'))
                                 ->default(function ($record) {
                                     return PaymentMethodLine::where('sort', 1)->first()->id;
                                 })
@@ -70,6 +72,7 @@ class PayAction extends Action
                                 ->required(),
                             Forms\Components\DatePicker::make('payment_date')
                                 ->native(false)
+                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.payment-date'))
                                 ->default(now())
                                 ->required(),
                             Forms\Components\Select::make('partner_bank_id')
@@ -77,12 +80,14 @@ class PayAction extends Action
                                     'partnerBank',
                                     'account_number',
                                 )
+                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.partner-bank-account'))
                                 ->default(function ($record) {
                                     return $record->partner->bankAccounts->first()->id;
                                 })
                                 ->searchable()
                                 ->required(),
                             Forms\Components\TextInput::make('communication')
+                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.communication'))
                                 ->default(function ($record) {
                                     return $record->name;
                                 })
@@ -109,8 +114,7 @@ class PayAction extends Action
             ->hidden(function (Move $record) {
                 return
                     $record->state != MoveState::POSTED->value
-                    || ! in_array($record->payment_state, [PaymentState::NOT_PAID->value, PaymentState::PARTIAL->value, PaymentState::IN_PAYMENT->value])
-                    || ! in_array($record->move_type, [MoveType::OUT_INVOICE->value, MoveType::OUT_REFUND->value, MoveType::IN_INVOICE->value, MoveType::IN_REFUND->value, MoveType::OUT_RECEIPT->value, MoveType::IN_RECEIPT->value]);
+                    || ! in_array($record->payment_state, [PaymentState::NOT_PAID->value, PaymentState::PARTIAL->value, PaymentState::IN_PAYMENT->value]);
             });
     }
 

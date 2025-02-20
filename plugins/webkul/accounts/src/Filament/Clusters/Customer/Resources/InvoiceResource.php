@@ -18,6 +18,9 @@ use Webkul\Partner\Models\Partner;
 use Filament\Forms\Set;
 use Webkul\Support\Models\Currency;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
+use Filament\Notifications\Notification;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
@@ -292,104 +295,185 @@ class InvoiceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->placeholder('-')
-                    ->label('Number')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.number'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_partner_display_name')
-                    ->label('Customer')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.customer'))
                     ->placeholder('-')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_date')
                     ->date()
                     ->placeholder('-')
-                    ->label('Invoice Date')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.invoice-date'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('checked')
                     ->boolean()
                     ->placeholder('-')
-                    ->label('Checked')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.checked'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
                     ->date()
                     ->placeholder('-')
-                    ->label('Accounting Date')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.accounting-date'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_date_due')
                     ->date()
                     ->placeholder('-')
-                    ->label('Due Date')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.due-date'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_origin')
                     ->date()
                     ->placeholder('-')
-                    ->label('Source Document')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.source-document'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('reference')
-                    ->label('Reference')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.reference'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoiceUser.name')
-                    ->label('Sales Person')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.sales-person'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('team.name')
-                    ->label('Sales Team')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.sales-team'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_untaxed_in_currency_signed')
-                    ->label('Tax Excluded')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.tax-excluded'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_tax_signed')
-                    ->label('Tax')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.tax'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_total_in_currency_signed')
-                    ->label('Total')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.total'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_residual_signed')
-                    ->label('Amount Due')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.amount-due'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('currency.id')
-                    ->label('Invoice Currency')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.invoice-currency'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->groups([
+                Tables\Grouping\Group::make('name')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.name'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('invoice_partner_display_name')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.invoice-partner-display-name'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('invoice_date')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.invoice-date'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('checked')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.checked'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('date')
+                    ->date()
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.date'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('invoice_date_due')
+                    ->date()
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.invoice-due-date'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('invoice_origin')
+                    ->date()
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.invoice-origin'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('invoiceUser.name')
+                    ->date()
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.sales-person'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('team.name')
+                    ->date()
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.sales-team'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('currency.name')
+                    ->date()
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.currency'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('created_at')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.created-at'))
+                    ->date()
+                    ->collapsible(),
+                Tables\Grouping\Group::make('updated_at')
+                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.updated-at'))
+                    ->date()
+                    ->collapsible(),
+            ])
+            ->filtersFormColumns(2)
+            ->filters([
+                Tables\Filters\QueryBuilder::make()
+                    ->constraintPickerColumns(2)
+                    ->constraints([
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('name')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.number')),
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('invoice_origin')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.invoice-origin')),
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('reference')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.reference')),
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('invoice_partner_display_name')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.invoice-partner-display-name')),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('invoice_date')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.invoice-date')),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('invoice_due_date')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.invoice-due-date')),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('created_at')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.created-at')),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('updated_at')
+                            ->label(__('accounts::filament/clusters/customers/resources/invoice.table.filters.updated-at')),
+                    ]),
+            ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('accounts::filament/clusters/customers/resources/invoice.table.actions.delete.notification.title'))
+                                ->body(__('accounts::filament/clusters/customers/resources/invoice.table.actions.delete.notification.body'))
+                        ),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('accounts::filament/clusters/customers/resources/invoice.table.bulk-actions.delete.notification.title'))
+                                ->body(__('accounts::filament/clusters/customers/resources/invoice.table.bulk-actions.delete.notification.body'))
+                        ),
                 ]),
             ]);
     }
@@ -404,12 +488,152 @@ class InvoiceResource extends Resource
         ];
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Grid::make(['default' => 3])
+                    ->schema([
+                        Infolists\Components\Group::make()
+                            ->schema([
+                                Infolists\Components\Tabs::make('Tabs')
+                                    ->tabs([
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.products.title'))
+                                            ->schema([
+                                                Infolists\Components\RepeatableEntry::make('moveLines')
+                                                    ->hiddenLabel()
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.products.repeater.products.entries.product'))
+                                                            ->icon('heroicon-o-shopping-bag'),
+                                                        Infolists\Components\TextEntry::make('quantity')
+                                                            ->numeric()
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.products.repeater.products.entries.quantity')),
+                                                        Infolists\Components\TextEntry::make('unit_price')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.products.repeater.products.entries.unit-price'))
+                                                            ->money('USD'),
+                                                        Infolists\Components\TextEntry::make('total')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.products.repeater.products.entries.total'))
+                                                            ->money('USD'),
+                                                    ])
+                                                    ->columns(5),
+                                                Infolists\Components\Livewire::make(Summary::class, function ($record) {
+                                                    return [
+                                                        'products' => $record->moveLines->map(function ($item) {
+                                                            return [
+                                                                ...$item->toArray(),
+                                                                'tax' => $item?->product?->productTaxes->pluck('id')->toArray() ?? [],
+                                                            ];
+                                                        })->toArray(),
+                                                    ];
+                                                }),
+                                            ]),
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.title'))
+                                            ->schema([
+                                                Infolists\Components\Fieldset::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.title'))
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('reference')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.customer-reference'))
+                                                            ->icon('heroicon-o-document'),
+                                                        Infolists\Components\TextEntry::make('invoiceUser.name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.sales-person'))
+                                                            ->icon('heroicon-o-user'),
+                                                        Infolists\Components\TextEntry::make('team.name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.sales-team'))
+                                                            ->icon('heroicon-o-users'),
+                                                        Infolists\Components\TextEntry::make('partnerBank.account_holder_name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.recipient-bank'))
+                                                            ->icon('heroicon-o-building-library'),
+                                                        Infolists\Components\TextEntry::make('payment_reference')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.payment-reference'))
+                                                            ->icon('heroicon-o-credit-card'),
+                                                        Infolists\Components\TextEntry::make('delivery_date')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.delivery-date'))
+                                                            ->date()
+                                                            ->icon('heroicon-o-truck'),
+                                                    ]),
+                                                Infolists\Components\Fieldset::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.title'))
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('invoiceIncoterm.name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.incoterm')),
+                                                        Infolists\Components\TextEntry::make('incoterm_location')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.incoterm-location')),
+                                                        Infolists\Components\TextEntry::make('fiscalPosition.name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.fiscal-position'))
+                                                            ->icon('heroicon-o-receipt-percent'),
+                                                        Infolists\Components\TextEntry::make('paymentMethodLine.name')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.payment-method')),
+                                                        Infolists\Components\IconEntry::make('auto_post')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.auto-post'))
+                                                            ->boolean(),
+                                                        Infolists\Components\IconEntry::make('checked')
+                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.checked'))
+                                                            ->boolean(),
+                                                    ]),
+                                            ]),
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.term-and-conditions.title'))
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('narration')
+                                                    ->markdown()
+                                                    ->columnSpanFull(),
+                                            ]),
+                                    ])->persistTabInQueryString(),
+                            ])->columnSpan(2),
+                        Infolists\Components\Group::make()
+                            ->schema([
+                                Infolists\Components\Section::make()
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('partner.name')
+                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.general.fields.customer'))
+                                            ->icon('heroicon-o-user-circle'),
+                                        Infolists\Components\TextEntry::make('partner_address')
+                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.general.fields.address'))
+                                            ->placeholder('-')
+                                            ->icon('heroicon-o-map'),
+                                    ]),
+                                Infolists\Components\Section::make()
+                                    ->schema([
+                                        Infolists\Components\Fieldset::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.title'))
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('invoice_date')
+                                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.fields.invoice-date'))
+                                                    ->date()
+                                                    ->icon('heroicon-o-calendar'),
+                                                Infolists\Components\TextEntry::make('invoice_date_due')
+                                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.fields.due-date'))
+                                                    ->date()
+                                                    ->icon('heroicon-o-clock'),
+                                                Infolists\Components\TextEntry::make('invoicePaymentTerm.name')
+                                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.fields.payment-term'))
+                                                    ->icon('heroicon-o-credit-card'),
+                                            ]),
+                                    ]),
+                                Infolists\Components\Section::make()
+                                    ->schema([
+                                        Infolists\Components\Fieldset::make(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.marketing.title'))
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('campaign.name')
+                                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.marketing.fields.campaign'))
+                                                    ->icon('heroicon-o-megaphone'),
+                                                Infolists\Components\TextEntry::make('medium.name')
+                                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.marketing.fields.medium'))
+                                                    ->icon('heroicon-o-signal'),
+                                                Infolists\Components\TextEntry::make('source.name')
+                                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.section.fieldset.marketing.fields.source'))
+                                                    ->icon('heroicon-o-funnel'),
+                                            ]),
+                                    ]),
+                            ])
+                            ->columnSpan(['lg' => 1]),
+                    ]),
+            ]);
+    }
+
     public static function getProductRepeater(): Forms\Components\Repeater
     {
         return Forms\Components\Repeater::make('products')
             ->relationship(
-                'moveLines',
-                fn($query) => $query->where('display_type', 'product'),
+                'moveLines'
             )
             ->hiddenLabel()
             ->live()

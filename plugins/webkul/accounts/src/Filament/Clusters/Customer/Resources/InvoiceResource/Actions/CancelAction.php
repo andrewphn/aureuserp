@@ -20,7 +20,7 @@ class CancelAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Cancel'))
+            ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/cancel-action.title'))
             ->color('gray')
             ->action(function (Move $record, Component $livewire): void {
                 $record->state = MoveState::CANCEL->value;

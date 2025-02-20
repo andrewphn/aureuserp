@@ -19,7 +19,7 @@ class ResetToDraftAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Reset To Draft'))
+            ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/reset-to-draft-action.title'))
             ->color('gray')
             ->action(function (Move $record, Component $livewire): void {
                 $record->state = MoveState::DRAFT->value;

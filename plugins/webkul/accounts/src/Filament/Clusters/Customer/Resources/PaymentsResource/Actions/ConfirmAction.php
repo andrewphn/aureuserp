@@ -19,7 +19,7 @@ class ConfirmAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Confirm'))
+            ->label(__('accounts::filament/clusters/customers/resources/payment/actions/confirm-action.title'))
             ->color('gray')
             ->action(function (Payment $record, Component $livewire): void {
                 $record->state = PaymentStatus::IN_PROCESS->value;

@@ -19,7 +19,7 @@ class MarkAsSendAdnUnsentAction extends Action
         parent::setUp();
 
         $this
-            ->label(fn(Payment $record) => $record->is_sent ? __('Unmark as Sent') : __('Mark As Sent'))
+            ->label(fn(Payment $record) => $record->is_sent ? __('accounts::filament/clusters/customers/resources/payment/actions/set-as-send-and-unsend-action.unmark-as-sent') : __('accounts::filament/clusters/customers/resources/payment/actions/set-as-send-and-unsend-action.mark-as-sent'))
             ->color('gray')
             ->action(function (Payment $record, Component $livewire): void {
                 $record->is_sent = ! $record->is_sent;

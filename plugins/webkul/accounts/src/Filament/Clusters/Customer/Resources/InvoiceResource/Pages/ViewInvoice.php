@@ -4,6 +4,7 @@ namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pa
 
 use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewInvoice extends ViewRecord
@@ -14,6 +15,13 @@ class ViewInvoice extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title(__('accounts::filament/clusters/customers/resources/invoice/pages/view-invoice.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/clusters/customers/resources/invoice/pages/view-invoice.header-actions.delete.notification.body'))
+                ),
         ];
     }
 }

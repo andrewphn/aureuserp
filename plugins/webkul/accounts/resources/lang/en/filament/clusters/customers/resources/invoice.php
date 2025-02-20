@@ -121,16 +121,48 @@ return [
     ],
 
     'table' => [
-        'columns' => [],
+        'columns' => [
+            'number'           => 'Number',
+            'customer'         => 'Customer',
+            'invoice-date'     => 'Invoice Date',
+            'checked'          => 'Checked',
+            'accounting-date'  => 'Accounting',
+            'due-date'         => 'Due Date',
+            'source-document'  => 'Source Document',
+            'reference'        => 'Reference',
+            'sales-person'     => 'Sales Person',
+            'sales-team'       => 'Sales Team',
+            'tax-excluded'     => 'Tax Excluded',
+            'tax'              => 'Tax',
+            'total'            => 'Total',
+            'amount-due'       => 'Amount Due',
+            'invoice-currency' => 'Invoice Currency',
+        ],
 
         'groups' => [
-            'created-at' => 'Created At',
-            'updated-at' => 'Updated At',
+            'name'                         => 'Name',
+            'invoice-partner-display-name' => 'Invoice Partner Display Name',
+            'invoice-date'                 => 'Invoice Date',
+            'checked'                      => 'Checked',
+            'date'                         => 'Date',
+            'invoice-due-date'             => 'Invoice Due Date',
+            'invoice-origin'               => 'Invoice Origin',
+            'sales-person'                 => 'Sales Person',
+            'sales-team'                   => 'Sales Team',
+            'currency'                     => 'Currency',
+            'created-at'                   => 'Created At',
+            'updated-at'                   => 'Updated At',
         ],
 
         'filters' => [
-            'created-at'                       => 'Created At',
-            'updated-at'                       => 'Updated At',
+            'number'                       => 'Number',
+            'invoice-partner-display-name' => 'Invoice Partner Display Name',
+            'invoice-date'                 => 'Invoice Date',
+            'invoice-due-date'             => 'Invoice Due Date',
+            'invoice-origin'               => 'Invoice Origin',
+            'reference'                    => 'Reference',
+            'created-at'                   => 'Created At',
+            'updated-at'                   => 'Updated At',
         ],
 
         'actions' => [
@@ -152,36 +184,98 @@ return [
         ],
     ],
 
-
     'infolist' => [
-        'sections' => [
-            'payment-information' => [
-                'title' => 'Payment Information',
-                'entries' => [
-                    'state'        => 'State',
-                    'payment-type' => 'Payment Type',
-                    'journal'      => 'Journal',
-                    'customer-bank-account' => 'Customer Bank Account',
-                    'customer'     => 'Customer',
+        'tabs' => [
+            'products' => [
+                'title' => 'Products',
+
+                'repeater' => [
+                    'products' => [
+                        'title' => 'Products',
+                        'entries' => [
+                            'product'    => 'Product',
+                            'quantity'   => 'Quantity',
+                            'unit-price' => 'Unit Price',
+                            'total'      => 'Total',
+                        ]
+                    ],
                 ]
             ],
 
-            'payment-details' => [
-                'title' => 'Payment Details',
+            'other-information' => [
+                'title' => 'Other Information',
+
                 'entries' => [
-                    'amount' => 'Amount',
-                    'date' => 'Date',
-                    'memo' => 'Memo',
+                    'fieldset' => [
+                        'invoice' => [
+                            'title' => 'Invoice',
+
+                            'entries' => [
+                                'customer-reference' => 'Customer Reference',
+                                'sale-person'        => 'Sale Person',
+                                'sales-team'         => 'Sales Team',
+                                'recipient-bank'     => 'Recipient Bank',
+                                'payment-reference'  => 'Payment Reference',
+                                'delivery-date'      => 'Delivery Date',
+                                'sales-person'       => 'Sales Person',
+                            ]
+                        ],
+
+                        'accounting' => [
+                            'title' => 'Accounting',
+                            'entries' => [
+                                'incoterm'          => 'Incoterm',
+                                'incoterm-location' => 'Incoterm Location',
+                                'fiscal-position'   => 'Fiscal Position',
+                                'payment-method'    => 'Payment Method',
+                                'auto-post'         => 'Auto Post',
+                                'checked'           => 'Checked',
+                            ]
+                        ],
+                    ],
                 ]
             ],
 
-            'payment-method' => [
-                'title' => 'Payment Method',
-                'entries' => [
-                    'payment-method' => 'Payment Method',
+            'term-and-conditions' => [
+                'title' => 'Term & Conditions',
+
+                'fields' => [
+                    'narration' => 'Term & Conditions',
+                ]
+            ]
+        ],
+
+        'section' => [
+            'fieldset' => [
+                'general' => [
+                    'title' => 'General',
+
+                    'fields' => [
+                        'customer' => 'Customer',
+                        'address'  => 'Address',
+                    ]
+                ],
+
+                'invoice-date-and-payment-term' => [
+                    'title' => 'Invoice Date & Payment Term',
+
+                    'fields' => [
+                        'invoice-date'     => 'Invoice Date',
+                        'due-date'         => 'Due Date',
+                        'payment-term'     => 'Payment Term',
+                    ]
+                ],
+
+                'marketing' => [
+                    'title' => 'Marketing',
+
+                    'fields' => [
+                        'campaign' => 'Campaign',
+                        'medium'   => 'Medium',
+                        'source'   => 'Source',
+                    ]
                 ]
             ]
         ]
     ],
-
 ];

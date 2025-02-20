@@ -666,7 +666,7 @@ class QuotationResource extends Resource
                                                         'products' => $record->salesOrderLines->map(function ($item) {
                                                             return [
                                                                 ...$item->toArray(),
-                                                                'tax' => $item->product->productTaxes->pluck('id')->toArray(),
+                                                                'tax' => $item?->product?->productTaxes->pluck('id')->toArray() ?? [],
                                                             ];
                                                         })->toArray(),
                                                     ];
