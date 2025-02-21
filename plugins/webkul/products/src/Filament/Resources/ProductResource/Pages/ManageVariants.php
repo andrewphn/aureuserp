@@ -52,14 +52,15 @@ class ManageVariants extends ManageRelatedRecords
         $table->columns([
             Tables\Columns\TextColumn::make('combinations')
                 ->label(__('products::filament/resources/product/pages/manage-variants.table.columns.variant-values'))
-                ->formatStateUsing(function ($record) {
+                ->state(function ($record) {
                     return $record->combinations->map(function ($combination) {
                         $attributeName = $combination->productAttributeValue?->attribute?->name;
                         $optionName = $combination->productAttributeValue?->attributeOption?->name;
 
                         return $attributeName && $optionName ? "{$attributeName}: {$optionName}" : $optionName;
-                    })->implode(', ');
+                    });
                 })
+                ->badge()
                 ->sortable()
                 ->searchable(),
             ...$table->getColumns()
