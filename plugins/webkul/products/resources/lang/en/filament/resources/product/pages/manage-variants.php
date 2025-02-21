@@ -20,6 +20,7 @@ return [
             'time-spent-on-subtasks' => 'Time Spent on Subtasks',
             'total-time-spent'       => 'Total Time Spent',
             'remaining-time'         => 'Remaining Time',
+            'variant-values'         => 'Variant Values',
         ],
 
         'actions' => [
