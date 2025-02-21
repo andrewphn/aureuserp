@@ -37,6 +37,7 @@ trait HasSaleOrderActions
                 ->setResource($this->getResource()),
             Action::make('confirm')
                 ->color('gray')
+                ->label(__('sales::traits/sale-order-action.header-actions.confirm.title'))
                 ->hidden(fn($record) => $record->state != OrderState::DRAFT->value)
                 ->action(function ($record, $livewire) {
                     $record->update([
@@ -50,12 +51,12 @@ trait HasSaleOrderActions
 
                     Notification::make()
                         ->success()
-                        ->title('Quotation confirmed')
-                        ->body('The quotation has been confirmed and converted to a sale.')
+                        ->title(__('sales::traits/sale-order-action.header-actions.confirm.notification.confirmed.title'))
+                        ->body(__('sales::traits/sale-order-action.header-actions.confirm.notification.confirmed.body'))
                         ->send();
                 }),
             Action::make('backToQuotation')
-                ->label('Set as Quotation')
+                ->label(__('sales::traits/sale-order-action.header-actions.back-to-quotation.title'))
                 ->color('gray')
                 ->hidden(fn($record) => $record->state != OrderState::CANCEL->value)
                 ->action(function ($record) {
@@ -68,13 +69,13 @@ trait HasSaleOrderActions
 
                     Notification::make()
                         ->success()
-                        ->title('Quotation Draft')
-                        ->body('The quotation has been set as draft.')
+                        ->title(__('sales::traits/sale-order-action.header-actions.back-to-quotation.notification.back-to-quotation.title'))
+                        ->body(__('sales::traits/sale-order-action.header-actions.back-to-quotation.notification.back-to-quotation.body'))
                         ->send();
                 }),
             Action::make('preview')
                 ->modalIcon('heroicon-s-document-text')
-                ->modalHeading(__('Preview Quotation'))
+                ->modalHeading(__('sales::traits/sale-order-action.header-actions.preview.modal.heading'))
                 ->modalWidth(MaxWidth::SevenExtraLarge)
                 ->modalFooterActions(function ($record) {
                     return [];
@@ -85,7 +86,7 @@ trait HasSaleOrderActions
                 ->color('gray'),
             Action::make('createInvoice')
                 ->modalIcon('heroicon-s-receipt-percent')
-                ->modalHeading(__('Preview Quotation'))
+                ->modalHeading(__('sales::traits/sale-order-action.header-actions.create-invoice.modal.heading'))
                 ->hidden(fn($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
                 ->action(function () {})
                 ->modalWidth(MaxWidth::SevenExtraLarge),
@@ -107,22 +108,24 @@ trait HasSaleOrderActions
                         'description' => 'Dear ' . $record->partner->name . ', <br/><br/>Your quotation <strong>' . $record->name . '</strong> amounting in <strong>' . $record->currency->symbol . ' ' . $record->amount_total . '</strong> is ready for review.<br/><br/>Should you have any questions or require further assistance, please feel free to reach out to us.',
                     ]);
                 })
+                ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.title'))
                 ->form(
                     function (Form $form, $record) {
                         return $form->schema([
                             Forms\Components\Select::make('partners')
                                 ->options(Partner::all()->pluck('name', 'id'))
                                 ->multiple()
+                                ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.partners'))
                                 ->searchable()
                                 ->preload(),
                             Forms\Components\TextInput::make('subject')
-                                ->placeholder('Subject')
+                                ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.subject'))
                                 ->hiddenLabel(),
                             Forms\Components\RichEditor::make('description')
-                                ->placeholder('Description')
+                                ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.description'))
                                 ->hiddenLabel(),
                             Forms\Components\FileUpload::make('file')
-                                ->label('Attachment')
+                                ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.attachment'))
                                 ->downloadable()
                                 ->openable()
                                 ->disk('public')
@@ -131,25 +134,26 @@ trait HasSaleOrderActions
                     }
                 )
                 ->modalIcon('heroicon-s-envelope')
-                ->modalHeading('Send Quotation by Email')
+                ->modalHeading(__('sales::traits/sale-order-action.header-actions.send-by-email.modal.heading'))
                 ->visible(fn($record) => $record->state != OrderState::DRAFT->value)
                 ->action(function ($record, array $data) {
                     $this->handleSendByEmail($record, $data);
                 }),
             Action::make('cancelQuotation')
                 ->color('gray')
-                ->label('Cancel')
+                ->label(__('sales::traits/sale-order-action.header-actions.cancel.title'))
                 ->modalIcon('heroicon-s-x-circle')
-                ->modalHeading(__('Cancel Quotation'))
+                ->modalHeading(__('sales::traits/sale-order-action.header-actions.cancel.modal.heading'))
+                ->modalDescription(__('sales::traits/sale-order-action.header-actions.cancel.modal.description'))
                 ->modalFooterActions(function ($record, $livewire): array {
                     return [
                         Action::make('sendAndCancel')
-                            ->label(__('Cancel and Send Email'))
+                            ->label(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.send-and-cancel.title'))
                             ->icon('heroicon-o-envelope')
                             ->modalIcon('heroicon-s-envelope')
                             ->action(function () use ($record, $livewire) {
                                 $record->update([
-                                    'state' => OrderState::CANCEL->value,
+                                    'state'          => OrderState::CANCEL->value,
                                     'invoice_status' => InvoiceStatus::NO->value,
                                 ]);
 
@@ -161,13 +165,13 @@ trait HasSaleOrderActions
 
                                 Notification::make()
                                     ->success()
-                                    ->title('Quotation cancelled')
-                                    ->body('The quotation has been cancelled.')
+                                    ->title(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.send-and-cancel.notification.cancelled.title'))
+                                    ->body(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.send-and-cancel.notification.cancelled.body'))
                                     ->send();
                             })
                             ->cancelParentActions(),
                         Action::make('cancel')
-                            ->label('Cancel')
+                            ->label(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.cancel.title'))
                             ->icon('heroicon-o-x-circle')
                             ->modalIcon('heroicon-s-x-circle')
                             ->action(function () use ($record) {
@@ -180,14 +184,14 @@ trait HasSaleOrderActions
 
                                 Notification::make()
                                     ->success()
-                                    ->title('Quotation cancelled')
-                                    ->body('The quotation has been cancelled.')
+                                    ->title(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.cancel.notification.cancelled.title'))
+                                    ->body(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.cancel.notification.cancelled.body'))
                                     ->send();
                             })
                             ->cancelParentActions(),
                         Action::make('close')
                             ->color('gray')
-                            ->label('Close')
+                            ->label(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.close.title'))
                             ->cancelParentActions(),
                     ];
                 })
@@ -199,15 +203,23 @@ trait HasSaleOrderActions
                                 ->multiple()
                                 ->default([$record->partner_id])
                                 ->searchable()
+                                ->label(__('sales::traits/sale-order-action.header-actions.cancel.form.fields.partner'))
                                 ->preload(),
                             Forms\Components\TextInput::make('subject')
-                                ->default(fn() => 'Quotation ' . $record->name . ' has been cancelled for Sales Order #' . $record->id)
-                                ->placeholder('Subject')
+                                ->default(fn() => __('sales::traits/sale-order-action.header-actions.cancel.form.fields.subject-default', [
+                                    'name' => $record->name,
+                                    'id'   => $record->id,
+                                ]))
+                                ->placeholder(__('sales::traits/sale-order-action.header-actions.cancel.form.fields.subject-placeholder'))
+                                ->label(__('sales::traits/sale-order-action.header-actions.cancel.form.fields.subject'))
                                 ->hiddenLabel(),
                             Forms\Components\RichEditor::make('description')
-                                ->placeholder('Description')
+                                ->label(__('sales::traits/sale-order-action.header-actions.cancel.form.fields.description'))
                                 ->default(function () use ($record) {
-                                    return 'Dear ' . $record->partner->name . ', <br/><br/>We would like to inform you that your Sales Order ' . $record->name . ' has been cancelled. As a result, no further charges will apply to this order. If a refund is required, it will be processed at the earliest convenience.<br/><br/>Should you have any questions or require further assistance, please feel free to reach out to us.';
+                                    return __('sales::traits/sale-order-action.header-actions.cancel.form.fields.description-default', [
+                                        'partner_name' => $record?->partner?->name,
+                                        'name'         => $record?->name,
+                                    ]);
                                 })
                                 ->hiddenLabel(),
                         ]);
@@ -229,13 +241,7 @@ trait HasSaleOrderActions
 
     private function preparePayloadForSendByEmail($record, $partner, $data)
     {
-        $modalName = match ($record->state) {
-            OrderState::DRAFT->value => 'Quotation',
-            OrderState::SALE->value => 'Sales Order',
-            OrderState::SENT->value => 'Quotation',
-            OrderState::CANCEL->value => 'Quotation',
-            default => 'Quotation',
-        };
+        $modalName = OrderState::options()[$record->state];
 
         return [
             'record_url'     => $this->getRedirectUrl() ?? '',
@@ -287,8 +293,8 @@ trait HasSaleOrderActions
 
         Notification::make()
             ->success()
-            ->title('Mail Sent')
-            ->body('The mail has been sent successfully.')
+            ->title(__('sales::traits/sale-order-action.header-actions.send-by-email.actions.notification.title'))
+            ->body(__('sales::traits/sale-order-action.header-actions.send-by-email.actions.notification.body'))
             ->send();
     }
 

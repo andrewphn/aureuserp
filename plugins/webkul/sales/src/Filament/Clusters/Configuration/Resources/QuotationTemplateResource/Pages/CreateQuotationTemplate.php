@@ -2,6 +2,7 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
 
+use Filament\Notifications\Notification;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -12,5 +13,13 @@ class CreateQuotationTemplate extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
+    }
+
+    protected function getCreatedNotification(): Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title(__('sales::filament/clusters/configurations/resources/quotation-template/pages/create-quotation-template.notification.title'))
+            ->body(__('sales::filament/clusters/configurations/resources/quotation-template/pages/create-quotation-template.notification.body'));
     }
 }

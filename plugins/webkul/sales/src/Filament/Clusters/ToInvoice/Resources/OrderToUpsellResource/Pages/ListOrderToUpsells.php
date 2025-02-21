@@ -24,11 +24,11 @@ class ListOrderToUpsells extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'my_orders' => PresetView::make(__('My Orders'))
+            'my_orders' => PresetView::make(__('sales::filament/clusters/to-invoice/resources/order-to-upsell/pages/list-order-to-upsell.tabs.my-orders'))
                 ->icon('heroicon-s-shopping-bag')
                 ->favorite()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('user_id', Auth::id())),
-            'archived' => PresetView::make(__('Archived'))
+            'archived' => PresetView::make(__('sales::filament/clusters/to-invoice/resources/order-to-upsell/pages/list-order-to-upsell.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->favorite()
                 ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),

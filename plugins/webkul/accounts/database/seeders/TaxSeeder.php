@@ -4,6 +4,7 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Account\Enums\TypeTaxUse;
 
 class TaxSeeder extends Seeder
 {
@@ -19,7 +20,7 @@ class TaxSeeder extends Seeder
                 'cash_basis_transition_account_id' => null,
                 'country_id' => 104,
                 'creator_id' => 1,
-                'type_tax_use' => 'none',
+                'type_tax_use' => TypeTaxUse::SALE->value,
                 'tax_scope' => null,
                 'amount_type' => 'percent',
                 'price_include_override' => null,
@@ -44,7 +45,7 @@ class TaxSeeder extends Seeder
                 'cash_basis_transition_account_id' => null,
                 'country_id' => 104,
                 'creator_id' => 1,
-                'type_tax_use' => 'none',
+                'type_tax_use' => TypeTaxUse::SALE->value,
                 'tax_scope' => null,
                 'amount_type' => 'fixed',
                 'price_include_override' => null,

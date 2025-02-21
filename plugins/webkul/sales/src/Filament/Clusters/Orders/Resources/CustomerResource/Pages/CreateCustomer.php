@@ -3,10 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
 
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
+use Webkul\Contact\Filament\Resources\PartnerResource\Pages\CreatePartner as BaseCreateCustomer;
 
-class CreateCustomer extends CreateRecord
+class CreateCustomer extends BaseCreateCustomer
 {
     protected static string $resource = CustomerResource::class;
 }

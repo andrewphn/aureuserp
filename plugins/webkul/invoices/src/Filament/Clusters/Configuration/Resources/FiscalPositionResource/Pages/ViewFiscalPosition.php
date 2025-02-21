@@ -3,31 +3,9 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
-use Filament\Actions;
-use Filament\Notifications\Notification;
-use Filament\Pages\SubNavigationPosition;
-use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages\ViewFiscalPosition as BaseViewFiscalPosition;
 
-class ViewFiscalPosition extends ViewRecord
+class ViewFiscalPosition extends BaseViewFiscalPosition
 {
     protected static string $resource = FiscalPositionResource::class;
-
-    public function getSubNavigationPosition(): SubNavigationPosition
-    {
-        return SubNavigationPosition::Top;
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\EditAction::make(),
-            Actions\DeleteAction::make()
-                ->successNotification(
-                    Notification::make()
-                        ->success()
-                        ->title(__('invoices::filament/clusters/configurations/resources/fiscal-position/pages/view-fiscal-position.header-actions.delete.notification.title'))
-                        ->body(__('invoices::filament/clusters/configurations/resources/fiscal-position/pages/view-fiscal-position.header-actions.delete.notification.body'))
-                ),
-        ];
-    }
 }

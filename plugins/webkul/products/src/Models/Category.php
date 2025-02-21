@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use InvalidArgumentException;
 use Webkul\Product\Database\Factories\CategoryFactory;
 use Webkul\Security\Models\User;
 
@@ -62,34 +63,93 @@ class Category extends Model
     {
         parent::boot();
 
-        static::saving(function ($category) {
-            $category->updateFullName();
-        });
-
-        static::updated(function ($category) {
-            if ($category->wasChanged('full_name')) {
-                $category->updateChildrenFullNames();
+        static::creating(function ($productCategory) {
+            if (! static::validateNoRecursion($productCategory)) {
+                throw new InvalidArgumentException('Circular reference detected in product category hierarchy');
             }
+
+            static::handleProductCategoryData($productCategory);
+        });
+
+        static::updating(function ($productCategory) {
+            if (! static::validateNoRecursion($productCategory)) {
+                throw new InvalidArgumentException('Circular reference detected in product category hierarchy');
+            }
+
+            static::handleProductCategoryData($productCategory);
         });
     }
 
-    protected function updateFullName(): void
+    protected static function validateNoRecursion($productCategory)
     {
-        if ($this->parent) {
-            $this->full_name = $this->parent->full_name.' / '.$this->name;
-        } else {
-            $this->full_name = $this->name;
+        if (! $productCategory->parent_id) {
+            return true;
         }
+
+        if (
+            $productCategory->exists
+            && $productCategory->id == $productCategory->parent_id
+        ) {
+            return false;
+        }
+
+        $visitedIds = [$productCategory->exists ? $productCategory->id : -1];
+        $currentParentId = $productCategory->parent_id;
+
+        while ($currentParentId) {
+            if (in_array($currentParentId, $visitedIds)) {
+                return false;
+            }
+
+            $visitedIds[] = $currentParentId;
+            $parent = static::find($currentParentId);
+
+            if (! $parent) {
+                break;
+            }
+
+            $currentParentId = $parent->parent_id;
+        }
+
+        return true;
     }
 
-    protected function updateChildrenFullNames(): void
+    protected static function handleProductCategoryData($productCategory)
     {
-        $this->children->each(function ($child) {
-            $child->updateFullName();
-            $child->save();
+        if ($productCategory->parent_id) {
+            $parent = static::find($productCategory->parent_id);
 
-            $child->updateChildrenFullNames();
-        });
+            if ($parent) {
+                $productCategory->parent_path = $parent->parent_path . $parent->id . '/';
+            } else {
+                $productCategory->parent_path = '/';
+                $productCategory->parent_id = null;
+            }
+        } else {
+            $productCategory->parent_path = '/';
+        }
+
+        $productCategory->full_name = static::getCompleteName($productCategory);
+    }
+
+    protected static function getCompleteName($productCategory)
+    {
+        $names = [];
+        $names[] = $productCategory->name;
+
+        $currentProductCategory = $productCategory;
+
+        while ($currentProductCategory->parent_id) {
+            $currentProductCategory = static::find($currentProductCategory->parent_id);
+
+            if ($currentProductCategory) {
+                array_unshift($names, $currentProductCategory->name);
+            } else {
+                break;
+            }
+        }
+
+        return implode(' / ', $names);
     }
 
     protected static function newFactory(): CategoryFactory

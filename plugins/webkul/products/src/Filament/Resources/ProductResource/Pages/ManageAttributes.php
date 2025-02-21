@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\Product\Models\ProductAttribute;
+use Webkul\Product\Filament\Resources\ProductResource\Actions\GenerateVariantsAction;
 
 class ManageAttributes extends ManageRelatedRecords
 {
@@ -37,14 +38,15 @@ class ManageAttributes extends ManageRelatedRecords
                     ->relationship('attribute', 'name')
                     ->searchable()
                     ->preload()
-                    ->createOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form)),
+                    ->editOptionForm(fn(Forms\Form $form): Form => AttributeResource::form($form))
+                    ->createOptionForm(fn(Forms\Form $form): Form => AttributeResource::form($form)),
                 Forms\Components\Select::make('options')
                     ->label(__('products::filament/resources/product/pages/manage-attributes.form.values'))
                     ->required()
                     ->relationship(
                         name: 'options',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('products_attribute_options.attribute_id', $get('attribute_id')),
+                        modifyQueryUsing: fn(Forms\Get $get, Builder $query) => $query->where('products_attribute_options.attribute_id', $get('attribute_id')),
                     )
                     ->searchable()
                     ->preload()
@@ -66,6 +68,7 @@ class ManageAttributes extends ManageRelatedRecords
                     ->badge(),
             ])
             ->headerActions([
+                GenerateVariantsAction::make(),
                 Tables\Actions\CreateAction::make()
                     ->label(__('products::filament/resources/product/pages/manage-attributes.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
@@ -74,7 +77,7 @@ class ManageAttributes extends ManageRelatedRecords
 
                         return $data;
                     })
-                    ->after(function ($record) {
+                    ->after(function (ProductAttribute $record) {
                         $this->updateOrCreateVariants($record);
                     })
                     ->successNotification(
@@ -86,7 +89,7 @@ class ManageAttributes extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->after(function ($record) {
+                    ->after(function (ProductAttribute $record) {
                         $this->updateOrCreateVariants($record);
                     })
                     ->successNotification(
@@ -96,6 +99,9 @@ class ManageAttributes extends ManageRelatedRecords
                             ->body(__('products::filament/resources/product/pages/manage-attributes.table.actions.edit.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
+                    ->after(function (ProductAttribute $record) {
+                        $this->updateOrCreateVariants($record);
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
@@ -108,6 +114,11 @@ class ManageAttributes extends ManageRelatedRecords
 
     protected function updateOrCreateVariants(ProductAttribute $record): void
     {
+        if ($record->product->attributes()->count() === 0) {
+            $record->product->variants()->delete();
+            return;
+        }
+
         $record->values->each(function ($value) use ($record) {
             $value->update([
                 'extra_price'  => $value->attributeOption->extra_price,
@@ -116,18 +127,6 @@ class ManageAttributes extends ManageRelatedRecords
             ]);
         });
 
-        // foreach ($record->product->attributes as $productAttribute) {
-        //     $record->product->variants()->updateOrCreate([
-        //         'product_id' => $record->product_id,
-        //         'attribute_id' => $productAttribute->attribute_id,
-        //     ], [
-        //         'price' => $record->product->price,
-        //         'sku' => $record->product->sku,
-        //         'weight' => $record->product->weight,
-        //         'status' => $record->product->status,
-        //         'quantity' => $record->product->quantity,
-        //         'attribute_id' => $productAttribute->attribute_id,
-        //     ]);
-        // }
+        $this->replaceMountedTableAction('products.generate.variants');
     }
 }

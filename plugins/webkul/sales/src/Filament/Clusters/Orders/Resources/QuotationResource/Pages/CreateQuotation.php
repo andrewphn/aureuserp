@@ -2,6 +2,7 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 
+use Filament\Notifications\Notification;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,14 @@ class CreateQuotation extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title(__('sales::filament/clusters/orders/resources/quotation/pages/create-quotation.notification.title'))
+            ->body(__('sales::filament/clusters/orders/resources/quotation/pages/create-quotation.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

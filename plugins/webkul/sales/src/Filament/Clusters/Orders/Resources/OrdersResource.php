@@ -23,12 +23,12 @@ class OrdersResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('Orders');
+        return __('sales::filament/clusters/orders/resources/order.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Orders');
+        return __('sales::filament/clusters/orders/resources/order.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -52,10 +52,10 @@ class OrdersResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrders::route('/'),
+            'index'  => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrders::route('/create'),
-            'view' => Pages\ViewOrders::route('/{record}'),
-            'edit' => Pages\EditOrders::route('/{record}/edit'),
+            'view'   => Pages\ViewOrders::route('/{record}'),
+            'edit'   => Pages\EditOrders::route('/{record}/edit'),
         ];
     }
 }

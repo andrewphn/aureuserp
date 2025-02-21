@@ -2,19 +2,10 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
 
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\ListTaxGroups as BaseListTaxGroups;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListTaxGroups extends ListRecords
+class ListTaxGroups extends BaseListTaxGroups
 {
     protected static string $resource = TaxGroupResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-                ->icon('heroicon-o-plus-circle'),
-        ];
-    }
 }

@@ -6,6 +6,7 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Sale\Traits\HasSaleOrderActions;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 
 class ViewQuotation extends ViewRecord
 {
@@ -17,6 +18,13 @@ class ViewQuotation extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title(__('sales::filament/clusters/orders/resources/quotation/pages/view-quotation.header-actions.notification.delete.title'))
+                        ->body(__('sales::filament/clusters/orders/resources/quotation/pages/view-quotation.header-actions.notification.delete.body'))
+                )
         ];
     }
 }

@@ -3,18 +3,9 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages\ListFiscalPositions as BaseListFiscalPositions;
 
-class ListFiscalPositions extends ListRecords
+class ListFiscalPositions extends BaseListFiscalPositions
 {
     protected static string $resource = FiscalPositionResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-                ->icon('heroicon-o-plus-circle'),
-        ];
-    }
 }

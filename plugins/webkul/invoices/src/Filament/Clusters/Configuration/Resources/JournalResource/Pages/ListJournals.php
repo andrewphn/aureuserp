@@ -2,19 +2,10 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
 
+use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource\Pages\ListJournals as BaseListJournals;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListJournals extends ListRecords
+class ListJournals extends BaseListJournals
 {
     protected static string $resource = JournalResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-                ->icon('heroicon-o-plus-circle'),
-        ];
-    }
 }

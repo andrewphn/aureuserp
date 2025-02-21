@@ -3,17 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
 
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Webkul\Contact\Filament\Resources\PartnerResource\Pages\ListPartners as BaseListCustomers;
 
-class ListCustomers extends ListRecords
+class ListCustomers extends BaseListCustomers
 {
     protected static string $resource = CustomerResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
 }

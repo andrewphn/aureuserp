@@ -2,18 +2,10 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListInvoices extends ListRecords
+class ListInvoices extends BaseListInvoices
 {
     protected static string $resource = InvoiceResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
 }

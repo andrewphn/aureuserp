@@ -20,7 +20,7 @@ class SaleTeam extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('Sales Teams');
+        return __('sales::filament/pages/sale-team.navigation.title');
     }
 
     public function getWidgets(): array

@@ -21,8 +21,7 @@ return [
             'inventory' => [
                 'title' => 'Inventory',
 
-                'fields' => [
-                ],
+                'fields' => [],
 
                 'fieldsets' => [
                     'logistics' => [
@@ -66,6 +65,7 @@ return [
     'table' => [
         'columns' => [
             'name'        => 'Name',
+            'variants'    => 'Variants',
             'images'      => 'Images',
             'type'        => 'Type',
             'reference'   => 'Reference',
@@ -189,8 +189,7 @@ return [
             'images' => [
                 'title' => 'Images',
 
-                'entries' => [
-                ],
+                'entries' => [],
             ],
 
             'settings' => [

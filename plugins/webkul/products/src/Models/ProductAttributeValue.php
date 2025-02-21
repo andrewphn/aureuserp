@@ -33,7 +33,6 @@ class ProductAttributeValue extends Model
         'attribute_id',
         'product_attribute_id',
         'attribute_option_id',
-        'creator_id',
     ];
 
     public function product(): BelongsTo
