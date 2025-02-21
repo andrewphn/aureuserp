@@ -2,5 +2,5 @@
 
 return [
     'base' => 'Base',
-    'tax' => 'of Tax',
+    'tax'  => 'of Tax',
 ];

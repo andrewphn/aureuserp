@@ -2,7 +2,7 @@
 
 return [
     'up-selling'  => 'Upselling Opportunity',
-    'invoiced'   => 'Fully Invoiced',
-    'to-invoice' => 'To Invoice',
-    'no'         => 'Nothing to Invoice',
+    'invoiced'    => 'Fully Invoiced',
+    'to-invoice'  => 'To Invoice',
+    'no'          => 'Nothing to Invoice',
 ];

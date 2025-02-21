@@ -4,10 +4,10 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Webkul\Invoice\Filament\Clusters\Vendors;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 use Filament\Tables\Table;
 use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
+use Webkul\Invoice\Filament\Clusters\Vendors;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
 class RefundResource extends BaseInvoiceResource
 {
@@ -57,7 +57,7 @@ class RefundResource extends BaseInvoiceResource
                                 ->label(__('invoices::filament/clusters/vendors/resources/refund.form.payment-reference')),
                             Forms\Components\TextInput::make('date')
                                 ->label(__('invoices::filament/clusters/vendors/resources/refund.form.date')),
-                        ])->columns(1)
+                        ])->columns(1),
                 ]),
         ], $nestedChildComponents));
 

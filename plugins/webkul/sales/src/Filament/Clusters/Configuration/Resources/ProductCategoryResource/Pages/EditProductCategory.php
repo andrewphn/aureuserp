@@ -2,11 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class EditProductCategory extends EditRecord
 {
@@ -37,7 +37,7 @@ class EditProductCategory extends EditRecord
                         ->success()
                         ->title(__('sales::filament/clusters/configurations/resources/product-category/pages/edit-product-category.header-actions.delete.notification.title'))
                         ->body(__('sales::filament/clusters/configurations/resources/product-category/pages/edit-product-category.header-actions.delete.notification.body'))
-                )
+                ),
         ];
     }
 

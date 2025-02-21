@@ -2,10 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductTagResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductTagResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductTagResource;
 
 class ListProductTags extends ListRecords
 {

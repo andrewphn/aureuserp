@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class ListProductCategories extends ListRecords
 {

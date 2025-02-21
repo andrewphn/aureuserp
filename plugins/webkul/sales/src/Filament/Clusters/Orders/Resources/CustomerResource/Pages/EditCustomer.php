@@ -2,8 +2,8 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
 use Webkul\Contact\Filament\Resources\PartnerResource\Pages\EditPartner as BaseEditCustomer;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
 
 class EditCustomer extends BaseEditCustomer
 {

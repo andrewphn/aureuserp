@@ -3,6 +3,7 @@
 namespace Webkul\Purchase;
 
 use Webkul\Support\Console\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
@@ -31,12 +32,14 @@ class PurchaseServiceProvider extends PackageServiceProvider
             ->runsSettings()
             ->hasDependencies([
                 'products',
+                'invoices',
             ])
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->installDependencies()
                     ->runsMigrations();
-            });
+            })
+            ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
     public function packageBooted(): void

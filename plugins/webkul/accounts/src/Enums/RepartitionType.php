@@ -13,7 +13,7 @@ enum RepartitionType: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::BASE => __('accounts::enums/repartition-type.base'),
+            self::BASE  => __('accounts::enums/repartition-type.base'),
             self::TAX   => __('accounts::enums/repartition-type.tax'),
         };
     }
@@ -22,7 +22,7 @@ enum RepartitionType: string implements HasLabel
     {
         return [
             self::BASE->value => __('accounts::enums/repartition-type.base'),
-            self::TAX->value => __('accounts::enums/repartition-type.tax'),
+            self::TAX->value  => __('accounts::enums/repartition-type.tax'),
         ];
     }
 }

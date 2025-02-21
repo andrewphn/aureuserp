@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 
 class EditTax extends EditRecord
 {
@@ -40,7 +40,7 @@ class EditTax extends EditRecord
                         ->success()
                         ->title(__('accounts::filament/clusters/configurations/resources/tax/pages/edit-tax.header-actions.delete.notification.title'))
                         ->body(__('accounts::filament/clusters/configurations/resources/tax/pages/edit-tax.header-actions.delete.notification.body'))
-                )
+                ),
         ];
     }
 }

@@ -3,11 +3,11 @@
 namespace Webkul\Account\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Webkul\Account\Enums\DelayType;
+use Webkul\Account\Enums\DueTermValue;
 use Webkul\Account\Models\PaymentDueTerm;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Security\Models\User;
-use Webkul\Account\Enums\DueTermValue;
-use Webkul\Account\Enums\DelayType;
 
 class PaymentDueTermFactory extends Factory
 {

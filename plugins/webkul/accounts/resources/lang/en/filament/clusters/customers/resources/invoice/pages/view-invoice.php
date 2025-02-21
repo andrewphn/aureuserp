@@ -8,5 +8,5 @@ return [
                 'body'  => 'The invoice has been deleted successfully.',
             ],
         ],
-    ]
+    ],
 ];

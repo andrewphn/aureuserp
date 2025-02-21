@@ -2,13 +2,12 @@
 
 namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToUpsellResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToUpsellResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToUpsellResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListOrderToUpsells extends ListRecords
 {
@@ -27,11 +26,11 @@ class ListOrderToUpsells extends ListRecords
             'my_orders' => PresetView::make(__('sales::filament/clusters/to-invoice/resources/order-to-upsell/pages/list-order-to-upsell.tabs.my-orders'))
                 ->icon('heroicon-s-shopping-bag')
                 ->favorite()
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('user_id', Auth::id())),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('user_id', Auth::id())),
             'archived' => PresetView::make(__('sales::filament/clusters/to-invoice/resources/order-to-upsell/pages/list-order-to-upsell.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->favorite()
-                ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }

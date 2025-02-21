@@ -24,8 +24,8 @@ enum Applicability: string implements HasLabel
     public static function options(): array
     {
         return [
-            self::ACCOUNT->value => __('accounts::enums/applicability.account'),
-            self::TAXES->value => __('accounts::enums/applicability.taxes'),
+            self::ACCOUNT->value  => __('accounts::enums/applicability.account'),
+            self::TAXES->value    => __('accounts::enums/applicability.taxes'),
             self::PRODUCTS->value => __('accounts::enums/applicability.products'),
         ];
     }

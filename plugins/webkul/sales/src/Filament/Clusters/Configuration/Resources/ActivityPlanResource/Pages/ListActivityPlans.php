@@ -2,13 +2,13 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource;
 use Webkul\Support\Models\ActivityPlan;
-use Filament\Resources\Components\Tab;
 
 class ListActivityPlans extends ListRecords
 {

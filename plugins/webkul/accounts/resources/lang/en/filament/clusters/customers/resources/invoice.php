@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title' => 'Invoices',
-        'group' => 'Invoices'
+        'group' => 'Invoices',
     ],
 
     'global-search' => [
@@ -22,7 +22,7 @@ return [
 
                 'repeater' => [
                     'products' => [
-                        'title' => 'Products',
+                        'title'            => 'Products',
                         'add-product-line' => 'Add Product Line',
 
                         'fields' => [
@@ -33,7 +33,7 @@ return [
                             'unit-price'          => 'Unit Price',
                             'sub-total'           => 'Sub Total',
                             'total'               => 'Total',
-                        ]
+                        ],
                     ],
                     'section' => [
                         'title' => 'Add a section',
@@ -41,8 +41,8 @@ return [
 
                     'note' => [
                         'title' => 'Add a note',
-                    ]
-                ]
+                    ],
+                ],
             ],
 
             'other-information' => [
@@ -51,7 +51,7 @@ return [
                 'fields' => [
                     'fieldset' => [
                         'invoice' => [
-                            'title' => 'Invoice',
+                            'title'  => 'Invoice',
                             'fields' => [
                                 'customer-reference' => 'Customer Reference',
                                 'sale-person'        => 'Sale Person',
@@ -60,11 +60,11 @@ return [
                                 'payment-reference'  => 'Payment Reference',
                                 'delivery-date'      => 'Delivery Date',
                                 'sales-person'       => 'Sales Person',
-                            ]
+                            ],
                         ],
 
                         'accounting' => [
-                            'title' => 'Accounting',
+                            'title'  => 'Accounting',
                             'fields' => [
                                 'incoterm'          => 'Incoterm',
                                 'incoterm-location' => 'Incoterm Location',
@@ -72,10 +72,10 @@ return [
                                 'payment-method'    => 'Payment Method',
                                 'auto-post'         => 'Auto Post',
                                 'checked'           => 'Checked',
-                            ]
+                            ],
                         ],
                     ],
-                ]
+                ],
             ],
 
             'term-and-conditions' => [
@@ -83,8 +83,8 @@ return [
 
                 'fields' => [
                     'narration' => 'Term & Conditions',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'section' => [
@@ -94,7 +94,7 @@ return [
 
                     'fields' => [
                         'customer' => 'Customer',
-                    ]
+                    ],
                 ],
 
                 'invoice-date-and-payment-term' => [
@@ -104,7 +104,7 @@ return [
                         'invoice-date'     => 'Invoice Date',
                         'due-date'         => 'Due Date',
                         'payment-term'     => 'Payment Term',
-                    ]
+                    ],
                 ],
 
                 'marketing' => [
@@ -114,10 +114,10 @@ return [
                         'campaign' => 'Campaign',
                         'medium'   => 'Medium',
                         'source'   => 'Source',
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+            ],
+        ],
     ],
 
     'table' => [
@@ -191,15 +191,15 @@ return [
 
                 'repeater' => [
                     'products' => [
-                        'title' => 'Products',
+                        'title'   => 'Products',
                         'entries' => [
                             'product'    => 'Product',
                             'quantity'   => 'Quantity',
                             'unit-price' => 'Unit Price',
                             'total'      => 'Total',
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
 
             'other-information' => [
@@ -218,11 +218,11 @@ return [
                                 'payment-reference'  => 'Payment Reference',
                                 'delivery-date'      => 'Delivery Date',
                                 'sales-person'       => 'Sales Person',
-                            ]
+                            ],
                         ],
 
                         'accounting' => [
-                            'title' => 'Accounting',
+                            'title'   => 'Accounting',
                             'entries' => [
                                 'incoterm'          => 'Incoterm',
                                 'incoterm-location' => 'Incoterm Location',
@@ -230,10 +230,10 @@ return [
                                 'payment-method'    => 'Payment Method',
                                 'auto-post'         => 'Auto Post',
                                 'checked'           => 'Checked',
-                            ]
+                            ],
                         ],
                     ],
-                ]
+                ],
             ],
 
             'term-and-conditions' => [
@@ -241,8 +241,8 @@ return [
 
                 'fields' => [
                     'narration' => 'Term & Conditions',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'section' => [
@@ -253,7 +253,7 @@ return [
                     'fields' => [
                         'customer' => 'Customer',
                         'address'  => 'Address',
-                    ]
+                    ],
                 ],
 
                 'invoice-date-and-payment-term' => [
@@ -263,7 +263,7 @@ return [
                         'invoice-date'     => 'Invoice Date',
                         'due-date'         => 'Due Date',
                         'payment-term'     => 'Payment Term',
-                    ]
+                    ],
                 ],
 
                 'marketing' => [
@@ -273,9 +273,9 @@ return [
                         'campaign' => 'Campaign',
                         'medium'   => 'Medium',
                         'source'   => 'Source',
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+            ],
+        ],
     ],
 ];

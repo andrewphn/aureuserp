@@ -4,11 +4,11 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
-use Webkul\Sale\Filament\Clusters\Orders;
-use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource\Pages;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Filament\Clusters\Orders;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource\Pages;
 use Webkul\Sale\Models\Order;
 
 class OrdersResource extends Resource

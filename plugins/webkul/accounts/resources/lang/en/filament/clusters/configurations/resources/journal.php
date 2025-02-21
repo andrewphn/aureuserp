@@ -5,12 +5,12 @@ return [
 
     'navigation' => [
         'title' => 'Journal',
-        'group' => 'Accounting'
+        'group' => 'Accounting',
     ],
 
     'global-search' => [
         'name' => 'Name',
-        'code' => 'Code'
+        'code' => 'Code',
     ],
 
     'form' => [
@@ -20,7 +20,7 @@ return [
 
                 'field-set' => [
                     'accounting-information' => [
-                        'title' => 'Accounting Information',
+                        'title'  => 'Accounting Information',
                         'fields' => [
                             'dedicated-credit-note-sequence' => 'Dedicated Credit Note Sequence',
                             'dedicated-payment-sequence'     => 'Dedicated Payment Sequence',
@@ -32,47 +32,47 @@ return [
                     ],
                     'bank-account-number' => [
                         'title' => 'Bank Account Number',
-                    ]
-                ]
+                    ],
+                ],
             ],
             'incoming-payments' => [
                 'title' => 'Incoming Payments',
 
                 'fields' => [
-                    'relation-notes' => 'Relation Notes',
+                    'relation-notes'             => 'Relation Notes',
                     'relation-notes-placeholder' => 'Enter any relation details',
-                ]
+                ],
             ],
             'outgoing-payments' => [
                 'title' => 'Outgoing Payments',
 
                 'fields' => [
-                    'relation-notes' => 'Relation Notes',
+                    'relation-notes'             => 'Relation Notes',
                     'relation-notes-placeholder' => 'Enter any relation details',
-                ]
+                ],
             ],
             'advanced-settings' => [
-                'title' => 'Advanced Settings',
+                'title'  => 'Advanced Settings',
                 'fields' => [
-                    'allowed-accounts' => 'Allowed Accounts',
-                    'control-access' => 'Control Access',
-                    'payment-communication' => 'Payment Communication',
-                    'auto-check-on-post' => 'Auto Check on Post',
-                    'communication-type' => 'Communication Type',
+                    'allowed-accounts'       => 'Allowed Accounts',
+                    'control-access'         => 'Control Access',
+                    'payment-communication'  => 'Payment Communication',
+                    'auto-check-on-post'     => 'Auto Check on Post',
+                    'communication-type'     => 'Communication Type',
                     'communication-standard' => 'Communication Standard',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'general' => [
             'title' => 'General Information',
 
             'fields' => [
-                'name' => 'Name',
-                'type' => 'Type',
+                'name'    => 'Name',
+                'type'    => 'Type',
                 'company' => 'Company',
-            ]
-        ]
+            ],
+        ],
     ],
 
     'table' => [
@@ -111,7 +111,7 @@ return [
 
                 'field-set' => [
                     'accounting-information' => [
-                        'title' => 'Accounting Information',
+                        'title'   => 'Accounting Information',
                         'entries' => [
                             'dedicated-credit-note-sequence' => 'Dedicated Credit Note Sequence',
                             'dedicated-payment-sequence'     => 'Dedicated Payment Sequence',
@@ -123,47 +123,47 @@ return [
                     ],
                     'bank-account-number' => [
                         'title' => 'Bank Account Number',
-                    ]
-                ]
+                    ],
+                ],
             ],
             'incoming-payments' => [
                 'title' => 'Incoming Payments',
 
                 'entries' => [
-                    'relation-notes' => 'Relation Notes',
+                    'relation-notes'             => 'Relation Notes',
                     'relation-notes-placeholder' => 'Enter any relation details',
-                ]
+                ],
             ],
             'outgoing-payments' => [
                 'title' => 'Outgoing Payments',
 
                 'entries' => [
-                    'relation-notes' => 'Relation Notes',
+                    'relation-notes'             => 'Relation Notes',
                     'relation-notes-placeholder' => 'Enter any relation details',
-                ]
+                ],
             ],
             'advanced-settings' => [
-                'title' => 'Advanced Settings',
+                'title'   => 'Advanced Settings',
                 'entries' => [
-                    'allowed-accounts' => 'Allowed Accounts',
-                    'control-access' => 'Control Access',
-                    'payment-communication' => 'Payment Communication',
-                    'auto-check-on-post' => 'Auto Check on Post',
-                    'communication-type' => 'Communication Type',
+                    'allowed-accounts'       => 'Allowed Accounts',
+                    'control-access'         => 'Control Access',
+                    'payment-communication'  => 'Payment Communication',
+                    'auto-check-on-post'     => 'Auto Check on Post',
+                    'communication-type'     => 'Communication Type',
                     'communication-standard' => 'Communication Standard',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'general' => [
             'title' => 'General Information',
 
             'entries' => [
-                'name' => 'Name',
-                'type' => 'Type',
+                'name'    => 'Name',
+                'type'    => 'Type',
                 'company' => 'Company',
-            ]
-        ]
+            ],
+        ],
     ],
 
 ];

@@ -6,5 +6,5 @@ return [
             'title' => 'Bank Account created',
             'body'  => 'The bank account has been created successfully.',
         ],
-    ]
+    ],
 ];

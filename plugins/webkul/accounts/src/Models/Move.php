@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
-use Webkul\Support\Models\UTMMedium;
-use Webkul\Support\Models\UTMSource;
 use Webkul\Sale\Models\Team;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UtmCampaign;
+use Webkul\Support\Models\UTMMedium;
+use Webkul\Support\Models\UTMSource;
 
 class Move extends Model
 {
@@ -203,7 +203,7 @@ class Move extends Model
         parent::boot();
 
         static::creating(function ($invoice) {
-            $invoice->name = 'ORD-TMP-' . time();
+            $invoice->name = 'ORD-TMP-'.time();
         });
 
         static::created(function ($invoice) {
@@ -221,6 +221,6 @@ class Move extends Model
      */
     public function updateName()
     {
-        $this->name = 'INV-' . $this->id;
+        $this->name = 'INV-'.$this->id;
     }
 }

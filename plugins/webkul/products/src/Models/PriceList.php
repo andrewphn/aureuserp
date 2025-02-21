@@ -20,7 +20,7 @@ class PriceList extends Model
         'company_id',
         'creator_id',
         'name',
-        'is_active'
+        'is_active',
     ];
 
     public function currency()

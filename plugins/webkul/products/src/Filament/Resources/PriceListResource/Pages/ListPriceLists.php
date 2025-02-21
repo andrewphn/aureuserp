@@ -2,9 +2,9 @@
 
 namespace Webkul\Product\Filament\Resources\PriceListResource\Pages;
 
-use Webkul\Product\Filament\Resources\PriceListResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Product\Filament\Resources\PriceListResource;
 
 class ListPriceLists extends ListRecords
 {

@@ -2,15 +2,15 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\Applicability;
 use Webkul\Account\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountTagResource\Pages;
@@ -53,7 +53,7 @@ class AccountTagResource extends Resource
     {
         return [
             __('accounts::filament/clusters/configurations/resources/account-tag.navigation.global-search.country') => $record->country?->name ?? '—',
-            __('accounts::filament/clusters/configurations/resources/account-tag.navigation.global-search.name') => $record->name ?? '—',
+            __('accounts::filament/clusters/configurations/resources/account-tag.navigation.global-search.name')    => $record->name ?? '—',
         ];
     }
 
@@ -89,8 +89,8 @@ class AccountTagResource extends Resource
                                     ->inline(false)
                                     ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.tax-negate'))
                                     ->required(),
-                            ])
-                    ])->columns(2)
+                            ]),
+                    ])->columns(2),
             ]);
     }
 
@@ -184,7 +184,7 @@ class AccountTagResource extends Resource
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('color')
                             ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.color'))
-                            ->formatStateUsing(fn($state) => "<span style='display:inline-block;width:15px;height:15px;background-color:{$state};border-radius:50%;'></span> " . $state)
+                            ->formatStateUsing(fn ($state) => "<span style='display:inline-block;width:15px;height:15px;background-color:{$state};border-radius:50%;'></span> ".$state)
                             ->html()
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('applicability')

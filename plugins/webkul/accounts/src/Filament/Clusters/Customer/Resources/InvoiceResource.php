@@ -2,38 +2,38 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources;
 
-use Webkul\Account\Filament\Clusters\Customer;
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Facades\FilamentView;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Account\Models\Move as AccountMove;
-use Webkul\Sale\Livewire\Summary;
-use Filament\Forms\Get;
-use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Partner\Models\Partner;
-use Filament\Forms\Set;
-use Webkul\Support\Models\Currency;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Infolists\Infolist;
-use Filament\Infolists;
-use Filament\Notifications\Notification;
-use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
+use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\TypeTaxUse;
+use Webkul\Account\Filament\Clusters\Customer;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 use Webkul\Account\Models\Journal;
+use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
-use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
+use Webkul\Field\Filament\Forms\Components\ProgressStepper;
+use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
+use Webkul\Sale\Livewire\Summary;
 use Webkul\Sale\Models\Product;
 use Webkul\Security\Filament\Resources\UserResource;
-use Webkul\Account\Enums\DisplayType;
+use Webkul\Support\Models\Currency;
 
 class InvoiceResource extends Resource
 {
@@ -115,7 +115,7 @@ class InvoiceResource extends Resource
                                                     ];
                                                 })
                                                     ->live()
-                                                    ->reactive()
+                                                    ->reactive(),
                                             ]),
                                         Forms\Components\Tabs\Tab::make(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.other-information.title'))
                                             ->schema([
@@ -126,12 +126,12 @@ class InvoiceResource extends Resource
                                                         Forms\Components\Select::make('invoice_user_id')
                                                             ->relationship('invoiceUser', 'name')
                                                             ->searchable()
-                                                            ->createOptionForm(fn(Form $form) => UserResource::form($form))
+                                                            ->createOptionForm(fn (Form $form) => UserResource::form($form))
                                                             ->preload()
                                                             ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.other-information.fields.fieldset.invoice.fields.sales-person')),
                                                         Forms\Components\Select::make('team_id')
                                                             ->relationship('team', 'name')
-                                                            ->createOptionForm(fn(Form $form) => TeamResource::form($form))
+                                                            ->createOptionForm(fn (Form $form) => TeamResource::form($form))
                                                             ->searchable()
                                                             ->preload()
                                                             ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.other-information.fields.fieldset.invoice.fields.sales-team')),
@@ -180,7 +180,7 @@ class InvoiceResource extends Resource
                                             ->schema([
                                                 Forms\Components\RichEditor::make('narration')
                                                     ->hiddenLabel()
-                                                    ->placeholder(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.term-and-conditions.fields.narration'))
+                                                    ->placeholder(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.term-and-conditions.fields.narration')),
                                             ]),
                                     ])
                                     ->persistTabInQueryString(),
@@ -196,7 +196,7 @@ class InvoiceResource extends Resource
                                                     ->relationship(
                                                         'partner',
                                                         'name',
-                                                        fn($query) => $query->where('sub_type', 'company'),
+                                                        fn ($query) => $query->where('sub_type', 'company'),
                                                     )
                                                     ->searchable()
                                                     ->preload()
@@ -206,8 +206,7 @@ class InvoiceResource extends Resource
                                                 Forms\Components\Placeholder::make('partner_address')
                                                     ->hiddenLabel()
                                                     ->visible(
-                                                        fn(Get $get) =>
-                                                        Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                        fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                                     )
                                                     ->content(function (Get $get) {
                                                         $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -225,7 +224,7 @@ class InvoiceResource extends Resource
                                                             "%s\n%s%s\n%s, %s %s\n%s",
                                                             $address->name ?? '',
                                                             $address->street1 ?? '',
-                                                            $address->street2 ? ', ' . $address->street2 : '',
+                                                            $address->street2 ? ', '.$address->street2 : '',
                                                             $address->city ?? '',
                                                             $address->state ? $address->state->name : '',
                                                             $address->zip ?? '',
@@ -249,11 +248,11 @@ class InvoiceResource extends Resource
                                                     ->default(now())
                                                     ->native(false)
                                                     ->live()
-                                                    ->hidden(fn(Get $get) => $get('invoice_payment_term_id') !== null)
+                                                    ->hidden(fn (Get $get) => $get('invoice_payment_term_id') !== null)
                                                     ->label(__('accounts::filament/clusters/customers/resources/invoice.form.section.fieldset.invoice-date-and-payment-term.fields.due-date')),
                                                 Forms\Components\Select::make('invoice_payment_term_id')
                                                     ->relationship('invoicePaymentTerm', 'name')
-                                                    ->required(fn(Get $get) => $get('invoice_date_due') === null)
+                                                    ->required(fn (Get $get) => $get('invoice_date_due') === null)
                                                     ->live()
                                                     ->searchable()
                                                     ->preload()
@@ -279,8 +278,8 @@ class InvoiceResource extends Resource
                                                     ->searchable()
                                                     ->preload()
                                                     ->label(__('accounts::filament/clusters/customers/resources/invoice.form.section.fieldset.marketing.fields.source')),
-                                            ])->columns(1)
-                                    ])
+                                            ])->columns(1),
+                                    ]),
                             ])
                             ->columnSpan(['lg' => 1]),
                     ])
@@ -643,8 +642,8 @@ class InvoiceResource extends Resource
             ->collapsible()
             ->defaultItems(0)
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
             ->extraItemActions([
                 Action::make('view')
                     ->icon('heroicon-m-eye')
@@ -740,7 +739,7 @@ class InvoiceResource extends Resource
                                     ->readOnly()
                                     ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.total')),
                             ]),
-                    ])->columns(2)
+                    ])->columns(2),
             ])
             ->saveRelationshipsUsing(function (Model $record, $state): void {
                 $existingProductIds = $record->moveLines()
@@ -760,22 +759,22 @@ class InvoiceResource extends Resource
                     $journal = Journal::where('code', 'INV')->first();
 
                     MoveLine::createOrUpdateProductLine([
-                        'id' => $data['id'] ?? null,
-                        'move_id' => $record?->id,
-                        'company_id' => $record?->company_id,
-                        'product_id' => $data['product_id'],
-                        'currency_id' => $data['currency_id'],
-                        'name' => $data['name'],
-                        'quantity' => $data['quantity'],
-                        'price_unit' => $data['price_unit'],
-                        'discount' => $data['discount'],
-                        'tax' => $data['tax'],
-                        'created_by' => Auth::id(),
-                        'move_name' => $record?->name ?? 'INV/' . date('Y/m'),
+                        'id'           => $data['id'] ?? null,
+                        'move_id'      => $record?->id,
+                        'company_id'   => $record?->company_id,
+                        'product_id'   => $data['product_id'],
+                        'currency_id'  => $data['currency_id'],
+                        'name'         => $data['name'],
+                        'quantity'     => $data['quantity'],
+                        'price_unit'   => $data['price_unit'],
+                        'discount'     => $data['discount'],
+                        'tax'          => $data['tax'],
+                        'created_by'   => Auth::id(),
+                        'move_name'    => $record?->name ?? 'INV/'.date('Y/m'),
                         'parent_state' => MoveState::DRAFT->value,
-                        'date' => now(),
-                        'journal_id' => $journal?->id,
-                        'account_id' => $journal?->default_account_id,
+                        'date'         => now(),
+                        'journal_id'   => $journal?->id,
+                        'account_id'   => $journal?->default_account_id,
                     ]);
                 }
 
@@ -793,7 +792,7 @@ class InvoiceResource extends Resource
         return Forms\Components\Repeater::make($displayType)
             ->relationship(
                 'moveLines',
-                fn($query) => $query->where('display_type', $displayType),
+                fn ($query) => $query->where('display_type', $displayType),
             )
             ->hiddenLabel()
             ->live()
@@ -801,15 +800,15 @@ class InvoiceResource extends Resource
             ->addActionLabel(function () use ($displayType) {
                 return match ($displayType) {
                     DisplayType::LINE_SECTION->value => __('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.section.title'),
-                    DisplayType::LINE_NOTE->value => __('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.note.title'),
-                    default => null,
+                    DisplayType::LINE_NOTE->value    => __('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.note.title'),
+                    default                          => null,
                 };
             })
             ->collapsible()
             ->defaultItems(0)
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Textarea::make('name')
                     ->hiddenLabel()
@@ -833,24 +832,24 @@ class InvoiceResource extends Resource
                     $moveLine = MoveLine::updateOrCreate(
                         ['id' => $data['id'] ?? null],
                         [
-                            'move_id' => $record?->id,
-                            'company_id' => $record?->company_id,
-                            'currency_id' => $data['currency_id'],
+                            'move_id'      => $record?->id,
+                            'company_id'   => $record?->company_id,
+                            'currency_id'  => $data['currency_id'],
                             'display_type' => $displayType,
-                            'name' => $data['name'],
-                            'created_by' => Auth::id(),
-                            'move_name' => $record?->name ?? 'INV/' . date('Y/m'),
+                            'name'         => $data['name'],
+                            'created_by'   => Auth::id(),
+                            'move_name'    => $record?->name ?? 'INV/'.date('Y/m'),
                             'parent_state' => MoveState::DRAFT->value,
-                            'date' => now(),
-                            'journal_id' => $journal?->id,
-                            'account_id' => $journal?->default_account_id,
+                            'date'         => now(),
+                            'journal_id'   => $journal?->id,
+                            'account_id'   => $journal?->default_account_id,
                         ]
                     );
 
                     $processedIds[] = $moveLine->id;
                 }
 
-                if (!empty($existingLineIds)) {
+                if (! empty($existingLineIds)) {
                     $record->moveLines()
                         ->where('display_type', $displayType)
                         ->whereIn('id', array_diff($existingLineIds, $processedIds))
@@ -907,7 +906,7 @@ class InvoiceResource extends Resource
 
             foreach ($taxes as $tax) {
                 $taxValue = floatval($tax->amount);
-                if (!$tax->include_base_amount) {
+                if (! $tax->include_base_amount) {
                     $taxAmount += $subtotalExcludingIncludedTax * ($taxValue / 100);
                 }
             }

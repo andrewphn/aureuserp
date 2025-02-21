@@ -2,8 +2,8 @@
 
 namespace Webkul\Sale\Filament\Widgets;
 
-use Illuminate\Contracts\Support\Htmlable;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Webkul\Sale\Models\Order;
 
@@ -30,8 +30,8 @@ class SaleTeamWidget extends ChartWidget
             $weekEnd = $weekStart->copy()->endOfWeek();
             $dates->push([
                 'start' => $weekStart,
-                'end' => $weekEnd,
-                'label' => $weekStart->format('d') . '-' . $weekEnd->format('d M'),
+                'end'   => $weekEnd,
+                'label' => $weekStart->format('d').'-'.$weekEnd->format('d M'),
             ]);
         }
 

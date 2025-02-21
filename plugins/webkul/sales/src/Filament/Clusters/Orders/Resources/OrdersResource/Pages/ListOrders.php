@@ -2,13 +2,13 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Sale\Enums\InvoiceStatus;
-use Webkul\TableViews\Filament\Concerns\HasTableViews;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages\ListQuotations as BaseListOrders;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListOrders extends BaseListOrders
 {
@@ -23,19 +23,19 @@ class ListOrders extends BaseListOrders
                 ->icon('heroicon-s-shopping-bag')
                 ->favorite()
                 ->default()
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('user_id', Auth::id())),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('user_id', Auth::id())),
             'to_invoice' => PresetView::make(__('sales::filament/clusters/orders/resources/order/pages/list-orders.tabs.to-invoice'))
                 ->icon('heroicon-s-receipt-percent')
                 ->favorite()
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('invoice_status', InvoiceStatus::TO_INVOICE->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('invoice_status', InvoiceStatus::TO_INVOICE->value)),
             'up_selling' => PresetView::make(__('sales::filament/clusters/orders/resources/order/pages/list-orders.tabs.up-selling'))
                 ->icon('heroicon-s-receipt-refund')
                 ->favorite()
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('invoice_status', InvoiceStatus::UP_SELLING->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('invoice_status', InvoiceStatus::UP_SELLING->value)),
             'archived' => PresetView::make(__('sales::filament/clusters/orders/resources/order/pages/list-orders.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->favorite()
-                ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }

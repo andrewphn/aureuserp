@@ -3,8 +3,8 @@
 namespace Webkul\Sale\Filament\Pages;
 
 use Filament\Pages\Dashboard as Page;
-use Webkul\Sale\Filament\Widgets;
 use Webkul\Sale\Filament\Clusters\Orders as OrderClusters;
+use Webkul\Sale\Filament\Widgets;
 
 class SaleTeam extends Page
 {

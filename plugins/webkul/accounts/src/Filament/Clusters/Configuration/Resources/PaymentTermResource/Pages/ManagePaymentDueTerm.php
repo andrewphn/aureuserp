@@ -4,8 +4,8 @@ namespace Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermRe
 
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Webkul\Account\Traits\PaymentDueTerm;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource;
+use Webkul\Account\Traits\PaymentDueTerm;
 
 class ManagePaymentDueTerm extends ManageRelatedRecords
 {

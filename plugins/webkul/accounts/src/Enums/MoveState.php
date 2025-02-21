@@ -15,7 +15,7 @@ enum MoveState: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::DRAFT => __('accounts::enums/move-state.draft'),
+            self::DRAFT  => __('accounts::enums/move-state.draft'),
             self::POSTED => __('accounts::enums/move-state.posted'),
             self::CANCEL => __('accounts::enums/move-state.cancel'),
         };
@@ -24,7 +24,7 @@ enum MoveState: string implements HasLabel
     public static function options(): array
     {
         return [
-            self::DRAFT->value => __('accounts::enums/move-state.draft'),
+            self::DRAFT->value  => __('accounts::enums/move-state.draft'),
             self::POSTED->value => __('accounts::enums/move-state.posted'),
             self::CANCEL->value => __('accounts::enums/move-state.cancel'),
         ];

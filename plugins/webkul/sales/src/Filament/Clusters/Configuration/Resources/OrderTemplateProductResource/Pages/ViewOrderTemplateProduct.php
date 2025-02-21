@@ -2,10 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource;
 
 class ViewOrderTemplateProduct extends ViewRecord
 {
@@ -21,7 +21,7 @@ class ViewOrderTemplateProduct extends ViewRecord
                         ->success()
                         ->title(__('sales::filament/clusters/configurations/resources/order-template/pages/view-order-template.header-actions.notification.delete.title'))
                         ->body(__('sales::filament/clusters/configurations/resource/order-template/pages/view-order-template.header-actions.notification.delete.body'))
-                )
+                ),
         ];
     }
 }

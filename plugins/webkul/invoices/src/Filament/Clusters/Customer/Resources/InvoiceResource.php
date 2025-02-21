@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
+use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
 class InvoiceResource extends BaseInvoiceResource

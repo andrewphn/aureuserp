@@ -3,5 +3,5 @@
 return [
     'tabs' => [
         'refund' => 'Refund',
-    ]
+    ],
 ];

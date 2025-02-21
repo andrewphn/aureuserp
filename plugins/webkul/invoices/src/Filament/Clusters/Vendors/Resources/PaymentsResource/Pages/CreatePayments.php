@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource;
 use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\CreatePayments as BaseCreatePayments;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource;
 
 class CreatePayments extends BaseCreatePayments
 {

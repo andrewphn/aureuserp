@@ -4,10 +4,10 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Webkul\Invoice\Filament\Clusters\Vendors;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource\Pages;
 use Filament\Tables\Table;
 use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
+use Webkul\Invoice\Filament\Clusters\Vendors;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource\Pages;
 
 class BillsResource extends BaseInvoiceResource
 {
@@ -55,7 +55,7 @@ class BillsResource extends BaseInvoiceResource
                                 ->label(__('invoices::filament/clusters/vendors/resources/bill.form.payment-reference')),
                             Forms\Components\TextInput::make('date')
                                 ->label(__('invoices::filament/clusters/vendors/resources/bill.form.date')),
-                        ])->columns(1)
+                        ])->columns(1),
                 ]),
         ], $nestedChildComponents));
 

@@ -3,21 +3,21 @@
 namespace Webkul\Product\Filament\Resources\ProductResource\Actions;
 
 use Closure;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Filament\Actions\Concerns\CanCustomizeProcess;
-use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes;
 use Webkul\Product\Models\Product;
 use Webkul\Product\Models\ProductAttribute;
-use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes;
 
 class GenerateVariantsAction extends Action
 {
     use CanCustomizeProcess;
 
-    protected Model | Closure | null $record;
+    protected Model|Closure|null $record;
 
     public static function getDefaultName(): ?string
     {
@@ -39,7 +39,7 @@ class GenerateVariantsAction extends Action
 
                 $this->generateVariants();
             })
-            ->hidden(fn(ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
+            ->hidden(fn (ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
     }
 
     protected function generateVariants(): void
@@ -82,10 +82,10 @@ class GenerateVariantsAction extends Action
         $arrays = $attributes->map(function (ProductAttribute $attribute) {
             return $attribute->options->map(function ($option) use ($attribute) {
                 return [
-                    'attribute_id' => $attribute->attribute_id,
+                    'attribute_id'         => $attribute->attribute_id,
                     'product_attribute_id' => $attribute->id,
-                    'attribute_option_id' => $option->id,
-                    'value' => $option->name,
+                    'attribute_option_id'  => $option->id,
+                    'value'                => $option->name,
                 ];
             })->toArray();
         })->toArray();
@@ -119,17 +119,17 @@ class GenerateVariantsAction extends Action
         $parentProduct = $this->record->load([
             'tags',
             'supplierInformation',
-            'priceRuleItems'
+            'priceRuleItems',
         ]);
 
         foreach ($combinations as $combination) {
-            $variantName = $this->record->name . ' - ' . collect($combination)
+            $variantName = $this->record->name.' - '.collect($combination)
                 ->pluck('value')
                 ->join(' / ');
 
             $variant = Product::firstOrNew([
                 'parent_id' => $this->record->id,
-                'name' => $variantName,
+                'name'      => $variantName,
             ]);
 
             if (! $variant->exists) {
@@ -145,7 +145,7 @@ class GenerateVariantsAction extends Action
                     'description_purchase' => $parentProduct->description_purchase,
                     'description_sale'     => $parentProduct->description_sale,
                     'barcode'              => null,
-                    'reference'            => $parentProduct->reference . '-' . strtolower(str_replace(' ', '-', $variantName)),
+                    'reference'            => $parentProduct->reference.'-'.strtolower(str_replace(' ', '-', $variantName)),
                     'uom_id'               => $parentProduct->uom_id,
                     'uom_po_id'            => $parentProduct->uom_po_id,
                     'category_id'          => $parentProduct->category_id,
@@ -159,8 +159,7 @@ class GenerateVariantsAction extends Action
                 $variant->tags()->sync($parentProduct->tags->pluck('id'));
 
                 foreach (
-                    $parentProduct->supplierInformation
-                    as $supplierInfo
+                    $parentProduct->supplierInformation as $supplierInfo
                 ) {
                     $variant->supplierInformation()->create([
                         'supplier_id'   => $supplierInfo->supplier_id,
@@ -172,8 +171,7 @@ class GenerateVariantsAction extends Action
                 }
 
                 foreach (
-                    $parentProduct->priceRuleItems
-                    as $priceRule
+                    $parentProduct->priceRuleItems as $priceRule
                 ) {
                     $variant->priceRuleItems()->create([
                         'price_rule_id' => $priceRule->price_rule_id,

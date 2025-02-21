@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource;
 
 class ListTaxGroups extends ListRecords
 {

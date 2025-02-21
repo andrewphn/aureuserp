@@ -1,0 +1,53 @@
+<?php
+
+namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
+
+use Webkul\Purchase\Filament\Clusters\Orders;
+use Filament\Pages\SubNavigationPosition;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class QuotationResource extends OrderResource
+{
+    protected static ?string $navigationIcon = 'heroicon-o-truck';
+
+    protected static bool $shouldRegisterNavigation = true;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $cluster = Orders::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('purchases::filament/clusters/orders/resources/quotation.navigation.title');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListQuotations::route('/'),
+            'create' => Pages\CreateQuotation::route('/create'),
+            'view' => Pages\ViewQuotation::route('/{record}'),
+            'edit' => Pages\EditQuotation::route('/{record}/edit'),
+        ];
+    }
+}

@@ -2,5 +2,5 @@
 
 return [
     'invoice' => 'Invoice',
-    'refund' => 'Refund',
+    'refund'  => 'Refund',
 ];

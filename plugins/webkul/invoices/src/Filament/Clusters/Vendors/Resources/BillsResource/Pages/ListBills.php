@@ -2,11 +2,11 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource;
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource;
+use Webkul\TableViews\Filament\Components\PresetView;
 
 class ListBills extends BaseListInvoices
 {
@@ -23,7 +23,7 @@ class ListBills extends BaseListInvoices
                     ->icon('heroicon-s-receipt-percent')
                     ->default()
                     ->favorite()
-                    ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_INVOICE->value)),
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_INVOICE->value)),
             ]
         );
     }

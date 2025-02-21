@@ -2,13 +2,12 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
 use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
-
 
 class EditPayments extends EditRecord
 {
@@ -38,7 +37,7 @@ class EditPayments extends EditRecord
             BaseActions\ResetToDraftAction::make(),
             BaseActions\MarkAsSendAdnUnsentAction::make(),
             BaseActions\CancelAction::make(),
-            BaseActions\RejectAction::make()
+            BaseActions\RejectAction::make(),
         ];
     }
 }

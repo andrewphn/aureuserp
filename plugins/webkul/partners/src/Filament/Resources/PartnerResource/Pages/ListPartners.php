@@ -6,8 +6,8 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Partner\Enums\AccountType;
+use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 

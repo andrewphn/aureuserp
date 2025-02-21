@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
-use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
 use Webkul\Account\Models\FiscalPosition;
 
@@ -42,7 +42,7 @@ class EditFiscalPosition extends EditRecord
                         ->success()
                         ->title(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/edit-fiscal-position.header-actions.delete.notification.title'))
                         ->body(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/edit-fiscal-position.header-actions.delete.notification.body'))
-                )
+                ),
         ];
     }
 

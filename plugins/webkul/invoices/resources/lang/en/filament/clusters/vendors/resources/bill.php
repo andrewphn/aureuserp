@@ -12,5 +12,5 @@ return [
         'reference'         => 'Reference',
         'payment-reference' => 'Payment Reference',
         'date'              => 'Date',
-    ]
+    ],
 ];

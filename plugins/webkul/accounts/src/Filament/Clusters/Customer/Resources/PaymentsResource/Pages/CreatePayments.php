@@ -3,10 +3,10 @@
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\PaymentStatus;
+use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource;
 
 class CreatePayments extends CreateRecord
 {

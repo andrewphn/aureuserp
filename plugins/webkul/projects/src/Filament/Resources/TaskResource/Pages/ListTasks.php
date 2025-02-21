@@ -28,7 +28,7 @@ class ListTasks extends ListRecords
     public function table(Table $table): Table
     {
         $table = parent::table($table)
-            ->modifyQueryUsing(fn ($query) => $query->whereNull('parent_id'));
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('parent_id'));
 
         return $table;
     }

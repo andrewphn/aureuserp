@@ -3,9 +3,9 @@
 namespace Webkul\Sale;
 
 use Livewire\Livewire;
+use Webkul\Sale\Livewire\Summary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
-use Webkul\Sale\Livewire\Summary;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
@@ -45,7 +45,6 @@ class SaleServiceProvider extends PackageServiceProvider
             })
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
-
 
     public function packageBooted(): void
     {

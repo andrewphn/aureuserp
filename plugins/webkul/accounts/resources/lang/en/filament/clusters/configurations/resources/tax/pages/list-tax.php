@@ -8,5 +8,5 @@ return [
         'goods'     => 'Goods',
         'active'    => 'Active',
         'in-active' => 'In active',
-    ]
+    ],
 ];

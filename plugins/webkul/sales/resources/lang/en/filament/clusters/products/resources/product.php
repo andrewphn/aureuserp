@@ -22,8 +22,8 @@ return [
             ],
 
             'invoice-policy' => [
-                'title' => 'Invoice Policy',
-                'ordered-policy' => 'You can invoice goods before they are delivered.',
+                'title'            => 'Invoice Policy',
+                'ordered-policy'   => 'You can invoice goods before they are delivered.',
                 'delivered-policy' => 'Invoice after delivery, based on quantities delivered, not ordered.',
             ],
 

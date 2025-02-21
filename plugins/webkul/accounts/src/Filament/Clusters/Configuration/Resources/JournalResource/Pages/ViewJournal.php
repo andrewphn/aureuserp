@@ -2,10 +2,10 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource;
 
 class ViewJournal extends ViewRecord
 {

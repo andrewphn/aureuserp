@@ -2,10 +2,10 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource;
-use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\ListPayments as BaseListPayments;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
+use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\ListPayments as BaseListPayments;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource;
+use Webkul\TableViews\Filament\Components\PresetView;
 
 class ListPayments extends BaseListPayments
 {
@@ -21,7 +21,7 @@ class ListPayments extends BaseListPayments
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-banknotes')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('partner_type', 'supplier')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('partner_type', 'supplier')),
         ];
     }
 }

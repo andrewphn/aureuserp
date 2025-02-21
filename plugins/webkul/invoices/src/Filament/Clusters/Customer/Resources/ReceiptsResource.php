@@ -2,12 +2,12 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Customer;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ReceiptsResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
+use Webkul\Invoice\Filament\Clusters\Customer;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ReceiptsResource\Pages;
 
 class ReceiptsResource extends BaseInvoiceResource
 {
@@ -48,7 +48,7 @@ class ReceiptsResource extends BaseInvoiceResource
                                 ->label(__('invoices::filament/clusters/customers/resources/receipts.form.fieldset.fields.reference')),
                             Forms\Components\TextInput::make('payment_reference')
                                 ->label(__('invoices::filament/clusters/customers/resources/receipts.form.fieldset.fields.payment-reference')),
-                        ])->columns(1)
+                        ])->columns(1),
                 ]),
         ], $nestedChildComponents));
 

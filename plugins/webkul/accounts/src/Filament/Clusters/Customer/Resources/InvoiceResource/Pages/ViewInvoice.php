@@ -2,10 +2,10 @@
 
 namespace Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource;
 
 class ViewInvoice extends ViewRecord
 {

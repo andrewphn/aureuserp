@@ -13,7 +13,7 @@ enum RoundingStrategy: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::BIGGEST_TAX => __('accounts::enums/rounding-strategy.biggest-tax'),
+            self::BIGGEST_TAX      => __('accounts::enums/rounding-strategy.biggest-tax'),
             self::ADD_INVOICE_LINE => __('accounts::enums/rounding-strategy.add-invoice'),
         };
     }
@@ -21,7 +21,7 @@ enum RoundingStrategy: string implements HasLabel
     public static function options(): array
     {
         return [
-            self::BIGGEST_TAX->value => __('accounts::enums/rounding-strategy.biggest-tax'),
+            self::BIGGEST_TAX->value      => __('accounts::enums/rounding-strategy.biggest-tax'),
             self::ADD_INVOICE_LINE->value => __('accounts::enums/rounding-strategy.add-invoice'),
         ];
     }

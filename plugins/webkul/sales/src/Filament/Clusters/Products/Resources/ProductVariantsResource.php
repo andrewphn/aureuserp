@@ -2,10 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Products\Resources;
 
-use Webkul\Sale\Filament\Clusters\Products;
-use Webkul\Sale\Filament\Clusters\Products\Resources\ProductVariantsResource\Pages;
 use Filament\Tables\Table;
+use Webkul\Sale\Filament\Clusters\Products;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource as BaseProductResource;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductVariantsResource\Pages;
 
 class ProductVariantsResource extends BaseProductResource
 {

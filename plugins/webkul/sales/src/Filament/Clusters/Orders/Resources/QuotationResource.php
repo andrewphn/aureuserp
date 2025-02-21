@@ -2,36 +2,36 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources;
 
-use Webkul\Sale\Filament\Clusters\Orders;
-use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
-use Webkul\Sale\Models\Order;
-use Filament\Resources\Resource;
-use Webkul\Sale\Livewire\Summary;
-use Filament\Forms\Form;
 use Filament\Forms;
-use Filament\Forms\Get;
-use Filament\Tables;
-use Filament\Tables\Columns\Summarizers\Sum;
-use Filament\Tables\Table;
-use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Enums\OrderState;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Table;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Tax;
+use Webkul\Field\Filament\Forms\Components\ProgressStepper;
+use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderDisplayType;
+use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Filament\Clusters\Orders;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
-use Webkul\Sale\Models\SaleOrderLine;
+use Webkul\Sale\Livewire\Summary;
+use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderTemplate;
 use Webkul\Sale\Models\Product;
+use Webkul\Sale\Models\SaleOrderLine;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -92,7 +92,7 @@ class QuotationResource extends Resource
                                                     ];
                                                 })
                                                     ->live()
-                                                    ->reactive()
+                                                    ->reactive(),
                                             ]),
                                         Forms\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.title'))
                                             ->schema([
@@ -121,11 +121,11 @@ class QuotationResource extends Resource
                                                                             ->prefix('of')
                                                                             ->suffix('%')
                                                                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.sales.fields.fieldset.signature-and-payment.fields.prepayment-percentage'))
-                                                                            ->visible(fn(Get $get) => $get('require_payment') === true),
+                                                                            ->visible(fn (Get $get) => $get('require_payment') === true),
                                                                     ])->columns(1),
                                                                 Forms\Components\TextInput::make('client_order_ref')
                                                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.sales.fields.customer-reference')),
-                                                            ])
+                                                            ]),
                                                     ]),
                                                 Forms\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.invoicing.title'))
                                                     ->schema([
@@ -138,7 +138,7 @@ class QuotationResource extends Resource
                                                             ->relationship('journal', 'name')
                                                             ->searchable()
                                                             ->preload()
-                                                            ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.invoicing.fields.invoicing-journal'))
+                                                            ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.invoicing.fields.invoicing-journal')),
                                                     ]),
                                                 Forms\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.shipping.title'))
                                                     ->schema([
@@ -166,7 +166,7 @@ class QuotationResource extends Resource
                                         Forms\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.form.tabs.term-and-conditions.title'))
                                             ->schema([
                                                 Forms\Components\RichEditor::make('note')
-                                                    ->hiddenLabel()
+                                                    ->hiddenLabel(),
                                             ]),
                                     ])
                                     ->persistTabInQueryString(),
@@ -197,8 +197,7 @@ class QuotationResource extends Resource
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn(Get $get) =>
-                                                Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -216,7 +215,7 @@ class QuotationResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->street2 ? ', '.$address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -243,14 +242,14 @@ class QuotationResource extends Resource
                                                             $price = $item->product?->price ?? 0;
 
                                                             return [
-                                                                'product_id' => $item->product_id ?? null,
-                                                                'name' => $item->name,
+                                                                'product_id'      => $item->product_id ?? null,
+                                                                'name'            => $item->name,
                                                                 'product_uom_qty' => $qty,
-                                                                'tax' => $item->product?->productTaxes->pluck('id')->toArray() ?? [],
-                                                                'customer_lead' => 1,
-                                                                'price_unit' => $price,
-                                                                'price_subtotal' => number_format($price * $qty, 2, '.', ''),
-                                                                'price_total' => number_format($price * $qty, 2, '.', '')
+                                                                'tax'             => $item->product?->productTaxes->pluck('id')->toArray() ?? [],
+                                                                'customer_lead'   => 1,
+                                                                'price_unit'      => $price,
+                                                                'price_subtotal'  => number_format($price * $qty, 2, '.', ''),
+                                                                'price_total'     => number_format($price * $qty, 2, '.', ''),
                                                             ];
                                                         })
                                                         ->toArray();
@@ -258,7 +257,7 @@ class QuotationResource extends Resource
                                                     $set('products', $initialProducts);
 
                                                     $initialSections = collect($orderTemplate->sections)
-                                                        ->map(fn($item) => [
+                                                        ->map(fn ($item) => [
                                                             'product_id' => $item->product_id ?? null,
                                                             'name'       => $item->name,
                                                             'quantity'   => $item->quantity ?? null,
@@ -268,7 +267,7 @@ class QuotationResource extends Resource
                                                     $set('sections', $initialSections);
 
                                                     $initialNotes = collect($orderTemplate->notes)
-                                                        ->map(fn($item) => [
+                                                        ->map(fn ($item) => [
                                                             'product_id' => $item->product_id ?? null,
                                                             'name'       => $item->name,
                                                             'quantity'   => $item->quantity ?? null,
@@ -278,7 +277,7 @@ class QuotationResource extends Resource
                                                     $set('notes', $initialNotes);
                                                 }
                                             })
-                                            ->label(__('sales::filament/clusters/orders/resources/quotation.form.fields.quotation-template'))
+                                            ->label(__('sales::filament/clusters/orders/resources/quotation.form.fields.quotation-template')),
                                     ]),
                                 Forms\Components\Section::make()
                                     ->schema([
@@ -297,7 +296,7 @@ class QuotationResource extends Resource
                                                     ->preload()
                                                     ->live()
                                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.fieldset.invoice-and-delivery-addresses.fields.delivery-address')),
-                                            ])->columns(1)
+                                            ])->columns(1),
                                     ]),
                                 Forms\Components\Section::make()
                                     ->schema([
@@ -336,21 +335,21 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn($state) => OrderState::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => OrderState::options()[$state] ?? $state)
                     ->badge()
-                    ->color(fn($state) => match ($state) {
-                        OrderState::DRAFT->value => 'gray',
-                        OrderState::SENT->value => 'primary',
-                        OrderState::SALE->value => 'success',
+                    ->color(fn ($state) => match ($state) {
+                        OrderState::DRAFT->value  => 'gray',
+                        OrderState::SENT->value   => 'primary',
+                        OrderState::SALE->value   => 'success',
                         OrderState::CANCEL->value => 'danger',
-                        default => 'gray',
+                        default                   => 'gray',
                     })
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn($state) => InvoiceStatus::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => InvoiceStatus::options()[$state] ?? $state)
                     ->badge()
                     ->searchable()
                     ->sortable(),
@@ -664,7 +663,7 @@ class QuotationResource extends Resource
                                                             ->schema([
                                                                 Infolists\Components\TextEntry::make('name')
                                                                     ->badge()
-                                                                    ->tooltip(fn($state) => $state)
+                                                                    ->tooltip(fn ($state) => $state)
                                                                     ->icon('heroicon-o-receipt-percent')
                                                                     ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.taxes')),
                                                             ])
@@ -687,7 +686,7 @@ class QuotationResource extends Resource
                                                     ])
                                                     ->columns(6),
                                                 Infolists\Components\RepeatableEntry::make('salesOrderSectionLines')
-                                                    ->hidden(fn($record) => $record->salesOrderSectionLines->isEmpty())
+                                                    ->hidden(fn ($record) => $record->salesOrderSectionLines->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('product.name')
                                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
@@ -699,7 +698,7 @@ class QuotationResource extends Resource
                                                     ])
                                                     ->columns(3),
                                                 Infolists\Components\RepeatableEntry::make('salesOrderNoteLines')
-                                                    ->hidden(fn($record) => $record->salesOrderNoteLines->isEmpty())
+                                                    ->hidden(fn ($record) => $record->salesOrderNoteLines->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('product.name')
                                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
@@ -870,9 +869,9 @@ class QuotationResource extends Resource
             ->collapsible()
             ->defaultItems(0)
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -992,7 +991,7 @@ class QuotationResource extends Resource
                                             $taxIds = $get('tax') ?? [];
                                             $taxAmount = 0;
 
-                                            if (!empty($taxIds)) {
+                                            if (! empty($taxIds)) {
                                                 $taxes = \Webkul\Account\Models\Tax::whereIn('id', $taxIds)->get();
                                                 foreach ($taxes as $tax) {
                                                     $taxValue = floatval($tax->amount);
@@ -1026,7 +1025,7 @@ class QuotationResource extends Resource
                                     ->placeholder('-')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.products.fields.total')),
                             ]),
-                    ])->columns(2)
+                    ])->columns(2),
             ]);
     }
 
@@ -1039,9 +1038,9 @@ class QuotationResource extends Resource
             ->collapsible()
             ->defaultItems(0)
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -1068,7 +1067,7 @@ class QuotationResource extends Resource
                         Forms\Components\Hidden::make('display_type')
                             ->required()
                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.products.fields.display-type'))
-                            ->default(OrderDisplayType::SECTION->value)
+                            ->default(OrderDisplayType::SECTION->value),
                     ]),
             ]);
     }
@@ -1082,9 +1081,9 @@ class QuotationResource extends Resource
             ->defaultItems(0)
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -1111,7 +1110,7 @@ class QuotationResource extends Resource
                         Forms\Components\Hidden::make('display_type')
                             ->required()
                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.products.fields.display-type'))
-                            ->default(OrderDisplayType::NOTE->value)
+                            ->default(OrderDisplayType::NOTE->value),
                     ]),
             ]);
     }

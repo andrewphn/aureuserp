@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources;
 
+use Webkul\Account\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource as BaseProductCategoryResource;
-use Webkul\Account\Filament\Clusters\Configuration;
 
 class ProductCategoryResource extends BaseProductCategoryResource
 {

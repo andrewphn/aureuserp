@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource;
 
 class CreateTax extends CreateRecord
 {

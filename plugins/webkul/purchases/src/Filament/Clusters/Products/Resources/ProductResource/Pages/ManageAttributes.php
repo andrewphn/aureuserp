@@ -2,9 +2,9 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes as BaseManageAttributes;
 use Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Purchase\Settings\ProductSettings;
-use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes as BaseManageAttributes;
 
 class ManageAttributes extends BaseManageAttributes
 {

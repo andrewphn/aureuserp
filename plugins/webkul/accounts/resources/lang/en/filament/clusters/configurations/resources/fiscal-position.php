@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title' => 'Fiscal Positions',
-        'group' => 'Accounting'
+        'group' => 'Accounting',
     ],
 
     'global-search' => [
@@ -24,7 +24,7 @@ return [
             'zip-to'               => 'Zip To',
             'detect-automatically' => 'Detect Automatically',
             'notes'                => 'Notes',
-        ]
+        ],
     ],
 
     'table' => [
@@ -69,6 +69,6 @@ return [
             'zip-to'               => 'Zip To',
             'detect-automatically' => 'Detect Automatically',
             'notes'                => 'Notes',
-        ]
+        ],
     ],
 ];

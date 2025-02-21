@@ -2,11 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
-use Webkul\Sale\Models\Team;
 use Filament\Resources\Components\Tab;
+use Filament\Resources\Pages\ListRecords;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
+use Webkul\Sale\Models\Team;
 
 class ListTeams extends ListRecords
 {
@@ -27,7 +27,7 @@ class ListTeams extends ListRecords
                 ->badge(Team::count()),
             'archived' => Tab::make(__('Archived'))
                 ->badge(Team::onlyTrashed()->count())
-                ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }

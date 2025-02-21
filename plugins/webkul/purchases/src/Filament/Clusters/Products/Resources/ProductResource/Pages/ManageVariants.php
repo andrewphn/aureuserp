@@ -2,9 +2,9 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageVariants as BaseManageVariants;
 use Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Purchase\Settings\ProductSettings;
-use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageVariants as BaseManageVariants;
 
 class ManageVariants extends BaseManageVariants
 {

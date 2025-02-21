@@ -5,12 +5,12 @@ return [
 
     'navigation' => [
         'title' => 'Payment Terms',
-        'group' => 'Invoicing'
+        'group' => 'Invoicing',
     ],
 
     'global-search' => [
         'company-name' => 'Company Name',
-        'payment-term' => 'Payment Term'
+        'payment-term' => 'Payment Term',
     ],
 
     'form' => [
@@ -24,7 +24,7 @@ return [
                 'note'                 => 'Note',
                 'status'               => 'Status',
             ],
-        ]
+        ],
     ],
 
     'table' => [
@@ -42,13 +42,13 @@ return [
         ],
 
         'groups' => [
-            'payment-term' => 'Payment Term',
-            'company-name' => 'Company Name',
-            'discount-days' => 'Discount Days',
-            'early-pay-discount' => 'Early Pay Discount',
-            'payment-term' => 'Payment Term',
-            'display-on-invoice' => 'Display on Invoice',
-            'early-discount' => 'Early Discount',
+            'payment-term'        => 'Payment Term',
+            'company-name'        => 'Company Name',
+            'discount-days'       => 'Discount Days',
+            'early-pay-discount'  => 'Early Pay Discount',
+            'payment-term'        => 'Payment Term',
+            'display-on-invoice'  => 'Display on Invoice',
+            'early-discount'      => 'Early Discount',
             'discount-percentage' => 'Discount Percentage',
         ],
 
@@ -111,6 +111,6 @@ return [
                 'note'                 => 'Note',
                 'status'               => 'Status',
             ],
-        ]
+        ],
     ],
 ];

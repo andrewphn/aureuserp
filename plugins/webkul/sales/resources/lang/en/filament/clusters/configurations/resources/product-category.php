@@ -15,10 +15,10 @@ return [
     'form' => [
         'sections' => [
             'fields' => [
-                'name' => 'Category Name',
+                'name'            => 'Category Name',
                 'parent-category' => 'Parent Category',
             ],
-        ]
+        ],
     ],
 
     'table' => [
@@ -74,6 +74,6 @@ return [
                 'name'            => 'Category Name',
                 'parent-category' => 'Parent Category',
             ],
-        ]
+        ],
     ],
 ];

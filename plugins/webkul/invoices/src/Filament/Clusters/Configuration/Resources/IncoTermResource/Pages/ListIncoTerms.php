@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource;
 use Webkul\Account\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages\ListIncoTerms as BaseListIncoTerms;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource;
 
 class ListIncoTerms extends BaseListIncoTerms
 {

@@ -3,15 +3,14 @@
 return [
     'title' => 'Incoterms',
 
-
     'navigation' => [
         'title' => 'Incoterms',
-        'group' => 'Invoicing'
+        'group' => 'Invoicing',
     ],
 
     'global-search' => [
         'name' => 'Name',
-        'code' => 'Code'
+        'code' => 'Code',
     ],
 
     'form' => [
@@ -84,6 +83,6 @@ return [
         'entries' => [
             'name' => 'Name',
             'code' => 'Code',
-        ]
-    ]
+        ],
+    ],
 ];

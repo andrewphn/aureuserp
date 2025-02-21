@@ -4,12 +4,12 @@ namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
-use Webkul\Sale\Filament\Clusters\ToInvoice;
-use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToInvoiceResource\Pages;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
+use Webkul\Sale\Filament\Clusters\ToInvoice;
+use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToInvoiceResource\Pages;
 use Webkul\Sale\Models\Order;
 
 class OrderToInvoiceResource extends Resource

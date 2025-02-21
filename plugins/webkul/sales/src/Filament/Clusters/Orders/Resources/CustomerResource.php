@@ -3,9 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources;
 
 use Filament\Tables\Table;
+use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Sale\Filament\Clusters\Orders;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
-use Webkul\Partner\Filament\Resources\PartnerResource;
 
 class CustomerResource extends PartnerResource
 {

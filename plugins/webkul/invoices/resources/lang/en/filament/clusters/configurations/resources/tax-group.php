@@ -5,12 +5,12 @@ return [
 
     'navigation' => [
         'title' => 'Tax Groups',
-        'group' => 'Accounting'
+        'group' => 'Accounting',
     ],
 
     'global-search' => [
         'company-name' => 'Company Name',
-        'payment-term' => 'Payment Term'
+        'payment-term' => 'Payment Term',
     ],
 
     'form' => [
@@ -21,7 +21,7 @@ return [
                 'name'               => 'Name',
                 'preceding-subtotal' => 'Preceding Subtotal',
             ],
-        ]
+        ],
     ],
 
     'table' => [
@@ -71,6 +71,6 @@ return [
                 'name'               => 'Name',
                 'preceding-subtotal' => 'Preceding Subtotal',
             ],
-        ]
+        ],
     ],
 ];

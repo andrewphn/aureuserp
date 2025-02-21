@@ -50,22 +50,22 @@ class TaxPartition extends Model
     public static function validateRepartitionLines($invoices, $refunds)
     {
         if ($invoices->count() !== $refunds->count()) {
-            throw new Exception("Invoice and credit note distribution should have the same number of records.");
+            throw new Exception('Invoice and credit note distribution should have the same number of records.');
         }
 
         if ($invoices->where('repartition_type', 'base')->count() !== 1 || $refunds->where('repartition_type', 'base')->count() !== 1) {
-            throw new Exception("Invoice and credit note distribution should each contain exactly one record for the base.");
+            throw new Exception('Invoice and credit note distribution should each contain exactly one record for the base.');
         }
 
-        if (!$invoices->where('repartition_type', 'tax')->count() || !$refunds->where('repartition_type', 'tax')->count()) {
-            throw new Exception("Invoice and credit note repartition should have at least one tax repartition record.");
+        if (! $invoices->where('repartition_type', 'tax')->count() || ! $refunds->where('repartition_type', 'tax')->count()) {
+            throw new Exception('Invoice and credit note repartition should have at least one tax repartition record.');
         }
 
         foreach ($invoices as $index => $invRep) {
             $refRep = $refunds[$index] ?? null;
 
-            if (!$refRep || $invRep->repartition_type !== $refRep->repartition_type || $invRep->factor_percent !== $refRep->factor_percent) {
-                throw new Exception("Invoice and credit note distribution should match (same percentages, in the same order).");
+            if (! $refRep || $invRep->repartition_type !== $refRep->repartition_type || $invRep->factor_percent !== $refRep->factor_percent) {
+                throw new Exception('Invoice and credit note distribution should match (same percentages, in the same order).');
             }
         }
 
@@ -73,11 +73,11 @@ class TaxPartition extends Model
         $negativeFactor = $invoices->where('factor_percent', '<', 0)->sum('factor_percent');
 
         if (bccomp((string) $positiveFactor, '100', 2) !== 0) {
-            throw new Exception("Invoice and credit note distribution should have a total factor (+) equal to 100.");
+            throw new Exception('Invoice and credit note distribution should have a total factor (+) equal to 100.');
         }
 
         if ($negativeFactor && bccomp((string) $negativeFactor, '-100', 2) !== 0) {
-            throw new Exception("Invoice and credit note distribution should have a total factor (-) equal to 100.");
+            throw new Exception('Invoice and credit note distribution should have a total factor (-) equal to 100.');
         }
     }
 

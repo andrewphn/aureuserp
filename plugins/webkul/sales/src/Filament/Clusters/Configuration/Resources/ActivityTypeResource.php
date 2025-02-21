@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityTypeResource\Pages;
 use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityTypeResource\Pages;
+use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
 class ActivityTypeResource extends BaseActivityTypeResource
 {

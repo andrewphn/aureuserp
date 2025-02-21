@@ -62,20 +62,20 @@ return new class extends Migration
                 ->constrained('currencies')
                 ->restrictOnDelete();
 
-            // $table->foreignId('fiscal_position_id')
-            //     ->nullable()
-            //     ->constrained('account_fiscal_position')
-            //     ->nullOnDelete();
+            $table->foreignId('fiscal_position_id')
+                ->nullable()
+                ->constrained('accounts_fiscal_positions')
+                ->nullOnDelete();
 
-            // $table->foreignId('payment_term_id')
-            //     ->nullable()
-            //     ->constrained('account_payment_term')
-            //     ->nullOnDelete();
+            $table->foreignId('payment_term_id')
+                ->nullable()
+                ->constrained('accounts_payment_terms')
+                ->nullOnDelete();
 
-            // $table->foreignId('incoterm_id')
-            //     ->nullable()
-            //     ->constrained('account_incoterms')
-            //     ->nullOnDelete();
+            $table->foreignId('incoterm_id')
+                ->nullable()
+                ->constrained('accounts_incoterms')
+                ->nullOnDelete();
 
             $table->foreignId('user_id')
                 ->nullable()

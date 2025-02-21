@@ -1,6 +1,6 @@
 <?php
 
-return  [
+return [
     'order'    => 'Ordered Quantities',
     'delivery' => 'Delivered Quantities',
 ];

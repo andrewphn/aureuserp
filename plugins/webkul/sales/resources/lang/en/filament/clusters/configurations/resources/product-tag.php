@@ -12,12 +12,11 @@ return [
         'name'    => 'Name',
     ],
 
-
     'form' => [
         'fields' => [
             'name'  => 'Name',
             'color' => 'Color',
-        ]
+        ],
     ],
 
     'table' => [
@@ -53,8 +52,8 @@ return [
 
     'infolist' => [
         'entries' => [
-            'name' => 'Name',
+            'name'  => 'Name',
             'color' => 'Color',
-        ]
+        ],
     ],
 ];
