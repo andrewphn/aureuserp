@@ -3,7 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages\EditFiscalPosition as BaseEditFiscalPosition;
+use Webkul\Account\Filament\Resources\FiscalPositionResource\Pages\EditFiscalPosition as BaseEditFiscalPosition;
 
 class EditFiscalPosition extends BaseEditFiscalPosition
 {

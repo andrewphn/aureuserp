@@ -7,7 +7,7 @@ use Filament\Forms\Form;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 use Filament\Tables\Table;
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
+use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 
 class RefundResource extends BaseInvoiceResource
 {

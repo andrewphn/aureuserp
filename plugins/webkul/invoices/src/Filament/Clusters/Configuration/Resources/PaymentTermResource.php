@@ -4,7 +4,7 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
 use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource\Pages;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\PaymentTermResource as BasePaymentTermResource;
+use Webkul\Account\Filament\Resources\PaymentTermResource as BasePaymentTermResource;
 
 class PaymentTermResource extends BasePaymentTermResource
 {

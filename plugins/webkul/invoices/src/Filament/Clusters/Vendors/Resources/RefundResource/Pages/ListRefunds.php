@@ -3,7 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;

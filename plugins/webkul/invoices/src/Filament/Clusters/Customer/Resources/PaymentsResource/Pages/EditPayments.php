@@ -4,7 +4,7 @@ namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource\P
 
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource;
 use Filament\Actions;
-use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\EditPayments as BaseEditPayments;
+use Webkul\Account\Filament\Resources\PaymentsResource\Pages\EditPayments as BaseEditPayments;
 
 class EditPayments extends BaseEditPayments
 {
