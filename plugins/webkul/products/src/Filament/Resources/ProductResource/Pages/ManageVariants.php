@@ -7,6 +7,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Table;
+use Filament\Tables;
 use Illuminate\Support\Arr;
 use Webkul\Product\Filament\Resources\ProductResource;
 
@@ -47,6 +48,23 @@ class ManageVariants extends ManageRelatedRecords
         }
 
         $table->columns(Arr::except($table->getColumns(), ['variants_count']));
+
+        $table->columns([
+            Tables\Columns\TextColumn::make('combinations')
+                ->label(__('products::filament/resources/product/pages/manage-variants.table.columns.variant-values'))
+                ->state(function ($record) {
+                    return $record->combinations->map(function ($combination) {
+                        $attributeName = $combination->productAttributeValue?->attribute?->name;
+                        $optionName = $combination->productAttributeValue?->attributeOption?->name;
+
+                        return $attributeName && $optionName ? "{$attributeName}: {$optionName}" : $optionName;
+                    });
+                })
+                ->badge()
+                ->sortable()
+                ->searchable(),
+            ...$table->getColumns()
+        ]);
 
         $table->modelLabel(__('products::filament/resources/product/pages/manage-variants.title'));
 

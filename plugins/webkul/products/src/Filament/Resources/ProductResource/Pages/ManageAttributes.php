@@ -114,11 +114,6 @@ class ManageAttributes extends ManageRelatedRecords
 
     protected function updateOrCreateVariants(ProductAttribute $record): void
     {
-        if ($record->product->attributes()->count() === 0) {
-            $record->product->variants()->delete();
-            return;
-        }
-
         $record->values->each(function ($value) use ($record) {
             $value->update([
                 'extra_price'  => $value->attributeOption->extra_price,
