@@ -6,6 +6,8 @@ use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
+use Livewire\Livewire;
+use Webkul\Purchase\Livewire\Summary;
 
 class PurchaseServiceProvider extends PackageServiceProvider
 {
@@ -44,6 +46,6 @@ class PurchaseServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        //
+        Livewire::component('order-summary', Summary::class);
     }
 }
