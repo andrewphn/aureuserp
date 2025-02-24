@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Models\Product;
+use Webkul\Invoice\Models\Product;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;

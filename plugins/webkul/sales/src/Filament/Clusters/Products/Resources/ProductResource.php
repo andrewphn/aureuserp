@@ -52,7 +52,7 @@ class ProductResource extends BaseProductResource
                 ->relationship(
                     'productTaxes',
                     'name',
-                    fn ($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
+                    fn($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
                 )
                 ->multiple()
                 ->live()
@@ -114,14 +114,14 @@ class ProductResource extends BaseProductResource
                         );
                     }
 
-                    return ! empty($parts) ? '(= '.implode(', ', $parts).')' : ' ';
+                    return ! empty($parts) ? '(= ' . implode(', ', $parts) . ')' : ' ';
                 }),
 
             Forms\Components\Select::make('accounts_product_supplier_taxes')
                 ->relationship(
                     'supplierTaxes',
                     'name',
-                    fn ($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
+                    fn($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
                 )
                 ->multiple()
                 ->live()
@@ -137,7 +137,7 @@ class ProductResource extends BaseProductResource
 
         $policyComponent = [
             Forms\Components\Section::make()
-                ->visible(fn (Get $get) => $get('sales_ok'))
+                ->visible(fn(Get $get) => $get('sales_ok'))
                 ->schema([
                     Forms\Components\Select::make('invoice_policy')
                         ->label(__('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.title'))
@@ -180,11 +180,11 @@ class ProductResource extends BaseProductResource
             Forms\Components\Actions\Action::make('is_favorite')
                 ->hiddenLabel()
                 ->outlined(false)
-                ->icon(fn ($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
+                ->icon(fn($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
                 ->color('warning')
                 ->iconButton()
                 ->size(ActionSize::Large->value)
-                ->action(fn ($record) => $record?->update(['is_favorite' => ! $record->is_favorite])),
+                ->action(fn($record) => $record?->update(['is_favorite' => ! $record->is_favorite])),
         ]);
 
         array_unshift($secondChildComponents, $favoriteAction);
