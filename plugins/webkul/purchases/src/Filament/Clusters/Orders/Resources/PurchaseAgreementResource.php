@@ -119,6 +119,7 @@ class PurchaseAgreementResource extends Resource
                                     ->searchable()
                                     ->required()
                                     ->preload()
+                                    ->default(auth()->user()->default_company_id)
                                     ->disabled(fn ($record): bool => $record && $record?->state != Enums\RequisitionState::DRAFT),
                             ]),
                     ])

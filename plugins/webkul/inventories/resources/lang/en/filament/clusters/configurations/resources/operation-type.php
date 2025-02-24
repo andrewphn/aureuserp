@@ -88,22 +88,22 @@ return [
                             'delivery-slip-hint-tooltip' => 'If this checkbox is ticked, System will automatically print the delivery slip of a picking when it is validated.',
 
                             'return-slip'              => 'Return Slip',
-                            'return-slip-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the return slip of a picking when it is validated.',
+                            'return-slip-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the return slip of a picking when it is validated.',
 
                             'product-labels'              => 'Product Labels',
-                            'product-labels-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the product labels of a picking when it is validated.',
+                            'product-labels-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the product labels of a picking when it is validated.',
 
                             'lots-labels'              => 'Lot/SN Labels',
-                            'lots-labels-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the lot/SN labels of a picking when it is validated.',
+                            'lots-labels-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the lot/SN labels of a picking when it is validated.',
 
                             'reception-report'              => 'Reception Report',
-                            'reception-report-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the reception report of a picking when it is validated and has assigned moves.',
+                            'reception-report-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the reception report of a picking when it is validated and has assigned moves.',
 
                             'reception-report-labels'              => 'Reception Report Labels',
-                            'reception-report-labels-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the reception report labels of a picking when it is validated.',
+                            'reception-report-labels-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the reception report labels of a picking when it is validated.',
 
                             'package-content'              => 'Package Content',
-                            'package-content-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the packages and their contents of a picking when it is validated.',
+                            'package-content-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the packages and their contents of a picking when it is validated.',
                         ],
                     ],
 
@@ -112,7 +112,7 @@ return [
 
                         'fields' => [
                             'package-label'              => 'Package Label',
-                            'package-label-hint-tooltip' => 'If this checkbox is ticked, Odoo will automatically print the package label when \&quot;Put in Pack\&quot; button is used.',
+                            'package-label-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the package label when \&quot;Put in Pack\&quot; button is used.',
                         ],
                     ],
                 ],
