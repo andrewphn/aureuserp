@@ -21,7 +21,7 @@ class ConfirmAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/confirm-action.title'))
+            ->label(__('accounts::filament/resources/invoice/actions/confirm-action.title'))
             ->color('gray')
             ->action(function (Move $record, Component $livewire): void {
                 if ($record->moveLines()->get()->isEmpty()) {

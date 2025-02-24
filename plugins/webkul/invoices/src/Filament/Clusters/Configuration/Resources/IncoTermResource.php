@@ -12,6 +12,21 @@ class IncoTermResource extends BaseIncoTermResource
 
     protected static ?string $cluster = Configuration::class;
 
+    public static function getModelLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/incoterm.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/incoterm.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('invoices::filament/clusters/configurations/resources/incoterm.navigation.group');
+    }
+
     public static function getPages(): array
     {
         return [

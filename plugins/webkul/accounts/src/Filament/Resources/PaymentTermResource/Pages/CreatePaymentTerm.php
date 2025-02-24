@@ -21,8 +21,8 @@ class CreatePaymentTerm extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/payment-term/pages/create-payment-term.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/payment-term/pages/create-payment-term.notification.body'));
+            ->title(__('accounts::filament/resources/payment-term/pages/create-payment-term.notification.title'))
+            ->body(__('accounts::filament/resources/payment-term/pages/create-payment-term.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

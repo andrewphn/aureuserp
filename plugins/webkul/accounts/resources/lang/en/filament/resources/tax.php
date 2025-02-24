@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Taxes',
-
-    'navigation' => [
-        'title' => 'Taxes',
-        'group' => 'Accounting',
-    ],
-
     'global-search' => [
         'company'     => 'Company',
         'amount-type' => 'Amount Type',

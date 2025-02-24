@@ -20,8 +20,8 @@ class EditTaxGroup extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/tax-group/pages/edit-tax-group.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/tax-group/pages/edit-tax-group.notification.body'));
+            ->title(__('accounts::filament/resources/tax-group/pages/edit-tax-group.notification.title'))
+            ->body(__('accounts::filament/resources/tax-group/pages/edit-tax-group.notification.body'));
     }
 
     protected function getHeaderActions(): array
@@ -32,8 +32,8 @@ class EditTaxGroup extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.body'))
                 ),
         ];
     }

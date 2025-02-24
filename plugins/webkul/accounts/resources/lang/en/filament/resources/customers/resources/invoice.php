@@ -131,7 +131,6 @@ return [
             'source-document'  => 'Source Document',
             'reference'        => 'Reference',
             'sales-person'     => 'Sales Person',
-            'sales-team'       => 'Sales Team',
             'tax-excluded'     => 'Tax Excluded',
             'tax'              => 'Tax',
             'total'            => 'Total',
@@ -148,7 +147,6 @@ return [
             'invoice-due-date'             => 'Invoice Due Date',
             'invoice-origin'               => 'Invoice Origin',
             'sales-person'                 => 'Sales Person',
-            'sales-team'                   => 'Sales Team',
             'currency'                     => 'Currency',
             'created-at'                   => 'Created At',
             'updated-at'                   => 'Updated At',
@@ -213,7 +211,6 @@ return [
                             'entries' => [
                                 'customer-reference' => 'Customer Reference',
                                 'sale-person'        => 'Sale Person',
-                                'sales-team'         => 'Sales Team',
                                 'recipient-bank'     => 'Recipient Bank',
                                 'payment-reference'  => 'Payment Reference',
                                 'delivery-date'      => 'Delivery Date',

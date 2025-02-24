@@ -31,21 +31,6 @@ class PaymentTermResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getModelLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/payment-term.title');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/payment-term.navigation.title');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('accounts::filament/clusters/configurations/resources/payment-term.navigation.group');
-    }
-
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -57,8 +42,8 @@ class PaymentTermResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('accounts::filament/clusters/configurations/resources/payment-term.global-search.company-name') => $record->company?->name ?? '—',
-            __('accounts::filament/clusters/configurations/resources/payment-term.global-search.payment-term') => $record->name ?? '—',
+            __('accounts::filament/resources/payment-term.global-search.company-name') => $record->company?->name ?? '—',
+            __('accounts::filament/resources/payment-term.global-search.payment-term') => $record->name ?? '—',
         ];
     }
 
@@ -72,7 +57,7 @@ class PaymentTermResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('name')
                                     ->required()
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.payment-term'))
+                                    ->label(__('accounts::filament/resources/payment-term.form.sections.fields.payment-term'))
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->columnSpan(1),
@@ -82,10 +67,10 @@ class PaymentTermResource extends Resource
                                 Forms\Components\Toggle::make('early_discount')
                                     ->live()
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.early-discount')),
+                                    ->label(__('accounts::filament/resources/payment-term.form.sections.fields.early-discount')),
                             ])->columns(2),
                         Forms\Components\Group::make()
-                            ->visible(fn (Get $get) => $get('early_discount'))
+                            ->visible(fn(Get $get) => $get('early_discount'))
                             ->schema([
                                 Forms\Components\TextInput::make('discount_percentage')
                                     ->required()
@@ -93,25 +78,25 @@ class PaymentTermResource extends Resource
                                     ->hiddenLabel(),
                                 Forms\Components\TextInput::make('discount_days')
                                     ->required()
-                                    ->prefix(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.discount-days-prefix'))
-                                    ->suffix(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.discount-days-suffix'))
+                                    ->prefix(__('accounts::filament/resources/payment-term.form.sections.fields.discount-days-prefix'))
+                                    ->suffix(__('accounts::filament/resources/payment-term.form.sections.fields.discount-days-suffix'))
                                     ->hiddenLabel(),
                             ])->columns(4),
                         Forms\Components\Group::make()
-                            ->visible(fn (Get $get) => $get('early_discount'))
+                            ->visible(fn(Get $get) => $get('early_discount'))
                             ->schema([
                                 Forms\Components\Select::make('early_pay_discount')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.reduced-tax'))
+                                    ->label(__('accounts::filament/resources/payment-term.form.sections.fields.reduced-tax'))
                                     ->options(EarlyPayDiscount::class)
                                     ->default(EarlyPayDiscount::INCLUDED->value),
                             ])->columns(2),
                         Forms\Components\RichEditor::make('note')
-                            ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.note')),
+                            ->label(__('accounts::filament/resources/payment-term.form.sections.fields.note')),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Toggle::make('is_active')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.status')),
+                                    ->label(__('accounts::filament/resources/payment-term.form.sections.fields.status')),
                             ])->columns(2),
                     ]),
             ]);
@@ -122,61 +107,61 @@ class PaymentTermResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.payment-term'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.payment-term'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('company.name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.company'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.company'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('discount_days')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.discount-days'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.discount-days'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('early_pay_discount')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.early-pay-discount'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.early-pay-discount'))
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => EarlyPayDiscount::options()[$state])
+                    ->formatStateUsing(fn($state) => EarlyPayDiscount::options()[$state])
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.status'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.status'))
                     ->sortable(),
                 Tables\Columns\IconColumn::make('display_on_invoice')
                     ->boolean()
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.display-on-invoice'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.display-on-invoice'))
                     ->sortable(),
                 Tables\Columns\IconColumn::make('early_discount')
                     ->boolean()
                     ->label(__('Early Discount'))
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.early-discount'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.early-discount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('createdBy.name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.created-by'))
+                    ->label(__('accounts::filament/resources/payment-term.table.columns.created-by'))
                     ->sortable(),
             ])
             ->groups([
                 Tables\Grouping\Group::make('company.name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.company-name'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.company-name'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('discount_days')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.discount-days'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.discount-days'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('early_pay_discount')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.early-pay-discount'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.early-pay-discount'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.payment-term'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.payment-term'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('display_on_invoice')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.display-on-invoice'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.display-on-invoice'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('early_discount')
                     ->label(__('Early Discount'))
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.early-discount'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.early-discount'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('discount_percentage')
-                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.groups.discount-percentage'))
+                    ->label(__('accounts::filament/resources/payment-term.table.groups.discount-percentage'))
                     ->collapsible(),
             ])
             ->actions([
@@ -186,22 +171,22 @@ class PaymentTermResource extends Resource
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('accounts::filament/clusters/configurations/resources/payment-term.table.actions.restore.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/payment-term.table.actions.restore.notification.body'))
+                            ->title(__('accounts::filament/resources/payment-term.table.actions.restore.notification.title'))
+                            ->body(__('accounts::filament/resources/payment-term.table.actions.restore.notification.body'))
                     ),
                 Tables\Actions\DeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('accounts::filament/clusters/configurations/resources/payment-term.table.actions.delete.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/payment-term.table.actions.delete.notification.body'))
+                            ->title(__('accounts::filament/resources/payment-term.table.actions.delete.notification.title'))
+                            ->body(__('accounts::filament/resources/payment-term.table.actions.delete.notification.body'))
                     ),
                 Tables\Actions\ForceDeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('accounts::filament/clusters/configurations/resources/payment-term.table.actions.force-delete.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/payment-term.table.actions.force-delete.notification.body'))
+                            ->title(__('accounts::filament/resources/payment-term.table.actions.force-delete.notification.title'))
+                            ->body(__('accounts::filament/resources/payment-term.table.actions.force-delete.notification.body'))
                     ),
             ])
             ->bulkActions([
@@ -210,22 +195,22 @@ class PaymentTermResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('accounts::filament/clusters/configurations/resources/payment-term.table.bulk-actions.delete.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/payment-term.table.bulk-actions.delete.notification.body'))
+                                ->title(__('accounts::filament/resources/payment-term.table.bulk-actions.delete.notification.title'))
+                                ->body(__('accounts::filament/resources/payment-term.table.bulk-actions.delete.notification.body'))
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('accounts::filament/clusters/configurations/resources/payment-term.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/payment-term.table.bulk-actions.force-delete.notification.body'))
+                                ->title(__('accounts::filament/resources/payment-term.table.bulk-actions.force-delete.notification.title'))
+                                ->body(__('accounts::filament/resources/payment-term.table.bulk-actions.force-delete.notification.body'))
                         ),
                     Tables\Actions\RestoreBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('accounts::filament/clusters/configurations/resources/payment-term.table.bulk-actions.force-restore.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/payment-term.table.bulk-actions.force-restore.notification.body'))
+                                ->title(__('accounts::filament/resources/payment-term.table.bulk-actions.force-restore.notification.title'))
+                                ->body(__('accounts::filament/resources/payment-term.table.bulk-actions.force-restore.notification.body'))
                         ),
                 ]),
             ]);
@@ -240,34 +225,34 @@ class PaymentTermResource extends Resource
                         Infolists\Components\Grid::make(['default' => 3])
                             ->schema([
                                 Infolists\Components\TextEntry::make('name')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.payment-term'))
+                                    ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.payment-term'))
                                     ->icon('heroicon-o-briefcase')
                                     ->placeholder('—'),
                                 Infolists\Components\IconEntry::make('early_discount')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.early-discount'))
+                                    ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.early-discount'))
                                     ->boolean(),
                                 Infolists\Components\Group::make()
                                     ->schema([
                                         Infolists\Components\TextEntry::make('discount_percentage')
                                             ->suffix('%')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.discount-percentage'))
+                                            ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.discount-percentage'))
                                             ->placeholder('—'),
 
                                         Infolists\Components\TextEntry::make('discount_days')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.discount-days-prefix'))
-                                            ->suffix(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.discount-days-suffix'))
+                                            ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.discount-days-prefix'))
+                                            ->suffix(__('accounts::filament/resources/payment-term.infolist.sections.entries.discount-days-suffix'))
                                             ->placeholder('—'),
                                     ])->columns(2),
                                 Infolists\Components\TextEntry::make('early_pay_discount')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.reduced-tax'))
+                                    ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.reduced-tax'))
                                     ->placeholder('—'),
                                 Infolists\Components\TextEntry::make('note')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.note'))
+                                    ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.note'))
                                     ->columnSpanFull()
-                                    ->formatStateUsing(fn ($state) => new HtmlString($state))
+                                    ->formatStateUsing(fn($state) => new HtmlString($state))
                                     ->placeholder('—'),
                                 Infolists\Components\IconEntry::make('is_active')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.status'))
+                                    ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.status'))
                                     ->boolean(),
                             ]),
                     ]),

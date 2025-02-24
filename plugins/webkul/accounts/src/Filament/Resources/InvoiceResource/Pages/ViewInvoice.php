@@ -19,8 +19,8 @@ class ViewInvoice extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/customers/resources/invoice/pages/view-invoice.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/customers/resources/invoice/pages/view-invoice.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/invoice/pages/view-invoice.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/invoice/pages/view-invoice.header-actions.delete.notification.body'))
                 ),
         ];
     }

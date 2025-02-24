@@ -23,21 +23,6 @@ class AccountTagResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getModelLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/account-tag.title');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/account-tag.navigation.title');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('accounts::filament/clusters/configurations/resources/account-tag.navigation.group');
-    }
-
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -49,8 +34,8 @@ class AccountTagResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('accounts::filament/clusters/configurations/resources/account-tag.navigation.global-search.country') => $record->country?->name ?? '—',
-            __('accounts::filament/clusters/configurations/resources/account-tag.navigation.global-search.name')    => $record->name ?? '—',
+            __('accounts::filament/resources/account-tag.navigation.global-search.country') => $record->country?->name ?? '—',
+            __('accounts::filament/resources/account-tag.navigation.global-search.name')    => $record->name ?? '—',
         ];
     }
 
@@ -61,30 +46,30 @@ class AccountTagResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\ColorPicker::make('color')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.color')),
+                            ->label(__('accounts::filament/resources/account-tag.form.fields.color')),
                         Forms\Components\Select::make('country_id')
                             ->searchable()
                             ->preload()
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.country'))
+                            ->label(__('accounts::filament/resources/account-tag.form.fields.country'))
                             ->relationship('country', 'name'),
                         Forms\Components\Select::make('applicability')
                             ->options(Applicability::options())
                             ->default(Applicability::ACCOUNT->value)
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.applicability'))
+                            ->label(__('accounts::filament/resources/account-tag.form.fields.applicability'))
                             ->required(),
                         Forms\Components\TextInput::make('name')
                             ->required()
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.name'))
+                            ->label(__('accounts::filament/resources/account-tag.form.fields.name'))
                             ->maxLength(255),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Toggle::make('is_active')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.status'))
+                                    ->label(__('accounts::filament/resources/account-tag.form.fields.status'))
                                     ->required(),
                                 Forms\Components\Toggle::make('tax_negate')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.form.fields.tax-negate'))
+                                    ->label(__('accounts::filament/resources/account-tag.form.fields.tax-negate'))
                                     ->required(),
                             ]),
                     ])->columns(2),
@@ -96,50 +81,50 @@ class AccountTagResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ColorColumn::make('color')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.color'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.color'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
                     ->numeric()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.country'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.country'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('createdBy.name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.created-by'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.created-by'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('applicability')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.applicability'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.applicability'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.name'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.name'))
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.status'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.status'))
                     ->boolean(),
                 Tables\Columns\IconColumn::make('tax_negate')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.tax-negate'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.tax-negate'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.created-at'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.created-at'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.columns.updated-at'))
+                    ->label(__('accounts::filament/resources/account-tag.table.columns.updated-at'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->groups([
                 Tables\Grouping\Group::make('country.name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.groups.country'))
+                    ->label(__('accounts::filament/resources/account-tag.table.groups.country'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('createdBy.name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.groups.created-by'))
+                    ->label(__('accounts::filament/resources/account-tag.table.groups.created-by'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('applicability')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.groups.applicability'))
+                    ->label(__('accounts::filament/resources/account-tag.table.groups.applicability'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('name')
-                    ->label(__('accounts::filament/clusters/configurations/resources/account-tag.table.groups.name'))
+                    ->label(__('accounts::filament/resources/account-tag.table.groups.name'))
                     ->collapsible(),
             ])
             ->actions([
@@ -176,25 +161,25 @@ class AccountTagResource extends Resource
                 Infolists\Components\Grid::make(['default' => 2])
                     ->schema([
                         Infolists\Components\TextEntry::make('name')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.name'))
+                            ->label(__('accounts::filament/resources/account-tag.infolist.entries.name'))
                             ->icon('heroicon-o-briefcase')
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('color')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.color'))
-                            ->formatStateUsing(fn ($state) => "<span style='display:inline-block;width:15px;height:15px;background-color:{$state};border-radius:50%;'></span> ".$state)
+                            ->label(__('accounts::filament/resources/account-tag.infolist.entries.color'))
+                            ->formatStateUsing(fn($state) => "<span style='display:inline-block;width:15px;height:15px;background-color:{$state};border-radius:50%;'></span> " . $state)
                             ->html()
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('applicability')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.applicability'))
+                            ->label(__('accounts::filament/resources/account-tag.infolist.entries.applicability'))
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('country.name')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.country'))
+                            ->label(__('accounts::filament/resources/account-tag.infolist.entries.country'))
                             ->placeholder('—'),
                         Infolists\Components\IconEntry::make('is_active')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.status'))
+                            ->label(__('accounts::filament/resources/account-tag.infolist.entries.status'))
                             ->boolean(),
                         Infolists\Components\IconEntry::make('tax_negate')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account-tag.infolist.entries.tax-negate'))
+                            ->label(__('accounts::filament/resources/account-tag.infolist.entries.tax-negate'))
                             ->boolean(),
                     ]),
             ]);

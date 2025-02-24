@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Fiscal Positions',
-
-    'navigation' => [
-        'title' => 'Fiscal Positions',
-        'group' => 'Accounting',
-    ],
-
     'global-search' => [
         'zip-from' => 'Zip From',
         'zip-to'   => 'Zip To',

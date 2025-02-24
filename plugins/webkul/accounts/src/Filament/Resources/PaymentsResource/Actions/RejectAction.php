@@ -19,7 +19,7 @@ class RejectAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('accounts::filament/clusters/customers/resources/payment/actions/reject-action.title'))
+            ->label(__('accounts::filament/resources/payment/actions/reject-action.title'))
             ->color('danger')
             ->action(function (Payment $record, Component $livewire): void {
                 $record->state = PaymentStatus::REJECTED->value;

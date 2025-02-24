@@ -9,11 +9,6 @@ class ProductCategoryResource extends BaseProductCategoryResource
 {
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('accounts::filament/clusters/configurations/resources/product-category.navigation.group');
-    }
-
     public static function getPages(): array
     {
         return [

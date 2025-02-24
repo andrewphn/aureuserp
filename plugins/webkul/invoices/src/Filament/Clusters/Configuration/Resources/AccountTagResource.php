@@ -12,6 +12,21 @@ class AccountTagResource extends BaseAccountTagResource
 
     protected static ?string $cluster = Configuration::class;
 
+    public static function getModelLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/account-tag.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/account-tag.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('invoices::filament/clusters/configurations/resources/account-tag.navigation.group');
+    }
+
     public static function getPages(): array
     {
         return [

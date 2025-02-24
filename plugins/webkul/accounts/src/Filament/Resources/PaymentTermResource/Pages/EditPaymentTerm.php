@@ -32,8 +32,8 @@ class EditPaymentTerm extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/payment-term/pages/edit-payment-term.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/payment-term/pages/edit-payment-term.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/payment-term/pages/edit-payment-term.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/payment-term/pages/edit-payment-term.header-actions.delete.notification.body'))
                 ),
         ];
     }
@@ -42,8 +42,8 @@ class EditPaymentTerm extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/payment-term/pages/edit-payment-term.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/payment-term/pages/edit-payment-term.notification.body'));
+            ->title(__('accounts::filament/resources/payment-term/pages/edit-payment-term.notification.title'))
+            ->body(__('accounts::filament/resources/payment-term/pages/edit-payment-term.notification.body'));
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

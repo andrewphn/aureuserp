@@ -25,8 +25,8 @@ class ViewFiscalPosition extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/view-fiscal-position.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/view-fiscal-position.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/fiscal-position/pages/view-fiscal-position.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/fiscal-position/pages/view-fiscal-position.header-actions.delete.notification.body'))
                 ),
         ];
     }

@@ -21,8 +21,8 @@ class CreateFiscalPosition extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/create-fiscal-position.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/create-fiscal-position.notification.body'));
+            ->title(__('accounts::filament/resources/fiscal-position/pages/create-fiscal-position.notification.title'))
+            ->body(__('accounts::filament/resources/fiscal-position/pages/create-fiscal-position.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
