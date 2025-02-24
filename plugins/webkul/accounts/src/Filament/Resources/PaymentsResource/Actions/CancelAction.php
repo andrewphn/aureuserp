@@ -19,7 +19,7 @@ class CancelAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('accounts::filament/clusters/customers/resources/payment/actions/cancel-action.title'))
+            ->label(__('accounts::filament/resources/payment/actions/cancel-action.title'))
             ->color('gray')
             ->action(function (Payment $record, Component $livewire): void {
                 $record->state = PaymentStatus::CANCELED->value;

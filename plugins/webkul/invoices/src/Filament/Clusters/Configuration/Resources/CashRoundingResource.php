@@ -12,6 +12,21 @@ class CashRoundingResource extends BaseCashRoundingResource
 
     protected static ?string $cluster = Configuration::class;
 
+    public static function getModelLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/cash-rounding.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/cash-rounding.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('invoices::filament/clusters/configurations/resources/cash-rounding.navigation.group');
+    }
+
     public static function getPages(): array
     {
         return [

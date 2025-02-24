@@ -25,8 +25,8 @@ class ListAccountTags extends ListRecords
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/account-tag/pages/list-account-tag.header-actions.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/account-tag/pages/list-account-tag.header-actions.notification.body'))
+                        ->title(__('accounts::filament/resources/account-tag/pages/list-account-tag.header-actions.notification.title'))
+                        ->body(__('accounts::filament/resources/account-tag/pages/list-account-tag.header-actions.notification.body'))
                 ),
         ];
     }

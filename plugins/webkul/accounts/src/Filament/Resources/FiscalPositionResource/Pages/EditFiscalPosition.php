@@ -23,8 +23,8 @@ class EditFiscalPosition extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/edit-fiscal-position.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/edit-fiscal-position.notification.body'));
+            ->title(__('accounts::filament/resources/fiscal-position/pages/edit-fiscal-position.notification.title'))
+            ->body(__('accounts::filament/resources/fiscal-position/pages/edit-fiscal-position.notification.body'));
     }
 
     public function getSubNavigationPosition(): SubNavigationPosition
@@ -40,8 +40,8 @@ class EditFiscalPosition extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/edit-fiscal-position.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/fiscal-position/pages/edit-fiscal-position.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/fiscal-position/pages/edit-fiscal-position.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/fiscal-position/pages/edit-fiscal-position.header-actions.delete.notification.body'))
                 ),
         ];
     }

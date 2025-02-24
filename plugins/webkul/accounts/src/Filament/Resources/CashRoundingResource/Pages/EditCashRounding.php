@@ -20,8 +20,8 @@ class EditCashRounding extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/edit-cash-rounding.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/edit-cash-rounding.notification.body'));
+            ->title(__('accounts::filament/resources/cash-rounding/pages/edit-cash-rounding.notification.title'))
+            ->body(__('accounts::filament/resources/cash-rounding/pages/edit-cash-rounding.notification.body'));
     }
 
     protected function getHeaderActions(): array
@@ -32,8 +32,8 @@ class EditCashRounding extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/edit-cash-rounding.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/edit-cash-rounding.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/cash-rounding/pages/edit-cash-rounding.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/cash-rounding/pages/edit-cash-rounding.header-actions.delete.notification.body'))
                 ),
         ];
     }

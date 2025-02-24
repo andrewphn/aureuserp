@@ -25,8 +25,8 @@ class ViewTax extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/tax/pages/view-tax.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/tax/pages/view-tax.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/tax/pages/view-tax.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/tax/pages/view-tax.header-actions.delete.notification.body'))
                 ),
         ];
     }

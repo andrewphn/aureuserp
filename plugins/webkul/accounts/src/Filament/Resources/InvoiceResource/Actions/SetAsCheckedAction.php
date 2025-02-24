@@ -19,7 +19,7 @@ class SetAsCheckedAction extends Action
 
         $this
             ->label(__('Set as checked'))
-            ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/set-as-checked-action.title'))
+            ->label(__('accounts::filament/resources/invoice/actions/set-as-checked-action.title'))
             ->color('gray')
             ->action(function (Move $record): void {
                 $record->checked = true;

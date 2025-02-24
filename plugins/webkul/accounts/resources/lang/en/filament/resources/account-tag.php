@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Account Tags',
-
-    'navigation' => [
-        'title' => 'Account Tags',
-        'group' => 'Accounting',
-    ],
-
     'global-search' => [
         'country' => 'Country',
         'name'    => 'Name',

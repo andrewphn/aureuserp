@@ -20,8 +20,8 @@ class EditAccount extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/account/pages/edit-account.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/account/pages/edit-account.notification.body'));
+            ->title(__('accounts::filament/resources/account/pages/edit-account.notification.title'))
+            ->body(__('accounts::filament/resources/account/pages/edit-account.notification.body'));
     }
 
     protected function getHeaderActions(): array
@@ -32,8 +32,8 @@ class EditAccount extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/account/pages/edit-account.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/account/pages/edit-account.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/account/pages/edit-account.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/account/pages/edit-account.header-actions.delete.notification.body'))
                 ),
         ];
     }

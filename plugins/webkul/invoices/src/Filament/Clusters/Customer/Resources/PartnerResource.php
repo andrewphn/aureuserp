@@ -27,11 +27,6 @@ class PartnerResource extends BasePartnerResource
         return __('invoices::filament/clusters/customers/resources/partners.navigation.title');
     }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('invoices::filament/clusters/customers/resources/partners.navigation.group');
-    }
-
     public static function table(Table $table): Table
     {
         return BasePartnerResource::table($table)

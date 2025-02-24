@@ -19,8 +19,8 @@ class ViewJournal extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/journal/pages/view-journal.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/journal/pages/view-journal.notification.body'))
+                        ->title(__('accounts::filament/resources/journal/pages/view-journal.notification.title'))
+                        ->body(__('accounts::filament/resources/journal/pages/view-journal.notification.body'))
                 ),
         ];
     }

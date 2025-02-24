@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Payment Terms',
-
-    'navigation' => [
-        'title' => 'Payment Terms',
-        'group' => 'Invoicing',
-    ],
-
     'global-search' => [
         'company-name' => 'Company Name',
         'payment-term' => 'Payment Term',

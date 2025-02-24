@@ -20,8 +20,8 @@ class CreateCashRounding extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/create-cash-rounding.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/create-cash-rounding.notification.body'));
+            ->title(__('accounts::filament/resources/cash-rounding/pages/create-cash-rounding.notification.title'))
+            ->body(__('accounts::filament/resources/cash-rounding/pages/create-cash-rounding.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

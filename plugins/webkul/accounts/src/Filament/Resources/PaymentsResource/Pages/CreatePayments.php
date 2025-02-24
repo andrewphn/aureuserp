@@ -21,8 +21,8 @@ class CreatePayments extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/customers/resources/payment/pages/create-payment.notification.title'))
-            ->body(__('accounts::filament/clusters/customers/resources/payment/pages/create-payment.notification.body'));
+            ->title(__('accounts::filament/resources/payment/pages/create-payment.notification.title'))
+            ->body(__('accounts::filament/resources/payment/pages/create-payment.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

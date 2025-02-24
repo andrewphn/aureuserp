@@ -12,6 +12,21 @@ class JournalResource extends BaseJournalResource
 
     protected static ?string $cluster = Configuration::class;
 
+    public static function getModelLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/journal.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/journal.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('invoices::filament/clusters/configurations/resources/journal.navigation.group');
+    }
+
     public static function getPages(): array
     {
         return [

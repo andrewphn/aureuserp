@@ -24,6 +24,6 @@ class ManageFiscalPositionTax extends ManageRelatedRecords
 
     public static function getNavigationLabel(): string
     {
-        return __('accounts::filament/clusters/configurations/resources/fiscal-position/pages/manage-fiscal-position.navigation.title');
+        return __('accounts::filament/resources/fiscal-position/pages/manage-fiscal-position.navigation.title');
     }
 }

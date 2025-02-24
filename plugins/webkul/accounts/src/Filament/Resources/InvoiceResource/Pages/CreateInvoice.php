@@ -27,8 +27,8 @@ class CreateInvoice extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/customers/resources/invoice/pages/create-invoice.notification.title'))
-            ->body(__('accounts::filament/clusters/customers/resources/invoice/pages/create-invoice.notification.body'));
+            ->title(__('accounts::filament/resources/invoice/pages/create-invoice.notification.title'))
+            ->body(__('accounts::filament/resources/invoice/pages/create-invoice.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

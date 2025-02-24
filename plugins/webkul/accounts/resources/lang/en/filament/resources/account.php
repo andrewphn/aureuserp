@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Accounts',
-
-    'navigation' => [
-        'title' => 'Accounts',
-        'group' => 'Accounting',
-    ],
-
     'global-search' => [
         'currency' => 'Currency',
         'name'     => 'Name',
