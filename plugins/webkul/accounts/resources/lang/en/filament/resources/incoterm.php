@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Incoterms',
-
-    'navigation' => [
-        'title' => 'Incoterms',
-        'group' => 'Invoicing',
-    ],
-
     'global-search' => [
         'name' => 'Name',
         'code' => 'Code',

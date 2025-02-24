@@ -30,6 +30,6 @@ class ManageDistributionForRefund extends ManageRelatedRecords
 
     public static function getNavigationLabel(): string
     {
-        return __('accounts::filament/clusters/configurations/resources/tax/pages/manage-distribution-for-refund.navigation.title');
+        return __('accounts::filament/resources/tax/pages/manage-distribution-for-refund.navigation.title');
     }
 }

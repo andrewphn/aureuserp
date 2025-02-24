@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Journal',
-
-    'navigation' => [
-        'title' => 'Journal',
-        'group' => 'Accounting',
-    ],
-
     'global-search' => [
         'name' => 'Name',
         'code' => 'Code',

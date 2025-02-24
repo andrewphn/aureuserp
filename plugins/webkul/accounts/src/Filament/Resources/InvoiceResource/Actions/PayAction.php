@@ -33,7 +33,7 @@ class PayAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.title'))
+            ->label(__('accounts::filament/resources/invoice/actions/pay-action.title'))
             ->color('primary')
             ->form(function (Form $form) {
                 return $form->schema([
@@ -50,10 +50,10 @@ class PayAction extends Action
                                 })
                                 ->searchable()
                                 ->preload()
-                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.journal'))
+                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.journal'))
                                 ->required(),
                             Forms\Components\TextInput::make('amount')
-                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.amount'))
+                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.amount'))
                                 ->prefix(fn ($record) => $record->currency->symbol ?? '')
                                 ->formatStateUsing(fn ($record) => number_format($record->moveLines->sum('price_total'), 2, '.', ''))
                                 ->dehydrateStateUsing(fn ($state) => (float) str_replace(',', '', $state))
@@ -63,7 +63,7 @@ class PayAction extends Action
                                     'paymentMethodLine',
                                     'name',
                                 )
-                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.payment-method-line'))
+                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.payment-method-line'))
                                 ->default(function ($record) {
                                     return PaymentMethodLine::where('sort', 1)->first()->id;
                                 })
@@ -72,7 +72,7 @@ class PayAction extends Action
                                 ->required(),
                             Forms\Components\DatePicker::make('payment_date')
                                 ->native(false)
-                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.payment-date'))
+                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.payment-date'))
                                 ->default(now())
                                 ->required(),
                             Forms\Components\Select::make('partner_bank_id')
@@ -80,14 +80,14 @@ class PayAction extends Action
                                     'partnerBank',
                                     'account_number',
                                 )
-                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.partner-bank-account'))
+                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.partner-bank-account'))
                                 ->default(function ($record) {
                                     return $record->partner->bankAccounts->first()->id;
                                 })
                                 ->searchable()
                                 ->required(),
                             Forms\Components\TextInput::make('communication')
-                                ->label(__('accounts::filament/clusters/customers/resources/invoice/actions/pay-action.form.fields.communication'))
+                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.communication'))
                                 ->default(function ($record) {
                                     return $record->name;
                                 })

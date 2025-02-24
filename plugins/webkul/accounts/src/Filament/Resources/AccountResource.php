@@ -24,21 +24,6 @@ class AccountResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
-    public static function getModelLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/account.title');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/account.navigation.title');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('accounts::filament/clusters/configurations/resources/account.navigation.group');
-    }
-
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -51,8 +36,8 @@ class AccountResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('accounts::filament/clusters/configurations/resources/account.global-search.currency') => $record->currency?->name ?? '—',
-            __('accounts::filament/clusters/configurations/resources/account.global-search.name')     => $record->name ?? '—',
+            __('accounts::filament/resources/account.global-search.currency') => $record->currency?->name ?? '—',
+            __('accounts::filament/resources/account.global-search.name')     => $record->name ?? '—',
         ];
     }
 
@@ -64,27 +49,27 @@ class AccountResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('code')
                             ->required()
-                            ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.code'))
+                            ->label(__('accounts::filament/resources/account.form.sections.fields.code'))
                             ->maxLength(255)
                             ->columnSpan(1),
                         Forms\Components\TextInput::make('name')
                             ->required()
-                            ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.account-name'))
+                            ->label(__('accounts::filament/resources/account.form.sections.fields.account-name'))
                             ->maxLength(255)
                             ->columnSpan(1),
-                        Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.accounting'))
+                        Forms\Components\Fieldset::make(__('accounts::filament/resources/account.form.sections.fields.accounting'))
                             ->schema([
                                 Forms\Components\Select::make('account_type')
                                     ->options(AccountType::options())
                                     ->preload()
                                     ->required()
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.account-type'))
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.account-type'))
                                     ->live()
                                     ->searchable(),
                                 Forms\Components\Select::make('invoices_account_tax')
                                     ->relationship('taxes', 'name')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.default-taxes'))
-                                    ->hidden(fn (Get $get) => $get('account_type') === AccountType::OFF_BALANCE->value)
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.default-taxes'))
+                                    ->hidden(fn(Get $get) => $get('account_type') === AccountType::OFF_BALANCE->value)
                                     ->multiple()
                                     ->preload()
                                     ->searchable(),
@@ -92,28 +77,28 @@ class AccountResource extends Resource
                                     ->relationship('tags', 'name')
                                     ->multiple()
                                     ->preload()
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.tags'))
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.tags'))
                                     ->searchable(),
                                 Forms\Components\Select::make('invoices_account_journals')
                                     ->relationship('journals', 'name')
                                     ->multiple()
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.journals'))
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.journals'))
                                     ->preload()
                                     ->searchable(),
                                 Forms\Components\Select::make('currency_id')
                                     ->relationship('currency', 'name')
                                     ->preload()
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.currency'))
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.currency'))
                                     ->searchable(),
                                 Forms\Components\Toggle::make('deprecated')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.deprecated')),
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.deprecated')),
                                 Forms\Components\Toggle::make('reconcile')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.reconcile')),
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.reconcile')),
                                 Forms\Components\Toggle::make('non_trade')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.non-trade')),
+                                    ->label(__('accounts::filament/resources/account.form.sections.fields.non-trade')),
                             ]),
                     ])->columns(2),
             ]);
@@ -125,25 +110,25 @@ class AccountResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('code')
                     ->searchable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.code')),
+                    ->label(__('accounts::filament/resources/account.table.columns.code')),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.account-name')),
+                    ->label(__('accounts::filament/resources/account.table.columns.account-name')),
                 Tables\Columns\TextColumn::make('account_type')
                     ->searchable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.account-type')),
+                    ->label(__('accounts::filament/resources/account.table.columns.account-type')),
                 Tables\Columns\TextColumn::make('currency.name')
                     ->searchable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.currency')),
+                    ->label(__('accounts::filament/resources/account.table.columns.currency')),
                 Tables\Columns\IconColumn::make('deprecated')
                     ->boolean()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.deprecated')),
+                    ->label(__('accounts::filament/resources/account.table.columns.deprecated')),
                 Tables\Columns\IconColumn::make('reconcile')
                     ->boolean()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.reconcile')),
+                    ->label(__('accounts::filament/resources/account.table.columns.reconcile')),
                 Tables\Columns\IconColumn::make('non_trade')
                     ->boolean()
-                    ->label(__('accounts::filament/clusters/configurations/resources/account.table.columns.non-trade')),
+                    ->label(__('accounts::filament/resources/account.table.columns.non-trade')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -152,8 +137,8 @@ class AccountResource extends Resource
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('accounts::filament/clusters/configurations/resources/account.table.actions.delete.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/account.table.actions.delete.notification.body'))
+                            ->title(__('accounts::filament/resources/account.table.actions.delete.notification.title'))
+                            ->body(__('accounts::filament/resources/account.table.actions.delete.notification.body'))
                     ),
             ])
             ->bulkActions([
@@ -162,8 +147,8 @@ class AccountResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('accounts::filament/clusters/configurations/resources/account.table.bulk-options.delete.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/account.table.bulk-options.delete.notification.body'))
+                                ->title(__('accounts::filament/resources/account.table.bulk-options.delete.notification.title'))
+                                ->body(__('accounts::filament/resources/account.table.bulk-options.delete.notification.body'))
                         ),
                 ]),
             ]);
@@ -176,51 +161,51 @@ class AccountResource extends Resource
                 Infolists\Components\Section::make()
                     ->schema([
                         Infolists\Components\TextEntry::make('code')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.code'))
+                            ->label(__('accounts::filament/resources/account.infolist.sections.entries.code'))
                             ->icon('heroicon-o-identification')
                             ->placeholder('-')
                             ->columnSpan(1),
                         Infolists\Components\TextEntry::make('name')
-                            ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.account-name'))
+                            ->label(__('accounts::filament/resources/account.infolist.sections.entries.account-name'))
                             ->icon('heroicon-o-document-text')
                             ->placeholder('-')
                             ->columnSpan(1),
-                        Infolists\Components\Section::make(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.accounting'))
+                        Infolists\Components\Section::make(__('accounts::filament/resources/account.infolist.sections.entries.accounting'))
                             ->schema([
                                 Infolists\Components\TextEntry::make('account_type')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.account-type'))
+                                    ->label(__('accounts::filament/resources/account.infolist.sections.entries.account-type'))
                                     ->placeholder('-')
                                     ->icon('heroicon-o-tag'),
                                 Infolists\Components\TextEntry::make('taxes.name')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.default-taxes'))
-                                    ->visible(fn ($record) => $record->account_type !== AccountType::OFF_BALANCE->value)
+                                    ->label(__('accounts::filament/resources/account.infolist.sections.entries.default-taxes'))
+                                    ->visible(fn($record) => $record->account_type !== AccountType::OFF_BALANCE->value)
                                     ->listWithLineBreaks()
                                     ->placeholder('-')
                                     ->icon('heroicon-o-calculator'),
                                 Infolists\Components\TextEntry::make('tags.name')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.tags'))
+                                    ->label(__('accounts::filament/resources/account.infolist.sections.entries.tags'))
                                     ->listWithLineBreaks()
                                     ->placeholder('-')
                                     ->icon('heroicon-o-tag'),
                                 Infolists\Components\TextEntry::make('journals.name')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.journals'))
+                                    ->label(__('accounts::filament/resources/account.infolist.sections.entries.journals'))
                                     ->listWithLineBreaks()
                                     ->placeholder('-')
                                     ->icon('heroicon-o-book-open'),
                                 Infolists\Components\TextEntry::make('currency.name')
-                                    ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.currency'))
+                                    ->label(__('accounts::filament/resources/account.infolist.sections.entries.currency'))
                                     ->placeholder('-')
                                     ->icon('heroicon-o-currency-dollar'),
                                 Infolists\Components\Grid::make(['default' => 3])
                                     ->schema([
                                         Infolists\Components\IconEntry::make('deprecated')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.deprecated'))
+                                            ->label(__('accounts::filament/resources/account.infolist.sections.entries.deprecated'))
                                             ->placeholder('-'),
                                         Infolists\Components\IconEntry::make('reconcile')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.reconcile'))
+                                            ->label(__('accounts::filament/resources/account.infolist.sections.entries.reconcile'))
                                             ->placeholder('-'),
                                         Infolists\Components\IconEntry::make('non_trade')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.non-trade'))
+                                            ->label(__('accounts::filament/resources/account.infolist.sections.entries.non-trade'))
                                             ->placeholder('-'),
                                     ]),
                             ])

@@ -19,8 +19,8 @@ class ViewCashRounding extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/view-cash-rounding.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/cash-rounding/pages/view-cash-rounding.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/cash-rounding/pages/view-cash-rounding.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/cash-rounding/pages/view-cash-rounding.header-actions.delete.notification.body'))
                 ),
         ];
     }

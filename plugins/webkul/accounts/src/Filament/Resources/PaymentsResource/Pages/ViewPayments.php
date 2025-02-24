@@ -23,8 +23,8 @@ class ViewPayments extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/customers/resources/payment/pages/view-payment.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/customers/resources/payment/pages/view-payment.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/payment/pages/view-payment.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/payment/pages/view-payment.header-actions.delete.notification.body'))
                 ),
             BaseActions\ConfirmAction::make(),
             BaseActions\ResetToDraftAction::make(),

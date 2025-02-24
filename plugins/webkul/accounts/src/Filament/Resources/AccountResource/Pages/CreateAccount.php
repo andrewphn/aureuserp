@@ -19,7 +19,7 @@ class CreateAccount extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/account/pages/create-account.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/account/pages/create-account.notification.body'));
+            ->title(__('accounts::filament/resources/account/pages/create-account.notification.title'))
+            ->body(__('accounts::filament/resources/account/pages/create-account.notification.body'));
     }
 }

@@ -25,8 +25,8 @@ class ViewPaymentTerm extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/payment-term/pages/view-payment-term.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/payment-term/pages/view-payment-term.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/payment-term/pages/view-payment-term.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/payment-term/pages/view-payment-term.header-actions.delete.notification.body'))
                 ),
         ];
     }

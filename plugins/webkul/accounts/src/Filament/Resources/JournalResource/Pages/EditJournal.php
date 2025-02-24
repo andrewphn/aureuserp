@@ -32,8 +32,8 @@ class EditJournal extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/journal/pages/edit-journal.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/journal/pages/edit-journal.notification.body'));
+            ->title(__('accounts::filament/resources/journal/pages/edit-journal.notification.title'))
+            ->body(__('accounts::filament/resources/journal/pages/edit-journal.notification.body'));
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

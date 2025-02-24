@@ -21,8 +21,8 @@ class EditTax extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/tax/pages/edit-tax.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/tax/pages/edit-tax.notification.body'));
+            ->title(__('accounts::filament/resources/tax/pages/edit-tax.notification.title'))
+            ->body(__('accounts::filament/resources/tax/pages/edit-tax.notification.body'));
     }
 
     protected function getRedirectUrl(): string
@@ -38,8 +38,8 @@ class EditTax extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/tax/pages/edit-tax.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/tax/pages/edit-tax.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/tax/pages/edit-tax.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/tax/pages/edit-tax.header-actions.delete.notification.body'))
                 ),
         ];
     }

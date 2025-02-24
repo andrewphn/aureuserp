@@ -19,8 +19,8 @@ class ListIncoTerms extends ListRecords
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/clusters/configurations/resources/inco-term/pages/list-inco-term.header-actions.notification.title'))
-                        ->body(__('accounts::filament/clusters/configurations/resources/inco-term/pages/list-inco-term.header-actions.notification.body'))
+                        ->title(__('accounts::filament/resources/inco-term/pages/list-inco-term.header-actions.notification.title'))
+                        ->body(__('accounts::filament/resources/inco-term/pages/list-inco-term.header-actions.notification.body'))
                 ),
         ];
     }

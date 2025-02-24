@@ -23,8 +23,8 @@ class CreateJournal extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/journal/pages/create-journal.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/journal/pages/create-journal.notification.body'));
+            ->title(__('accounts::filament/resources/journal/pages/create-journal.notification.title'))
+            ->body(__('accounts::filament/resources/journal/pages/create-journal.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

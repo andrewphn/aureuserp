@@ -19,7 +19,7 @@ class CreateTaxGroup extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/configurations/resources/tax-group/pages/create-tax-group.notification.title'))
-            ->body(__('accounts::filament/clusters/configurations/resources/tax-group/pages/create-tax-group.notification.body'));
+            ->title(__('accounts::filament/resources/tax-group/pages/create-tax-group.notification.title'))
+            ->body(__('accounts::filament/resources/tax-group/pages/create-tax-group.notification.body'));
     }
 }

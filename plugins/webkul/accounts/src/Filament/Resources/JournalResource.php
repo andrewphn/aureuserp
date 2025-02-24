@@ -27,21 +27,6 @@ class JournalResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getModelLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/journal.title');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('accounts::filament/clusters/configurations/resources/journal.navigation.title');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('accounts::filament/clusters/configurations/resources/journal.navigation.group');
-    }
-
     public static function getGloballySearchableAttributes(): array
     {
         return [
@@ -53,8 +38,8 @@ class JournalResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('accounts::filament/clusters/configurations/resources/journal.global-search.name') => $record->name ?? '—',
-            __('accounts::filament/clusters/configurations/resources/journal.global-search.code') => $record->code ?? '—',
+            __('accounts::filament/resources/journal.global-search.name') => $record->name ?? '—',
+            __('accounts::filament/resources/journal.global-search.code') => $record->code ?? '—',
         ];
     }
 
@@ -68,9 +53,9 @@ class JournalResource extends Resource
                             ->schema([
                                 Forms\Components\Tabs::make()
                                     ->tabs([
-                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.title'))
+                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.form.tabs.journal-entries.title'))
                                             ->schema([
-                                                Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.title'))
+                                                Forms\Components\Fieldset::make(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.title'))
                                                     ->schema([
                                                         Forms\Components\Group::make()
                                                             ->schema([
@@ -78,25 +63,25 @@ class JournalResource extends Resource
                                                                     ->hidden(function (Get $get) {
                                                                         return ! in_array($get('type'), [JournalType::SALE->value, JournalType::PURCHASE->value]);
                                                                     })
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.dedicated-credit-note-sequence')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.dedicated-credit-note-sequence')),
                                                                 Forms\Components\Toggle::make('payment_order')
                                                                     ->hidden(function (Get $get) {
                                                                         return ! in_array($get('type'), [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]);
                                                                     })
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.dedicated-payment-sequence')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.dedicated-payment-sequence')),
                                                                 Forms\Components\TextInput::make('code')
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.sort-code'))
-                                                                    ->placeholder(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.sort-code-placeholder')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.sort-code'))
+                                                                    ->placeholder(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.sort-code-placeholder')),
                                                                 Forms\Components\Select::make('currency_id')
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.currency'))
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.currency'))
                                                                     ->relationship('currency', 'name')
                                                                     ->preload()
                                                                     ->searchable(),
                                                                 Forms\Components\ColorPicker::make('color')
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.color')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.color')),
                                                             ]),
                                                     ]),
-                                                Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.bank-account-number.title'))
+                                                Forms\Components\Fieldset::make(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.bank-account-number.title'))
                                                     ->visible(function (Get $get) {
                                                         return $get('type') === JournalType::BANK->value;
                                                     })
@@ -111,7 +96,7 @@ class JournalResource extends Resource
                                                             ]),
                                                     ]),
                                             ]),
-                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.incoming-payments.title'))
+                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.form.tabs.incoming-payments.title'))
                                             ->visible(function (Get $get) {
                                                 return in_array($get('type'), [
                                                     JournalType::BANK->value,
@@ -122,10 +107,10 @@ class JournalResource extends Resource
                                             })
                                             ->schema([
                                                 Forms\Components\Textarea::make('relation_notes')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.incoming-payments.fields.relation-notes'))
-                                                    ->placeholder(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.incoming-payments.fields.relation-notes-placeholder')),
+                                                    ->label(__('accounts::filament/resources/journal.form.tabs.incoming-payments.fields.relation-notes'))
+                                                    ->placeholder(__('accounts::filament/resources/journal.form.tabs.incoming-payments.fields.relation-notes-placeholder')),
                                             ]),
-                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.outgoing-payments.title'))
+                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.form.tabs.outgoing-payments.title'))
                                             ->visible(function (Get $get) {
                                                 return in_array($get('type'), [
                                                     JournalType::BANK->value,
@@ -137,12 +122,12 @@ class JournalResource extends Resource
                                             ->schema([
                                                 Forms\Components\Textarea::make('relation_notes')
                                                     ->label('Relation Notes')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.outgoing-payments.fields.relation-notes'))
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.outgoing-payments.fields.relation-notes-placeholder')),
+                                                    ->label(__('accounts::filament/resources/journal.form.tabs.outgoing-payments.fields.relation-notes'))
+                                                    ->label(__('accounts::filament/resources/journal.form.tabs.outgoing-payments.fields.relation-notes-placeholder')),
                                             ]),
-                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.title'))
+                                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.form.tabs.advanced-settings.title'))
                                             ->schema([
-                                                Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.control-access'))
+                                                Forms\Components\Fieldset::make(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.control-access'))
                                                     ->schema([
                                                         Forms\Components\Group::make()
                                                             ->schema([
@@ -150,20 +135,20 @@ class JournalResource extends Resource
                                                                     ->relationship('allowedAccounts', 'name')
                                                                     ->multiple()
                                                                     ->preload()
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.allowed-accounts')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.allowed-accounts')),
                                                                 Forms\Components\Toggle::make('auto_check_on_post')
-                                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.auto-check-on-post')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.auto-check-on-post')),
                                                             ]),
                                                     ]),
-                                                Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.payment-communication'))
-                                                    ->visible(fn (Get $get) => $get('type') === JournalType::SALE->value)
+                                                Forms\Components\Fieldset::make(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.payment-communication'))
+                                                    ->visible(fn(Get $get) => $get('type') === JournalType::SALE->value)
                                                     ->schema([
                                                         Forms\Components\Select::make('invoice_reference_type')
                                                             ->options(CommunicationType::options())
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.communication-type')),
+                                                            ->label(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.communication-type')),
                                                         Forms\Components\Select::make('invoice_reference_model')
                                                             ->options(CommunicationStandard::options())
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.communication-standard')),
+                                                            ->label(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.communication-standard')),
                                                     ]),
                                             ]),
                                     ])
@@ -172,20 +157,20 @@ class JournalResource extends Resource
                             ->columnSpan(['lg' => 2]),
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\Section::make(__('accounts::filament/clusters/configurations/resources/journal.form.general.title'))
+                                Forms\Components\Section::make(__('accounts::filament/resources/journal.form.general.title'))
                                     ->schema([
                                         Forms\Components\Group::make()
                                             ->schema([
                                                 Forms\Components\TextInput::make('name')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.general.fields.name'))
+                                                    ->label(__('accounts::filament/resources/journal.form.general.fields.name'))
                                                     ->required(),
                                                 Forms\Components\Select::make('type')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.general.fields.type'))
+                                                    ->label(__('accounts::filament/resources/journal.form.general.fields.type'))
                                                     ->options(JournalType::options())
                                                     ->required()
                                                     ->live(),
                                                 Forms\Components\Select::make('company_id')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.form.general.fields.company'))
+                                                    ->label(__('accounts::filament/resources/journal.form.general.fields.company'))
                                                     ->disabled()
                                                     ->relationship('company', 'name')
                                                     ->default(Auth::user()->default_company_id)
@@ -207,28 +192,28 @@ class JournalResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.name')),
+                    ->label(__('accounts::filament/resources/journal.table.columns.name')),
                 Tables\Columns\TextColumn::make('type')
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => JournalType::options()[$state] ?? $state)
+                    ->formatStateUsing(fn($state) => JournalType::options()[$state] ?? $state)
                     ->sortable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.type')),
+                    ->label(__('accounts::filament/resources/journal.table.columns.type')),
                 Tables\Columns\TextColumn::make('code')
                     ->searchable()
                     ->sortable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.code')),
+                    ->label(__('accounts::filament/resources/journal.table.columns.code')),
                 Tables\Columns\TextColumn::make('currency.name')
                     ->searchable()
                     ->sortable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.currency')),
+                    ->label(__('accounts::filament/resources/journal.table.columns.currency')),
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->searchable()
                     ->sortable()
-                    ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.created-by')),
+                    ->label(__('accounts::filament/resources/journal.table.columns.created-by')),
                 Tables\Columns\IconColumn::make('is_active')
                     ->sortable()
                     ->boolean()
-                    ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.status')),
+                    ->label(__('accounts::filament/resources/journal.table.columns.status')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -236,8 +221,8 @@ class JournalResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->successNotification(
                         Notification::make()
-                            ->title(__('accounts::filament/clusters/configurations/resources/journal.table.actions.delete.notification.title'))
-                            ->body(__('accounts::filament/clusters/configurations/resources/journal.table.actions.delete.notification.body'))
+                            ->title(__('accounts::filament/resources/journal.table.actions.delete.notification.title'))
+                            ->body(__('accounts::filament/resources/journal.table.actions.delete.notification.body'))
                     ),
             ])
             ->bulkActions([
@@ -245,8 +230,8 @@ class JournalResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->successNotification(
                             Notification::make()
-                                ->title(__('accounts::filament/clusters/configurations/resources/journal.table.bulk-actions.delete.notification.title'))
-                                ->body(__('accounts::filament/clusters/configurations/resources/journal.table.bulk-actions.delete.notification.body'))
+                                ->title(__('accounts::filament/resources/journal.table.bulk-actions.delete.notification.title'))
+                                ->body(__('accounts::filament/resources/journal.table.bulk-actions.delete.notification.body'))
                         ),
                 ]),
             ]);
@@ -262,95 +247,95 @@ class JournalResource extends Resource
                             ->schema([
                                 Infolists\Components\Tabs::make('Journal Information')
                                     ->tabs([
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.title'))
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.title'))
                                             ->schema([
-                                                Infolists\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.title'))
+                                                Infolists\Components\Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.title'))
                                                     ->schema([
                                                         Infolists\Components\IconEntry::make('refund_order')
                                                             ->boolean()
-                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::SALE->value, JournalType::PURCHASE->value]))
+                                                            ->visible(fn($record) => in_array($record->type, [JournalType::SALE->value, JournalType::PURCHASE->value]))
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-credit-note-sequence')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-credit-note-sequence')),
                                                         Infolists\Components\IconEntry::make('payment_order')
                                                             ->boolean()
                                                             ->placeholder('-')
-                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-payment-sequence')),
+                                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-payment-sequence')),
                                                         Infolists\Components\TextEntry::make('code')
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.sort-code')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.sort-code')),
                                                         Infolists\Components\TextEntry::make('currency.name')
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.currency')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.currency')),
                                                         Infolists\Components\ColorEntry::make('color')
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.color')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.color')),
                                                     ])->columns(2),
-                                                Infolists\Components\Section::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.bank-account.title'))
-                                                    ->visible(fn ($record) => $record->type === JournalType::BANK->value)
+                                                Infolists\Components\Section::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.bank-account.title'))
+                                                    ->visible(fn($record) => $record->type === JournalType::BANK->value)
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('bankAccount.account_number')
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.bank-account.entries.account-number')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.bank-account.entries.account-number')),
                                                     ]),
                                             ]),
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.incoming-payments.title'))
-                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.title'))
+                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('relation_notes')
                                                     ->placeholder('-')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.incoming-payments.entries.relation-notes'))
+                                                    ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.relation-notes'))
                                                     ->markdown(),
                                             ]),
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.outgoing-payments.title'))
-                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.title'))
+                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('relation_notes')
                                                     ->placeholder('-')
-                                                    ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.outgoing-payments.entries.relation-notes'))
+                                                    ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.relation-notes'))
                                                     ->markdown(),
                                             ]),
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.title'))
+                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.title'))
                                             ->schema([
-                                                Infolists\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.title'))
+                                                Infolists\Components\Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.title'))
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('allowedAccounts.name')
                                                             ->placeholder('-')
                                                             ->listWithLineBreaks()
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.entries.allowed-accounts')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.entries.allowed-accounts')),
                                                         Infolists\Components\IconEntry::make('auto_check_on_post')
                                                             ->boolean()
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.entries.auto-check-on-post')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.entries.auto-check-on-post')),
                                                     ]),
-                                                Infolists\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.payment-communication.title'))
-                                                    ->visible(fn ($record) => $record->type === JournalType::SALE->value)
+                                                Infolists\Components\Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.title'))
+                                                    ->visible(fn($record) => $record->type === JournalType::SALE->value)
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('invoice_reference_type')
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-type')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-type')),
                                                         Infolists\Components\TextEntry::make('invoice_reference_model')
                                                             ->placeholder('-')
-                                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-standard')),
+                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-standard')),
                                                     ]),
                                             ]),
                                     ]),
                             ])->columnSpan(2),
                         Infolists\Components\Group::make()
                             ->schema([
-                                Infolists\Components\Section::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.general.title'))
+                                Infolists\Components\Section::make(__('accounts::filament/resources/journal.infolist.general.title'))
                                     ->schema([
                                         Infolists\Components\TextEntry::make('name')
                                             ->placeholder('-')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.general.entries.name'))
+                                            ->label(__('accounts::filament/resources/journal.infolist.general.entries.name'))
                                             ->icon('heroicon-o-document-text'),
                                         Infolists\Components\TextEntry::make('type')
                                             ->placeholder('-')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.general.entries.type'))
+                                            ->label(__('accounts::filament/resources/journal.infolist.general.entries.type'))
                                             ->icon('heroicon-o-tag'),
                                         Infolists\Components\TextEntry::make('company.name')
                                             ->placeholder('-')
-                                            ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.general.entries.company'))
+                                            ->label(__('accounts::filament/resources/journal.infolist.general.entries.company'))
                                             ->icon('heroicon-o-building-office'),
                                     ]),
                             ])->columnSpan(1),

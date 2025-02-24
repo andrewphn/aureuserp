@@ -12,6 +12,21 @@ class FiscalPositionResource extends BaseFiscalPositionResource
 
     protected static ?string $cluster = Configuration::class;
 
+    public static function getModelLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/fiscal-position.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('invoices::filament/clusters/configurations/resources/fiscal-position.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('invoices::filament/clusters/configurations/resources/fiscal-position.navigation.group');
+    }
+
     public static function getPages(): array
     {
         return [

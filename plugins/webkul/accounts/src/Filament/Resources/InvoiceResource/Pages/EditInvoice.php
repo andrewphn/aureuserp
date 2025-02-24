@@ -27,8 +27,8 @@ class EditInvoice extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/customers/resources/invoice/pages/edit-invoice.notification.title'))
-            ->body(__('accounts::filament/clusters/customers/resources/invoice/pages/edit-invoice.notification.body'));
+            ->title(__('accounts::filament/resources/invoice/pages/edit-invoice.notification.title'))
+            ->body(__('accounts::filament/resources/invoice/pages/edit-invoice.notification.body'));
     }
 
     protected function getHeaderActions(): array

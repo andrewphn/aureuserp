@@ -22,8 +22,8 @@ class EditPayments extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('accounts::filament/clusters/customers/resources/payment/pages/edit-payment.notification.title'))
-            ->body(__('accounts::filament/clusters/customers/resources/payment/pages/edit-payment.notification.body'));
+            ->title(__('accounts::filament/resources/payment/pages/edit-payment.notification.title'))
+            ->body(__('accounts::filament/resources/payment/pages/edit-payment.notification.body'));
     }
 
     protected function getHeaderActions(): array

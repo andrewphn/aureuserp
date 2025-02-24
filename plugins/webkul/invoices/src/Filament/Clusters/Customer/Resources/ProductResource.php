@@ -22,11 +22,6 @@ class ProductResource extends BaseProductResource
         return __('invoices::filament/clusters/customers/resources/products.navigation.title');
     }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('invoices::filament/clusters/customers/resources/products.navigation.group');
-    }
-
     public static function getPages(): array
     {
         return [

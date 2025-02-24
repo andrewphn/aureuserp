@@ -14,6 +14,16 @@ class InvoiceResource extends BaseInvoiceResource
 
     protected static ?string $cluster = Customer::class;
 
+    public static function getModelLabel(): string
+    {
+        return __('invoices::filament/clusters/customers/resources/invoice.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('invoices::filament/clusters/customers/resources/invoice.navigation.title');
+    }
+
     public static function getPages(): array
     {
         return [

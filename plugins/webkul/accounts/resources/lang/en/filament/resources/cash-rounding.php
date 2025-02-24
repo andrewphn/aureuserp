@@ -1,13 +1,6 @@
 <?php
 
 return [
-    'title' => 'Cash Rounding',
-
-    'navigation' => [
-        'title' => 'Cash Rounding',
-        'group' => 'Management',
-    ],
-
     'global-search' => [
         'name'     => 'Name',
     ],
