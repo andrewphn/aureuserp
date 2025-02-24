@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\EditInvoice as BaseEditInvoice;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as BaseEditInvoice;
 
 class EditCreditNotes extends BaseEditInvoice
 {

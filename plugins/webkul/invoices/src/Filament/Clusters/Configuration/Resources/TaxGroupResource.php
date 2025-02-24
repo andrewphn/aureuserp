@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxGroupResource as BaseTaxGroupResource;
-use Webkul\Invoice\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Resources\TaxGroupResource as BaseTaxGroupResource;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Configuration;
 
 class TaxGroupResource extends BaseTaxGroupResource
 {

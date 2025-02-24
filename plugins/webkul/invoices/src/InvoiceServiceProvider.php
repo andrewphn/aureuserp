@@ -20,8 +20,12 @@ class InvoiceServiceProvider extends PackageServiceProvider
             ->hasTranslations()
             ->hasMigrations([])
             ->runsMigrations()
+            ->hasDependencies([
+                'sales',
+            ])
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
+                    ->installDependencies()
                     ->runsMigrations()
                     ->runsSeeders();
             })

@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages\ViewFiscalPosition as BaseViewFiscalPosition;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource;
+use Webkul\Account\Filament\Resources\FiscalPositionResource\Pages\ViewFiscalPosition as BaseViewFiscalPosition;
 
 class ViewFiscalPosition extends BaseViewFiscalPosition
 {

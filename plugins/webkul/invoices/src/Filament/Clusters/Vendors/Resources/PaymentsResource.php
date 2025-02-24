@@ -3,9 +3,9 @@
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
 use Filament\Tables\Table;
-use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource as BasePaymentsResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource\Pages;
+use Webkul\Account\Filament\Resources\PaymentsResource as BasePaymentsResource;
 
 class PaymentsResource extends BasePaymentsResource
 {

@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\IncoTermResource as BaseIncoTermResource;
 use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages;
+use Webkul\Account\Filament\Resources\IncoTermResource as BaseIncoTermResource;
 
 class IncoTermResource extends BaseIncoTermResource
 {

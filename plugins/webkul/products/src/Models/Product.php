@@ -146,6 +146,11 @@ class Product extends Model
         return $this->hasMany(self::class, 'parent_id');
     }
 
+    public function combinations(): HasMany
+    {
+        return $this->hasMany(ProductCombination::class, 'product_id');
+    }
+
     public function priceRuleItems(): HasMany
     {
         return $this->hasMany(PriceRuleItem::class);

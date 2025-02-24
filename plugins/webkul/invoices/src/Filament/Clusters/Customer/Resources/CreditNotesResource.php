@@ -5,9 +5,9 @@ namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
+use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 
 class CreditNotesResource extends BaseInvoiceResource
 {

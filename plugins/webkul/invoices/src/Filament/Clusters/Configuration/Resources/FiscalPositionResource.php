@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\FiscalPositionResource as BaseFiscalPositionResource;
 use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\FiscalPositionResource\Pages;
+use Webkul\Account\Filament\Resources\FiscalPositionResource as BaseFiscalPositionResource;
 
 class FiscalPositionResource extends BaseFiscalPositionResource
 {

@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\CashRoundingResource\Pages\ViewCashRounding as BaseViewCashRounding;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\CashRoundingResource;
+use Webkul\Account\Filament\Resources\CashRoundingResource\Pages\ViewCashRounding as BaseViewCashRounding;
 
 class ViewCashRounding extends BaseViewCashRounding
 {
