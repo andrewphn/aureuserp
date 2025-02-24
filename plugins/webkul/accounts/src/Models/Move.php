@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Models\Team;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -84,7 +83,6 @@ class Move extends Model
         'is_move_sent',
         'source_id',
         'medium_id',
-        'team_id',
     ];
 
     public function campaign()
@@ -180,11 +178,6 @@ class Move extends Model
     public function medium()
     {
         return $this->belongsTo(UTMMedium::class);
-    }
-
-    public function team()
-    {
-        return $this->belongsTo(Team::class);
     }
 
     public function paymentMethodLine()

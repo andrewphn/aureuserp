@@ -27,10 +27,9 @@ use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
-use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
+use Webkul\Product\Filament\Resources\ProductResource;
+use Webkul\Product\Models\Product;
 use Webkul\Sale\Livewire\Summary;
-use Webkul\Sale\Models\Product;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Support\Models\Currency;
 
@@ -126,12 +125,6 @@ class InvoiceResource extends Resource
                                                             ->createOptionForm(fn (Form $form) => UserResource::form($form))
                                                             ->preload()
                                                             ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.other-information.fields.fieldset.invoice.fields.sales-person')),
-                                                        Forms\Components\Select::make('team_id')
-                                                            ->relationship('team', 'name')
-                                                            ->createOptionForm(fn (Form $form) => TeamResource::form($form))
-                                                            ->searchable()
-                                                            ->preload()
-                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.other-information.fields.fieldset.invoice.fields.sales-team')),
                                                         Forms\Components\Select::make('partner_bank_id')
                                                             ->relationship('partnerBank', 'account_holder_name')
                                                             ->searchable()
@@ -342,12 +335,6 @@ class InvoiceResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('team.name')
-                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.sales-team'))
-                    ->searchable()
-                    ->placeholder('-')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_untaxed_in_currency_signed')
                     ->label(__('accounts::filament/clusters/customers/resources/invoice.table.columns.tax-excluded'))
                     ->searchable()
@@ -407,10 +394,6 @@ class InvoiceResource extends Resource
                 Tables\Grouping\Group::make('invoiceUser.name')
                     ->date()
                     ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.sales-person'))
-                    ->collapsible(),
-                Tables\Grouping\Group::make('team.name')
-                    ->date()
-                    ->label(__('accounts::filament/clusters/customers/resources/invoice.table.groups.sales-team'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('currency.name')
                     ->date()
@@ -534,9 +517,6 @@ class InvoiceResource extends Resource
                                                         Infolists\Components\TextEntry::make('invoiceUser.name')
                                                             ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.sales-person'))
                                                             ->icon('heroicon-o-user'),
-                                                        Infolists\Components\TextEntry::make('team.name')
-                                                            ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.sales-team'))
-                                                            ->icon('heroicon-o-users'),
                                                         Infolists\Components\TextEntry::make('partnerBank.account_holder_name')
                                                             ->label(__('accounts::filament/clusters/customers/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.recipient-bank'))
                                                             ->icon('heroicon-o-building-library'),
@@ -646,6 +626,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-m-eye')
                     ->action(function (array $arguments, $livewire, $state): void {
                         $redirectUrl = ProductResource::getUrl('edit', ['record' => $state[$arguments['item']]['product_id']]);
+
                         $livewire->redirect($redirectUrl, navigate: FilamentView::hasSpaMode());
                     }),
             ])
@@ -662,6 +643,7 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
+                                    ->createOptionForm(fn (Form $form) => ProductResource::form($form))
                                     ->label('Product')
                                     ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.product'))
                                     ->afterStateHydrated(function ($state, Set $set, Get $get) {

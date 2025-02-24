@@ -21,7 +21,7 @@ class InvoiceServiceProvider extends PackageServiceProvider
             ->hasMigrations([])
             ->runsMigrations()
             ->hasDependencies([
-                'sales',
+                'accounts',
             ])
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
