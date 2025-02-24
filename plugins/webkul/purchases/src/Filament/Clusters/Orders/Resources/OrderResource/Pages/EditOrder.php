@@ -2,13 +2,12 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Pages;
 
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
 class EditOrder extends EditRecord
 {

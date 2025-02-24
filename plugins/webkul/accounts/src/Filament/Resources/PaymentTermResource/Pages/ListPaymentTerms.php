@@ -5,8 +5,8 @@ namespace Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
-use Webkul\Account\Models\PaymentTerm;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
+use Webkul\Account\Models\PaymentTerm;
 
 class ListPaymentTerms extends ListRecords
 {

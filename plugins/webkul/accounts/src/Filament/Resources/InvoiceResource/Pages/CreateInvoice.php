@@ -7,12 +7,12 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums;
 use Webkul\Account\Enums\PaymentState;
+use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
-use Webkul\Account\Filament\Resources\InvoiceResource;
 
 class CreateInvoice extends CreateRecord
 {

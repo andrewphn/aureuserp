@@ -2,9 +2,9 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Pages;
 
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
 class ListOrders extends ListRecords
 {

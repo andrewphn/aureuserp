@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Account\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Resources\TaxGroupResource\Pages;
 use Webkul\Account\Models\TaxGroup;
 

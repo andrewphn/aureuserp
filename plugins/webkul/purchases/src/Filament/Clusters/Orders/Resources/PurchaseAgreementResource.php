@@ -92,7 +92,7 @@ class PurchaseAgreementResource extends Resource
                                     ->searchable()
                                     ->preload(),
                             ]),
-                            
+
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Group::make()

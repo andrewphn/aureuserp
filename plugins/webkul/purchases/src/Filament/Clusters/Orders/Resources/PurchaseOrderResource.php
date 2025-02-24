@@ -2,18 +2,9 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
-use Webkul\Purchase\Filament\Clusters\Orders;
 use Filament\Pages\SubNavigationPosition;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
+use Webkul\Purchase\Filament\Clusters\Orders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResource\Pages;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PurchaseOrderResource extends OrderResource
 {
@@ -44,10 +35,10 @@ class PurchaseOrderResource extends OrderResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPurchaseOrders::route('/'),
+            'index'  => Pages\ListPurchaseOrders::route('/'),
             'create' => Pages\CreatePurchaseOrder::route('/create'),
-            'view' => Pages\ViewPurchaseOrder::route('/{record}'),
-            'edit' => Pages\EditPurchaseOrder::route('/{record}/edit'),
+            'view'   => Pages\ViewPurchaseOrder::route('/{record}'),
+            'edit'   => Pages\EditPurchaseOrder::route('/{record}/edit'),
         ];
     }
 }

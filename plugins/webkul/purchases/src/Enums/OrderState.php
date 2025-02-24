@@ -21,27 +21,27 @@ enum OrderState: string implements HasColor, HasLabel
             self::DRAFT->value    => __('purchases::enums/order-state.draft'),
             self::SENT->value     => __('purchases::enums/order-state.sent'),
             self::PURCHASE->value => __('purchases::enums/order-state.purchase'),
-            self::DONE->value => __('purchases::enums/order-state.done'),
+            self::DONE->value     => __('purchases::enums/order-state.done'),
         ];
     }
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::DRAFT => __('purchases::enums/order-state.draft'),
-            self::SENT => __('purchases::enums/order-state.sent'),
+            self::DRAFT    => __('purchases::enums/order-state.draft'),
+            self::SENT     => __('purchases::enums/order-state.sent'),
             self::PURCHASE => __('purchases::enums/order-state.purchase'),
-            self::DONE => __('purchases::enums/order-state.done'),
+            self::DONE     => __('purchases::enums/order-state.done'),
         };
     }
 
     public function getColor(): string
     {
         return match ($this) {
-            self::DRAFT => 'gray',
-            self::SENT => 'blue',
+            self::DRAFT    => 'gray',
+            self::SENT     => 'blue',
             self::PURCHASE => 'success',
-            self::DONE => 'success',
+            self::DONE     => 'success',
         };
     }
 }

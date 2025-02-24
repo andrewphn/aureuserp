@@ -13,9 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\RoundingMethod;
 use Webkul\Account\Enums\RoundingStrategy;
-use Webkul\Account\Models\CashRounding;
-use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Resources\CashRoundingResource\Pages;
+use Webkul\Account\Models\CashRounding;
 
 class CashRoundingResource extends Resource
 {

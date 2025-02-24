@@ -5,9 +5,9 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource\Pages;
-use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 
 class BillsResource extends BaseInvoiceResource
 {

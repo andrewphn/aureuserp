@@ -13,7 +13,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\AccountType;
-use Webkul\Account\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Resources\AccountResource\Pages;
 use Webkul\Account\Models\Account;
 

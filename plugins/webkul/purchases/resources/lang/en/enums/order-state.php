@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'draft' => 'RFQ',
-    'sent' => 'RFQ Sent',
+    'draft'    => 'RFQ',
+    'sent'     => 'RFQ Sent',
     'purchase' => 'Purchase Order',
-    'done' => 'Locked',
+    'done'     => 'Locked',
 ];

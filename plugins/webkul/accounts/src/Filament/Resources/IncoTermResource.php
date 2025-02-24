@@ -12,9 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Clusters\Configuration;
-use Webkul\Account\Models\Incoterm;
 use Webkul\Account\Filament\Resources\IncoTermResource\Pages;
+use Webkul\Account\Models\Incoterm;
 
 class IncoTermResource extends Resource
 {

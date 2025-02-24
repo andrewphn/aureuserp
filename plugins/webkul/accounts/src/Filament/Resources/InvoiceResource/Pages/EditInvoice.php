@@ -6,13 +6,13 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Filament\Resources\InvoiceResource;
+use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
-use Webkul\Account\Filament\Resources\InvoiceResource;
-use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 
 class EditInvoice extends EditRecord
 {

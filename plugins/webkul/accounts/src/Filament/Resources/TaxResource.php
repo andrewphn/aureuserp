@@ -15,9 +15,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
-use Webkul\Account\Filament\Clusters\Configuration;
-use Webkul\Account\Filament\Resources\TaxResource\RelationManagers;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
+use Webkul\Account\Filament\Resources\TaxResource\RelationManagers;
 use Webkul\Account\Models\Tax;
 
 class TaxResource extends Resource

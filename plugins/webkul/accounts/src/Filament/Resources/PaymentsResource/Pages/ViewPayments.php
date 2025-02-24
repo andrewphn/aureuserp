@@ -3,11 +3,11 @@
 namespace Webkul\Account\Filament\Resources\PaymentsResource\Pages;
 
 use Filament\Actions;
-use Webkul\Chatter\Filament\Actions as ChatterActions;
-use Webkul\Account\Filament\Resources\PaymentsResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Resources\PaymentsResource;
 use Webkul\Account\Filament\Resources\PaymentsResource\Actions as BaseActions;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class ViewPayments extends ViewRecord
 {

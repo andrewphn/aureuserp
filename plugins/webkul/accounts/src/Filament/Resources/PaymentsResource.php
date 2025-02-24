@@ -2,9 +2,8 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Webkul\Account\Filament\Resources\PaymentsResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Infolists;
@@ -18,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Enums\PaymentType;
-use Webkul\Account\Filament\Clusters\Customer;
+use Webkul\Account\Filament\Resources\PaymentsResource\Pages;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Payment;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;

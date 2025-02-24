@@ -2,10 +2,10 @@
 
 namespace Webkul\Account\Filament\Resources\IncoTermResource\Pages;
 
-use Webkul\Account\Filament\Resources\IncoTermResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Resources\IncoTermResource;
 
 class ListIncoTerms extends ListRecords
 {

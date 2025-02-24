@@ -2,12 +2,12 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Pages;
 
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
 class ViewOrder extends ViewRecord
 {

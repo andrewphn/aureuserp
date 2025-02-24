@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ViewInvoice as BaseEditInvoice;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 
 class ViewRefund extends BaseEditInvoice
 {

@@ -2,10 +2,10 @@
 
 namespace Webkul\Account\Filament\Resources\TaxGroupResource\Pages;
 
-use Webkul\Account\Filament\Resources\TaxGroupResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Resources\TaxGroupResource;
 
 class ViewTaxGroup extends ViewRecord
 {

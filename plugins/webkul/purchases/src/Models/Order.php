@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Account\Models\FiscalPosition;
+use Webkul\Account\Models\Incoterm;
+use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Address;
 use Webkul\Partner\Models\Partner;
-use Webkul\Account\Models\FiscalPosition;
-use Webkul\Account\Models\Incoterm;
-use Webkul\Account\Models\PaymentTerm;
 use Webkul\Purchase\Database\Factories\OrderFactory;
+use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
-use Webkul\Purchase\Enums;
 
 class Order extends Model
 {

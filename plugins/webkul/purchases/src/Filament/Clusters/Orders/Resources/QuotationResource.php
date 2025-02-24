@@ -2,18 +2,9 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
-use Webkul\Purchase\Filament\Clusters\Orders;
 use Filament\Pages\SubNavigationPosition;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
+use Webkul\Purchase\Filament\Clusters\Orders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class QuotationResource extends OrderResource
 {
@@ -44,10 +35,10 @@ class QuotationResource extends OrderResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListQuotations::route('/'),
+            'index'  => Pages\ListQuotations::route('/'),
             'create' => Pages\CreateQuotation::route('/create'),
-            'view' => Pages\ViewQuotation::route('/{record}'),
-            'edit' => Pages\EditQuotation::route('/{record}/edit'),
+            'view'   => Pages\ViewQuotation::route('/{record}'),
+            'edit'   => Pages\EditQuotation::route('/{record}/edit'),
         ];
     }
 }

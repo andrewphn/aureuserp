@@ -6,8 +6,8 @@ use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Support\Arr;
 use Webkul\Product\Filament\Resources\ProductResource;
 
@@ -63,7 +63,7 @@ class ManageVariants extends ManageRelatedRecords
                 ->badge()
                 ->sortable()
                 ->searchable(),
-            ...$table->getColumns()
+            ...$table->getColumns(),
         ]);
 
         $table->modelLabel(__('products::filament/resources/product/pages/manage-variants.title'));

@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
 use Webkul\Account\Filament\Resources\AccountResource\Pages\EditAccount as BaseEditAccount;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
 
 class EditAccount extends BaseEditAccount
 {

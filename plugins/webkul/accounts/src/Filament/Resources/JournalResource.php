@@ -13,12 +13,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Resources\JournalResource\Pages;
-use Webkul\Account\Models\Journal;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Enums\JournalType;
-use Webkul\Account\Filament\Clusters\Configuration;
+use Webkul\Account\Filament\Resources\JournalResource\Pages;
+use Webkul\Account\Models\Journal;
 
 class JournalResource extends Resource
 {

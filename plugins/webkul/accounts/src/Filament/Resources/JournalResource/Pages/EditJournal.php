@@ -6,9 +6,9 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Resources\JournalResource;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
+use Webkul\Account\Filament\Resources\JournalResource;
 use Webkul\Account\Models\Journal;
 
 class EditJournal extends EditRecord

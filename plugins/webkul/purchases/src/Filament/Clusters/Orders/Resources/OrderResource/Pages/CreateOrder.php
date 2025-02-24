@@ -2,11 +2,11 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Pages;
 
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
-use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
 class CreateOrder extends CreateRecord
 {

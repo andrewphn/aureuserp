@@ -17,7 +17,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Webkul\Account\Enums\EarlyPayDiscount;
-use Webkul\Account\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 use Webkul\Account\Filament\Resources\PaymentTermResource\RelationManagers;
 use Webkul\Account\Models\PaymentTerm;

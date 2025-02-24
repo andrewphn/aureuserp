@@ -2,10 +2,9 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Infolists;
@@ -21,7 +20,7 @@ use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\TypeTaxUse;
-use Webkul\Account\Filament\Clusters\Customer;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;

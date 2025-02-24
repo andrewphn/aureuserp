@@ -6,9 +6,9 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Enums;
+use Webkul\Account\Filament\Resources\TaxResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Webkul\Account\Filament\Resources\TaxResource;
 
 class ListTaxes extends ListRecords
 {
