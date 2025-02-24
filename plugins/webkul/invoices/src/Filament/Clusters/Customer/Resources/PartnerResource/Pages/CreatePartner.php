@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
 use Filament\Resources\Pages\CreateRecord;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
 
 class CreatePartner extends CreateRecord
 {

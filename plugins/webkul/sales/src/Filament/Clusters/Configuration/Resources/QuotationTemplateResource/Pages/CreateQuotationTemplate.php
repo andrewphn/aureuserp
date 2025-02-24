@@ -3,8 +3,8 @@
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 use Filament\Resources\Pages\CreateRecord;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 
 class CreateQuotationTemplate extends CreateRecord
 {

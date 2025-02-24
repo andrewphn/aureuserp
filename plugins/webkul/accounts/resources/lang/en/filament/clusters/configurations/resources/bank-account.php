@@ -9,7 +9,7 @@ return [
     'form' => [
         'account-number'     => 'Account Number',
         'bank'               => [
-            'title' => 'Bank',
+            'title'    => 'Bank',
             'sections' => [
                 'general' => [
                     'title' => 'General',

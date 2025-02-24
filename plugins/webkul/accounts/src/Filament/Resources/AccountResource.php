@@ -2,19 +2,19 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\AccountType;
 use Webkul\Account\Filament\Resources\AccountResource\Pages;
 use Webkul\Account\Models\Account;
-use Webkul\Account\Enums\AccountType;
 
 class AccountResource extends Resource
 {
@@ -84,7 +84,7 @@ class AccountResource extends Resource
                                 Forms\Components\Select::make('invoices_account_tax')
                                     ->relationship('taxes', 'name')
                                     ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.default-taxes'))
-                                    ->hidden(fn(Get $get) => $get('account_type') === AccountType::OFF_BALANCE->value)
+                                    ->hidden(fn (Get $get) => $get('account_type') === AccountType::OFF_BALANCE->value)
                                     ->multiple()
                                     ->preload()
                                     ->searchable(),
@@ -114,8 +114,8 @@ class AccountResource extends Resource
                                 Forms\Components\Toggle::make('non_trade')
                                     ->inline(false)
                                     ->label(__('accounts::filament/clusters/configurations/resources/account.form.sections.fields.non-trade')),
-                            ])
-                    ])->columns(2)
+                            ]),
+                    ])->columns(2),
             ]);
     }
 
@@ -193,7 +193,7 @@ class AccountResource extends Resource
                                     ->icon('heroicon-o-tag'),
                                 Infolists\Components\TextEntry::make('taxes.name')
                                     ->label(__('accounts::filament/clusters/configurations/resources/account.infolist.sections.entries.default-taxes'))
-                                    ->visible(fn($record) => $record->account_type !== AccountType::OFF_BALANCE->value)
+                                    ->visible(fn ($record) => $record->account_type !== AccountType::OFF_BALANCE->value)
                                     ->listWithLineBreaks()
                                     ->placeholder('-')
                                     ->icon('heroicon-o-calculator'),
@@ -232,10 +232,10 @@ class AccountResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAccounts::route('/'),
+            'index'  => Pages\ListAccounts::route('/'),
             'create' => Pages\CreateAccount::route('/create'),
-            'view' => Pages\ViewAccount::route('/{record}'),
-            'edit' => Pages\EditAccount::route('/{record}/edit'),
+            'view'   => Pages\ViewAccount::route('/{record}'),
+            'edit'   => Pages\EditAccount::route('/{record}/edit'),
         ];
     }
 }

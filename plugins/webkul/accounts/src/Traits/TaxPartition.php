@@ -2,14 +2,14 @@
 
 namespace Webkul\Account\Traits;
 
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
-use Webkul\Account\Enums;
-use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Enums;
 use Webkul\Account\Models\TaxPartition as TaxPartitionModel;
 
 trait TaxPartition
@@ -23,7 +23,7 @@ trait TaxPartition
                     ->numeric()
                     ->label(__('accounts::traits/tax-partition.form.factor-percent'))
                     ->live()
-                    ->afterStateUpdated(fn(Set $set, $state) => $set('factor', (float) $state / 100)),
+                    ->afterStateUpdated(fn (Set $set, $state) => $set('factor', (float) $state / 100)),
                 Forms\Components\TextInput::make('factor')
                     ->readOnly()
                     ->label(__('accounts::traits/tax-partition.form.factor-ratio')),
@@ -63,10 +63,10 @@ trait TaxPartition
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('accounts::traits/tax-partition.table.columns.company')),
                 Tables\Columns\TextColumn::make('repartition_type')
-                    ->formatStateUsing(fn($state) => Enums\RepartitionType::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\RepartitionType::options()[$state])
                     ->label(__('accounts::traits/tax-partition.table.columns.repartition-type')),
                 Tables\Columns\TextColumn::make('document_type')
-                    ->formatStateUsing(fn($state) => Enums\DocumentType::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\DocumentType::options()[$state])
                     ->label(__('accounts::traits/tax-partition.table.columns.document-type')),
                 Tables\Columns\IconColumn::make('use_in_tax_closing')
                     ->boolean()
@@ -85,7 +85,7 @@ trait TaxPartition
                         Notification::make()
                             ->title(__('accounts::traits/tax-partition.table.actions.delete.notification.title'))
                             ->body(__('accounts::traits/tax-partition.table.actions.delete.notification.body'))
-                    )
+                    ),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
@@ -105,6 +105,6 @@ trait TaxPartition
                     }),
             ])
             ->reorderable('sort')
-            ->modifyQueryUsing(fn($query) => $query->where('document_type', $this->getDocumentType()));
+            ->modifyQueryUsing(fn ($query) => $query->where('document_type', $this->getDocumentType()));
     }
 }

@@ -2,17 +2,17 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Form;
 use Filament\Forms;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Filament\Resources\FiscalPositionResource\Pages;
 use Webkul\Account\Filament\Resources\FiscalPositionResource\RelationManagers;
 use Webkul\Account\Models\FiscalPosition;
@@ -96,7 +96,7 @@ class FiscalPositionResource extends Resource
                             ])->columns(2),
                         Forms\Components\RichEditor::make('notes')
                             ->label(__('accounts::filament/clusters/configurations/resources/fiscal-position.form.fields.notes')),
-                    ])
+                    ]),
             ]);
     }
 
@@ -214,7 +214,7 @@ class FiscalPositionResource extends Resource
                             ->label(__('accounts::filament/clusters/configurations/resources/fiscal-position.infolist.entries.notes'))
                             ->placeholder('-')
                             ->markdown(),
-                    ])
+                    ]),
             ]);
     }
 
@@ -237,14 +237,13 @@ class FiscalPositionResource extends Resource
         ];
     }
 
-
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListFiscalPositions::route('/'),
-            'create' => Pages\CreateFiscalPosition::route('/create'),
-            'view'   => Pages\ViewFiscalPosition::route('/{record}'),
-            'edit'   => Pages\EditFiscalPosition::route('/{record}/edit'),
+            'index'               => Pages\ListFiscalPositions::route('/'),
+            'create'              => Pages\CreateFiscalPosition::route('/create'),
+            'view'                => Pages\ViewFiscalPosition::route('/{record}'),
+            'edit'                => Pages\EditFiscalPosition::route('/{record}/edit'),
             'fiscal-position-tax' => Pages\ManageFiscalPositionTax::route('/{record}/fiscal-position-tax'),
         ];
     }

@@ -2,8 +2,8 @@
 
 namespace Webkul\Sale\Filament\Clusters\Products\Resources\PriceListResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Products\Resources\PriceListResource;
 use Webkul\Product\Filament\Resources\PriceListResource\Pages\EditPriceList as BaseEditPriceList;
+use Webkul\Sale\Filament\Clusters\Products\Resources\PriceListResource;
 
 class EditPriceList extends BaseEditPriceList
 {

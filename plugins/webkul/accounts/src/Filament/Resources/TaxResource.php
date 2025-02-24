@@ -2,21 +2,21 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\Page;
 use Filament\Forms;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
-use Webkul\Account\Filament\Resources\TaxResource\RelationManagers;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
+use Webkul\Account\Filament\Resources\TaxResource\RelationManagers;
 use Webkul\Account\Models\Tax;
 
 class TaxResource extends Resource
@@ -119,8 +119,8 @@ class TaxResource extends Resource
                                     ->label(__('accounts::filament/clusters/configurations/resources/tax.form.sections.field-set.description-and-legal-notes.fields.description')),
                                 Forms\Components\RichEditor::make('invoice_legal_notes')
                                     ->label(__('accounts::filament/clusters/configurations/resources/tax.form.sections.field-set.description-and-legal-notes.fields.legal-notes')),
-                            ])->columns(1)
-                    ])
+                            ])->columns(1),
+                    ]),
             ]);
     }
 
@@ -148,17 +148,17 @@ class TaxResource extends Resource
                 Tables\Columns\TextColumn::make('type_tax_use')
                     ->label(__('accounts::filament/clusters/configurations/resources/tax.table.columns.type-tax-use'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Enums\TypeTaxUse::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\TypeTaxUse::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_scope')
                     ->label(__('accounts::filament/clusters/configurations/resources/tax.table.columns.tax-scope'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Enums\TaxScope::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\TaxScope::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_type')
                     ->label(__('accounts::filament/clusters/configurations/resources/tax.table.columns.amount-type'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Enums\AmountType::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\AmountType::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_label')
                     ->label(__('accounts::filament/clusters/configurations/resources/tax.table.columns.invoice-label'))
@@ -229,7 +229,7 @@ class TaxResource extends Resource
                                 ->title(__('accounts::filament/clusters/configurations/resources/tax.table.actions.delete.notification.title'))
                                 ->body(__('accounts::filament/clusters/configurations/resources/tax.table.actions.delete.notification.body'))
                         ),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -4,15 +4,15 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
 use Webkul\Payment\Models\PaymentToken;
 use Webkul\Payment\Models\PaymentTransaction;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
-use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Support\Models\Currency;
-use Webkul\Chatter\Traits\HasLogActivity;
 
 class Payment extends Model
 {
@@ -52,19 +52,19 @@ class Payment extends Model
 
     protected array $logAttributes = [
         'name',
-        'move.name' => 'Move',
-        'company.name' => 'Company',
-        'partner.name' => 'Partner',
-        'partner_type' => 'Partner Type',
+        'move.name'          => 'Move',
+        'company.name'       => 'Company',
+        'partner.name'       => 'Partner',
+        'partner_type'       => 'Partner Type',
         'paymentMethod.name' => 'Payment Method',
-        'currency.name' => 'Currency',
+        'currency.name'      => 'Currency',
         'paymentToken',
-        'sourcePayment.name' => 'Source Payment',
+        'sourcePayment.name'      => 'Source Payment',
         'paymentTransaction.name' => 'Payment Transaction',
         'destinationAccount.name' => 'Destination Account',
         'outstandingAccount.name' => 'Outstanding Account',
-        'is_sent' => 'Is Sent',
-        'state' => 'State',
+        'is_sent'                 => 'Is Sent',
+        'state'                   => 'State',
     ];
 
     public function move()

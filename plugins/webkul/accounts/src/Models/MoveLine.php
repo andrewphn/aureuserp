@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Models\Product;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Webkul\Account\Enums;
 
 class MoveLine extends Model
 {
@@ -160,19 +160,19 @@ class MoveLine extends Model
     public static function createOrUpdateProductLine(array $data): Collection
     {
         return DB::transaction(function () use ($data) {
-            $lines = new Collection();
+            $lines = new Collection;
 
-            if (!empty($data['id'])) {
+            if (! empty($data['id'])) {
                 $productLine = self::find($data['id']);
                 $productLine->fill(array_merge($data, [
                     'display_type' => Enums\DisplayType::PRODUCT->value,
-                    'name' => $data['name'] ?? Product::find($data['product_id'])?->name,
+                    'name'         => $data['name'] ?? Product::find($data['product_id'])?->name,
                 ]));
             } else {
-                $productLine = new self();
+                $productLine = new self;
                 $productLine->fill(array_merge($data, [
                     'display_type' => Enums\DisplayType::PRODUCT->value,
-                    'name' => $data['name'] ?? Product::find($data['product_id'])?->name,
+                    'name'         => $data['name'] ?? Product::find($data['product_id'])?->name,
                 ]));
             }
 
@@ -180,7 +180,7 @@ class MoveLine extends Model
             $productLine->save();
             $lines->push($productLine);
 
-            if (!empty($data['tax'])) {
+            if (! empty($data['tax'])) {
                 $existingTaxLines = self::where('move_id', $data['move_id'])
                     ->where('display_type', Enums\DisplayType::TAX->value)
                     ->get();
@@ -188,7 +188,7 @@ class MoveLine extends Model
                 $taxes = Tax::whereIn('id', $data['tax'])->get();
 
                 $existingTaxLines->each(function ($taxLine) use ($data) {
-                    if (!in_array($taxLine->tax_line_id, $data['tax'])) {
+                    if (! in_array($taxLine->tax_line_id, $data['tax'])) {
                         $taxLine->delete();
                     }
                 });
@@ -198,18 +198,18 @@ class MoveLine extends Model
                         return $line->tax_line_id === $tax->id;
                     });
 
-                    if (!$taxLine) {
-                        $taxLine = new self();
+                    if (! $taxLine) {
+                        $taxLine = new self;
                     }
 
                     $taxLineData = array_merge($data, [
-                        'display_type' => 'tax',
-                        'name' => $tax->name,
-                        'product_id' => null,
+                        'display_type'   => 'tax',
+                        'name'           => $tax->name,
+                        'product_id'     => null,
                         'product_uom_id' => null,
-                        'quantity' => null,
-                        'price_unit' => null,
-                        'tax_line_id' => $tax->id,
+                        'quantity'       => null,
+                        'price_unit'     => null,
+                        'tax_line_id'    => $tax->id,
                     ]);
 
                     $taxLine->fill($taxLineData);
@@ -223,17 +223,17 @@ class MoveLine extends Model
                 ->where('display_type', Enums\DisplayType::PAYMENT_TERM->value)
                 ->first();
 
-            if (!$paymentLine) {
-                $paymentLine = new self();
+            if (! $paymentLine) {
+                $paymentLine = new self;
             }
 
             $paymentLineData = array_merge($data, [
-                'display_type' => Enums\DisplayType::PAYMENT_TERM->value,
-                'name' => null,
-                'product_id' => null,
+                'display_type'   => Enums\DisplayType::PAYMENT_TERM->value,
+                'name'           => null,
+                'product_id'     => null,
                 'product_uom_id' => null,
-                'quantity' => null,
-                'price_unit' => null,
+                'quantity'       => null,
+                'price_unit'     => null,
             ]);
 
             $paymentLine->fill($paymentLineData);
@@ -290,21 +290,21 @@ class MoveLine extends Model
         $amountResidual = $moveLines
             ->whereIn('display_type', [
                 Enums\DisplayType::PRODUCT->value,
-                Enums\DisplayType::TAX->value
+                Enums\DisplayType::TAX->value,
             ])
             ->sum('amount_residual');
 
         $move->update([
-            'amount_untaxed' => $amountUntaxed,
-            'amount_tax' => $amountTax,
-            'amount_total' => $amountTotal,
-            'amount_residual' => $amountResidual,
-            'amount_untaxed_signed' => $amountUntaxed,
+            'amount_untaxed'                    => $amountUntaxed,
+            'amount_tax'                        => $amountTax,
+            'amount_total'                      => $amountTotal,
+            'amount_residual'                   => $amountResidual,
+            'amount_untaxed_signed'             => $amountUntaxed,
             'amount_untaxed_in_currency_signed' => $amountUntaxed,
-            'amount_tax_signed' => $amountTax,
-            'amount_total_signed' => $amountTotal,
-            'amount_total_in_currency_signed' => $amountTotal,
-            'amount_residual_signed' => $amountResidual,
+            'amount_tax_signed'                 => $amountTax,
+            'amount_total_signed'               => $amountTotal,
+            'amount_total_in_currency_signed'   => $amountTotal,
+            'amount_residual_signed'            => $amountResidual,
         ]);
     }
 
@@ -324,7 +324,7 @@ class MoveLine extends Model
         $taxAmount = 0;
         $includedTaxAmount = 0;
 
-        if (!empty($data['tax'])) {
+        if (! empty($data['tax'])) {
             $taxes = Tax::whereIn('id', $data['tax'])->get();
 
             foreach ($taxes as $tax) {
@@ -336,7 +336,7 @@ class MoveLine extends Model
 
             $baseForAdditionalTax = $subtotalAfterDiscount - $includedTaxAmount;
             foreach ($taxes as $tax) {
-                if (!$tax->include_base_amount) {
+                if (! $tax->include_base_amount) {
                     $taxAmount += $baseForAdditionalTax * (floatval($tax->amount) / 100);
                 }
             }
@@ -368,7 +368,7 @@ class MoveLine extends Model
             ->where('display_type', 'product')
             ->first();
 
-        if (!$productLine) {
+        if (! $productLine) {
             return;
         }
 

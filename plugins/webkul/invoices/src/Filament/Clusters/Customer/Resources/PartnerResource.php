@@ -4,8 +4,8 @@ namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
 use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Customer;
-use Webkul\Partner\Filament\Resources\PartnerResource as BasePartnerResource;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages;
+use Webkul\Partner\Filament\Resources\PartnerResource as BasePartnerResource;
 
 class PartnerResource extends BasePartnerResource
 {

@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Resources\TaxGroupResource\Pages;
 
-use Webkul\Account\Filament\Resources\TaxGroupResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Webkul\Account\Filament\Resources\TaxGroupResource;
 
 class CreateTaxGroup extends CreateRecord
 {

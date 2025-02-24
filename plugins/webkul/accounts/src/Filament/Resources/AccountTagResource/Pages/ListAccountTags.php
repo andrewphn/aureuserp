@@ -2,10 +2,10 @@
 
 namespace Webkul\Account\Filament\Resources\AccountTagResource\Pages;
 
-use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\AccountTagResource;
 
 class ListAccountTags extends ListRecords

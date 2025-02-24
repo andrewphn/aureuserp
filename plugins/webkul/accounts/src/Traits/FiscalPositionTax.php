@@ -2,13 +2,13 @@
 
 namespace Webkul\Account\Traits;
 
-use Filament\Forms\Form;
 use Filament\Forms;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
-use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
 trait FiscalPositionTax
@@ -27,7 +27,7 @@ trait FiscalPositionTax
                     ->relationship('taxDestination', 'name')
                     ->label(__('accounts::traits/fiscal-position-tax.form.fields.tax-destination'))
                     ->preload()
-                    ->searchable()
+                    ->searchable(),
             ]);
     }
 

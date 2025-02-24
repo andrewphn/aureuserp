@@ -1,5 +1,5 @@
 <?php
 
-return  [
+return [
     'title' => 'Set as Checked',
 ];

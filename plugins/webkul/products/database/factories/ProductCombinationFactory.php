@@ -14,8 +14,8 @@ class ProductCombinationFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => 1,
-            'product_attribute_id' => 1,
+            'product_id'                 => 1,
+            'product_attribute_id'       => 1,
             'product_attribute_value_id' => 1,
         ];
     }

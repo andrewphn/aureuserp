@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Resources\TaxResource\Pages;
 
-use Webkul\Account\Filament\Resources\TaxResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Resources\TaxResource;
 
 class ViewTax extends ViewRecord
 {

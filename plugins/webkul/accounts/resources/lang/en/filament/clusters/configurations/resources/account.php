@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title' => 'Accounts',
-        'group' => 'Accounting'
+        'group' => 'Accounting',
     ],
 
     'global-search' => [
@@ -28,7 +28,7 @@ return [
                 'reconcile'     => 'Reconcile',
                 'non-trade'     => 'Non Trade',
             ],
-        ]
+        ],
     ],
 
     'table' => [
@@ -61,7 +61,6 @@ return [
         ],
     ],
 
-
     'infolist' => [
         'sections' => [
             'entries' => [
@@ -84,18 +83,18 @@ return [
                         'include-in-price'    => 'Include in price',
                         'include-base-amount' => 'Include base amount',
                         'is-base-affected'    => 'Is base affected',
-                    ]
+                    ],
                 ],
 
                 'description-and-legal-notes' => [
-                    'title' => 'Description & Invoice Legal Notes',
+                    'title'   => 'Description & Invoice Legal Notes',
                     'entries' => [
                         'description' => 'Description',
                         'legal-notes' => 'Legal Notes',
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+            ],
+        ],
     ],
 
     'infolist' => [
@@ -113,6 +112,6 @@ return [
                 'reconcile'     => 'Reconcile',
                 'non-trade'     => 'Non Trade',
             ],
-        ]
+        ],
     ],
 ];

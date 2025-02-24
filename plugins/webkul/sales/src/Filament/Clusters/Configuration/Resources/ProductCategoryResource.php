@@ -5,12 +5,12 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Table;
+use Webkul\Product\Filament\Resources\CategoryResource as BaseProductCategoryResource;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 use Webkul\Sale\Models\Category;
-use Webkul\Product\Filament\Resources\CategoryResource as BaseProductCategoryResource;
 
 class ProductCategoryResource extends BaseProductCategoryResource
 {
@@ -34,7 +34,7 @@ class ProductCategoryResource extends BaseProductCategoryResource
                             ->maxLength(255),
                         Forms\Components\Select::make('parent_id')
                             ->relationship('parent', 'full_name')
-                            ->label(__('sales::filament/clusters/configurations/resources/product-category.form.sections.fields.parent-category'))
+                            ->label(__('sales::filament/clusters/configurations/resources/product-category.form.sections.fields.parent-category')),
                     ])->columns(2),
             ]);
     }

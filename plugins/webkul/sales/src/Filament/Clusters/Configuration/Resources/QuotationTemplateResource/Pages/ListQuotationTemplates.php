@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 
 class ListQuotationTemplates extends ListRecords
 {

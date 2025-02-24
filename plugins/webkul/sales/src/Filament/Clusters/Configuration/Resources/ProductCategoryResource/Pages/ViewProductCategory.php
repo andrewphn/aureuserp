@@ -2,11 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class ViewProductCategory extends ViewRecord
 {
@@ -24,7 +24,7 @@ class ViewProductCategory extends ViewRecord
                         ->success()
                         ->title(__('sales::filament/clusters/configurations/resources/product-category/pages/view-product-category.header-actions.delete.notification.title'))
                         ->body(__('sales::filament/clusters/configurations/resources/product-category/pages/view-product-category.header-actions.delete.notification.body'))
-                )
+                ),
         ];
     }
 }

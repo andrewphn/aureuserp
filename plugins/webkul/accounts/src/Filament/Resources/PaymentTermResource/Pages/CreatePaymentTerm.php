@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 
-use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Webkul\Account\Models\PaymentTerm;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
+use Webkul\Account\Models\PaymentTerm;
 
 class CreatePaymentTerm extends CreateRecord
 {

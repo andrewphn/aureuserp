@@ -36,8 +36,8 @@ return [
                     'title' => 'Payment Due Term created',
                     'body'  => 'The payment due term has been created successfully.',
                 ],
-            ]
-        ]
+            ],
+        ],
     ],
 
     'infolist' => [

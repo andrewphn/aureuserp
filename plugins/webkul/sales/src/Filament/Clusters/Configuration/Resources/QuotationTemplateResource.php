@@ -2,23 +2,23 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Facades\FilamentView;
 use Filament\Tables;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Sale\Models\OrderTemplate;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Infolists\Infolist;
-use Filament\Infolists;
-use Filament\Notifications\Notification;
-use Filament\Support\Facades\FilamentView;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Webkul\Sale\Enums\OrderDisplayType;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
+use Webkul\Sale\Models\OrderTemplate;
 
 class QuotationTemplateResource extends Resource
 {
@@ -79,7 +79,7 @@ class QuotationTemplateResource extends Resource
                                             ->schema([
                                                 Forms\Components\RichEditor::make('note')
                                                     ->placeholder(__('sales::filament/clusters/configurations/resources/quotation-template.form.tabs.terms-and-conditions.note-placeholder'))
-                                                    ->hiddenLabel()
+                                                    ->hiddenLabel(),
                                             ]),
                                     ])
                                     ->persistTabInQueryString(),
@@ -103,8 +103,8 @@ class QuotationTemplateResource extends Resource
                                                     ->searchable()
                                                     ->preload()
                                                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.sections.general.fields.sale-journal'))
-                                                    ->required()
-                                            ])->columns(1)
+                                                    ->required(),
+                                            ])->columns(1),
                                     ]),
                                 Forms\Components\Section::make()
                                     ->schema([
@@ -119,8 +119,8 @@ class QuotationTemplateResource extends Resource
                                                     ->prefix('of')
                                                     ->suffix('%')
                                                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.sections.signature-and-payment.fields.prepayment-percentage'))
-                                                    ->visible(fn(Get $get) => $get('require_payment') === true),
-                                            ])->columns(1)
+                                                    ->visible(fn (Get $get) => $get('require_payment') === true),
+                                            ])->columns(1),
                                     ]),
                             ])
                             ->columnSpan(['lg' => 1]),
@@ -270,9 +270,9 @@ class QuotationTemplateResource extends Resource
             ->reorderable()
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -306,9 +306,9 @@ class QuotationTemplateResource extends Resource
                                     ->label('Name'),
                                 Forms\Components\TextInput::make('quantity')
                                     ->required()
-                                    ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.tabs.products.fields.quantity'))
+                                    ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.tabs.products.fields.quantity')),
                             ]),
-                    ])->columns(2)
+                    ])->columns(2),
             ]);
     }
 
@@ -320,9 +320,9 @@ class QuotationTemplateResource extends Resource
             ->reorderable()
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -350,7 +350,7 @@ class QuotationTemplateResource extends Resource
                             ->default(0),
                         Forms\Components\Hidden::make('display_type')
                             ->required()
-                            ->default(OrderDisplayType::SECTION->value)
+                            ->default(OrderDisplayType::SECTION->value),
                     ]),
             ]);
     }
@@ -363,9 +363,9 @@ class QuotationTemplateResource extends Resource
             ->reorderable()
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -393,7 +393,7 @@ class QuotationTemplateResource extends Resource
                             ->default(0),
                         Forms\Components\Hidden::make('display_type')
                             ->required()
-                            ->default(OrderDisplayType::NOTE->value)
+                            ->default(OrderDisplayType::NOTE->value),
                     ]),
             ]);
     }
@@ -433,7 +433,7 @@ class QuotationTemplateResource extends Resource
 
                                                 Infolists\Components\RepeatableEntry::make('sections')
                                                     ->hiddenLabel()
-                                                    ->hidden(fn($record) => $record->sections->isEmpty())
+                                                    ->hidden(fn ($record) => $record->sections->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('name')
                                                             ->placeholder('-')
@@ -446,7 +446,7 @@ class QuotationTemplateResource extends Resource
 
                                                 Infolists\Components\RepeatableEntry::make('notes')
                                                     ->hiddenLabel()
-                                                    ->hidden(fn($record) => $record->notes->isEmpty())
+                                                    ->hidden(fn ($record) => $record->notes->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('name')
                                                             ->placeholder('-')
@@ -497,7 +497,7 @@ class QuotationTemplateResource extends Resource
                                                 Infolists\Components\TextEntry::make('prepayment_percentage')
                                                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.infolist.entries.prepayment-percentage'))
                                                     ->suffix('%')
-                                                    ->visible(fn($record) => $record->require_payment === true),
+                                                    ->visible(fn ($record) => $record->require_payment === true),
                                             ]),
                                     ]),
                             ])

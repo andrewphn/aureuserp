@@ -2,22 +2,22 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Resources\Pages\Page;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Webkul\Account\Enums\EarlyPayDiscount;
+use Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 use Webkul\Account\Filament\Resources\PaymentTermResource\RelationManagers;
 use Webkul\Account\Models\PaymentTerm;
 
@@ -85,7 +85,7 @@ class PaymentTermResource extends Resource
                                     ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.early-discount')),
                             ])->columns(2),
                         Forms\Components\Group::make()
-                            ->visible(fn(Get $get) => $get('early_discount'))
+                            ->visible(fn (Get $get) => $get('early_discount'))
                             ->schema([
                                 Forms\Components\TextInput::make('discount_percentage')
                                     ->required()
@@ -98,12 +98,12 @@ class PaymentTermResource extends Resource
                                     ->hiddenLabel(),
                             ])->columns(4),
                         Forms\Components\Group::make()
-                            ->visible(fn(Get $get) => $get('early_discount'))
+                            ->visible(fn (Get $get) => $get('early_discount'))
                             ->schema([
                                 Forms\Components\Select::make('early_pay_discount')
                                     ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.reduced-tax'))
                                     ->options(EarlyPayDiscount::class)
-                                    ->default(EarlyPayDiscount::INCLUDED->value)
+                                    ->default(EarlyPayDiscount::INCLUDED->value),
                             ])->columns(2),
                         Forms\Components\RichEditor::make('note')
                             ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.note')),
@@ -112,7 +112,7 @@ class PaymentTermResource extends Resource
                                 Forms\Components\Toggle::make('is_active')
                                     ->inline(false)
                                     ->label(__('accounts::filament/clusters/configurations/resources/payment-term.form.sections.fields.status')),
-                            ])->columns(2)
+                            ])->columns(2),
                     ]),
             ]);
     }
@@ -136,7 +136,7 @@ class PaymentTermResource extends Resource
                 Tables\Columns\TextColumn::make('early_pay_discount')
                     ->label(__('accounts::filament/clusters/configurations/resources/payment-term.table.columns.early-pay-discount'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => EarlyPayDiscount::options()[$state])
+                    ->formatStateUsing(fn ($state) => EarlyPayDiscount::options()[$state])
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
@@ -264,13 +264,13 @@ class PaymentTermResource extends Resource
                                 Infolists\Components\TextEntry::make('note')
                                     ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.note'))
                                     ->columnSpanFull()
-                                    ->formatStateUsing(fn($state) => new HtmlString($state))
+                                    ->formatStateUsing(fn ($state) => new HtmlString($state))
                                     ->placeholder('—'),
                                 Infolists\Components\IconEntry::make('is_active')
                                     ->label(__('accounts::filament/clusters/configurations/resources/payment-term.infolist.sections.entries.status'))
                                     ->boolean(),
                             ]),
-                    ])
+                    ]),
             ]);
     }
 

@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
+use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages;
-use Filament\Tables\Table;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource as BaseProductResource;
 
 class ProductResource extends BaseProductResource

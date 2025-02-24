@@ -2,23 +2,23 @@
 
 return [
     'form' => [
-        'factor-percent' => 'Factor Percent',
-        'factor-ratio'   => 'Factor Ratio',
-        'repartition-type' => 'Repartition Type',
-        'document-type' => 'Document Type',
-        'account' => 'Account',
-        'tax' => 'Tax',
+        'factor-percent'    => 'Factor Percent',
+        'factor-ratio'      => 'Factor Ratio',
+        'repartition-type'  => 'Repartition Type',
+        'document-type'     => 'Document Type',
+        'account'           => 'Account',
+        'tax'               => 'Tax',
         'tax-closing-entry' => 'Tax Closing Entry',
     ],
 
     'table' => [
         'columns' => [
-            'factor-percent' => 'Factor Percent(%)',
-            'account' => 'Account',
-            'tax' => 'Tax',
-            'company' => 'Company',
-            'repartition-type' => 'Repartition Type',
-            'document-type' => 'Document Type',
+            'factor-percent'    => 'Factor Percent(%)',
+            'account'           => 'Account',
+            'tax'               => 'Tax',
+            'company'           => 'Company',
+            'repartition-type'  => 'Repartition Type',
+            'document-type'     => 'Document Type',
             'tax-closing-entry' => 'Tax Closing Entry',
         ],
 
@@ -44,7 +44,7 @@ return [
                     'title' => 'Tax Partition Term created',
                     'body'  => 'The tax Partition term has been created successfully.',
                 ],
-            ]
-        ]
+            ],
+        ],
     ],
 ];

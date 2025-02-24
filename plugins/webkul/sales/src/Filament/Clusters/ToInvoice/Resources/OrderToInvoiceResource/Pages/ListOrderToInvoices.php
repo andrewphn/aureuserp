@@ -2,12 +2,12 @@
 
 namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToInvoiceResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToInvoiceResource;
 use Filament\Resources\Pages\ListRecords;
-use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToInvoiceResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListOrderToInvoices extends ListRecords
 {
@@ -26,11 +26,11 @@ class ListOrderToInvoices extends ListRecords
             'my_orders' => PresetView::make(__('sales::filament/clusters/to-invoice/resources/order-to-invoice/pages/list-order-to-invoice.tabs.my-orders'))
                 ->icon('heroicon-s-shopping-bag')
                 ->favorite()
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('user_id', Auth::id())),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('user_id', Auth::id())),
             'archived' => PresetView::make(__('sales::filament/clusters/to-invoice/resources/order-to-invoice/pages/list-order-to-invoice.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->favorite()
-                ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }

@@ -110,7 +110,7 @@ class Project extends Model implements Sortable
     protected function plannedDate(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, array $attributes) => $attributes['start_date'] . ' - ' . $attributes['end_date'],
+            get: fn (mixed $value, array $attributes) => $attributes['start_date'].' - '.$attributes['end_date'],
         );
     }
 

@@ -2,12 +2,12 @@
 
 namespace Webkul\Account\Filament\Resources\JournalResource\Pages;
 
-use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Webkul\Account\Filament\Resources\JournalResource;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
+use Webkul\Account\Filament\Resources\JournalResource;
 use Webkul\Account\Models\Journal;
 
 class CreateJournal extends CreateRecord

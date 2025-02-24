@@ -3,12 +3,12 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Sale\Enums\OrderState;
 use Webkul\Account\Models\Tax;
 use Webkul\Sale\Enums\InvoiceStatus;
+use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 
 class CreateQuotation extends CreateRecord
 {
@@ -49,7 +49,7 @@ class CreateQuotation extends CreateRecord
             return;
         }
 
-        $taxIds = $salesOrderLines->flatMap(fn($sale) => $sale->product?->productTaxes->pluck('id') ?? [])->unique()->toArray();
+        $taxIds = $salesOrderLines->flatMap(fn ($sale) => $sale->product?->productTaxes->pluck('id') ?? [])->unique()->toArray();
         $taxData = Tax::whereIn('id', $taxIds)->get()->keyBy('id');
 
         $totals = $salesOrderLines->reduce(function ($carry, $orderSale) use ($taxData) {

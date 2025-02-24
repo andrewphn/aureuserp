@@ -2,10 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages;
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Product\Models\Attribute;
 use Webkul\Product\Filament\Resources\AttributeResource;
+use Webkul\Product\Models\Attribute;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages;
 
 class ProductAttributeResource extends AttributeResource
 {

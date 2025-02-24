@@ -2,11 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 
 class EditQuotationTemplate extends EditRecord
 {

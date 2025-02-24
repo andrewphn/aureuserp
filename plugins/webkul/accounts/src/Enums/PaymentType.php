@@ -13,7 +13,7 @@ enum PaymentType: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::SEND => __('accounts::enums/payment-type.send'),
+            self::SEND    => __('accounts::enums/payment-type.send'),
             self::RECEIVE => __('accounts::enums/payment-type.receive'),
         };
     }
@@ -21,7 +21,7 @@ enum PaymentType: string implements HasLabel
     public static function options(): array
     {
         return [
-            self::SEND->value => __('accounts::enums/payment-type.send'),
+            self::SEND->value    => __('accounts::enums/payment-type.send'),
             self::RECEIVE->value => __('accounts::enums/payment-type.receive'),
         ];
     }

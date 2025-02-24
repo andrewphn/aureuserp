@@ -12,19 +12,18 @@ return [
         'name'    => 'Name',
     ],
 
-
     'form' => [
         'fields' => [
-            'sort' => 'Sort',
+            'sort'           => 'Sort',
             'order-template' => 'Order Template',
-            'company' => 'Company',
-            'product' => 'Product',
-            'product-uom' => 'Product UOM',
-            'creator' => 'Creator',
-            'display-type' => 'Display Type',
-            'name' => 'Name',
-            'quantity' => 'Quantity',
-        ]
+            'company'        => 'Company',
+            'product'        => 'Product',
+            'product-uom'    => 'Product UOM',
+            'creator'        => 'Creator',
+            'display-type'   => 'Display Type',
+            'name'           => 'Name',
+            'quantity'       => 'Quantity',
+        ],
     ],
 
     'table' => [
@@ -69,14 +68,14 @@ return [
 
     'infolist' => [
         'entries' => [
-            'sort' => 'Sort Order',
+            'sort'           => 'Sort Order',
             'order-template' => 'Order Template',
-            'company' => 'Company',
-            'product' => 'Product',
-            'product-uom' => 'Product UOM',
-            'display-type' => 'Display Type',
-            'name' => 'Name',
-            'quantity' => 'Quantity',
+            'company'        => 'Company',
+            'product'        => 'Product',
+            'product-uom'    => 'Product UOM',
+            'display-type'   => 'Display Type',
+            'name'           => 'Name',
+            'quantity'       => 'Quantity',
         ],
     ],
 ];

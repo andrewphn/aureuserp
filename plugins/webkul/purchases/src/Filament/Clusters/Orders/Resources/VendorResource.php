@@ -7,12 +7,11 @@ use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Webkul\Field\Filament\Traits\HasCustomFields;
-use Webkul\Purchase\Filament\Clusters\Orders;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Pages;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
+use Webkul\Purchase\Filament\Clusters\Orders;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Pages;
 
 class VendorResource extends PartnerResource
 {
@@ -24,7 +23,7 @@ class VendorResource extends PartnerResource
 
     protected static ?string $cluster = Orders::class;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 4;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

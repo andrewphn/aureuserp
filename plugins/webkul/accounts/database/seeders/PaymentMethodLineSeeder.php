@@ -60,7 +60,7 @@ class PaymentMethodLineSeeder extends Seeder
                 'name'               => 'Manual Payment',
                 'created_at'         => $now,
                 'updated_at'         => $now,
-            ]
+            ],
         ];
 
         DB::table('accounts_payment_method_lines')->insert($paymentMethodLines);

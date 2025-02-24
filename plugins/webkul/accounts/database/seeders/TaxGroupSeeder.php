@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class TaxGroupSeeder extends Seeder
 {
@@ -27,7 +27,7 @@ class TaxGroupSeeder extends Seeder
             ['sort' => 7, 'company_id' => 1, 'country_id' => 104, 'creator_id' => 1, 'name' => 'Nil Rated', 'preceding_subtotal' => null, 'created_at' => $now, 'updated_at' => $now],
             ['sort' => 8, 'company_id' => 1, 'country_id' => 104, 'creator_id' => 1, 'name' => 'Non GST Supplies', 'preceding_subtotal' => null, 'created_at' => $now, 'updated_at' => $now],
             ['sort' => 9, 'company_id' => 1, 'country_id' => 104, 'creator_id' => 1, 'name' => 'TCS', 'preceding_subtotal' => null, 'created_at' => $now, 'updated_at' => $now],
-            ['sort' => 10, 'company_id' => 1, 'country_id' => 104, 'creator_id' => 1, 'name' => 'TDS', 'preceding_subtotal' => null, 'created_at' => $now, 'updated_at' => $now]
+            ['sort' => 10, 'company_id' => 1, 'country_id' => 104, 'creator_id' => 1, 'name' => 'TDS', 'preceding_subtotal' => null, 'created_at' => $now, 'updated_at' => $now],
         ];
 
         DB::table('accounts_tax_groups')->insert($taxGroups);

@@ -2,5 +2,5 @@
 
 return [
     'section' => 'Section',
-    'note' => 'Note',
+    'note'    => 'Note',
 ];

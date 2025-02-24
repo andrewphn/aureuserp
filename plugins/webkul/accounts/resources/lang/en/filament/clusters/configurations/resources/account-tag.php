@@ -15,13 +15,13 @@ return [
 
     'form' => [
         'fields' => [
-            'color' => 'Color',
-            'country' => 'Country',
+            'color'         => 'Color',
+            'country'       => 'Country',
             'applicability' => 'Applicability',
-            'name' => 'Name',
-            'status' => 'Status',
-            'tax-negate' => 'Tax Negate',
-        ]
+            'name'          => 'Name',
+            'status'        => 'Status',
+            'tax-negate'    => 'Tax Negate',
+        ],
     ],
 
     'table' => [
@@ -80,12 +80,12 @@ return [
 
     'infolist' => [
         'entries' => [
-            'color' => 'Color',
-            'country' => 'Country',
+            'color'         => 'Color',
+            'country'       => 'Country',
             'applicability' => 'Applicability',
-            'name' => 'Name',
-            'status' => 'Status',
-            'tax-negate' => 'Tax Negate',
-        ]
+            'name'          => 'Name',
+            'status'        => 'Status',
+            'tax-negate'    => 'Tax Negate',
+        ],
     ],
 ];

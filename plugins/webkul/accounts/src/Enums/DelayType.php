@@ -17,20 +17,20 @@ enum DelayType: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::DAYS_AFTER => __('accounts::enums/delay-type.days-after'),
-            self::DAYS_AFTER_END_OF_MONTH => __('accounts::enums/delay-type.days-after-end-of-month'),
+            self::DAYS_AFTER                   => __('accounts::enums/delay-type.days-after'),
+            self::DAYS_AFTER_END_OF_MONTH      => __('accounts::enums/delay-type.days-after-end-of-month'),
             self::DAYS_AFTER_END_OF_NEXT_MONTH => __('accounts::enums/delay-type.days-after-end-of-next-month'),
-            self::DAYS_END_OF_MONTH_NO_THE => __('accounts::enums/delay-type.days-end-of-month-no-the'),
+            self::DAYS_END_OF_MONTH_NO_THE     => __('accounts::enums/delay-type.days-end-of-month-no-the'),
         };
     }
 
     public static function options(): array
     {
         return [
-            self::DAYS_AFTER->value => __('accounts::enums/delay-type.days-after'),
-            self::DAYS_AFTER_END_OF_MONTH->value => __('accounts::enums/delay-type.days-after-end-of-month'),
+            self::DAYS_AFTER->value                   => __('accounts::enums/delay-type.days-after'),
+            self::DAYS_AFTER_END_OF_MONTH->value      => __('accounts::enums/delay-type.days-after-end-of-month'),
             self::DAYS_AFTER_END_OF_NEXT_MONTH->value => __('accounts::enums/delay-type.days-after-end-of-next-month'),
-            self::DAYS_END_OF_MONTH_NO_THE->value => __('accounts::enums/delay-type.days-end-of-month-no-the'),
+            self::DAYS_END_OF_MONTH_NO_THE->value     => __('accounts::enums/delay-type.days-end-of-month-no-the'),
         ];
     }
 }

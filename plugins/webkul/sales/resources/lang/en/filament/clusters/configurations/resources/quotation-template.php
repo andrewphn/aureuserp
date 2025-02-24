@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title'  => 'Quotation Template',
-        'group' => 'Sales Orders',
+        'group'  => 'Sales Orders',
     ],
 
     'global-search' => [
@@ -13,24 +13,23 @@ return [
         'name'    => 'Name',
     ],
 
-
     'form' => [
         'tabs' => [
             'products' => [
-                'title' => 'Products',
+                'title'  => 'Products',
                 'fields' => [
                     'products'     => 'Products',
                     'name'         => 'Name',
                     'quantity'     => 'Quantity',
-                ]
+                ],
             ],
 
             'terms-and-conditions' => [
-                'title' => 'Terms & Conditions',
+                'title'  => 'Terms & Conditions',
                 'fields' => [
-                    'note-placeholder' => 'Write your terms and conditions for the quotations.'
-                ]
-            ]
+                    'note-placeholder' => 'Write your terms and conditions for the quotations.',
+                ],
+            ],
         ],
 
         'sections' => [
@@ -51,8 +50,8 @@ return [
                     'online-signature'      => 'Online Signature',
                     'online-payment'        => 'Online Payment',
                     'prepayment-percentage' => 'Prepayment Percentage',
-                ]
-            ]
+                ],
+            ],
         ],
     ],
 
@@ -116,17 +115,17 @@ return [
             ],
         ],
         'entries' => [
-            'product' => 'Product',
-            'description' => 'Description',
-            'quantity' => 'Quantity',
-            'unit-price' => 'Unit Price',
-            'section-name' => 'Section Name',
-            'note-title' => 'Note Title',
-            'name' => 'Template Name',
-            'quotation-validity' => 'Quotation Validity',
-            'sale-journal' => 'Sale Journal',
-            'online-signature' => 'Online Signature',
-            'online-payment' => 'Online Payment',
+            'product'               => 'Product',
+            'description'           => 'Description',
+            'quantity'              => 'Quantity',
+            'unit-price'            => 'Unit Price',
+            'section-name'          => 'Section Name',
+            'note-title'            => 'Note Title',
+            'name'                  => 'Template Name',
+            'quotation-validity'    => 'Quotation Validity',
+            'sale-journal'          => 'Sale Journal',
+            'online-signature'      => 'Online Signature',
+            'online-payment'        => 'Online Payment',
             'prepayment-percentage' => 'Prepayment Percentage',
         ],
     ],

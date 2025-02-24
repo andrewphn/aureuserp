@@ -54,6 +54,7 @@ class Requisition extends Model
      */
     protected $casts = [
         'state' => Enums\RequisitionState::class,
+        'type'  => Enums\RequisitionType::class,
     ];
 
     protected array $logAttributes = [
@@ -110,7 +111,11 @@ class Requisition extends Model
      */
     public function updateName()
     {
-        $this->name = 'BO/'.$this->id;
+        if ($this->type == Enums\RequisitionType::BLANKET_ORDER) {
+            $this->name = 'BO/'.$this->id;
+        } else {
+            $this->name = 'PT/'.$this->id;
+        }
     }
 
     protected static function newFactory(): RequisitionFactory

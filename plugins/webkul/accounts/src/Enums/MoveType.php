@@ -23,26 +23,26 @@ enum MoveType: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::ENTRY => __('accounts::enums/move-type.entry'),
+            self::ENTRY       => __('accounts::enums/move-type.entry'),
             self::OUT_INVOICE => __('accounts::enums/move-type.out-invoice'),
-            self::OUT_REFUND => __('accounts::enums/move-type.out-refund'),
-            self::IN_INVOICE => __('accounts::enums/move-type.in-invoice'),
-            self::IN_REFUND => __('accounts::enums/move-type.in-refund'),
+            self::OUT_REFUND  => __('accounts::enums/move-type.out-refund'),
+            self::IN_INVOICE  => __('accounts::enums/move-type.in-invoice'),
+            self::IN_REFUND   => __('accounts::enums/move-type.in-refund'),
             self::OUT_RECEIPT => __('accounts::enums/move-type.out-receipt'),
-            self::IN_RECEIPT => __('accounts::enums/move-type.in-receipt'),
+            self::IN_RECEIPT  => __('accounts::enums/move-type.in-receipt'),
         };
     }
 
     public static function options(): array
     {
         return [
-            self::ENTRY->value => __('accounts::enums/move-type.entry'),
+            self::ENTRY->value       => __('accounts::enums/move-type.entry'),
             self::OUT_INVOICE->value => __('accounts::enums/move-type.out-invoice'),
-            self::OUT_REFUND->value => __('accounts::enums/move-type.out-refund'),
-            self::IN_INVOICE->value => __('accounts::enums/move-type.in-invoice'),
-            self::IN_REFUND->value => __('accounts::enums/move-type.in-refund'),
+            self::OUT_REFUND->value  => __('accounts::enums/move-type.out-refund'),
+            self::IN_INVOICE->value  => __('accounts::enums/move-type.in-invoice'),
+            self::IN_REFUND->value   => __('accounts::enums/move-type.in-refund'),
             self::OUT_RECEIPT->value => __('accounts::enums/move-type.out-receipt'),
-            self::IN_RECEIPT->value => __('accounts::enums/move-type.in-receipt'),
+            self::IN_RECEIPT->value  => __('accounts::enums/move-type.in-receipt'),
         ];
     }
 }

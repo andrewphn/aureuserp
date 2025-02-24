@@ -2,13 +2,12 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Webkul\Account\Filament\Resources\PaymentsResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -18,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Enums\PaymentType;
+use Webkul\Account\Filament\Resources\PaymentsResource\Pages;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Payment;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
@@ -56,7 +56,7 @@ class PaymentsResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('accounts::filament/clusters/customers/resources/payment.global-search.name') => $record?->name ?? '—',
+            __('accounts::filament/clusters/customers/resources/payment.global-search.name')  => $record?->name ?? '—',
             __('accounts::filament/clusters/customers/resources/payment.global-search.state') => $record?->state ?? '—',
         ];
     }
@@ -89,7 +89,7 @@ class PaymentsResource extends Resource
                                     ->relationship(
                                         'journal',
                                         'name',
-                                        fn($query) => $query->whereIn('type', ['bank', 'cash'])
+                                        fn ($query) => $query->whereIn('type', ['bank', 'cash'])
                                     )
                                     ->label(__('accounts::filament/clusters/customers/resources/payment.form.sections.fields.journal'))
                                     ->searchable()
@@ -141,9 +141,9 @@ class PaymentsResource extends Resource
                                     ->default(now())
                                     ->required(),
                                 Forms\Components\TextInput::make('memo')
-                                    ->label(__('accounts::filament/clusters/customers/resources/payment.form.sections.fields.memo'))
-                            ])->columns(2)
-                    ])
+                                    ->label(__('accounts::filament/clusters/customers/resources/payment.form.sections.fields.memo')),
+                            ])->columns(2),
+                    ]),
             ])
             ->columns('full');
     }
@@ -340,7 +340,7 @@ class PaymentsResource extends Resource
                             ->success()
                             ->title(__('accounts::filament/clusters/customers/resources/payment.table.actions.delete.notification.title'))
                             ->body(__('accounts::filament/clusters/customers/resources/payment.table.actions.delete.notification.body'))
-                    )
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -350,7 +350,7 @@ class PaymentsResource extends Resource
                                 ->success()
                                 ->title(__('accounts::filament/clusters/customers/resources/payment.table.bulk-actions.delete.notification.title'))
                                 ->body(__('accounts::filament/clusters/customers/resources/payment.table.bulk-actions.delete.notification.body'))
-                        )
+                        ),
                 ]),
             ]);
     }
@@ -367,21 +367,21 @@ class PaymentsResource extends Resource
                                     ->schema([
                                         Infolists\Components\TextEntry::make('state')
                                             ->badge()
-                                            ->color(fn(string $state): string => match ($state) {
-                                                PaymentStatus::DRAFT->value => 'gray',
+                                            ->color(fn (string $state): string => match ($state) {
+                                                PaymentStatus::DRAFT->value      => 'gray',
                                                 PaymentStatus::IN_PROCESS->value => 'warning',
-                                                PaymentStatus::PAID->value => 'success',
-                                                PaymentStatus::CANCELED->value => 'danger',
-                                                default => 'gray',
+                                                PaymentStatus::PAID->value       => 'success',
+                                                PaymentStatus::CANCELED->value   => 'danger',
+                                                default                          => 'gray',
                                             })
                                             ->label(__('accounts::filament/clusters/customers/resources/payment.infolist.sections.payment-information.entries.state'))
-                                            ->formatStateUsing(fn(string $state): string => PaymentStatus::options()[$state])
+                                            ->formatStateUsing(fn (string $state): string => PaymentStatus::options()[$state])
                                             ->columnSpanFull(),
 
                                         Infolists\Components\TextEntry::make('payment_type')
                                             ->label(__('accounts::filament/clusters/customers/resources/payment.infolist.sections.payment-information.entries.payment-type'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->formatStateUsing(fn($state) => PaymentState::options()[$state]),
+                                            ->formatStateUsing(fn ($state) => PaymentState::options()[$state]),
                                         Infolists\Components\TextEntry::make('journal.name')
                                             ->label(__('accounts::filament/clusters/customers/resources/payment.infolist.sections.payment-information.entries.journal'))
                                             ->icon('heroicon-o-document-text')
@@ -390,7 +390,7 @@ class PaymentsResource extends Resource
                                             ->label(__('accounts::filament/clusters/customers/resources/payment.infolist.sections.payment-information.entries.customer-bank-account'))
                                             ->icon('heroicon-o-building-library')
                                             ->placeholder('—')
-                                            ->visible(fn($record) => $record->journal?->type === 'bank'),
+                                            ->visible(fn ($record) => $record->journal?->type === 'bank'),
                                         Infolists\Components\TextEntry::make('partner.name')
                                             ->label(__('accounts::filament/clusters/customers/resources/payment.infolist.sections.payment-information.entries.customer'))
                                             ->icon('heroicon-o-user')

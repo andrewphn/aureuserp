@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Resources\JournalResource\Pages;
 
-use Webkul\Account\Filament\Resources\JournalResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Webkul\Account\Filament\Resources\JournalResource;
 
 class ListJournals extends ListRecords
 {

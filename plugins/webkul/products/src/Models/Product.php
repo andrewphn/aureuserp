@@ -18,7 +18,7 @@ use Webkul\Support\Models\UOM;
 
 class Product extends Model
 {
-    use HasChatter, HasLogActivity, HasFactory, SoftDeletes;
+    use HasChatter, HasFactory, HasLogActivity, SoftDeletes;
 
     /**
      * Table name.

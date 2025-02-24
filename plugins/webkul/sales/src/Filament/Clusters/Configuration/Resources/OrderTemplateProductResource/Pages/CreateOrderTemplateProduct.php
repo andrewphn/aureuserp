@@ -3,9 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource;
 
 class CreateOrderTemplateProduct extends CreateRecord
 {

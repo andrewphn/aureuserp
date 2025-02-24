@@ -54,7 +54,7 @@ return new class extends Migration
                 'invoice_policy',
                 'sales_ok',
                 'purchase_ok',
-                'sale_line_warn_msg'
+                'sale_line_warn_msg',
             ]);
         });
     }

@@ -3,10 +3,10 @@
 namespace Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
-use Webkul\Account\Models\PaymentTerm;
+use Filament\Resources\Pages\ListRecords;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
+use Webkul\Account\Models\PaymentTerm;
 
 class ListPaymentTerms extends ListRecords
 {
@@ -27,7 +27,7 @@ class ListPaymentTerms extends ListRecords
                 ->badge(PaymentTerm::count()),
             'archived' => Tab::make(__('accounts::filament/clusters/configurations/resources/payment-term/pages/list-payment-term.tabs.archived'))
                 ->badge(PaymentTerm::onlyTrashed()->count())
-                ->modifyQueryUsing(fn($query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }

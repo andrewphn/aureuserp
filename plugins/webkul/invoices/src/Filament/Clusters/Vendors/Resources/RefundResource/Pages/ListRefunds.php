@@ -2,12 +2,12 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
-use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListRefunds extends BaseListInvoices
 {
@@ -26,7 +26,7 @@ class ListRefunds extends BaseListInvoices
                     ->icon('heroicon-s-receipt-refund')
                     ->default()
                     ->favorite()
-                    ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
             ]
         );
     }

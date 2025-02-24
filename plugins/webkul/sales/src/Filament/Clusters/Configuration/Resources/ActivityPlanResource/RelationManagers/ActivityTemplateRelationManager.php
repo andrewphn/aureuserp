@@ -44,7 +44,7 @@ class ActivityTemplateRelationManager extends RelationManager
                                                     ->searchable()
                                                     ->required()
                                                     ->default(ActivityType::first()?->id)
-                                                    ->createOptionForm(fn(Form $form) => ActivityTypeResource::form($form))
+                                                    ->createOptionForm(fn (Form $form) => ActivityTypeResource::form($form))
                                                     ->preload()
                                                     ->live()
                                                     ->afterStateUpdated(function ($state, callable $set) {
@@ -79,8 +79,8 @@ class ActivityTemplateRelationManager extends RelationManager
                                             ->preload(),
                                         Forms\Components\Select::make('responsible_id')
                                             ->label(__('sales::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.fields.assignee'))
-                                            ->options(fn() => User::pluck('name', 'id'))
-                                            ->hidden(fn(Get $get) => $get('responsible_type') !== ActivityResponsibleType::OTHER->value)
+                                            ->options(fn () => User::pluck('name', 'id'))
+                                            ->hidden(fn (Get $get) => $get('responsible_type') !== ActivityResponsibleType::OTHER->value)
                                             ->searchable()
                                             ->preload(),
                                     ]),
@@ -168,7 +168,7 @@ class ActivityTemplateRelationManager extends RelationManager
                     ->label(__('sales::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.activity-status')),
                 Tables\Filters\Filter::make('has_delay')
                     ->label(__('sales::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.has-delay'))
-                    ->query(fn($query) => $query->whereNotNull('delay_count')),
+                    ->query(fn ($query) => $query->whereNotNull('delay_count')),
             ])
             ->groups([
                 Tables\Grouping\Group::make('responsible.name')
@@ -274,7 +274,7 @@ class ActivityTemplateRelationManager extends RelationManager
                                         Infolists\Components\TextEntry::make('delay_from')
                                             ->label(__('sales::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.infolist.sections.delay-information.entries.delay-from'))
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn($state) => ActivityDelayInterval::options()[$state])
+                                            ->formatStateUsing(fn ($state) => ActivityDelayInterval::options()[$state])
                                             ->helperText(__('sales::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.infolist.sections.delay-information.entries.delay-from-helper-text'))
                                             ->icon('heroicon-o-ellipsis-horizontal-circle'),
                                     ])->columns(2),

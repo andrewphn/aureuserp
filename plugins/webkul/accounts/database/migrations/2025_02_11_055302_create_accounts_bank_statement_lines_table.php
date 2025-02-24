@@ -35,7 +35,6 @@ return new class extends Migration
             $table->boolean('is_reconciled')->default(0)->comment('Is Reconciled');
             $table->double('amount_residual')->nullable()->comment('Amount Residual');
 
-
             $table->timestamps();
         });
     }

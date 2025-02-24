@@ -13,7 +13,7 @@ enum DocumentType: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::INVOICE => __('accounts::enums/document-type.invoice'),
+            self::INVOICE  => __('accounts::enums/document-type.invoice'),
             self::REFUND   => __('accounts::enums/document-type.refund'),
         };
     }
@@ -22,7 +22,7 @@ enum DocumentType: string implements HasLabel
     {
         return [
             self::INVOICE->value => __('accounts::enums/document-type.invoice'),
-            self::REFUND->value => __('accounts::enums/document-type.refund'),
+            self::REFUND->value  => __('accounts::enums/document-type.refund'),
         ];
     }
 }

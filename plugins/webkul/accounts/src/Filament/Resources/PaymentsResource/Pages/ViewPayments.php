@@ -2,12 +2,12 @@
 
 namespace Webkul\Account\Filament\Resources\PaymentsResource\Pages;
 
-use Webkul\Account\Filament\Resources\PaymentsResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\Account\Filament\Resources\PaymentsResource;
 use Webkul\Account\Filament\Resources\PaymentsResource\Actions as BaseActions;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class ViewPayments extends ViewRecord
 {
@@ -30,7 +30,7 @@ class ViewPayments extends ViewRecord
             BaseActions\ResetToDraftAction::make(),
             BaseActions\MarkAsSendAdnUnsentAction::make(),
             BaseActions\CancelAction::make(),
-            BaseActions\RejectAction::make()
+            BaseActions\RejectAction::make(),
         ];
     }
 }

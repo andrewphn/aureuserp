@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title' => 'Taxes',
-        'group' => 'Accounting'
+        'group' => 'Accounting',
     ],
 
     'global-search' => [
@@ -36,18 +36,18 @@ return [
                         'include-in-price'    => 'Include in price',
                         'include-base-amount' => 'Include base amount',
                         'is-base-affected'    => 'Is base affected',
-                    ]
+                    ],
                 ],
 
                 'description-and-legal-notes' => [
-                    'title' => 'Description & Invoice Legal Notes',
+                    'title'  => 'Description & Invoice Legal Notes',
                     'fields' => [
                         'description' => 'Description',
                         'legal-notes' => 'Legal Notes',
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+            ],
+        ],
     ],
 
     'table' => [
@@ -62,7 +62,7 @@ return [
             'amount-type'             => 'Amount Type',
             'invoice-label'           => 'Invoice Label',
             'tax-exigibility'         => 'Tax Exigibility',
-            'price-include-override' => 'Price Include Override',
+            'price-include-override'  => 'Price Include Override',
             'amount'                  => 'Amount',
             'status'                  => 'Status',
             'include-base-amount'     => 'Include Base Amount',
@@ -99,7 +99,6 @@ return [
         ],
     ],
 
-
     'infolist' => [
         'sections' => [
             'entries' => [
@@ -122,18 +121,18 @@ return [
                         'include-in-price'    => 'Include in price',
                         'include-base-amount' => 'Include base amount',
                         'is-base-affected'    => 'Is base affected',
-                    ]
+                    ],
                 ],
 
                 'description-and-legal-notes' => [
-                    'title' => 'Description & Invoice Legal Notes',
+                    'title'   => 'Description & Invoice Legal Notes',
                     'entries' => [
                         'description' => 'Description',
                         'legal-notes' => 'Legal Notes',
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+            ],
+        ],
     ],
 
 ];

@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
+use Webkul\Account\Filament\Resources\PaymentsResource as BasePaymentsResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource\Pages;
-use Webkul\Account\Filament\Resources\PaymentsResource as BasePaymentsResource;
 
 class PaymentsResource extends BasePaymentsResource
 {
@@ -17,10 +17,10 @@ class PaymentsResource extends BasePaymentsResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPayments::route('/'),
+            'index'  => Pages\ListPayments::route('/'),
             'create' => Pages\CreatePayments::route('/create'),
-            'view' => Pages\ViewPayments::route('/{record}'),
-            'edit' => Pages\EditPayments::route('/{record}/edit'),
+            'view'   => Pages\ViewPayments::route('/{record}'),
+            'edit'   => Pages\EditPayments::route('/{record}/edit'),
         ];
     }
 }

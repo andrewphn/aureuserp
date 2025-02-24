@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'draft' => 'Draft',
+    'draft'      => 'Draft',
     'in-process' => 'In Process',
-    'paid' => 'Paid',
-    'not-paid' => 'Not Paid',
-    'canceled' => 'Canceled',
-    'rejected' => 'Rejected',
+    'paid'       => 'Paid',
+    'not-paid'   => 'Not Paid',
+    'canceled'   => 'Canceled',
+    'rejected'   => 'Rejected',
 ];

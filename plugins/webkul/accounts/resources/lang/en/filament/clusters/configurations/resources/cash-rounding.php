@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title' => 'Cash Rounding',
-        'group' => 'Management'
+        'group' => 'Management',
     ],
 
     'global-search' => [
@@ -14,13 +14,13 @@ return [
 
     'form' => [
         'fields' => [
-            'name'     => 'Name',
+            'name'               => 'Name',
             'rounding-precision' => 'Rounding Precision',
-            'rounding-strategy' => 'Rounding Strategy',
-            'profit-account' => 'Profit Account',
-            'loss-account' => 'Loss Account',
-            'rounding-method' => 'Rounding Method',
-        ]
+            'rounding-strategy'  => 'Rounding Strategy',
+            'profit-account'     => 'Profit Account',
+            'loss-account'       => 'Loss Account',
+            'rounding-method'    => 'Rounding Method',
+        ],
     ],
 
     'table' => [
@@ -34,12 +34,12 @@ return [
         ],
 
         'groups' => [
-            'name' => 'Name',
+            'name'              => 'Name',
             'rounding-strategy' => 'Rounding Strategy',
-            'rounding-method' => 'Rounding Method',
-            'created-by' => 'Created By',
-            'profit-account' => 'Profit Account',
-            'loss-account' => 'Loss Account',
+            'rounding-method'   => 'Rounding Method',
+            'created-by'        => 'Created By',
+            'profit-account'    => 'Profit Account',
+            'loss-account'      => 'Loss Account',
         ],
 
         'actions' => [
@@ -63,12 +63,12 @@ return [
 
     'infolist' => [
         'entries' => [
-            'name'     => 'Name',
+            'name'               => 'Name',
             'rounding-precision' => 'Rounding Precision',
-            'rounding-strategy' => 'Rounding Strategy',
-            'profit-account' => 'Profit Account',
-            'loss-account' => 'Loss Account',
-            'rounding-method' => 'Rounding Method',
-        ]
+            'rounding-strategy'  => 'Rounding Strategy',
+            'profit-account'     => 'Profit Account',
+            'loss-account'       => 'Loss Account',
+            'rounding-method'    => 'Rounding Method',
+        ],
     ],
 ];

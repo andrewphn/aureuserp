@@ -2,22 +2,22 @@
 
 namespace Webkul\Sale\Filament\Clusters\Products\Resources;
 
-use Webkul\Sale\Filament\Clusters\Products;
-use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
-use Webkul\Sale\Models\Product;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
-use Filament\Tables\Table;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\ActionSize;
+use Filament\Tables\Table;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 use Webkul\Sale\Enums\InvoicePolicy;
+use Webkul\Sale\Filament\Clusters\Products;
+use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
+use Webkul\Sale\Models\Product;
 use Webkul\Support\Models\UOM;
 
 class ProductResource extends BaseProductResource
@@ -52,7 +52,7 @@ class ProductResource extends BaseProductResource
                 ->relationship(
                     'productTaxes',
                     'name',
-                    fn($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
+                    fn ($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
                 )
                 ->multiple()
                 ->live()
@@ -65,7 +65,7 @@ class ProductResource extends BaseProductResource
                     $price = floatval($get('price'));
                     $selectedTaxIds = $get('accounts_product_taxes');
 
-                    if (!$price || empty($selectedTaxIds)) {
+                    if (! $price || empty($selectedTaxIds)) {
                         return '';
                     }
 
@@ -74,7 +74,7 @@ class ProductResource extends BaseProductResource
                     $result = [
                         'total_excluded' => $price,
                         'total_included' => $price,
-                        'taxes' => []
+                        'taxes'          => [],
                     ];
 
                     $totalTaxAmount = 0;
@@ -89,9 +89,9 @@ class ProductResource extends BaseProductResource
                         }
 
                         $result['taxes'][] = [
-                            'tax' => $tax,
-                            'base' => $price,
-                            'amount' => $taxAmount
+                            'tax'    => $tax,
+                            'base'   => $price,
+                            'amount' => $taxAmount,
                         ];
                     }
 
@@ -114,14 +114,14 @@ class ProductResource extends BaseProductResource
                         );
                     }
 
-                    return !empty($parts) ? '(= ' . implode(', ', $parts) . ')' : ' ';
+                    return ! empty($parts) ? '(= '.implode(', ', $parts).')' : ' ';
                 }),
 
             Forms\Components\Select::make('accounts_product_supplier_taxes')
                 ->relationship(
                     'supplierTaxes',
                     'name',
-                    fn($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
+                    fn ($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
                 )
                 ->multiple()
                 ->live()
@@ -137,7 +137,7 @@ class ProductResource extends BaseProductResource
 
         $policyComponent = [
             Forms\Components\Section::make()
-                ->visible(fn(Get $get) => $get('sales_ok'))
+                ->visible(fn (Get $get) => $get('sales_ok'))
                 ->schema([
                     Forms\Components\Select::make('invoice_policy')
                         ->label(__('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.title'))
@@ -148,12 +148,12 @@ class ProductResource extends BaseProductResource
                         ->hiddenLabel()
                         ->content(function (Get $get) {
                             return match ($get('invoice_policy')) {
-                                InvoicePolicy::ORDER->value => __('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.ordered-policy'),
+                                InvoicePolicy::ORDER->value    => __('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.ordered-policy'),
                                 InvoicePolicy::DELIVERY->value => __('sales::filament/clusters/products/resources/product.form.sections.invoice-policy.delivered-policy'),
-                                default => '',
+                                default                        => '',
                             };
                         }),
-                ])
+                ]),
         ];
 
         array_splice($childComponents, 1, 0, $policyComponent);
@@ -180,11 +180,11 @@ class ProductResource extends BaseProductResource
             Forms\Components\Actions\Action::make('is_favorite')
                 ->hiddenLabel()
                 ->outlined(false)
-                ->icon(fn($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
+                ->icon(fn ($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
                 ->color('warning')
                 ->iconButton()
                 ->size(ActionSize::Large->value)
-                ->action(fn($record) => $record?->update(['is_favorite' => ! $record->is_favorite,])),
+                ->action(fn ($record) => $record?->update(['is_favorite' => ! $record->is_favorite])),
         ]);
 
         array_unshift($secondChildComponents, $favoriteAction);

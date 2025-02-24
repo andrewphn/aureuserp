@@ -2,18 +2,18 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductTagResource\Pages;
-use Filament\Forms\Form;
 use Filament\Forms;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Product\Models\Tag;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductTagResource\Pages;
 
 class ProductTagResource extends Resource
 {

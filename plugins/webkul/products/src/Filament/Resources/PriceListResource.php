@@ -2,11 +2,11 @@
 
 namespace Webkul\Product\Filament\Resources;
 
-use Webkul\Product\Filament\Resources\PriceListResource\Pages;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Webkul\Product\Filament\Resources\PriceListResource\Pages;
 use Webkul\Product\Models\PriceList;
 
 class PriceListResource extends Resource
@@ -60,10 +60,10 @@ class PriceListResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPriceLists::route('/'),
+            'index'  => Pages\ListPriceLists::route('/'),
             'create' => Pages\CreatePriceList::route('/create'),
-            'view' => Pages\ViewPriceList::route('/{record}'),
-            'edit' => Pages\EditPriceList::route('/{record}/edit'),
+            'view'   => Pages\ViewPriceList::route('/{record}'),
+            'edit'   => Pages\EditPriceList::route('/{record}/edit'),
         ];
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages;
 
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
 
 class ListPartners extends ListRecords
 {

@@ -3,9 +3,9 @@
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
 use Filament\Notifications\Notification;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class CreateProductCategory extends CreateRecord
 {

@@ -19,22 +19,22 @@ enum AutoPost: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::NO    => __('accounts::enums/auto-post.no'),
-            self::AT_DATE => __('accounts::enums/auto-post.at-date'),
-            self::MONTHLY => __('accounts::enums/auto-post.monthly'),
+            self::NO        => __('accounts::enums/auto-post.no'),
+            self::AT_DATE   => __('accounts::enums/auto-post.at-date'),
+            self::MONTHLY   => __('accounts::enums/auto-post.monthly'),
             self::QUARTERLY => __('accounts::enums/auto-post.quarterly'),
-            self::YEARLY => __('accounts::enums/auto-post.yearly'),
+            self::YEARLY    => __('accounts::enums/auto-post.yearly'),
         };
     }
 
     public static function options(): array
     {
         return [
-            self::NO->value    => __('accounts::enums/auto-post.no'),
-            self::AT_DATE->value => __('accounts::enums/auto-post.at-date'),
-            self::MONTHLY->value => __('accounts::enums/auto-post.monthly'),
+            self::NO->value        => __('accounts::enums/auto-post.no'),
+            self::AT_DATE->value   => __('accounts::enums/auto-post.at-date'),
+            self::MONTHLY->value   => __('accounts::enums/auto-post.monthly'),
             self::QUARTERLY->value => __('accounts::enums/auto-post.quarterly'),
-            self::YEARLY->value => __('accounts::enums/auto-post.yearly'),
+            self::YEARLY->value    => __('accounts::enums/auto-post.yearly'),
         ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Account\Filament\Resources\BankAccountResource as BaseBankAccountResource;
+use Webkul\Invoice\Filament\Clusters\Configuration;
 
 class BankAccountResource extends BaseBankAccountResource
 {

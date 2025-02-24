@@ -2,10 +2,20 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Pages;
 
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ListPartners as BaseListPartners;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;
 
 class ListVendors extends BaseListPartners
 {
     protected static string $resource = VendorResource::class;
+
+    public function table(Table $table): Table
+    {
+        $table = parent::table($table)
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('sub_type', 'supplier'));
+
+        return $table;
+    }
 }

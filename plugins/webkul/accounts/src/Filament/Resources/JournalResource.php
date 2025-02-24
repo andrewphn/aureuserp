@@ -2,22 +2,22 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Account\Filament\Resources\JournalResource\Pages;
-use Webkul\Account\Models\Journal;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Enums\JournalType;
+use Webkul\Account\Filament\Resources\JournalResource\Pages;
+use Webkul\Account\Models\Journal;
 
 class JournalResource extends Resource
 {
@@ -94,7 +94,7 @@ class JournalResource extends Resource
                                                                     ->searchable(),
                                                                 Forms\Components\ColorPicker::make('color')
                                                                     ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.color')),
-                                                            ])
+                                                            ]),
                                                     ]),
                                                 Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.journal-entries.field-set.bank-account-number.title'))
                                                     ->visible(function (Get $get) {
@@ -107,9 +107,9 @@ class JournalResource extends Resource
                                                                     ->searchable()
                                                                     ->preload()
                                                                     ->relationship('bankAccount', 'account_number')
-                                                                    ->hiddenLabel()
-                                                            ])
-                                                    ])
+                                                                    ->hiddenLabel(),
+                                                            ]),
+                                                    ]),
                                             ]),
                                         Forms\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.incoming-payments.title'))
                                             ->visible(function (Get $get) {
@@ -117,7 +117,7 @@ class JournalResource extends Resource
                                                     JournalType::BANK->value,
                                                     JournalType::CASH->value,
                                                     JournalType::BANK->value,
-                                                    JournalType::CREDIT_CARD->value
+                                                    JournalType::CREDIT_CARD->value,
                                                 ]);
                                             })
                                             ->schema([
@@ -131,7 +131,7 @@ class JournalResource extends Resource
                                                     JournalType::BANK->value,
                                                     JournalType::CASH->value,
                                                     JournalType::BANK->value,
-                                                    JournalType::CREDIT_CARD->value
+                                                    JournalType::CREDIT_CARD->value,
                                                 ]);
                                             })
                                             ->schema([
@@ -153,10 +153,10 @@ class JournalResource extends Resource
                                                                     ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.allowed-accounts')),
                                                                 Forms\Components\Toggle::make('auto_check_on_post')
                                                                     ->label(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.auto-check-on-post')),
-                                                            ])
+                                                            ]),
                                                     ]),
                                                 Forms\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.form.tabs.advanced-settings.fields.payment-communication'))
-                                                    ->visible(fn(Get $get) => $get('type') === JournalType::SALE->value)
+                                                    ->visible(fn (Get $get) => $get('type') === JournalType::SALE->value)
                                                     ->schema([
                                                         Forms\Components\Select::make('invoice_reference_type')
                                                             ->options(CommunicationType::options())
@@ -189,7 +189,7 @@ class JournalResource extends Resource
                                                     ->disabled()
                                                     ->relationship('company', 'name')
                                                     ->default(Auth::user()->default_company_id)
-                                                    ->required()
+                                                    ->required(),
                                             ]),
                                     ]),
                             ])
@@ -210,7 +210,7 @@ class JournalResource extends Resource
                     ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.name')),
                 Tables\Columns\TextColumn::make('type')
                     ->searchable()
-                    ->formatStateUsing(fn($state) => JournalType::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => JournalType::options()[$state] ?? $state)
                     ->sortable()
                     ->label(__('accounts::filament/clusters/configurations/resources/journal.table.columns.type')),
                 Tables\Columns\TextColumn::make('code')
@@ -268,13 +268,13 @@ class JournalResource extends Resource
                                                     ->schema([
                                                         Infolists\Components\IconEntry::make('refund_order')
                                                             ->boolean()
-                                                            ->visible(fn($record) => in_array($record->type, [JournalType::SALE->value, JournalType::PURCHASE->value]))
+                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::SALE->value, JournalType::PURCHASE->value]))
                                                             ->placeholder('-')
                                                             ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-credit-note-sequence')),
                                                         Infolists\Components\IconEntry::make('payment_order')
                                                             ->boolean()
                                                             ->placeholder('-')
-                                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                                             ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-payment-sequence')),
                                                         Infolists\Components\TextEntry::make('code')
                                                             ->placeholder('-')
@@ -287,7 +287,7 @@ class JournalResource extends Resource
                                                             ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.color')),
                                                     ])->columns(2),
                                                 Infolists\Components\Section::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.journal-entries.field-set.bank-account.title'))
-                                                    ->visible(fn($record) => $record->type === JournalType::BANK->value)
+                                                    ->visible(fn ($record) => $record->type === JournalType::BANK->value)
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('bankAccount.account_number')
                                                             ->placeholder('-')
@@ -295,7 +295,7 @@ class JournalResource extends Resource
                                                     ]),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.incoming-payments.title'))
-                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('relation_notes')
                                                     ->placeholder('-')
@@ -303,7 +303,7 @@ class JournalResource extends Resource
                                                     ->markdown(),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.outgoing-payments.title'))
-                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('relation_notes')
                                                     ->placeholder('-')
@@ -324,7 +324,7 @@ class JournalResource extends Resource
                                                             ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.entries.auto-check-on-post')),
                                                     ]),
                                                 Infolists\Components\Fieldset::make(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.payment-communication.title'))
-                                                    ->visible(fn($record) => $record->type === JournalType::SALE->value)
+                                                    ->visible(fn ($record) => $record->type === JournalType::SALE->value)
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('invoice_reference_type')
                                                             ->placeholder('-')
@@ -334,7 +334,7 @@ class JournalResource extends Resource
                                                             ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-standard')),
                                                     ]),
                                             ]),
-                                    ])
+                                    ]),
                             ])->columnSpan(2),
                         Infolists\Components\Group::make()
                             ->schema([
@@ -352,7 +352,7 @@ class JournalResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/clusters/configurations/resources/journal.infolist.general.entries.company'))
                                             ->icon('heroicon-o-building-office'),
-                                    ])
+                                    ]),
                             ])->columnSpan(1),
                     ]),
             ]);

@@ -5,14 +5,14 @@ namespace Webkul\Account\Filament\Resources\InvoiceResource\Pages;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Enums;
 use Webkul\Account\Enums\PaymentState;
+use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
-use Webkul\Account\Enums;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Models\Currency;
-use Webkul\Account\Filament\Resources\InvoiceResource;
 
 class CreateInvoice extends CreateRecord
 {
@@ -74,7 +74,7 @@ class CreateInvoice extends CreateRecord
         }
 
         $data['partner_bank_id'] = $partner->bankAccounts
-            ->filter(fn($bankAccount) => $bankAccount->can_send_money)
+            ->filter(fn ($bankAccount) => $bankAccount->can_send_money)
             ->first()?->id;
 
         return $data;

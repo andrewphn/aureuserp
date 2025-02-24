@@ -6,12 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Account\Models\FiscalPosition;
+use Webkul\Account\Models\Incoterm;
+use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Address;
 use Webkul\Partner\Models\Partner;
 use Webkul\Purchase\Database\Factories\OrderFactory;
+use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -62,9 +66,9 @@ class Order extends Model
         'partner_id',
         'partner_address_id',
         'currency_id',
-        'fiscal_position_id', // Todo: add relationship
-        'payment_term_id', // Todo: add relationship
-        'incoterm_id', // Todo: add relationship
+        'fiscal_position_id',
+        'payment_term_id',
+        'incoterm_id',
         'user_id',
         'company_id',
         'creator_id',
@@ -76,6 +80,7 @@ class Order extends Model
      * @var string
      */
     protected $casts = [
+        'state'                    => Enums\OrderState::class,
         'mail_reminder_confirmed'  => 'boolean',
         'mail_reception_confirmed' => 'boolean',
         'mail_reception_declined'  => 'boolean',
@@ -108,6 +113,21 @@ class Order extends Model
     public function partnerAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class);
+    }
+
+    public function fiscalPosition(): BelongsTo
+    {
+        return $this->belongsTo(FiscalPosition::class);
+    }
+
+    public function paymentTerm(): BelongsTo
+    {
+        return $this->belongsTo(PaymentTerm::class);
+    }
+
+    public function incoterm(): BelongsTo
+    {
+        return $this->belongsTo(Incoterm::class);
     }
 
     public function currency(): BelongsTo

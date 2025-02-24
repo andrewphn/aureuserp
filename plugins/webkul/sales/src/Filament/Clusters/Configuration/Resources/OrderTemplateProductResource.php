@@ -2,18 +2,18 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages;
-use Webkul\Sale\Models\OrderTemplateProduct;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages;
+use Webkul\Sale\Models\OrderTemplateProduct;
 
 class OrderTemplateProductResource extends Resource
 {
@@ -76,7 +76,7 @@ class OrderTemplateProductResource extends Resource
                             ->label(__('sales::filament/clusters/configurations/resources/order-template.form.fields.quantity'))
                             ->required()
                             ->numeric(),
-                    ])->columns(2)
+                    ])->columns(2),
             ]);
     }
 
@@ -187,7 +187,7 @@ class OrderTemplateProductResource extends Resource
                         Infolists\Components\TextEntry::make('quantity')
                             ->label(__('sales::filament/clusters/configurations/resources/order-template.infolist.entries.quantity'))
                             ->numeric(),
-                    ])->columns(2)
+                    ])->columns(2),
             ]);
     }
 }

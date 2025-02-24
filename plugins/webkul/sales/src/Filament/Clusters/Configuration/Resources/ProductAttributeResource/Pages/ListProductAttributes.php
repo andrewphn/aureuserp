@@ -4,9 +4,9 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttribute
 
 use Filament\Actions;
 use Filament\Notifications\Notification;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
-use Filament\Resources\Components\Tab;
 use Webkul\Product\Models\Attribute;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource;
 

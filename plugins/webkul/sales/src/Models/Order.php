@@ -8,18 +8,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\PaymentTerm;
-use Webkul\Partner\Models\Partner;
-use Webkul\Support\Models\UTMMedium;
-use Webkul\Support\Models\UTMSource;
-use Webkul\Sale\Enums\OrderDisplayType;
-use Webkul\Security\Models\User;
-use Webkul\Support\Models\Company;
-use Webkul\Support\Models\Currency;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
-use Webkul\Sale\Enums\InvoiceStatus;
+use Webkul\Partner\Models\Partner;
+use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Sale\Enums\OrderState;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Currency;
+use Webkul\Support\Models\UTMMedium;
+use Webkul\Support\Models\UTMSource;
 
 class Order extends Model
 {
@@ -66,38 +65,38 @@ class Order extends Model
     ];
 
     protected array $logAttributes = [
-        'medium.name'   => 'Medium',
-        'utmSource.name' => 'UTM Source',
-        'partner.name'  => 'Customer',
-        'partnerInvoice.name' => 'Invoice Address',
+        'medium.name'          => 'Medium',
+        'utmSource.name'       => 'UTM Source',
+        'partner.name'         => 'Customer',
+        'partnerInvoice.name'  => 'Invoice Address',
         'partnerShipping.name' => 'Shipping Address',
-        'fiscalPosition.name' => 'Fiscal Position',
-        'paymentTerm.name' => 'Payment Term',
-        'currency.name' => 'Currency',
-        'user.name' => 'Salesperson',
-        'team.name' => 'Sales Team',
-        'creator.name' => 'Created By',
-        'company.name' => 'Company',
-        'name' => 'Order Reference',
-        'state' => 'Order Status',
-        'client_order_ref' => 'Customer Reference',
-        'origin' => 'Source Document',
-        'reference' => 'Reference',
-        'signed_by' => 'Signed By',
-        'invoice_status' => 'Invoice Status',
-        'validity_date' => 'Validity Date',
-        'note' => 'Terms and Conditions',
-        'currency_rate' => 'Currency Rate',
-        'amount_untaxed' => 'Subtotal',
-        'amount_tax' => 'Tax',
-        'amount_total' => 'Total',
-        'locked' => 'Locked',
-        'require_signature' => 'Require Signature',
-        'require_payment' => 'Require Payment',
-        'commitment_date' => 'Commitment Date',
-        'date_order' => 'Order Date',
-        'signed_on' => 'Signed On',
-        'prepayment_percent' => 'Prepayment Percentage'
+        'fiscalPosition.name'  => 'Fiscal Position',
+        'paymentTerm.name'     => 'Payment Term',
+        'currency.name'        => 'Currency',
+        'user.name'            => 'Salesperson',
+        'team.name'            => 'Sales Team',
+        'creator.name'         => 'Created By',
+        'company.name'         => 'Company',
+        'name'                 => 'Order Reference',
+        'state'                => 'Order Status',
+        'client_order_ref'     => 'Customer Reference',
+        'origin'               => 'Source Document',
+        'reference'            => 'Reference',
+        'signed_by'            => 'Signed By',
+        'invoice_status'       => 'Invoice Status',
+        'validity_date'        => 'Validity Date',
+        'note'                 => 'Terms and Conditions',
+        'currency_rate'        => 'Currency Rate',
+        'amount_untaxed'       => 'Subtotal',
+        'amount_tax'           => 'Tax',
+        'amount_total'         => 'Total',
+        'locked'               => 'Locked',
+        'require_signature'    => 'Require Signature',
+        'require_payment'      => 'Require Payment',
+        'commitment_date'      => 'Commitment Date',
+        'date_order'           => 'Order Date',
+        'signed_on'            => 'Signed On',
+        'prepayment_percent'   => 'Prepayment Percentage',
     ];
 
     public function company()
@@ -197,9 +196,9 @@ class Order extends Model
 
         static::creating(function ($order) {
             if ($order->state === 'sale') {
-                $order->name = 'ORD-TMP-' . time();
+                $order->name = 'ORD-TMP-'.time();
             } else {
-                $order->name = 'QT-TMP-' . time();
+                $order->name = 'QT-TMP-'.time();
             }
         });
 
@@ -219,9 +218,9 @@ class Order extends Model
     public function updateName()
     {
         if ($this->state === OrderState::SALE->value) {
-            $this->name = 'ORD-' . $this->id;
+            $this->name = 'ORD-'.$this->id;
         } else {
-            $this->name = 'QT-' . $this->id;
+            $this->name = 'QT-'.$this->id;
         }
     }
 }

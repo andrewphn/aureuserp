@@ -11,8 +11,11 @@ class Summary extends Component
     public $products = [];
 
     public $subtotal = 0;
+
     public $totalDiscount = 0;
+
     public $totalTax = 0;
+
     public $grandTotal = 0;
 
     public function mount($products)

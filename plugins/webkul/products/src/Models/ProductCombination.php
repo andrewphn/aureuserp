@@ -14,7 +14,7 @@ class ProductCombination extends Model
 
     protected $fillable = [
         'product_id',
-        'product_attribute_value_id'
+        'product_attribute_value_id',
     ];
 
     public function product(): BelongsTo

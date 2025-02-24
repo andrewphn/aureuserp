@@ -2,19 +2,19 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pages;
-use Webkul\Sale\Models\Team;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pages;
+use Webkul\Sale\Models\Team;
 
 class TeamResource extends Resource
 {
@@ -47,9 +47,9 @@ class TeamResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('sales::filament/clusters/configurations/resources/team.global-search.company-name') => $record->company?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/team.global-search.user-name') => $record->user?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/team.global-search.name') => $record->name ?? '—',
+            __('sales::filament/clusters/configurations/resources/team.global-search.company-name')    => $record->company?->name ?? '—',
+            __('sales::filament/clusters/configurations/resources/team.global-search.user-name')       => $record->user?->name ?? '—',
+            __('sales::filament/clusters/configurations/resources/team.global-search.name')            => $record->name ?? '—',
             __('sales::filament/clusters/configurations/resources/team.global-search.invoiced-target') => $record->invoiced_target ?? '—',
         ];
     }

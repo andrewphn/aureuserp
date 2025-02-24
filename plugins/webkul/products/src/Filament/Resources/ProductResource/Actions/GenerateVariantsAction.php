@@ -3,22 +3,22 @@
 namespace Webkul\Product\Filament\Resources\ProductResource\Actions;
 
 use Closure;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Filament\Actions\Concerns\CanCustomizeProcess;
-use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes;
 use Webkul\Product\Models\Product;
 use Webkul\Product\Models\ProductAttribute;
 use Webkul\Product\Models\ProductCombination;
-use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes;
 
 class GenerateVariantsAction extends Action
 {
     use CanCustomizeProcess;
 
-    protected Model | Closure | null $record;
+    protected Model|Closure|null $record;
 
     public static function getDefaultName(): ?string
     {
@@ -37,7 +37,7 @@ class GenerateVariantsAction extends Action
                 $this->record = $livewire->getRecord();
                 $this->generateVariants();
             })
-            ->hidden(fn(ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
+            ->hidden(fn (ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
     }
 
     protected function generateVariants(): void
@@ -94,8 +94,8 @@ class GenerateVariantsAction extends Action
                 $variant = $this->createVariant($this->record, [$value]);
 
                 ProductCombination::create([
-                    'product_id' => $variant->id,
-                    'product_attribute_value_id' => $value->id
+                    'product_id'                 => $variant->id,
+                    'product_attribute_value_id' => $value->id,
                 ]);
 
                 $processedVariantIds[] = $variant->id;
@@ -145,8 +145,8 @@ class GenerateVariantsAction extends Action
 
                 foreach ($combination as $attributeValue) {
                     ProductCombination::create([
-                        'product_id' => $variant->id,
-                        'product_attribute_value_id' => $attributeValue->id
+                        'product_id'                 => $variant->id,
+                        'product_attribute_value_id' => $attributeValue->id,
                     ]);
                 }
 
@@ -187,13 +187,13 @@ class GenerateVariantsAction extends Action
 
     protected function createVariant(Product $parent, array $attributeValues): Product
     {
-        $variantName = $parent->name . ' - ' . collect($attributeValues)
-            ->map(fn($value) => $value->attributeOption->name)
+        $variantName = $parent->name.' - '.collect($attributeValues)
+            ->map(fn ($value) => $value->attributeOption->name)
             ->implode(' / ');
 
         $extraPrice = collect($attributeValues)->sum('extra_price');
 
-        $variant = new Product();
+        $variant = new Product;
 
         $variant->fill([
             'type'                 => $parent->type,
@@ -214,7 +214,7 @@ class GenerateVariantsAction extends Action
             'description_purchase' => $parent->description_purchase,
             'description_sale'     => $parent->description_sale,
             'barcode'              => null,
-            'reference'            => $parent->reference . '-' . strtolower(str_replace(' ', '-', $variantName)),
+            'reference'            => $parent->reference.'-'.strtolower(str_replace(' ', '-', $variantName)),
             'images'               => $parent->images,
         ]);
 
@@ -225,14 +225,14 @@ class GenerateVariantsAction extends Action
 
     protected function updateVariant(Product $variant, array $attributeValues): void
     {
-        $variantName = $this->record->name . ' - ' . collect($attributeValues)
-            ->map(fn($value) => $value->attributeOption->name)
+        $variantName = $this->record->name.' - '.collect($attributeValues)
+            ->map(fn ($value) => $value->attributeOption->name)
             ->implode(' / ');
 
         $extraPrice = collect($attributeValues)->sum('extra_price');
 
         $variant->fill([
-            'name' => $variantName,
+            'name'  => $variantName,
             'price' => $this->record->price + $extraPrice,
         ]);
 

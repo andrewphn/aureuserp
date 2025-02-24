@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Traits;
 
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Webkul\Account\Enums;
 
 trait PaymentDueTerm
@@ -38,7 +38,7 @@ trait PaymentDueTerm
                     ->relationship('paymentTerm', 'name')
                     ->label(__('accounts::traits/payment-due-term.form.payment-term'))
                     ->searchable()
-                    ->preload()
+                    ->preload(),
             ]);
     }
 
@@ -51,7 +51,7 @@ trait PaymentDueTerm
                     ->sortable(),
                 Tables\Columns\TextColumn::make('value')
                     ->label(__('accounts::traits/payment-due-term.table.columns.value'))
-                    ->formatStateUsing(fn($state) => Enums\DueTermValue::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\DueTermValue::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('value_amount')
                     ->label(__('accounts::traits/payment-due-term.table.columns.value-amount'))
@@ -60,7 +60,7 @@ trait PaymentDueTerm
                     ->label(__('accounts::traits/payment-due-term.table.columns.after'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('delay_type')
-                    ->formatStateUsing(fn($state) => Enums\DelayType::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\DelayType::options()[$state])
                     ->label(__('accounts::traits/payment-due-term.table.columns.delay-type'))
                     ->sortable(),
             ])
@@ -89,7 +89,7 @@ trait PaymentDueTerm
                             ->title('accounts::traits/payment-due-term.table.actions.delete.notification.title')
                             ->body('accounts::traits/payment-due-term.table.actions.delete.notification.body')
                     )
-                    ->icon('heroicon-o-plus-circle')
+                    ->icon('heroicon-o-plus-circle'),
             ]);
     }
 }
