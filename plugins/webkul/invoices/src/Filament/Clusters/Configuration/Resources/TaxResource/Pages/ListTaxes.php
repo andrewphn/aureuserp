@@ -2,7 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
 
-use Webkul\Account\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ListTaxes as BaseListTaxes;
+use Webkul\Account\Filament\Resources\TaxResource\Pages\ListTaxes as BaseListTaxes;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource;
 
 class ListTaxes extends BaseListTaxes

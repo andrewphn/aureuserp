@@ -58,7 +58,6 @@ class AccountServiceProvider extends PackageServiceProvider
             ->runsMigrations()
             ->hasDependencies([
                 'products',
-                'invoices',
             ])
             ->hasSeeder('Webkul\\Account\\Database\Seeders\\DatabaseSeeder')
             ->hasInstallCommand(function (InstallCommand $command) {

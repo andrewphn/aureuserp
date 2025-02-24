@@ -4,7 +4,7 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
 use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\JournalResource\Pages;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\JournalResource as BaseJournalResource;
+use Webkul\Account\Filament\Resources\JournalResource as BaseJournalResource;
 
 class JournalResource extends BaseJournalResource
 {

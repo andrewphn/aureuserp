@@ -7,7 +7,7 @@ use Webkul\Invoice\Filament\Clusters\Customer\Resources\ReceiptsResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Webkul\Account\Filament\Clusters\Customer\Resources\InvoiceResource as BaseInvoiceResource;
+use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 
 class ReceiptsResource extends BaseInvoiceResource
 {

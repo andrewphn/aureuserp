@@ -3,7 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource;
-use Webkul\Account\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\ListPayments as BaseListPayments;
+use Webkul\Account\Filament\Resources\PaymentsResource\Pages\ListPayments as BaseListPayments;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 

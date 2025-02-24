@@ -3,7 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource\Pages\ViewAccount as BaseViewAccount;
+use Webkul\Account\Filament\Resources\AccountResource\Pages\ViewAccount as BaseViewAccount;
 
 class ViewAccount extends BaseViewAccount
 {

@@ -4,7 +4,7 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
 use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\AccountResource\Pages;
-use Webkul\Account\Filament\Clusters\Configuration\Resources\AccountResource as BaseAccountResource;
+use Webkul\Account\Filament\Resources\AccountResource as BaseAccountResource;
 
 class AccountResource extends BaseAccountResource
 {
