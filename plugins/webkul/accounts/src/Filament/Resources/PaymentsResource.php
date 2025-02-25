@@ -74,7 +74,7 @@ class PaymentsResource extends Resource
                                     ->relationship(
                                         'journal',
                                         'name',
-                                        fn($query) => $query->whereIn('type', ['bank', 'cash'])
+                                        fn ($query) => $query->whereIn('type', ['bank', 'cash'])
                                     )
                                     ->label(__('accounts::filament/resources/payment.form.sections.fields.journal'))
                                     ->searchable()
@@ -352,7 +352,7 @@ class PaymentsResource extends Resource
                                     ->schema([
                                         Infolists\Components\TextEntry::make('state')
                                             ->badge()
-                                            ->color(fn(string $state): string => match ($state) {
+                                            ->color(fn (string $state): string => match ($state) {
                                                 PaymentStatus::DRAFT->value      => 'gray',
                                                 PaymentStatus::IN_PROCESS->value => 'warning',
                                                 PaymentStatus::PAID->value       => 'success',
@@ -360,13 +360,13 @@ class PaymentsResource extends Resource
                                                 default                          => 'gray',
                                             })
                                             ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.state'))
-                                            ->formatStateUsing(fn(string $state): string => PaymentStatus::options()[$state])
+                                            ->formatStateUsing(fn (string $state): string => PaymentStatus::options()[$state])
                                             ->columnSpanFull(),
 
                                         Infolists\Components\TextEntry::make('payment_type')
                                             ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.payment-type'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->formatStateUsing(fn($state) => PaymentState::options()[$state]),
+                                            ->formatStateUsing(fn ($state) => PaymentState::options()[$state]),
                                         Infolists\Components\TextEntry::make('journal.name')
                                             ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.journal'))
                                             ->icon('heroicon-o-document-text')
@@ -375,7 +375,7 @@ class PaymentsResource extends Resource
                                             ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.customer-bank-account'))
                                             ->icon('heroicon-o-building-library')
                                             ->placeholder('—')
-                                            ->visible(fn($record) => $record->journal?->type === 'bank'),
+                                            ->visible(fn ($record) => $record->journal?->type === 'bank'),
                                         Infolists\Components\TextEntry::make('partner.name')
                                             ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.customer'))
                                             ->icon('heroicon-o-user')

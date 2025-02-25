@@ -4,10 +4,10 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Page
 
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ListPartners as BaseListPartners;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors as BaseListVendors;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;
 
-class ListVendors extends BaseListPartners
+class ListVendors extends BaseListVendors
 {
     protected static string $resource = VendorResource::class;
 

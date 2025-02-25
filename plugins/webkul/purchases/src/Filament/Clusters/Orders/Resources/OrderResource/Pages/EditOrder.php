@@ -41,4 +41,9 @@ class EditOrder extends EditRecord
                 ),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        OrderResource::collectTotals($this->getRecord());
+    }
 }

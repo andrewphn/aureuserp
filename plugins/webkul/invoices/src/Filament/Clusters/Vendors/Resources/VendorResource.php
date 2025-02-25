@@ -5,17 +5,17 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Infolist;
 use Filament\Infolists;
-use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Tables\Table;
+use Webkul\Account\Models\Partner;
+use Webkul\Contact\Filament\Resources\PartnerResource as BaseVendorResource;
+use Webkul\Invoice\Enums;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\RelationManagers;
-use Webkul\Account\Models\Partner;
-use Webkul\Invoice\Enums;
-use Webkul\Contact\Filament\Resources\PartnerResource as BaseVendorResource;
 
 class VendorResource extends BaseVendorResource
 {
@@ -59,6 +59,8 @@ class VendorResource extends BaseVendorResource
         $firstTabFirstChildComponent->childComponents([
             Forms\Components\Group::make()
                 ->schema([
+                    Forms\Components\Hidden::make('sub_type')
+                        ->default('supplier'),
                     Forms\Components\Select::make('user_id')
                         ->relationship('user', 'name')
                         ->preload()
@@ -91,8 +93,8 @@ class VendorResource extends BaseVendorResource
                             ->relationship('propertyOutboundPaymentMethodLine', 'name')
                             ->preload()
                             ->searchable()
-                            ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.fields.payment-method'))
-                    ])->columns(2)
+                            ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.fields.payment-method')),
+                    ])->columns(2),
             ])
             ->columns(1);
 
@@ -105,7 +107,7 @@ class VendorResource extends BaseVendorResource
                             ->relationship('propertyAccountPosition', 'name')
                             ->searchable()
                             ->preload(),
-                    ])->columns(2)
+                    ])->columns(2),
             ])
             ->columns(1);
 
@@ -133,13 +135,13 @@ class VendorResource extends BaseVendorResource
                                 Forms\Components\Select::make('peppol_eas')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.peppol-eas'))
                                     ->live()
-                                    ->visible(fn(Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && !empty($get('invoice_edi_format_store')))
+                                    ->visible(fn (Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store')))
                                     ->options(Enums\PartyIdentificationScheme::class),
                                 Forms\Components\TextInput::make('peppol_endpoint')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.endpoint'))
                                     ->live()
-                                    ->visible(fn(Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && !empty($get('invoice_edi_format_store')))
-                            ])->columns(2)
+                                    ->visible(fn (Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store'))),
+                            ])->columns(2),
                     ]),
 
                 Forms\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.automation'))
@@ -160,7 +162,7 @@ class VendorResource extends BaseVendorResource
         $internalNotes = Forms\Components\Tabs\Tab::make(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.internal-notes.title'))
             ->schema([
                 Forms\Components\RichEditor::make('comment')
-                    ->hiddenLabel()
+                    ->hiddenLabel(),
             ]);
 
         $secondChildComponents->childComponents([
@@ -240,7 +242,7 @@ class VendorResource extends BaseVendorResource
                             ->placeholder('-')
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.entries.payment-method'))
                             ->icon('heroicon-o-banknotes'),
-                    ])->columns(2)
+                    ])->columns(2),
             ])
             ->columns(1);
 
@@ -252,7 +254,7 @@ class VendorResource extends BaseVendorResource
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.entries.fiscal-position'))
                             ->placeholder('-')
                             ->icon('heroicon-o-document-text'),
-                    ])->columns(2)
+                    ])->columns(2),
             ])
             ->columns(1);
 
@@ -280,8 +282,8 @@ class VendorResource extends BaseVendorResource
                                     ->icon('heroicon-o-identification'),
                                 Infolists\Components\TextEntry::make('peppol_endpoint')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.endpoint'))
-                                    ->icon('heroicon-o-globe-alt')
-                            ])->columns(2)
+                                    ->icon('heroicon-o-globe-alt'),
+                            ])->columns(2),
                     ]),
 
                 Infolists\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.automation'))
@@ -303,7 +305,7 @@ class VendorResource extends BaseVendorResource
                 Infolists\Components\TextEntry::make('comment')
                     ->hiddenLabel()
                     ->html()
-                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->icon('heroicon-o-chat-bubble-left-right'),
             ]);
 
         $secondChildComponents->childComponents([

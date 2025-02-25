@@ -69,7 +69,7 @@ class AccountResource extends Resource
                                 Forms\Components\Select::make('invoices_account_tax')
                                     ->relationship('taxes', 'name')
                                     ->label(__('accounts::filament/resources/account.form.sections.fields.default-taxes'))
-                                    ->hidden(fn(Get $get) => $get('account_type') === AccountType::OFF_BALANCE->value)
+                                    ->hidden(fn (Get $get) => $get('account_type') === AccountType::OFF_BALANCE->value)
                                     ->multiple()
                                     ->preload()
                                     ->searchable(),
@@ -178,7 +178,7 @@ class AccountResource extends Resource
                                     ->icon('heroicon-o-tag'),
                                 Infolists\Components\TextEntry::make('taxes.name')
                                     ->label(__('accounts::filament/resources/account.infolist.sections.entries.default-taxes'))
-                                    ->visible(fn($record) => $record->account_type !== AccountType::OFF_BALANCE->value)
+                                    ->visible(fn ($record) => $record->account_type !== AccountType::OFF_BALANCE->value)
                                     ->listWithLineBreaks()
                                     ->placeholder('-')
                                     ->icon('heroicon-o-calculator'),

@@ -2,6 +2,8 @@
 
 namespace Webkul\Purchase;
 
+use Livewire\Livewire;
+use Webkul\Purchase\Livewire\Summary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -24,6 +26,7 @@ class PurchaseServiceProvider extends PackageServiceProvider
                 '2025_02_11_101105_create_purchases_requisition_lines_table',
                 '2025_02_11_101110_create_purchases_orders_table',
                 '2025_02_11_101118_create_purchases_order_lines_table',
+                '2025_02_11_135617_create_purchases_order_item_taxes_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -31,7 +34,6 @@ class PurchaseServiceProvider extends PackageServiceProvider
             ])
             ->runsSettings()
             ->hasDependencies([
-                'products',
                 'invoices',
             ])
             ->hasInstallCommand(function (InstallCommand $command) {
@@ -44,6 +46,6 @@ class PurchaseServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        //
+        Livewire::component('order-summary', Summary::class);
     }
 }

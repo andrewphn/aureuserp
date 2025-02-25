@@ -2,12 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Products\Resources;
 
-
 use Filament\Resources\Pages\Page;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource as BaseProductResource;
 use Webkul\Sale\Filament\Clusters\Products;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 use Webkul\Sale\Models\Product;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource as BaseProductResource;
 
 class ProductResource extends BaseProductResource
 {

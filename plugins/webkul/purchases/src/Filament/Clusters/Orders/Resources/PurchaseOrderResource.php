@@ -25,13 +25,6 @@ class PurchaseOrderResource extends OrderResource
         return __('purchases::filament/clusters/orders/resources/purchase-order.navigation.title');
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [

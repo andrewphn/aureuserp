@@ -477,13 +477,6 @@ class PurchaseAgreementResource extends Resource
             ->columns(1);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

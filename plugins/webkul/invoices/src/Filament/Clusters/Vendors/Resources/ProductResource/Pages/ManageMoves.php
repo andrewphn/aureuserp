@@ -4,14 +4,14 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pag
 
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource;
 
 class ManageMoves extends ManageRelatedRecords
 {
@@ -46,17 +46,17 @@ class ManageMoves extends ManageRelatedRecords
                 Tables\Columns\TextColumn::make('lot.name')
                     ->label(__('invoices::filament/clusters/vendors/resources/product/pages/manage-moves.table.columns.lot'))
                     ->sortable()
-                    ->visible(fn(TraceabilitySettings $traceabilitySettings) => $traceabilitySettings->enable_lots_serial_numbers && $this->getOwnerRecord()->tracking != Enums\ProductTracking::QTY),
+                    ->visible(fn (TraceabilitySettings $traceabilitySettings) => $traceabilitySettings->enable_lots_serial_numbers && $this->getOwnerRecord()->tracking != Enums\ProductTracking::QTY),
                 Tables\Columns\TextColumn::make('resultPackage.name')
                     ->label(__('invoices::filament/clusters/vendors/resources/product/pages/manage-moves.table.columns.package'))
                     ->sortable()
-                    ->visible(fn(OperationSettings $operationSettings) => $operationSettings->enable_packages),
+                    ->visible(fn (OperationSettings $operationSettings) => $operationSettings->enable_packages),
                 Tables\Columns\TextColumn::make('sourceLocation.full_name')
                     ->label(__('invoices::filament/clusters/vendors/resources/product/pages/manage-moves.table.columns.source-location'))
-                    ->visible(fn(WarehouseSettings $warehouseSettings) => $warehouseSettings->enable_locations),
+                    ->visible(fn (WarehouseSettings $warehouseSettings) => $warehouseSettings->enable_locations),
                 Tables\Columns\TextColumn::make('destinationLocation.full_name')
                     ->label(__('invoices::filament/clusters/vendors/resources/product/pages/manage-moves.table.columns.destination-location'))
-                    ->visible(fn(WarehouseSettings $warehouseSettings) => $warehouseSettings->enable_locations),
+                    ->visible(fn (WarehouseSettings $warehouseSettings) => $warehouseSettings->enable_locations),
                 Tables\Columns\TextColumn::make('qty')
                     ->label(__('invoices::filament/clusters/vendors/resources/product/pages/manage-moves.table.columns.quantity'))
                     ->sortable(),

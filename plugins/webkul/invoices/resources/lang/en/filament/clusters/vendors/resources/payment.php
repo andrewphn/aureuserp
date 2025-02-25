@@ -1,9 +1,9 @@
 <?php
 
-return  [
+return [
     'title' => 'Payments',
 
     'navigation' => [
         'title' => 'Payments',
-    ]
+    ],
 ];

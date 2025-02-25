@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-use Illuminate\Support\Facades\Auth;
-use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class CreateProductCategory extends CreateRecord
