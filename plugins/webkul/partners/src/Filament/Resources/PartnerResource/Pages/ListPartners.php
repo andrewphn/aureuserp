@@ -37,17 +37,17 @@ class ListPartners extends ListRecords
             'individuals' => PresetView::make(__('partners::filament/resources/partner/pages/list-partners.tabs.individuals'))
                 ->icon('heroicon-s-user')
                 ->favorite()
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('account_type', AccountType::INDIVIDUAL)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('account_type', AccountType::INDIVIDUAL)),
 
             'companies' => PresetView::make(__('partners::filament/resources/partner/pages/list-partners.tabs.companies'))
                 ->icon('heroicon-s-building-office')
                 ->favorite()
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('account_type', AccountType::COMPANY)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('account_type', AccountType::COMPANY)),
 
             'archived' => PresetView::make(__('partners::filament/resources/partner/pages/list-partners.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->favorite()
-                ->modifyQueryUsing(fn (Builder $query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(fn(Builder $query) => $query->onlyTrashed()),
         ];
     }
 }
