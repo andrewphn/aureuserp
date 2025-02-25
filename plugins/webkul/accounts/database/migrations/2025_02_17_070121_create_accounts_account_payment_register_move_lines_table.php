@@ -12,17 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounts_account_payment_register_move_lines', function (Blueprint $table) {
-            $table->foreignId('payment_register_id')
-                ->comment('Account Payment Register Id')
-                ->constrained('accounts_payment_registers')
-                ->cascadeOnDelete()
-                ->name('fk_payment_register');
+            $table->foreignId('payment_register_id')->comment('Account Payment Register Id');
+            $table->foreignId('move_line_id')->comment('Account move line');
 
-            $table->foreignId('move_line_id')
-                ->comment('Account move line')
-                ->constrained('accounts_account_move_lines')
-                ->cascadeOnDelete()
-                ->name('fk_move_line');
+            $table->foreign('payment_register_id', 'fk_payment_register')
+                ->references('id')
+                ->on('accounts_payment_registers')
+                ->cascadeOnDelete();
+
+            $table->foreign('move_line_id', 'fk_move_line')
+                ->references('id')
+                ->on('accounts_account_move_lines')
+                ->cascadeOnDelete();
         });
     }
 
