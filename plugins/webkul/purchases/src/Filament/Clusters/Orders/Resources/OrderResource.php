@@ -4,7 +4,10 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Account\Models\Tax;
@@ -73,6 +76,7 @@ class OrderResource extends Resource
                                     ->required()
                                     ->searchable()
                                     ->preload()
+                                    ->default(Auth::user()->defaultCompany?->currency_id)
                                     ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                             ]),
 
@@ -193,37 +197,34 @@ class OrderResource extends Resource
                     ->schema([
                         Forms\Components\Grid::make(4)
                             ->schema([
-                                Forms\Components\Hidden::make('id'),
-                                Forms\Components\Hidden::make('currency_id')
-                                    ->default(Currency::first()->id),
                                 Forms\Components\Select::make('product_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
                                     ->relationship('product', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateHydrated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($state) {
-                                            self::updateProductCalculations($state, $set, $get);
-                                        }
-                                    })
                                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($state) {
-                                            self::updateProductCalculations($state, $set, $get);
+                                        if ($get('product_id')) {
+                                            $product = Product::find($get('product_id'));
+
+                                            $set('taxes', $product->productTaxes->pluck('id')->toArray());
                                         }
+
+                                        self::calculateLineTotals($set, $get);
                                     })
                                     ->required(),
-                                Forms\Components\Hidden::make('name')
-                                    ->live(onBlur: true),
+                                Forms\Components\DateTimePicker::make('planned_at')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.expected-arrival'))
+                                    ->native(false)
+                                    ->suffixIcon('heroicon-o-calendar')
+                                    ->default(now()),
                                 Forms\Components\TextInput::make('product_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
                                     ->required()
                                     ->default(1)
                                     ->live()
                                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($get('product_id')) {
-                                            self::updateLineCalculations($set, $get);
-                                        }
+                                        self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
@@ -241,17 +242,15 @@ class OrderResource extends Resource
                                     ->relationship(
                                         'taxes',
                                         'name',
-                                        fn ($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
+                                        function(Builder $query) {
+                                            return $query->where('type_tax_use', TypeTaxUse::PURCHASE->value);
+                                        },
                                     )
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
                                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
-                                        if ($get('product_id')) {
-                                            $product = Product::find($get('product_id'));
-                                            $product->productTaxes()->sync($state);
-                                            self::updateLineCalculations($set, $get);
-                                        }
+                                        self::calculateLineTotals($set, $get);
                                     })
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
@@ -260,9 +259,7 @@ class OrderResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($get('product_id')) {
-                                            self::updateLineCalculations($set, $get);
-                                        }
+                                        self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
@@ -271,132 +268,304 @@ class OrderResource extends Resource
                                     ->required()
                                     ->live()
                                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($get('product_id')) {
-                                            self::updateLineCalculations($set, $get);
-                                        }
+                                        self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.sub-total'))
-                                    ->numeric()
-                                    ->live()
-                                    ->required()
+                                    ->default(0)
                                     ->readOnly(),
-                                Forms\Components\TextInput::make('price_total')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.total'))
-                                    ->numeric()
-                                    ->live()
-                                    ->required()
-                                    ->readOnly(),
+                                Forms\Components\Hidden::make('price_tax')
+                                    ->default(0),
+                                Forms\Components\Hidden::make('price_total')
+                                    ->default(0),
                             ]),
-                    ])->columns(2),
+                    ])
+                    ->columns(2),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
                 $product = Product::find($data['product_id']);
 
                 $data = array_merge($data, [
-                    'name'                    => $product->name,
-                    'state'                   => $record->state->value,
-                    'product_uom_qty'         => $data['product_qty'],
-                    'product_packaging_qty'   => $data['product_qty'],
-                    'qty_received_method'     => 'manual',
-                    'uom_id'                  => $data['uom_id'] ?? $product->uom_id,
-                    'currency_id'             => $record->currency_id,
-                    'partner_id'              => $record->partner_id,
-                    'creator_id'              => Auth::id(),
-                    'company_id'              => Auth::user()->default_company_id,
+                    'name'                  => $product->name,
+                    'state'                 => $record->state->value,
+                    'product_uom_qty'       => $data['product_qty'],
+                    'product_packaging_qty' => $data['product_qty'],
+                    'qty_received_method'   => 'manual',
+                    'uom_id'                => $data['uom_id'] ?? $product->uom_id,
+                    'currency_id'           => $record->currency_id,
+                    'partner_id'            => $record->partner_id,
+                    'creator_id'            => Auth::id(),
+                    'company_id'            => Auth::user()->default_company_id,
                 ]);
 
                 return $data;
             });
     }
 
-    private static function updateProductCalculations($productId, Forms\Set $set, Forms\Get $get): void
+    private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
     {
-        $product = Product::find($productId);
+        if (! $get('product_id')) {
+            $set('price_unit', 0);
 
-        $quantity = floatval($get('quantity') ?? 1);
+            $set('discount', 0);
+        
+            $set('price_tax', 0);
 
-        $priceUnit = floatval($product->price);
+            $set('price_subtotal', 0);
 
-        $set('name', $product->name);
+            $set('price_total', 0);
+
+            return;
+        }
+
+        $product = Product::find($get('product_id'));
+
+        $priceUnit = floatval($product->cost ?? $product->price);
 
         $set('price_unit', $priceUnit);
 
-        $set('tax', $product->productTaxes->pluck('id')->toArray());
+        $quantity = floatval($get('product_qty') ?? 1);
 
-        self::calculateTotals($quantity, $priceUnit, floatval($get('discount')), $product->productTaxes->pluck('id')->toArray(), $set);
-    }
-
-    private static function updateLineCalculations(Forms\Set $set, Forms\Get $get): void
-    {
-        $quantity = floatval($get('quantity') ?? 1);
-
-        $priceUnit = floatval($get('price_unit') ?? 0);
-
-        $discount = floatval($get('discount') ?? 0);
-
-        $taxIds = $get('tax') ?? [];
-
-        self::calculateTotals($quantity, $priceUnit, $discount, $taxIds, $set);
-    }
-
-    private static function calculateTotals(float $quantity, float $priceUnit, float $discount, array $taxIds, Forms\Set $set): void
-    {
-        $baseAmount = $quantity * $priceUnit;
-
-        $discountAmount = $baseAmount * ($discount / 100);
-
-        $subtotalBeforeTax = $baseAmount - $discountAmount;
+        $taxIds = $get('taxes') ?? [];
 
         $taxAmount = 0;
 
-        $includedTaxAmount = 0;
+        $subTotal = ($priceUnit * $quantity) - ($get('discount') ?? 0);
 
         if (! empty($taxIds)) {
-            $taxes = Tax::whereIn('id', $taxIds)->get();
+            $taxes = Tax::whereIn('id', $taxIds)
+                ->orderBy('sort')
+                ->get();
+            
+            $baseAmount = $subTotal;
 
+            $taxesComputed = [];
+            
             foreach ($taxes as $tax) {
-                $taxValue = floatval($tax->amount);
+                $amount = floatval($tax->amount);
 
-                if ($tax->include_base_amount) {
-                    $includedTaxRate = $taxValue / 100;
-                    $includedTaxAmount += $subtotalBeforeTax - ($subtotalBeforeTax / (1 + $includedTaxRate));
+                $currentTaxBase = $baseAmount;
+
+                $tax->price_include_override ??= 'tax_excluded';
+                
+                if ($tax->is_base_affected) {
+                    foreach ($taxesComputed as $prevTax) {
+                        if ($prevTax['include_base_amount']) {
+                            $currentTaxBase += $prevTax['tax_amount'];
+                        }
+                    }
                 }
-            }
+                
+                $currentTaxAmount = 0;
+                
+                if ($tax->price_include_override == 'tax_included') {
+                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
+                    
+                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
+                    
+                    if (empty($taxesComputed)) {
+                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
 
-            $subtotalExcludingIncludedTax = $subtotalBeforeTax - $includedTaxAmount;
+                        $subTotal = $priceUnit * $quantity;
 
-            foreach ($taxes as $tax) {
-                $taxValue = floatval($tax->amount);
-
-                if (! $tax->include_base_amount) {
-                    $taxAmount += $subtotalExcludingIncludedTax * ($taxValue / 100);
+                        $baseAmount = $subTotal;
+                    }
+                } elseif ($tax->price_include_override == 'tax_excluded') {
+                    if ($tax->amount_type == 'percent') {
+                        $currentTaxAmount = $currentTaxBase * $amount / 100;
+                    } else {
+                        $currentTaxAmount = $amount * $quantity;
+                    }
                 }
+                
+                $taxesComputed[] = [
+                    'tax_id' => $tax->id,
+                    'tax_amount' => $currentTaxAmount,
+                    'include_base_amount' => $tax->include_base_amount
+                ];
+                
+                $taxAmount += $currentTaxAmount;
             }
         }
-
-        $set('price_subtotal', number_format($subtotalBeforeTax, 2, '.', ''));
-
-        $set('price_total', number_format($subtotalBeforeTax + $taxAmount, 2, '.', ''));
+        
+        $set('price_subtotal', round($subTotal, 4));
+        
+        $set('price_tax', $taxAmount);
+        
+        $set('price_total', $subTotal + $taxAmount);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                //
+            ->columns(static::mergeCustomTableColumns([
+                Tables\Columns\TextColumn::make('partner_reference')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.vendor-reference'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.reference'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('partner.name')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.vendor'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('company.name')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.company'))
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.buyer'))
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('ordered_at')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.order-deadline'))
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('origin')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.source-document'))
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('untaxed_amount')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.untaxed-amount'))
+                    ->sortable()
+                    ->money(fn (Order $record) => $record->currency->code)
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('total_amount')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.total-amount'))
+                    ->sortable()
+                    ->money(fn (Order $record) => $record->currency->code)
+                    ->toggleable(),
+            ]))
+            ->groups([
+                Tables\Grouping\Group::make('partner.name')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.groups.vendor')),
+                Tables\Grouping\Group::make('user.name')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.groups.buyer')),
+                Tables\Grouping\Group::make('state')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.groups.state')),
+                Tables\Grouping\Group::make('created_at')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.groups.created-at'))
+                    ->collapsible(),
+                Tables\Grouping\Group::make('updated_at')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.groups.updated-at'))
+                    ->date()
+                    ->collapsible(),
             ])
             ->filters([
-                //
-            ])
+                Tables\Filters\QueryBuilder::make()
+                    ->constraints(collect(static::mergeCustomTableQueryBuilderConstraints([
+                        Tables\Filters\QueryBuilder\Constraints\SelectConstraint::make('state')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.status'))
+                            ->multiple()
+                            ->options(Enums\OrderState::class)
+                            ->icon('heroicon-o-bars-2'),
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('partner_reference')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.vendor-reference'))
+                            ->icon('heroicon-o-identification'),
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('name')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.reference'))
+                            ->icon('heroicon-o-identification'),
+                        Tables\Filters\QueryBuilder\Constraints\NumberConstraint::make('untaxed_amount')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.untaxed-amount')),
+                        Tables\Filters\QueryBuilder\Constraints\NumberConstraint::make('total_amount')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.total-amount')),
+                        Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint::make('partner')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.vendor'))
+                            ->multiple()
+                            ->selectable(
+                                IsRelatedToOperator::make()
+                                    ->titleAttribute('name')
+                                    ->searchable()
+                                    ->multiple()
+                                    ->preload(),
+                            )
+                            ->icon('heroicon-o-user'),
+                        Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint::make('user')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.buyer'))
+                            ->multiple()
+                            ->selectable(
+                                IsRelatedToOperator::make()
+                                    ->titleAttribute('name')
+                                    ->searchable()
+                                    ->multiple()
+                                    ->preload(),
+                            )
+                            ->icon('heroicon-o-user'),
+                        Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint::make('company')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.company'))
+                            ->multiple()
+                            ->selectable(
+                                IsRelatedToOperator::make()
+                                    ->titleAttribute('name')
+                                    ->searchable()
+                                    ->multiple()
+                                    ->preload(),
+                            )
+                            ->icon('heroicon-o-building-office'),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('ordered_at')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.order-deadline')),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('created_at')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.created-at')),
+                        Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('updated_at')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.updated-at')),
+                    ]))->filter()->values()->all()),
+            ], layout: \Filament\Tables\Enums\FiltersLayout::Modal)
+            ->filtersTriggerAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->slideOver(),
+            )
+            ->filtersFormColumns(2)
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('purchases::filament/clusters/orders/resources/order.table.actions.delete.notification.title'))
+                                ->body(__('purchases::filament/clusters/orders/resources/order.table.actions.delete.notification.body')),
+                        ),
+                ]),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+                Tables\Actions\DeleteBulkAction::make()
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title(__('purchases::filament/clusters/orders/resources/order.table.bulk-actions.delete.notification.title'))
+                            ->body(__('purchases::filament/clusters/orders/resources/order.table.bulk-actions.delete.notification.body')),
+                    ),
+            ])
+            ->checkIfRecordIsSelectableUsing(
+                fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\RequisitionState::CLOSED,
+            );
+    }
+
+    public static function collectTotals(Order $record): void
+    {
+        $record->untaxed_amount = 0;
+        $record->tax_amount = 0;
+        $record->total_amount = 0;
+        $record->total_cc_amount = 0;
+
+        foreach ($record->lines as $line) {
+            $record->untaxed_amount += $line->price_subtotal;
+            $record->tax_amount += $line->price_tax;
+            $record->total_amount += $line->price_total;
+            $record->total_cc_amount += $line->price_total;
+        }
+
+        $record->save();
     }
 }

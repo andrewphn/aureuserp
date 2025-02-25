@@ -59,6 +59,8 @@ class VendorResource extends BaseVendorResource
         $firstTabFirstChildComponent->childComponents([
             Forms\Components\Group::make()
                 ->schema([
+                    Forms\Components\Hidden::make('sub_type')
+                        ->default('supplier'),
                     Forms\Components\Select::make('user_id')
                         ->relationship('user', 'name')
                         ->preload()

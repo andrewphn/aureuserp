@@ -33,4 +33,9 @@ class CreateOrder extends CreateRecord
 
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        OrderResource::collectTotals($this->getRecord());
+    }
 }

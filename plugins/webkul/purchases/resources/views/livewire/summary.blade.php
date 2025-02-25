@@ -58,62 +58,25 @@
         <div class="flex justify-end">
             <div class="invoice-container">
                 @php
-                    $subtotal = 0;
+                    $subTotal = 0;
                     $totalDiscount = 0;
-                    $totalIncludedTax = 0;
-                    $totalAdditionalTax = 0;
+                    $totalTax = 0;
                     $grandTotal = 0;
 
                     foreach ($products as $product) {
-                        $quantity = floatval(($product['product_uom_qty'] ?? $product['product_qty'])  ?? 1);
-                        $price = floatval($product['price_unit'] ?? 0);
-                        $discount = floatval($product['discount'] ?? 0);
-                        $taxIds = $product['tax'] ?? [];
+                        $subTotal += $product['price_subtotal'];
 
-                        $lineBaseAmount = $quantity * $price;
+                        $totalTax += $product['price_tax'];
 
-                        $lineDiscountAmount = $lineBaseAmount * ($discount / 100);
-                        $lineSubtotalBeforeTax = $lineBaseAmount - $lineDiscountAmount;
+                        $totalDiscount += $product['discount'];
 
-                        $totalDiscount += $lineDiscountAmount;
-
-                        $lineIncludedTax = 0;
-                        $lineAdditionalTax = 0;
-                        $adjustedSubtotal = $lineSubtotalBeforeTax;
-
-                        if (!empty($taxIds)) {
-                            $taxes = \Webkul\Account\Models\Tax::whereIn('id', $taxIds)->get();
-
-                            foreach ($taxes as $tax) {
-                                $taxValue = floatval($tax->amount);
-                                if ($tax->include_base_amount) {
-                                    $includedTaxRate = $taxValue / 100;
-                                    $includedTaxAmount = $adjustedSubtotal - ($adjustedSubtotal / (1 + $includedTaxRate));
-                                    $lineIncludedTax += $includedTaxAmount;
-                                    $adjustedSubtotal -= $includedTaxAmount;
-                                }
-                            }
-
-                            foreach ($taxes as $tax) {
-                                $taxValue = floatval($tax->amount);
-                                if (!$tax->include_base_amount) {
-                                    $lineAdditionalTax += $adjustedSubtotal * ($taxValue / 100);
-                                }
-                            }
-                        }
-
-                        $subtotal += $adjustedSubtotal;
-                        $totalIncludedTax += $lineIncludedTax;
-                        $totalAdditionalTax += $lineAdditionalTax;
+                        $grandTotal += $product['price_total'];
                     }
-
-                    $totalTax = $totalIncludedTax + $totalAdditionalTax;
-                    $grandTotal = $subtotal + $totalAdditionalTax;
                 @endphp
 
                 <div class="invoice-item">
-                    <span>Subtotal (Before Discount)</span>
-                    <span>{{ number_format($subtotal + $totalDiscount, 2) }}</span>
+                    <span>Subtotal</span>
+                    <span>{{ number_format($subTotal, 2) }}</span>
                 </div>
 
                 @if ($totalDiscount > 0)
@@ -123,27 +86,16 @@
                     </div>
                 @endif
 
-                <div class="invoice-item">
-                    <span>Subtotal (After Discount)</span>
-                    <span>{{ number_format($subtotal, 2) }}</span>
-                </div>
-
-                @if ($totalIncludedTax > 0)
+                @if ($totalTax > 0)
                     <div class="invoice-item">
-                        <span>Included Tax</span>
-                        <span>{{ number_format($totalIncludedTax, 2) }}</span>
-                    </div>
-                @endif
-
-                @if ($totalAdditionalTax > 0)
-                    <div class="invoice-item">
-                        <span>Additional Tax</span>
-                        <span>{{ number_format($totalAdditionalTax, 2) }}</span>
+                        <span>Tax Amount</span>
+                        <span>{{ number_format($totalTax, 2) }}</span>
                     </div>
                 @endif
 
                 <div class="divider"></div>
-                <div class="font-bold invoice-item">
+
+                <div class="font-bold invoice-item" style="color: #000">
                     <span>Grand Total</span>
                     <span>{{ number_format($grandTotal, 2) }}</span>
                 </div>

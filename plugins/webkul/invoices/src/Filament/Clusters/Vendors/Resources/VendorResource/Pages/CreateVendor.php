@@ -17,6 +17,8 @@ class CreateVendor extends BaseCreateVendor
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $data['sub_type'] = 'supplier';
+
         return $data;
     }
 

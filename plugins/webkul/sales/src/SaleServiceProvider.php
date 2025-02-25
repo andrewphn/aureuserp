@@ -25,7 +25,6 @@ class SaleServiceProvider extends PackageServiceProvider
                 '2025_01_28_074033_create_sales_team_members_table',
                 '2025_01_28_102329_create_add_columns_to_product_categories_table',
                 '2025_01_28_122700_create_sales_order_templates_table',
-                '2025_02_04_082243_add_sales_fields_to_products_table',
                 '2025_02_05_053212_create_sales_orders_table',
                 '2025_02_05_080609_create_sales_order_template_products_table',
                 '2025_02_05_102851_create_sales_order_lines_table',

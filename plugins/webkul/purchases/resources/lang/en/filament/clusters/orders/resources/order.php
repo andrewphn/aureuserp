@@ -31,13 +31,13 @@ return [
 
                         'fields' => [
                             'product' => 'Product',
+                            'expected-arrival' => 'Expected Arrival',
                             'quantity' => 'Quantity',
                             'unit' => 'Unit',
                             'taxes' => 'Taxes',
                             'discount-percentage' => 'Discount (%)',
                             'unit-price' => 'Unit Price',
                             'sub-total' => 'Sub Total',
-                            'total' => 'Total',
                         ],
                     ],
 
@@ -74,6 +74,64 @@ return [
 
             'terms' => [
                 'title' => 'Terms and Conditions',
+            ],
+        ],
+    ],
+
+    'table' => [
+        'columns' => [
+            'vendor-reference' => 'Vendor Reference',
+            'reference' => 'Reference',
+            'vendor' => 'Vendor',
+            'buyer' => 'Buyer',
+            'company' => 'Company',
+            'order-deadline' => 'Order Deadline',
+            'source-document' => 'Source Document',
+            'untaxed-amount' => 'Untaxed Amount',
+            'total-amount' => 'Total Amount',
+            'status' => 'Status',
+            'billing-status' => 'Billing Status',
+            'currency' => 'Currency',
+        ],
+
+        'groups' => [
+            'vendor'     => 'Vendor',
+            'buyer'      => 'Buyer',
+            'state'      => 'State',
+            'created-at' => 'Created At',
+            'updated-at' => 'Updated At',
+        ],
+
+        'filters' => [
+            'status' => 'Status',
+            'vendor-reference' => 'Vendor Reference',
+            'reference' => 'Reference',
+            'untaxed-amount' => 'Untaxed Amount',
+            'total-amount' => 'Total Amount',
+            'order-deadline' => 'Order Deadline',
+            'vendor'         => 'Vendor',
+            'buyer'          => 'Buyer',
+            'company'        => 'Company',
+            'status'         => 'Status',
+            'created-at'     => 'Created At',
+            'updated-at'     => 'Updated At',
+        ],
+
+        'actions' => [
+            'delete' => [
+                'notification' => [
+                    'title' => 'Order deleted',
+                    'body'  => 'The order has been deleted successfully.',
+                ],
+            ],
+        ],
+
+        'bulk-actions' => [
+            'delete' => [
+                'notification' => [
+                    'title' => 'Order deleted',
+                    'body'  => 'The order has been deleted successfully.',
+                ],
             ],
         ],
     ],

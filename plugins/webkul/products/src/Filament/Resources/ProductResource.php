@@ -13,8 +13,6 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages\ManageProducts;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Category;
 use Webkul\Product\Models\Product;
@@ -105,8 +103,7 @@ class ProductResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->default(Category::first()?->id)
-                                    ->hiddenOn(ManageProducts::class)
-                                    ->createOptionForm(fn (Forms\Form $form): Form => ProductCategoryResource::form($form)),
+                                    ->createOptionForm(fn (Forms\Form $form): Form => CategoryResource::form($form)),
                                 Forms\Components\Select::make('company_id')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.company'))
                                     ->relationship('company', 'name')

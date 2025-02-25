@@ -18,7 +18,9 @@ class InvoiceServiceProvider extends PackageServiceProvider
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
-            ->hasMigrations([])
+            ->hasMigrations([
+                '2025_02_04_082243_alter_products_products_table',
+            ])
             ->runsMigrations()
             ->hasDependencies([
                 'accounts',
