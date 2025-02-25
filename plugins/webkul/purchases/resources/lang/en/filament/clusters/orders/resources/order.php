@@ -23,7 +23,37 @@ return [
             'products' => [
                 'title' => 'Products',
 
-                'fields' => [
+                'repeater' => [
+                    'products' => [
+                        'title' => 'Products',
+                        'add-product-line' => 'Add Product',
+
+
+                        'fields' => [
+                            'product' => 'Product',
+                            'quantity' => 'Quantity',
+                            'unit' => 'Unit',
+                            'taxes' => 'Taxes',
+                            'discount-percentage' => 'Discount (%)',
+                            'unit-price' => 'Unit Price',
+                            'sub-total' => 'Sub Total',
+                            'total' => 'Total',
+                        ],
+                    ],
+
+                    'section' => [
+                        'title' => 'Add Section',
+
+                        'fields' => [
+                        ],
+                    ],
+
+                    'note' => [
+                        'title' => 'Add Note',
+
+                        'fields' => [
+                        ],
+                    ],
                 ],
             ],
 

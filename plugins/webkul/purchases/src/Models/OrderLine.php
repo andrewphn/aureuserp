@@ -5,12 +5,14 @@ namespace Webkul\Purchase\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Database\Factories\OrderLineFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Account\Models\Tax;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
@@ -102,6 +104,11 @@ class OrderLine extends Model
     public function uom(): BelongsTo
     {
         return $this->belongsTo(UOM::class);
+    }
+
+    public function taxes(): BelongsToMany
+    {
+        return $this->belongsToMany(Tax::class, 'purchases_order_item_taxes', 'order_line_id', 'tax_id');
     }
 
     public function currency(): BelongsTo

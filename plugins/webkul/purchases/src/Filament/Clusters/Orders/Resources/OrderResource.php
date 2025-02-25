@@ -8,17 +8,18 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Account\Models\Tax;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Filament\Resources\IncoTermResource;
 use Filament\Support\Facades\FilamentView;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Field\Filament\Traits\HasCustomFields;
-use Webkul\Account\Enums\DisplayType;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Models\Order;
 use Webkul\Support\Models\Currency;
 use Webkul\Purchase\Livewire\Summary;
+use Webkul\Purchase\Settings;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource;
 
@@ -104,8 +105,6 @@ class OrderResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.title'))
                             ->schema([
                                 static::getProductRepeater(),
-                                static::getSectionRepeater(DisplayType::LINE_SECTION->value),
-                                static::getSectionRepeater(DisplayType::LINE_NOTE->value),
                                 Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get) {
                                     return [
                                         'products' => $get('products'),
@@ -124,14 +123,14 @@ class OrderResource extends Resource
                                             ->relationship('user', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->default(auth()->id())
+                                            ->default(Auth::id())
                                             ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                                         Forms\Components\Select::make('company_id')
                                             ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.company'))
                                             ->relationship('company', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->default(auth()->user()->default_company_id)
+                                            ->default(Auth::user()->default_company_id)
                                             ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                         Forms\Components\TextInput::make('reference')
                                             ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.source-document')),
@@ -179,27 +178,16 @@ class OrderResource extends Resource
     public static function getProductRepeater(): Forms\Components\Repeater
     {
         return Forms\Components\Repeater::make('products')
-            ->relationship(
-                'lines'
-            )
+            ->relationship('lines')
             ->hiddenLabel()
             ->live()
             ->reactive()
-            ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.title'))
-            ->addActionLabel(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.add-product-line'))
+            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.title'))
+            ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
             ->collapsible()
             ->defaultItems(0)
-            ->cloneable()
             ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
-            ->extraItemActions([
-                Forms\Components\Actions\Action::make('view')
-                    ->icon('heroicon-m-eye')
-                    ->action(function (array $arguments, $livewire, $state): void {
-                        $redirectUrl = ProductResource::getUrl('edit', ['record' => $state[$arguments['item']]['product_id']]);
-                        $livewire->redirect($redirectUrl, navigate: FilamentView::hasSpaMode());
-                    }),
-            ])
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -209,12 +197,11 @@ class OrderResource extends Resource
                                 Forms\Components\Hidden::make('currency_id')
                                     ->default(Currency::first()->id),
                                 Forms\Components\Select::make('product_id')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
                                     ->relationship('product', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->label('Product')
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.product'))
                                     ->afterStateHydrated(function ($state, Forms\Set $set, Forms\Get $get) {
                                         if ($state) {
                                             self::updateProductCalculations($state, $set, $get);
@@ -228,7 +215,8 @@ class OrderResource extends Resource
                                     ->required(),
                                 Forms\Components\Hidden::make('name')
                                     ->live(onBlur: true),
-                                Forms\Components\TextInput::make('quantity')
+                                Forms\Components\TextInput::make('product_qty')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
                                     ->required()
                                     ->default(1)
                                     ->live()
@@ -236,12 +224,26 @@ class OrderResource extends Resource
                                         if ($get('product_id')) {
                                             self::updateLineCalculations($set, $get);
                                         }
-                                    })
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.quantity')),
-                                Forms\Components\Select::make('tax')
-                                    ->options(Tax::where('type_tax_use', TypeTaxUse::SALE->value)->pluck('name', 'id')->toArray())
+                                    }),
+                                Forms\Components\Select::make('uom_id')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
+                                    ->relationship(
+                                        'uom',
+                                        'name',
+                                        fn ($query) => $query->where('category_id', 1),
+                                    )
                                     ->searchable()
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.taxes'))
+                                    ->preload()
+                                    ->required()
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                Forms\Components\Select::make('taxes')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.taxes'))
+                                    ->relationship(
+                                        'taxes',
+                                        'name',
+                                        fn ($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
+                                    )
+                                    ->searchable()
                                     ->multiple()
                                     ->preload()
                                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
@@ -253,17 +255,17 @@ class OrderResource extends Resource
                                     })
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
                                     ->numeric()
                                     ->default(0)
-                                    ->required()
                                     ->live()
                                     ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
                                         if ($get('product_id')) {
                                             self::updateLineCalculations($set, $get);
                                         }
-                                    })
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.discount-percentage')),
+                                    }),
                                 Forms\Components\TextInput::make('price_unit')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
@@ -272,148 +274,54 @@ class OrderResource extends Resource
                                         if ($get('product_id')) {
                                             self::updateLineCalculations($set, $get);
                                         }
-                                    })
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.unit-price')),
+                                    }),
                                 Forms\Components\TextInput::make('price_subtotal')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.sub-total'))
                                     ->numeric()
                                     ->live()
                                     ->required()
-                                    ->readOnly()
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.sub-total')),
+                                    ->readOnly(),
                                 Forms\Components\TextInput::make('price_total')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.total'))
                                     ->numeric()
                                     ->live()
                                     ->required()
-                                    ->readOnly()
-                                    ->label(__('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.products.fields.total')),
+                                    ->readOnly(),
                             ]),
                     ])->columns(2),
             ])
-            ->saveRelationshipsUsing(function (Model $record, $state): void {
-                // $existingProductIds = $record->moveLines()
-                //     ->where('display_type', DisplayType::PRODUCT->value)
-                //     ->pluck('id')
-                //     ->toArray();
+            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
+                $product = Product::find($data['product_id']);
 
-                // $processedIds = [];
+                $data = array_merge($data, [
+                    'name'                    => $product->name,
+                    'state'                   => $record->state->value,
+                    'product_uom_qty'         => $data['product_qty'],
+                    'product_packaging_qty'   => $data['product_qty'],
+                    'qty_received_method'     => 'manual',
+                    'uom_id'                  => $data['uom_id'] ?? $product->uom_id,
+                    'currency_id'             => $record->currency_id,
+                    'partner_id'              => $record->partner_id,
+                    'creator_id'              => Auth::id(),
+                    'company_id'              => Auth::user()->default_company_id,
+                ]);
 
-                // foreach ($state as $data) {
-                //     if (! empty($data['id'])) {
-                //         $processedIds[] = $data['id'];
-                //     }
-
-                //     $data['date'] = now();
-
-                //     $journal = Journal::where('code', 'INV')->first();
-
-                //     MoveLine::createOrUpdateProductLine([
-                //         'id'           => $data['id'] ?? null,
-                //         'move_id'      => $record?->id,
-                //         'company_id'   => $record?->company_id,
-                //         'product_id'   => $data['product_id'],
-                //         'currency_id'  => $data['currency_id'],
-                //         'name'         => $data['name'],
-                //         'quantity'     => $data['quantity'],
-                //         'price_unit'   => $data['price_unit'],
-                //         'discount'     => $data['discount'],
-                //         'tax'          => $data['tax'],
-                //         'created_by'   => Auth::id(),
-                //         'move_name'    => $record?->name ?? 'INV/'.date('Y/m'),
-                //         'parent_state' => MoveState::DRAFT->value,
-                //         'date'         => now(),
-                //         'journal_id'   => $journal?->id,
-                //         'account_id'   => $journal?->default_account_id,
-                //     ]);
-                // }
-
-                // if (! empty($existingProductIds)) {
-                //     $record->moveLines()
-                //         ->where('display_type', DisplayType::PRODUCT->value)
-                //         ->whereIn('id', array_diff($existingProductIds, $processedIds))
-                //         ->delete();
-                // }
-            });
-    }
-
-    public static function getSectionRepeater($displayType): Forms\Components\Repeater
-    {
-        return Forms\Components\Repeater::make($displayType)
-            ->relationship(
-                'lines',
-                fn ($query) => $query->where('display_type', $displayType),
-            )
-            ->hiddenLabel()
-            ->live()
-            ->reactive()
-            ->addActionLabel(function () use ($displayType) {
-                return match ($displayType) {
-                    DisplayType::LINE_SECTION->value => __('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.section.title'),
-                    DisplayType::LINE_NOTE->value    => __('accounts::filament/clusters/customers/resources/invoice.form.tabs.products.repeater.note.title'),
-                    default                          => null,
-                };
-            })
-            ->collapsible()
-            ->defaultItems(0)
-            ->cloneable()
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
-            ->schema([
-                Forms\Components\Textarea::make('name')
-                    ->hiddenLabel()
-                    ->required(),
-                Forms\Components\Hidden::make('currency_id')
-                    ->default(Currency::first()->id),
-            ])
-            ->saveRelationshipsUsing(function (Model $record, $state) use ($displayType) {
-                // $existingLineIds = $record->moveLines()
-                //     ->where('display_type', $displayType)
-                //     ->pluck('id')
-                //     ->toArray();
-
-                // $processedIds = [];
-
-                // $journal = Journal::where('code', 'INV')->first();
-
-                // foreach ($state as $data) {
-                //     $data['date'] = now();
-
-                //     $moveLine = MoveLine::updateOrCreate(
-                //         ['id' => $data['id'] ?? null],
-                //         [
-                //             'move_id'      => $record?->id,
-                //             'company_id'   => $record?->company_id,
-                //             'currency_id'  => $data['currency_id'],
-                //             'display_type' => $displayType,
-                //             'name'         => $data['name'],
-                //             'created_by'   => Auth::id(),
-                //             'move_name'    => $record?->name ?? 'INV/'.date('Y/m'),
-                //             'parent_state' => MoveState::DRAFT->value,
-                //             'date'         => now(),
-                //             'journal_id'   => $journal?->id,
-                //             'account_id'   => $journal?->default_account_id,
-                //         ]
-                //     );
-
-                //     $processedIds[] = $moveLine->id;
-                // }
-
-                // if (! empty($existingLineIds)) {
-                //     $record->moveLines()
-                //         ->where('display_type', $displayType)
-                //         ->whereIn('id', array_diff($existingLineIds, $processedIds))
-                //         ->delete();
-                // }
+                return $data;
             });
     }
 
     private static function updateProductCalculations($productId, Forms\Set $set, Forms\Get $get): void
     {
         $product = Product::find($productId);
+
         $quantity = floatval($get('quantity') ?? 1);
+
         $priceUnit = floatval($product->price);
 
         $set('name', $product->name);
+
         $set('price_unit', $priceUnit);
+
         $set('tax', $product->productTaxes->pluck('id')->toArray());
 
         self::calculateTotals($quantity, $priceUnit, floatval($get('discount')), $product->productTaxes->pluck('id')->toArray(), $set);
@@ -422,8 +330,11 @@ class OrderResource extends Resource
     private static function updateLineCalculations(Forms\Set $set, Forms\Get $get): void
     {
         $quantity = floatval($get('quantity') ?? 1);
+
         $priceUnit = floatval($get('price_unit') ?? 0);
+
         $discount = floatval($get('discount') ?? 0);
+
         $taxIds = $get('tax') ?? [];
 
         self::calculateTotals($quantity, $priceUnit, $discount, $taxIds, $set);
@@ -434,9 +345,11 @@ class OrderResource extends Resource
         $baseAmount = $quantity * $priceUnit;
 
         $discountAmount = $baseAmount * ($discount / 100);
+
         $subtotalBeforeTax = $baseAmount - $discountAmount;
 
         $taxAmount = 0;
+
         $includedTaxAmount = 0;
 
         if (! empty($taxIds)) {
@@ -444,6 +357,7 @@ class OrderResource extends Resource
 
             foreach ($taxes as $tax) {
                 $taxValue = floatval($tax->amount);
+
                 if ($tax->include_base_amount) {
                     $includedTaxRate = $taxValue / 100;
                     $includedTaxAmount += $subtotalBeforeTax - ($subtotalBeforeTax / (1 + $includedTaxRate));
@@ -454,6 +368,7 @@ class OrderResource extends Resource
 
             foreach ($taxes as $tax) {
                 $taxValue = floatval($tax->amount);
+
                 if (! $tax->include_base_amount) {
                     $taxAmount += $subtotalExcludingIncludedTax * ($taxValue / 100);
                 }
@@ -461,6 +376,7 @@ class OrderResource extends Resource
         }
 
         $set('price_subtotal', number_format($subtotalBeforeTax, 2, '.', ''));
+
         $set('price_total', number_format($subtotalBeforeTax + $taxAmount, 2, '.', ''));
     }
 
