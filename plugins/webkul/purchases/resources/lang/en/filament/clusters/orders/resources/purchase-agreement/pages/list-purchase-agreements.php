@@ -5,6 +5,15 @@ return [
         'title' => 'Purchase Agreements',
     ],
 
+    'tabs' => [
+        'my-agreements' => 'My Agreements',
+        'blanket-orders' => 'Blanket Orders',
+        'purchase-templates' => 'Purchase Templates',
+        'draft' => 'Draft',
+        'done' => 'Done',
+        'archived' => 'Archived',
+    ],
+
     'header-actions' => [
         'create' => [
             'label' => 'New Purchase Agreement',

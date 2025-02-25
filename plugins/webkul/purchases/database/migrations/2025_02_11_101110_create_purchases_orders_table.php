@@ -16,11 +16,12 @@ return new class extends Migration
             $table->string('access_token')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->string('priority')->nullable();
+            $table->string('priority')->default(0);
             $table->string('origin')->nullable();
             $table->string('partner_reference')->nullable();
             $table->string('state')->nullable();
-            $table->string('invoice_status')->nullable();
+            $table->string('invoice_status')->default('no');
+            $table->string('receipt_status')->default('no');
             $table->decimal('untaxed_amount', 15, 2)->nullable();
             $table->decimal('tax_amount', 15, 2)->nullable();
             $table->decimal('total_amount', 15, 2)->nullable();
@@ -33,7 +34,6 @@ return new class extends Migration
             $table->datetime('calendar_start_at')->nullable();
             $table->datetime('effective_date')->nullable();
             $table->string('incoterm_location')->nullable();
-            $table->string('receipt_status')->nullable();
             $table->boolean('mail_reminder_confirmed')->nullable()->default(0);
             $table->boolean('mail_reception_confirmed')->nullable()->default(0);
             $table->boolean('mail_reception_declined')->nullable()->default(0);

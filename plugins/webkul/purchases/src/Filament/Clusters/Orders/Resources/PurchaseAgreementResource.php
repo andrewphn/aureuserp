@@ -30,7 +30,7 @@ class PurchaseAgreementResource extends Resource
 
     protected static ?string $model = Requisition::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
     protected static bool $shouldRegisterNavigation = true;
 
@@ -326,8 +326,17 @@ class PurchaseAgreementResource extends Resource
             ->filtersFormColumns(2)
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ViewAction::make()
+                        ->hidden(fn ($record) => $record->trashed()),
+                    Tables\Actions\EditAction::make()
+                        ->hidden(fn ($record) => $record->trashed()),
+                    Tables\Actions\RestoreAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.restore.notification.title'))
+                                ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.restore.notification.body')),
+                        ),
                     Tables\Actions\DeleteAction::make()
                         ->successNotification(
                             Notification::make()
@@ -335,9 +344,39 @@ class PurchaseAgreementResource extends Resource
                                 ->title(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.delete.notification.title'))
                                 ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.delete.notification.body')),
                         ),
+                    Tables\Actions\ForceDeleteAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.title'))
+                                ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.body')),
+                        ),
                 ]),
             ])
             ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.bulk-actions.restore.notification.title'))
+                                ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.bulk-actions.restore.notification.body')),
+                        ),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.bulk-actions.delete.notification.title'))
+                                ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.bulk-actions.delete.notification.body')),
+                        ),
+                    Tables\Actions\ForceDeleteBulkAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.title'))
+                                ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.body')),
+                        ),
+                ]),
                 Tables\Actions\DeleteBulkAction::make()
                     ->successNotification(
                         Notification::make()

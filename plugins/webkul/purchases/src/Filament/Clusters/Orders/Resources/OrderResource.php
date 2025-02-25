@@ -21,6 +21,7 @@ use Webkul\Purchase\Enums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\Product;
+use Webkul\Account\Models\Partner;
 use Webkul\Purchase\Settings;
 
 class OrderResource extends Resource
@@ -58,6 +59,14 @@ class OrderResource extends Resource
                                     ->required()
                                     ->preload()
                                     ->createOptionForm(fn (Form $form) => VendorResource::form($form))
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        if ($state) {
+                                            $vendor = Partner::find($state);
+
+                                            $set('payment_term_id', $vendor->property_supplier_payment_term_id);
+                                        }
+                                    })
+                                    ->live()
                                     ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                 Forms\Components\TextInput::make('partner_reference')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.vendor-reference'))
@@ -151,14 +160,8 @@ class OrderResource extends Resource
                                 Forms\Components\Group::make()
                                     ->schema([
                                         Forms\Components\Select::make('payment_term_id')
-                                            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.incoterm'))
+                                            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.payment-term'))
                                             ->relationship('paymentTerm', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
-                                        Forms\Components\Select::make('fiscal_position_id')
-                                            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.fiscal-position'))
-                                            ->relationship('fiscalPosition', 'name')
                                             ->searchable()
                                             ->preload()
                                             ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
@@ -299,103 +302,19 @@ class OrderResource extends Resource
             });
     }
 
-    private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
-    {
-        if (! $get('product_id')) {
-            $set('price_unit', 0);
-
-            $set('discount', 0);
-
-            $set('price_tax', 0);
-
-            $set('price_subtotal', 0);
-
-            $set('price_total', 0);
-
-            return;
-        }
-
-        $product = Product::find($get('product_id'));
-
-        $priceUnit = floatval($product->cost ?? $product->price);
-
-        $set('price_unit', $priceUnit);
-
-        $quantity = floatval($get('product_qty') ?? 1);
-
-        $taxIds = $get('taxes') ?? [];
-
-        $taxAmount = 0;
-
-        $subTotal = ($priceUnit * $quantity) - ($get('discount') ?? 0);
-
-        if (! empty($taxIds)) {
-            $taxes = Tax::whereIn('id', $taxIds)
-                ->orderBy('sort')
-                ->get();
-
-            $baseAmount = $subTotal;
-
-            $taxesComputed = [];
-
-            foreach ($taxes as $tax) {
-                $amount = floatval($tax->amount);
-
-                $currentTaxBase = $baseAmount;
-
-                $tax->price_include_override ??= 'tax_excluded';
-
-                if ($tax->is_base_affected) {
-                    foreach ($taxesComputed as $prevTax) {
-                        if ($prevTax['include_base_amount']) {
-                            $currentTaxBase += $prevTax['tax_amount'];
-                        }
-                    }
-                }
-
-                $currentTaxAmount = 0;
-
-                if ($tax->price_include_override == 'tax_included') {
-                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-
-                    if (empty($taxesComputed)) {
-                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
-
-                        $subTotal = $priceUnit * $quantity;
-
-                        $baseAmount = $subTotal;
-                    }
-                } elseif ($tax->price_include_override == 'tax_excluded') {
-                    if ($tax->amount_type == 'percent') {
-                        $currentTaxAmount = $currentTaxBase * $amount / 100;
-                    } else {
-                        $currentTaxAmount = $amount * $quantity;
-                    }
-                }
-
-                $taxesComputed[] = [
-                    'tax_id'              => $tax->id,
-                    'tax_amount'          => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount,
-                ];
-
-                $taxAmount += $currentTaxAmount;
-            }
-        }
-
-        $set('price_subtotal', round($subTotal, 4));
-
-        $set('price_tax', $taxAmount);
-
-        $set('price_total', $subTotal + $taxAmount);
-    }
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns(static::mergeCustomTableColumns([
+                Tables\Columns\IconColumn::make('priority')
+                    ->label('')
+                    ->icon(fn (Order $record): string => $record->priority ? 'heroicon-s-star' : 'heroicon-o-star')
+                    ->color(fn (Order $record): string => $record->priority ? 'warning' : 'gray')
+                    ->action(function (Order $record): void {
+                        $record->update([
+                            'priority' => ! $record->priority,
+                        ]);
+                    }),
                 Tables\Columns\TextColumn::make('partner_reference')
                     ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.vendor-reference'))
                     ->searchable()
@@ -509,6 +428,28 @@ class OrderResource extends Resource
                                     ->preload(),
                             )
                             ->icon('heroicon-o-building-office'),
+                        Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint::make('paymentTerm')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.payment-term'))
+                            ->multiple()
+                            ->selectable(
+                                IsRelatedToOperator::make()
+                                    ->titleAttribute('name')
+                                    ->searchable()
+                                    ->multiple()
+                                    ->preload(),
+                            )
+                            ->icon('heroicon-o-currency-dollar'),
+                        Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint::make('incoterm')
+                            ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.incoterm'))
+                            ->multiple()
+                            ->selectable(
+                                IsRelatedToOperator::make()
+                                    ->titleAttribute('name')
+                                    ->searchable()
+                                    ->multiple()
+                                    ->preload(),
+                            )
+                            ->icon('heroicon-o-globe-alt'),
                         Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('ordered_at')
                             ->label(__('purchases::filament/clusters/orders/resources/order.table.filters.order-deadline')),
                         Tables\Filters\QueryBuilder\Constraints\DateConstraint::make('created_at')
@@ -547,6 +488,99 @@ class OrderResource extends Resource
             ->checkIfRecordIsSelectableUsing(
                 fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\RequisitionState::CLOSED,
             );
+    }
+
+    private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            $set('price_unit', 0);
+
+            $set('discount', 0);
+
+            $set('price_tax', 0);
+
+            $set('price_subtotal', 0);
+
+            $set('price_total', 0);
+
+            return;
+        }
+
+        $product = Product::find($get('product_id'));
+
+        $priceUnit = floatval($product->cost ?? $product->price);
+
+        $set('price_unit', $priceUnit);
+
+        $quantity = floatval($get('product_qty') ?? 1);
+
+        $taxIds = $get('taxes') ?? [];
+
+        $taxAmount = 0;
+
+        $subTotal = ($priceUnit * $quantity) - ($get('discount') ?? 0);
+
+        if (! empty($taxIds)) {
+            $taxes = Tax::whereIn('id', $taxIds)
+                ->orderBy('sort')
+                ->get();
+
+            $baseAmount = $subTotal;
+
+            $taxesComputed = [];
+
+            foreach ($taxes as $tax) {
+                $amount = floatval($tax->amount);
+
+                $currentTaxBase = $baseAmount;
+
+                $tax->price_include_override ??= 'tax_excluded';
+
+                if ($tax->is_base_affected) {
+                    foreach ($taxesComputed as $prevTax) {
+                        if ($prevTax['include_base_amount']) {
+                            $currentTaxBase += $prevTax['tax_amount'];
+                        }
+                    }
+                }
+
+                $currentTaxAmount = 0;
+
+                if ($tax->price_include_override == 'tax_included') {
+                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
+
+                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
+
+                    if (empty($taxesComputed)) {
+                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
+
+                        $subTotal = $priceUnit * $quantity;
+
+                        $baseAmount = $subTotal;
+                    }
+                } elseif ($tax->price_include_override == 'tax_excluded') {
+                    if ($tax->amount_type == 'percent') {
+                        $currentTaxAmount = $currentTaxBase * $amount / 100;
+                    } else {
+                        $currentTaxAmount = $amount * $quantity;
+                    }
+                }
+
+                $taxesComputed[] = [
+                    'tax_id'              => $tax->id,
+                    'tax_amount'          => $currentTaxAmount,
+                    'include_base_amount' => $tax->include_base_amount,
+                ];
+
+                $taxAmount += $currentTaxAmount;
+            }
+        }
+
+        $set('price_subtotal', round($subTotal, 4));
+
+        $set('price_tax', $taxAmount);
+
+        $set('price_total', $subTotal + $taxAmount);
     }
 
     public static function collectTotals(Order $record): void

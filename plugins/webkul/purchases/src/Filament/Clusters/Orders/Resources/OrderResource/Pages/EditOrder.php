@@ -7,6 +7,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Actions as OrderActions;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
 class EditOrder extends EditRecord
@@ -31,6 +32,7 @@ class EditOrder extends EditRecord
         return [
             ChatterAction::make()
                 ->setResource(static::$resource),
+            OrderActions\SendEmailAction::make(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OrderState::DONE)
                 ->successNotification(
@@ -45,5 +47,10 @@ class EditOrder extends EditRecord
     protected function afterSave(): void
     {
         OrderResource::collectTotals($this->getRecord());
+    }
+
+    public function updateForm(): void
+    {
+        $this->fillForm();
     }
 }
