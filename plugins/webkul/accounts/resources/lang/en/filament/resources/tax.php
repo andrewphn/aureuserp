@@ -26,18 +26,15 @@ return [
                         'invoice-label'       => 'Invoice label',
                         'tax-group'           => 'Tax Group',
                         'country'             => 'Country',
-                        'include-in-price'    => 'Include in price',
-                        'include-base-amount' => 'Include base amount',
-                        'is-base-affected'    => 'Is base affected',
+                        'include-in-price'    => 'Included in Price',
+                        'include-base-amount' => 'Affect Base of Subsequent Taxes',
+                        'is-base-affected'    => 'Base Affected by Previous Taxes',
                     ],
                 ],
 
-                'description-and-legal-notes' => [
-                    'title'  => 'Description & Invoice Legal Notes',
-                    'fields' => [
-                        'description' => 'Description',
-                        'legal-notes' => 'Legal Notes',
-                    ],
+                'fields' => [
+                    'description' => 'Description',
+                    'legal-notes' => 'Legal Notes',
                 ],
             ],
         ],

@@ -10,10 +10,12 @@ use Webkul\Account\Enums\RepartitionType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 
-class Tax extends Model
+class Tax extends Model implements Sortable
 {
-    use HasFactory;
+    use HasFactory, SortableTrait;
 
     protected $table = 'accounts_taxes';
 
@@ -38,6 +40,10 @@ class Tax extends Model
         'include_base_amount',
         'is_base_affected',
         'analytic',
+    ];
+
+    public $sortable = [
+        'order_column_name' => 'sort',
     ];
 
     public function company()

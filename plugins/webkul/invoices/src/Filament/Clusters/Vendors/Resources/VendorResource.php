@@ -27,7 +27,7 @@ class VendorResource extends BaseVendorResource
 
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $cluster = Vendors::class;
 

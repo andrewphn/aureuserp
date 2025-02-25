@@ -45,8 +45,7 @@ class CategoryResource extends Resource
                     ->columnSpan(['lg' => 2]),
 
                 Forms\Components\Group::make()
-                    ->schema([
-                    ])
+                    ->schema([])
                     ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);

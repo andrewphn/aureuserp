@@ -4,7 +4,6 @@ return [
     'tabs' => [
         'goods'                => 'Goods',
         'services'             => 'Services',
-        'inventory-management' => 'Inventory Management',
         'favorites'            => 'Favorites',
         'archived'             => 'Archived',
     ],

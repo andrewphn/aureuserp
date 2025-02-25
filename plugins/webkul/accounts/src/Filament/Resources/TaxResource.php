@@ -8,15 +8,13 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
-use Filament\Resources\Pages\Page;
-use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
+use Webkul\Account\Enums\TaxIncludeOverride;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
-use Webkul\Account\Filament\Resources\TaxResource\RelationManagers;
 use Webkul\Account\Models\Tax;
 
 class TaxResource extends Resource
@@ -88,8 +86,9 @@ class TaxResource extends Resource
                                 Forms\Components\Select::make('country_id')
                                     ->relationship('country', 'name')
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.country')),
-                                Forms\Components\Toggle::make('price_include_override')
-                                    ->inline(false)
+                                Forms\Components\Select::make('price_include_override')
+                                    ->options(TaxIncludeOverride::class)
+                                    ->default(TaxIncludeOverride::DEFAULT->value)
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.include-in-price')),
                                 Forms\Components\Toggle::make('include_base_amount')
                                     ->inline(false)
@@ -98,13 +97,10 @@ class TaxResource extends Resource
                                     ->inline(false)
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.is-base-affected')),
                             ]),
-                        Forms\Components\Fieldset::make(__('accounts::filament/resources/tax.form.sections.field-set.description-and-legal-notes.title'))
-                            ->schema([
-                                Forms\Components\RichEditor::make('description')
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.description-and-legal-notes.fields.description')),
-                                Forms\Components\RichEditor::make('invoice_legal_notes')
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.description-and-legal-notes.fields.legal-notes')),
-                            ])->columns(1),
+                        Forms\Components\RichEditor::make('description')
+                            ->label(__('accounts::filament/resources/tax.form.sections.field-set.fields.description')),
+                        Forms\Components\RichEditor::make('invoice_legal_notes')
+                            ->label(__('accounts::filament/resources/tax.form.sections.field-set.fields.legal-notes')),
                     ]),
             ]);
     }
@@ -226,7 +222,8 @@ class TaxResource extends Resource
                                 ->body(__('accounts::filament/resources/tax.table.bulk-actions.delete.notification.body'))
                         ),
                 ]),
-            ]);
+            ])
+            ->reorderable('sort', 'desc');
     }
 
     public static function infolist(Infolist $infolist): Infolist
@@ -301,41 +298,13 @@ class TaxResource extends Resource
             ]);
     }
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            Pages\ViewTax::class,
-            Pages\EditTax::class,
-            Pages\ManageDistributionForInvoice::class,
-            Pages\ManageDistributionForRefund::class,
-        ]);
-    }
-
-    public static function getRelations(): array
-    {
-        $relations = [
-            RelationGroup::make('distribution_for_invoice', [
-                RelationManagers\DistributionForInvoiceRelationManager::class,
-            ])
-                ->icon('heroicon-o-banknotes'),
-            RelationGroup::make('distribution_for_refund', [
-                RelationManagers\DistributionForRefundRelationManager::class,
-            ])
-                ->icon('heroicon-o-banknotes'),
-        ];
-
-        return $relations;
-    }
-
     public static function getPages(): array
     {
         return [
-            'index'                           => Pages\ListTaxes::route('/'),
-            'create'                          => Pages\CreateTax::route('/create'),
-            'view'                            => Pages\ViewTax::route('/{record}'),
-            'edit'                            => Pages\EditTax::route('/{record}/edit'),
-            'manage-distribution-for-invoice' => Pages\ManageDistributionForInvoice::route('/{record}/manage-distribution-for-invoice'),
-            'manage-distribution-for-refunds' => Pages\ManageDistributionForRefund::route('/{record}/manage-distribution-for-refunds'),
+            'index'  => Pages\ListTaxes::route('/'),
+            'create' => Pages\CreateTax::route('/create'),
+            'view'   => Pages\ViewTax::route('/{record}'),
+            'edit'   => Pages\EditTax::route('/{record}/edit'),
         ];
     }
 }

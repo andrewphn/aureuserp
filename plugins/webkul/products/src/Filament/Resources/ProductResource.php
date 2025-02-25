@@ -77,7 +77,7 @@ class ProductResource extends Resource
                                             ->minValue(0),
                                     ]),
                             ])
-                            ->visible(fn (Forms\Get $get): bool => $get('type') == ProductType::GOODS->value),
+                            ->visible(fn(Forms\Get $get): bool => $get('type') == ProductType::GOODS->value),
                     ])
                     ->columnSpan(['lg' => 2]),
 
@@ -140,8 +140,8 @@ class ProductResource extends Resource
             ->columns([
                 Tables\Columns\IconColumn::make('is_favorite')
                     ->label('')
-                    ->icon(fn (Product $record): string => $record->is_favorite ? 'heroicon-s-star' : 'heroicon-o-star')
-                    ->color(fn (Product $record): string => $record->is_favorite ? 'warning' : 'gray')
+                    ->icon(fn(Product $record): string => $record->is_favorite ? 'heroicon-s-star' : 'heroicon-o-star')
+                    ->color(fn(Product $record): string => $record->is_favorite ? 'warning' : 'gray')
                     ->action(function (Product $record): void {
                         $record->update([
                             'is_favorite' => ! $record->is_favorite,
@@ -316,16 +316,16 @@ class ProductResource extends Resource
                     ])->filter()->values()->all()),
             ], layout: \Filament\Tables\Enums\FiltersLayout::Modal)
             ->filtersTriggerAction(
-                fn (Tables\Actions\Action $action) => $action
+                fn(Tables\Actions\Action $action) => $action
                     ->slideOver(),
             )
             ->filtersFormColumns(2)
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make()
-                        ->hidden(fn ($record) => $record->trashed()),
+                        ->hidden(fn($record) => $record->trashed()),
                     Tables\Actions\EditAction::make()
-                        ->hidden(fn ($record) => $record->trashed()),
+                        ->hidden(fn($record) => $record->trashed()),
                     Tables\Actions\RestoreAction::make()
                         ->successNotification(
                             Notification::make()
@@ -445,7 +445,7 @@ class ProductResource extends Resource
                                     ->hiddenLabel()
                                     ->circular(),
                             ])
-                            ->visible(fn ($record): bool => ! empty($record->images)),
+                            ->visible(fn($record): bool => ! empty($record->images)),
 
                         Infolists\Components\Section::make(__('products::filament/resources/product.infolist.sections.inventory.title'))
                             ->schema([
@@ -465,7 +465,7 @@ class ProductResource extends Resource
                                             ]),
                                     ]),
                             ])
-                            ->visible(fn ($record): bool => $record->type == ProductType::GOODS),
+                            ->visible(fn($record): bool => $record->type == ProductType::GOODS),
                     ])
                     ->columnSpan(['lg' => 2]),
 
