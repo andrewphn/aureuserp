@@ -8,15 +8,12 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
-use Filament\Resources\Pages\Page;
-use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
-use Webkul\Account\Filament\Resources\TaxResource\RelationManagers;
 use Webkul\Account\Models\Tax;
 
 class TaxResource extends Resource
@@ -302,41 +299,13 @@ class TaxResource extends Resource
             ]);
     }
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            Pages\ViewTax::class,
-            Pages\EditTax::class,
-            Pages\ManageDistributionForInvoice::class,
-            Pages\ManageDistributionForRefund::class,
-        ]);
-    }
-
-    public static function getRelations(): array
-    {
-        $relations = [
-            RelationGroup::make('distribution_for_invoice', [
-                RelationManagers\DistributionForInvoiceRelationManager::class,
-            ])
-                ->icon('heroicon-o-banknotes'),
-            RelationGroup::make('distribution_for_refund', [
-                RelationManagers\DistributionForRefundRelationManager::class,
-            ])
-                ->icon('heroicon-o-banknotes'),
-        ];
-
-        return $relations;
-    }
-
     public static function getPages(): array
     {
         return [
-            'index'                           => Pages\ListTaxes::route('/'),
-            'create'                          => Pages\CreateTax::route('/create'),
-            'view'                            => Pages\ViewTax::route('/{record}'),
-            'edit'                            => Pages\EditTax::route('/{record}/edit'),
-            'manage-distribution-for-invoice' => Pages\ManageDistributionForInvoice::route('/{record}/manage-distribution-for-invoice'),
-            'manage-distribution-for-refunds' => Pages\ManageDistributionForRefund::route('/{record}/manage-distribution-for-refunds'),
+            'index'  => Pages\ListTaxes::route('/'),
+            'create' => Pages\CreateTax::route('/create'),
+            'view'   => Pages\ViewTax::route('/{record}'),
+            'edit'   => Pages\EditTax::route('/{record}/edit'),
         ];
     }
 }
