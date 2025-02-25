@@ -2,6 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages;
 
+use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\CreatePartner as BaseCreateVendor;
 
@@ -17,5 +18,10 @@ class CreateVendor extends BaseCreateVendor
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         return $data;
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('invoices::filament/clusters/vendors/resources/vendor/pages/create-vendor.title');
     }
 }
