@@ -132,7 +132,7 @@ class Move extends Model
 
     public function partnerBank()
     {
-        return $this->belongsTo(BankAccount::class);
+        return $this->belongsTo(BankAccount::class, 'partner_bank_id');
     }
 
     public function fiscalPosition()
@@ -177,7 +177,7 @@ class Move extends Model
 
     public function medium()
     {
-        return $this->belongsTo(UTMMedium::class);
+        return $this->belongsTo(UTMMedium::class, 'medium_id');
     }
 
     public function paymentMethodLine()
@@ -185,7 +185,7 @@ class Move extends Model
         return $this->belongsTo(PaymentMethodLine::class, 'preferred_payment_method_line_id');
     }
 
-    public function moveLines()
+    public function lines()
     {
         return $this->hasMany(MoveLine::class)
             ->where('display_type', 'product');
