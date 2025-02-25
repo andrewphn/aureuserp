@@ -2,6 +2,7 @@
 
 namespace Webkul\Account\Filament\Resources;
 
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -10,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\RoundingMethod;
 use Webkul\Account\Enums\RoundingStrategy;
 use Webkul\Account\Filament\Resources\CashRoundingResource\Pages;
@@ -59,16 +59,6 @@ class CashRoundingResource extends Resource
                                     ->options(RoundingStrategy::class)
                                     ->default(RoundingStrategy::BIGGEST_TAX->value)
                                     ->label(__('accounts::filament/resources/cash-rounding.form.fields.rounding-strategy')),
-                                Forms\Components\Select::make('profit_account_id')
-                                    ->relationship('profitAccount', 'name')
-                                    ->label(__('accounts::filament/resources/cash-rounding.form.fields.profit-account'))
-                                    ->required()
-                                    ->autofocus(),
-                                Forms\Components\Select::make('loss_account_id')
-                                    ->relationship('lossAccount', 'name')
-                                    ->label(__('accounts::filament/resources/cash-rounding.form.fields.loss-account'))
-                                    ->required()
-                                    ->autofocus(),
                                 Forms\Components\Select::make('rounding_method')
                                     ->options(RoundingMethod::class)
                                     ->default(RoundingMethod::HALF_UP->value)
@@ -102,14 +92,6 @@ class CashRoundingResource extends Resource
                     ->label(__('accounts::filament/resources/cash-rounding.table.columns.created-by'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('profitAccount.name')
-                    ->label(__('accounts::filament/resources/cash-rounding.table.columns.profit-account'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('lossAccount.name')
-                    ->label(__('accounts::filament/resources/cash-rounding.table.columns.loss-account'))
-                    ->searchable()
-                    ->sortable(),
             ])
             ->groups([
                 Tables\Grouping\Group::make('name')
@@ -123,12 +105,6 @@ class CashRoundingResource extends Resource
                     ->collapsible(),
                 Tables\Grouping\Group::make('createdBy.name')
                     ->label(__('accounts::filament/resources/cash-rounding.table.groups.created-by'))
-                    ->collapsible(),
-                Tables\Grouping\Group::make('profitAccount.name')
-                    ->label(__('accounts::filament/resources/cash-rounding.table.groups.profit-account'))
-                    ->collapsible(),
-                Tables\Grouping\Group::make('lossAccount.name')
-                    ->label(__('accounts::filament/resources/cash-rounding.table.groups.loss-account'))
                     ->collapsible(),
             ])
             ->actions([
@@ -178,12 +154,6 @@ class CashRoundingResource extends Resource
                                     ->label(__('accounts::filament/resources/cash-rounding.infolist.entries.rounding-strategy'))
                                     ->icon('heroicon-o-cog')
                                     ->formatStateUsing(fn(string $state): string => RoundingStrategy::options()[$state]),
-                                Infolists\Components\TextEntry::make('profitAccount.name')
-                                    ->label(__('accounts::filament/resources/cash-rounding.infolist.entries.profit-account'))
-                                    ->icon('heroicon-o-arrow-trending-up'),
-                                Infolists\Components\TextEntry::make('lossAccount.name')
-                                    ->label(__('accounts::filament/resources/cash-rounding.infolist.entries.loss-account'))
-                                    ->icon('heroicon-o-arrow-trending-down'),
                                 Infolists\Components\TextEntry::make('rounding_method')
                                     ->label(__('accounts::filament/resources/cash-rounding.infolist.entries.rounding-method'))
                                     ->icon('heroicon-o-adjustments-horizontal')

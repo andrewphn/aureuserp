@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
+use Webkul\Account\Enums\TaxIncludeOverride;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
 use Webkul\Account\Models\Tax;
 
@@ -85,8 +86,9 @@ class TaxResource extends Resource
                                 Forms\Components\Select::make('country_id')
                                     ->relationship('country', 'name')
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.country')),
-                                Forms\Components\Toggle::make('price_include_override')
-                                    ->inline(false)
+                                Forms\Components\Select::make('price_include_override')
+                                    ->options(TaxIncludeOverride::class)
+                                    ->default(TaxIncludeOverride::DEFAULT->value)
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.include-in-price')),
                                 Forms\Components\Toggle::make('include_base_amount')
                                     ->inline(false)
@@ -95,13 +97,10 @@ class TaxResource extends Resource
                                     ->inline(false)
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.is-base-affected')),
                             ]),
-                        Forms\Components\Fieldset::make(__('accounts::filament/resources/tax.form.sections.field-set.description-and-legal-notes.title'))
-                            ->schema([
-                                Forms\Components\RichEditor::make('description')
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.description-and-legal-notes.fields.description')),
-                                Forms\Components\RichEditor::make('invoice_legal_notes')
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.description-and-legal-notes.fields.legal-notes')),
-                            ])->columns(1),
+                        Forms\Components\RichEditor::make('description')
+                            ->label(__('accounts::filament/resources/tax.form.sections.field-set.fields.description')),
+                        Forms\Components\RichEditor::make('invoice_legal_notes')
+                            ->label(__('accounts::filament/resources/tax.form.sections.field-set.fields.legal-notes')),
                     ]),
             ]);
     }

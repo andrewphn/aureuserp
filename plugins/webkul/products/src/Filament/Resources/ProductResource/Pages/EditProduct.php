@@ -6,6 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Product\Filament\Resources\ProductResource;
@@ -13,6 +14,11 @@ use Webkul\Product\Filament\Resources\ProductResource;
 class EditProduct extends EditRecord
 {
     protected static string $resource = ProductResource::class;
+
+    public function getSubNavigationPosition(): SubNavigationPosition
+    {
+        return SubNavigationPosition::Top;
+    }
 
     protected function getRedirectUrl(): string
     {
@@ -71,7 +77,7 @@ class EditProduct extends EditRecord
 
                     return response()->streamDownload(function () use ($pdf) {
                         echo $pdf->output();
-                    }, 'Product-'.$record->name.'.pdf');
+                    }, 'Product-' . $record->name . '.pdf');
                 }),
             Actions\DeleteAction::make()
                 ->successNotification(

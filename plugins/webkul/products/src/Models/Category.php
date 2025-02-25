@@ -2,17 +2,19 @@
 
 namespace Webkul\Product\Models;
 
+use InvalidArgumentException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use InvalidArgumentException;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Product\Database\Factories\CategoryFactory;
 use Webkul\Security\Models\User;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, HasChatter, HasLogActivity;
 
     /**
      * Table name.
@@ -32,6 +34,14 @@ class Category extends Model
         'parent_path',
         'parent_id',
         'creator_id',
+    ];
+
+    protected $logAttributes = [
+        'name',
+        'full_name',
+        'parent_path',
+        'parent.name' => 'Parent Category',
+        'creator.name' => 'Creator',
     ];
 
     public function parent(): BelongsTo
@@ -120,7 +130,7 @@ class Category extends Model
             $parent = static::find($productCategory->parent_id);
 
             if ($parent) {
-                $productCategory->parent_path = $parent->parent_path.$parent->id.'/';
+                $productCategory->parent_path = $parent->parent_path . $parent->id . '/';
             } else {
                 $productCategory->parent_path = '/';
                 $productCategory->parent_id = null;

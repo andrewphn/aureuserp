@@ -11,13 +11,6 @@ class Category extends BaseCategory
 {
     use HasChatter;
 
-    protected array $logAttributes = [
-        'name'            => 'Name',
-        'completed_name'  => 'Completed Name',
-        'createdBy.name'  => 'Created By',
-        'parent.name'     => 'Parent',
-    ];
-
     public function __construct(array $attributes = [])
     {
         $this->mergeFillable([

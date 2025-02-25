@@ -4,6 +4,7 @@ namespace Webkul\Product\Filament\Resources\ProductResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
@@ -16,6 +17,11 @@ class ManageVariants extends ManageRelatedRecords
     protected static string $resource = ProductResource::class;
 
     protected static string $relationship = 'variants';
+
+    public function getSubNavigationPosition(): SubNavigationPosition
+    {
+        return SubNavigationPosition::Top;
+    }
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
