@@ -13,6 +13,8 @@ return [
             'payment-terms' => 'Payment Terms',
             'payment-method' => 'Payment Method',
             'fiscal-position' => 'Fiscal Position',
+            'purchase' => 'Purchase',
+            'fiscal-information' => 'Fiscal Information',
         ],
         'tabs' => [
             'invoicing' => [
@@ -41,6 +43,8 @@ return [
             'payment-terms' => 'Payment Terms',
             'payment-method' => 'Payment Method',
             'fiscal-position' => 'Fiscal Position',
+            'purchase' => 'Purchase',
+            'fiscal-information' => 'Fiscal Information',
         ],
         'tabs' => [
             'invoicing' => [

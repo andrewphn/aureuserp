@@ -78,7 +78,7 @@ class VendorResource extends BaseVendorResource
                 ->columns(2),
         ]);
 
-        $purchaseComponents = Forms\Components\Fieldset::make('Purchase')
+        $purchaseComponents = Forms\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.form.fields.purchase'))
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -96,7 +96,7 @@ class VendorResource extends BaseVendorResource
             ])
             ->columns(1);
 
-        $fiscalInformation = Forms\Components\Fieldset::make('Fiscal Information')
+        $fiscalInformation = Forms\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.form.fields.fiscal-information'))
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -228,7 +228,7 @@ class VendorResource extends BaseVendorResource
                 ->columns(2),
         ]);
 
-        $purchaseComponents = Infolists\Components\Fieldset::make('Purchase')
+        $purchaseComponents = Infolists\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.infolist.entries.purchase'))
             ->schema([
                 Infolists\Components\Group::make()
                     ->schema([
@@ -244,7 +244,7 @@ class VendorResource extends BaseVendorResource
             ])
             ->columns(1);
 
-        $fiscalInformation = Infolists\Components\Fieldset::make('Fiscal Information')
+        $fiscalInformation = Infolists\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.infolist.entries.fiscal-information'))
             ->schema([
                 Infolists\Components\Group::make()
                     ->schema([
