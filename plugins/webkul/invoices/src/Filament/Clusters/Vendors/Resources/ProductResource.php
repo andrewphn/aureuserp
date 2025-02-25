@@ -28,6 +28,8 @@ class ProductResource extends BaseProductResource
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
+    protected static bool $shouldRegisterNavigation = true;
+
     protected static ?int $navigationSort = 5;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
