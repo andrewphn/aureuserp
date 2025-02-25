@@ -22,7 +22,7 @@ class BankAccountsRelationManager extends RelationManager
         return BankAccountResource::table($table)
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label(__('Create Bank Account'))
+                    ->label(__('invoices::filament/clusters/vendors/resources/vendor/relation-manager/bank-account-relation-manager.create-bank-account'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
                         return $data;

@@ -19,7 +19,7 @@ class ManageBankAccounts extends ManageRelatedRecords
 
     public static function getNavigationLabel(): string
     {
-        return __('Bank Accounts');
+        return __('invoices::filament/clusters/vendors/resources/vendor/pages/manage-bank-account.title');
     }
 
     public function form(Form $form): Form
@@ -32,7 +32,7 @@ class ManageBankAccounts extends ManageRelatedRecords
         return BankAccountResource::table($table)
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label(__('Create Bank Account'))
+                    ->label(__('invoices::filament/clusters/vendors/resources/vendor/pages/manage-bank-account.table.header-actions.create.title'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
                         return $data;

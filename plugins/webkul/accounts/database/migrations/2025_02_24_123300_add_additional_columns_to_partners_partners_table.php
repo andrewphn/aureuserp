@@ -16,10 +16,10 @@ return new class extends Migration
             $table->integer('supplier_rank')->nullable()->comment('Supplier Rank');
             $table->integer('customer_rank')->nullable()->comment('Customer Rank');
             $table->string('invoice_warning')->nullable()->comment('Invoice');
-            $table->string('autopost_bills')->comment('Auto post bills');
+            $table->string('autopost_bills')->nullable()->comment('Auto post bills');
             $table->string('credit_limit')->nullable()->comment('Credit Limits');
-            $table->string('ignore_abnormal_invoice_date')->comment('Ignore Abnormal Invoice Date');
-            $table->string('ignore_abnormal_invoice_amount')->comment('Ignore abnormal Invoice amount');
+            $table->string('ignore_abnormal_invoice_date')->nullable()->comment('Ignore Abnormal Invoice Date');
+            $table->string('ignore_abnormal_invoice_amount')->nullable()->comment('Ignore abnormal Invoice amount');
             $table->string('invoice_sending_method')->nullable()->comment('Invoice Sending');
             $table->string('invoice_edi_format_store')->nullable()->comment('Invoice Edi Format Store');
             $table->integer('trust')->nullable()->comment('Degree of trust you have in this debtor');
@@ -31,13 +31,47 @@ return new class extends Migration
             $table->string('sale_warn_msg')->nullable()->comment('Sale Warning Message');
             $table->text('comment')->nullable()->comment('Comment');
 
-            $table->foreignId('property_account_payable_id')->nullable()->constrained('accounts_accounts')->nullOnDelete()->comment('Account Payable');
-            $table->foreignId('property_account_receivable_id')->nullable()->constrained('accounts_accounts')->nullOnDelete()->comment('Account Receivable');
-            $table->foreignId('property_account_position_id')->nullable()->constrained('accounts_accounts')->nullOnDelete()->comment('Account Position');
-            $table->foreignId('property_payment_term_id')->nullable()->constrained('accounts_payment_terms')->nullOnDelete()->comment('Payment Term');
-            $table->foreignId('property_supplier_payment_term_id')->nullable()->constrained('accounts_payment_terms')->nullOnDelete()->comment('Supplier payment term');
-            $table->foreignId('property_inbound_payment_method_line_id')->nullable()->constrained('accounts_payment_method_lines')->nullOnDelete()->comment('Property Inbound Payment Method Line');
-            $table->foreignId('property_outbound_payment_method_line_id')->nullable()->constrained('accounts_payment_method_lines')->nullOnDelete()->comment('Property Outbound Payment Method Line');
+            $table->foreignId('property_account_payable_id')->nullable()
+                ->comment('Account Payable')
+                ->constrained('accounts_accounts')
+                ->nullOnDelete()
+                ->name('fk_partners_account_payable');
+
+            $table->foreignId('property_account_receivable_id')->nullable()
+                ->comment('Account Receivable')
+                ->constrained('accounts_accounts')
+                ->nullOnDelete()
+                ->name('fk_partners_account_receivable');
+
+            $table->foreignId('property_account_position_id')->nullable()
+                ->comment('Account Position')
+                ->constrained('accounts_accounts')
+                ->nullOnDelete()
+                ->name('fk_partners_account_position');
+
+            $table->foreignId('property_payment_term_id')->nullable()
+                ->comment('Payment Term')
+                ->constrained('accounts_payment_terms')
+                ->nullOnDelete()
+                ->name('fk_partners_payment_term');
+
+            $table->foreignId('property_supplier_payment_term_id')->nullable()
+                ->comment('Supplier payment term')
+                ->constrained('accounts_payment_terms')
+                ->nullOnDelete()
+                ->name('fk_partners_supplier_payment_term');
+
+            $table->foreignId('property_inbound_payment_method_line_id')->nullable()
+                ->comment('Property Inbound Payment Method Line')
+                ->constrained('accounts_payment_method_lines')
+                ->nullOnDelete()
+                ->name('fk_partners_inbound_payment_method');
+
+            $table->foreignId('property_outbound_payment_method_line_id')->nullable()
+                ->comment('Property Outbound Payment Method Line')
+                ->constrained('accounts_payment_method_lines')
+                ->nullOnDelete()
+                ->name('fk_partners_outbound_payment_method');
         });
     }
 
@@ -47,6 +81,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('partners_partners', function (Blueprint $table) {
+            $table->dropForeign('fk_partners_account_payable');
+            $table->dropForeign('fk_partners_account_receivable');
+            $table->dropForeign('fk_partners_account_position');
+            $table->dropForeign('fk_partners_payment_term');
+            $table->dropForeign('fk_partners_supplier_payment_term');
+            $table->dropForeign('fk_partners_inbound_payment_method');
+            $table->dropForeign('fk_partners_outbound_payment_method');
+
             $table->dropColumn([
                 'message_bounce',
                 'supplier_rank',
@@ -65,13 +107,14 @@ return new class extends Migration
                 'peppol_eas',
                 'sale_warn',
                 'sale_warn_msg',
+                'comment',
                 'property_account_payable_id',
                 'property_account_receivable_id',
                 'property_account_position_id',
                 'property_payment_term_id',
                 'property_supplier_payment_term_id',
-                'property_outbound_payment_method_line_id',
                 'property_inbound_payment_method_line_id',
+                'property_outbound_payment_method_line_id',
             ]);
         });
     }
