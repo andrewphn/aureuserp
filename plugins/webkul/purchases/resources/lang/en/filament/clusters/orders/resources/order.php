@@ -25,19 +25,18 @@ return [
 
                 'repeater' => [
                     'products' => [
-                        'title' => 'Products',
+                        'title'            => 'Products',
                         'add-product-line' => 'Add Product',
 
-
                         'fields' => [
-                            'product' => 'Product',
-                            'expected-arrival' => 'Expected Arrival',
-                            'quantity' => 'Quantity',
-                            'unit' => 'Unit',
-                            'taxes' => 'Taxes',
+                            'product'             => 'Product',
+                            'expected-arrival'    => 'Expected Arrival',
+                            'quantity'            => 'Quantity',
+                            'unit'                => 'Unit',
+                            'taxes'               => 'Taxes',
                             'discount-percentage' => 'Discount (%)',
-                            'unit-price' => 'Unit Price',
-                            'sub-total' => 'Sub Total',
+                            'unit-price'          => 'Unit Price',
+                            'sub-total'           => 'Sub Total',
                         ],
                     ],
 
@@ -81,17 +80,17 @@ return [
     'table' => [
         'columns' => [
             'vendor-reference' => 'Vendor Reference',
-            'reference' => 'Reference',
-            'vendor' => 'Vendor',
-            'buyer' => 'Buyer',
-            'company' => 'Company',
-            'order-deadline' => 'Order Deadline',
-            'source-document' => 'Source Document',
-            'untaxed-amount' => 'Untaxed Amount',
-            'total-amount' => 'Total Amount',
-            'status' => 'Status',
-            'billing-status' => 'Billing Status',
-            'currency' => 'Currency',
+            'reference'        => 'Reference',
+            'vendor'           => 'Vendor',
+            'buyer'            => 'Buyer',
+            'company'          => 'Company',
+            'order-deadline'   => 'Order Deadline',
+            'source-document'  => 'Source Document',
+            'untaxed-amount'   => 'Untaxed Amount',
+            'total-amount'     => 'Total Amount',
+            'status'           => 'Status',
+            'billing-status'   => 'Billing Status',
+            'currency'         => 'Currency',
         ],
 
         'groups' => [
@@ -103,18 +102,18 @@ return [
         ],
 
         'filters' => [
-            'status' => 'Status',
+            'status'           => 'Status',
             'vendor-reference' => 'Vendor Reference',
-            'reference' => 'Reference',
-            'untaxed-amount' => 'Untaxed Amount',
-            'total-amount' => 'Total Amount',
-            'order-deadline' => 'Order Deadline',
-            'vendor'         => 'Vendor',
-            'buyer'          => 'Buyer',
-            'company'        => 'Company',
-            'status'         => 'Status',
-            'created-at'     => 'Created At',
-            'updated-at'     => 'Updated At',
+            'reference'        => 'Reference',
+            'untaxed-amount'   => 'Untaxed Amount',
+            'total-amount'     => 'Total Amount',
+            'order-deadline'   => 'Order Deadline',
+            'vendor'           => 'Vendor',
+            'buyer'            => 'Buyer',
+            'company'          => 'Company',
+            'status'           => 'Status',
+            'created-at'       => 'Created At',
+            'updated-at'       => 'Updated At',
         ],
 
         'actions' => [

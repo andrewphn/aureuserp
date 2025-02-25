@@ -26,7 +26,7 @@ class TaxGroupSeeder extends Seeder
                 'name'               => 'Tax 15%',
                 'preceding_subtotal' => null,
                 'created_at'         => $now,
-                'updated_at'         => $now
+                'updated_at'         => $now,
             ],
         ];
 

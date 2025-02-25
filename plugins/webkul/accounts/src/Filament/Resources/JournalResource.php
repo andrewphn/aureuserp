@@ -141,7 +141,7 @@ class JournalResource extends Resource
                                                             ]),
                                                     ]),
                                                 Forms\Components\Fieldset::make(__('accounts::filament/resources/journal.form.tabs.advanced-settings.fields.payment-communication'))
-                                                    ->visible(fn(Get $get) => $get('type') === JournalType::SALE->value)
+                                                    ->visible(fn (Get $get) => $get('type') === JournalType::SALE->value)
                                                     ->schema([
                                                         Forms\Components\Select::make('invoice_reference_type')
                                                             ->options(CommunicationType::options())
@@ -195,7 +195,7 @@ class JournalResource extends Resource
                     ->label(__('accounts::filament/resources/journal.table.columns.name')),
                 Tables\Columns\TextColumn::make('type')
                     ->searchable()
-                    ->formatStateUsing(fn($state) => JournalType::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => JournalType::options()[$state] ?? $state)
                     ->sortable()
                     ->label(__('accounts::filament/resources/journal.table.columns.type')),
                 Tables\Columns\TextColumn::make('code')
@@ -253,13 +253,13 @@ class JournalResource extends Resource
                                                     ->schema([
                                                         Infolists\Components\IconEntry::make('refund_order')
                                                             ->boolean()
-                                                            ->visible(fn($record) => in_array($record->type, [JournalType::SALE->value, JournalType::PURCHASE->value]))
+                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::SALE->value, JournalType::PURCHASE->value]))
                                                             ->placeholder('-')
                                                             ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-credit-note-sequence')),
                                                         Infolists\Components\IconEntry::make('payment_order')
                                                             ->boolean()
                                                             ->placeholder('-')
-                                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                                             ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-payment-sequence')),
                                                         Infolists\Components\TextEntry::make('code')
                                                             ->placeholder('-')
@@ -272,7 +272,7 @@ class JournalResource extends Resource
                                                             ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.color')),
                                                     ])->columns(2),
                                                 Infolists\Components\Section::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.bank-account.title'))
-                                                    ->visible(fn($record) => $record->type === JournalType::BANK->value)
+                                                    ->visible(fn ($record) => $record->type === JournalType::BANK->value)
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('bankAccount.account_number')
                                                             ->placeholder('-')
@@ -280,7 +280,7 @@ class JournalResource extends Resource
                                                     ]),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.title'))
-                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('relation_notes')
                                                     ->placeholder('-')
@@ -288,7 +288,7 @@ class JournalResource extends Resource
                                                     ->markdown(),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.title'))
-                                            ->visible(fn($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
+                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK->value, JournalType::CASH->value, JournalType::CREDIT_CARD->value]))
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('relation_notes')
                                                     ->placeholder('-')
@@ -309,7 +309,7 @@ class JournalResource extends Resource
                                                             ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.entries.auto-check-on-post')),
                                                     ]),
                                                 Infolists\Components\Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.title'))
-                                                    ->visible(fn($record) => $record->type === JournalType::SALE->value)
+                                                    ->visible(fn ($record) => $record->type === JournalType::SALE->value)
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('invoice_reference_type')
                                                             ->placeholder('-')

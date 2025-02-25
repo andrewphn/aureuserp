@@ -6,10 +6,10 @@ use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Tables\Table;
+use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource as BaseProductResource;
-use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Invoice\Models\Product;
 
 class ProductResource extends BaseProductResource

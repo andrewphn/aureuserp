@@ -4,27 +4,24 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Webkul\Account\Models\Tax;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Filament\Resources\IncoTermResource;
-use Filament\Support\Facades\FilamentView;
+use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Purchase\Enums;
-use Webkul\Purchase\Models\Order;
-use Webkul\Support\Models\Currency;
 use Webkul\Purchase\Livewire\Summary;
-use Webkul\Purchase\Settings;
+use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\Product;
-use Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource;
+use Webkul\Purchase\Settings;
 
 class OrderResource extends Resource
 {
@@ -242,7 +239,7 @@ class OrderResource extends Resource
                                     ->relationship(
                                         'taxes',
                                         'name',
-                                        function(Builder $query) {
+                                        function (Builder $query) {
                                             return $query->where('type_tax_use', TypeTaxUse::PURCHASE->value);
                                         },
                                     )
@@ -308,7 +305,7 @@ class OrderResource extends Resource
             $set('price_unit', 0);
 
             $set('discount', 0);
-        
+
             $set('price_tax', 0);
 
             $set('price_subtotal', 0);
@@ -336,18 +333,18 @@ class OrderResource extends Resource
             $taxes = Tax::whereIn('id', $taxIds)
                 ->orderBy('sort')
                 ->get();
-            
+
             $baseAmount = $subTotal;
 
             $taxesComputed = [];
-            
+
             foreach ($taxes as $tax) {
                 $amount = floatval($tax->amount);
 
                 $currentTaxBase = $baseAmount;
 
                 $tax->price_include_override ??= 'tax_excluded';
-                
+
                 if ($tax->is_base_affected) {
                     foreach ($taxesComputed as $prevTax) {
                         if ($prevTax['include_base_amount']) {
@@ -355,14 +352,14 @@ class OrderResource extends Resource
                         }
                     }
                 }
-                
+
                 $currentTaxAmount = 0;
-                
+
                 if ($tax->price_include_override == 'tax_included') {
                     $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-                    
+
                     $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-                    
+
                     if (empty($taxesComputed)) {
                         $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
 
@@ -377,21 +374,21 @@ class OrderResource extends Resource
                         $currentTaxAmount = $amount * $quantity;
                     }
                 }
-                
+
                 $taxesComputed[] = [
-                    'tax_id' => $tax->id,
-                    'tax_amount' => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount
+                    'tax_id'              => $tax->id,
+                    'tax_amount'          => $currentTaxAmount,
+                    'include_base_amount' => $tax->include_base_amount,
                 ];
-                
+
                 $taxAmount += $currentTaxAmount;
             }
         }
-        
+
         $set('price_subtotal', round($subTotal, 4));
-        
+
         $set('price_tax', $taxAmount);
-        
+
         $set('price_total', $subTotal + $taxAmount);
     }
 

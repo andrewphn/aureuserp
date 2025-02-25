@@ -4,9 +4,9 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCatego
 
 use Filament\Actions;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
-use Filament\Resources\Pages\EditRecord;
 
 class EditProductCategory extends EditRecord
 {

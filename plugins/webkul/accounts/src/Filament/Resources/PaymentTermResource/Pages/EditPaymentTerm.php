@@ -2,13 +2,11 @@
 
 namespace Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 
-use Exception;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
-use Webkul\Account\Models\PaymentDueTerm;
 
 class EditPaymentTerm extends EditRecord
 {

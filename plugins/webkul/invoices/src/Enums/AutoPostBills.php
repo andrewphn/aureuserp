@@ -16,8 +16,8 @@ enum AutoPostBills: string implements HasLabel
     {
         return match ($this) {
             self::ALWAYS => __('invoices::enums/auto-post-bills.always'),
-            self::ASK => __('invoices::enums/auto-post-bills.ask'),
-            self::NEVER => __('invoices::enums/auto-post-bills.never'),
+            self::ASK    => __('invoices::enums/auto-post-bills.ask'),
+            self::NEVER  => __('invoices::enums/auto-post-bills.never'),
         };
     }
 
@@ -25,8 +25,8 @@ enum AutoPostBills: string implements HasLabel
     {
         return [
             self::ALWAYS->value => __('invoices::enums/auto-post-bills.always'),
-            self::ASK->value => __('invoices::enums/auto-post-bills.ask'),
-            self::NEVER->value => __('invoices::enums/auto-post-bills.never'),
+            self::ASK->value    => __('invoices::enums/auto-post-bills.ask'),
+            self::NEVER->value  => __('invoices::enums/auto-post-bills.never'),
         ];
     }
 }

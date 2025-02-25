@@ -2,7 +2,6 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -11,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\RoundingMethod;
 use Webkul\Account\Enums\RoundingStrategy;
 use Webkul\Account\Filament\Resources\CashRoundingResource\Pages;
@@ -80,12 +80,12 @@ class CashRoundingResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('strategy')
                     ->label(__('accounts::filament/resources/cash-rounding.table.columns.rounding-strategy'))
-                    ->formatStateUsing(fn($state) => RoundingStrategy::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => RoundingStrategy::options()[$state] ?? $state)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('rounding_method')
                     ->label(__('accounts::filament/resources/cash-rounding.table.columns.rounding-method'))
-                    ->formatStateUsing(fn($state) => RoundingMethod::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => RoundingMethod::options()[$state] ?? $state)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('createdBy.name')
@@ -153,11 +153,11 @@ class CashRoundingResource extends Resource
                                 Infolists\Components\TextEntry::make('strategy')
                                     ->label(__('accounts::filament/resources/cash-rounding.infolist.entries.rounding-strategy'))
                                     ->icon('heroicon-o-cog')
-                                    ->formatStateUsing(fn(string $state): string => RoundingStrategy::options()[$state]),
+                                    ->formatStateUsing(fn (string $state): string => RoundingStrategy::options()[$state]),
                                 Infolists\Components\TextEntry::make('rounding_method')
                                     ->label(__('accounts::filament/resources/cash-rounding.infolist.entries.rounding-method'))
                                     ->icon('heroicon-o-adjustments-horizontal')
-                                    ->formatStateUsing(fn(string $state): string => RoundingMethod::options()[$state]),
+                                    ->formatStateUsing(fn (string $state): string => RoundingMethod::options()[$state]),
                             ])->columns(2),
                     ])->columns(2),
             ]);

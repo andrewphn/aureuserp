@@ -5,5 +5,5 @@ return [
 
     'navigation' => [
         'title' => 'Invoices',
-    ]
+    ],
 ];

@@ -70,7 +70,7 @@ class PaymentTermResource extends Resource
                                     ->label(__('accounts::filament/resources/payment-term.form.sections.fields.early-discount')),
                             ])->columns(2),
                         Forms\Components\Group::make()
-                            ->visible(fn(Get $get) => $get('early_discount'))
+                            ->visible(fn (Get $get) => $get('early_discount'))
                             ->schema([
                                 Forms\Components\TextInput::make('discount_percentage')
                                     ->required()
@@ -83,7 +83,7 @@ class PaymentTermResource extends Resource
                                     ->hiddenLabel(),
                             ])->columns(4),
                         Forms\Components\Group::make()
-                            ->visible(fn(Get $get) => $get('early_discount'))
+                            ->visible(fn (Get $get) => $get('early_discount'))
                             ->schema([
                                 Forms\Components\Select::make('early_pay_discount')
                                     ->label(__('accounts::filament/resources/payment-term.form.sections.fields.reduced-tax'))
@@ -121,7 +121,7 @@ class PaymentTermResource extends Resource
                 Tables\Columns\TextColumn::make('early_pay_discount')
                     ->label(__('accounts::filament/resources/payment-term.table.columns.early-pay-discount'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => EarlyPayDiscount::options()[$state])
+                    ->formatStateUsing(fn ($state) => EarlyPayDiscount::options()[$state])
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
@@ -249,7 +249,7 @@ class PaymentTermResource extends Resource
                                 Infolists\Components\TextEntry::make('note')
                                     ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.note'))
                                     ->columnSpanFull()
-                                    ->formatStateUsing(fn($state) => new HtmlString($state))
+                                    ->formatStateUsing(fn ($state) => new HtmlString($state))
                                     ->placeholder('—'),
                                 Infolists\Components\IconEntry::make('is_active')
                                     ->label(__('accounts::filament/resources/payment-term.infolist.sections.entries.status'))

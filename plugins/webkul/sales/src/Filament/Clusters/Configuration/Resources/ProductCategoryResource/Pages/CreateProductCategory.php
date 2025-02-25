@@ -2,9 +2,8 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages\CreateProductCategory as BaseCreateProductCategory;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class CreateProductCategory extends BaseCreateProductCategory
 {

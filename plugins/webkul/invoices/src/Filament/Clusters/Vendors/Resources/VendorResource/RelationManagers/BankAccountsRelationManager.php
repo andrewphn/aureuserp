@@ -4,8 +4,8 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Rela
 
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Webkul\Partner\Filament\Resources\BankAccountResource;
 
 class BankAccountsRelationManager extends RelationManager
@@ -26,7 +26,7 @@ class BankAccountsRelationManager extends RelationManager
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
                         return $data;
-                    })
+                    }),
             ]);
     }
 }

@@ -166,7 +166,7 @@ class AccountTagResource extends Resource
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('color')
                             ->label(__('accounts::filament/resources/account-tag.infolist.entries.color'))
-                            ->formatStateUsing(fn($state) => "<span style='display:inline-block;width:15px;height:15px;background-color:{$state};border-radius:50%;'></span> " . $state)
+                            ->formatStateUsing(fn ($state) => "<span style='display:inline-block;width:15px;height:15px;background-color:{$state};border-radius:50%;'></span> ".$state)
                             ->html()
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('applicability')

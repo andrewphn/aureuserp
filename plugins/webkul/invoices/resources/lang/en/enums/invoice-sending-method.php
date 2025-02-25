@@ -3,5 +3,5 @@
 return [
     'download' => 'Download',
     'by-email' => 'Email',
-    'by-post' => 'Post',
+    'by-post'  => 'Post',
 ];

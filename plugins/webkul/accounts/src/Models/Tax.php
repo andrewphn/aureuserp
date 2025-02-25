@@ -5,13 +5,13 @@ namespace Webkul\Account\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Enums\DocumentType;
 use Webkul\Account\Enums\RepartitionType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
-use Spatie\EloquentSortable\Sortable;
-use Spatie\EloquentSortable\SortableTrait;
 
 class Tax extends Model implements Sortable
 {

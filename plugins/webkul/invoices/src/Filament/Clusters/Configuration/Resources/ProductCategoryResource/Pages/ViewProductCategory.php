@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 

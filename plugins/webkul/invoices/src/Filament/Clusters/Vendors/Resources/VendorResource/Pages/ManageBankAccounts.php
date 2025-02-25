@@ -2,10 +2,10 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages;
 
-use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\BankAccountResource;
 
@@ -36,7 +36,7 @@ class ManageBankAccounts extends ManageRelatedRecords
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
                         return $data;
-                    })
+                    }),
             ]);
     }
 }

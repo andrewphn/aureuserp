@@ -2,10 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Models\Category;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource as BaseProductCategoryResource;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
+use Webkul\Sale\Models\Category;
 
 class ProductCategoryResource extends BaseProductCategoryResource
 {

@@ -2,7 +2,6 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
-use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -10,15 +9,16 @@ use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\ActionSize;
+use Filament\Tables\Table;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Tax;
-use Webkul\Support\Models\UOM;
 use Webkul\Field\Filament\Traits\HasCustomFields;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages;
+use Webkul\Invoice\Enums\InvoicePolicy;
 use Webkul\Invoice\Filament\Clusters\Vendors;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages;
 use Webkul\Invoice\Models\Product;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
-use Webkul\Invoice\Enums\InvoicePolicy;
+use Webkul\Support\Models\UOM;
 
 class ProductResource extends BaseProductResource
 {
@@ -54,7 +54,7 @@ class ProductResource extends BaseProductResource
                 ->relationship(
                     'productTaxes',
                     'name',
-                    fn($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
+                    fn ($query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
                 )
                 ->multiple()
                 ->live()
@@ -116,14 +116,14 @@ class ProductResource extends BaseProductResource
                         );
                     }
 
-                    return ! empty($parts) ? '(= ' . implode(', ', $parts) . ')' : ' ';
+                    return ! empty($parts) ? '(= '.implode(', ', $parts).')' : ' ';
                 }),
 
             Forms\Components\Select::make('accounts_product_supplier_taxes')
                 ->relationship(
                     'supplierTaxes',
                     'name',
-                    fn($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
+                    fn ($query) => $query->where('type_tax_use', TypeTaxUse::PURCHASE->value),
                 )
                 ->multiple()
                 ->live()
@@ -139,7 +139,7 @@ class ProductResource extends BaseProductResource
 
         $policyComponent = [
             Forms\Components\Section::make()
-                ->visible(fn(Get $get) => $get('sales_ok'))
+                ->visible(fn (Get $get) => $get('sales_ok'))
                 ->schema([
                     Forms\Components\Select::make('invoice_policy')
                         ->label(__('invoices::filament/clusters/vendors/resources/product.form.sections.invoice-policy.title'))
@@ -182,11 +182,11 @@ class ProductResource extends BaseProductResource
             Forms\Components\Actions\Action::make('is_favorite')
                 ->hiddenLabel()
                 ->outlined(false)
-                ->icon(fn($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
+                ->icon(fn ($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
                 ->color('warning')
                 ->iconButton()
                 ->size(ActionSize::Large->value)
-                ->action(fn($record) => $record?->update(['is_favorite' => ! $record->is_favorite])),
+                ->action(fn ($record) => $record?->update(['is_favorite' => ! $record->is_favorite])),
         ]);
 
         array_unshift($secondChildComponents, $favoriteAction);
