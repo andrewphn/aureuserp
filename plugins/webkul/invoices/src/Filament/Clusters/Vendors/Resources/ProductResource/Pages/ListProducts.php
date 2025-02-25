@@ -4,8 +4,9 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pag
 
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource;
-use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages\ListProducts as BaseListProducts;
 use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\Product\Enums\ProductType;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ListProducts as BaseListProducts;
 
 class ListProducts extends BaseListProducts
 {
@@ -13,21 +14,35 @@ class ListProducts extends BaseListProducts
 
     public function getPresetTableViews(): array
     {
-        $predefinedPresets = [
+        return [
+            'goods_products' => PresetView::make(__('invoices::filament/clusters/vendors/resources/product/pages/list-products.tabs.goods'))
+                ->icon('heroicon-s-squares-plus')
+                ->favorite()
+                ->default()
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('type', ProductType::GOODS)),
+            'services_products' => PresetView::make(__('invoices::filament/clusters/vendors/resources/product/pages/list-products.tabs.services'))
+                ->icon('heroicon-s-sparkles')
+                ->favorite()
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('type', ProductType::SERVICE)),
+            'favorites_products' => PresetView::make(__('invoices::filament/clusters/vendors/resources/product/pages/list-products.tabs.favorites'))
+                ->icon('heroicon-s-star')
+                ->favorite()
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_favorite', true)),
+            'archived_products' => PresetView::make(__('invoices::filament/clusters/vendors/resources/product/pages/list-products.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->favorite()
+                ->modifyQueryUsing(function ($query) {
+                    return $query->onlyTrashed();
+                }),
             'sales' => PresetView::make(__('invoices::filament/clusters/vendors/resources/products/pages/list-product.tabs.sales'))
                 ->icon('heroicon-s-scale')
                 ->favorite()
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('sales_ok', true)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('sales_ok', true)),
             'purchase' => PresetView::make(__('invoices::filament/clusters/vendors/resources/products/pages/list-product.tabs.purchase'))
                 ->icon('heroicon-s-arrow-top-right-on-square')
                 ->favorite()
                 ->default()
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('purchase_ok', true)),
-        ];
-
-        return [
-            ...$predefinedPresets,
-            ...parent::getPresetTableViews(),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('purchase_ok', true)),
         ];
     }
 }
