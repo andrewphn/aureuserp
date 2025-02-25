@@ -2,10 +2,10 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Pages;
 
-use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ViewPartner as BaseViewPartner;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ViewVendor as BaseViewVendor;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;
 
-class ViewVendor extends BaseViewPartner
+class ViewVendor extends BaseViewVendor
 {
     protected static string $resource = VendorResource::class;
 }
