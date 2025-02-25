@@ -2,16 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
-use Filament\Pages\SubNavigationPosition;
-use Webkul\Product\Filament\Resources\ProductResource\Pages\CreateProduct as BaseCreateProduct;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages\CreateProduct as BaseCreateProduct;
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 
 class CreateProduct extends BaseCreateProduct
 {
     protected static string $resource = ProductResource::class;
-
-    public function getSubNavigationPosition(): SubNavigationPosition
-    {
-        return SubNavigationPosition::Top;
-    }
 }

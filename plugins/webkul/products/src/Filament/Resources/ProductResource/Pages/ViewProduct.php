@@ -6,6 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Product\Filament\Resources\ProductResource;
@@ -13,6 +14,11 @@ use Webkul\Product\Filament\Resources\ProductResource;
 class ViewProduct extends ViewRecord
 {
     protected static string $resource = ProductResource::class;
+
+    public function getSubNavigationPosition(): SubNavigationPosition
+    {
+        return SubNavigationPosition::Top;
+    }
 
     protected function getHeaderActions(): array
     {
@@ -58,7 +64,7 @@ class ViewProduct extends ViewRecord
 
                     return response()->streamDownload(function () use ($pdf) {
                         echo $pdf->output();
-                    }, 'Product-'.$record->name.'.pdf');
+                    }, 'Product-' . $record->name . '.pdf');
                 }),
             Actions\DeleteAction::make()
                 ->successNotification(
