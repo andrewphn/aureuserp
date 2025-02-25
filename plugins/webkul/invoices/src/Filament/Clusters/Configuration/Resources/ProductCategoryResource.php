@@ -17,6 +17,8 @@ class ProductCategoryResource extends BaseProductCategoryResource
 
     protected static ?string $cluster = Configuration::class;
 
+    protected static bool $shouldRegisterNavigation = true;
+
     public static function getNavigationGroup(): ?string
     {
         return __('invoices::filament/clusters/configurations/resources/product-category.navigation.group');

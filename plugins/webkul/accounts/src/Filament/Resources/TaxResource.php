@@ -226,7 +226,8 @@ class TaxResource extends Resource
                                 ->body(__('accounts::filament/resources/tax.table.bulk-actions.delete.notification.body'))
                         ),
                 ]),
-            ]);
+            ])
+            ->reorderable('sort', 'desc');
     }
 
     public static function infolist(Infolist $infolist): Infolist
