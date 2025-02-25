@@ -119,6 +119,7 @@ class VendorResource extends BaseVendorResource
         ]);
 
         $invoicingComponent = Forms\Components\Tabs\Tab::make(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.title'))
+            ->icon('heroicon-o-receipt-percent')
             ->schema([
                 Forms\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.customer-invoices'))
                     ->schema([
@@ -135,12 +136,12 @@ class VendorResource extends BaseVendorResource
                                 Forms\Components\Select::make('peppol_eas')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.peppol-eas'))
                                     ->live()
-                                    ->visible(fn (Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store')))
+                                    ->visible(fn(Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store')))
                                     ->options(Enums\PartyIdentificationScheme::class),
                                 Forms\Components\TextInput::make('peppol_endpoint')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.endpoint'))
                                     ->live()
-                                    ->visible(fn (Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store'))),
+                                    ->visible(fn(Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store'))),
                             ])->columns(2),
                     ]),
 
@@ -160,6 +161,7 @@ class VendorResource extends BaseVendorResource
             ]);
 
         $internalNotes = Forms\Components\Tabs\Tab::make(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.internal-notes.title'))
+            ->icon('heroicon-o-chat-bubble-left-right')
             ->schema([
                 Forms\Components\RichEditor::make('comment')
                     ->hiddenLabel(),
@@ -266,22 +268,27 @@ class VendorResource extends BaseVendorResource
         ]);
 
         $invoicingComponent = Infolists\Components\Tabs\Tab::make(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.title'))
+            ->icon('heroicon-o-receipt-percent')
             ->schema([
                 Infolists\Components\Fieldset::make(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.customer-invoices'))
                     ->schema([
                         Infolists\Components\TextEntry::make('invoice_sending_method')
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.invoice-sending-method'))
+                            ->placeholder('-')
                             ->icon('heroicon-o-paper-airplane'),
                         Infolists\Components\TextEntry::make('invoice_edi_format_store')
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.invoice-edi-format-store'))
+                            ->placeholder('-')
                             ->icon('heroicon-o-document'),
                         Infolists\Components\Group::make()
                             ->schema([
                                 Infolists\Components\TextEntry::make('peppol_eas')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.peppol-eas'))
+                                    ->placeholder('-')
                                     ->icon('heroicon-o-identification'),
                                 Infolists\Components\TextEntry::make('peppol_endpoint')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.endpoint'))
+                                    ->placeholder('-')
                                     ->icon('heroicon-o-globe-alt'),
                             ])->columns(2),
                     ]),
@@ -290,21 +297,26 @@ class VendorResource extends BaseVendorResource
                     ->schema([
                         Infolists\Components\TextEntry::make('autopost_bills')
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.auto-post-bills'))
+                            ->placeholder('-')
                             ->icon('heroicon-o-bolt'),
                         Infolists\Components\IconEntry::make('ignore_abnormal_invoice_amount')
                             ->boolean()
+                            ->placeholder('-')
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.ignore-abnormal-invoice-amount')),
                         Infolists\Components\IconEntry::make('ignore_abnormal_invoice_date')
                             ->boolean()
+                            ->placeholder('-')
                             ->label(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.invoicing.entries.ignore-abnormal-invoice-date')),
                     ]),
             ]);
 
         $internalNotes = Infolists\Components\Tabs\Tab::make(__('invoices::filament/clusters/vendors/resources/vendor.infolist.tabs.internal-notes.title'))
+            ->icon('heroicon-o-chat-bubble-left-right')
             ->schema([
                 Infolists\Components\TextEntry::make('comment')
                     ->hiddenLabel()
                     ->html()
+                    ->placeholder('-')
                     ->icon('heroicon-o-chat-bubble-left-right'),
             ]);
 
