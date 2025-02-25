@@ -31,47 +31,48 @@ return new class extends Migration
             $table->string('sale_warn_msg')->nullable()->comment('Sale Warning Message');
             $table->text('comment')->nullable()->comment('Comment');
 
-            $table->foreignId('property_account_payable_id')->nullable()
-                ->comment('Account Payable')
-                ->constrained('accounts_accounts')
-                ->nullOnDelete()
-                ->name('fk_partners_account_payable');
+            $table->foreignId('property_account_payable_id')->nullable()->comment('Account Payable');
+            $table->foreignId('property_account_receivable_id')->nullable()->comment('Account Receivable');
+            $table->foreignId('property_account_position_id')->nullable()->comment('Account Position');
+            $table->foreignId('property_payment_term_id')->nullable()->comment('Payment Term');
+            $table->foreignId('property_supplier_payment_term_id')->nullable()->comment('Supplier payment term');
+            $table->foreignId('property_inbound_payment_method_line_id')->nullable()->comment('Property Inbound Payment Method Line');
+            $table->foreignId('property_outbound_payment_method_line_id')->nullable()->comment('Property Outbound Payment Method Line');
 
-            $table->foreignId('property_account_receivable_id')->nullable()
-                ->comment('Account Receivable')
-                ->constrained('accounts_accounts')
-                ->nullOnDelete()
-                ->name('fk_partners_account_receivable');
+            $table->foreign('property_account_payable_id', 'fk_partners_account_payable')
+                ->references('id')
+                ->on('accounts_accounts')
+                ->nullOnDelete();
 
-            $table->foreignId('property_account_position_id')->nullable()
-                ->comment('Account Position')
-                ->constrained('accounts_accounts')
-                ->nullOnDelete()
-                ->name('fk_partners_account_position');
+            $table->foreign('property_account_receivable_id', 'fk_partners_account_receivable')
+                ->references('id')
+                ->on('accounts_accounts')
+                ->nullOnDelete();
 
-            $table->foreignId('property_payment_term_id')->nullable()
-                ->comment('Payment Term')
-                ->constrained('accounts_payment_terms')
-                ->nullOnDelete()
-                ->name('fk_partners_payment_term');
+            $table->foreign('property_account_position_id', 'fk_partners_account_position')
+                ->references('id')
+                ->on('accounts_accounts')
+                ->nullOnDelete();
 
-            $table->foreignId('property_supplier_payment_term_id')->nullable()
-                ->comment('Supplier payment term')
-                ->constrained('accounts_payment_terms')
-                ->nullOnDelete()
-                ->name('fk_partners_supplier_payment_term');
+            $table->foreign('property_payment_term_id', 'fk_partners_payment_term')
+                ->references('id')
+                ->on('accounts_payment_terms')
+                ->nullOnDelete();
 
-            $table->foreignId('property_inbound_payment_method_line_id')->nullable()
-                ->comment('Property Inbound Payment Method Line')
-                ->constrained('accounts_payment_method_lines')
-                ->nullOnDelete()
-                ->name('fk_partners_inbound_payment_method');
+            $table->foreign('property_supplier_payment_term_id', 'fk_partners_supplier_payment_term')
+                ->references('id')
+                ->on('accounts_payment_terms')
+                ->nullOnDelete();
 
-            $table->foreignId('property_outbound_payment_method_line_id')->nullable()
-                ->comment('Property Outbound Payment Method Line')
-                ->constrained('accounts_payment_method_lines')
-                ->nullOnDelete()
-                ->name('fk_partners_outbound_payment_method');
+            $table->foreign('property_inbound_payment_method_line_id', 'fk_partners_inbound_payment_method')
+                ->references('id')
+                ->on('accounts_payment_method_lines')
+                ->nullOnDelete();
+
+            $table->foreign('property_outbound_payment_method_line_id', 'fk_partners_outbound_payment_method')
+                ->references('id')
+                ->on('accounts_payment_method_lines')
+                ->nullOnDelete();
         });
     }
 
