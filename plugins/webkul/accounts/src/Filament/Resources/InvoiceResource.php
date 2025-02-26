@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -66,6 +67,7 @@ class InvoiceResource extends Resource
                     ->live()
                     ->reactive(),
                 Forms\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
+                    ->icon('heroicon-o-document-text')
                     ->schema([
                         Forms\Components\Group::make()
                             ->schema([
@@ -75,6 +77,12 @@ class InvoiceResource extends Resource
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->placeholder('INV/2025/00001')
+                                    ->default(fn() => AccountMove::generateNextInvoiceNumber())
+                                    ->unique(
+                                        table: 'accounts_account_moves',
+                                        column: 'name',
+                                        ignoreRecord: true,
+                                    )
                                     ->columnSpan(1),
                             ])->columns(2),
                         Forms\Components\Group::make()
@@ -86,7 +94,6 @@ class InvoiceResource extends Resource
                                         'name',
                                     )
                                     ->searchable()
-                                    ->required()
                                     ->preload(),
                                 Forms\Components\DatePicker::make('invoice_date')
                                     ->label(__('Invoice Date'))
@@ -97,11 +104,11 @@ class InvoiceResource extends Resource
                                     ->default(now())
                                     ->native(false)
                                     ->live()
-                                    ->hidden(fn (Get $get) => $get('invoice_payment_term_id') !== null)
+                                    ->hidden(fn(Get $get) => $get('invoice_payment_term_id') !== null)
                                     ->label(__('Due Date')),
                                 Forms\Components\Select::make('invoice_payment_term_id')
                                     ->relationship('invoicePaymentTerm', 'name')
-                                    ->required(fn (Get $get) => $get('invoice_date_due') === null)
+                                    ->required(fn(Get $get) => $get('invoice_date_due') === null)
                                     ->live()
                                     ->searchable()
                                     ->preload()
@@ -111,6 +118,7 @@ class InvoiceResource extends Resource
                 Forms\Components\Tabs::make()
                     ->schema([
                         Forms\Components\Tabs\Tab::make(__('Invoice Lines'))
+                            ->icon('heroicon-o-list-bullet')
                             ->schema([
                                 static::getProductRepeater(),
                                 Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get) {
@@ -122,6 +130,7 @@ class InvoiceResource extends Resource
                                     ->reactive(),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('Other Information'))
+                            ->icon('heroicon-o-information-circle')
                             ->schema([
                                 Forms\Components\Fieldset::make('Invoice')
                                     ->schema([
@@ -160,10 +169,20 @@ class InvoiceResource extends Resource
                                             ->label(__('Payment Method')),
                                         Forms\Components\Select::make('auto_post')
                                             ->options(AutoPost::class)
+                                            ->default(AutoPost::NO->value)
                                             ->label(__('Auto Post')),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
                                             ->label(__('Checked')),
+                                    ]),
+                                Forms\Components\Fieldset::make('Additional Information')
+                                    ->schema([
+                                        Forms\Components\Select::make('company_id')
+                                            ->label(__('Company'))
+                                            ->relationship('company', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->default(Auth::user()->default_company_id)
                                     ]),
                                 Forms\Components\Fieldset::make('Marketing')
                                     ->schema([
@@ -369,6 +388,213 @@ class InvoiceResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
+                    ->icon('heroicon-o-document-text')
+                    ->schema([
+                        Infolists\Components\Grid::make()
+                            ->schema([
+                                Infolists\Components\TextEntry::make('name')
+                                    ->placeholder('-')
+                                    ->label(__('Customer Invoice'))
+                                    ->icon('heroicon-o-document')
+                                    ->weight('bold')
+                                    ->size(TextEntrySize::Large),
+                            ])->columns(2),
+                        Infolists\Components\Grid::make()
+                            ->schema([
+                                Infolists\Components\TextEntry::make('partner.name')
+                                    ->placeholder('-')
+                                    ->label(__('Customer'))
+                                    ->visible(fn($record) => $record->partner_id !== null)
+                                    ->icon('heroicon-o-user'),
+                                Infolists\Components\TextEntry::make('invoice_partner_display_name')
+                                    ->placeholder('-')
+                                    ->label(__('Customer'))
+                                    ->visible(fn($record) => $record->partner_id === null)
+                                    ->icon('heroicon-o-user'),
+                                Infolists\Components\TextEntry::make('invoice_date')
+                                    ->placeholder('-')
+                                    ->label(__('Invoice Date'))
+                                    ->icon('heroicon-o-calendar')
+                                    ->date(),
+                                Infolists\Components\TextEntry::make('invoice_date_due')
+                                    ->placeholder('-')
+                                    ->icon('heroicon-o-clock')
+                                    ->date(),
+                                Infolists\Components\TextEntry::make('invoicePaymentTerm.name')
+                                    ->placeholder('-')
+                                    ->label(__('Payment Term'))
+                                    ->icon('heroicon-o-calendar-days'),
+                            ])->columns(2),
+                    ]),
+                Infolists\Components\Tabs::make()
+                    ->columnSpan('full')
+                    ->tabs([
+                        Infolists\Components\Tabs\Tab::make(__('Invoice Lines'))
+                            ->icon('heroicon-o-list-bullet')
+                            ->schema([
+                                Infolists\Components\Section::make()
+                                    ->schema([
+                                        Infolists\Components\RepeatableEntry::make('products')
+                                            ->schema([
+                                                Infolists\Components\Grid::make()
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('product.name')
+                                                            ->placeholder('-')
+                                                            ->label(__('Product'))
+                                                            ->icon('heroicon-o-cube'),
+                                                        Infolists\Components\TextEntry::make('description')
+                                                            ->placeholder('-')
+                                                            ->label(__('Description'))
+                                                            ->icon('heroicon-o-document-text')
+                                                            ->columnSpan(2),
+                                                        Infolists\Components\TextEntry::make('quantity')
+                                                            ->placeholder('-')
+                                                            ->label(__('Quantity'))
+                                                            ->icon('heroicon-o-hashtag'),
+                                                        Infolists\Components\TextEntry::make('product_uom.name')
+                                                            ->placeholder('-')
+                                                            ->label(__('Unit of Measure'))
+                                                            ->icon('heroicon-o-scale'),
+                                                        Infolists\Components\TextEntry::make('price_unit')
+                                                            ->placeholder('-')
+                                                            ->label(__('Unit Price'))
+                                                            ->icon('heroicon-o-currency-dollar')
+                                                            ->money('USD'),
+                                                        Infolists\Components\TextEntry::make('discount')
+                                                            ->placeholder('-')
+                                                            ->label(__('Discount'))
+                                                            ->icon('heroicon-o-tag')
+                                                            ->suffix('%'),
+                                                        Infolists\Components\TextEntry::make('tax.name')
+                                                            ->placeholder('-')
+                                                            ->label(__('Tax'))
+                                                            ->icon('heroicon-o-receipt-percent'),
+                                                        Infolists\Components\TextEntry::make('price_subtotal')
+                                                            ->placeholder('-')
+                                                            ->label(__('Subtotal'))
+                                                            ->icon('heroicon-o-calculator')
+                                                            ->money('USD'),
+                                                        Infolists\Components\TextEntry::make('price_total')
+                                                            ->placeholder('-')
+                                                            ->label(__('Total'))
+                                                            ->icon('heroicon-o-banknotes')
+                                                            ->money('USD')
+                                                            ->weight('bold'),
+                                                    ])->columns(3),
+                                            ]),
+                                    ]),
+                                Infolists\Components\Section::make()
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('amount_untaxed')
+                                            ->placeholder('-')
+                                            ->label(__('Untaxed Amount'))
+                                            ->icon('heroicon-o-calculator')
+                                            ->money('USD'),
+                                        Infolists\Components\TextEntry::make('amount_tax')
+                                            ->placeholder('-')
+                                            ->label(__('Tax'))
+                                            ->icon('heroicon-o-receipt-percent')
+                                            ->money('USD'),
+                                        Infolists\Components\TextEntry::make('amount_total')
+                                            ->placeholder('-')
+                                            ->label(__('Total'))
+                                            ->icon('heroicon-o-banknotes')
+                                            ->money('USD')
+                                            ->weight('bold')
+                                            ->size(TextEntrySize::Large),
+                                    ])
+                                    ->columns(3)
+                                    ->grow(false),
+                            ]),
+                        Infolists\Components\Tabs\Tab::make(__('Other Information'))
+                            ->icon('heroicon-o-information-circle')
+                            ->schema([
+                                Infolists\Components\Section::make('Invoice')
+                                    ->icon('heroicon-o-document')
+                                    ->schema([
+                                        Infolists\Components\Grid::make()
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('reference')
+                                                    ->placeholder('-')
+                                                    ->label(__('Customer Reference'))
+                                                    ->icon('heroicon-o-hashtag'),
+                                                Infolists\Components\TextEntry::make('invoiceUser.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('Sales Person'))
+                                                    ->icon('heroicon-o-user'),
+                                                Infolists\Components\TextEntry::make('partnerBank.account_number')
+                                                    ->placeholder('-')
+                                                    ->label(__('Recipient Bank'))
+                                                    ->icon('heroicon-o-building-library'),
+                                                Infolists\Components\TextEntry::make('payment_reference')
+                                                    ->placeholder('-')
+                                                    ->label(__('Payment Reference'))
+                                                    ->icon('heroicon-o-identification'),
+                                                Infolists\Components\TextEntry::make('delivery_date')
+                                                    ->placeholder('-')
+                                                    ->label(__('Delivery Date'))
+                                                    ->icon('heroicon-o-truck')
+                                                    ->date(),
+                                            ])->columns(2),
+                                    ]),
+                                Infolists\Components\Section::make('Accounting')
+                                    ->icon('heroicon-o-calculator')
+                                    ->schema([
+                                        Infolists\Components\Grid::make()
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('invoiceIncoterm.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('Incoterm'))
+                                                    ->icon('heroicon-o-globe-alt'),
+                                                Infolists\Components\TextEntry::make('incoterm_location')
+                                                    ->placeholder('-')
+                                                    ->label(__('Incoterm Address'))
+                                                    ->icon('heroicon-o-map-pin'),
+                                                Infolists\Components\TextEntry::make('paymentMethodLine.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('Payment Method'))
+                                                    ->icon('heroicon-o-credit-card'),
+                                                Infolists\Components\TextEntry::make('auto_post')
+                                                    ->placeholder('-')
+                                                    ->label(__('Auto Post'))
+                                                    ->icon('heroicon-o-arrow-path')
+                                                    ->formatStateUsing(fn(string $state): string => AutoPost::from($state)->getLabel()),
+                                                Infolists\Components\IconEntry::make('checked')
+                                                    ->label(__('Checked'))
+                                                    ->icon('heroicon-o-check-circle')
+                                                    ->boolean(),
+                                            ])->columns(2),
+                                    ]),
+                                Infolists\Components\Section::make('Marketing')
+                                    ->icon('heroicon-o-megaphone')
+                                    ->schema([
+                                        Infolists\Components\Grid::make()
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('campaign.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('Campaign'))
+                                                    ->icon('heroicon-o-presentation-chart-line'),
+                                                Infolists\Components\TextEntry::make('medium.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('Medium'))
+                                                    ->icon('heroicon-o-device-phone-mobile'),
+                                                Infolists\Components\TextEntry::make('source.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('Source'))
+                                                    ->icon('heroicon-o-link'),
+                                            ])->columns(2),
+                                    ]),
+                            ]),
+                    ])
+                    ->persistTabInQueryString(),
+            ]);
+    }
+
     public static function getPages(): array
     {
         return [
@@ -377,144 +603,6 @@ class InvoiceResource extends Resource
             'view'   => Pages\ViewInvoice::route('/{record}'),
             'edit'   => Pages\EditInvoice::route('/{record}/edit'),
         ];
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Infolists\Components\Grid::make(['default' => 3])
-                    ->schema([
-                        Infolists\Components\Group::make()
-                            ->schema([
-                                Infolists\Components\Tabs::make('Tabs')
-                                    ->tabs([
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/invoice.infolist.tabs.products.title'))
-                                            ->schema([
-                                                Infolists\Components\RepeatableEntry::make('moveLines')
-                                                    ->hiddenLabel()
-                                                    ->schema([
-                                                        Infolists\Components\TextEntry::make('name')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.products.repeater.products.entries.product'))
-                                                            ->icon('heroicon-o-shopping-bag'),
-                                                        Infolists\Components\TextEntry::make('quantity')
-                                                            ->numeric()
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.products.repeater.products.entries.quantity')),
-                                                        Infolists\Components\TextEntry::make('unit_price')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.products.repeater.products.entries.unit-price'))
-                                                            ->money('USD'),
-                                                        Infolists\Components\TextEntry::make('total')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.products.repeater.products.entries.total'))
-                                                            ->money('USD'),
-                                                    ])
-                                                    ->columns(5),
-                                                Infolists\Components\Livewire::make(Summary::class, function ($record) {
-                                                    return [
-                                                        'products' => $record->moveLines->map(function ($item) {
-                                                            return [
-                                                                ...$item->toArray(),
-                                                                'tax' => $item?->product?->productTaxes->pluck('id')->toArray() ?? [],
-                                                            ];
-                                                        })->toArray(),
-                                                    ];
-                                                }),
-                                            ]),
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/invoice.infolist.tabs.other-information.title'))
-                                            ->schema([
-                                                Infolists\Components\Fieldset::make(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.title'))
-                                                    ->schema([
-                                                        Infolists\Components\TextEntry::make('reference')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.customer-reference'))
-                                                            ->icon('heroicon-o-document'),
-                                                        Infolists\Components\TextEntry::make('invoiceUser.name')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.sales-person'))
-                                                            ->icon('heroicon-o-user'),
-                                                        Infolists\Components\TextEntry::make('partnerBank.account_holder_name')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.recipient-bank'))
-                                                            ->icon('heroicon-o-building-library'),
-                                                        Infolists\Components\TextEntry::make('payment_reference')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.payment-reference'))
-                                                            ->icon('heroicon-o-credit-card'),
-                                                        Infolists\Components\TextEntry::make('delivery_date')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.invoice.entries.delivery-date'))
-                                                            ->date()
-                                                            ->icon('heroicon-o-truck'),
-                                                    ]),
-                                                Infolists\Components\Fieldset::make(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.title'))
-                                                    ->schema([
-                                                        Infolists\Components\TextEntry::make('invoiceIncoterm.name')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.incoterm')),
-                                                        Infolists\Components\TextEntry::make('incoterm_location')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.incoterm-location')),
-                                                        Infolists\Components\TextEntry::make('fiscalPosition.name')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.fiscal-position'))
-                                                            ->icon('heroicon-o-receipt-percent'),
-                                                        Infolists\Components\TextEntry::make('paymentMethodLine.name')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.payment-method')),
-                                                        Infolists\Components\IconEntry::make('auto_post')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.auto-post'))
-                                                            ->boolean(),
-                                                        Infolists\Components\IconEntry::make('checked')
-                                                            ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.entries.fieldset.accounting.entries.checked'))
-                                                            ->boolean(),
-                                                    ]),
-                                            ]),
-                                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/invoice.infolist.tabs.term-and-conditions.title'))
-                                            ->schema([
-                                                Infolists\Components\TextEntry::make('narration')
-                                                    ->markdown()
-                                                    ->columnSpanFull(),
-                                            ]),
-                                    ])->persistTabInQueryString(),
-                            ])->columnSpan(2),
-                        Infolists\Components\Group::make()
-                            ->schema([
-                                Infolists\Components\Section::make()
-                                    ->schema([
-                                        Infolists\Components\TextEntry::make('partner.name')
-                                            ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.general.fields.customer'))
-                                            ->icon('heroicon-o-user-circle'),
-                                        Infolists\Components\TextEntry::make('partner_address')
-                                            ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.general.fields.address'))
-                                            ->placeholder('-')
-                                            ->icon('heroicon-o-map'),
-                                    ]),
-                                Infolists\Components\Section::make()
-                                    ->schema([
-                                        Infolists\Components\Fieldset::make(__('accounts::filament/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.title'))
-                                            ->schema([
-                                                Infolists\Components\TextEntry::make('invoice_date')
-                                                    ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.fields.invoice-date'))
-                                                    ->date()
-                                                    ->icon('heroicon-o-calendar'),
-                                                Infolists\Components\TextEntry::make('invoice_date_due')
-                                                    ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.fields.due-date'))
-                                                    ->date()
-                                                    ->icon('heroicon-o-clock'),
-                                                Infolists\Components\TextEntry::make('invoicePaymentTerm.name')
-                                                    ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.invoice-date-and-payment-term.fields.payment-term'))
-                                                    ->icon('heroicon-o-credit-card'),
-                                            ]),
-                                    ]),
-                                Infolists\Components\Section::make()
-                                    ->schema([
-                                        Infolists\Components\Fieldset::make(__('accounts::filament/resources/invoice.infolist.section.fieldset.marketing.title'))
-                                            ->schema([
-                                                Infolists\Components\TextEntry::make('campaign.name')
-                                                    ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.marketing.fields.campaign'))
-                                                    ->icon('heroicon-o-megaphone'),
-                                                Infolists\Components\TextEntry::make('medium.name')
-                                                    ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.marketing.fields.medium'))
-                                                    ->icon('heroicon-o-signal'),
-                                                Infolists\Components\TextEntry::make('source.name')
-                                                    ->label(__('accounts::filament/resources/invoice.infolist.section.fieldset.marketing.fields.source'))
-                                                    ->icon('heroicon-o-funnel'),
-                                            ]),
-                                    ]),
-                            ])
-                            ->columnSpan(['lg' => 1]),
-                    ]),
-            ]);
     }
 
     public static function getProductRepeater(): Forms\Components\Repeater
@@ -528,8 +616,8 @@ class InvoiceResource extends Resource
             ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -556,7 +644,7 @@ class InvoiceResource extends Resource
                                     ->required()
                                     ->default(1)
                                     ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\Select::make('uom_id')
@@ -564,7 +652,7 @@ class InvoiceResource extends Resource
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn ($query) => $query->where('category_id', 1),
+                                        fn($query) => $query->where('category_id', 1),
                                     )
                                     ->searchable()
                                     ->preload()
@@ -581,7 +669,7 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
-                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
+                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
                                         self::calculateLineTotals($set, $get);
                                     })
                                     ->live(),
@@ -590,7 +678,7 @@ class InvoiceResource extends Resource
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\TextInput::make('price_unit')
@@ -599,7 +687,7 @@ class InvoiceResource extends Resource
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\TextInput::make('price_subtotal')

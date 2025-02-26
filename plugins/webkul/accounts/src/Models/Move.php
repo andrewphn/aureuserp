@@ -191,29 +191,31 @@ class Move extends Model
             ->where('display_type', 'product');
     }
 
+    public static function generateNextInvoiceNumber()
+    {
+        $lastInvoice = self::whereNotNull('name')
+            ->where('name', 'like', 'INV/%')
+            ->orderBy('name', 'desc')
+            ->first();
+
+        if ($lastInvoice) {
+            $lastNumber = (int) substr($lastInvoice->name, strrpos($lastInvoice->name, '/') + 1);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        return 'INV/' . date('Y') . '/' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($invoice) {
-            $invoice->name = 'ORD-TMP-'.time();
+        static::creating(function ($model) {
+            if (empty($model->name)) {
+                $model->name = self::generateNextInvoiceNumber();
+            }
         });
-
-        static::created(function ($invoice) {
-            $invoice->updateName();
-            $invoice->saveQuietly();
-        });
-
-        static::updating(function ($invoice) {
-            $invoice->updateName();
-        });
-    }
-
-    /**
-     * Update the name based on the state without trigger any additional events.
-     */
-    public function updateName()
-    {
-        $this->name = 'INV-'.$this->id;
     }
 }
