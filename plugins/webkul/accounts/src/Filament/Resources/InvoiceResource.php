@@ -24,6 +24,7 @@ use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Models\Product;
 use Webkul\Sale\Livewire\Summary;
+use Webkul\Invoice\Settings;
 
 class InvoiceResource extends Resource
 {
@@ -656,7 +657,8 @@ class InvoiceResource extends Resource
                                     )
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
                                     ->relationship(
