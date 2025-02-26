@@ -23,7 +23,7 @@ use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Models\Product;
-use Webkul\Sale\Livewire\Summary;
+use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Invoice\Settings;
 
 class InvoiceResource extends Resource
@@ -122,7 +122,7 @@ class InvoiceResource extends Resource
                             ->icon('heroicon-o-list-bullet')
                             ->schema([
                                 static::getProductRepeater(),
-                                Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get) {
+                                Forms\Components\Livewire::make(InvoiceSummary::class, function (Forms\Get $get) {
                                     return [
                                         'products' => $get('products'),
                                     ];
@@ -183,7 +183,14 @@ class InvoiceResource extends Resource
                                             ->relationship('company', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->default(Auth::user()->default_company_id)
+                                            ->default(Auth::user()->default_company_id),
+                                        Forms\Components\Select::make('currency_id')
+                                            ->label(__('Currency'))
+                                            ->relationship('currency', 'name')
+                                            ->required()
+                                            ->searchable()
+                                            ->preload()
+                                            ->default(Auth::user()->defaultCompany?->currency_id),
                                     ]),
                                 Forms\Components\Fieldset::make('Marketing')
                                     ->schema([
@@ -611,6 +618,7 @@ class InvoiceResource extends Resource
         return Forms\Components\Repeater::make('products')
             ->relationship('lines')
             ->hiddenLabel()
+            ->reorderable()
             ->live()
             ->reactive()
             ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.title'))
@@ -709,15 +717,16 @@ class InvoiceResource extends Resource
 
                 $data = array_merge($data, [
                     'name'                  => $product->name,
-                    'state'                 => $record->state->value,
-                    'product_uom_qty'       => $data['product_qty'],
-                    'product_packaging_qty' => $data['product_qty'],
-                    'qty_received_method'   => 'manual',
+                    'quantity'              => $data['quantity'],
                     'uom_id'                => $data['uom_id'] ?? $product->uom_id,
                     'currency_id'           => $record->currency_id,
                     'partner_id'            => $record->partner_id,
                     'creator_id'            => Auth::id(),
+                    'partner_id'            => $record->partner_id,
                     'company_id'            => Auth::user()->default_company_id,
+                    'company_currency_id'   => Auth::user()->defaultCompany->currency_id ?? $record->currency_id,
+                    'commercial_partner_id' => $record->partner_id,
+                    'display_type'          => 'product',
                 ]);
 
                 return $data;
@@ -746,7 +755,7 @@ class InvoiceResource extends Resource
 
         $set('price_unit', $priceUnit);
 
-        $quantity = floatval($get('product_qty') ?? 1);
+        $quantity = floatval($get('quantity') ?? 1);
 
         $taxIds = $get('taxes') ?? [];
 

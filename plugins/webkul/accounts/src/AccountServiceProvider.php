@@ -2,6 +2,8 @@
 
 namespace Webkul\Account;
 
+use Livewire\Livewire;
+use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -69,5 +71,10 @@ class AccountServiceProvider extends PackageServiceProvider
                     ->runsSeeders();
             })
             ->hasUninstallCommand(function (UninstallCommand $command) {});
+    }
+
+    public function packageBooted(): void
+    {
+        Livewire::component('invoice-summary', InvoiceSummary::class);
     }
 }
