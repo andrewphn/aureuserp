@@ -38,7 +38,7 @@ return [
                             'taxes'               => 'Taxes',
                             'discount-percentage' => 'Discount (%)',
                             'unit-price'          => 'Unit Price',
-                            'sub-total'           => 'Sub Total',
+                            'amount'              => 'Amount',
                         ],
                     ],
 

@@ -25,7 +25,6 @@ class TodoAction extends Action
             ->action(function (Operation $record, Component $livewire): void {
                 if (! $record->moves->count()) {
                     Notification::make()
-                        ->success()
                         ->title(__('inventories::filament/clusters/operations/actions/todo.notification.warning.title'))
                         ->body(__('inventories::filament/clusters/operations/actions/todo.notification.warning.body'))
                         ->warning()

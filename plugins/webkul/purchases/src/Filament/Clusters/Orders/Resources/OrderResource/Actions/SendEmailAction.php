@@ -3,16 +3,17 @@
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Actions;
 
 use Filament\Actions\Action;
-use Webkul\Purchase\Enums;
+use Webkul\Purchase\Enums\OrderState;
+use Filament\Notifications\Notification;
 use Filament\Forms;
 use Webkul\Account\Models\Partner;
 use Livewire\Component;
-use Webkul\Purchase\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
+use Webkul\Purchase\Models\Order;
 
 class SendEmailAction extends Action
 {
@@ -29,6 +30,7 @@ class SendEmailAction extends Action
 
         $this
             ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.label'))
+            ->label(fn () => $this->getRecord()->state === OrderState::DRAFT ? __('purchases::filament/clusters/orders/resources/order/actions/send-email.label') : __('purchases::filament/clusters/orders/resources/order/actions/send-email.resend-label'))
             ->form([
                 Forms\Components\Select::make('vendors')
                     ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.form.fields.to'))
@@ -78,28 +80,50 @@ class SendEmailAction extends Action
                     ->downloadable()
                     ->openable(),
             ])
-            ->action(function (array $data, $record, Component $livewire) {
+            ->action(function (array $data, Order $record, Component $livewire) {
                 $pdfPath = $this->generatePdf($record);
 
                 foreach ($data['vendors'] as $vendorId) {
                     $vendor = Partner::find($vendorId);
 
                     if ($vendor?->email) {
-                        Mail::to($vendor->email)->send(new VendorPurchaseOrderMail($data['subject'], $data['message'], $pdfPath));
+                        try {
+                            Mail::to($vendor->email)->send(new VendorPurchaseOrderMail($data['subject'], $data['message'], $pdfPath));
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
                     }
                 }
 
                 $record->update([
-                    'state' => Enums\OrderState::SENT,
+                    'state' => OrderState::SENT,
                 ]);
+
+                $record->lines->each(function ($line) {
+                    $line->update([
+                        'state' => OrderState::SENT,
+                    ]);
+                });
 
                 Storage::delete($pdfPath);
 
                 $livewire->updateForm();
+
+                Notification::make()
+                    ->title(__('purchases::filament/clusters/orders/resources/order/actions/send-email.action.notification.success.title'))
+                    ->body(__('purchases::filament/clusters/orders/resources/order/actions/send-email.action.notification.success.body'))
+                    ->success()
+                    ->send();
             })
+            ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
             ->hidden(fn () => in_array($this->getRecord()->state, [
-                Enums\OrderState::DONE,
-                Enums\OrderState::CANCELED,
+                OrderState::DONE,
+                OrderState::CANCELED,
             ]));
     }
 

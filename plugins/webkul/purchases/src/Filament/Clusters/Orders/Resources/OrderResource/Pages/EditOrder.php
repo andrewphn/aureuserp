@@ -33,6 +33,9 @@ class EditOrder extends EditRecord
             ChatterAction::make()
                 ->setResource(static::$resource),
             OrderActions\SendEmailAction::make(),
+            OrderActions\PrintRFQAction::make(),
+            OrderActions\CancelAction::make(),
+            OrderActions\DraftAction::make(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OrderState::DONE)
                 ->successNotification(

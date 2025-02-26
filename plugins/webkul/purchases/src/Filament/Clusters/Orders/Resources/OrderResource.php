@@ -43,7 +43,15 @@ class OrderResource extends Resource
                 ProgressStepper::make('state')
                     ->hiddenLabel()
                     ->inline()
-                    ->options(Enums\OrderState::options())
+                    ->options(function ($record) {
+                        $options = Enums\OrderState::options();
+                        
+                        if ($record && $record->state !== Enums\OrderState::CANCELED) {
+                            unset($options[Enums\OrderState::CANCELED->value]);
+                        }
+                        
+                        return $options;
+                    })
                     ->default(Enums\OrderState::DRAFT)
                     ->disabled(),
                 Forms\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
@@ -396,12 +404,14 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductUpdated($set, $get);
                                     })
-                                    ->required(),
+                                    ->required()
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::SENT, Enums\OrderState::PURCHASE, Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\DateTimePicker::make('planned_at')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.expected-arrival'))
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
-                                    ->default(now()),
+                                    ->default(now())
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('product_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
                                     ->required()
@@ -410,7 +420,8 @@ class OrderResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductQtyUpdated($set, $get);
-                                    }),
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
                                     ->relationship(
@@ -424,7 +435,8 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterUOMUpdated($set, $get);
                                     })
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('product_packaging_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging-qty'))
                                     ->live()
@@ -432,7 +444,8 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductPackagingQtyUpdated($set, $get);
                                     })
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Select::make('product_packaging_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging'))
                                     ->relationship(
@@ -445,7 +458,18 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductPackagingUpdated($set, $get);
                                     })
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                Forms\Components\TextInput::make('price_unit')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
+                                    ->numeric()
+                                    ->default(0)
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        self::calculateLineTotals($set, $get);
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.taxes'))
                                     ->relationship(
@@ -461,7 +485,8 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
                                         self::calculateLineTotals($set, $get);
                                     })
-                                    ->live(),
+                                    ->live()
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
                                     ->numeric()
@@ -469,20 +494,13 @@ class OrderResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         self::calculateLineTotals($set, $get);
-                                    }),
-                                Forms\Components\TextInput::make('price_unit')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('price_subtotal')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.sub-total'))
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.amount'))
                                     ->default(0)
-                                    ->readOnly(),
+                                    ->readOnly()
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
