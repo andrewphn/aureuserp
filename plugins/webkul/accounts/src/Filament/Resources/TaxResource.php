@@ -89,13 +89,16 @@ class TaxResource extends Resource
                                 Forms\Components\Select::make('price_include_override')
                                     ->options(TaxIncludeOverride::class)
                                     ->default(TaxIncludeOverride::DEFAULT->value)
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.include-in-price')),
+                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.include-in-price'))
+                                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('Overrides the Company\'s default on whether the price you use on the product and invoices includes this tax.')),
                                 Forms\Components\Toggle::make('include_base_amount')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.include-base-amount')),
+                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.include-base-amount'))
+                                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('If set, taxes with a higher sequence than this one will be affected by it, provided they accept it.')),
                                 Forms\Components\Toggle::make('is_base_affected')
                                     ->inline(false)
-                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.is-base-affected')),
+                                    ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.is-base-affected'))
+                                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('If set, taxes with a lower sequence might affect this one, provided they try to do it.')),
                             ]),
                         Forms\Components\RichEditor::make('description')
                             ->label(__('accounts::filament/resources/tax.form.sections.field-set.fields.description')),
@@ -129,17 +132,17 @@ class TaxResource extends Resource
                 Tables\Columns\TextColumn::make('type_tax_use')
                     ->label(__('accounts::filament/resources/tax.table.columns.type-tax-use'))
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => Enums\TypeTaxUse::options()[$state])
+                    ->formatStateUsing(fn($state) => Enums\TypeTaxUse::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_scope')
                     ->label(__('accounts::filament/resources/tax.table.columns.tax-scope'))
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => Enums\TaxScope::options()[$state])
+                    ->formatStateUsing(fn($state) => Enums\TaxScope::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_type')
                     ->label(__('accounts::filament/resources/tax.table.columns.amount-type'))
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => Enums\AmountType::options()[$state])
+                    ->formatStateUsing(fn($state) => Enums\AmountType::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_label')
                     ->label(__('accounts::filament/resources/tax.table.columns.invoice-label'))
