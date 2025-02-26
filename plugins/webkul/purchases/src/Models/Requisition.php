@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
 use Webkul\Purchase\Database\Factories\RequisitionFactory;
@@ -18,7 +19,7 @@ use Webkul\Support\Models\Currency;
 
 class Requisition extends Model
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes;
 
     /**
      * Table name.

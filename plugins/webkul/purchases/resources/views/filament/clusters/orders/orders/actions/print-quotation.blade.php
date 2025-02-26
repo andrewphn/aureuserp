@@ -51,57 +51,9 @@
                     <tr>
                         <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
                             <b>
-                                @if ($record->type == 'blanket_order')
-                                    Blanket Order
-                                @else
-                                    Purchase Template
-                                @endif
-                                {{ $record->name }}
+                                Request for Quotation #{{ $record->name }}
                             </b>
                         </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Information -->
-            <table style="margin-bottom: 40px">
-                <tbody>
-                    <tr>
-                        @if ($record->ends_at)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Agreement Validity:
-                                </b>
-
-                                <div>
-                                    {{ $record->ends_at }}
-                                </div>
-                            </td>
-                        @endif
-
-                        @if ($record->user_id)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Contact:
-                                </b>
-
-                                <div>
-                                    {{ $record->user->name }}
-                                </div>
-                            </td>
-                        @endif
-
-                        @if ($record->reference)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Reference:
-                                </b>
-
-                                <div>
-                                    {{ $record->reference }}
-                                </div>
-                            </td>
-                        @endif
                     </tr>
                 </tbody>
             </table>
@@ -113,21 +65,15 @@
                         <thead>
                             <tr>
                                 <th>
-                                    Product
+                                    Description
                                 </th>
 
                                 <th>
-                                    Quantity
+                                    Expected Date
                                 </th>
 
-                                @if (app(\Webkul\Purchase\Settings\ProductSettings::class)->enable_uom)
-                                    <th>
-                                        Unit
-                                    </th>
-                                @endif
-
                                 <th>
-                                    Unit Price
+                                    Qty
                                 </th>
                             </tr>
                         </thead>
@@ -136,21 +82,15 @@
                             @foreach ($record->lines as $item)
                                 <tr>
                                     <td>
-                                        {{ $item->product->name }}
+                                        {{ $item->name }}
                                     </td>
 
                                     <td>
-                                        {{ $item->qty.' '.$item->product->uom->name }}
+                                        {{ $item->planned_at }}
                                     </td>
 
-                                    @if (app(\Webkul\Purchase\Settings\ProductSettings::class)->enable_uom)
-                                        <td>
-                                            {{ $item->uom?->name }}
-                                        </td>
-                                    @endif
-
                                     <td>
-                                        {{ $item->price_unit }}
+                                        {{ $item->product_qty.' '.$item->product->uom->name }}
                                     </td>
                                 </tr>
                             @endforeach

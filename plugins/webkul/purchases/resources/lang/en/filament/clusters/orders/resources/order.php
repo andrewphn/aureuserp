@@ -33,6 +33,8 @@ return [
                             'expected-arrival'    => 'Expected Arrival',
                             'quantity'            => 'Quantity',
                             'unit'                => 'Unit',
+                            'packaging-qty'       => 'Packaging Qty',
+                            'packaging'           => 'Packaging',
                             'taxes'               => 'Taxes',
                             'discount-percentage' => 'Discount (%)',
                             'unit-price'          => 'Unit Price',
@@ -79,6 +81,7 @@ return [
 
     'table' => [
         'columns' => [
+            'priority'         => 'Priority',
             'vendor-reference' => 'Vendor Reference',
             'reference'        => 'Reference',
             'vendor'           => 'Vendor',
@@ -111,6 +114,8 @@ return [
             'vendor'           => 'Vendor',
             'buyer'            => 'Buyer',
             'company'          => 'Company',
+            'payment-term'     => 'Payment Term',
+            'incoterm'         => 'Incoterm',
             'status'           => 'Status',
             'created-at'       => 'Created At',
             'updated-at'       => 'Updated At',

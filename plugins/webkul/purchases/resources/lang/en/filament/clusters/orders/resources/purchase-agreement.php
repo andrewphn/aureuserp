@@ -90,13 +90,41 @@ return [
                     'body'  => 'The purchase agreement has been deleted successfully.',
                 ],
             ],
+
+            'restore' => [
+                'notification' => [
+                    'title' => 'Purchase Agreement restored',
+                    'body'  => 'The purchase agreement has been restored successfully.',
+                ],
+            ],
+
+            'force-delete' => [
+                'notification' => [
+                    'title' => 'Purchase Agreement permanently deleted',
+                    'body'  => 'The purchase agreement has been permanently deleted successfully.',
+                ],
+            ],
         ],
 
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Purchase Agreement deleted',
-                    'body'  => 'The purchase agreement has been deleted successfully.',
+                    'title' => 'Purchase Agreements deleted',
+                    'body'  => 'The purchase agreements has been deleted successfully.',
+                ],
+            ],
+
+            'restore' => [
+                'notification' => [
+                    'title' => 'Purchase Agreements restored',
+                    'body'  => 'The purchase agreements has been restored successfully.',
+                ],
+            ],
+
+            'force-delete' => [
+                'notification' => [
+                    'title' => 'Purchase Agreement permanently deleted',
+                    'body'  => 'The purchase agreements has been permanently deleted successfully.',
                 ],
             ],
         ],

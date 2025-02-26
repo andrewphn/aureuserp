@@ -98,7 +98,7 @@ class ProductResource extends BaseProductResource
                     }
 
                     $result['total_excluded'] = $price;
-                    $result['total_included'] = $price + $totalTaxAmount;
+                    $result['total_in$this->record->is_configurable = true;cluded'] = $price + $totalTaxAmount;
 
                     $parts = [];
 

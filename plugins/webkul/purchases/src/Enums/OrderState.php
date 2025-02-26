@@ -15,6 +15,8 @@ enum OrderState: string implements HasColor, HasLabel
 
     case DONE = 'done';
 
+    case CANCELED = 'canceled';
+
     public static function options(): array
     {
         return [
@@ -22,6 +24,7 @@ enum OrderState: string implements HasColor, HasLabel
             self::SENT->value     => __('purchases::enums/order-state.sent'),
             self::PURCHASE->value => __('purchases::enums/order-state.purchase'),
             self::DONE->value     => __('purchases::enums/order-state.done'),
+            self::CANCELED->value => __('purchases::enums/order-state.canceled'),
         ];
     }
 
@@ -32,6 +35,7 @@ enum OrderState: string implements HasColor, HasLabel
             self::SENT     => __('purchases::enums/order-state.sent'),
             self::PURCHASE => __('purchases::enums/order-state.purchase'),
             self::DONE     => __('purchases::enums/order-state.done'),
+            self::CANCELED => __('purchases::enums/order-state.canceled'),
         };
     }
 
@@ -42,6 +46,7 @@ enum OrderState: string implements HasColor, HasLabel
             self::SENT     => 'blue',
             self::PURCHASE => 'success',
             self::DONE     => 'success',
+            self::CANCELED => 'danger',
         };
     }
 }
