@@ -16,7 +16,7 @@
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
-            font-size: 14px;
+            font-size: 16px;
             color: #555;
         }
 
@@ -59,7 +59,6 @@
             <div class="invoice-container">
                 @php
                     $subTotal = 0;
-                    $totalDiscount = 0;
                     $totalTax = 0;
                     $grandTotal = 0;
 
@@ -68,27 +67,18 @@
 
                         $totalTax += $product['price_tax'];
 
-                        $totalDiscount += $product['discount'];
-
                         $grandTotal += $product['price_total'];
                     }
                 @endphp
 
                 <div class="invoice-item">
-                    <span>Subtotal</span>
+                    <span>Untaxed Amount</span>
                     <span>{{ number_format($subTotal, 2) }}</span>
                 </div>
 
-                @if ($totalDiscount > 0)
-                    <div class="invoice-item">
-                        <span>Discount</span>
-                        <span>-{{ number_format($totalDiscount, 2) }}</span>
-                    </div>
-                @endif
-
                 @if ($totalTax > 0)
                     <div class="invoice-item">
-                        <span>Tax Amount</span>
+                        <span>Tax</span>
                         <span>{{ number_format($totalTax, 2) }}</span>
                     </div>
                 @endif
@@ -96,7 +86,7 @@
                 <div class="divider"></div>
 
                 <div class="font-bold invoice-item" style="color: #000">
-                    <span>Grand Total</span>
+                    <span>Total</span>
                     <span>{{ number_format($grandTotal, 2) }}</span>
                 </div>
             </div>

@@ -21,7 +21,9 @@ use Webkul\Purchase\Enums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\Product;
+use Webkul\Product\Models\Packaging;
 use Webkul\Account\Models\Partner;
+use Webkul\Support\Models\UOM;
 use Webkul\Purchase\Settings;
 
 class OrderResource extends Resource
@@ -177,129 +179,6 @@ class OrderResource extends Resource
                     ]),
             ])
             ->columns(1);
-    }
-
-    public static function getProductRepeater(): Forms\Components\Repeater
-    {
-        return Forms\Components\Repeater::make('products')
-            ->relationship('lines')
-            ->hiddenLabel()
-            ->live()
-            ->reactive()
-            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.title'))
-            ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
-            ->collapsible()
-            ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
-            ->schema([
-                Forms\Components\Group::make()
-                    ->schema([
-                        Forms\Components\Grid::make(4)
-                            ->schema([
-                                Forms\Components\Select::make('product_id')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
-                                    ->relationship('product', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($get('product_id')) {
-                                            $product = Product::find($get('product_id'));
-
-                                            $set('taxes', $product->productTaxes->pluck('id')->toArray());
-                                        }
-
-                                        self::calculateLineTotals($set, $get);
-                                    })
-                                    ->required(),
-                                Forms\Components\DateTimePicker::make('planned_at')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.expected-arrival'))
-                                    ->native(false)
-                                    ->suffixIcon('heroicon-o-calendar')
-                                    ->default(now()),
-                                Forms\Components\TextInput::make('product_qty')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
-                                    ->required()
-                                    ->default(1)
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
-                                Forms\Components\Select::make('uom_id')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
-                                    ->relationship(
-                                        'uom',
-                                        'name',
-                                        fn ($query) => $query->where('category_id', 1),
-                                    )
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
-                                Forms\Components\Select::make('taxes')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.taxes'))
-                                    ->relationship(
-                                        'taxes',
-                                        'name',
-                                        function (Builder $query) {
-                                            return $query->where('type_tax_use', TypeTaxUse::PURCHASE->value);
-                                        },
-                                    )
-                                    ->searchable()
-                                    ->multiple()
-                                    ->preload()
-                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
-                                        self::calculateLineTotals($set, $get);
-                                    })
-                                    ->live(),
-                                Forms\Components\TextInput::make('discount')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
-                                Forms\Components\TextInput::make('price_unit')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
-                                Forms\Components\TextInput::make('price_subtotal')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.sub-total'))
-                                    ->default(0)
-                                    ->readOnly(),
-                                Forms\Components\Hidden::make('price_tax')
-                                    ->default(0),
-                                Forms\Components\Hidden::make('price_total')
-                                    ->default(0),
-                            ]),
-                    ])
-                    ->columns(2),
-            ])
-            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
-                $product = Product::find($data['product_id']);
-
-                $data = array_merge($data, [
-                    'name'                  => $product->name,
-                    'state'                 => $record->state->value,
-                    'product_uom_qty'       => $data['product_qty'],
-                    'product_packaging_qty' => $data['product_qty'],
-                    'qty_received_method'   => 'manual',
-                    'uom_id'                => $data['uom_id'] ?? $product->uom_id,
-                    'currency_id'           => $record->currency_id,
-                    'partner_id'            => $record->partner_id,
-                    'creator_id'            => Auth::id(),
-                    'company_id'            => Auth::user()->default_company_id,
-                ]);
-
-                return $data;
-            });
     }
 
     public static function table(Table $table): Table
@@ -490,6 +369,309 @@ class OrderResource extends Resource
             );
     }
 
+    public static function getProductRepeater(): Forms\Components\Repeater
+    {
+        return Forms\Components\Repeater::make('products')
+            ->relationship('lines')
+            ->hiddenLabel()
+            ->live()
+            ->reactive()
+            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.title'))
+            ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
+            ->collapsible()
+            ->defaultItems(0)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->schema([
+                Forms\Components\Group::make()
+                    ->schema([
+                        Forms\Components\Grid::make(4)
+                            ->schema([
+                                Forms\Components\Select::make('product_id')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
+                                    ->relationship('product', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterProductUpdated($set, $get);
+                                    })
+                                    ->required(),
+                                Forms\Components\DateTimePicker::make('planned_at')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.expected-arrival'))
+                                    ->native(false)
+                                    ->suffixIcon('heroicon-o-calendar')
+                                    ->default(now()),
+                                Forms\Components\TextInput::make('product_qty')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
+                                    ->required()
+                                    ->default(1)
+                                    ->numeric()
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterProductQtyUpdated($set, $get);
+                                    }),
+                                Forms\Components\Select::make('uom_id')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
+                                    ->relationship(
+                                        'uom',
+                                        'name',
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
+                                    )
+                                    ->required()
+                                    ->live()
+                                    ->selectablePlaceholder(false)
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterUOMUpdated($set, $get);
+                                    })
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                Forms\Components\TextInput::make('product_packaging_qty')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging-qty'))
+                                    ->live()
+                                    ->numeric()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterProductPackagingQtyUpdated($set, $get);
+                                    })
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                Forms\Components\Select::make('product_packaging_id')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging'))
+                                    ->relationship(
+                                        'productPackaging',
+                                        'name',
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterProductPackagingUpdated($set, $get);
+                                    })
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                Forms\Components\Select::make('taxes')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.taxes'))
+                                    ->relationship(
+                                        'taxes',
+                                        'name',
+                                        function (Builder $query) {
+                                            return $query->where('type_tax_use', TypeTaxUse::PURCHASE->value);
+                                        },
+                                    )
+                                    ->searchable()
+                                    ->multiple()
+                                    ->preload()
+                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
+                                        self::calculateLineTotals($set, $get);
+                                    })
+                                    ->live(),
+                                Forms\Components\TextInput::make('discount')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
+                                    ->numeric()
+                                    ->default(0)
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        self::calculateLineTotals($set, $get);
+                                    }),
+                                Forms\Components\TextInput::make('price_unit')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
+                                    ->numeric()
+                                    ->default(0)
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        self::calculateLineTotals($set, $get);
+                                    }),
+                                Forms\Components\TextInput::make('price_subtotal')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.sub-total'))
+                                    ->default(0)
+                                    ->readOnly(),
+                                Forms\Components\Hidden::make('product_uom_qty')
+                                    ->default(0),
+                                Forms\Components\Hidden::make('price_tax')
+                                    ->default(0),
+                                Forms\Components\Hidden::make('price_total')
+                                    ->default(0),
+                            ]),
+                    ])
+                    ->columns(2),
+            ])
+            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
+                $product = Product::find($data['product_id']);
+
+                $data = array_merge($data, [
+                    'name'                => $product->name,
+                    'state'               => $record->state->value,
+                    'qty_received_method' => 'manual',
+                    'uom_id'              => $data['uom_id'] ?? $product->uom_id,
+                    'currency_id'         => $record->currency_id,
+                    'partner_id'          => $record->partner_id,
+                    'creator_id'          => Auth::id(),
+                    'company_id'          => Auth::user()->default_company_id,
+                ]);
+
+                return $data;
+            });
+    }
+
+    private static function afterProductUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $product = Product::find($get('product_id'));
+
+        $set('uom_id', $product->uom_id);
+
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+
+        $set('price_unit', round($priceUnit, 2));
+
+        $set('taxes', $product->productTaxes->pluck('id')->toArray());
+
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), round($uomQuantity, 2));
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+
+        $set('product_packaging_qty', $packaging['packaging_qty'] ?? null);
+
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function afterProductQtyUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), $uomQuantity);
+        
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+
+        $set('product_packaging_qty', $packaging['packaging_qty'] ?? null);
+
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function afterUOMUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), $uomQuantity);
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+
+        $set('product_packaging_qty', $packaging['packaging_qty'] ?? null);
+
+        $product = Product::find($get('product_id'));
+
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+
+        $set('price_unit', round($priceUnit, 2));
+
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function afterProductPackagingQtyUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        if ($get('product_packaging_id')) {
+            $packaging = Packaging::find($get('product_packaging_id'));
+
+            $packagingQty = floatval($get('product_packaging_qty') ?? 0);
+
+            $productUOMQty = $packagingQty * $packaging->qty;
+
+            $set('product_uom_qty', round($productUOMQty, 2));
+
+            $uom = Uom::find($get('uom_id'));
+
+            $productQty = $uom ? $productUOMQty * $uom->factor : $productUOMQty;
+
+            $set('product_qty', round($productQty, 2));
+        }
+        
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function afterProductPackagingUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        if ($get('product_packaging_id')) {
+            $packaging = Packaging::find($get('product_packaging_id'));
+
+            $productUOMQty = $get('product_uom_qty') ?: 1;
+            
+            if ($packaging) {
+                $packagingQty = $productUOMQty / $packaging->qty;
+
+                $set('product_packaging_qty', $packagingQty);
+            }
+        } else {
+            $set('product_packaging_qty', null);
+        }
+        
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function calculateUnitQuantity($uomId, $quantity)
+    {
+        if (! $uomId) {
+            return $quantity;
+        }
+
+        $uom = Uom::find($uomId);
+
+        return (float) ($quantity ?? 0) / $uom->factor;
+    }
+
+    private static function calculateUnitPrice($uomId, $price)
+    {
+        if (! $uomId) {
+            return $price;
+        }
+
+        $uom = Uom::find($uomId);
+
+        return (float) ($price / $uom->factor);
+    }
+
+    private static function getBestPackaging($productId, $quantity)
+    {
+        $packagings = Packaging::where('product_id', $productId)
+            ->orderByDesc('qty')
+            ->get();
+
+        foreach ($packagings as $packaging) {
+            if ($quantity && $quantity % $packaging->qty == 0) {
+                return [
+                    'packaging_id' => $packaging->id,
+                    'packaging_qty' => round($quantity / $packaging->qty, 2),
+                ];
+            }
+        }
+
+        return null;
+    }
+
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
     {
         if (! $get('product_id')) {
@@ -506,11 +688,7 @@ class OrderResource extends Resource
             return;
         }
 
-        $product = Product::find($get('product_id'));
-
-        $priceUnit = floatval($product->cost ?? $product->price);
-
-        $set('price_unit', $priceUnit);
+        $priceUnit = floatval($get('price_unit'));
 
         $quantity = floatval($get('product_qty') ?? 1);
 
@@ -518,7 +696,15 @@ class OrderResource extends Resource
 
         $taxAmount = 0;
 
-        $subTotal = ($priceUnit * $quantity) - ($get('discount') ?? 0);
+        $subTotal = $priceUnit * $quantity;
+
+        $discountValue = floatval($get('discount') ?? 0);
+
+        if ($discountValue > 0) {
+            $discountAmount = $subTotal * ($discountValue / 100);
+
+            $subTotal = $subTotal - $discountAmount;
+        }
 
         if (! empty($taxIds)) {
             $taxes = Tax::whereIn('id', $taxIds)

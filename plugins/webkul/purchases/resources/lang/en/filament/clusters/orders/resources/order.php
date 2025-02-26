@@ -33,6 +33,8 @@ return [
                             'expected-arrival'    => 'Expected Arrival',
                             'quantity'            => 'Quantity',
                             'unit'                => 'Unit',
+                            'packaging-qty'       => 'Packaging Qty',
+                            'packaging'           => 'Packaging',
                             'taxes'               => 'Taxes',
                             'discount-percentage' => 'Discount (%)',
                             'unit-price'          => 'Unit Price',

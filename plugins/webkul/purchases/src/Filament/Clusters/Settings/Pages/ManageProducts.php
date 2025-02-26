@@ -46,12 +46,12 @@ class ManageProducts extends SettingsPage
     {
         return $form
             ->schema([
-                // Forms\Components\Toggle::make('enable_variants')
-                //     ->label(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-variants'))
-                //     ->helperText(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-variants-helper-text')),
-                // Forms\Components\Toggle::make('enable_uom')
-                //     ->label(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-uom'))
-                //     ->helperText(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-uom-helper-text')),
+                Forms\Components\Toggle::make('enable_variants')
+                    ->label(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-variants'))
+                    ->helperText(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-variants-helper-text')),
+                Forms\Components\Toggle::make('enable_uom')
+                    ->label(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-uom'))
+                    ->helperText(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-uom-helper-text')),
                 Forms\Components\Toggle::make('enable_packagings')
                     ->label(__('purchases::filament/clusters/settings/pages/manage-products.form.enable-packagings'))
                     ->helperText(function () {

@@ -51,12 +51,7 @@
                     <tr>
                         <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
                             <b>
-                                @if ($record->type == 'blanket_order')
-                                    Blanket Order
-                                @else
-                                    Purchase Template
-                                @endif
-                                {{ $record->name }}
+                                Request for Quotation #{{ $record->name }}
                             </b>
                         </td>
                     </tr>
@@ -67,22 +62,10 @@
             <table style="margin-bottom: 40px">
                 <tbody>
                     <tr>
-                        @if ($record->ends_at)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Agreement Validity:
-                                </b>
-
-                                <div>
-                                    {{ $record->ends_at }}
-                                </div>
-                            </td>
-                        @endif
-
                         @if ($record->user_id)
                             <td style="padding: 2px 18px;border:none;font-size: 16px;">
                                 <b>
-                                    Contact:
+                                    Buyer:
                                 </b>
 
                                 <div>
@@ -91,14 +74,38 @@
                             </td>
                         @endif
 
-                        @if ($record->reference)
+                        @if ($record->partner_reference)
                             <td style="padding: 2px 18px;border:none;font-size: 16px;">
                                 <b>
-                                    Reference:
+                                    Your Order Reference:
                                 </b>
 
                                 <div>
-                                    {{ $record->reference }}
+                                    {{ $record->partner_reference }}
+                                </div>
+                            </td>
+                        @endif
+
+                        @if ($record->ordered_at)
+                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
+                                <b>
+                                    Order Deadline:
+                                </b>
+
+                                <div>
+                                    {{ $record->ordered_at }}
+                                </div>
+                            </td>
+                        @endif
+
+                        @if ($record->planned_at)
+                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
+                                <b>
+                                    Expected Arrival:
+                                </b>
+
+                                <div>
+                                    {{ $record->planned_at }}
                                 </div>
                             </td>
                         @endif
@@ -113,21 +120,27 @@
                         <thead>
                             <tr>
                                 <th>
-                                    Product
+                                    Description
                                 </th>
 
                                 <th>
                                     Quantity
                                 </th>
 
-                                @if (app(\Webkul\Purchase\Settings\ProductSettings::class)->enable_uom)
-                                    <th>
-                                        Unit
-                                    </th>
-                                @endif
-
                                 <th>
                                     Unit Price
+                                </th>
+
+                                <th>
+                                    Discount
+                                </th>
+
+                                <th>
+                                    Taxes
+                                </th>
+
+                                <th>
+                                    Amount
                                 </th>
                             </tr>
                         </thead>
@@ -136,27 +149,75 @@
                             @foreach ($record->lines as $item)
                                 <tr>
                                     <td>
-                                        {{ $item->product->name }}
+                                        {{ $item->name }}
                                     </td>
 
                                     <td>
-                                        {{ $item->qty.' '.$item->product->uom->name }}
+                                        {{ $item->product_qty.' '.$item->product->uom->name }}
                                     </td>
-
-                                    @if (app(\Webkul\Purchase\Settings\ProductSettings::class)->enable_uom)
-                                        <td>
-                                            {{ $item->uom?->name }}
-                                        </td>
-                                    @endif
 
                                     <td>
                                         {{ $item->price_unit }}
+                                    </td>
+
+                                    <td>
+                                        {{ round($item->discount, 2) }}%
+                                    </td>
+
+                                    <td>
+                                        {{ $item->taxes->pluck('name')->implode(', ') }}
+                                    </td>
+
+                                    <td>
+                                        {{ $item->price_subtotal }}
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+
+                    <!-- Summary Table -->
+                    <div class="summary">
+                        <table class="{{ app()->getLocale   () }}">
+                            <tbody>
+                                <tr>
+                                    <td>Untaxed Amount</td>
+                                    <td>-</td>
+                                    <td>{{ $record->untaxed_amount }}</td>
+                                </tr>
+            
+                                <tr>
+                                    <td>Tax</td>
+                                    <td>-</td>
+                                    <td>{{ $record->tax_amount }}</td>
+                                </tr>
+            
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td><strong>-</strong></td>
+                                    <td><strong>{{ $record->total_amount }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            @endif
+
+            <!-- Information -->
+            @if ($record->payment_term_id)
+                <table style="margin-bottom: 40px">
+                    <tbody>
+                        <tr>
+                            <td style="width: 50%; padding: 2px 18px;border:none;">
+                                <b>
+                                    Payment Terms:
+                                </b>
+
+                                {{ $record->paymentTerm->name }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             @endif
         </div>
     @endforeach
