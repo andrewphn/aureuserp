@@ -42,12 +42,17 @@ class EditInvoice extends EditRecord
             BaseActions\CancelAction::make(),
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
+            BaseActions\PreviewAction::make(),
         ];
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();
+
+        $record = $this->getRecord();
+
+        $data['partner_id'] = $data['partner_id'] ??= $record->partner_id;
 
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);
@@ -60,7 +65,7 @@ class EditInvoice extends EditRecord
         return $data;
     }
 
-    protected function afterCreate(): void
+    protected function afterSave(): void
     {
         $record = $this->getRecord();
 
@@ -71,32 +76,48 @@ class EditInvoice extends EditRecord
 
     protected function updatePaymentTerm($record): void
     {
-        if (
-            $record->invoicePaymentTerm
-            && $record->invoicePaymentTerm?->dueTerm?->nb_days
-        ) {
+        $paymentTermLine = MoveLine::where('move_id', $record->id)
+            ->where('display_type', 'payment_term')
+            ->first();
+
+        if ($record->invoicePaymentTerm && $record->invoicePaymentTerm?->dueTerm?->nb_days) {
             $dateMaturity = $record->invoice_date_due->addDays($record->invoicePaymentTerm->dueTerm->nb_days);
         } else {
             $dateMaturity = $record->invoice_date_due;
         }
 
-        MoveLine::create([
-            'move_id'               => $record->id,
-            'move_name'             => $record->name,
-            'display_type'          => 'payment_term',
-            'currency_id'           => $record->currency_id,
-            'partner_id'            => $record->partner_id,
-            'date_maturity'         => $dateMaturity,
-            'company_id'            => $record->company_id,
-            'company_currency_id'   => $record->company_currency_id,
-            'commercial_partner_id' => $record->partner_id,
-            'sort'                  => MoveLine::max('sort') + 1,
-            'parent_state'          => $record->state,
-            'date'                  => now(),
-            'creator_id'            => $record->creator_id,
-            'debit'                 => $record->amount_total,
-            'balance'               => $record->amount_total,
-            'amount_currency'       => $record->amount_total,
-        ]);
+        if ($paymentTermLine) {
+            $paymentTermLine->update([
+                'currency_id'           => $record->currency_id,
+                'partner_id'            => $record->partner_id,
+                'date_maturity'         => $dateMaturity,
+                'company_id'            => $record->company_id,
+                'company_currency_id'   => $record->company_currency_id,
+                'commercial_partner_id' => $record->partner_id,
+                'parent_state'          => $record->state,
+                'debit'                 => $record->amount_total,
+                'balance'               => $record->amount_total,
+                'amount_currency'       => $record->amount_total,
+            ]);
+        } else {
+            MoveLine::create([
+                'move_id'               => $record->id,
+                'move_name'             => $record->name,
+                'display_type'          => 'payment_term',
+                'currency_id'           => $record->currency_id,
+                'partner_id'            => $record->partner_id,
+                'date_maturity'         => $dateMaturity,
+                'company_id'            => $record->company_id,
+                'company_currency_id'   => $record->company_currency_id,
+                'commercial_partner_id' => $record->partner_id,
+                'sort'                  => MoveLine::max('sort') + 1,
+                'parent_state'          => $record->state,
+                'date'                  => now(),
+                'creator_id'            => $record->creator_id,
+                'debit'                 => $record->amount_total,
+                'balance'               => $record->amount_total,
+                'amount_currency'       => $record->amount_total,
+            ]);
+        }
     }
 }

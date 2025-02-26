@@ -87,7 +87,8 @@ class InvoiceResource extends Resource
                                         column: 'name',
                                         ignoreRecord: true,
                                     )
-                                    ->columnSpan(1),
+                                    ->columnSpan(1)
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
@@ -101,7 +102,8 @@ class InvoiceResource extends Resource
                                             )
                                             ->searchable()
                                             ->preload()
-                                            ->live(),
+                                            ->live()
+                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
@@ -134,7 +136,8 @@ class InvoiceResource extends Resource
                                 Forms\Components\DatePicker::make('invoice_date')
                                     ->label(__('Invoice Date'))
                                     ->default(now())
-                                    ->native(false),
+                                    ->native(false)
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
                                     ->default(now())
@@ -182,12 +185,15 @@ class InvoiceResource extends Resource
                                             ->relationship('partnerBank', 'account_number')
                                             ->searchable()
                                             ->preload()
-                                            ->label(__('Recipient Bank')),
+                                            ->label(__('Recipient Bank'))
+                                            ->createOptionForm(fn($form) => BankAccountResource::form($form))
+                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\TextInput::make('payment_reference')
                                             ->label(__('Payment Reference')),
                                         Forms\Components\DatePicker::make('delivery_date')
                                             ->native(false)
-                                            ->label(__('Delivery Date')),
+                                            ->label(__('Delivery Date'))
+                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                     ]),
                                 Forms\Components\Fieldset::make('Accounting')
                                     ->schema([
@@ -206,7 +212,8 @@ class InvoiceResource extends Resource
                                         Forms\Components\Select::make('auto_post')
                                             ->options(AutoPost::class)
                                             ->default(AutoPost::NO->value)
-                                            ->label(__('Auto Post')),
+                                            ->label(__('Auto Post'))
+                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
                                             ->label(__('Checked')),
@@ -755,6 +762,7 @@ class InvoiceResource extends Resource
                     'credit'                => floatval($data['price_total']),
                     'balance'               => -floatval($data['price_total']),
                     'amount_currency'       => -floatval($data['price_total']),
+                    ''
                 ]);
 
                 return $data;
