@@ -35,7 +35,7 @@ class MoveLine extends Model
         'statement_id',
         'statement_line_id',
         'product_id',
-        'product_uom_id',
+        'uom_id',
         'created_by',
         'move_name',
         'parent_state',

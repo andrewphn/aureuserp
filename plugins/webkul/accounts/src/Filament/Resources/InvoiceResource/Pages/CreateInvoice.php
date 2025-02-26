@@ -55,10 +55,10 @@ class CreateInvoice extends CreateRecord
 
         $this->getResource()::collectTotals($record);
 
-        $this->createPaymentTerm($record);
+        $this->createPaymentTermLine($record);
     }
 
-    protected function createPaymentTerm($record): void
+    private function createPaymentTermLine($record): void
     {
         if ($record->invoicePaymentTerm && $record->invoicePaymentTerm?->dueTerm?->nb_days) {
             $dateMaturity = $record->invoice_date_due->addDays($record->invoicePaymentTerm->dueTerm->nb_days);
@@ -85,4 +85,6 @@ class CreateInvoice extends CreateRecord
             'amount_currency'       => $record->amount_total,
         ]);
     }
+
+    public static function createTaxLine($record): void {}
 }

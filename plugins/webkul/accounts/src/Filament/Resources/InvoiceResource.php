@@ -27,7 +27,10 @@ use Webkul\Invoice\Models\Product;
 use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
+use Webkul\Inventory\Models\Move;
 use Webkul\Invoice\Settings;
+use Webkul\Product\Models\Packaging;
+use Webkul\Support\Models\UOM;
 
 class InvoiceResource extends Resource
 {
@@ -252,6 +255,12 @@ class InvoiceResource extends Resource
                                             ->preload()
                                             ->label(__('Source')),
                                     ]),
+                            ]),
+                        Forms\Components\Tabs\Tab::make(__('Term & Conditions'))
+                            ->icon('heroicon-o-clipboard-document-list')
+                            ->schema([
+                                Forms\Components\RichEditor::make('narration')
+                                    ->hiddenLabel(),
                             ]),
                     ])
                     ->persistTabInQueryString(),
@@ -498,7 +507,7 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('Quantity'))
                                             ->icon('heroicon-o-hashtag'),
-                                        Infolists\Components\TextEntry::make('product_uom.name')
+                                        Infolists\Components\TextEntry::make('uom.name')
                                             ->placeholder('-')
                                             ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
                                             ->label(__('Unit of Measure'))
@@ -536,15 +545,6 @@ class InvoiceResource extends Resource
                                             ->money(fn($record) => $record->currency->name)
                                             ->weight('bold'),
                                     ])->columns(5),
-                                // Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
-                                //     return [
-                                //         'products' => $record->lines->map(function ($item) {
-                                //             return [
-                                //                 ...$item->toArray(),
-                                //             ];
-                                //         })->toArray(),
-                                //     ];
-                                // }),
                             ]),
                         Infolists\Components\Tabs\Tab::make(__('Other Information'))
                             ->icon('heroicon-o-information-circle')
@@ -645,11 +645,10 @@ class InvoiceResource extends Resource
         return Forms\Components\Repeater::make('products')
             ->relationship('lines')
             ->hiddenLabel()
-            ->reorderable()
             ->live()
             ->reactive()
-            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.title'))
-            ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
+            ->label(__('Products'))
+            ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
             ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
@@ -665,34 +664,32 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
-                                        if ($get('product_id')) {
-                                            $product = Product::find($get('product_id'));
-
-                                            $set('taxes', $product->productTaxes->pluck('id')->toArray());
-                                        }
-
-                                        self::calculateLineTotals($set, $get);
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterProductUpdated($set, $get);
                                     })
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
                                     ->label(__('Quantity'))
                                     ->required()
                                     ->default(1)
+                                    ->numeric()
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
+                                        static::afterProductQtyUpdated($set, $get);
                                     }),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1),
+                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
-                                    ->searchable()
-                                    ->preload()
                                     ->required()
+                                    ->live()
+                                    ->selectablePlaceholder(false)
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        static::afterUOMUpdated($set, $get);
+                                    })
                                     ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
@@ -709,12 +706,12 @@ class InvoiceResource extends Resource
                                     ->afterStateHydrated(function (Forms\Get $get, Forms\Set $set) {
                                         self::calculateLineTotals($set, $get);
                                     })
-                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
                                         self::calculateLineTotals($set, $get);
                                     })
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
-                                    ->label(__('Discount'))
+                                    ->label(__('Discount Percentage'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
@@ -722,7 +719,7 @@ class InvoiceResource extends Resource
                                         self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\TextInput::make('price_unit')
-                                    ->label(__('Price Unit'))
+                                    ->label(__('Unit Price'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
@@ -731,9 +728,11 @@ class InvoiceResource extends Resource
                                         self::calculateLineTotals($set, $get);
                                     }),
                                 Forms\Components\TextInput::make('price_subtotal')
-                                    ->label(__('Price'))
+                                    ->label(__('Sub Total'))
                                     ->default(0)
                                     ->readOnly(),
+                                Forms\Components\Hidden::make('product_uom_qty')
+                                    ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_total')
@@ -742,31 +741,111 @@ class InvoiceResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
-                $product = Product::find($data['product_id']);
+            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record) => static::mutateProductRelationship($data, $record))
+            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record) => static::mutateProductRelationship($data, $record));
+    }
 
-                $data = array_merge($data, [
-                    'name'                  => $product->name,
-                    'quantity'              => $data['quantity'],
-                    'uom_id'                => $data['uom_id'] ?? $product->uom_id,
-                    'currency_id'           => $record->currency_id,
-                    'partner_id'            => $record->partner_id,
-                    'creator_id'            => Auth::id(),
-                    'company_id'            => Auth::user()->default_company_id,
-                    'company_currency_id'   => Auth::user()->defaultCompany->currency_id ?? $record->currency_id,
-                    'commercial_partner_id' => $record->partner_id,
-                    'display_type'          => 'product',
-                    'sort'                  => MoveLine::max('sort') + 1,
-                    'parent_state'          => $record->state,
-                    'debit'                 => 0.00,
-                    'credit'                => floatval($data['price_total']),
-                    'balance'               => -floatval($data['price_total']),
-                    'amount_currency'       => -floatval($data['price_total']),
-                    ''
-                ]);
+    private static function mutateProductRelationship(array $data, $record): array
+    {
+        $product = Product::find($data['product_id']);
 
-                return $data;
-            });
+        $data = array_merge($data, [
+            'name'                  => $product->name,
+            'quantity'              => $data['quantity'],
+            'uom_id'                => $data['uom_id'] ?? $product->uom_id,
+            'currency_id'           => $record->currency_id,
+            'partner_id'            => $record->partner_id,
+            'creator_id'            => Auth::id(),
+            'company_id'            => Auth::user()->default_company_id,
+            'company_currency_id'   => Auth::user()->defaultCompany->currency_id ?? $record->currency_id,
+            'commercial_partner_id' => $record->partner_id,
+            'display_type'          => 'product',
+            'sort'                  => MoveLine::max('sort') + 1,
+            'parent_state'          => $record->state,
+            'debit'                 => 0.00,
+            'credit'                => floatval($data['price_subtotal']),
+            'balance'               => -floatval($data['price_subtotal']),
+            'amount_currency'       => -floatval($data['price_subtotal']),
+        ]);
+
+        return $data;
+    }
+
+    private static function afterProductUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $product = Product::find($get('product_id'));
+
+        $set('uom_id', $product->uom_id);
+
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+
+        $set('price_unit', round($priceUnit, 2));
+
+        $set('taxes', $product->productTaxes->pluck('id')->toArray());
+
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('quantity'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function afterProductQtyUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('quantity'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function afterUOMUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('quantity'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        $product = Product::find($get('product_id'));
+
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+
+        $set('price_unit', round($priceUnit, 2));
+
+        self::calculateLineTotals($set, $get);
+    }
+
+    private static function calculateUnitQuantity($uomId, $quantity)
+    {
+        if (! $uomId) {
+            return $quantity;
+        }
+
+        $uom = Uom::find($uomId);
+
+        return (float) ($quantity ?? 0) / $uom->factor;
+    }
+
+    private static function calculateUnitPrice($uomId, $price)
+    {
+        if (! $uomId) {
+            return $price;
+        }
+
+        $uom = Uom::find($uomId);
+
+        return (float) ($price / $uom->factor);
     }
 
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
@@ -785,11 +864,7 @@ class InvoiceResource extends Resource
             return;
         }
 
-        $product = Product::find($get('product_id'));
-
-        $priceUnit = floatval($product->cost ?? $product->price);
-
-        $set('price_unit', $priceUnit);
+        $priceUnit = floatval($get('price_unit'));
 
         $quantity = floatval($get('quantity') ?? 1);
 
@@ -797,7 +872,15 @@ class InvoiceResource extends Resource
 
         $taxAmount = 0;
 
-        $subTotal = ($priceUnit * $quantity) - (floatval($get('discount')) ?? 0);
+        $subTotal = $priceUnit * $quantity;
+
+        $discountValue = floatval($get('discount') ?? 0);
+
+        if ($discountValue > 0) {
+            $discountAmount = $subTotal * ($discountValue / 100);
+
+            $subTotal = $subTotal - $discountAmount;
+        }
 
         if (! empty($taxIds)) {
             $taxes = Tax::whereIn('id', $taxIds)
