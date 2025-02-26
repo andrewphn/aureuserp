@@ -697,7 +697,7 @@ class InvoiceResource extends Resource
                                         'taxes',
                                         'name',
                                         function (Builder $query) {
-                                            return $query->where('type_tax_use', TypeTaxUse::PURCHASE->value);
+                                            return $query->where('type_tax_use', TypeTaxUse::SALE->value);
                                         },
                                     )
                                     ->searchable()

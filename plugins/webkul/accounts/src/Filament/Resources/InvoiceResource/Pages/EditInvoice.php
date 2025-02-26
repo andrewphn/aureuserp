@@ -176,13 +176,13 @@ class EditInvoice extends EditRecord
                     }
                 }
 
-                $taxesComputed[] = [
-                    'tax_id'              => $tax->id,
-                    'tax_amount'          => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount,
-                ];
+                $existingTaxLine = MoveLine::where([
+                    'move_id' => $record->id,
+                    'display_type' => 'tax',
+                    'name' => $tax->name,
+                ])->first();
 
-                MoveLine::create([
+                $taxLineData = [
                     'name'                  => $tax->name,
                     'move_id'               => $record->id,
                     'move_name'             => $record->name,
@@ -192,16 +192,22 @@ class EditInvoice extends EditRecord
                     'company_id'            => $record->company_id,
                     'company_currency_id'   => $record->company_currency_id,
                     'commercial_partner_id' => $record->partner_id,
-                    'sort'                  => MoveLine::max('sort') + 1,
                     'parent_state'          => $record->state,
                     'date'                  => now(),
                     'creator_id'            => $record->creator_id,
-                    'debit'                 => 0.0,
+                    'debit'                 => $currentTaxAmount,
                     'credit'                => $currentTaxAmount,
                     'balance'               => -$currentTaxAmount,
                     'amount_currency'       => -$currentTaxAmount,
                     'tax_base_amount'       => $currentTaxBase,
-                ]);
+                ];
+
+                if ($existingTaxLine) {
+                    $existingTaxLine->update($taxLineData);
+                } else {
+                    $taxLineData['sort'] = MoveLine::max('sort') + 1;
+                    MoveLine::create($taxLineData);
+                }
             }
         }
     }
