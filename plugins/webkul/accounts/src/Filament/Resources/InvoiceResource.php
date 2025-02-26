@@ -10,6 +10,7 @@ use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,6 +25,8 @@ use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Models\Product;
 use Webkul\Account\Livewire\InvoiceSummary;
+use Webkul\Account\Models\MoveLine;
+use Webkul\Account\Models\Partner;
 use Webkul\Invoice\Settings;
 
 class InvoiceResource extends Resource
@@ -88,14 +91,46 @@ class InvoiceResource extends Resource
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\Select::make('partner_id')
-                                    ->label(__('Customer'))
-                                    ->relationship(
-                                        'partner',
-                                        'name',
-                                    )
-                                    ->searchable()
-                                    ->preload(),
+                                Forms\Components\Group::make()
+                                    ->schema([
+                                        Forms\Components\Select::make('partner_id')
+                                            ->label(__('Customer'))
+                                            ->relationship(
+                                                'partner',
+                                                'name',
+                                            )
+                                            ->searchable()
+                                            ->preload()
+                                            ->live(),
+                                        Forms\Components\Placeholder::make('partner_address')
+                                            ->hiddenLabel()
+                                            ->visible(
+                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                            )
+                                            ->content(function (Get $get) {
+                                                $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
+
+                                                if (
+                                                    ! $partner
+                                                    || $partner->addresses->isEmpty()
+                                                ) {
+                                                    return null;
+                                                }
+
+                                                $address = $partner->addresses->first();
+
+                                                return sprintf(
+                                                    "%s\n%s%s\n%s, %s %s\n%s",
+                                                    $address->name ?? '',
+                                                    $address->street1 ?? '',
+                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->city ?? '',
+                                                    $address->state ? $address->state->name : '',
+                                                    $address->zip ?? '',
+                                                    $address->country ? $address->country->name : ''
+                                                );
+                                            }),
+                                    ]),
                                 Forms\Components\DatePicker::make('invoice_date')
                                     ->label(__('Invoice Date'))
                                     ->default(now())
@@ -445,79 +480,64 @@ class InvoiceResource extends Resource
                         Infolists\Components\Tabs\Tab::make(__('Invoice Lines'))
                             ->icon('heroicon-o-list-bullet')
                             ->schema([
-                                Infolists\Components\Section::make()
+                                Infolists\Components\RepeatableEntry::make('lines')
+                                    ->hiddenLabel()
                                     ->schema([
-                                        Infolists\Components\RepeatableEntry::make('products')
-                                            ->schema([
-                                                Infolists\Components\Grid::make()
-                                                    ->schema([
-                                                        Infolists\Components\TextEntry::make('product.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('Product'))
-                                                            ->icon('heroicon-o-cube'),
-                                                        Infolists\Components\TextEntry::make('description')
-                                                            ->placeholder('-')
-                                                            ->label(__('Description'))
-                                                            ->icon('heroicon-o-document-text')
-                                                            ->columnSpan(2),
-                                                        Infolists\Components\TextEntry::make('quantity')
-                                                            ->placeholder('-')
-                                                            ->label(__('Quantity'))
-                                                            ->icon('heroicon-o-hashtag'),
-                                                        Infolists\Components\TextEntry::make('product_uom.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('Unit of Measure'))
-                                                            ->icon('heroicon-o-scale'),
-                                                        Infolists\Components\TextEntry::make('price_unit')
-                                                            ->placeholder('-')
-                                                            ->label(__('Unit Price'))
-                                                            ->icon('heroicon-o-currency-dollar')
-                                                            ->money('USD'),
-                                                        Infolists\Components\TextEntry::make('discount')
-                                                            ->placeholder('-')
-                                                            ->label(__('Discount'))
-                                                            ->icon('heroicon-o-tag')
-                                                            ->suffix('%'),
-                                                        Infolists\Components\TextEntry::make('tax.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('Tax'))
-                                                            ->icon('heroicon-o-receipt-percent'),
-                                                        Infolists\Components\TextEntry::make('price_subtotal')
-                                                            ->placeholder('-')
-                                                            ->label(__('Subtotal'))
-                                                            ->icon('heroicon-o-calculator')
-                                                            ->money('USD'),
-                                                        Infolists\Components\TextEntry::make('price_total')
-                                                            ->placeholder('-')
-                                                            ->label(__('Total'))
-                                                            ->icon('heroicon-o-banknotes')
-                                                            ->money('USD')
-                                                            ->weight('bold'),
-                                                    ])->columns(3),
-                                            ]),
-                                    ]),
-                                Infolists\Components\Section::make()
-                                    ->schema([
-                                        Infolists\Components\TextEntry::make('amount_untaxed')
+                                        Infolists\Components\TextEntry::make('product.name')
                                             ->placeholder('-')
-                                            ->label(__('Untaxed Amount'))
-                                            ->icon('heroicon-o-calculator')
-                                            ->money('USD'),
-                                        Infolists\Components\TextEntry::make('amount_tax')
+                                            ->label(__('Product'))
+                                            ->icon('heroicon-o-cube'),
+                                        Infolists\Components\TextEntry::make('quantity')
                                             ->placeholder('-')
-                                            ->label(__('Tax'))
+                                            ->label(__('Quantity'))
+                                            ->icon('heroicon-o-hashtag'),
+                                        Infolists\Components\TextEntry::make('product_uom.name')
+                                            ->placeholder('-')
+                                            ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
+                                            ->label(__('Unit of Measure'))
+                                            ->icon('heroicon-o-scale'),
+                                        Infolists\Components\TextEntry::make('price_unit')
+                                            ->placeholder('-')
+                                            ->label(__('Unit Price'))
+                                            ->icon('heroicon-o-currency-dollar')
+                                            ->money(fn($record) => $record->currency->name),
+                                        Infolists\Components\TextEntry::make('discount')
+                                            ->placeholder('-')
+                                            ->label(__('Discount'))
+                                            ->icon('heroicon-o-tag')
+                                            ->suffix('%'),
+                                        Infolists\Components\TextEntry::make('taxes.name')
+                                            ->badge()
+                                            ->state(function ($record): array {
+                                                return $record->taxes->map(fn($tax) => [
+                                                    'name' => $tax->name,
+                                                ])->toArray();
+                                            })
                                             ->icon('heroicon-o-receipt-percent')
-                                            ->money('USD'),
-                                        Infolists\Components\TextEntry::make('amount_total')
+                                            ->formatStateUsing(fn($state) => $state['name'])
+                                            ->placeholder('-')
+                                            ->weight(FontWeight::Bold),
+                                        Infolists\Components\TextEntry::make('price_subtotal')
+                                            ->placeholder('-')
+                                            ->label(__('Subtotal'))
+                                            ->icon('heroicon-o-calculator')
+                                            ->money(fn($record) => $record->currency->name),
+                                        Infolists\Components\TextEntry::make('price_total')
                                             ->placeholder('-')
                                             ->label(__('Total'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->money('USD')
-                                            ->weight('bold')
-                                            ->size(TextEntrySize::Large),
-                                    ])
-                                    ->columns(3)
-                                    ->grow(false),
+                                            ->money(fn($record) => $record->currency->name)
+                                            ->weight('bold'),
+                                    ])->columns(5),
+                                // Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
+                                //     return [
+                                //         'products' => $record->lines->map(function ($item) {
+                                //             return [
+                                //                 ...$item->toArray(),
+                                //             ];
+                                //         })->toArray(),
+                                //     ];
+                                // }),
                             ]),
                         Infolists\Components\Tabs\Tab::make(__('Other Information'))
                             ->icon('heroicon-o-information-circle')
@@ -679,6 +699,9 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
+                                    ->afterStateHydrated(function (Forms\Get $get, Forms\Set $set) {
+                                        self::calculateLineTotals($set, $get);
+                                    })
                                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
                                         self::calculateLineTotals($set, $get);
                                     })
@@ -722,11 +745,16 @@ class InvoiceResource extends Resource
                     'currency_id'           => $record->currency_id,
                     'partner_id'            => $record->partner_id,
                     'creator_id'            => Auth::id(),
-                    'partner_id'            => $record->partner_id,
                     'company_id'            => Auth::user()->default_company_id,
                     'company_currency_id'   => Auth::user()->defaultCompany->currency_id ?? $record->currency_id,
                     'commercial_partner_id' => $record->partner_id,
                     'display_type'          => 'product',
+                    'sort'                  => MoveLine::max('sort') + 1,
+                    'parent_state'          => $record->state,
+                    'debit'                 => 0.00,
+                    'credit'                => floatval($data['price_total']),
+                    'balance'               => -floatval($data['price_total']),
+                    'amount_currency'       => -floatval($data['price_total']),
                 ]);
 
                 return $data;
@@ -761,7 +789,7 @@ class InvoiceResource extends Resource
 
         $taxAmount = 0;
 
-        $subTotal = ($priceUnit * $quantity) - ($get('discount') ?? 0);
+        $subTotal = ($priceUnit * $quantity) - (floatval($get('discount')) ?? 0);
 
         if (! empty($taxIds)) {
             $taxes = Tax::whereIn('id', $taxIds)
@@ -824,5 +852,22 @@ class InvoiceResource extends Resource
         $set('price_tax', $taxAmount);
 
         $set('price_total', $subTotal + $taxAmount);
+    }
+
+    public static function collectTotals(AccountMove $record): void
+    {
+        $record->amount_untaxed = 0;
+        $record->amount_tax = 0;
+        $record->amount_total = 0;
+
+        $lines = $record->lines->where('display_type', 'product');
+
+        foreach ($lines as $line) {
+            $record->amount_untaxed += $line->price_subtotal;
+            $record->amount_tax += $line->price_tax;
+            $record->amount_total += $line->price_total;
+        }
+
+        $record->save();
     }
 }

@@ -64,13 +64,13 @@
                     $grandTotal = 0;
 
                     foreach ($products as $product) {
-                        $subTotal += $product['price_subtotal'];
+                        $subTotal += floatval($product['price_subtotal']);
 
                         $totalTax += $product['price_tax'];
 
-                        $totalDiscount += $product['discount'];
+                        $totalDiscount += floatval($product['discount']);
 
-                        $grandTotal += $product['price_total'];
+                        $grandTotal += floatval($product['price_total']);
                     }
                 @endphp
 
@@ -89,7 +89,7 @@
                 @if ($totalTax > 0)
                     <div class="invoice-item">
                         <span>Tax Amount</span>
-                        <span>{{ number_format($totalTax, 2) }}</span>
+                        <span>{{ number_format($totalTax, 2) }}</span>  
                     </div>
                 @endif
 

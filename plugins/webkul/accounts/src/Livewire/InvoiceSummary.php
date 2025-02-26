@@ -25,7 +25,7 @@ class InvoiceSummary extends Component
 
     public function render()
     {
-        return view('accounts::livewire/invoice_summary', [
+        return view('accounts::livewire/invoice-summary', [
             'products' => $this->products,
         ]);
     }

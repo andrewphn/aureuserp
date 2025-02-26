@@ -6,13 +6,10 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums;
-use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Filament\Resources\InvoiceResource;
-use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
-use Webkul\Account\Models\PaymentTerm;
-use Webkul\Partner\Models\Partner;
-use Webkul\Support\Models\Currency;
+use Webkul\Account\Models\MoveLine;
+use Webkul\Account\Models\Partner;
 
 class CreateInvoice extends CreateRecord
 {
@@ -50,5 +47,42 @@ class CreateInvoice extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        $record = $this->getRecord();
+
+        $this->getResource()::collectTotals($record);
+
+        $this->createPaymentTerm($record);
+    }
+
+    protected function createPaymentTerm($record): void
+    {
+        if ($record->invoicePaymentTerm && $record->invoicePaymentTerm?->dueTerm?->nb_days) {
+            $dateMaturity = $record->invoice_date_due->addDays($record->invoicePaymentTerm->dueTerm->nb_days);
+        } else {
+            $dateMaturity = $record->invoice_date_due;
+        }
+
+        MoveLine::create([
+            'move_id'               => $record->id,
+            'move_name'             => $record->name,
+            'display_type'          => 'payment_term',
+            'currency_id'           => $record->currency_id,
+            'partner_id'            => $record->partner_id,
+            'date_maturity'         => $dateMaturity,
+            'company_id'            => $record->company_id,
+            'company_currency_id'   => $record->company_currency_id,
+            'commercial_partner_id' => $record->partner_id,
+            'sort'                  => MoveLine::max('sort') + 1,
+            'parent_state'          => $record->state,
+            'date'                  => now(),
+            'creator_id'            => $record->creator_id,
+            'debit'                 => $record->amount_total,
+            'balance'               => $record->amount_total,
+            'amount_currency'       => $record->amount_total,
+        ]);
     }
 }
