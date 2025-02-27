@@ -85,6 +85,10 @@ class Move extends Model
         'medium_id',
     ];
 
+    protected $casts = [
+        'invoice_date_due' => 'datetime',
+    ];
+
     public function campaign()
     {
         return $this->belongsTo(UtmCampaign::class);

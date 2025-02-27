@@ -23,9 +23,15 @@ class ResetToDraftAction extends Action
             ->color('gray')
             ->action(function (Move $record, Component $livewire): void {
                 $record->state = MoveState::DRAFT->value;
+
+                $record->lines->each(function ($moveLine) {
+                    $moveLine->parent_state = MoveState::DRAFT->value;
+                    $moveLine->save();
+                });
+
                 $record->save();
 
-                $livewire->refreshFormData(['state']);
+                $livewire->refreshFormData(['state', 'parent_state']);
             })
             ->visible(function (Move $record) {
                 return

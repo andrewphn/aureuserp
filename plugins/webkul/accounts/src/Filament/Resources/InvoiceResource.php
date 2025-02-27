@@ -690,7 +690,8 @@ class InvoiceResource extends Resource
                                     ->default(1)
                                     ->numeric()
                                     ->live()
-                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->dehydrated()
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
                                     ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit'))
@@ -702,6 +703,7 @@ class InvoiceResource extends Resource
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
+                                    ->dehydrated()
                                     ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
                                     ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
                                     ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
@@ -717,6 +719,7 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
+                                    ->dehydrated()
                                     ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
                                     ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
                                     ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
@@ -726,7 +729,8 @@ class InvoiceResource extends Resource
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->dehydrated()
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
                                     ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('Unit Price'))
@@ -734,13 +738,14 @@ class InvoiceResource extends Resource
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->dehydrated()
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
                                     ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('Sub Total'))
                                     ->default(0)
-                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->readOnly(),
+                                    ->dehydrated()
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -760,6 +765,14 @@ class InvoiceResource extends Resource
 
     private static function mutateProductRelationship(array $data, $record, $livewire): array
     {
+        $data['product_id'] ??= $record->product_id;
+        $data['quantity'] ??= $record->quantity;
+        $data['uom_id'] ??= $record->uom_id;
+        $data['price_subtotal'] ??= $record->price_subtotal;
+        $data['discount'] ??= $record->discount;
+        $data['discount_date'] ??= $record->discount_date;
+
+
         $product = Product::find($data['product_id']);
 
         $user = Auth::user();
