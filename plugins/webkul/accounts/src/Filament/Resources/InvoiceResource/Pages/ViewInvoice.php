@@ -7,6 +7,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class ViewInvoice extends ViewRecord
 {
@@ -15,6 +16,8 @@ class ViewInvoice extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            ChatterActions\ChatterAction::make()
+                ->setResource($this->getResource()),
             Actions\EditAction::make(),
             BaseActions\PayAction::make(),
             BaseActions\ConfirmAction::make(),

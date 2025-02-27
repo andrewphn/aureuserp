@@ -12,10 +12,13 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Field\Traits\HasCustomFields;
 
 class Move extends Model
 {
-    use HasFactory;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
 
     protected $table = 'accounts_account_moves';
 
@@ -83,6 +86,52 @@ class Move extends Model
         'is_move_sent',
         'source_id',
         'medium_id',
+    ];
+
+    protected array $logAttributes = [
+        'medium.name' => 'Medium',
+        'source.name' => 'UTM Source',
+        'partner.name' => 'Customer',
+        'commercialPartner.name' => 'Commercial Partner',
+        'partnerShipping.name' => 'Shipping Address',
+        'partnerBank.name' => 'Bank Account',
+        'fiscalPosition.name' => 'Fiscal Position',
+        'currency.name' => 'Currency',
+        'reversedEntry.name' => 'Reversed Entry',
+        'invoiceUser.name' => 'Invoice User',
+        'invoiceIncoterm.name' => 'Invoice Incoterm',
+        'invoiceCashRounding.name' => 'Invoice Cash Rounding',
+        'createdBy.name' => 'Created By',
+        'name' => 'Invoice Reference',
+        'state' => 'Invoice Status',
+        'reference' => 'Reference',
+        'invoiceSourceEmail' => 'Source Email',
+        'invoicePartnerDisplayName' => 'Partner Display Name',
+        'invoiceOrigin' => 'Invoice Origin',
+        'incotermLocation' => 'Incoterm Location',
+        'date' => 'Invoice Date',
+        'invoice_date' => 'Invoice Date',
+        'invoice_date_due' => 'Due Date',
+        'delivery_date' => 'Delivery Date',
+        'narration' => 'Notes',
+        'amount_untaxed' => 'Subtotal',
+        'amount_tax' => 'Tax',
+        'amount_total' => 'Total',
+        'amount_residual' => 'Residual',
+        'amount_untaxed_signed' => 'Subtotal (Signed)',
+        'amount_untaxed_in_currency_signed' => 'Subtotal (In Currency) (Signed)',
+        'amount_tax_signed' => 'Tax (Signed)',
+        'amount_total_signed' => 'Total (Signed)',
+        'amount_total_in_currency_signed' => 'Total (In Currency) (Signed)',
+        'amount_residual_signed' => 'Residual (Signed)',
+        'quick_edit_total_amount' => 'Quick Edit Total Amount',
+        'is_storno' => 'Is Storno',
+        'always_tax_exigible' => 'Always Tax Exigible',
+        'checked' => 'Checked',
+        'posted_before' => 'Posted Before',
+        'made_sequence_gap' => 'Made Sequence Gap',
+        'is_manually_modified' => 'Is Manually Modified',
+        'is_move_sent' => 'Is Move Sent',
     ];
 
     protected $casts = [

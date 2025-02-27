@@ -12,6 +12,7 @@ use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Partner\Models\Partner;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class EditInvoice extends EditRecord
 {
@@ -33,6 +34,8 @@ class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ChatterActions\ChatterAction::make()
+                ->setResource($this->getResource()),
             Actions\ViewAction::make(),
             Actions\DeleteAction::make(),
             BaseActions\PayAction::make(),

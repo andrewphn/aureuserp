@@ -28,9 +28,7 @@ use Webkul\Invoice\Models\Product;
 use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
-use Webkul\Inventory\Models\Move;
 use Webkul\Invoice\Settings;
-use Webkul\Product\Models\Packaging;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 

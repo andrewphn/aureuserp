@@ -13,10 +13,10 @@
         body {
             font-size: 12px;
             color: #091341;
-            font-family: "'DejaVu Sans'";
+            font-family: 'DejaVu Sans';
         }
         b, th {
-            font-family: "'DejaVu Sans'";
+            font-family: 'DejaVu Sans';
         }
         .page-content {
             padding: 12px;
