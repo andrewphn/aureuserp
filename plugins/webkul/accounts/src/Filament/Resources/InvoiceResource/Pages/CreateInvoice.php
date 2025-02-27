@@ -92,6 +92,7 @@ class CreateInvoice extends CreateRecord
     private function createTaxLine($record): void
     {
         $lines = $record->lines->where('display_type', DisplayType::PRODUCT->value);
+        $newTaxEntries = [];
 
         foreach ($lines as $line) {
             if ($line->taxes->isEmpty()) {
@@ -99,20 +100,14 @@ class CreateInvoice extends CreateRecord
             }
 
             $taxes = $line->taxes()->orderBy('sort')->get();
-
             $baseAmount = $line->price_subtotal;
-
             $priceUnit = $line->price_unit;
-
             $quantity = $line->quantity;
-
             $taxesComputed = [];
 
             foreach ($taxes as $tax) {
                 $amount = floatval($tax->amount);
-
                 $currentTaxBase = $baseAmount;
-
                 $tax->price_include_override ??= 'tax_excluded';
 
                 if ($tax->is_base_affected) {
@@ -127,51 +122,55 @@ class CreateInvoice extends CreateRecord
 
                 if ($tax->price_include_override == 'tax_included') {
                     $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-
                     $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
 
                     if (empty($taxesComputed)) {
-                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
-
-                        $subTotal = $priceUnit * $quantity;
-
-                        $baseAmount = $subTotal;
+                        $priceUnit -= ($currentTaxAmount / $quantity);
+                        $baseAmount = $priceUnit * $quantity;
                     }
                 } elseif ($tax->price_include_override == 'tax_excluded') {
-                    if ($tax->amount_type == 'percent') {
-                        $currentTaxAmount = $currentTaxBase * $amount / 100;
-                    } else {
-                        $currentTaxAmount = $amount * $quantity;
-                    }
+                    $currentTaxAmount = ($tax->amount_type == 'percent') ? ($currentTaxBase * $amount / 100) : ($amount * $quantity);
+                }
+
+                if (isset($newTaxEntries[$tax->id])) {
+                    $newTaxEntries[$tax->id]['credit'] += $currentTaxAmount;
+                    $newTaxEntries[$tax->id]['balance'] -= $currentTaxAmount;
+                    $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
+                } else {
+                    $newTaxEntries[$tax->id] = [
+                        'name' => $tax->name,
+                        'move_id' => $record->id,
+                        'move_name' => $record->name,
+                        'display_type' => 'tax',
+                        'currency_id' => $record->currency_id,
+                        'partner_id' => $record->partner_id,
+                        'company_id' => $record->company_id,
+                        'company_currency_id' => $record->company_currency_id,
+                        'commercial_partner_id' => $record->partner_id,
+                        'sort' => MoveLine::max('sort') + 1,
+                        'parent_state' => $record->state,
+                        'date' => now(),
+                        'creator_id' => $record->creator_id,
+                        'debit' => 0.0,
+                        'credit' => $currentTaxAmount,
+                        'balance' => -$currentTaxAmount,
+                        'amount_currency' => -$currentTaxAmount,
+                        'tax_base_amount' => $currentTaxBase,
+                        'tax_line_id' => $tax->id,
+                        'tax_group_id' => $tax->tax_group_id,
+                    ];
                 }
 
                 $taxesComputed[] = [
-                    'tax_id'              => $tax->id,
-                    'tax_amount'          => $currentTaxAmount,
+                    'tax_id' => $tax->id,
+                    'tax_amount' => $currentTaxAmount,
                     'include_base_amount' => $tax->include_base_amount,
                 ];
-
-                MoveLine::create([
-                    'name'                  => $tax->name,
-                    'move_id'               => $record->id,
-                    'move_name'             => $record->name,
-                    'display_type'          => 'tax',
-                    'currency_id'           => $record->currency_id,
-                    'partner_id'            => $record->partner_id,
-                    'company_id'            => $record->company_id,
-                    'company_currency_id'   => $record->company_currency_id,
-                    'commercial_partner_id' => $record->partner_id,
-                    'sort'                  => MoveLine::max('sort') + 1,
-                    'parent_state'          => $record->state,
-                    'date'                  => now(),
-                    'creator_id'            => $record->creator_id,
-                    'debit'                 => 0.0,
-                    'credit'                => $currentTaxAmount,
-                    'balance'               => -$currentTaxAmount,
-                    'amount_currency'       => -$currentTaxAmount,
-                    'tax_base_amount'       => $currentTaxBase,
-                ]);
             }
+        }
+
+        foreach ($newTaxEntries as $taxData) {
+            MoveLine::create($taxData);
         }
     }
 }
