@@ -11,6 +11,7 @@ use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Models\Move;
+use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\MoveReversal;
 use Webkul\Support\Traits\PDFHandler;
 
@@ -104,20 +105,71 @@ class CreditNoteAction extends Action
 
         $creditNote->newMoves()->attach($newMove->id);
 
-        $this->createMoveLines($newMove, $record);
+        $this->createProductsLines($newMove, $record);
+
+        $this->createPaymentTermLine($newMove, $record);
+
+        $this->createTaxLines($newMove, $record);
     }
 
-    private function createMoveLines(Move $newMove, Move $record): void
+    private function createProductsLines(Move $newMove, Move $record): void
     {
-        $record->allLines->each(function ($line) use ($newMove) {
+        $record->lines->each(function (MoveLine $line) use ($newMove, $record) {
             $newMoveLine = $line->replicate();
 
+            $newMoveLine->parent_state = $record->state;
+            $newMoveLine->reference = $record->reference;
+            $newMoveLine->move_name = null;
             $newMoveLine->move_id = $newMove->id;
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
-            $newMoveLine->debit = -$line->debit;
-            $newMoveLine->credit = -$line->credit;
-            $newMoveLine->balance = -$line->balance;
-            $newMoveLine->amount_currency = -$line->amount_currency;
+            $newMoveLine->debit = $line->credit;
+            $newMoveLine->credit = 0.00;
+            $newMoveLine->balance = - ($line->balance);
+            $newMoveLine->amount_currency = - ($line->amount_currency);
+
+            $newMoveLine->save();
+        });
+    }
+
+    private function createPaymentTermLine(Move $newMove, Move $record)
+    {
+        MoveLine::create([
+            'move_id' => $newMove->id,
+            'move_name' => $newMove->name,
+            'display_type' => 'payment_term',
+            'currency_id' => $newMove->currency_id,
+            'partner_id' => $newMove->partner_id,
+            'date_maturity' => $newMove->invoice_date_due,
+            'company_id' => $newMove->company_id,
+            'company_currency_id' => $newMove->company_currency_id,
+            'commercial_partner_id' => $newMove->partner_id,
+            'sort' => $newMove->lines->max('sort') + 1,
+            'parent_state' => $newMove->state,
+            'date' => now(),
+            'creator_id' => $newMove->creator_id,
+            'debit' => 0.00,
+            'credit' => $newMove->amount_total,
+            'balance' => -$newMove->amount_total,
+            'amount_currency' => -$newMove->amount_total,
+            'amount_residual' => -$newMove->amount_total,
+            'amount_residual_currency' => -$newMove->amount_total,
+        ]);
+    }
+
+    private function createTaxLines(Move $newMove, Move $record)
+    {
+        $record->taxLines->each(function (MoveLine $line) use ($newMove) {
+            $newMoveLine = $line->replicate();
+
+            $newMoveLine->parent_state = $newMove->state;
+            $newMoveLine->reference = $newMove->reference;
+            $newMoveLine->move_name = null;
+            $newMoveLine->move_id = $newMove->id;
+            $newMoveLine->sort = $newMove->lines->max('sort') + 1;
+            $newMoveLine->debit = $line->credit;
+            $newMoveLine->credit = 0.00;
+            $newMoveLine->balance = - ($line->balance);
+            $newMoveLine->amount_currency = - ($line->amount_currency);
 
             $newMoveLine->save();
         });

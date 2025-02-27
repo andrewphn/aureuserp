@@ -257,6 +257,18 @@ class Move extends Model
         return $this->hasMany(MoveLine::class);
     }
 
+    public function taxLines()
+    {
+        return $this->hasMany(MoveLine::class)
+            ->where('display_type', 'tax');
+    }
+
+    public function paymentTermLine()
+    {
+        return $this->hasOne(MoveLine::class)
+            ->where('display_type', 'payment_term');
+    }
+
     public static function generateNextInvoiceNumber(): string
     {
         $year = date('Y');

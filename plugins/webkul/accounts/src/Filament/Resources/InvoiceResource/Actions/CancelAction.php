@@ -26,7 +26,7 @@ class CancelAction extends Action
                 $record->state = MoveState::CANCEL->value;
                 $record->save();
 
-                $record->lines->each(function ($moveLine) {
+                $record->allLines->each(function ($moveLine) {
                     $moveLine->parent_state = MoveState::POSTED->value;
                     $moveLine->save();
                 });
