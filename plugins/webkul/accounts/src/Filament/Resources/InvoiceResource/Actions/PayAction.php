@@ -34,7 +34,7 @@ class PayAction extends Action
 
         $this
             ->label(__('accounts::filament/resources/invoice/actions/pay-action.title'))
-            ->color('primary')
+            ->color('success')
             ->form(function (Form $form) {
                 return $form->schema([
                     Forms\Components\Group::make()

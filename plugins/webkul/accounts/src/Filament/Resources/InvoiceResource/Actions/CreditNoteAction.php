@@ -44,6 +44,7 @@ class CreditNoteAction extends Action
                     Forms\Components\DatePicker::make('date')
                         ->label(__('Reason displayed on Credit Note'))
                         ->default(now())
+                        ->native(false)
                         ->required(),
                 ]);
             }
