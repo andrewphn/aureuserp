@@ -1,332 +1,283 @@
-<style>
-    .invoice-container {
-        background-color: white;
-        width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0 auto;
-        font-family: Inter, Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .invoice-header {
-        background-color: #f2f2f2;
-        padding: 30px;
-        position: relative;
-    }
-
-    .invoice-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .logo {
-        font-size: 24px;
-        font-weight: 700;
-    }
-
-    .invoice-number {
-        font-size: 18px;
-        font-weight: 600;
-        background-color: #e6e6e6;
-        padding: 8px 15px;
-        border-radius: 30px;
-    }
-
-    .invoice-dates {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-    }
-
-    .date-item {
-        flex: 1;
-        margin-right: 20px;
-    }
-
-    .date-item:last-child {
-        margin-right: 0;
-    }
-
-    .date-label {
-        font-size: 12px;
-        margin-bottom: 5px;
-        opacity: 0.7;
-    }
-
-    .date-value {
-        font-size: 16px;
-        font-weight: 600;
-    }
-
-    .invoice-body {
-        padding: 30px;
-    }
-
-    .address-container {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 40px;
-    }
-
-    .address-block {
-        flex: 1;
-        max-width: 45%;
-    }
-
-    .address-title {
-        font-size: 14px;
-        text-transform: uppercase;
-        font-weight: 600;
-        margin-bottom: 10px;
-        letter-spacing: 1px;
-    }
-
-    .address-content {
-        font-size: 15px;
-        line-height: 1.5;
-    }
-
-    .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 30px;
-    }
-
-    .invoice-table th {
-        background-color: #f2f2f2;
-        padding: 12px 15px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #d9d9d9;
-    }
-
-    .invoice-table td {
-        padding: 15px;
-        border-bottom: 1px solid #d9d9d9;
-        font-size: 15px;
-    }
-
-    .invoice-table .amount {
-        font-weight: 600;
-    }
-
-    .total-section {
-        width: 50%;
-        margin-left: auto;
-    }
-
-    .total-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #d9d9d9;
-    }
-
-    .total-row.final {
-        border-bottom: none;
-        font-weight: 700;
-        font-size: 18px;
-        padding-top: 20px;
-    }
-
-    .payment-info {
-        margin-top: 40px;
-        padding: 20px;
-        background-color: #f2f2f2;
-        border-radius: 8px;
-        font-size: 15px;
-    }
-
-    .payment-title {
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-
-    .incoterm {
-        display: inline-block;
-        background-color: #e6e6e6;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: 600;
-        margin-top: 10px;
-    }
-
-    @media print {
-        .invoice-container {
-            box-shadow: none;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" dir="ltr">
+<head>
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'DejaVu Sans';
+        }
+        body {
+            font-size: 12px;
+            color: #091341;
+            font-family: "'DejaVu Sans'";
+        }
+        b, th {
+            font-family: "'DejaVu Sans'";
+        }
+        .page-content {
+            padding: 12px;
+        }
+        .page-header {
+            border-bottom: 1px solid #E9EFFC;
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            color: #000DBB;
+            padding: 24px 0;
+            margin: 0;
+        }
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        .logo-container.rtl {
+            left: auto;
+            right: 20px;
+        }
+        .logo-container img {
             max-width: 100%;
+            height: auto;
         }
-    }
-
-    @media (max-width: 768px) {
-        .address-container {
-            flex-direction: column;
+        .page-header b {
+            display: inline-block;
+            vertical-align: middle;
         }
-
-        .address-block {
-            max-width: 100%;
-            margin-bottom: 20px;
+        .small-text {
+            font-size: 7px;
         }
-
-        .total-section {
+        table {
             width: 100%;
+            border-spacing: 1px 0;
+            border-collapse: separate;
+            margin-bottom: 16px;
+        }
+        table thead th {
+            background-color: #E9EFFC;
+            color: #000DBB;
+            padding: 6px 18px;
+            text-align: left;
+        }
+        table.rtl thead tr th {
+            text-align: right;
+        }
+        table tbody td {
+            padding: 9px 18px;
+            border-bottom: 1px solid #E9EFFC;
+            text-align: left;
+            vertical-align: top;
+        }
+        table.rtl tbody tr td {
+            text-align: right;
+        }
+        .summary {
+            width: 100%;
+            display: inline-block;
+        }
+        .summary table {
+            float: right;
+            width: 250px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            background-color: #E9EFFC;
+            white-space: nowrap;
+        }
+        .summary table.rtl {
+            width: 280px;
+        }
+        .summary table.rtl {
+            margin-right: 480px;
+        }
+        .summary table td {
+            padding: 5px 10px;
+        }
+        .summary table td:nth-child(2) {
+            text-align: center;
+        }
+        .summary table td:nth-child(3) {
+            text-align: right;
         }
 
-        .invoice-dates {
-            flex-direction: column;
+        .payment-info {
+            clear: both;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #E9EFFC;
+            border-radius: 8px;
+            font-size: 10px;
+            color: #091341;
         }
 
-        .date-item {
-            margin-bottom: 15px;
+        .payment-info-title {
+            font-weight: 600;
+            margin-bottom: 10px;
         }
-    }
-</style>
 
-<div class="invoice-container">
-    <div class="invoice-header">
-        <div class="invoice-title">
-            <div class="logo">{{ $record->company->name }}</div>
-            <div class="invoice-number">{{ $record->name }}</div>
+        .payment-info-details {
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body dir="ltr">
+    <div class="page">
+        <!-- Header -->
+        <div class="page-header">
+            <b>Invoice</b>
         </div>
-
-        <div class="invoice-dates">
-            @if ($record->invoice_date)
-                <div class="date-item">
-                    <div class="date-label">INVOICE DATE</div>
-                    <div class="date-value">{{ $record->invoice_date }}</div>
-                </div>
-            @endif
-
-            @if ($record->invoice_date_due)
-                <div class="date-item">
-                    <div class="date-label">DUE DATE</div>
-                    <div class="date-value">{{ $record->invoice_date_due }}</div>
-                </div>
-            @endif
-
-            @if ($record->invoiceIncoterm)
-                <div class="date-item">
-                    <div class="date-label">INCOTERM</div>
-                    <div class="date-value">{{ $record->invoiceIncoterm?->name }}</div>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <div class="invoice-body">
-        <div class="address-container">
-            <div class="address-block">
-                <div class="address-title">From</div>
-                <div class="address-content">
-                    <strong>{{ $record->company->name }}</strong><br>
-                    {{ sprintf(
-                        "%s\n%s%s\n%s, %s %s\n%s",
-                        $record->company->address->name ?? '',
-                        $record->company->address->street1 ?? '',
-                        $record->company->address->street2 ? ', ' . $record->company->address->street2 : '',
-                        $record->company->address->city ?? '',
-                        $record->company->address->state ? $record->company->address->state->name : '',
-                        $record->company->address->zip ?? '',
-                        $record->company->address->country ? $record->company->address->country->name : ''
-                    ) }}
-                </div>
-            </div>
-
-            <div class="address-block">
-                <div class="address-title">To</div>
-                <div class="address-content">
-                    <strong>{{ $record->partner?->name }}</strong><br>
-
-                    @if ($record->partner?->email)
-                        {{ $record->partner?->email }}<br>
-                    @endif
-
-                    @if ($record->partner?->phone)
-                        {{ $record->partner?->phone }}<br>
-                    @endif
-
-                    @php
-                        $address = $record->partner->addresses->where('type', 'present')->first();
-
-                        $address = sprintf(
-                            "%s\n%s%s\n%s, %s %s\n%s",
-                            $address->name ?? '',
-                            $address->street1 ?? '',
-                            $address->street2 ? ', ' . $address->street2 : '',
-                            $address->city ?? '',
-                            $address->state ? $address->state->name : '',
-                            $address->zip ?? '',
-                            $address->country ? $address->country->name : ''
-                        );
-                    @endphp
-
-                    @if ($address)
-                        {{ $address }}
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <table class="invoice-table">
-            <thead>
-                <tr>
-                    <th width="40%">Description</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Discount</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($record->lines as $line)
+        <div class="page-content">
+            <!-- Invoice Information -->
+            <table class="ltr">
+                <tbody>
                     <tr>
-                        <td>{{ $line?->name ?? '-' }}</td>
-                        <td>{{ $line?->quantity ?? '-' }}</td>
-                        <td>{{ $record->currency->symbol }}{{ number_format($line->price_unit, 2) }}</td>
-                        <td>{{ $record->currency->symbol }}{{ number_format($line->discount, 2) }}</td>
-                        <td class="amount">{{ $record->currency->symbol }}{{ number_format($line->price_total, 2) }}</td>
+                        <td style="width: 50%; padding: 2px 18px;border:none;">
+                            <b>Invoice ID:</b>
+                            <span>{{ $record->name }}</span>
+                        </td>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    <tr>
+                        <td style="width: 50%; padding: 2px 18px;border:none;">
+                            <b>Invoice Date:</b>
+                            <span>{{ $record->invoice_date }}</span>
+                        </td>
+                        <td style="width: 50%; padding: 2px 18px;border:none;">
+                            <b>Due Date:</b>
+                            <span>{{ $record->invoice_date_due }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Billing & Shipping Address -->
+            <table class="ltr">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">
+                            <b>Bill From</b>
+                        </th>
+                        <th style="width: 50%">
+                            <b>Ship to</b>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="width: 50%">
+                            <div>
+                                <strong>{{ $record->company->name }}</strong><br>
+                                {{ sprintf(
+                                    "%s\n%s%s\n%s, %s %s\n%s",
+                                    $record->company->address->name ?? '',
+                                    $record->company->address->street1 ?? '',
+                                    $record->company->address->street2 ? ', ' . $record->company->address->street2 : '',
+                                    $record->company->address->city ?? '',
+                                    $record->company->address->state ? $record->company->address->state->name : '',
+                                    $record->company->address->zip ?? '',
+                                    $record->company->address->country ? $record->company->address->country->name : ''
+                                ) }}
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div>
+                                <strong>{{ $record->partner?->name }}</strong><br>
+                                @if ($record->partner?->email)
+                                    {{ $record->partner?->email }}<br>
+                                @endif
+                                @if ($record->partner?->phone)
+                                    {{ $record->partner?->phone }}<br>
+                                @endif
+                                @php
+                                    $address = $record->partner->addresses->where('type', 'present')->first();
+                                    $address = sprintf(
+                                        "%s\n%s%s\n%s, %s %s\n%s",
+                                        $address->name ?? '',
+                                        $address->street1 ?? '',
+                                        $address->street2 ? ', ' . $address->street2 : '',
+                                        $address->city ?? '',
+                                        $address->state ? $address->state->name : '',
+                                        $address->zip ?? '',
+                                        $address->country ? $address->country->name : ''
+                                    );
+                                @endphp
+                                @if ($address)
+                                    {{ $address }}
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <div class="total-section">
-            <div class="total-row">
-                <div>Untaxed Amount</div>
-                <div>{{ $record->currency->symbol }} {{ number_format($record->amount_untaxed, 2) }}</div>
+            <!-- Items -->
+            <div class="items">
+                <table class="ltr">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($record->lines as $line)
+                            <tr>
+                                <td>{{ $line?->name ?? '-' }}</td>
+                                <td>{{ $line?->name ?? '-' }}</td>
+                                <td>{{ $record->currency->symbol }}{{ number_format($line->price_unit, 2) }}</td>
+                                <td>{{ $line?->quantity ?? '-' }}</td>
+                                <td>{{ $record->currency->symbol }}{{ number_format($line->price_total, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary">
+                <table class="ltr">
+                    <tbody>
+                        <tr>
+                            <td>Subtotal</td>
+                            <td>-</td>
+                            <td>{{ $record->currency->symbol }} {{ number_format($record->amount_untaxed, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Discount</td>
+                            <td>-</td>
+                            <td>-{{ $record->currency->symbol }} {{ number_format($record->total_discount, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 1px solid #FFFFFF;">
+                                <b>Grand Total</b>
+                            </td>
+                            <td style="border-top: 1px solid #FFFFFF;">-</td>
+                            <td style="border-top: 1px solid #FFFFFF;">
+                                <b>{{ $record->currency->symbol }} {{ number_format($record->amount_total, 2) }}</b>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            @if ($record->total_discount > 0)
-                <div class="total-row final">
-                    <div>Discount</div>
-                    <div>-{{ $record->currency->symbol }} {{ number_format($record->total_discount, 2) }}</div>
+            <!-- Payment Information Section -->
+            @if ($record->name)
+                <div class="payment-info">
+                    <div class="payment-info-title">Payment Information</div>
+                    <div>
+                        Payment Communication: {{ $record->name }}
+                        @if ($record?->partnerBank?->bank?->name || $record?->partnerBank?->account_number)
+                            <br>
+                            <span class="payment-info-details">on this account details:</span>
+                            {{ $record?->partnerBank?->bank?->name ?? 'N/A' }}
+                            ({{ $record?->partnerBank?->account_number ?? 'N/A' }})
+                        @endif
+                    </div>
                 </div>
             @endif
-
-            <div class="total-row final">
-                <div>TOTAL DUE</div>
-                <div>{{ $record->currency->symbol }} {{ number_format($record->amount_total, 2) }}</div>
-            </div>
         </div>
-
-       @if ($record->name)
-            <div class="payment-info">
-                <div class="payment-title">Payment Information</div>
-                <div>
-                    Payment Communication: {{ $record->name }}
-                    @if ($record?->partnerBank?->bank?->name || $record?->partnerBank?->account_number)
-                        on this account:
-                        {{ $record?->partnerBank?->bank?->name ?? 'N/A' }}
-                        ({{ $record?->partnerBank?->account_number ?? 'N/A' }})
-                    @endif
-                </div>
-            </div>
-        @endif
     </div>
-</div>
+</body>
+</html>

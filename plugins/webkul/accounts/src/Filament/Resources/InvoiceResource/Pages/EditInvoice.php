@@ -41,6 +41,7 @@ class EditInvoice extends EditRecord
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
             BaseActions\PreviewAction::make(),
+            BaseActions\PrintAndSendAction::make(),
         ];
     }
 

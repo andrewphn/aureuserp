@@ -22,6 +22,7 @@ class ViewInvoice extends ViewRecord
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
             BaseActions\PreviewAction::make(),
+            BaseActions\PrintAndSendAction::make(),
             Actions\DeleteAction::make()
                 ->successNotification(
                     Notification::make()

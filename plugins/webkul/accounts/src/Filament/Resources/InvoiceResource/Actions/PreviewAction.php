@@ -24,8 +24,6 @@ class PreviewAction extends Action
             ->color('gray')
             ->visible(fn(Move $record) => $record->state == MoveState::POSTED->value)
             ->modalHeading(__('Preview Invoice'))
-            ->modalWidth(MaxWidth::SevenExtraLarge)
-            ->modalIcon('heroicon-s-document-text')
             ->modalContent(function ($record) {
                 return view('accounts::invoice/actions/preview.index', ['record' => $record]);
             });
