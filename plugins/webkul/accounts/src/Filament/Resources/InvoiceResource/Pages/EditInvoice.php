@@ -49,7 +49,10 @@ class EditInvoice extends EditRecord
 
         $record = $this->getRecord();
 
-        $data['partner_id'] = $data['partner_id'] ??= $record->partner_id;
+        $data['partner_id'] ??= $record->partner_id;
+        $data['invoice_date'] ??= $record->invoice_date;
+        $data['name'] ??= $record->name;
+        $data['auto_post'] ??= $record->auto_post;
 
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);

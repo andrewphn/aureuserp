@@ -5,6 +5,7 @@ namespace Webkul\Account\Filament\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
@@ -30,6 +31,7 @@ use Webkul\Account\Models\Partner;
 use Webkul\Inventory\Models\Move;
 use Webkul\Invoice\Settings;
 use Webkul\Product\Models\Packaging;
+use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
 class InvoiceResource extends Resource
@@ -165,6 +167,7 @@ class InvoiceResource extends Resource
                                 static::getProductRepeater(),
                                 Forms\Components\Livewire::make(InvoiceSummary::class, function (Forms\Get $get) {
                                     return [
+                                        'currency' => Currency::find($get('currency_id')),
                                         'products' => $get('products'),
                                     ];
                                 })
@@ -235,6 +238,8 @@ class InvoiceResource extends Resource
                                             ->required()
                                             ->searchable()
                                             ->preload()
+                                            ->live()
+                                            ->reactive()
                                             ->default(Auth::user()->defaultCompany?->currency_id),
                                     ]),
                                 Forms\Components\Fieldset::make('Marketing')
@@ -542,9 +547,20 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('Total'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->money(fn($record) => $record->currency->name)
+                                            ->money(fn($record) => $record->currency->symbol)
                                             ->weight('bold'),
                                     ])->columns(5),
+                                Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
+                                    return [
+                                        'currency' => $record->currency,
+                                        'products' => $record->lines->map(function ($item) {
+                                            return [
+                                                ...$item->toArray(),
+                                                'taxes' => $item->taxes->pluck('id')->toArray() ?? [],
+                                            ];
+                                        })->toArray(),
+                                    ];
+                                })
                             ]),
                         Infolists\Components\Tabs\Tab::make(__('Other Information'))
                             ->icon('heroicon-o-information-circle')
@@ -664,9 +680,9 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterProductUpdated($set, $get);
-                                    })
+                                    ->dehydrated()
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
                                     ->label(__('Quantity'))
@@ -674,9 +690,8 @@ class InvoiceResource extends Resource
                                     ->default(1)
                                     ->numeric()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterProductQtyUpdated($set, $get);
-                                    }),
+                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit'))
                                     ->relationship(
@@ -687,9 +702,8 @@ class InvoiceResource extends Resource
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterUOMUpdated($set, $get);
-                                    })
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
                                     ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
@@ -703,33 +717,29 @@ class InvoiceResource extends Resource
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
-                                    ->afterStateHydrated(function (Forms\Get $get, Forms\Set $set) {
-                                        self::calculateLineTotals($set, $get);
-                                    })
-                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
-                                        self::calculateLineTotals($set, $get);
-                                    })
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('Discount Percentage'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('Unit Price'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('Sub Total'))
                                     ->default(0)
+                                    ->readOnly(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
                                     ->readOnly(),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
@@ -741,32 +751,43 @@ class InvoiceResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record) => static::mutateProductRelationship($data, $record))
-            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record) => static::mutateProductRelationship($data, $record));
+            ->addable(function ($record) {
+                return $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]);
+            })
+            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
-    private static function mutateProductRelationship(array $data, $record): array
+    private static function mutateProductRelationship(array $data, $record, $livewire): array
     {
         $product = Product::find($data['product_id']);
+
+        $user = Auth::user();
 
         $data = array_merge($data, [
             'name'                  => $product->name,
             'quantity'              => $data['quantity'],
             'uom_id'                => $data['uom_id'] ?? $product->uom_id,
-            'currency_id'           => $record->currency_id,
+            'currency_id'           => ($livewire->data['currency_id'] ?? $record->currency_id) ?? $user->defaultCompany->currency_id,
             'partner_id'            => $record->partner_id,
-            'creator_id'            => Auth::id(),
-            'company_id'            => Auth::user()->default_company_id,
-            'company_currency_id'   => Auth::user()->defaultCompany->currency_id ?? $record->currency_id,
+            'creator_id'            => $user->id,
+            'company_id'            => $user->default_company_id,
+            'company_currency_id'   => $user->defaultCompany->currency_id ?? $record->currency_id,
             'commercial_partner_id' => $record->partner_id,
             'display_type'          => 'product',
             'sort'                  => MoveLine::max('sort') + 1,
-            'parent_state'          => $record->state,
+            'parent_state'          => $record->move->state,
             'debit'                 => 0.00,
             'credit'                => floatval($data['price_subtotal']),
             'balance'               => -floatval($data['price_subtotal']),
             'amount_currency'       => -floatval($data['price_subtotal']),
         ]);
+
+        if ($data['discount'] > 0) {
+            $data['discount_date'] = now();
+        } else {
+            $data['discount_date'] = null;
+        }
 
         return $data;
     }

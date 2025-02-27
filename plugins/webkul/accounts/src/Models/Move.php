@@ -185,6 +185,14 @@ class Move extends Model
         return $this->belongsTo(PaymentMethodLine::class, 'preferred_payment_method_line_id');
     }
 
+    public function getTotalDiscountAttribute()
+    {
+        return $this->lines()
+            ->where('display_type', 'product')
+            ->sum('discount');
+    }
+
+
     public function lines()
     {
         return $this->hasMany(MoveLine::class)

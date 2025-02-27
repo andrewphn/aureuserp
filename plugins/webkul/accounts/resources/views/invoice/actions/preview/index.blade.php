@@ -5,7 +5,7 @@
         border-radius: 12px;
         overflow: hidden;
         margin: 0 auto;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: Inter, Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .invoice-header {
@@ -301,6 +301,13 @@
                 <div>Untaxed Amount</div>
                 <div>{{ $record->currency->symbol }} {{ number_format($record->amount_untaxed, 2) }}</div>
             </div>
+
+            @if ($record->total_discount > 0)
+                <div class="total-row final">
+                    <div>Discount</div>
+                    <div>-{{ $record->currency->symbol }} {{ number_format($record->total_discount, 2) }}</div>
+                </div>
+            @endif
 
             <div class="total-row final">
                 <div>TOTAL DUE</div>

@@ -74,22 +74,22 @@
                     }
                 @endphp
 
-                <div class="invoice-item">
+               <div class="invoice-item">
                     <span>Subtotal</span>
-                    <span>{{ number_format($subTotal, 2) }}</span>
+                    <span>{{ $currency->symbol }} {{ number_format($subTotal, 2) }}</span>
                 </div>
 
                 @if ($totalDiscount > 0)
                     <div class="invoice-item">
                         <span>Discount</span>
-                        <span>-{{ number_format($totalDiscount, 2) }}</span>
+                        <span>- {{ $currency->symbol }} {{ number_format($totalDiscount, 2) }}</span>
                     </div>
                 @endif
 
                 @if ($totalTax > 0)
                     <div class="invoice-item">
                         <span>Tax Amount</span>
-                        <span>{{ number_format($totalTax, 2) }}</span>  
+                        <span>{{ $currency->symbol }} {{ number_format($totalTax, 2) }}</span>
                     </div>
                 @endif
 
@@ -97,7 +97,7 @@
 
                 <div class="font-bold invoice-item">
                     <span>Grand Total</span>
-                    <span>{{ number_format($grandTotal, 2) }}</span>
+                    <span>{{ $currency->symbol }} {{ number_format($grandTotal, 2) }}</span>
                 </div>
             </div>
         </div>

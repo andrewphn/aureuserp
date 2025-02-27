@@ -58,6 +58,7 @@ return new class extends Migration
             $table->decimal('price_unit', 15, 2)->nullable()->comment('Price Unit');
             $table->decimal('price_subtotal', 15, 2)->nullable()->comment('Subtotal');
             $table->decimal('price_total', 15, 2)->nullable()->comment('Total');
+            $table->decimal('price_tax', 15, 2)->nullable()->comment('Price Tax');
             $table->decimal('discount', 5, 2)->nullable()->comment('Discount (%)');
             $table->decimal('discount_amount_currency', 15, 2)->nullable()->comment('Discount Amount in Currency');
             $table->decimal('discount_balance', 15, 2)->nullable()->comment('Discount Balance');

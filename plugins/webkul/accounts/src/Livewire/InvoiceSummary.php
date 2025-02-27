@@ -18,8 +18,13 @@ class InvoiceSummary extends Component
 
     public $grandTotal = 0;
 
-    public function mount($products)
+    #[Reactive]
+    public $currency = null;
+
+    public function mount($currency, $products)
     {
+        $this->currency = $currency;
+
         $this->products = $products ?? [];
     }
 
