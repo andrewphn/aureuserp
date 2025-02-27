@@ -200,7 +200,7 @@ class Move extends Model
 
     public function reversedEntry()
     {
-        return $this->belongsTo(Move::class, 'reversed_entry_id');
+        return $this->belongsTo(self::class, 'reversed_entry_id');
     }
 
     public function invoiceUser()
@@ -252,21 +252,25 @@ class Move extends Model
             ->where('display_type', 'product');
     }
 
-    public static function generateNextInvoiceNumber()
+    public function allLines()
     {
-        $lastInvoice = self::whereNotNull('name')
-            ->where('name', 'like', 'INV/%')
-            ->orderBy('name', 'desc')
+        return $this->hasMany(MoveLine::class);
+    }
+
+    public static function generateNextInvoiceNumber(): string
+    {
+        $year = date('Y');
+        $prefix = "INV/{$year}/";
+
+        $lastInvoice = self::whereRaw("name LIKE ?", ["{$prefix}%"])
+            ->latest('name')
             ->first();
 
-        if ($lastInvoice) {
-            $lastNumber = (int) substr($lastInvoice->name, strrpos($lastInvoice->name, '/') + 1);
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1;
-        }
+        $lastNumber = optional($lastInvoice)->name
+            ? (int) substr($lastInvoice->name, strlen($prefix))
+            : 0;
 
-        return 'INV/' . date('Y') . '/' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        return $prefix . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
     }
 
     protected static function boot()
@@ -277,6 +281,16 @@ class Move extends Model
             if (empty($model->name)) {
                 $model->name = self::generateNextInvoiceNumber();
             }
+
+            $model->sequence_prefix = self::extractPrefixFromName($model->name);
         });
+    }
+
+    /**
+     * Extracts the prefix (e.g., "INV/2025/") from the given invoice name.
+     */
+    protected static function extractPrefixFromName(string $name): string
+    {
+        return substr($name, 0, strrpos($name, '/') + 1);
     }
 }

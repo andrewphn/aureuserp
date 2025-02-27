@@ -58,10 +58,13 @@ class EditInvoice extends EditRecord
         $data['invoice_date'] ??= $record->invoice_date;
         $data['name'] ??= $record->name;
         $data['auto_post'] ??= $record->auto_post;
+        $data['invoice_currency_rate'] ??= 1.0;
 
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);
 
+            $data['commercial_partner_id'] = $partner->id;
+            $data['partner_shipping_id'] = $partner->id;
             $data['invoice_partner_display_name'] = $partner->name;
         } else {
             $data['invoice_partner_display_name'] = "#Created By: {$user->name}";
@@ -95,35 +98,39 @@ class EditInvoice extends EditRecord
 
         if ($paymentTermLine) {
             $paymentTermLine->update([
-                'currency_id'           => $record->currency_id,
-                'partner_id'            => $record->partner_id,
-                'date_maturity'         => $dateMaturity,
-                'company_id'            => $record->company_id,
-                'company_currency_id'   => $record->company_currency_id,
-                'commercial_partner_id' => $record->partner_id,
-                'parent_state'          => $record->state,
-                'debit'                 => $record->amount_total,
-                'balance'               => $record->amount_total,
-                'amount_currency'       => $record->amount_total,
+                'currency_id'              => $record->currency_id,
+                'partner_id'               => $record->partner_id,
+                'date_maturity'            => $dateMaturity,
+                'company_id'               => $record->company_id,
+                'company_currency_id'      => $record->company_currency_id,
+                'commercial_partner_id'    => $record->partner_id,
+                'parent_state'             => $record->state,
+                'debit'                    => $record->amount_total,
+                'balance'                  => $record->amount_total,
+                'amount_currency'          => $record->amount_total,
+                'amount_residual'          => $record->amount_total,
+                'amount_residual_currency' => $record->amount_total,
             ]);
         } else {
             MoveLine::create([
-                'move_id'               => $record->id,
-                'move_name'             => $record->name,
-                'display_type'          => 'payment_term',
-                'currency_id'           => $record->currency_id,
-                'partner_id'            => $record->partner_id,
-                'date_maturity'         => $dateMaturity,
-                'company_id'            => $record->company_id,
-                'company_currency_id'   => $record->company_currency_id,
-                'commercial_partner_id' => $record->partner_id,
-                'sort'                  => MoveLine::max('sort') + 1,
-                'parent_state'          => $record->state,
-                'date'                  => now(),
-                'creator_id'            => $record->creator_id,
-                'debit'                 => $record->amount_total,
-                'balance'               => $record->amount_total,
-                'amount_currency'       => $record->amount_total,
+                'move_id'                  => $record->id,
+                'move_name'                => $record->name,
+                'display_type'             => 'payment_term',
+                'currency_id'              => $record->currency_id,
+                'partner_id'               => $record->partner_id,
+                'date_maturity'            => $dateMaturity,
+                'company_id'               => $record->company_id,
+                'company_currency_id'      => $record->company_currency_id,
+                'commercial_partner_id'    => $record->partner_id,
+                'sort'                     => MoveLine::max('sort') + 1,
+                'parent_state'             => $record->state,
+                'date'                     => now(),
+                'creator_id'               => $record->creator_id,
+                'debit'                    => $record->amount_total,
+                'balance'                  => $record->amount_total,
+                'amount_currency'          => $record->amount_total,
+                'amount_residual'          => $record->amount_total,
+                'amount_residual_currency' => $record->amount_total,
             ]);
         }
     }
@@ -182,7 +189,6 @@ class EditInvoice extends EditRecord
                 }
 
                 if (isset($newTaxEntries[$tax->id])) {
-                    $newTaxEntries[$tax->id]['debit'] += $currentTaxAmount;
                     $newTaxEntries[$tax->id]['credit'] += $currentTaxAmount;
                     $newTaxEntries[$tax->id]['balance'] -= $currentTaxAmount;
                     $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
@@ -200,7 +206,7 @@ class EditInvoice extends EditRecord
                         'parent_state' => $record->state,
                         'date' => now(),
                         'creator_id' => $record->creator_id,
-                        'debit' => $currentTaxAmount,
+                        'debit' => 0,
                         'credit' => $currentTaxAmount,
                         'balance' => -$currentTaxAmount,
                         'amount_currency' => -$currentTaxAmount,

@@ -753,9 +753,6 @@ class InvoiceResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->addable(function ($record) {
-                return $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]);
-            })
             ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
             ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
@@ -786,7 +783,8 @@ class InvoiceResource extends Resource
             'commercial_partner_id' => $record->partner_id,
             'display_type'          => 'product',
             'sort'                  => MoveLine::max('sort') + 1,
-            'parent_state'          => $record->move->state,
+            'parent_state'          => $record->move->state ?? MoveState::DRAFT->value,
+            'move_name'             => $record->move->name,
             'debit'                 => 0.00,
             'credit'                => floatval($data['price_subtotal']),
             'balance'               => -floatval($data['price_subtotal']),
@@ -981,13 +979,29 @@ class InvoiceResource extends Resource
         $record->amount_untaxed = 0;
         $record->amount_tax = 0;
         $record->amount_total = 0;
+        $record->amount_residual = 0;
+        $record->amount_untaxed_signed = 0;
+        $record->amount_untaxed_in_currency_signed = 0;
+        $record->amount_tax_signed = 0;
+        $record->amount_total_signed = 0;
+        $record->amount_total_in_currency_signed = 0;
+        $record->amount_residual_signed = 0;
 
         $lines = $record->lines->where('display_type', 'product');
 
         foreach ($lines as $line) {
-            $record->amount_untaxed += $line->price_subtotal;
-            $record->amount_tax += $line->price_tax;
-            $record->amount_total += $line->price_total;
+            $record->amount_untaxed += floatval($line->price_subtotal);
+            $record->amount_tax += floatval($line->price_tax);
+            $record->amount_total += floatval($line->price_total);
+
+            $record->amount_untaxed_signed += floatval($line->price_subtotal);
+            $record->amount_untaxed_in_currency_signed += floatval($line->price_subtotal);
+            $record->amount_tax_signed += floatval($line->price_tax);
+            $record->amount_total_signed += floatval($line->price_total);
+            $record->amount_total_in_currency_signed += floatval($line->price_total);
+
+            $record->amount_residual += floatval($line->price_total);
+            $record->amount_residual_signed += floatval($line->price_total);
         }
 
         $record->save();
