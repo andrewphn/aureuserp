@@ -44,6 +44,7 @@ class EditInvoice extends EditRecord
             BaseActions\SetAsCheckedAction::make(),
             BaseActions\PreviewAction::make(),
             BaseActions\PrintAndSendAction::make(),
+            BaseActions\CreditNoteAction::make(),
         ];
     }
 
