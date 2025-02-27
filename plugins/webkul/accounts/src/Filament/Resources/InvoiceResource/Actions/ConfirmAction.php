@@ -36,7 +36,7 @@ class ConfirmAction extends Action
                     $moveLine->save();
                 });
 
-                $livewire->refreshFormData(['state']);
+                $livewire->refreshFormData(['state', 'parent_state']);
             })
             ->hidden(function (Move $record) {
                 return
