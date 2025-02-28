@@ -20,13 +20,13 @@ use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages;
+use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Models\MoveLine;
+use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Models\Product;
-use Webkul\Account\Livewire\InvoiceSummary;
-use Webkul\Account\Models\MoveLine;
-use Webkul\Account\Models\Partner;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
@@ -83,7 +83,7 @@ class InvoiceResource extends Resource
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->placeholder('INV/2025/00001')
-                                    ->default(fn() => AccountMove::generateNextInvoiceNumber())
+                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber())
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
@@ -757,7 +757,7 @@ class InvoiceResource extends Resource
             ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
-    private static function mutateProductRelationship(array $data, $record, $livewire): array
+    public static function mutateProductRelationship(array $data, $record, $livewire): array
     {
         $data['product_id'] ??= $record->product_id;
         $data['quantity'] ??= $record->quantity;
@@ -765,7 +765,6 @@ class InvoiceResource extends Resource
         $data['price_subtotal'] ??= $record->price_subtotal;
         $data['discount'] ??= $record->discount;
         $data['discount_date'] ??= $record->discount_date;
-
 
         $product = Product::find($data['product_id']);
 
@@ -780,11 +779,11 @@ class InvoiceResource extends Resource
             'creator_id'            => $user->id,
             'company_id'            => $user->default_company_id,
             'company_currency_id'   => $user->defaultCompany->currency_id ?? $record->currency_id,
-            'commercial_partner_id' => $record->partner_id,
+            'commercial_partner_id' => $livewire->record->partner_id,
             'display_type'          => 'product',
             'sort'                  => MoveLine::max('sort') + 1,
-            'parent_state'          => $record->move->state ?? MoveState::DRAFT->value,
-            'move_name'             => $record->move->name,
+            'parent_state'          => $livewire->record->state ?? MoveState::DRAFT->value,
+            'move_name'             => $livewire->record->name,
             'debit'                 => 0.00,
             'credit'                => floatval($data['price_subtotal']),
             'balance'               => -floatval($data['price_subtotal']),

@@ -4,6 +4,9 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
@@ -12,9 +15,6 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
-use Webkul\Chatter\Traits\HasChatter;
-use Webkul\Chatter\Traits\HasLogActivity;
-use Webkul\Field\Traits\HasCustomFields;
 
 class Move extends Model
 {
@@ -89,49 +89,49 @@ class Move extends Model
     ];
 
     protected array $logAttributes = [
-        'medium.name' => 'Medium',
-        'source.name' => 'UTM Source',
-        'partner.name' => 'Customer',
-        'commercialPartner.name' => 'Commercial Partner',
-        'partnerShipping.name' => 'Shipping Address',
-        'partnerBank.name' => 'Bank Account',
-        'fiscalPosition.name' => 'Fiscal Position',
-        'currency.name' => 'Currency',
-        'reversedEntry.name' => 'Reversed Entry',
-        'invoiceUser.name' => 'Invoice User',
-        'invoiceIncoterm.name' => 'Invoice Incoterm',
-        'invoiceCashRounding.name' => 'Invoice Cash Rounding',
-        'createdBy.name' => 'Created By',
-        'name' => 'Invoice Reference',
-        'state' => 'Invoice Status',
-        'reference' => 'Reference',
-        'invoiceSourceEmail' => 'Source Email',
-        'invoicePartnerDisplayName' => 'Partner Display Name',
-        'invoiceOrigin' => 'Invoice Origin',
-        'incotermLocation' => 'Incoterm Location',
-        'date' => 'Invoice Date',
-        'invoice_date' => 'Invoice Date',
-        'invoice_date_due' => 'Due Date',
-        'delivery_date' => 'Delivery Date',
-        'narration' => 'Notes',
-        'amount_untaxed' => 'Subtotal',
-        'amount_tax' => 'Tax',
-        'amount_total' => 'Total',
-        'amount_residual' => 'Residual',
-        'amount_untaxed_signed' => 'Subtotal (Signed)',
+        'medium.name'                       => 'Medium',
+        'source.name'                       => 'UTM Source',
+        'partner.name'                      => 'Customer',
+        'commercialPartner.name'            => 'Commercial Partner',
+        'partnerShipping.name'              => 'Shipping Address',
+        'partnerBank.name'                  => 'Bank Account',
+        'fiscalPosition.name'               => 'Fiscal Position',
+        'currency.name'                     => 'Currency',
+        'reversedEntry.name'                => 'Reversed Entry',
+        'invoiceUser.name'                  => 'Invoice User',
+        'invoiceIncoterm.name'              => 'Invoice Incoterm',
+        'invoiceCashRounding.name'          => 'Invoice Cash Rounding',
+        'createdBy.name'                    => 'Created By',
+        'name'                              => 'Invoice Reference',
+        'state'                             => 'Invoice Status',
+        'reference'                         => 'Reference',
+        'invoiceSourceEmail'                => 'Source Email',
+        'invoicePartnerDisplayName'         => 'Partner Display Name',
+        'invoiceOrigin'                     => 'Invoice Origin',
+        'incotermLocation'                  => 'Incoterm Location',
+        'date'                              => 'Invoice Date',
+        'invoice_date'                      => 'Invoice Date',
+        'invoice_date_due'                  => 'Due Date',
+        'delivery_date'                     => 'Delivery Date',
+        'narration'                         => 'Notes',
+        'amount_untaxed'                    => 'Subtotal',
+        'amount_tax'                        => 'Tax',
+        'amount_total'                      => 'Total',
+        'amount_residual'                   => 'Residual',
+        'amount_untaxed_signed'             => 'Subtotal (Signed)',
         'amount_untaxed_in_currency_signed' => 'Subtotal (In Currency) (Signed)',
-        'amount_tax_signed' => 'Tax (Signed)',
-        'amount_total_signed' => 'Total (Signed)',
-        'amount_total_in_currency_signed' => 'Total (In Currency) (Signed)',
-        'amount_residual_signed' => 'Residual (Signed)',
-        'quick_edit_total_amount' => 'Quick Edit Total Amount',
-        'is_storno' => 'Is Storno',
-        'always_tax_exigible' => 'Always Tax Exigible',
-        'checked' => 'Checked',
-        'posted_before' => 'Posted Before',
-        'made_sequence_gap' => 'Made Sequence Gap',
-        'is_manually_modified' => 'Is Manually Modified',
-        'is_move_sent' => 'Is Move Sent',
+        'amount_tax_signed'                 => 'Tax (Signed)',
+        'amount_total_signed'               => 'Total (Signed)',
+        'amount_total_in_currency_signed'   => 'Total (In Currency) (Signed)',
+        'amount_residual_signed'            => 'Residual (Signed)',
+        'quick_edit_total_amount'           => 'Quick Edit Total Amount',
+        'is_storno'                         => 'Is Storno',
+        'always_tax_exigible'               => 'Always Tax Exigible',
+        'checked'                           => 'Checked',
+        'posted_before'                     => 'Posted Before',
+        'made_sequence_gap'                 => 'Made Sequence Gap',
+        'is_manually_modified'              => 'Is Manually Modified',
+        'is_move_sent'                      => 'Is Move Sent',
     ];
 
     protected $casts = [
@@ -245,7 +245,6 @@ class Move extends Model
             ->sum('discount');
     }
 
-
     public function lines()
     {
         return $this->hasMany(MoveLine::class)
@@ -269,12 +268,12 @@ class Move extends Model
             ->where('display_type', 'payment_term');
     }
 
-    public static function generateNextInvoiceNumber(): string
+    public static function generateNextInvoiceAndCreditNoteNumber(string $type = 'INV'): string
     {
         $year = date('Y');
-        $prefix = "INV/{$year}/";
+        $prefix = "{$type}/{$year}/";
 
-        $lastInvoice = self::whereRaw("name LIKE ?", ["{$prefix}%"])
+        $lastInvoice = self::whereRaw('name LIKE ?', ["{$prefix}%"])
             ->latest('name')
             ->first();
 
@@ -282,7 +281,7 @@ class Move extends Model
             ? (int) substr($lastInvoice->name, strlen($prefix))
             : 0;
 
-        return $prefix . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
     }
 
     protected static function boot()
@@ -291,7 +290,7 @@ class Move extends Model
 
         static::creating(function ($model) {
             if (empty($model->name)) {
-                $model->name = self::generateNextInvoiceNumber();
+                $model->name = self::generateNextInvoiceAndCreditNoteNumber();
             }
 
             $model->sequence_prefix = self::extractPrefixFromName($model->name);
@@ -299,7 +298,7 @@ class Move extends Model
     }
 
     /**
-     * Extracts the prefix (e.g., "INV/2025/") from the given invoice name.
+     * Extracts the prefix (e.g., "INV or RINV/2025/") from the given invoice and credit Note name.
      */
     protected static function extractPrefixFromName(string $name): string
     {
