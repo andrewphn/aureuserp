@@ -657,7 +657,7 @@ class CreditNotesResource extends Resource
             'index'  => Pages\ListCreditNotes::route('/'),
             'create' => Pages\CreateCreditNotes::route('/create'),
             'edit'   => Pages\EditCreditNotes::route('/{record}/edit'),
-            'view'   => Pages\EditCreditNotes::route('/{record}'),
+            'view'   => Pages\ViewCreditNote::route('/{record}'),
         ];
     }
 

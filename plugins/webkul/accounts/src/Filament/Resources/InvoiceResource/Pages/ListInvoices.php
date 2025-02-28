@@ -21,7 +21,7 @@ class ListInvoices extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'test' => PresetView::make(__('Invoice'))
+            'invoice' => PresetView::make(__('Invoices'))
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')

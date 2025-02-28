@@ -36,7 +36,6 @@ class EditInvoice extends EditRecord
             ChatterActions\ChatterAction::make()
                 ->setResource($this->getResource()),
             Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
             BaseActions\PayAction::make(),
             BaseActions\ConfirmAction::make(),
             BaseActions\CancelAction::make(),
@@ -45,6 +44,7 @@ class EditInvoice extends EditRecord
             BaseActions\PreviewAction::make(),
             BaseActions\PrintAndSendAction::make(),
             BaseActions\CreditNoteAction::make(),
+            Actions\DeleteAction::make(),
         ];
     }
 

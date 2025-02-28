@@ -3,15 +3,12 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
 
 use Filament\Notifications\Notification;
-use Filament\Actions;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as BaseEditInvoice;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource;
 use Webkul\Account\Enums\DisplayType;
-use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as BaseEditInvoice;
 use Webkul\Account\Models\MoveLine;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource;
 use Webkul\Partner\Models\Partner;
-use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class EditCreditNotes extends BaseEditInvoice
 {
@@ -32,19 +29,18 @@ class EditCreditNotes extends BaseEditInvoice
 
     protected function getHeaderActions(): array
     {
+        $predefinedActions = parent::getHeaderActions();
+
+        $predefinedActions = collect($predefinedActions)->filter(function ($action) {
+
+            return !in_array($action->getName(), [
+                'customers.invoice.set-as-checked',
+                'customers.invoice.credit-note'
+            ]);
+        })->toArray();
+
         return [
-            ChatterActions\ChatterAction::make()
-                ->setResource($this->getResource()),
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-            BaseActions\PayAction::make(),
-            BaseActions\ConfirmAction::make(),
-            BaseActions\CancelAction::make(),
-            BaseActions\ResetToDraftAction::make(),
-            BaseActions\SetAsCheckedAction::make(),
-            BaseActions\PreviewAction::make(),
-            BaseActions\PrintAndSendAction::make(),
-            BaseActions\CreditNoteAction::make(),
+            ...$predefinedActions,
         ];
     }
 
@@ -105,11 +101,12 @@ class EditCreditNotes extends BaseEditInvoice
                 'company_currency_id'      => $record->company_currency_id,
                 'commercial_partner_id'    => $record->partner_id,
                 'parent_state'             => $record->state,
-                'debit'                    => $record->amount_total,
-                'balance'                  => $record->amount_total,
-                'amount_currency'          => $record->amount_total,
-                'amount_residual'          => $record->amount_total,
-                'amount_residual_currency' => $record->amount_total,
+                'debit'                    => 0.00,
+                'credit'                   => $record->amount_total,
+                'balance'                  => -$record->amount_total,
+                'amount_currency'          => -$record->amount_total,
+                'amount_residual'          => -$record->amount_total,
+                'amount_residual_currency' => -$record->amount_total,
             ]);
         } else {
             MoveLine::create([
@@ -126,11 +123,12 @@ class EditCreditNotes extends BaseEditInvoice
                 'parent_state'             => $record->state,
                 'date'                     => now(),
                 'creator_id'               => $record->creator_id,
-                'debit'                    => $record->amount_total,
-                'balance'                  => $record->amount_total,
-                'amount_currency'          => $record->amount_total,
-                'amount_residual'          => $record->amount_total,
-                'amount_residual_currency' => $record->amount_total,
+                'debit'                    => 0.00,
+                'credit'                   => $record->amount_total,
+                'balance'                  => -$record->amount_total,
+                'amount_currency'          => -$record->amount_total,
+                'amount_residual'          => -$record->amount_total,
+                'amount_residual_currency' => -$record->amount_total,
             ]);
         }
     }
@@ -194,31 +192,31 @@ class EditCreditNotes extends BaseEditInvoice
                     $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
                 } else {
                     $newTaxEntries[$tax->id] = [
-                        'name' => $tax->name,
-                        'move_id' => $record->id,
-                        'move_name' => $record->name,
-                        'display_type' => 'tax',
-                        'currency_id' => $record->currency_id,
-                        'partner_id' => $record->partner_id,
-                        'company_id' => $record->company_id,
-                        'company_currency_id' => $record->company_currency_id,
+                        'name'                  => $tax->name,
+                        'move_id'               => $record->id,
+                        'move_name'             => $record->name,
+                        'display_type'          => 'tax',
+                        'currency_id'           => $record->currency_id,
+                        'partner_id'            => $record->partner_id,
+                        'company_id'            => $record->company_id,
+                        'company_currency_id'   => $record->company_currency_id,
                         'commercial_partner_id' => $record->partner_id,
-                        'parent_state' => $record->state,
-                        'date' => now(),
-                        'creator_id' => $record->creator_id,
-                        'debit' => 0,
-                        'credit' => $currentTaxAmount,
-                        'balance' => -$currentTaxAmount,
-                        'amount_currency' => -$currentTaxAmount,
-                        'tax_base_amount' => $currentTaxBase,
-                        'tax_line_id' => $tax->id,
-                        'tax_group_id' => $tax->tax_group_id,
+                        'parent_state'          => $record->state,
+                        'date'                  => now(),
+                        'creator_id'            => $record->creator_id,
+                        'debit'                 => 0,
+                        'credit'                => $currentTaxAmount,
+                        'balance'               => $currentTaxAmount,
+                        'amount_currency'       => $currentTaxAmount,
+                        'tax_base_amount'       => $currentTaxBase,
+                        'tax_line_id'           => $tax->id,
+                        'tax_group_id'          => $tax->tax_group_id,
                     ];
                 }
 
                 $taxesComputed[] = [
-                    'tax_id' => $tax->id,
-                    'tax_amount' => $currentTaxAmount,
+                    'tax_id'              => $tax->id,
+                    'tax_amount'          => $currentTaxAmount,
                     'include_base_amount' => $tax->include_base_amount,
                 ];
             }
