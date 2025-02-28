@@ -8,11 +8,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Filament\Notifications\Notification;
 use Webkul\Purchase\Models\Order;
 
-class CancelAction extends Action
+class ConfirmAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'purchases.orders.cancel';
+        return 'purchases.orders.confirm';
     }
 
     protected function setUp(): void
@@ -20,29 +20,31 @@ class CancelAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('purchases::filament/clusters/orders/resources/order/actions/cancel.label'))
-            ->color('gray')
+            ->label(__('purchases::filament/clusters/orders/resources/order/actions/confirm.label'))
             ->requiresConfirmation()
+            ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'gray' : 'primary')
             ->action(function (Order $record, Component $livewire): void {
                 $record->update([
-                    'state' => OrderState::CANCELED,
+                    'state' => OrderState::PURCHASE,
+                    'approved_at' => now(),
                 ]);
 
                 foreach ($record->lines as $move) {
                     $move->update([
-                        'state' => OrderState::CANCELED,
+                        'state' => OrderState::PURCHASE,
                     ]);
                 }
 
                 $livewire->updateForm();
 
                 Notification::make()
-                    ->title(__('purchases::filament/clusters/orders/resources/order/actions/cancel.action.notification.success.title'))
-                    ->body(__('purchases::filament/clusters/orders/resources/order/actions/cancel.action.notification.success.body'))
+                    ->title(__('purchases::filament/clusters/orders/resources/order/actions/confirm.action.notification.success.title'))
+                    ->body(__('purchases::filament/clusters/orders/resources/order/actions/confirm.action.notification.success.body'))
                     ->success()
                     ->send();
             })
             ->visible(fn () => ! in_array($this->getRecord()->state, [
+                OrderState::PURCHASE,
                 OrderState::DONE,
                 OrderState::CANCELED,
             ]));

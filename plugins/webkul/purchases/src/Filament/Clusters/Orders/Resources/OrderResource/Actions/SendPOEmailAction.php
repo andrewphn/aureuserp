@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Mail;
 use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
 use Webkul\Purchase\Models\Order;
 
-class SendEmailAction extends Action
+class SendPOEmailAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'purchases.orders.send-email';
+        return 'purchases.orders.send-po-email';
     }
 
     protected function setUp(): void
@@ -29,11 +29,10 @@ class SendEmailAction extends Action
         $userName = Auth::user()->name;
 
         $this
-            ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.label'))
-            ->label(fn () => $this->getRecord()->state === OrderState::DRAFT ? __('purchases::filament/clusters/orders/resources/order/actions/send-email.label') : __('purchases::filament/clusters/orders/resources/order/actions/send-email.resend-label'))
+            ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.label'))
             ->form([
                 Forms\Components\Select::make('vendors')
-                    ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.form.fields.to'))
+                    ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.form.fields.to'))
                     ->options(Partner::get()->mapWithKeys(fn ($partner) => [
                         $partner->id => $partner->email 
                             ? "{$partner->name} <{$partner->email}>" 
@@ -44,23 +43,21 @@ class SendEmailAction extends Action
                     ->preload()
                     ->default(fn () => [$this->getRecord()->partner_id]),
                 Forms\Components\TextInput::make('subject')
-                    ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.form.fields.subject'))
+                    ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.form.fields.subject'))
                     ->required()
                     ->default("Purchase Order #{$this->getRecord()->name}"),
                 Forms\Components\RichEditor::make('message')
-                    ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.form.fields.message'))
+                    ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.form.fields.message'))
                     ->required()
-                    ->default("<p>Dear {$this->getRecord()->partner->name} <br><br>Here is in attachment a request for quotation <strong>{$this->getRecord()->name}</strong>.
+                    ->default("<p>Dear {$this->getRecord()->partner->name} <br><br>Here is in attachment a purchase order <strong>{$this->getRecord()->name}</strong> amounting in <strong>{$this->getRecord()->total_amount}</strong>.
                             
                             <br><br>
                             
-                            If you have any questions, please do not hesitate to contact us.
+                            The receipt is expected for <strong>{$this->getRecord()->planned_at}</strong>.
                             
                             <br><br>
-                            
-                            <a href=\"http://localhost:8069/my/purchase/8?access_token={$this->getRecord()->access_token}\">Accept</a>
-                            
-                            <a href=\"http://localhost:8069/my/purchase/8?access_token={$this->getRecord()->access_token}\">Decline</a>
+
+                            Could you please acknowledge the receipt of this order?
                             
                             <br><br>
                             
@@ -88,7 +85,11 @@ class SendEmailAction extends Action
 
                     if ($vendor?->email) {
                         try {
-                            Mail::to($vendor->email)->send(new VendorPurchaseOrderMail($data['subject'], $data['message'], $pdfPath));
+                            Mail::to($vendor->email)->send(new VendorPurchaseOrderMail(
+                                $data['subject'],
+                                $data['message'],
+                                $pdfPath
+                            ));
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->body($e->getMessage())
@@ -99,16 +100,6 @@ class SendEmailAction extends Action
                         }
                     }
                 }
-
-                $record->update([
-                    'state' => OrderState::SENT,
-                ]);
-
-                $record->lines->each(function ($line) {
-                    $line->update([
-                        'state' => OrderState::SENT,
-                    ]);
-                });
 
                 $message = $record->addMessage([
                     'body' => $data['message'],
@@ -125,24 +116,21 @@ class SendEmailAction extends Action
                 $livewire->updateForm();
 
                 Notification::make()
-                    ->title(__('purchases::filament/clusters/orders/resources/order/actions/send-email.action.notification.success.title'))
-                    ->body(__('purchases::filament/clusters/orders/resources/order/actions/send-email.action.notification.success.body'))
+                    ->title(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.action.notification.success.title'))
+                    ->body(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.action.notification.success.body'))
                     ->success()
                     ->send();
             })
             ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
-            ->visible(fn () => in_array($this->getRecord()->state, [
-                OrderState::DRAFT,
-                OrderState::SENT,
-            ]));
+            ->visible(fn () => $this->getRecord()->state == OrderState::PURCHASE);
     }
 
     private function generatePdf($record)
     {
-        $pdfPath = 'Request for Quotation-'.str_replace('/', '_', $record->name).'.pdf';
+        $pdfPath = 'Purchase Order-'.str_replace('/', '_', $record->name).'.pdf';
 
         if (! Storage::exists($pdfPath)) {
-            $pdf = PDF::loadView('purchases::filament.clusters.orders.orders.actions.print-quotation', [
+            $pdf = PDF::loadView('purchases::filament.clusters.orders.orders.actions.print-purchase-order', [
                 'records'  => [$record],
             ]);
 

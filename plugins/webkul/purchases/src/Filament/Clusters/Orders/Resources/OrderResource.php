@@ -50,6 +50,10 @@ class OrderResource extends Resource
                             unset($options[Enums\OrderState::CANCELED->value]);
                         }
                         
+                        if ($record && $record->state !== Enums\OrderState::DONE) {
+                            unset($options[Enums\OrderState::DONE->value]);
+                        }
+                        
                         return $options;
                     })
                     ->default(Enums\OrderState::DRAFT)
@@ -115,6 +119,8 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.expected-arrival'))
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
+                                    ->hint('Test')
+                                    ->hint(fn ($record): string => $record && $record->mail_reminder_confirmed ? __('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.confirmed-by-vendor') : '')
                                     ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                             ]),
                     ])
@@ -247,6 +253,11 @@ class OrderResource extends Resource
                     ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.total-amount'))
                     ->sortable()
                     ->money(fn (Order $record) => $record->currency->code)
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('invoice_status')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.billing-status'))
+                    ->sortable()
+                    ->badge()
                     ->toggleable(),
             ]))
             ->groups([
@@ -390,6 +401,8 @@ class OrderResource extends Resource
             ->defaultItems(0)
             ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->deletable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]))
+            ->addable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]))
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -422,6 +435,19 @@ class OrderResource extends Resource
                                         static::afterProductQtyUpdated($set, $get);
                                     })
                                     ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                Forms\Components\TextInput::make('qty_received')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.received'))
+                                    ->required()
+                                    ->default(0)
+                                    ->numeric()
+                                    ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                Forms\Components\TextInput::make('qty_invoiced')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.billed'))
+                                    ->default(0)
+                                    ->numeric()
+                                    ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
+                                    ->disabled(),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
                                     ->relationship(
@@ -506,6 +532,8 @@ class OrderResource extends Resource
                                 Forms\Components\Hidden::make('price_tax')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_total')
+                                    ->default(0),
+                                Forms\Components\Hidden::make('price_total_cc')
                                     ->default(0),
                             ]),
                     ])
@@ -703,6 +731,8 @@ class OrderResource extends Resource
 
             $set('price_total', 0);
 
+            $set('price_total_cc', 0);
+
             return;
         }
 
@@ -782,6 +812,8 @@ class OrderResource extends Resource
 
         $set('price_subtotal', round($subTotal, 4));
 
+        $set('price_total_cc', round($subTotal, 4));
+
         $set('price_tax', $taxAmount);
 
         $set('price_total', $subTotal + $taxAmount);
@@ -799,6 +831,15 @@ class OrderResource extends Resource
             $record->tax_amount += $line->price_tax;
             $record->total_amount += $line->price_total;
             $record->total_cc_amount += $line->price_total;
+
+            $line->qty_received_manual = $line->qty_received;
+            $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
+
+            $line->save();
+        }
+
+        if ($record->qty_to_invoice != 0) {
+            $record->invoice_status = Enums\OrderInvoiceStatus::TO_INVOICED;
         }
 
         $record->save();

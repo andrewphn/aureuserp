@@ -45,8 +45,9 @@ class PrintRFQAction extends Action
                 }, 'Purchase Order-'.str_replace('/', '_', $record->name).'.pdf');
             })
             ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
-            ->hidden(fn () => in_array($this->getRecord()->state, [
-                OrderState::CANCELED,
+            ->visible(fn () => in_array($this->getRecord()->state, [
+                OrderState::DRAFT,
+                OrderState::SENT,
             ]));
     }
 }

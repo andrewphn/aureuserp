@@ -15,6 +15,7 @@ return [
                     'confirmation-date'        => 'Confirmation Date',
                     'order-deadline'           => 'Order Deadline',
                     'expected-arrival'         => 'Expected Arrival',
+                    'confirmed-by-vendor'      => 'Confirmed by Vendor',
                 ],
             ],
         ],
@@ -32,6 +33,8 @@ return [
                             'product'             => 'Product',
                             'expected-arrival'    => 'Expected Arrival',
                             'quantity'            => 'Quantity',
+                            'received'            => 'Received',
+                            'billed'              => 'Billed',
                             'unit'                => 'Unit',
                             'packaging-qty'       => 'Packaging Qty',
                             'packaging'           => 'Packaging',
@@ -94,6 +97,7 @@ return [
             'status'           => 'Status',
             'billing-status'   => 'Billing Status',
             'currency'         => 'Currency',
+            'billing-status'   => 'Billing Status',
         ],
 
         'groups' => [

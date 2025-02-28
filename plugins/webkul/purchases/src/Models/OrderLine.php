@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
@@ -15,6 +16,7 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
+use Webkul\Account\Models\MoveLine;
 
 class OrderLine extends Model
 {
@@ -129,6 +131,11 @@ class OrderLine extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function accountMoveLines(): HasMany
+    {
+        return $this->hasMany(MoveLine::class);
     }
 
     protected static function newFactory(): OrderLineFactory
