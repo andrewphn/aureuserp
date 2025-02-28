@@ -39,16 +39,6 @@ class InvoiceResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'invoice_partner_display_name',
-            'invoice_date',
-            'invoice_date_due',
-        ];
-    }
-
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [

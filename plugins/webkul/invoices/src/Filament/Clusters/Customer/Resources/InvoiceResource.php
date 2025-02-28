@@ -24,6 +24,16 @@ class InvoiceResource extends BaseInvoiceResource
         return __('invoices::filament/clusters/customers/resources/invoice.navigation.title');
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'name',
+            'invoice_partner_display_name',
+            'invoice_date',
+            'invoice_date_due',
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
