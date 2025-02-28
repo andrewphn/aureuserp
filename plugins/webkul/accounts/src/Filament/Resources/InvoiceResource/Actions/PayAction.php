@@ -78,6 +78,8 @@ class PayAction extends Action
                 $this->registerPayment($record, $data);
 
                 $this->createPayment($record, $data);
+
+                $record->update(['payment_state' => PaymentState::PAID->value]);
             })
             ->hidden(function (Move $record) {
                 return
