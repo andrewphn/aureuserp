@@ -17,7 +17,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\HtmlString;
 use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
@@ -29,6 +28,7 @@ use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
+use Webkul\Field\Filament\Infolists\Components\ProgressStepper as ComponentsProgressStepper;
 use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
@@ -280,6 +280,15 @@ class InvoiceResource extends Resource
                     ->label(__('accounts::filament/resources/invoice.table.columns.number'))
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('payment_state')
+                    ->label(__('Payment State'))
+                    ->placeholder('-')
+                    ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
+                    ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
+                    ->formatStateUsing(fn($state) => PaymentState::from($state)->getLabel())
+                    ->badge()
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_partner_display_name')
                     ->label(__('accounts::filament/resources/invoice.table.columns.customer'))
                     ->placeholder('-')
@@ -457,6 +466,14 @@ class InvoiceResource extends Resource
                 Infolists\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
+                        Infolists\Components\Actions::make([
+                            Infolists\Components\Actions\Action::make('is_favorite')
+                                ->icon('heroicon-o-check-badge')
+                                ->color('success')
+                                ->visible(fn($record) => $record && $record->payment_state == PaymentState::PAID->value)
+                                ->label(PaymentState::PAID->getLabel())
+                                ->size(ActionSize::ExtraLarge->value)
+                        ]),
                         Infolists\Components\Grid::make()
                             ->schema([
                                 Infolists\Components\TextEntry::make('name')
