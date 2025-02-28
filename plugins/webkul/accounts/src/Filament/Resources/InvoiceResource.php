@@ -28,7 +28,6 @@ use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Field\Filament\Infolists\Components\ProgressStepper as ComponentsProgressStepper;
 use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
@@ -69,7 +68,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Forms\Components\Actions::make([
-                            Forms\Components\Actions\Action::make('is_favorite')
+                            Forms\Components\Actions\Action::make('payment_state')
                                 ->icon('heroicon-o-check-badge')
                                 ->color('success')
                                 ->visible(fn($record) => $record && $record->payment_state == PaymentState::PAID->value)
@@ -467,7 +466,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Infolists\Components\Actions::make([
-                            Infolists\Components\Actions\Action::make('is_favorite')
+                            Infolists\Components\Actions\Action::make('payment_state')
                                 ->icon('heroicon-o-check-badge')
                                 ->color('success')
                                 ->visible(fn($record) => $record && $record->payment_state == PaymentState::PAID->value)

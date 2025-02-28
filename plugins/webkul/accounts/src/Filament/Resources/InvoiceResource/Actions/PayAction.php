@@ -49,6 +49,7 @@ class PayAction extends Action
                                             ->whereHas('journal', fn($q) => $q->where('type', 'bank'));
                                     }
                                 )
+                                ->required()
                                 ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.payment-method-line'))
                                 ->searchable()
                                 ->preload(),

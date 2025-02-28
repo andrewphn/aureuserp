@@ -81,6 +81,7 @@ class CreditNoteAction extends Action
             'invoice_user_id'                   => $record->invoice_user_id,
             'reference'                         => "Reversal of: {$record->name}, {$creditNote->reason}",
             'state'                             => MoveState::DRAFT->value,
+            'name'                              => Move::generateNextInvoiceAndCreditNoteNumber('RINV'),
             'move_type'                         => MoveType::OUT_REFUND->value,
             'auto_post'                         => AutoPost::NO->value,
             'payment_state'                     => PaymentState::NOT_PAID->value,
