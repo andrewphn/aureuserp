@@ -32,6 +32,7 @@ use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
+use Webkul\Support\Services\MoveLineCalculationService;
 
 class InvoiceResource extends Resource
 {
@@ -73,7 +74,7 @@ class InvoiceResource extends Resource
                                 ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
                                 ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
                                 ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value)
+                                ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
@@ -471,7 +472,7 @@ class InvoiceResource extends Resource
                                 ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
                                 ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
                                 ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value)
+                                ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Infolists\Components\Grid::make()
                             ->schema([
@@ -574,7 +575,7 @@ class InvoiceResource extends Resource
                                             ];
                                         })->toArray(),
                                     ];
-                                })
+                                }),
                             ]),
                         Infolists\Components\Tabs\Tab::make(__('Other Information'))
                             ->icon('heroicon-o-information-circle')
@@ -895,99 +896,24 @@ class InvoiceResource extends Resource
 
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
     {
-        if (! $get('product_id')) {
-            $set('price_unit', 0);
+        $calculationService = app(MoveLineCalculationService::class);
 
-            $set('discount', 0);
+        $lineData = [
+            'product_id'     => $get('product_id'),
+            'price_unit'     => $get('price_unit'),
+            'quantity'       => $get('quantity'),
+            'taxes'          => $get('taxes'),
+            'discount'       => $get('discount'),
+            'price_subtotal' => $get('price_subtotal'),
+            'price_tax'      => $get('price_tax'),
+            'price_total'    => $get('price_total'),
+        ];
 
-            $set('price_tax', 0);
+        $updatedLineData = $calculationService->calculateLineTotals($lineData);
 
-            $set('price_subtotal', 0);
-
-            $set('price_total', 0);
-
-            return;
-        }
-
-        $priceUnit = floatval($get('price_unit'));
-
-        $quantity = floatval($get('quantity') ?? 1);
-
-        $taxIds = $get('taxes') ?? [];
-
-        $taxAmount = 0;
-
-        $subTotal = $priceUnit * $quantity;
-
-        $discountValue = floatval($get('discount') ?? 0);
-
-        if ($discountValue > 0) {
-            $discountAmount = $subTotal * ($discountValue / 100);
-
-            $subTotal = $subTotal - $discountAmount;
-        }
-
-        if (! empty($taxIds)) {
-            $taxes = Tax::whereIn('id', $taxIds)
-                ->orderBy('sort')
-                ->get();
-
-            $baseAmount = $subTotal;
-
-            $taxesComputed = [];
-
-            foreach ($taxes as $tax) {
-                $amount = floatval($tax->amount);
-
-                $currentTaxBase = $baseAmount;
-
-                $tax->price_include_override ??= 'tax_excluded';
-
-                if ($tax->is_base_affected) {
-                    foreach ($taxesComputed as $prevTax) {
-                        if ($prevTax['include_base_amount']) {
-                            $currentTaxBase += $prevTax['tax_amount'];
-                        }
-                    }
-                }
-
-                $currentTaxAmount = 0;
-
-                if ($tax->price_include_override == 'tax_included') {
-                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-
-                    if (empty($taxesComputed)) {
-                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
-
-                        $subTotal = $priceUnit * $quantity;
-
-                        $baseAmount = $subTotal;
-                    }
-                } elseif ($tax->price_include_override == 'tax_excluded') {
-                    if ($tax->amount_type == 'percent') {
-                        $currentTaxAmount = $currentTaxBase * $amount / 100;
-                    } else {
-                        $currentTaxAmount = $amount * $quantity;
-                    }
-                }
-
-                $taxesComputed[] = [
-                    'tax_id'              => $tax->id,
-                    'tax_amount'          => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount,
-                ];
-
-                $taxAmount += $currentTaxAmount;
-            }
-        }
-
-        $set('price_subtotal', round($subTotal, 4));
-
-        $set('price_tax', $taxAmount);
-
-        $set('price_total', $subTotal + $taxAmount);
+        $set('price_subtotal', $updatedLineData['price_subtotal']);
+        $set('price_tax', $updatedLineData['price_tax']);
+        $set('price_total', $updatedLineData['price_total']);
     }
 
     public static function collectTotals(AccountMove $record): void
