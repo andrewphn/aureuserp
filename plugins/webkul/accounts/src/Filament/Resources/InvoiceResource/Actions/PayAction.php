@@ -87,6 +87,13 @@ class PayAction extends Action
 
                 $this->createMoveLine($record, $newMove, $payment, $data);
 
+                if (
+                    $record->reversedEntry
+                    && $record->reversedEntry->payment_state == PaymentState::NOT_PAID->value
+                ) {
+                    $record->reversedEntry->update(['payment_state' => PaymentState::REVERSED->value]);
+                }
+
                 $record->update(['payment_state' => PaymentState::PAID->value]);
             })
             ->hidden(function (Move $record) {

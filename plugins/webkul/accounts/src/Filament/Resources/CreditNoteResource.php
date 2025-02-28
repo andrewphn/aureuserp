@@ -57,10 +57,10 @@ class CreditNoteResource extends Resource
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('payment_state')
-                                ->icon('heroicon-o-check-badge')
-                                ->color('success')
-                                ->visible(fn($record) => $record && $record->payment_state == PaymentState::PAID->value)
-                                ->label(PaymentState::PAID->getLabel())
+                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value)
                         ]),
                         Forms\Components\Group::make()
@@ -272,10 +272,10 @@ class CreditNoteResource extends Resource
                     ->schema([
                         Infolists\Components\Actions::make([
                             Infolists\Components\Actions\Action::make('payment_state')
-                                ->icon('heroicon-o-check-badge')
-                                ->color('success')
-                                ->visible(fn($record) => $record && $record->payment_state == PaymentState::PAID->value)
-                                ->label(PaymentState::PAID->getLabel())
+                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value)
                         ]),
                         Infolists\Components\Grid::make()
