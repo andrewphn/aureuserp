@@ -18,4 +18,9 @@ class PaymentMethod extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function accountMovePayment()
+    {
+        return $this->hasMany(Move::class, 'payment_id');
+    }
 }

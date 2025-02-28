@@ -110,7 +110,7 @@ class OrderLine extends Model
 
     public function taxes(): BelongsToMany
     {
-        return $this->belongsToMany(Tax::class, 'purchases_order_item_taxes', 'order_line_id', 'tax_id');
+        return $this->belongsToMany(Tax::class, 'purchases_order_line_taxes', 'order_line_id', 'tax_id');
     }
 
     public function currency(): BelongsTo

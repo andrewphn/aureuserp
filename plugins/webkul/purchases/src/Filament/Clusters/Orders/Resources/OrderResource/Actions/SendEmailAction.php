@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
 use Webkul\Purchase\Models\Order;
+use Illuminate\Support\Facades\URL;
 
 class SendEmailAction extends Action
 {
@@ -27,6 +28,16 @@ class SendEmailAction extends Action
         parent::setUp();
 
         $userName = Auth::user()->name;
+
+        $acceptRespondUrl = URL::signedRoute('purchases.quotations.respond', [
+            'order' => $this->getRecord()->id,
+            'action' => 'accept',
+        ]);
+
+        $declineRespondUrl = URL::signedRoute('purchases.quotations.respond', [
+            'order' => $this->getRecord()->id,
+            'action' => 'decline',
+        ]);
 
         $this
             ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-email.label'))
@@ -58,9 +69,9 @@ class SendEmailAction extends Action
                             
                             <br><br>
                             
-                            <a href=\"http://localhost:8069/my/purchase/8?access_token={$this->getRecord()->access_token}\">Accept</a>
+                            <a href=\"{$acceptRespondUrl}\">Accept</a>
                             
-                            <a href=\"http://localhost:8069/my/purchase/8?access_token={$this->getRecord()->access_token}\">Decline</a>
+                            <a href=\"{$declineRespondUrl}\">Decline</a>
                             
                             <br><br>
                             

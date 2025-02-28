@@ -26,7 +26,12 @@ class CancelAction extends Action
                 $record->state = MoveState::CANCEL->value;
                 $record->save();
 
-                $livewire->refreshFormData(['state']);
+                $record->allLines->each(function ($moveLine) {
+                    $moveLine->parent_state = MoveState::POSTED->value;
+                    $moveLine->save();
+                });
+
+                $livewire->refreshFormData(['state', 'parent_state']);
             })
             ->hidden(function (Move $record) {
                 return

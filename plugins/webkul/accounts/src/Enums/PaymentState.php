@@ -3,8 +3,10 @@
 namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasIcon;
 
-enum PaymentState: string implements HasLabel
+enum PaymentState: string implements HasLabel, HasColor, HasIcon
 {
     case NOT_PAID = 'not_paid';
 
@@ -44,5 +46,31 @@ enum PaymentState: string implements HasLabel
             self::BLOCKED->value          => __('accounts::enums/payment-state.blocked'),
             self::INVOICING_LEGACY->value => __('accounts::enums/payment-state.invoicing-legacy'),
         ];
+    }
+
+    public function getColor(): ?string
+    {
+        return match ($this) {
+            self::NOT_PAID         => 'gray',
+            self::IN_PAYMENT       => 'warning',
+            self::PAID             => 'success',
+            self::PARTIAL          => 'info',
+            self::REVERSED         => 'danger',
+            self::BLOCKED          => 'danger',
+            self::INVOICING_LEGACY => 'gray',
+        };
+    }
+
+    public function getIcon(): ?string
+    {
+        return match ($this) {
+            self::NOT_PAID         => 'heroicon-o-x-circle',
+            self::IN_PAYMENT       => 'heroicon-o-clock',
+            self::PAID             => 'heroicon-o-check-circle',
+            self::PARTIAL          => 'heroicon-o-currency-dollar',
+            self::REVERSED         => 'heroicon-o-arrow-uturn-left',
+            self::BLOCKED          => 'heroicon-o-x-circle',
+            self::INVOICING_LEGACY => 'heroicon-o-document-text',
+        };
     }
 }

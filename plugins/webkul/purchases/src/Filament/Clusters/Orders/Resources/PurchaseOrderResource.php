@@ -34,6 +34,7 @@ class PurchaseOrderResource extends OrderResource
         return $page->generateNavigationItems([
             Pages\ViewPurchaseOrder::class,
             Pages\EditPurchaseOrder::class,
+            Pages\ManageBills::class,
         ]);
     }
 
@@ -50,6 +51,7 @@ class PurchaseOrderResource extends OrderResource
             'create' => Pages\CreatePurchaseOrder::route('/create'),
             'view'   => Pages\ViewPurchaseOrder::route('/{record}'),
             'edit'   => Pages\EditPurchaseOrder::route('/{record}/edit'),
+            'bills'  => Pages\ManageBills::route('/{record}/bills'),
         ];
     }
 }

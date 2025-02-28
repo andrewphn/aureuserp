@@ -6,7 +6,11 @@ use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
 use Filament\Notifications\Notification;
+use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Purchase\Models\Order;
+use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Enums as AccountEnums;
 
 class CreateBillAction extends Action
 {
@@ -55,10 +59,58 @@ class CreateBillAction extends Action
 
     private function createAccountMove($record): void
     {
+        $accountMove = AccountMove::create([
+            'state' => AccountEnums\MoveState::DRAFT,
+            'move_type' => AccountEnums\MoveType::IN_INVOICE,
+            'payment_state' => AccountEnums\PaymentStatus::NOT_PAID,
+            'invoice_partner_display_name' => $record->partner->name,
+            'invoice_origin' => $record->name,
+            'date' => $record->ordered_at,//Check: ordered_at or created_at
+            'invoice_date_due' => now(),
+            'invoice_currency_rate' => 1,
+            'journal_id' => AccountJournal::where('code', AccountEnums\JournalType::PURCHASE)->first()?->id,
+            'company_id' => $record->company_id,
+            'currency_id' => $record->currency_id,
+            'invoice_payment_term_id' => $record->payment_term_id,
+            'partner_id' => $record->partner_id,
+            'commercial_partner_id' => $record->partner_id,
+            'partner_shipping_id' => $record->partner_shipping_id,
+            // 'partner_bank_id' => $record->partner_bank_id,//TODO: add partner bank id
+            'fiscal_position_id' => $record->fiscal_position_id,
+            // 'preferred_payment_method_line_id' => 1,
+            'creator_id' => Auth::id(),
+        ]);
 
+        foreach ($record->lines as $line) {
+            $this->createAccountMoveLine($accountMove, $line);
+        }
     }
 
-    private function createAccountMoveLine($record): void
+    private function createAccountMoveLine($accountMove, $orderLine): void
     {
+        $accountMoveLine = $accountMove->lines()->create([
+            'state' => AccountEnums\MoveState::DRAFT,
+            'name' => $orderLine->name,
+            'display_type' => AccountEnums\DisplayType::PRODUCT,
+            'date' => $accountMove->date,
+            'debit' => 100,
+            'credit' => 0,
+            'amount_currency' => 100,
+            'quantity' => $orderLine->qty_to_invoice,
+            'price_unit' => $orderLine->price_unit,
+            'price_subtotal' => 100,
+            'price_total' => 100,
+            'discount' => 0,
+            'journal_id' => $accountMove->journal_id,
+            'company_id' => $accountMove->company_id,
+            'currency_id' => $accountMove->currency_id,
+            'company_currency_id' => $accountMove->currency_id,
+            'partner_id' => $accountMove->partner_id,
+            'product_id' => $orderLine->product_id,
+            'product_uom_id' => $orderLine->uom_id,
+            'purchase_order_line_id' => $orderLine->id,
+        ]);
+
+        $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
     }
 }

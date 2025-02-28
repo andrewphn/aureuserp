@@ -7,6 +7,7 @@ use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
 use Filament\Notifications\Notification;
 use Webkul\Purchase\Models\Order;
+use Webkul\Account\Enums\MoveState;
 
 class CancelAction extends Action
 {
@@ -24,6 +25,18 @@ class CancelAction extends Action
             ->color('gray')
             ->requiresConfirmation()
             ->action(function (Order $record, Component $livewire): void {
+                $record->accountMoves->each(function ($move) {
+                    if ($move->state !== MoveState::CANCEL) {
+                        Notification::make()
+                            ->title(__('purchases::filament/clusters/orders/resources/order/actions/cancel.action.notification.warning.title'))
+                            ->body(__('purchases::filament/clusters/orders/resources/order/actions/cancel.action.notification.warning.body'))
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+                });
+
                 $record->update([
                     'state' => OrderState::CANCELED,
                 ]);

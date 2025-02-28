@@ -2,61 +2,37 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
-use Webkul\Invoice\Filament\Clusters\Customer;
+use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Filament\Resources\CreditNoteResource as BaseCreditNoteResource;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Customer;
 
-class CreditNotesResource extends BaseInvoiceResource
+class CreditNotesResource extends BaseCreditNoteResource
 {
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    protected static ?string $cluster = Customer::class;
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $cluster = Customer::class;
-
     public static function getModelLabel(): string
     {
-        return __('invoices::filament/clusters/customers/resources/credit-note.title');
+        return __('Credit Note');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('invoices::filament/clusters/customers/resources/credit-note.navigation.title');
+        return __('Credit Notes');
     }
 
-    public static function form(Form $form): Form
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
-        $form = BaseInvoiceResource::form($form);
-
-        $components = $form->getComponents();
-
-        $secondGroupComponents = $components[1]->getChildComponents();
-
-        $nestedChildComponents = $secondGroupComponents[1]->getChildComponents();
-
-        $secondGroupComponents[1]->schema(array_merge([
-            Forms\Components\Section::make()
-                ->schema([
-                    Forms\Components\Fieldset::make(__('invoices::filament/clusters/customers/resources/credit-note.form.fieldset.credit-note.title'))
-                        ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->placeholder('RINV/2025/00001')
-                                ->label(__('invoices::filament/clusters/customers/resources/credit-note.form.fieldset.credit-note.fields.customer-credit-note')),
-                        ])->columns(1),
-                ]),
-        ], $nestedChildComponents));
-
-        return $form;
-    }
-
-    public static function table(Table $table): Table
-    {
-        return BaseInvoiceResource::table($table);
+        return [
+            __('accounts::filament/resources/invoice.navigation.global-search.number')           => $record?->name ?? '—',
+            __('accounts::filament/resources/invoice.navigation.global-search.customer')         => $record?->invoice_partner_display_name ?? '—',
+            __('accounts::filament/resources/invoice.navigation.global-search.invoice-date')     => $record?->invoice_date ?? '—',
+            __('accounts::filament/resources/invoice.navigation.global-search.invoice-date-due') => $record?->invoice_date_due ?? '—',
+        ];
     }
 
     public static function getPages(): array
@@ -65,7 +41,7 @@ class CreditNotesResource extends BaseInvoiceResource
             'index'  => Pages\ListCreditNotes::route('/'),
             'create' => Pages\CreateCreditNotes::route('/create'),
             'edit'   => Pages\EditCreditNotes::route('/{record}/edit'),
-            'view'   => Pages\EditCreditNotes::route('/{record}'),
+            'view'   => Pages\ViewCreditNote::route('/{record}'),
         ];
     }
 }
