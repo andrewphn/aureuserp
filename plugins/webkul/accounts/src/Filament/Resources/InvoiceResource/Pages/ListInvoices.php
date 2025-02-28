@@ -21,25 +21,30 @@ class ListInvoices extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
+            'invoice' => PresetView::make(__('Invoices'))
+                ->favorite()
+                ->default()
+                ->icon('heroicon-s-receipt-percent')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::OUT_INVOICE->value)),
             'draft' => PresetView::make(__('Draft'))
                 ->favorite()
                 ->icon('heroicon-s-stop')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('state', MoveState::DRAFT->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::DRAFT->value)),
             'posted' => PresetView::make(__('Posted'))
                 ->favorite()
                 ->icon('heroicon-s-play')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('state', MoveState::POSTED->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::POSTED->value)),
             'cancelled' => PresetView::make(__('Cancelled'))
                 ->favorite()
                 ->icon('heroicon-s-x-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('state', MoveState::CANCEL->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::CANCEL->value)),
             'not_secured' => PresetView::make(__('Not Secured'))
                 ->favorite()
                 ->icon('heroicon-s-shield-exclamation')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('inalterable_hash')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('inalterable_hash')),
             'in_refund' => PresetView::make(__('Refund'))
                 ->icon('heroicon-s-receipt-refund')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
             'to_check' => PresetView::make(__('To Check'))
                 ->icon('heroicon-s-check-badge')
                 ->modifyQueryUsing(function (Builder $query) {

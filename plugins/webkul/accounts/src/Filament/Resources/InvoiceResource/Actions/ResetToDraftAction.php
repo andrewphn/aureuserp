@@ -21,11 +21,18 @@ class ResetToDraftAction extends Action
         $this
             ->label(__('accounts::filament/resources/invoice/actions/reset-to-draft-action.title'))
             ->color('gray')
+            ->icon('heroicon-o-arrow-path')
             ->action(function (Move $record, Component $livewire): void {
                 $record->state = MoveState::DRAFT->value;
+
+                $record->lines->each(function ($moveLine) {
+                    $moveLine->parent_state = MoveState::DRAFT->value;
+                    $moveLine->save();
+                });
+
                 $record->save();
 
-                $livewire->refreshFormData(['state']);
+                $livewire->refreshFormData(['state', 'parent_state']);
             })
             ->visible(function (Move $record) {
                 return

@@ -141,4 +141,9 @@ class Payment extends Model
     {
         return $this->belongsTo(PaymentToken::class, 'payment_token_id');
     }
+
+    public function accountMovePayment()
+    {
+        return $this->belongsToMany(Move::class, 'accounts_accounts_move_payment', 'payment_id', 'invoice_id');
+    }
 }

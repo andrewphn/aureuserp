@@ -90,6 +90,6 @@ class PaymentRegister extends Model
 
     public function registerMoveLines()
     {
-        return $this->hasMany(AccountPaymentRegisterMoveLine::class, 'payment_register_id');
+        return $this->belongsToMany(MoveLine::class, 'accounts_account_payment_register_move_lines', 'payment_register_id', 'move_line_id');
     }
 }

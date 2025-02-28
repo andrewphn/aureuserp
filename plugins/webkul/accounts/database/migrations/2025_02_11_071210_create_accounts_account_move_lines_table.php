@@ -31,7 +31,7 @@ return new class extends Migration
             $table->foreignId('statement_line_id')->nullable()->constrained('accounts_bank_statement_lines')->nullOnDelete();
 
             $table->foreignId('product_id')->comment('Product')->nullable()->constrained('products_products')->restrictOnDelete();
-            $table->foreignId('product_uom_id')->comment('Unit of Measure')->nullable()->constrained('unit_of_measures')->restrictOnDelete();
+            $table->foreignId('uom_id')->comment('Unit of Measure')->nullable()->constrained('unit_of_measures')->restrictOnDelete();
             $table->foreignId('created_by')->nullable()->comment('Created By')->constrained('users')->nullOnDelete();
 
             $table->string('move_name')->comment('Number')->nullable();
@@ -58,6 +58,7 @@ return new class extends Migration
             $table->decimal('price_unit', 15, 2)->nullable()->comment('Price Unit');
             $table->decimal('price_subtotal', 15, 2)->nullable()->comment('Subtotal');
             $table->decimal('price_total', 15, 2)->nullable()->comment('Total');
+            $table->decimal('price_tax', 15, 2)->nullable()->comment('Price Tax');
             $table->decimal('discount', 5, 2)->nullable()->comment('Discount (%)');
             $table->decimal('discount_amount_currency', 15, 2)->nullable()->comment('Discount Amount in Currency');
             $table->decimal('discount_balance', 15, 2)->nullable()->comment('Discount Balance');

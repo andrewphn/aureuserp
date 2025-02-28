@@ -36,7 +36,7 @@ trait HasSaleOrderActions
             Action::make('confirm')
                 ->color('gray')
                 ->label(__('sales::traits/sale-order-action.header-actions.confirm.title'))
-                ->hidden(fn ($record) => $record->state != OrderState::DRAFT->value)
+                ->hidden(fn($record) => $record->state != OrderState::DRAFT->value)
                 ->action(function ($record, $livewire) {
                     $record->update([
                         'state'          => OrderState::SALE->value,
@@ -56,7 +56,7 @@ trait HasSaleOrderActions
             Action::make('backToQuotation')
                 ->label(__('sales::traits/sale-order-action.header-actions.back-to-quotation.title'))
                 ->color('gray')
-                ->hidden(fn ($record) => $record->state != OrderState::CANCEL->value)
+                ->hidden(fn($record) => $record->state != OrderState::CANCEL->value)
                 ->action(function ($record) {
                     $record->update([
                         'state'          => OrderState::DRAFT->value,
@@ -85,7 +85,7 @@ trait HasSaleOrderActions
             Action::make('createInvoice')
                 ->modalIcon('heroicon-s-receipt-percent')
                 ->modalHeading(__('sales::traits/sale-order-action.header-actions.create-invoice.modal.heading'))
-                ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
+                ->hidden(fn($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
                 ->action(function () {})
                 ->modalWidth(MaxWidth::SevenExtraLarge),
             Action::make('sendByEmail')
@@ -94,16 +94,16 @@ trait HasSaleOrderActions
                         ->setPaper('A4', 'portrait')
                         ->setOption('defaultFont', 'Arial');
 
-                    $fileName = "$record->name-".time().'.pdf';
-                    $filePath = 'sales-orders/'.$fileName;
+                    $fileName = "$record->name-" . time() . '.pdf';
+                    $filePath = 'sales-orders/' . $fileName;
 
                     Storage::disk('public')->put($filePath, $pdf->output());
 
                     $action->fillForm([
                         'file'        => $filePath,
                         'partners'    => [$record->partner_id],
-                        'subject'     => $record->partner->name.' Quotation (Ref '.$record->name.')',
-                        'description' => 'Dear '.$record->partner->name.', <br/><br/>Your quotation <strong>'.$record->name.'</strong> amounting in <strong>'.$record->currency->symbol.' '.$record->amount_total.'</strong> is ready for review.<br/><br/>Should you have any questions or require further assistance, please feel free to reach out to us.',
+                        'subject'     => $record->partner->name . ' Quotation (Ref ' . $record->name . ')',
+                        'description' => 'Dear ' . $record->partner->name . ', <br/><br/>Your quotation <strong>' . $record->name . '</strong> amounting in <strong>' . $record->currency->symbol . ' ' . $record->amount_total . '</strong> is ready for review.<br/><br/>Should you have any questions or require further assistance, please feel free to reach out to us.',
                     ]);
                 })
                 ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.title'))
@@ -133,7 +133,7 @@ trait HasSaleOrderActions
                 )
                 ->modalIcon('heroicon-s-envelope')
                 ->modalHeading(__('sales::traits/sale-order-action.header-actions.send-by-email.modal.heading'))
-                ->visible(fn ($record) => $record->state != OrderState::DRAFT->value)
+                ->visible(fn($record) => $record->state != OrderState::DRAFT->value)
                 ->action(function ($record, array $data) {
                     $this->handleSendByEmail($record, $data);
                 }),
@@ -204,7 +204,7 @@ trait HasSaleOrderActions
                                 ->label(__('sales::traits/sale-order-action.header-actions.cancel.form.fields.partner'))
                                 ->preload(),
                             Forms\Components\TextInput::make('subject')
-                                ->default(fn () => __('sales::traits/sale-order-action.header-actions.cancel.form.fields.subject-default', [
+                                ->default(fn() => __('sales::traits/sale-order-action.header-actions.cancel.form.fields.subject-default', [
                                     'name' => $record->name,
                                     'id'   => $record->id,
                                 ]))
@@ -223,7 +223,7 @@ trait HasSaleOrderActions
                         ]);
                     }
                 )
-                ->hidden(fn ($record) => ! in_array($record->state, [OrderState::DRAFT->value, OrderState::SENT->value, OrderState::SALE->value])),
+                ->hidden(fn($record) => ! in_array($record->state, [OrderState::DRAFT->value, OrderState::SENT->value, OrderState::SALE->value])),
             Actions\DeleteAction::make(),
         ];
 

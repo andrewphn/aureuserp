@@ -2,6 +2,8 @@
 
 namespace Webkul\Account;
 
+use Livewire\Livewire;
+use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -51,10 +53,16 @@ class AccountServiceProvider extends PackageServiceProvider
                 '2025_02_11_120712_create_accounts_partial_reconciles_table',
                 '2025_02_11_121630_add_columns_to_accounts_moves_table',
                 '2025_02_11_121635_add_columns_to_accounts_account_payments_table',
-                '2025_02_11_121635_add_columns_to_accounts_moves_lines_table copy',
+                '2025_02_11_121635_add_columns_to_accounts_moves_lines_table',
                 '2025_02_17_064828_create_accounts_payment_registers_table',
                 '2025_02_17_070121_create_accounts_account_payment_register_move_lines_table',
                 '2025_02_24_123300_add_additional_columns_to_partners_partners_table',
+                '2025_02_24_124300_create_accounts_accounts_move_line_taxes_table',
+                '2025_02_27_112520_create_accounts_accounts_move_reversals_table',
+                '2025_02_27_132520_create_accounts_accounts_move_reversal_move_table',
+                '2025_02_27_142520_create_accounts_accounts_move_reversal_new_move_table',
+                '2025_02_28_142520_create_accounts_accounts_move_payment_table',
+                '2025_02_28_142520_create_accounts_accounts_payment_register_move_line'
             ])
             ->runsMigrations()
             ->hasDependencies([
@@ -68,5 +76,10 @@ class AccountServiceProvider extends PackageServiceProvider
                     ->runsSeeders();
             })
             ->hasUninstallCommand(function (UninstallCommand $command) {});
+    }
+
+    public function packageBooted(): void
+    {
+        Livewire::component('invoice-summary', InvoiceSummary::class);
     }
 }

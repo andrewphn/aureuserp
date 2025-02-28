@@ -4,6 +4,10 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\PaymentStatus;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
@@ -15,7 +19,7 @@ use Webkul\Support\Models\UTMSource;
 
 class Move extends Model
 {
-    use HasFactory;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
 
     protected $table = 'accounts_account_moves';
 
@@ -85,6 +89,57 @@ class Move extends Model
         'medium_id',
     ];
 
+    protected array $logAttributes = [
+        'medium.name'                       => 'Medium',
+        'source.name'                       => 'UTM Source',
+        'partner.name'                      => 'Customer',
+        'commercialPartner.name'            => 'Commercial Partner',
+        'partnerShipping.name'              => 'Shipping Address',
+        'partnerBank.name'                  => 'Bank Account',
+        'fiscalPosition.name'               => 'Fiscal Position',
+        'currency.name'                     => 'Currency',
+        'reversedEntry.name'                => 'Reversed Entry',
+        'invoiceUser.name'                  => 'Invoice User',
+        'invoiceIncoterm.name'              => 'Invoice Incoterm',
+        'invoiceCashRounding.name'          => 'Invoice Cash Rounding',
+        'createdBy.name'                    => 'Created By',
+        'name'                              => 'Invoice Reference',
+        'state'                             => 'Invoice Status',
+        'reference'                         => 'Reference',
+        'invoiceSourceEmail'                => 'Source Email',
+        'invoicePartnerDisplayName'         => 'Partner Display Name',
+        'invoiceOrigin'                     => 'Invoice Origin',
+        'incotermLocation'                  => 'Incoterm Location',
+        'date'                              => 'Invoice Date',
+        'invoice_date'                      => 'Invoice Date',
+        'invoice_date_due'                  => 'Due Date',
+        'delivery_date'                     => 'Delivery Date',
+        'narration'                         => 'Notes',
+        'amount_untaxed'                    => 'Subtotal',
+        'amount_tax'                        => 'Tax',
+        'amount_total'                      => 'Total',
+        'amount_residual'                   => 'Residual',
+        'amount_untaxed_signed'             => 'Subtotal (Signed)',
+        'amount_untaxed_in_currency_signed' => 'Subtotal (In Currency) (Signed)',
+        'amount_tax_signed'                 => 'Tax (Signed)',
+        'amount_total_signed'               => 'Total (Signed)',
+        'amount_total_in_currency_signed'   => 'Total (In Currency) (Signed)',
+        'amount_residual_signed'            => 'Residual (Signed)',
+        'quick_edit_total_amount'           => 'Quick Edit Total Amount',
+        'is_storno'                         => 'Is Storno',
+        'always_tax_exigible'               => 'Always Tax Exigible',
+        'checked'                           => 'Checked',
+        'posted_before'                     => 'Posted Before',
+        'made_sequence_gap'                 => 'Made Sequence Gap',
+        'is_manually_modified'              => 'Is Manually Modified',
+        'is_move_sent'                      => 'Is Move Sent',
+    ];
+
+    protected $casts = [
+        'invoice_date_due' => 'datetime',
+        'payment_state'    => PaymentStatus::class,
+    ];
+
     public function campaign()
     {
         return $this->belongsTo(UtmCampaign::class);
@@ -132,7 +187,7 @@ class Move extends Model
 
     public function partnerBank()
     {
-        return $this->belongsTo(BankAccount::class);
+        return $this->belongsTo(BankAccount::class, 'partner_bank_id');
     }
 
     public function fiscalPosition()
@@ -147,7 +202,7 @@ class Move extends Model
 
     public function reversedEntry()
     {
-        return $this->belongsTo(Move::class, 'reversed_entry_id');
+        return $this->belongsTo(self::class, 'reversed_entry_id');
     }
 
     public function invoiceUser()
@@ -177,7 +232,7 @@ class Move extends Model
 
     public function medium()
     {
-        return $this->belongsTo(UTMMedium::class);
+        return $this->belongsTo(UTMMedium::class, 'medium_id');
     }
 
     public function paymentMethodLine()
@@ -185,35 +240,70 @@ class Move extends Model
         return $this->belongsTo(PaymentMethodLine::class, 'preferred_payment_method_line_id');
     }
 
-    public function moveLines()
+    public function getTotalDiscountAttribute()
+    {
+        return $this->lines()
+            ->where('display_type', 'product')
+            ->sum('discount');
+    }
+
+    public function lines()
     {
         return $this->hasMany(MoveLine::class)
             ->where('display_type', 'product');
+    }
+
+    public function allLines()
+    {
+        return $this->hasMany(MoveLine::class);
+    }
+
+    public function taxLines()
+    {
+        return $this->hasMany(MoveLine::class)
+            ->where('display_type', 'tax');
+    }
+
+    public function paymentTermLine()
+    {
+        return $this->hasOne(MoveLine::class)
+            ->where('display_type', 'payment_term');
+    }
+
+    public static function generateNextInvoiceAndCreditNoteNumber(string $type = 'INV'): string
+    {
+        $year = date('Y');
+        $prefix = "{$type}/{$year}/";
+
+        $lastInvoice = self::whereRaw('name LIKE ?', ["{$prefix}%"])
+            ->latest('name')
+            ->first();
+
+        $lastNumber = optional($lastInvoice)->name
+            ? (int) substr($lastInvoice->name, strlen($prefix))
+            : 0;
+
+        return $prefix . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
     }
 
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($invoice) {
-            $invoice->name = 'ORD-TMP-'.time();
-        });
+        static::creating(function ($model) {
+            if (empty($model->name)) {
+                $model->name = self::generateNextInvoiceAndCreditNoteNumber();
+            }
 
-        static::created(function ($invoice) {
-            $invoice->updateName();
-            $invoice->saveQuietly();
-        });
-
-        static::updating(function ($invoice) {
-            $invoice->updateName();
+            $model->sequence_prefix = self::extractPrefixFromName($model->name);
         });
     }
 
     /**
-     * Update the name based on the state without trigger any additional events.
+     * Extracts the prefix (e.g., "INV or RINV/2025/") from the given invoice and credit Note name.
      */
-    public function updateName()
+    protected static function extractPrefixFromName(string $name): string
     {
-        $this->name = 'INV-'.$this->id;
+        return substr($name, 0, strrpos($name, '/') + 1);
     }
 }
