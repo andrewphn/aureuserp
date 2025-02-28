@@ -10,14 +10,17 @@ use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages;
 use Webkul\Account\Livewire\InvoiceSummary;
@@ -65,6 +68,14 @@ class InvoiceResource extends Resource
                 Forms\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('is_favorite')
+                                ->icon('heroicon-o-check-badge')
+                                ->color('success')
+                                ->visible(fn($record) => $record && $record->payment_state == PaymentState::PAID->value)
+                                ->label(PaymentState::PAID->getLabel())
+                                ->size(ActionSize::ExtraLarge->value)
+                        ]),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('name')
