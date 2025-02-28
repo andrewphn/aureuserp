@@ -137,6 +137,8 @@ class PayAction extends Action
             'move_id'                        => $record->id,
             'amount'                         => $data['amount'],
             'payment_method_line_id'         => $data['payment_method_line_id'],
+            'payment_method_id'              => $paymentMethodLine->payment_method_id,
+            'currency_id'                    => $record->currency_id,
             'partner_bank_id'                => $data['partner_bank_id'],
             'communication'                  => $data['communication'],
             'creator_id'                     => Auth::id(),
