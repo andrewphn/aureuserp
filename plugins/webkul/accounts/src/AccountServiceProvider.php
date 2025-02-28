@@ -60,7 +60,9 @@ class AccountServiceProvider extends PackageServiceProvider
                 '2025_02_24_124300_create_accounts_accounts_move_line_taxes_table',
                 '2025_02_27_112520_create_accounts_accounts_move_reversals_table',
                 '2025_02_27_132520_create_accounts_accounts_move_reversal_move_table',
-                '2025_02_27_142520_create_accounts_accounts_move_reversal_new_move_table'
+                '2025_02_27_142520_create_accounts_accounts_move_reversal_new_move_table',
+                '2025_02_28_142520_create_accounts_accounts_move_payment_table',
+                '2025_02_28_142520_create_accounts_accounts_payment_register_move_line'
             ])
             ->runsMigrations()
             ->hasDependencies([

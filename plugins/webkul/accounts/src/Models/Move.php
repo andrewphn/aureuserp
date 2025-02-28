@@ -281,7 +281,7 @@ class Move extends Model
             ? (int) substr($lastInvoice->name, strlen($prefix))
             : 0;
 
-        return $prefix.str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+        return $prefix . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
     }
 
     protected static function boot()
