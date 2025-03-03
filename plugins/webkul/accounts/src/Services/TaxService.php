@@ -17,7 +17,7 @@ class TaxService
     public static function collectionTaxes($taxIds, $subTotal, $quantity)
     {
         if (empty($taxIds)) {
-            return [$subTotal, 0];
+            return [$subTotal, 0, []];
         }
 
         $taxes = Tax::whereIn('id', $taxIds)
