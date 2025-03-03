@@ -117,19 +117,25 @@ class PrintAndSendAction extends Action
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
 
+        $viewTemplate = 'accounts::mail/invoice/actions/invoice';
+
         foreach ($partners as $partner) {
+            if (! $partner->email) {
+                continue;
+            }
+
             $attachments = [];
 
             foreach ($data['files'] as $file) {
                 $attachments[] = [
-                    'path' => asset(Storage::url($file)),
+                    'path' => asset('storage/' . $file),
                     'name' => basename($file),
                 ];
             }
 
             app(EmailService::class)->send(
                 mailClass: InvoiceEmail::class,
-                view: $viewName = 'accounts::mail/invoice/actions/invoice',
+                view: $viewTemplate,
                 payload: $this->preparePayloadForSendByEmail($record, $partner, $data),
                 attachments: $attachments,
             );
@@ -139,7 +145,7 @@ class PrintAndSendAction extends Action
             'from' => [
                 'company' => Auth::user()->defaultCompany->toArray(),
             ],
-            'body' => view($viewName, [
+            'body' => view($viewTemplate, [
                 'payload' => $this->preparePayloadForSendByEmail($record, $partner, $data),
             ])->render(),
             'type' => 'comment',
