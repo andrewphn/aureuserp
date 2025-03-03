@@ -33,6 +33,15 @@ class EditOrder extends EditRecord
             ChatterAction::make()
                 ->setResource(static::$resource),
             OrderActions\SendEmailAction::make(),
+            OrderActions\SendPOEmailAction::make(),
+            OrderActions\PrintRFQAction::make(),
+            OrderActions\DraftAction::make(),
+            OrderActions\ConfirmAction::make(),
+            OrderActions\ConfirmReceiptDateAction::make(),
+            OrderActions\CreateBillAction::make(),
+            OrderActions\LockAction::make(),
+            OrderActions\UnlockAction::make(),
+            OrderActions\CancelAction::make(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OrderState::DONE)
                 ->successNotification(
@@ -42,6 +51,15 @@ class EditOrder extends EditRecord
                         ->body(__('purchases::filament/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.body')),
                 ),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (! empty($data['ordered_at'])) {
+            $data['calendar_start_at'] = $data['ordered_at'];
+        }
+
+        return $data;
     }
 
     protected function afterSave(): void

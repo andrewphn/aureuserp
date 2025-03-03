@@ -29,6 +29,8 @@ class CreateOrder extends CreateRecord
     {
         $data['creator_id'] = Auth::id();
 
+        $data['calendar_start_at'] = $data['ordered_at'];
+
         $data['state'] ??= Enums\OrderState::DRAFT;
 
         return $data;

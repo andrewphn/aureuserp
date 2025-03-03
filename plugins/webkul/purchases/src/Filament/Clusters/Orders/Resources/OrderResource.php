@@ -2,6 +2,8 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -20,11 +22,13 @@ use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
 use Webkul\Product\Models\Packaging;
 use Webkul\Account\Models\Partner;
 use Webkul\Support\Models\UOM;
 use Webkul\Purchase\Settings;
+use Webkul\Purchase\Settings\OrderSettings;
 
 class OrderResource extends Resource
 {
@@ -43,7 +47,19 @@ class OrderResource extends Resource
                 ProgressStepper::make('state')
                     ->hiddenLabel()
                     ->inline()
-                    ->options(Enums\OrderState::options())
+                    ->options(function ($record) {
+                        $options = Enums\OrderState::options();
+                        
+                        if ($record && $record->state !== Enums\OrderState::CANCELED) {
+                            unset($options[Enums\OrderState::CANCELED->value]);
+                        }
+                        
+                        if ($record && $record->state !== Enums\OrderState::DONE) {
+                            unset($options[Enums\OrderState::DONE->value]);
+                        }
+                        
+                        return $options;
+                    })
                     ->default(Enums\OrderState::DRAFT)
                     ->disabled(),
                 Forms\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
@@ -77,7 +93,8 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.agreement'))
                                     ->relationship('requisition', 'name')
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->visible(fn (OrderSettings $setting): bool => $setting->enable_purchase_agreements),
                                 Forms\Components\Select::make('currency_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.currency'))
                                     ->relationship('currency', 'name')
@@ -100,6 +117,7 @@ class OrderResource extends Resource
                                 Forms\Components\DateTimePicker::make('ordered_at')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.order-deadline'))
                                     ->native(false)
+                                    ->required()
                                     ->suffixIcon('heroicon-o-calendar')
                                     ->default(now())
                                     ->hidden(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
@@ -107,7 +125,9 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.expected-arrival'))
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
-                                    ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
+                                    ->hint('Test')
+                                    ->hint(fn ($record): string => $record && $record->mail_reminder_confirmed ? __('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.confirmed-by-vendor') : '')
+                                    ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                             ]),
                     ])
                     ->columns(2),
@@ -142,6 +162,7 @@ class OrderResource extends Resource
                                             ->relationship('company', 'name')
                                             ->searchable()
                                             ->preload()
+                                            ->required()
                                             ->default(Auth::user()->default_company_id)
                                             ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                         Forms\Components\TextInput::make('reference')
@@ -239,6 +260,11 @@ class OrderResource extends Resource
                     ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.total-amount'))
                     ->sortable()
                     ->money(fn(Order $record) => $record->currency->code)
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('invoice_status')
+                    ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.billing-status'))
+                    ->sortable()
+                    ->badge()
                     ->toggleable(),
             ]))
             ->groups([
@@ -369,6 +395,176 @@ class OrderResource extends Resource
             );
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make()
+                    ->schema([
+                        Infolists\Components\TextEntry::make('state')
+                            ->badge(),
+                    ])
+                    ->compact(),
+
+                Infolists\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.title'))
+                    ->schema([
+                        Infolists\Components\Grid::make(2)
+                            ->schema([
+                                Infolists\Components\Group::make([
+                                    Infolists\Components\TextEntry::make('partner.name')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.vendor'))
+                                        ->icon('heroicon-o-user-group'),
+                                    Infolists\Components\TextEntry::make('partner_reference')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.vendor-reference'))
+                                        ->icon('heroicon-o-document-text')
+                                        ->placeholder('—'),
+                                    Infolists\Components\TextEntry::make('requisition.name')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.agreement'))
+                                        ->placeholder('—')
+                                        ->icon('heroicon-o-document-check')
+                                        ->visible(fn (OrderSettings $setting): bool => $setting->enable_purchase_agreements),
+                                    Infolists\Components\TextEntry::make('currency.name')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.currency'))
+                                        ->icon('heroicon-o-currency-dollar'),
+                                ]),
+
+                                Infolists\Components\Group::make([
+                                    Infolists\Components\TextEntry::make('approved_at')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.confirmation-date'))
+                                        ->dateTime()
+                                        ->icon('heroicon-o-calendar')
+                                        ->visible(fn($record): bool => ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                    Infolists\Components\TextEntry::make('ordered_at')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.order-deadline'))
+                                        ->dateTime()
+                                        ->icon('heroicon-o-calendar')
+                                        ->hidden(fn($record): bool => ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                    Infolists\Components\TextEntry::make('planned_at')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.expected-arrival'))
+                                        ->dateTime()
+                                        ->icon('heroicon-o-calendar')
+                                        ->hintColor('success')
+                                        ->hint(fn ($record): string => $record->mail_reminder_confirmed ? __('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.confirmed-by-vendor') : ''),
+                                ]),
+                            ]),
+                    ]),
+
+                Infolists\Components\Tabs::make('Tabs')
+                    ->tabs([
+                        Infolists\Components\Tabs\Tab::make(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.title'))
+                            ->schema([
+                                Infolists\Components\RepeatableEntry::make('lines')
+                                    ->hiddenLabel()
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.title'))
+                                    ->schema([
+                                        Infolists\Components\Grid::make(4)
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('product.name')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.product'))
+                                                    ->icon('heroicon-o-cube'),
+                                                Infolists\Components\TextEntry::make('planned_at')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.expected-arrival'))
+                                                    ->dateTime()
+                                                    ->icon('heroicon-o-calendar'),
+                                                Infolists\Components\TextEntry::make('product_qty')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.quantity'))
+                                                    ->icon('heroicon-o-calculator'),
+                                                Infolists\Components\TextEntry::make('qty_received')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.received'))
+                                                    ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
+                                                    ->icon('heroicon-o-calculator'),
+                                                Infolists\Components\TextEntry::make('qty_invoiced')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.billed'))
+                                                    ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
+                                                    ->icon('heroicon-o-calculator'),
+                                                Infolists\Components\TextEntry::make('uom.name')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.unit'))
+                                                    ->icon('heroicon-o-beaker')
+                                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                                Infolists\Components\TextEntry::make('product_packaging_qty')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.packaging-qty'))
+                                                    ->icon('heroicon-o-calculator')
+                                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                                Infolists\Components\TextEntry::make('productPackaging.name')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.packaging'))
+                                                    ->icon('heroicon-o-gift')
+                                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                                Infolists\Components\TextEntry::make('price_unit')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.unit-price'))
+                                                    ->money(fn ($record) => $record->order->currency->code),
+                                                Infolists\Components\TextEntry::make('taxes.name')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.taxes'))
+                                                    ->bulleted(),
+                                                Infolists\Components\TextEntry::make('discount')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.discount-percentage'))
+                                                    ->suffix('%'),
+                                                Infolists\Components\TextEntry::make('price_subtotal')
+                                                    ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.amount'))
+                                                    ->money(fn ($record) => $record->order->currency->code),
+                                            ]),
+                                    ])
+                                    ->columnSpanFull(),
+                                
+                                Infolists\Components\Group::make([
+                                    Infolists\Components\TextEntry::make('untaxed_amount')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.untaxed-amount'))
+                                        ->money(fn (Order $record) => $record->currency->code),
+                                    Infolists\Components\TextEntry::make('tax_amount')
+                                        ->label('Tax Amount')
+                                        ->money(fn (Order $record) => $record->currency->code),
+                                    Infolists\Components\TextEntry::make('total_amount')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.total-amount'))
+                                        ->money(fn (Order $record) => $record->currency->code),
+                                    Infolists\Components\TextEntry::make('invoice_status')
+                                        ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.billing-status'))
+                                        ->badge(),
+                                ])
+                                    ->columnSpanFull()
+                                    ->columns(4),
+                            ]),
+
+                        Infolists\Components\Tabs\Tab::make(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.title'))
+                            ->schema([
+                                Infolists\Components\Grid::make(2)
+                                    ->schema([
+                                        Infolists\Components\Group::make([
+                                            Infolists\Components\TextEntry::make('user.name')
+                                                ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.entries.buyer'))
+                                                ->placeholder('—'),
+                                            Infolists\Components\TextEntry::make('company.name')
+                                                ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.entries.company'))
+                                                ->placeholder('—'),
+                                            Infolists\Components\TextEntry::make('reference')
+                                                ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.entries.source-document'))
+                                                ->placeholder('—'),
+                                            Infolists\Components\TextEntry::make('incoterm.name')
+                                                ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.entries.incoterm'))
+                                                ->icon('heroicon-o-question-mark-circle')
+                                                ->placeholder('—')
+                                                ->tooltip(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.entries.incoterm-tooltip')),
+                                        ]),
+
+                                        Infolists\Components\Group::make([
+                                            Infolists\Components\TextEntry::make('paymentTerm.name')
+                                                ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.additional.entries.payment-term'))
+                                                ->placeholder('—'),
+                                        ]),
+                                    ]),
+                            ]),
+
+                        Infolists\Components\Tabs\Tab::make(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.terms.title'))
+                            ->schema([
+                                Infolists\Components\TextEntry::make('description')
+                                    ->hiddenLabel()
+                                    ->markdown()
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
+            ])
+            ->columns(1);
+    }
+
     public static function getProductRepeater(): Forms\Components\Repeater
     {
         return Forms\Components\Repeater::make('products')
@@ -380,8 +576,10 @@ class OrderResource extends Resource
             ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->deletable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]))
+            ->addable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]))
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -396,12 +594,25 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductUpdated($set, $get);
                                     })
-                                    ->required(),
+                                    ->required()
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::SENT, Enums\OrderState::PURCHASE, Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\DateTimePicker::make('planned_at')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.expected-arrival'))
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
-                                    ->default(now()),
+                                    ->required()
+                                    ->default(now())
+                                    ->default(function(Forms\Get $get, Forms\Set $set) {
+                                        if (empty($get('../../planned_at'))) {
+                                            $set('../../planned_at', now());
+                                        }
+
+                                        return now();
+                                    })
+                                    ->afterStateUpdated(function (?string $state, Forms\Set $set) {
+                                        $set('../../planned_at', $state);
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('product_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
                                     ->required()
@@ -410,7 +621,21 @@ class OrderResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductQtyUpdated($set, $get);
-                                    }),
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                Forms\Components\TextInput::make('qty_received')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.received'))
+                                    ->required()
+                                    ->default(0)
+                                    ->numeric()
+                                    ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                Forms\Components\TextInput::make('qty_invoiced')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.billed'))
+                                    ->default(0)
+                                    ->numeric()
+                                    ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
+                                    ->disabled(),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
                                     ->relationship(
@@ -424,7 +649,8 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterUOMUpdated($set, $get);
                                     })
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('product_packaging_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging-qty'))
                                     ->live()
@@ -432,7 +658,8 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductPackagingQtyUpdated($set, $get);
                                     })
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Select::make('product_packaging_id')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging'))
                                     ->relationship(
@@ -445,7 +672,18 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductPackagingUpdated($set, $get);
                                     })
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                Forms\Components\TextInput::make('price_unit')
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
+                                    ->numeric()
+                                    ->default(0)
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                        self::calculateLineTotals($set, $get);
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.taxes'))
                                     ->relationship(
@@ -461,7 +699,8 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
                                         self::calculateLineTotals($set, $get);
                                     })
-                                    ->live(),
+                                    ->live()
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
                                     ->numeric()
@@ -469,20 +708,13 @@ class OrderResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         self::calculateLineTotals($set, $get);
-                                    }),
-                                Forms\Components\TextInput::make('price_unit')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    })
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('price_subtotal')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.sub-total'))
+                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.amount'))
                                     ->default(0)
-                                    ->readOnly(),
+                                    ->readOnly()
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -692,10 +924,6 @@ class OrderResource extends Resource
 
         $quantity = floatval($get('product_qty') ?? 1);
 
-        $taxIds = $get('taxes') ?? [];
-
-        $taxAmount = 0;
-
         $subTotal = $priceUnit * $quantity;
 
         $discountValue = floatval($get('discount') ?? 0);
@@ -706,61 +934,9 @@ class OrderResource extends Resource
             $subTotal = $subTotal - $discountAmount;
         }
 
-        if (! empty($taxIds)) {
-            $taxes = Tax::whereIn('id', $taxIds)
-                ->orderBy('sort')
-                ->get();
+        $taxIds = $get('taxes') ?? [];
 
-            $baseAmount = $subTotal;
-
-            $taxesComputed = [];
-
-            foreach ($taxes as $tax) {
-                $amount = floatval($tax->amount);
-
-                $currentTaxBase = $baseAmount;
-
-                $tax->price_include_override ??= 'tax_excluded';
-
-                if ($tax->is_base_affected) {
-                    foreach ($taxesComputed as $prevTax) {
-                        if ($prevTax['include_base_amount']) {
-                            $currentTaxBase += $prevTax['tax_amount'];
-                        }
-                    }
-                }
-
-                $currentTaxAmount = 0;
-
-                if ($tax->price_include_override == 'tax_included') {
-                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-
-                    if (empty($taxesComputed)) {
-                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
-
-                        $subTotal = $priceUnit * $quantity;
-
-                        $baseAmount = $subTotal;
-                    }
-                } elseif ($tax->price_include_override == 'tax_excluded') {
-                    if ($tax->amount_type == 'percent') {
-                        $currentTaxAmount = $currentTaxBase * $amount / 100;
-                    } else {
-                        $currentTaxAmount = $amount * $quantity;
-                    }
-                }
-
-                $taxesComputed[] = [
-                    'tax_id'              => $tax->id,
-                    'tax_amount'          => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount,
-                ];
-
-                $taxAmount += $currentTaxAmount;
-            }
-        }
+        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $quantity);
 
         $set('price_subtotal', round($subTotal, 4));
 
@@ -777,12 +953,119 @@ class OrderResource extends Resource
         $record->total_cc_amount = 0;
 
         foreach ($record->lines as $line) {
+            $line = static::collectLineTotals($line);
+
             $record->untaxed_amount += $line->price_subtotal;
             $record->tax_amount += $line->price_tax;
             $record->total_amount += $line->price_total;
             $record->total_cc_amount += $line->price_total;
         }
 
+        if ($record->qty_to_invoice != 0) {
+            $record->invoice_status = Enums\OrderInvoiceStatus::TO_INVOICED;
+        }
+
         $record->save();
+    }
+
+    public static function collectLineTotals(OrderLine $line): OrderLine
+    {
+        $line->qty_received_manual = $line->qty_received;
+
+        $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
+
+        $subTotal = $line->price_unit * $line->product_qty;
+
+        $discountAmount = 0;
+        
+        if ($line->discount > 0) {
+            $discountAmount = $subTotal * ($line->discount / 100);
+
+            $subTotal = $subTotal - $discountAmount;
+        }
+
+        $taxIds = $line->taxes->pluck('id')->toArray();
+
+        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $line->product_qty);
+
+        $line->price_subtotal = round($subTotal, 4);
+
+        $line->price_tax = $taxAmount;
+
+        $line->price_total = $subTotal + $taxAmount;
+
+        $line->save();
+
+        return $line;
+    }
+
+    public static function collectionTaxes($taxIds, $subTotal, $quantity)
+    {
+        if (empty($taxIds)) {
+            return [$subTotal, 0];
+        }
+
+        $taxes = Tax::whereIn('id', $taxIds)
+            ->orderBy('sort')
+            ->get();
+        
+        $taxesComputed = [];
+
+        $totalTaxAmount = 0;
+
+        $adjustedSubTotal = $subTotal;
+
+        foreach ($taxes as $tax) {
+            $amount = floatval($tax->amount);
+
+            $tax->price_include_override ??= 'tax_excluded';
+
+            $currentTaxBase = $adjustedSubTotal;
+            
+            if ($tax->is_base_affected) {
+                foreach ($taxesComputed as $prevTax) {
+                    if ($prevTax['include_base_amount']) {
+                        $currentTaxBase += $prevTax['tax_amount'];
+                    }
+                }
+            }
+            
+            $currentTaxAmount = 0;
+            
+            if ($tax->price_include_override == 'tax_included') {
+                if ($tax->amount_type == 'percent') {
+                    $taxFactor = $amount / 100;
+
+                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
+                } else {
+                    $currentTaxAmount = $amount * $quantity;
+                    
+                    if ($currentTaxAmount > $adjustedSubTotal) {
+                        $currentTaxAmount = $adjustedSubTotal;
+                    }
+                }
+                
+                $adjustedSubTotal -= $currentTaxAmount;
+            } else {
+                if ($tax->amount_type == 'percent') {
+                    $currentTaxAmount = $currentTaxBase * $amount / 100;
+                } else {
+                    $currentTaxAmount = $amount * $quantity;
+                }
+            }
+            
+            $taxesComputed[] = [
+                'tax_id' => $tax->id,
+                'tax_amount' => $currentTaxAmount,
+                'include_base_amount' => $tax->include_base_amount,
+            ];
+            
+            $totalTaxAmount += $currentTaxAmount;
+        }
+        
+        return [
+            round($adjustedSubTotal, 4),
+            round($totalTaxAmount, 4)
+        ];
     }
 }

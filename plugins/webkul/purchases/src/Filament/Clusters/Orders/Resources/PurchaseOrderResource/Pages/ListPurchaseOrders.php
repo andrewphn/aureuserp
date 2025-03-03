@@ -4,7 +4,6 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResour
 
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Pages\ListOrders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResource;
-use Filament\Tables\Table;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Purchase\Enums\OrderState;
@@ -13,12 +12,6 @@ use Illuminate\Support\Facades\Auth;
 class ListPurchaseOrders extends ListOrders
 {
     protected static string $resource = PurchaseOrderResource::class;
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('state', [OrderState::PURCHASE, OrderState::DONE]));
-    }
 
     public function getPresetTableViews(): array
     {
@@ -38,7 +31,7 @@ class ListPurchaseOrders extends ListOrders
                 ->favorite()
                 ->modifyQueryUsing(function (Builder $query) {
                     return $query
-                        ->whereIn('state', [OrderState::PURCHASE, OrderState::DONE])
+                        ->where('state', OrderState::SENT)
                         ->where('ordered_at', '<', now());
                 }),
 

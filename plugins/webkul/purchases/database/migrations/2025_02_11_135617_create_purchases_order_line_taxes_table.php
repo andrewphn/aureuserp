@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchases_order_item_taxes', function (Blueprint $table) {
+        Schema::create('purchases_order_line_taxes', function (Blueprint $table) {
             $table->foreignId('order_line_id')
                 ->constrained('purchases_order_lines')
                 ->cascadeOnDelete();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchases_order_item_taxes');
+        Schema::dropIfExists('purchases_order_line_taxes');
     }
 };
