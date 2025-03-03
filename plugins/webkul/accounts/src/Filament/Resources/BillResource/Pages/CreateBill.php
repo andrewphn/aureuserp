@@ -2,17 +2,14 @@
 
 namespace Webkul\Account\Filament\Resources\BillResource\Pages;
 
-use Webkul\Account\Filament\Resources\BillResource;
-use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums;
-use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\PaymentState;
+use Webkul\Account\Filament\Resources\BillResource;
 use Webkul\Account\Models\Move;
-use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Services\MoveLineCalculationService;
 
 class CreateBill extends CreateRecord
 {
@@ -56,8 +53,6 @@ class CreateBill extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $record = $this->getRecord();
-
-        $this->getResource()::collectTotals($record);
+        $this->getResource()::collectTotals($this->getRecord());
     }
 }

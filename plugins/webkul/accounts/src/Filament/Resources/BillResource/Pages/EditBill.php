@@ -3,8 +3,8 @@
 namespace Webkul\Account\Filament\Resources\BillResource\Pages;
 
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\BillResource;
 use Webkul\Account\Filament\Resources\BillResource\Actions\CreditNoteAction;
@@ -73,8 +73,6 @@ class EditBill extends EditRecord
 
     protected function afterSave(): void
     {
-        $record = $this->getRecord();
-
-        $this->getResource()::collectTotals($record);
+        $this->getResource()::collectTotals($this->getRecord());
     }
 }
