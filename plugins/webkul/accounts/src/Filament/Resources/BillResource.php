@@ -687,9 +687,6 @@ class BillResource extends Resource
             'quantity'       => $get('quantity'),
             'taxes'          => $get('taxes'),
             'discount'       => $get('discount'),
-            'price_subtotal' => $get('price_subtotal'),
-            'price_tax'      => $get('price_tax'),
-            'price_total'    => $get('price_total'),
         ];
 
         $calculationService = app(MoveLineCalculationService::class);
@@ -874,8 +871,6 @@ class BillResource extends Resource
             }
         }
 
-        foreach ($existingTaxLines as $oldTaxLine) {
-            $oldTaxLine->delete();
-        }
+        $existingTaxLines->each->delete();
     }
 }
