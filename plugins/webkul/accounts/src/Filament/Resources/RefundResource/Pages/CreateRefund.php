@@ -60,9 +60,9 @@ class CreateRefund extends CreateBaseRefund
 
         $this->getResource()::collectTotals($record);
 
-        $this->createPaymentTermLine($record);
+        // $this->createPaymentTermLine($record);
 
-        $this->createTaxLine($record);
+        // $this->createTaxLine($record);
     }
 
     private function createPaymentTermLine($record): void
