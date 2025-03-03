@@ -30,6 +30,8 @@ use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
 use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\Inventory\Models\Packaging;
+use Webkul\Support\Models\UOM;
 
 class OperationResource extends Resource
 {
@@ -548,7 +550,7 @@ class OperationResource extends Resource
                     ->live()
                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                         if ($product = Product::find($get('product_id'))) {
-                            $set('product_packaging_id', $product->product_packaging_id);
+                            $packaging = static::getBestPackaging($get('product_id'), round($uomQuantity, 2));
 
                             $set('uom_id', $product->uom_id);
                         }
@@ -606,7 +608,7 @@ class OperationResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
+                    ->visible(fn (Settings\ProductSettings $settings): bool => $settings->enable_uom)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\Toggle::make('is_picked')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.picked'))
@@ -908,6 +910,105 @@ class OperationResource extends Resource
 
                 $set('received_qty', $totalQty);
             });
+    }
+
+    private static function afterProductUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $product = Product::find($get('product_id'));
+
+        $set('uom_id', $product->uom_id);
+
+        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+
+        $set('product_qty', round($productQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), round($productQuantity, 2));
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+    }
+
+    private static function afterProductQtyUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+
+        $set('product_qty', round($productQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), $productQuantity);
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+    }
+
+    private static function afterUOMUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+
+        $set('product_uom_qty', round($productQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), $productQuantity);
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+    }
+
+    private static function afterProductPackagingUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        if ($get('product_packaging_id')) {
+            $packaging = Packaging::find($get('product_packaging_id'));
+
+            $productUOMQty = $get('product_uom_qty') ?: 1;
+
+            if ($packaging) {
+                $packagingQty = $productUOMQty / $packaging->qty;
+
+                $set('product_packaging_qty', $packagingQty);
+            }
+        } else {
+            $set('product_packaging_qty', null);
+        }
+    }
+
+    private static function calculateProductQuantity($uomId, $uomQuantity)
+    {
+        if (! $uomId) {
+            return $uomQuantity;
+        }
+
+        $uom = Uom::find($uomId);
+
+        return (float) ($uomQuantity ?? 0) / $uom->factor;
+    }
+
+    private static function getBestPackaging($productId, $quantity)
+    {
+        $packagings = Packaging::where('product_id', $productId)
+            ->orderByDesc('qty')
+            ->get();
+
+        foreach ($packagings as $packaging) {
+            if ($quantity && $quantity % $packaging->qty == 0) {
+                return [
+                    'packaging_id' => $packaging->id,
+                    'packaging_qty' => round($quantity / $packaging->qty, 2),
+                ];
+            }
+        }
+
+        return null;
     }
 
     public static function getPresetTableViews(): array

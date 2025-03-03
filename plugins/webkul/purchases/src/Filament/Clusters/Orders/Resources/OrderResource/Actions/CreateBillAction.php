@@ -6,11 +6,12 @@ use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
 use Filament\Notifications\Notification;
-use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Purchase\Models\AccountMove;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Purchase\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums as AccountEnums;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
 class CreateBillAction extends Action
 {
@@ -43,6 +44,10 @@ class CreateBillAction extends Action
                     return;
                 }
 
+                $this->createAccountMove($record);
+
+                OrderResource::collectTotals($record);
+
                 $livewire->updateForm();
 
                 Notification::make()
@@ -60,6 +65,7 @@ class CreateBillAction extends Action
     private function createAccountMove($record): void
     {
         $accountMove = AccountMove::create([
+            'auto_post' => 'no',
             'state' => AccountEnums\MoveState::DRAFT,
             'move_type' => AccountEnums\MoveType::IN_INVOICE,
             'payment_state' => AccountEnums\PaymentStatus::NOT_PAID,
@@ -68,7 +74,7 @@ class CreateBillAction extends Action
             'date' => now(),
             'invoice_date_due' => now(),
             'invoice_currency_rate' => 1,
-            'journal_id' => AccountJournal::where('code', AccountEnums\JournalType::PURCHASE)->first()?->id,
+            'journal_id' => AccountJournal::where('type', AccountEnums\JournalType::PURCHASE->value)->first()?->id,
             'company_id' => $record->company_id,
             'currency_id' => $record->currency_id,
             'invoice_payment_term_id' => $record->payment_term_id,
@@ -107,6 +113,10 @@ class CreateBillAction extends Action
             'product_uom_id' => $orderLine->uom_id,
             'purchase_order_line_id' => $orderLine->id,
         ]);
+
+        $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
+
+        $orderLine->save();
 
         $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
     }

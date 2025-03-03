@@ -17,6 +17,8 @@ class ManageLogistics extends SettingsPage
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
+    protected static ?string $slug = 'inventory/manage-logistics';
+
     protected static ?string $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 5;

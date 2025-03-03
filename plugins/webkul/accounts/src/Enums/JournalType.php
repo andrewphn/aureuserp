@@ -6,8 +6,8 @@ use Filament\Support\Contracts\HasLabel;
 
 enum JournalType: string implements HasLabel
 {
-    case SALE = 'tax_included';
-    case PURCHASE = 'tax_excluded';
+    case SALE = 'sale';
+    case PURCHASE = 'purchase';
     case CASH = 'cash';
     case BANK = 'bank';
     case CREDIT_CARD = 'credit';

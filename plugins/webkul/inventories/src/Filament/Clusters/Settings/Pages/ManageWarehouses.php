@@ -20,6 +20,8 @@ class ManageWarehouses extends SettingsPage
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
+    protected static ?string $slug = 'inventory/manage-warehouses';
+
     protected static ?string $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 3;

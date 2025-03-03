@@ -17,6 +17,8 @@ class ManageOperations extends SettingsPage
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
+    protected static ?string $slug = 'inventory/manage-operations';
+
     protected static ?string $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 1;

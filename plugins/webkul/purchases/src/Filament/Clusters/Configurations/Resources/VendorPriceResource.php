@@ -10,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Product\Models\ProductSupplier;
 use Webkul\Purchase\Filament\Clusters\Configurations;
@@ -94,6 +95,7 @@ class VendorPriceResource extends Resource
                                             ->relationship('currency', 'name')
                                             ->required()
                                             ->searchable()
+                                            ->default(Auth::user()->defaultCompany?->currency_id)
                                             ->preload(),
                                         Forms\Components\DatePicker::make('starts_at')
                                             ->label(__('purchases::filament/clusters/configurations/resources/vendor-price.form.sections.prices.fields.valid-from'))
@@ -114,6 +116,7 @@ class VendorPriceResource extends Resource
                                     ->label(__('purchases::filament/clusters/configurations/resources/vendor-price.form.sections.prices.fields.company'))
                                     ->relationship('company', 'name')
                                     ->searchable()
+                                    ->default(Auth::user()->default_company_id)
                                     ->preload(),
                             ]),
                     ])

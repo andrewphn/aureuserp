@@ -77,11 +77,37 @@ class OrderResource extends Resource
                                     ->required()
                                     ->preload()
                                     ->createOptionForm(fn(Form $form) => VendorResource::form($form))
-                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
                                         if ($state) {
                                             $vendor = Partner::find($state);
 
                                             $set('payment_term_id', $vendor->property_supplier_payment_term_id);
+
+                                            $products = $get('products');
+                                            if (is_array($products)) {
+                                                foreach ($products as $key => $product) {
+                                                    if (isset($product['product_id'])) {
+                                                        $productModel = Product::find($product['product_id']);
+                                                        if ($productModel) {
+                                                            $vendorPrices = $productModel->supplierInformation
+                                                                ->where('partner_id', $state)
+                                                                ->where('currency_id', $get('currency_id'))
+                                                                ->where('min_qty', '<=', $product['product_qty'] ?? 1)
+                                                                ->sortByDesc('sort');
+
+                                                            if ($vendorPrices->isNotEmpty()) {
+                                                                $vendorPrice = $vendorPrices->first()->price;
+                                                            } else {
+                                                                $vendorPrice = $productModel->cost ?? $productModel->price;
+                                                            }
+
+                                                            $set("products.$key.price_unit", round($vendorPrice, 2));
+
+                                                            self::calculateLineTotals($set, $get, "products.$key.");
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     })
                                     ->live()
@@ -753,15 +779,15 @@ class OrderResource extends Resource
 
         $set('uom_id', $product->uom_id);
 
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+
+        $set('product_uom_qty', round($uomQuantity, 2));
+
+        $priceUnit = static::calculateUnitPrice($get);
 
         $set('price_unit', round($priceUnit, 2));
 
         $set('taxes', $product->productTaxes->pluck('id')->toArray());
-
-        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
-
-        $set('product_uom_qty', round($uomQuantity, 2));
 
         $packaging = static::getBestPackaging($get('product_id'), round($uomQuantity, 2));
 
@@ -807,9 +833,7 @@ class OrderResource extends Resource
 
         $set('product_packaging_qty', $packaging['packaging_qty'] ?? null);
 
-        $product = Product::find($get('product_id'));
-
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $priceUnit = static::calculateUnitPrice($get);
 
         $set('price_unit', round($priceUnit, 2));
 
@@ -875,15 +899,31 @@ class OrderResource extends Resource
         return (float) ($quantity ?? 0) / $uom->factor;
     }
 
-    private static function calculateUnitPrice($uomId, $price)
+    private static function calculateUnitPrice($get)
     {
-        if (! $uomId) {
-            return $price;
+        $product = Product::find($get('product_id'));
+
+        $vendorPrices = $product->supplierInformation->sortByDesc('sort');
+
+        if ($get('../../partner_id')) {
+            $vendorPrices = $vendorPrices->where('partner_id', $get('../../partner_id'));
         }
 
-        $uom = Uom::find($uomId);
+        $vendorPrices = $vendorPrices->where('min_qty', '<=', $get('product_qty') ?? 1)->where('currency_id', $get('../../currency_id'));
 
-        return (float) ($price / $uom->factor);
+        if (! $vendorPrices->isEmpty()) {
+            $vendorPrice = $vendorPrices->first()->price;
+        } else {
+            $vendorPrice = $product->cost ?? $product->price;
+        }
+
+        if (! $get('uom_id')) {
+            return $vendorPrice;
+        }
+
+        $uom = Uom::find($get('uom_id'));
+
+        return (float) ($vendorPrice / $uom->factor);
     }
 
     private static function getBestPackaging($productId, $quantity)
@@ -904,29 +944,29 @@ class OrderResource extends Resource
         return null;
     }
 
-    private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
+    private static function calculateLineTotals(Forms\Set $set, Forms\Get $get, ?string $prefix = ''): void
     {
-        if (! $get('product_id')) {
-            $set('price_unit', 0);
+        if (! $get($prefix.'product_id')) {
+            $set($prefix.'price_unit', 0);
 
-            $set('discount', 0);
+            $set($prefix.'discount', 0);
 
-            $set('price_tax', 0);
+            $set($prefix.'price_tax', 0);
 
-            $set('price_subtotal', 0);
+            $set($prefix.'price_subtotal', 0);
 
-            $set('price_total', 0);
+            $set($prefix.'price_total', 0);
 
             return;
         }
 
-        $priceUnit = floatval($get('price_unit'));
+        $priceUnit = floatval($get($prefix.'price_unit'));
 
-        $quantity = floatval($get('product_qty') ?? 1);
+        $quantity = floatval($get($prefix.'product_qty') ?? 1);
 
         $subTotal = $priceUnit * $quantity;
 
-        $discountValue = floatval($get('discount') ?? 0);
+        $discountValue = floatval($get($prefix.'discount') ?? 0);
 
         if ($discountValue > 0) {
             $discountAmount = $subTotal * ($discountValue / 100);
@@ -934,15 +974,15 @@ class OrderResource extends Resource
             $subTotal = $subTotal - $discountAmount;
         }
 
-        $taxIds = $get('taxes') ?? [];
+        $taxIds = $get($prefix.'taxes') ?? [];
 
         [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $quantity);
 
-        $set('price_subtotal', round($subTotal, 4));
+        $set($prefix.'price_subtotal', round($subTotal, 4));
 
-        $set('price_tax', $taxAmount);
+        $set($prefix.'price_tax', $taxAmount);
 
-        $set('price_total', $subTotal + $taxAmount);
+        $set($prefix.'price_total', $subTotal + $taxAmount);
     }
 
     public static function collectTotals(Order $record): void
@@ -951,6 +991,7 @@ class OrderResource extends Resource
         $record->tax_amount = 0;
         $record->total_amount = 0;
         $record->total_cc_amount = 0;
+        $record->invoice_count = 0;
 
         foreach ($record->lines as $line) {
             $line = static::collectLineTotals($line);
@@ -961,8 +1002,16 @@ class OrderResource extends Resource
             $record->total_cc_amount += $line->price_total;
         }
 
+        $record->invoice_count = $record->accountMoves->count();
+
         if ($record->qty_to_invoice != 0) {
             $record->invoice_status = Enums\OrderInvoiceStatus::TO_INVOICED;
+        } else {
+            if ($record->invoice_count) {
+                $record->invoice_status = Enums\OrderInvoiceStatus::INVOICED;
+            } else {
+                $record->invoice_status = Enums\OrderInvoiceStatus::NO;
+            }
         }
 
         $record->save();
