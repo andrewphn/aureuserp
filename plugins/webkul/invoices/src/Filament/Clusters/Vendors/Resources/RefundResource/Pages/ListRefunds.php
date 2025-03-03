@@ -3,6 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
@@ -17,17 +18,15 @@ class ListRefunds extends BaseListInvoices
 
     public function getPresetTableViews(): array
     {
-        $presets = parent::getPresetTableViews();
+        $predefinedViews = parent::getPresetTableViews();
 
-        return array_merge(
-            $presets,
-            [
-                'in_refund' => PresetView::make(__('invoices::filament/clusters/vendors/resources/refund/pages/list-refund.tabs.refund'))
-                    ->icon('heroicon-s-receipt-refund')
-                    ->default()
-                    ->favorite()
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
-            ]
-        );
+        return [
+            'in_refund' => PresetView::make(__('Refunds'))
+                ->favorite()
+                ->default()
+                ->icon('heroicon-s-receipt-percent')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
+            ...Arr::except($predefinedViews, ['invoice', 'in_refund']),
+        ];
     }
 }

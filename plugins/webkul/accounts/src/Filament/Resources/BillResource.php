@@ -90,6 +90,7 @@ class BillResource extends Resource
                                             ->relationship(
                                                 'partner',
                                                 'name',
+                                                fn($query) => $query->where('sub_type', 'supplier')->orderBy('id'),
                                             )
                                             ->searchable()
                                             ->preload()
