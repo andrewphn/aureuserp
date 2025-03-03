@@ -23,7 +23,6 @@ use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Models\Tax;
 use Webkul\Account\Services\MoveLineCalculationService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
@@ -58,10 +57,10 @@ class BillResource extends Resource
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('payment_state')
-                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Forms\Components\Group::make()
@@ -72,14 +71,14 @@ class BillResource extends Resource
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->placeholder('BILL/2025/00001')
-                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('BILL'))
+                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber('BILL'))
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
                                         ignoreRecord: true,
                                     )
                                     ->columnSpan(1)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
@@ -90,16 +89,16 @@ class BillResource extends Resource
                                             ->relationship(
                                                 'partner',
                                                 'name',
-                                                fn($query) => $query->where('sub_type', 'supplier')->orderBy('id'),
+                                                fn ($query) => $query->where('sub_type', 'supplier')->orderBy('id'),
                                             )
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -117,7 +116,7 @@ class BillResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->street2 ? ', '.$address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -129,35 +128,35 @@ class BillResource extends Resource
                                     ->label(__('Bill Date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\TextInput::make('reference')
                                     ->label(__('Bill Reference'))
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('date')
                                     ->label(__('Accounting Date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\TextInput::make('payment_reference')
                                     ->label(__('Payment Reference'))
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Select::make('partner_bank_id')
                                     ->relationship('partnerBank', 'account_number')
                                     ->searchable()
                                     ->preload()
                                     ->label(__('Recipient Bank'))
-                                    ->createOptionForm(fn($form) => BankAccountResource::form($form))
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->createOptionForm(fn ($form) => BankAccountResource::form($form))
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
                                     ->default(now())
                                     ->native(false)
                                     ->live()
-                                    ->hidden(fn(Get $get) => $get('invoice_payment_term_id') !== null)
+                                    ->hidden(fn (Get $get) => $get('invoice_payment_term_id') !== null)
                                     ->label(__('Due Date')),
                                 Forms\Components\Select::make('invoice_payment_term_id')
                                     ->relationship('invoicePaymentTerm', 'name')
-                                    ->required(fn(Get $get) => $get('invoice_date_due') === null)
+                                    ->required(fn (Get $get) => $get('invoice_date_due') === null)
                                     ->live()
                                     ->searchable()
                                     ->preload()
@@ -203,7 +202,7 @@ class BillResource extends Resource
                                             ->options(AutoPost::class)
                                             ->default(AutoPost::NO->value)
                                             ->label(__('Auto Post'))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
                                             ->label(__('Checked')),
@@ -253,10 +252,10 @@ class BillResource extends Resource
                     ->schema([
                         Infolists\Components\Actions::make([
                             Infolists\Components\Actions\Action::make('payment_state')
-                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Infolists\Components\Grid::make()
@@ -273,12 +272,12 @@ class BillResource extends Resource
                                 Infolists\Components\TextEntry::make('partner.name')
                                     ->placeholder('-')
                                     ->label(__('Customer'))
-                                    ->visible(fn($record) => $record->partner_id !== null)
+                                    ->visible(fn ($record) => $record->partner_id !== null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_partner_display_name')
                                     ->placeholder('-')
                                     ->label(__('Customer'))
-                                    ->visible(fn($record) => $record->partner_id === null)
+                                    ->visible(fn ($record) => $record->partner_id === null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_date')
                                     ->placeholder('-')
@@ -314,14 +313,14 @@ class BillResource extends Resource
                                             ->icon('heroicon-o-hashtag'),
                                         Infolists\Components\TextEntry::make('uom.name')
                                             ->placeholder('-')
-                                            ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
+                                            ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
                                             ->label(__('Unit of Measure'))
                                             ->icon('heroicon-o-scale'),
                                         Infolists\Components\TextEntry::make('price_unit')
                                             ->placeholder('-')
                                             ->label(__('Unit Price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn ($record) => $record->currency->name),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('Discount'))
@@ -330,24 +329,24 @@ class BillResource extends Resource
                                         Infolists\Components\TextEntry::make('taxes.name')
                                             ->badge()
                                             ->state(function ($record): array {
-                                                return $record->taxes->map(fn($tax) => [
+                                                return $record->taxes->map(fn ($tax) => [
                                                     'name' => $tax->name,
                                                 ])->toArray();
                                             })
                                             ->icon('heroicon-o-receipt-percent')
-                                            ->formatStateUsing(fn($state) => $state['name'])
+                                            ->formatStateUsing(fn ($state) => $state['name'])
                                             ->placeholder('-')
                                             ->weight(FontWeight::Bold),
                                         Infolists\Components\TextEntry::make('price_subtotal')
                                             ->placeholder('-')
                                             ->label(__('Subtotal'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn ($record) => $record->currency->name),
                                         Infolists\Components\TextEntry::make('price_total')
                                             ->placeholder('-')
                                             ->label(__('Total'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->money(fn($record) => $record->currency->symbol)
+                                            ->money(fn ($record) => $record->currency->symbol)
                                             ->weight('bold'),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
@@ -414,7 +413,7 @@ class BillResource extends Resource
                                                     ->placeholder('-')
                                                     ->label(__('Auto Post'))
                                                     ->icon('heroicon-o-arrow-path')
-                                                    ->formatStateUsing(fn(string $state): string => AutoPost::from($state)->getLabel()),
+                                                    ->formatStateUsing(fn (string $state): string => AutoPost::from($state)->getLabel()),
                                                 Infolists\Components\IconEntry::make('checked')
                                                     ->label(__('Checked'))
                                                     ->icon('heroicon-o-check-circle')
@@ -467,8 +466,8 @@ class BillResource extends Resource
             ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -481,8 +480,8 @@ class BillResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
                                     ->label(__('Quantity'))
@@ -491,22 +490,22 @@ class BillResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
                                     ->relationship(
@@ -520,9 +519,9 @@ class BillResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
-                                    ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('Discount Percentage'))
@@ -530,8 +529,8 @@ class BillResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('Unit Price'))
                                     ->numeric()
@@ -539,13 +538,13 @@ class BillResource extends Resource
                                     ->required()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('Sub Total'))
                                     ->default(0)
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -556,8 +555,8 @@ class BillResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
     public static function mutateProductRelationship(array $data, $record, $livewire): array
@@ -682,21 +681,43 @@ class BillResource extends Resource
 
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get): void
     {
-        $lineData = [
-            'product_id'     => $get('product_id'),
-            'price_unit'     => $get('price_unit'),
-            'quantity'       => $get('quantity'),
-            'taxes'          => $get('taxes'),
-            'discount'       => $get('discount'),
-        ];
+        if (! $get('product_id')) {
+            $set('price_unit', 0);
 
-        $calculationService = app(MoveLineCalculationService::class);
+            $set('discount', 0);
 
-        $updatedLineData = $calculationService->calculateLineTotals($lineData);
+            $set('price_tax', 0);
 
-        $set('price_subtotal', $updatedLineData['price_subtotal']);
-        $set('price_tax', $updatedLineData['price_tax']);
-        $set('price_total', $updatedLineData['price_total']);
+            $set('price_subtotal', 0);
+
+            $set('price_total', 0);
+
+            return;
+        }
+
+        $priceUnit = floatval($get('price_unit'));
+
+        $quantity = floatval($get('product_qty') ?? 1);
+
+        $subTotal = $priceUnit * $quantity;
+
+        $discountValue = floatval($get('discount') ?? 0);
+
+        if ($discountValue > 0) {
+            $discountAmount = $subTotal * ($discountValue / 100);
+
+            $subTotal = $subTotal - $discountAmount;
+        }
+
+        $taxIds = $get('taxes') ?? [];
+
+        [$subTotal, $taxAmount] = app(MoveLineCalculationService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
+
+        $set('price_subtotal', round($subTotal, 4));
+
+        $set('price_tax', $taxAmount);
+
+        $set('price_total', $subTotal + $taxAmount);
     }
 
     public static function collectTotals(AccountMove $record): void
@@ -749,7 +770,7 @@ class BillResource extends Resource
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount, $taxesComputed] = static::collectionTaxes($taxIds, $subTotal, $line->quantity);
+        [$subTotal, $taxAmount, $taxesComputed] = app(MoveLineCalculationService::class)->collectionTaxes($taxIds, $subTotal, $line->quantity);
 
         if ($taxAmount > 0) {
             static::updateOrCreateTaxLine($line, $subTotal, $taxesComputed, $newTaxEntries);
@@ -764,77 +785,6 @@ class BillResource extends Resource
         $line->save();
 
         return $line;
-    }
-
-    public static function collectionTaxes($taxIds, $subTotal, $quantity)
-    {
-        if (empty($taxIds)) {
-            return [$subTotal, 0];
-        }
-
-        $taxes = Tax::whereIn('id', $taxIds)
-            ->orderBy('sort')
-            ->get();
-
-        $taxesComputed = [];
-
-        $totalTaxAmount = 0;
-
-        $adjustedSubTotal = $subTotal;
-
-        foreach ($taxes as $tax) {
-            $amount = floatval($tax->amount);
-
-            $tax->price_include_override ??= 'tax_excluded';
-
-            $currentTaxBase = $adjustedSubTotal;
-
-            if ($tax->is_base_affected) {
-                foreach ($taxesComputed as $prevTax) {
-                    if ($prevTax['include_base_amount']) {
-                        $currentTaxBase += $prevTax['tax_amount'];
-                    }
-                }
-            }
-
-            $currentTaxAmount = 0;
-
-            if ($tax->price_include_override == 'tax_included') {
-                if ($tax->amount_type == 'percent') {
-                    $taxFactor = $amount / 100;
-
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-                } else {
-                    $currentTaxAmount = $amount * $quantity;
-
-                    if ($currentTaxAmount > $adjustedSubTotal) {
-                        $currentTaxAmount = $adjustedSubTotal;
-                    }
-                }
-
-                $adjustedSubTotal -= $currentTaxAmount;
-            } else {
-                if ($tax->amount_type == 'percent') {
-                    $currentTaxAmount = $currentTaxBase * $amount / 100;
-                } else {
-                    $currentTaxAmount = $amount * $quantity;
-                }
-            }
-
-            $taxesComputed[] = [
-                'tax_id'              => $tax->id,
-                'tax_amount'          => $currentTaxAmount,
-                'include_base_amount' => $tax->include_base_amount,
-            ];
-
-            $totalTaxAmount += $currentTaxAmount;
-        }
-
-        return [
-            round($adjustedSubTotal, 4),
-            round($totalTaxAmount, 4),
-            $taxesComputed,
-        ];
     }
 
     public static function updateOrCreatePaymentTermLine($move): void
@@ -889,9 +839,9 @@ class BillResource extends Resource
             $currentTaxAmount = $computedTax['tax_amount'];
 
             if (isset($newTaxEntries[$tax->id])) {
-                $newTaxEntries[$tax->id]['debit']           += $currentTaxAmount;
-                $newTaxEntries[$tax->id]['credit']          += $currentTaxAmount;
-                $newTaxEntries[$tax->id]['balance']         += $currentTaxAmount;
+                $newTaxEntries[$tax->id]['debit'] += $currentTaxAmount;
+                $newTaxEntries[$tax->id]['credit'] += $currentTaxAmount;
+                $newTaxEntries[$tax->id]['balance'] += $currentTaxAmount;
                 $newTaxEntries[$tax->id]['amount_currency'] += $currentTaxAmount;
                 $newTaxEntries[$tax->id]['tax_base_amount'] += $subTotal;
             } else {
