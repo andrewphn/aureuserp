@@ -15,6 +15,7 @@ use Filament\Support\Enums\FontWeight;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
+use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -716,20 +717,168 @@ class BillResource extends Resource
         $lines = $record->lines->where('display_type', 'product');
 
         foreach ($lines as $line) {
-            $record->amount_untaxed += floatval($line->price_subtotal);
-            $record->amount_tax += floatval($line->price_tax);
-            $record->amount_total += floatval($line->price_total);
+            $lineData = [
+                'product_id'     => $line->product_id,
+                'price_unit'     => $line->price_unit,
+                'quantity'       => $line->quantity,
+                'taxes'          => $line->taxes->pluck('id')->toArray(),
+                'discount'       => $line->discount,
+                'price_subtotal' => $line->price_subtotal,
+                'price_tax'      => $line->price_tax,
+                'price_total'    => $line->price_total,
+            ];
 
-            $record->amount_untaxed_signed += -floatval($line->price_subtotal);
-            $record->amount_untaxed_in_currency_signed += -floatval($line->price_subtotal);
-            $record->amount_tax_signed += -floatval($line->price_tax);
-            $record->amount_total_signed += -floatval($line->price_total);
-            $record->amount_total_in_currency_signed += -floatval($line->price_total);
+            $updatedLine = app(MoveLineCalculationService::class)->calculateLineTotals($lineData);
 
-            $record->amount_residual += floatval($line->price_total);
-            $record->amount_residual_signed += -floatval($line->price_total);
+            $record->amount_untaxed += floatval($updatedLine['price_subtotal']);
+            $record->amount_tax += floatval($updatedLine['price_tax']);
+            $record->amount_total += floatval($updatedLine['price_total']);
+
+            $record->amount_untaxed_signed += -floatval($updatedLine['price_subtotal']);
+            $record->amount_untaxed_in_currency_signed += -floatval($updatedLine['price_subtotal']);
+            $record->amount_tax_signed += -floatval($updatedLine['price_tax']);
+            $record->amount_total_signed += -floatval($updatedLine['price_total']);
+            $record->amount_total_in_currency_signed += -floatval($updatedLine['price_total']);
+
+            $record->amount_residual += floatval($updatedLine['price_total']);
+            $record->amount_residual_signed += -floatval($updatedLine['price_total']);
         }
 
         $record->save();
+
+        static::updateOrCreatePaymentTermLine($record);
+
+        static::updateOrCreateTaxLine($record);
+    }
+
+    public static function updateOrCreatePaymentTermLine($record): void
+    {
+        $dateMaturity = $record->invoice_date_due;
+
+        if ($record->invoicePaymentTerm && $record->invoicePaymentTerm->dueTerm?->nb_days) {
+            $dateMaturity = $dateMaturity->addDays($record->invoicePaymentTerm->dueTerm->nb_days);
+        }
+
+        $data = [
+            'currency_id'              => $record->currency_id,
+            'partner_id'               => $record->partner_id,
+            'date_maturity'            => $dateMaturity,
+            'company_id'               => $record->company_id,
+            'company_currency_id'      => $record->company_currency_id,
+            'commercial_partner_id'    => $record->partner_id,
+            'parent_state'             => $record->state,
+            'debit'                    => 0.00,
+            'credit'                   => $record->amount_total,
+            'balance'                  => -$record->amount_total,
+            'amount_currency'          => -$record->amount_total,
+            'amount_residual'          => -$record->amount_total,
+            'amount_residual_currency' => -$record->amount_total,
+        ];
+
+        MoveLine::updateOrCreate(
+            ['move_id' => $record->id, 'display_type' => 'payment_term'],
+            array_merge($data, [
+                'move_name' => $record->name,
+                'sort'      => MoveLine::whereNotNull('sort')->max('sort') + 1,
+                'date'      => now(),
+                'creator_id' => $record->creator_id,
+            ])
+        );
+    }
+
+    private static function updateOrCreateTaxLine($record): void
+    {
+        $calculationService = app(MoveLineCalculationService::class);
+        $lines = $record->lines->where('display_type', DisplayType::PRODUCT->value);
+        $existingTaxLines = MoveLine::where('move_id', $record->id)->where('display_type', 'tax')->get()->keyBy('tax_line_id');
+        $newTaxEntries = [];
+
+        foreach ($lines as $line) {
+            if ($line->taxes->isEmpty()) {
+                continue;
+            }
+
+            $lineData = [
+                'product_id' => $line->product_id,
+                'price_unit' => $line->price_unit,
+                'quantity'   => $line->quantity,
+                'taxes'      => $line->taxes->pluck('id')->toArray(),
+                'discount'   => $line->discount ?? 0,
+            ];
+
+            $calculatedLine = $calculationService->calculateLineTotals($lineData);
+            $taxes = $line->taxes()->orderBy('sort')->get();
+            $baseAmount = $calculatedLine['price_subtotal'];
+
+            $taxCalculationResult = $calculationService->calculateTaxes(
+                $lineData['taxes'],
+                $baseAmount,
+                $lineData['quantity'],
+                $lineData['price_unit']
+            );
+
+            $taxesComputed = $taxCalculationResult['taxesComputed'];
+
+            foreach ($taxes as $tax) {
+                $computedTax = collect($taxesComputed)->firstWhere('tax_id', $tax->id);
+
+                if (! $computedTax) {
+                    continue;
+                }
+
+                $currentTaxAmount = $computedTax['tax_amount'];
+
+                $currentTaxBase = $baseAmount;
+                if ($tax->is_base_affected) {
+                    foreach ($taxesComputed as $prevTax) {
+                        if ($prevTax['include_base_amount'] && $prevTax['tax_id'] !== $tax->id) {
+                            $currentTaxBase += $prevTax['tax_amount'];
+                        }
+                    }
+                }
+
+                if (isset($newTaxEntries[$tax->id])) {
+                    $newTaxEntries[$tax->id]['credit'] += $currentTaxAmount;
+                    $newTaxEntries[$tax->id]['balance'] -= $currentTaxAmount;
+                    $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
+                } else {
+                    $newTaxEntries[$tax->id] = [
+                        'name'                  => $tax->name,
+                        'move_id'               => $record->id,
+                        'move_name'             => $record->name,
+                        'display_type'          => 'tax',
+                        'currency_id'           => $record->currency_id,
+                        'partner_id'            => $record->partner_id,
+                        'company_id'            => $record->company_id,
+                        'company_currency_id'   => $record->company_currency_id,
+                        'commercial_partner_id' => $record->partner_id,
+                        'parent_state'          => $record->state,
+                        'date'                  => now(),
+                        'creator_id'            => $record->creator_id,
+                        'debit'                 => $currentTaxAmount,
+                        'credit'                => 0,
+                        'balance'               => $currentTaxAmount,
+                        'amount_currency'       => $currentTaxAmount,
+                        'tax_base_amount'       => $currentTaxBase,
+                        'tax_line_id'           => $tax->id,
+                        'tax_group_id'          => $tax->tax_group_id,
+                    ];
+                }
+            }
+        }
+
+        foreach ($newTaxEntries as $taxId => $taxData) {
+            if (isset($existingTaxLines[$taxId])) {
+                $existingTaxLines[$taxId]->update($taxData);
+                unset($existingTaxLines[$taxId]);
+            } else {
+                $taxData['sort'] = MoveLine::max('sort') + 1;
+                MoveLine::create($taxData);
+            }
+        }
+
+        foreach ($existingTaxLines as $oldTaxLine) {
+            $oldTaxLine->delete();
+        }
     }
 }
