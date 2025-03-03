@@ -189,22 +189,29 @@
                                 @if ($record->partner?->phone)
                                     {{ $record->partner?->phone }}<br>
                                 @endif
+
                                 @php
-                                    $address = $record->partner->addresses->where('type', 'present')->first();
-                                    $address = sprintf(
-                                        "%s\n%s%s\n%s, %s %s\n%s",
-                                        $address->name ?? '',
-                                        $address->street1 ?? '',
-                                        $address->street2 ? ', ' . $address->street2 : '',
-                                        $address->city ?? '',
-                                        $address->state ? $address->state->name : '',
-                                        $address->zip ?? '',
-                                        $address->country ? $address->country->name : ''
-                                    );
+                                    $addressRecord = $record->partner->addresses->where('type', 'present')->first();
+                                    $address = '';
+
+                                    if ($addressRecord) {
+                                        $address = sprintf(
+                                            "%s\n%s%s\n%s, %s %s\n%s",
+                                            $addressRecord->name ?? '',
+                                            $addressRecord->street1 ?? '',
+                                            $addressRecord->street2 ? ', ' . $addressRecord->street2 : '',
+                                            $addressRecord->city ?? '',
+                                            $addressRecord->state ? $addressRecord->state->name : '',
+                                            $addressRecord->zip ?? '',
+                                            $addressRecord->country ? $addressRecord->country->name : ''
+                                        );
+                                    }
                                 @endphp
-                                @if ($address)
+
+                                @if (!empty($address))
                                     {{ $address }}
                                 @endif
+
                             </div>
                         </td>
                     </tr>

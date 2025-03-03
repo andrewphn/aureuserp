@@ -10,8 +10,9 @@ use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Models\MoveLine;
-use Webkul\Partner\Models\Partner;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\Partner\Models\Partner;
+use Webkul\Support\Services\MoveLineCalculationService;
 
 class EditInvoice extends EditRecord
 {
@@ -65,7 +66,7 @@ class EditInvoice extends EditRecord
             $partner = Partner::find($data['partner_id']);
 
             $data['commercial_partner_id'] = $partner->id;
-            $data['partner_shipping_id'] = $partner->id;
+            $data['partner_shipping_id'] = $partner->addresses->where('type', 'present')->first()?->id;
             $data['invoice_partner_display_name'] = $partner->name;
         } else {
             $data['invoice_partner_display_name'] = "#Created By: {$user->name}";
@@ -138,6 +139,7 @@ class EditInvoice extends EditRecord
 
     private function updateOrCreateTaxLine($record): void
     {
+        $calculationService = app(MoveLineCalculationService::class);
         $lines = $record->lines->where('display_type', DisplayType::PRODUCT->value);
         $existingTaxLines = MoveLine::where('move_id', $record->id)->where('display_type', 'tax')->get()->keyBy('tax_line_id');
         $newTaxEntries = [];
@@ -147,46 +149,43 @@ class EditInvoice extends EditRecord
                 continue;
             }
 
+            $lineData = [
+                'product_id' => $line->product_id,
+                'price_unit' => $line->price_unit,
+                'quantity'   => $line->quantity,
+                'taxes'      => $line->taxes->pluck('id')->toArray(),
+                'discount'   => $line->discount ?? 0,
+            ];
+
+            $calculatedLine = $calculationService->calculateLineTotals($lineData);
             $taxes = $line->taxes()->orderBy('sort')->get();
-            $priceUnit = $line->price_unit;
-            $quantity = $line->quantity;
-            $baseAmount = $line->price_subtotal;
-            $subTotal = $priceUnit * $quantity;
-            $discountValue = floatval($line->discount ?? 0);
+            $baseAmount = $calculatedLine['price_subtotal'];
 
-            if ($discountValue > 0) {
-                $discountAmount = $subTotal * ($discountValue / 100);
-                $subTotal -= $discountAmount;
-            }
+            $taxCalculationResult = $calculationService->calculateTaxes(
+                $lineData['taxes'],
+                $baseAmount,
+                $lineData['quantity'],
+                $lineData['price_unit']
+            );
 
-            $taxesComputed = [];
+            $taxesComputed = $taxCalculationResult['taxesComputed'];
 
             foreach ($taxes as $tax) {
-                $amount = floatval($tax->amount);
-                $currentTaxBase = $baseAmount;
-                $tax->price_include_override ??= 'tax_excluded';
+                $computedTax = collect($taxesComputed)->firstWhere('tax_id', $tax->id);
 
+                if (! $computedTax) {
+                    continue;
+                }
+
+                $currentTaxAmount = $computedTax['tax_amount'];
+
+                $currentTaxBase = $baseAmount;
                 if ($tax->is_base_affected) {
                     foreach ($taxesComputed as $prevTax) {
-                        if ($prevTax['include_base_amount']) {
+                        if ($prevTax['include_base_amount'] && $prevTax['tax_id'] !== $tax->id) {
                             $currentTaxBase += $prevTax['tax_amount'];
                         }
                     }
-                }
-
-                $currentTaxAmount = 0;
-
-                if ($tax->price_include_override == 'tax_included') {
-                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-
-                    if (empty($taxesComputed)) {
-                        $priceUnit -= ($currentTaxAmount / $quantity);
-                        $subTotal = $priceUnit * $quantity;
-                        $baseAmount = $subTotal;
-                    }
-                } elseif ($tax->price_include_override == 'tax_excluded') {
-                    $currentTaxAmount = ($tax->amount_type == 'percent') ? ($currentTaxBase * $amount / 100) : ($amount * $quantity);
                 }
 
                 if (isset($newTaxEntries[$tax->id])) {
@@ -195,33 +194,27 @@ class EditInvoice extends EditRecord
                     $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
                 } else {
                     $newTaxEntries[$tax->id] = [
-                        'name' => $tax->name,
-                        'move_id' => $record->id,
-                        'move_name' => $record->name,
-                        'display_type' => 'tax',
-                        'currency_id' => $record->currency_id,
-                        'partner_id' => $record->partner_id,
-                        'company_id' => $record->company_id,
-                        'company_currency_id' => $record->company_currency_id,
+                        'name'                  => $tax->name,
+                        'move_id'               => $record->id,
+                        'move_name'             => $record->name,
+                        'display_type'          => 'tax',
+                        'currency_id'           => $record->currency_id,
+                        'partner_id'            => $record->partner_id,
+                        'company_id'            => $record->company_id,
+                        'company_currency_id'   => $record->company_currency_id,
                         'commercial_partner_id' => $record->partner_id,
-                        'parent_state' => $record->state,
-                        'date' => now(),
-                        'creator_id' => $record->creator_id,
-                        'debit' => 0,
-                        'credit' => $currentTaxAmount,
-                        'balance' => -$currentTaxAmount,
-                        'amount_currency' => -$currentTaxAmount,
-                        'tax_base_amount' => $currentTaxBase,
-                        'tax_line_id' => $tax->id,
-                        'tax_group_id' => $tax->tax_group_id,
+                        'parent_state'          => $record->state,
+                        'date'                  => now(),
+                        'creator_id'            => $record->creator_id,
+                        'debit'                 => 0,
+                        'credit'                => $currentTaxAmount,
+                        'balance'               => -$currentTaxAmount,
+                        'amount_currency'       => -$currentTaxAmount,
+                        'tax_base_amount'       => $currentTaxBase,
+                        'tax_line_id'           => $tax->id,
+                        'tax_group_id'          => $tax->tax_group_id,
                     ];
                 }
-
-                $taxesComputed[] = [
-                    'tax_id' => $tax->id,
-                    'tax_amount' => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount,
-                ];
             }
         }
 

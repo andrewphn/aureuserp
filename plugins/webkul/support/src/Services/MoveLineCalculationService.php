@@ -9,7 +9,7 @@ class MoveLineCalculationService
     /**
      * Calculate all line totals for an invoice line
      *
-     * @param array $lineData Current line data
+     * @param  array  $lineData  Current line data
      * @return array Updated line data with calculated values
      */
     public function calculateLineTotals(array $lineData): array
@@ -57,16 +57,16 @@ class MoveLineCalculationService
     /**
      * Reset all line values to zero
      *
-     * @param array $lineData Current line data
+     * @param  array  $lineData  Current line data
      * @return array Line data with reset values
      */
-    private function resetLineValues(array $lineData): array
+    public function resetLineValues(array $lineData): array
     {
-        $lineData['price_unit']     = 0;
-        $lineData['discount']       = 0;
-        $lineData['price_tax']      = 0;
+        $lineData['price_unit'] = 0;
+        $lineData['discount'] = 0;
+        $lineData['price_tax'] = 0;
         $lineData['price_subtotal'] = 0;
-        $lineData['price_total']    = 0;
+        $lineData['price_total'] = 0;
 
         return $lineData;
     }
@@ -74,13 +74,13 @@ class MoveLineCalculationService
     /**
      * Calculate taxes for an invoice line
      *
-     * @param array $taxIds IDs of selected taxes
-     * @param float $baseAmount Base amount for tax calculation
-     * @param float $quantity Line quantity
-     * @param float $priceUnit Unit price
+     * @param  array  $taxIds  IDs of selected taxes
+     * @param  float  $baseAmount  Base amount for tax calculation
+     * @param  float  $quantity  Line quantity
+     * @param  float  $priceUnit  Unit price
      * @return array Tax calculation results
      */
-    private function calculateTaxes(array $taxIds, float $baseAmount, float $quantity, float $priceUnit): array
+    public function calculateTaxes(array $taxIds, float $baseAmount, float $quantity, float $priceUnit): array
     {
         if (empty($taxIds)) {
             return [];
