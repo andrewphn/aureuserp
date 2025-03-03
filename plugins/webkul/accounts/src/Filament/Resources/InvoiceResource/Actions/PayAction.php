@@ -50,7 +50,7 @@ class PayAction extends Action
                                     }
                                 )
                                 ->required()
-                                ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.payment-method-line'))
+                                ->label('Payment Method')
                                 ->searchable()
                                 ->preload(),
                             Forms\Components\DatePicker::make('payment_date')
@@ -65,7 +65,7 @@ class PayAction extends Action
                                 )
                                 ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.partner-bank-account'))
                                 ->default(function ($record) {
-                                    return $record->partner->bankAccounts->first()->id;
+                                    return $record?->partner?->bankAccounts?->first()?->id;
                                 })
                                 ->searchable()
                                 ->required(),

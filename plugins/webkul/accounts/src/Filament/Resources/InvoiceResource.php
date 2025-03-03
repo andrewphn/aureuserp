@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -279,15 +280,6 @@ class InvoiceResource extends Resource
                     ->label(__('accounts::filament/resources/invoice.table.columns.number'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('payment_state')
-                    ->label(__('Payment State'))
-                    ->placeholder('-')
-                    ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                    ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                    ->formatStateUsing(fn($state) => PaymentState::from($state)->getLabel())
-                    ->badge()
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_partner_display_name')
                     ->label(__('accounts::filament/resources/invoice.table.columns.customer'))
                     ->placeholder('-')
@@ -317,6 +309,16 @@ class InvoiceResource extends Resource
                     ->label(__('accounts::filament/resources/invoice.table.columns.due-date'))
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('payment_state')
+                    ->label(__('Payment State'))
+                    ->placeholder('-')
+                    ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
+                    ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
+                    ->formatStateUsing(fn($state) => PaymentState::from($state)->getLabel())
+                    ->badge()
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_origin')
                     ->date()
                     ->placeholder('-')
@@ -341,24 +343,33 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
+                    ->money(fn($record) => $record->currency->name)
+                    ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_tax_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.tax'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
+                    ->money(fn($record) => $record->currency->name)
+                    ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_total_in_currency_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.total'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
+                    ->money(fn($record) => $record->currency->name)
+                    ->summarize(Sum::make())
+                    ->money(fn($record) => $record->currency->name)
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_residual_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.amount-due'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
+                    ->money(fn($record) => $record->currency->name)
+                    ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('currency.id')
                     ->label(__('accounts::filament/resources/invoice.table.columns.invoice-currency'))

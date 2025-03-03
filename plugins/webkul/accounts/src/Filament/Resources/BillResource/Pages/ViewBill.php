@@ -24,9 +24,6 @@ class ViewBill extends ViewRecord
             BaseActions\CancelAction::make(),
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
-            BaseActions\PreviewAction::make()
-                ->setTemplate('accounts::invoice/actions/preview.index'),
-            BaseActions\PrintAndSendAction::make(),
             BaseActions\CreditNoteAction::make(),
             Actions\DeleteAction::make()
                 ->successNotification(
