@@ -16,108 +16,90 @@ return [
     ],
 
     'form' => [
+        'section' => [
+            'general' => [
+                'title' => 'General',
+                'fields' => [
+                    'customer-invoice' => 'Customer Invoice',
+                    'customer' => 'Customer',
+                    'invoice-date' => 'Invoice Date',
+                    'due-date' => 'Due Date',
+                    'payment-term' => 'Payment Term',
+                ]
+            ],
+        ],
+
         'tabs' => [
-            'products' => [
-                'title' => 'Products',
+            'invoice-lines' => [
+                'title' => 'Invoice Lines',
 
                 'repeater' => [
                     'products' => [
-                        'title'            => 'Products',
-                        'add-product-line' => 'Add Product Line',
+                        'title' => 'Products',
+                        'add-product' => 'Add Product',
 
                         'fields' => [
                             'product'             => 'Product',
                             'quantity'            => 'Quantity',
+                            'unit'                => 'Unit',
                             'taxes'               => 'Taxes',
-                            'discount-percentage' => 'Discount (%)',
+                            'discount-percentage' => 'Discount Percentage',
                             'unit-price'          => 'Unit Price',
                             'sub-total'           => 'Sub Total',
-                            'total'               => 'Total',
-                        ],
-                    ],
-                    'section' => [
-                        'title' => 'Add a section',
-                    ],
-
-                    'note' => [
-                        'title' => 'Add a note',
-                    ],
-                ],
+                        ]
+                    ]
+                ]
             ],
 
             'other-information' => [
                 'title' => 'Other Information',
-
-                'fields' => [
-                    'fieldset' => [
-                        'invoice' => [
-                            'title'  => 'Invoice',
-                            'fields' => [
-                                'customer-reference' => 'Customer Reference',
-                                'sale-person'        => 'Sale Person',
-                                'sales-team'         => 'Sales Team',
-                                'recipient-bank'     => 'Recipient Bank',
-                                'payment-reference'  => 'Payment Reference',
-                                'delivery-date'      => 'Delivery Date',
-                                'sales-person'       => 'Sales Person',
-                            ],
-                        ],
-
-                        'accounting' => [
-                            'title'  => 'Accounting',
-                            'fields' => [
-                                'incoterm'          => 'Incoterm',
-                                'incoterm-location' => 'Incoterm Location',
-                                'fiscal-position'   => 'Fiscal Position',
-                                'payment-method'    => 'Payment Method',
-                                'auto-post'         => 'Auto Post',
-                                'checked'           => 'Checked',
-                            ],
-                        ],
+                'fieldset' => [
+                    'invoice' => [
+                        'title' => 'Invoice',
+                        'fields' => [
+                            'customer-reference' => 'Customer Reference',
+                            'sales-person' => 'Sales Person',
+                            'payment-reference' => 'Payment Reference',
+                            'recipient-bank' => 'Recipient Bank',
+                            'delivery-date' => 'Delivery Date',
+                        ]
                     ],
-                ],
+
+                    'accounting' => [
+                        'title' => 'Accounting',
+
+                        'fieldset' => [
+                            'incoterm' => 'Incoterm',
+                            'incoterm-location' => 'Incoterm Location',
+                            'payment-method' => 'Payment Method',
+                            'auto-post' => 'Auto Post',
+                            'checked' => 'Checked',
+                        ]
+                    ],
+
+                    'additional-information' => [
+                        'title' => 'Additional Information',
+                        'fields' => [
+                            'company' => 'Company',
+                            'currency' => 'Currency'
+                        ]
+                    ],
+
+                    'marketing' => [
+                        'title' => 'Marketing',
+                        'fields' => [
+                            'campaign' => 'Campaign',
+                            'medium' => 'Medium',
+                            'source' => 'Source',
+                        ]
+                    ]
+                ]
             ],
 
             'term-and-conditions' => [
                 'title' => 'Term & Conditions',
-
-                'fields' => [
-                    'narration' => 'Term & Conditions',
-                ],
-            ],
-        ],
-
-        'section' => [
-            'fieldset' => [
-                'general' => [
-                    'title' => 'General',
-
-                    'fields' => [
-                        'customer' => 'Customer',
-                    ],
-                ],
-
-                'invoice-date-and-payment-term' => [
-                    'title' => 'Invoice Date & Payment Term',
-
-                    'fields' => [
-                        'invoice-date'     => 'Invoice Date',
-                        'due-date'         => 'Due Date',
-                        'payment-term'     => 'Payment Term',
-                    ],
-                ],
-
-                'marketing' => [
-                    'title' => 'Marketing',
-
-                    'fields' => [
-                        'campaign' => 'Campaign',
-                        'medium'   => 'Medium',
-                        'source'   => 'Source',
-                    ],
-                ],
-            ],
-        ],
+            ]
+        ]
     ],
 
     'table' => [
@@ -183,96 +165,88 @@ return [
     ],
 
     'infolist' => [
+        'section' => [
+            'general' => [
+                'title' => 'General',
+                'entries' => [
+                    'customer-invoice' => 'Customer Invoice',
+                    'customer' => 'Customer',
+                    'invoice-date' => 'Invoice Date',
+                    'due-date' => 'Due Date',
+                    'payment-term' => 'Payment Term',
+                ]
+            ],
+        ],
+
         'tabs' => [
-            'products' => [
-                'title' => 'Products',
+            'invoice-lines' => [
+                'title' => 'Invoice Lines',
 
                 'repeater' => [
                     'products' => [
-                        'title'   => 'Products',
                         'entries' => [
-                            'product'    => 'Product',
-                            'quantity'   => 'Quantity',
-                            'unit-price' => 'Unit Price',
-                            'total'      => 'Total',
-                        ],
-                    ],
-                ],
+                            'product'             => 'Product',
+                            'quantity'            => 'Quantity',
+                            'unit'                => 'Unit Of Measure',
+                            'taxes'               => 'Taxes',
+                            'discount-percentage' => 'Discount Percentage',
+                            'unit-price'          => 'Unit Price',
+                            'sub-total'           => 'Sub Total',
+                            'total'               => 'Total',
+                        ]
+                    ]
+                ]
             ],
 
             'other-information' => [
                 'title' => 'Other Information',
-
-                'entries' => [
-                    'fieldset' => [
-                        'invoice' => [
-                            'title' => 'Invoice',
-
-                            'entries' => [
-                                'customer-reference' => 'Customer Reference',
-                                'sale-person'        => 'Sale Person',
-                                'recipient-bank'     => 'Recipient Bank',
-                                'payment-reference'  => 'Payment Reference',
-                                'delivery-date'      => 'Delivery Date',
-                                'sales-person'       => 'Sales Person',
-                            ],
-                        ],
-
-                        'accounting' => [
-                            'title'   => 'Accounting',
-                            'entries' => [
-                                'incoterm'          => 'Incoterm',
-                                'incoterm-location' => 'Incoterm Location',
-                                'fiscal-position'   => 'Fiscal Position',
-                                'payment-method'    => 'Payment Method',
-                                'auto-post'         => 'Auto Post',
-                                'checked'           => 'Checked',
-                            ],
-                        ],
+                'fieldset' => [
+                    'invoice' => [
+                        'title' => 'Invoice',
+                        'entries' => [
+                            'customer-reference' => 'Customer Reference',
+                            'sales-person' => 'Sales Person',
+                            'payment-reference' => 'Payment Reference',
+                            'recipient-bank' => 'Recipient Bank',
+                            'delivery-date' => 'Delivery Date',
+                        ]
                     ],
-                ],
+
+                    'accounting' => [
+                        'title' => 'Accounting',
+
+                        'fieldset' => [
+                            'incoterm' => 'Incoterm',
+                            'incoterm-location' => 'Incoterm Location',
+                            'payment-method' => 'Payment Method',
+                            'auto-post' => 'Auto Post',
+                            'checked' => 'Checked',
+                        ]
+                    ],
+
+                    'additional-information' => [
+                        'title' => 'Additional Information',
+                        'entries' => [
+                            'company' => 'Company',
+                            'currency' => 'Currency'
+                        ]
+                    ],
+
+                    'marketing' => [
+                        'title' => 'Marketing',
+                        'entries' => [
+                            'campaign' => 'Campaign',
+                            'medium' => 'Medium',
+                            'source' => 'Source',
+                        ]
+                    ]
+                ]
             ],
 
             'term-and-conditions' => [
                 'title' => 'Term & Conditions',
-
-                'fields' => [
-                    'narration' => 'Term & Conditions',
-                ],
-            ],
-        ],
-
-        'section' => [
-            'fieldset' => [
-                'general' => [
-                    'title' => 'General',
-
-                    'fields' => [
-                        'customer' => 'Customer',
-                        'address'  => 'Address',
-                    ],
-                ],
-
-                'invoice-date-and-payment-term' => [
-                    'title' => 'Invoice Date & Payment Term',
-
-                    'fields' => [
-                        'invoice-date'     => 'Invoice Date',
-                        'due-date'         => 'Due Date',
-                        'payment-term'     => 'Payment Term',
-                    ],
-                ],
-
-                'marketing' => [
-                    'title' => 'Marketing',
-
-                    'fields' => [
-                        'campaign' => 'Campaign',
-                        'medium'   => 'Medium',
-                        'source'   => 'Source',
-                    ],
-                ],
-            ],
-        ],
+            ]
+        ]
     ],
+
 ];
