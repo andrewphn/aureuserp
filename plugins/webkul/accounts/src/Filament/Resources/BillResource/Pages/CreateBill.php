@@ -37,7 +37,7 @@ class CreateBill extends CreateRecord
 
         $data['creator_id'] = $user->id;
         $data['state'] ??= Enums\MoveState::DRAFT->value;
-        $data['move_type'] ??= Enums\MoveType::OUT_INVOICE->value;
+        $data['move_type'] ??= Enums\MoveType::IN_INVOICE->value;
         $data['date'] = now();
         $data['sort'] = Move::max('sort') + 1;
         $data['payment_state'] = PaymentState::NOT_PAID->value;
