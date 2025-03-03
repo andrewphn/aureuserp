@@ -1,16 +1,16 @@
 <?php
 
-namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource\Pages;
+namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages;
 
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Enums\MoveType;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as BaseListInvoices;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillsResource;
+use Webkul\Account\Filament\Resources\BillResource\Pages\ListBills as BaseListBills;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 
-class ListBills extends BaseListInvoices
+class ListBills extends BaseListBills
 {
-    protected static string $resource = BillsResource::class;
+    protected static string $resource = BillResource::class;
 
     public function getPresetTableViews(): array
     {
@@ -23,7 +23,7 @@ class ListBills extends BaseListInvoices
                     ->icon('heroicon-s-receipt-percent')
                     ->default()
                     ->favorite()
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_INVOICE->value)),
+                    ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_INVOICE->value)),
             ]
         );
     }

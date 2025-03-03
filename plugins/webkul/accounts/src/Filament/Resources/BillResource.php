@@ -2,26 +2,25 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Filament\Forms;
+use Webkul\Account\Filament\Resources\BillResource\Pages;
 use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages;
 use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
@@ -33,23 +32,14 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Support\Services\MoveLineCalculationService;
 
-class InvoiceResource extends Resource
+
+class BillResource extends Resource
 {
     protected static ?string $model = AccountMove::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/invoice.navigation.global-search.number')           => $record?->name ?? '—',
-            __('accounts::filament/resources/invoice.navigation.global-search.customer')         => $record?->invoice_partner_display_name ?? '—',
-            __('accounts::filament/resources/invoice.navigation.global-search.invoice-date')     => $record?->invoice_date ?? '—',
-            __('accounts::filament/resources/invoice.navigation.global-search.invoice-date-due') => $record?->invoice_date_due ?? '—',
-        ];
-    }
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function form(Form $form): Form
     {
@@ -78,12 +68,12 @@ class InvoiceResource extends Resource
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label(__('Customer Invoice'))
+                                    ->label(__('Vendor Bill'))
                                     ->required()
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
-                                    ->placeholder('INV/2025/00001')
-                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber())
+                                    ->placeholder('BILL/2025/00001')
+                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('BILL'))
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
@@ -97,7 +87,7 @@ class InvoiceResource extends Resource
                                 Forms\Components\Group::make()
                                     ->schema([
                                         Forms\Components\Select::make('partner_id')
-                                            ->label(__('Customer'))
+                                            ->label(__('Vendor'))
                                             ->relationship(
                                                 'partner',
                                                 'name',
@@ -136,9 +126,27 @@ class InvoiceResource extends Resource
                                             }),
                                     ]),
                                 Forms\Components\DatePicker::make('invoice_date')
-                                    ->label(__('Invoice Date'))
+                                    ->label(__('Bill Date'))
                                     ->default(now())
                                     ->native(false)
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                Forms\Components\TextInput::make('reference')
+                                    ->label(__('Bill Reference'))
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                Forms\Components\DatePicker::make('date')
+                                    ->label(__('Accounting Date'))
+                                    ->default(now())
+                                    ->native(false)
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                Forms\Components\TextInput::make('payment_reference')
+                                    ->label(__('Payment Reference'))
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                Forms\Components\Select::make('partner_bank_id')
+                                    ->relationship('partnerBank', 'account_number')
+                                    ->searchable()
+                                    ->preload()
+                                    ->label(__('Recipient Bank'))
+                                    ->createOptionForm(fn($form) => BankAccountResource::form($form))
                                     ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
@@ -174,30 +182,6 @@ class InvoiceResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('Other Information'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
-                                Forms\Components\Fieldset::make('Invoice')
-                                    ->schema([
-                                        Forms\Components\TextInput::make('reference')
-                                            ->label(__('Customer Reference'))
-                                            ->maxLength(255),
-                                        Forms\Components\Select::make('invoice_user_id')
-                                            ->relationship('invoiceUser', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->label(__('Sales Person')),
-                                        Forms\Components\Select::make('partner_bank_id')
-                                            ->relationship('partnerBank', 'account_number')
-                                            ->searchable()
-                                            ->preload()
-                                            ->label(__('Recipient Bank'))
-                                            ->createOptionForm(fn($form) => BankAccountResource::form($form))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                                        Forms\Components\TextInput::make('payment_reference')
-                                            ->label(__('Payment Reference')),
-                                        Forms\Components\DatePicker::make('delivery_date')
-                                            ->native(false)
-                                            ->label(__('Delivery Date'))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                                    ]),
                                 Forms\Components\Fieldset::make('Accounting')
                                     ->schema([
                                         Forms\Components\Select::make('invoice_incoterm_id')
@@ -207,6 +191,9 @@ class InvoiceResource extends Resource
                                             ->label(__('Incoterm')),
                                         Forms\Components\TextInput::make('incoterm_location')
                                             ->label(__('Incoterm Location')),
+                                    ]),
+                                Forms\Components\Fieldset::make('Secured')
+                                    ->schema([
                                         Forms\Components\Select::make('preferred_payment_method_line_id')
                                             ->relationship('paymentMethodLine', 'name')
                                             ->preload()
@@ -238,24 +225,6 @@ class InvoiceResource extends Resource
                                             ->live()
                                             ->reactive()
                                             ->default(Auth::user()->defaultCompany?->currency_id),
-                                    ]),
-                                Forms\Components\Fieldset::make('Marketing')
-                                    ->schema([
-                                        Forms\Components\Select::make('campaign_id')
-                                            ->relationship('campaign', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->label(__('Campaign')),
-                                        Forms\Components\Select::make('medium_id')
-                                            ->relationship('medium', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->label(__('Medium')),
-                                        Forms\Components\Select::make('source_id')
-                                            ->relationship('source', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->label(__('Source')),
                                     ]),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('Term & Conditions'))
@@ -660,15 +629,23 @@ class InvoiceResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
-            'view'   => Pages\ViewInvoice::route('/{record}'),
-            'edit'   => Pages\EditInvoice::route('/{record}/edit'),
+            'index'  => Pages\ListBills::route('/'),
+            'create' => Pages\CreateBill::route('/create'),
+            'edit'   => Pages\EditBill::route('/{record}/edit'),
+            'view'   => Pages\ViewBill::route('/{record}'),
         ];
     }
+
 
     public static function getProductRepeater(): Forms\Components\Repeater
     {
@@ -935,14 +912,14 @@ class InvoiceResource extends Resource
             $record->amount_tax += floatval($line->price_tax);
             $record->amount_total += floatval($line->price_total);
 
-            $record->amount_untaxed_signed += floatval($line->price_subtotal);
-            $record->amount_untaxed_in_currency_signed += floatval($line->price_subtotal);
-            $record->amount_tax_signed += floatval($line->price_tax);
-            $record->amount_total_signed += floatval($line->price_total);
-            $record->amount_total_in_currency_signed += floatval($line->price_total);
+            $record->amount_untaxed_signed += -floatval($line->price_subtotal);
+            $record->amount_untaxed_in_currency_signed += -floatval($line->price_subtotal);
+            $record->amount_tax_signed += -floatval($line->price_tax);
+            $record->amount_total_signed += -floatval($line->price_total);
+            $record->amount_total_in_currency_signed += -floatval($line->price_total);
 
             $record->amount_residual += floatval($line->price_total);
-            $record->amount_residual_signed += floatval($line->price_total);
+            $record->amount_residual_signed += -floatval($line->price_total);
         }
 
         $record->save();
