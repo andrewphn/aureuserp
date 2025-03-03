@@ -957,6 +957,7 @@ class InvoiceResource extends Resource
         $record->amount_total_signed = 0;
         $record->amount_total_in_currency_signed = 0;
         $record->amount_residual_signed = 0;
+        $newTaxEntries = [];
 
         $lines = $record->lines->where('display_type', 'product');
 
