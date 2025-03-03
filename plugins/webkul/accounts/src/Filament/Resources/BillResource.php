@@ -29,7 +29,7 @@ use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Webkul\Support\Services\MoveLineCalculationService;
+use Webkul\Account\Services\MoveLineCalculationService;
 
 class BillResource extends Resource
 {

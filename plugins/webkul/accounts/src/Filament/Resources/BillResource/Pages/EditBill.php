@@ -13,7 +13,7 @@ use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Partner\Models\Partner;
-use Webkul\Support\Services\MoveLineCalculationService;
+use Webkul\Account\Services\MoveLineCalculationService;
 
 class EditBill extends EditRecord
 {

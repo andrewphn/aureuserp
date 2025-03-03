@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Support\Services;
+namespace Webkul\Account\Services;
 
 use Webkul\Account\Models\Tax;
 

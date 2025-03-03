@@ -30,7 +30,7 @@ use Webkul\Support\Models\UOM;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\ActionSize;
 use Webkul\Account\Enums\PaymentState;
-use Webkul\Support\Services\MoveLineCalculationService;
+use Webkul\Account\Services\MoveLineCalculationService;
 
 class CreditNoteResource extends Resource
 {

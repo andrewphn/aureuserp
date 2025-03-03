@@ -12,7 +12,7 @@ use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Models\Move;
-use Webkul\Support\Services\MoveLineCalculationService;
+use Webkul\Account\Services\MoveLineCalculationService;
 
 class CreateCreditNote extends CreateRecord
 {
