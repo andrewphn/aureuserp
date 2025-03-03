@@ -1,22 +1,22 @@
 <?php
 
-namespace Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
+namespace Webkul\Account\Filament\Resources\RefundResource\Pages;
 
+use Webkul\Account\Filament\Resources\RefundResource;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateRecord;
 use Webkul\Account\Enums;
 use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Models\Move;
 use Webkul\Support\Services\MoveLineCalculationService;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateBaseRefund;
 
-class CreateCreditNote extends CreateRecord
+class CreateRefund extends CreateBaseRefund
 {
-    protected static string $resource = CreditNoteResource::class;
+    protected static string $resource = RefundResource::class;
 
     protected function getRedirectUrl(): string
     {
@@ -27,8 +27,8 @@ class CreateCreditNote extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('Credit Note Created'))
-            ->body(__('Credit Note has been created successfully.'));
+            ->title(__('Refund Created'))
+            ->body(__('Refund has been created successfully.'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -37,7 +37,7 @@ class CreateCreditNote extends CreateRecord
 
         $data['creator_id'] = $user->id;
         $data['state'] ??= Enums\MoveState::DRAFT->value;
-        $data['move_type'] ??= Enums\MoveType::OUT_REFUND->value;
+        $data['move_type'] ??= Enums\MoveType::IN_REFUND->value;
         $data['date'] = now();
         $data['sort'] = Move::max('sort') + 1;
         $data['payment_state'] = PaymentState::NOT_PAID->value;
@@ -169,10 +169,10 @@ class CreateCreditNote extends CreateRecord
                         'parent_state'          => $record->state,
                         'date'                  => now(),
                         'creator_id'            => $record->creator_id,
-                        'debit'                 => $currentTaxAmount,
-                        'credit'                => 0.00,
-                        'balance'               => $currentTaxAmount,
-                        'amount_currency'       => $currentTaxAmount,
+                        'debit'                 => 0.00,
+                        'credit'                => $currentTaxAmount,
+                        'balance'               => -$currentTaxAmount,
+                        'amount_currency'       => -$currentTaxAmount,
                         'tax_base_amount'       => $currentTaxBase,
                         'tax_line_id'           => $tax->id,
                         'tax_group_id'          => $tax->tax_group_id,

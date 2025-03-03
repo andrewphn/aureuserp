@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Account\Filament\Resources\InvoiceResource\Actions;
+namespace Webkul\Account\Filament\Resources\BillResource\Actions;
 
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -14,13 +14,10 @@ use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\MoveReversal;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource;
-use Webkul\Support\Traits\PDFHandler;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 
 class CreditNoteAction extends Action
 {
-    use PDFHandler;
-
     public static function getDefaultName(): ?string
     {
         return 'customers.invoice.credit-note';
@@ -66,7 +63,7 @@ class CreditNoteAction extends Action
 
             $move = $this->createMove($creditNote, $record);
 
-            $redirectUrl = CreditNotesResource::getUrl('edit', ['record' => $move->id]);
+            $redirectUrl = RefundResource::getUrl('edit', ['record' => $move->id]);
 
             $livewire->redirect($redirectUrl, navigate: FilamentView::hasSpaMode());
         });
@@ -85,8 +82,8 @@ class CreditNoteAction extends Action
             'invoice_user_id'                   => $record->invoice_user_id,
             'reference'                         => "Reversal of: {$record->name}, {$creditNote->reason}",
             'state'                             => MoveState::DRAFT->value,
-            'name'                              => Move::generateNextInvoiceAndCreditNoteNumber('RINV'),
-            'move_type'                         => MoveType::OUT_REFUND->value,
+            'name'                              => Move::generateNextInvoiceAndCreditNoteNumber('RBILL'),
+            'move_type'                         => MoveType::IN_REFUND->value,
             'auto_post'                         => AutoPost::NO->value,
             'payment_state'                     => PaymentState::NOT_PAID->value,
             'invoice_partner_display_name'      => $record->invoice_partner_display_name,
@@ -132,8 +129,8 @@ class CreditNoteAction extends Action
             $newMoveLine->move_name = null;
             $newMoveLine->move_id = $newMove->id;
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
-            $newMoveLine->debit = $line->credit;
-            $newMoveLine->credit = 0.00;
+            $newMoveLine->debit = 0.00;
+            $newMoveLine->credit = $line->debit;
             $newMoveLine->balance = - ($line->balance);
             $newMoveLine->amount_currency = - ($line->amount_currency);
 
@@ -157,8 +154,8 @@ class CreditNoteAction extends Action
             'parent_state'             => $newMove->state,
             'date'                     => now(),
             'creator_id'               => $newMove->creator_id,
-            'debit'                    => 0.00,
-            'credit'                   => $newMove->amount_total,
+            'debit'                    => $newMove->amount_total,
+            'credit'                   => 0.00,
             'balance'                  => -$newMove->amount_total,
             'amount_currency'          => -$newMove->amount_total,
             'amount_residual'          => -$newMove->amount_total,
@@ -176,8 +173,8 @@ class CreditNoteAction extends Action
             $newMoveLine->move_name = null;
             $newMoveLine->move_id = $newMove->id;
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
-            $newMoveLine->debit = $line->credit;
-            $newMoveLine->credit = 0.00;
+            $newMoveLine->debit = 0.00;
+            $newMoveLine->credit = $line->debit;
             $newMoveLine->balance = - ($line->balance);
             $newMoveLine->amount_currency = - ($line->amount_currency);
 

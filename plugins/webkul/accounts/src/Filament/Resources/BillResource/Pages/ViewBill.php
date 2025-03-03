@@ -7,6 +7,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\BillResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
+use Webkul\Account\Filament\Resources\BillResource\Actions\CreditNoteAction;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class ViewBill extends ViewRecord
@@ -24,7 +25,7 @@ class ViewBill extends ViewRecord
             BaseActions\CancelAction::make(),
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
-            BaseActions\CreditNoteAction::make(),
+            CreditNoteAction::make(),
             Actions\DeleteAction::make()
                 ->successNotification(
                     Notification::make()

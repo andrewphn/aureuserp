@@ -2,42 +2,42 @@
 
 namespace Webkul\Account\Filament\Resources;
 
+use Webkul\Account\Filament\Resources\RefundResource\Pages;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
-use Filament\Forms;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Models\MoveLine;
+use Webkul\Field\Filament\Forms\Components\ProgressStepper;
+use Webkul\Invoice\Models\Product;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
-use Webkul\Account\Enums\MoveState;
-use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
+use Webkul\Account\Filament\Resources\BankAccountResource;
 use Webkul\Account\Livewire\InvoiceSummary;
-use Webkul\Account\Models\Move as AccountMove;
-use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Filament\Resources\BillResource\Pages;
-use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
-use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
+use Filament\Support\Enums\ActionSize;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Support\Services\MoveLineCalculationService;
 
-class BillResource extends Resource
+class RefundResource extends Resource
 {
     protected static ?string $model = AccountMove::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function form(Form $form): Form
     {
@@ -61,17 +61,17 @@ class BillResource extends Resource
                                 ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
                                 ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
                                 ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value),
+                                ->size(ActionSize::ExtraLarge->value)
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label(__('Vendor Bill'))
+                                    ->label(__('Vendor Credit Note'))
                                     ->required()
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
-                                    ->placeholder('BILL/2025/00001')
-                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('BILL'))
+                                    ->placeholder('RBILL/2025/00001')
+                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('RBILL'))
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
@@ -123,21 +123,19 @@ class BillResource extends Resource
                                                 );
                                             }),
                                     ]),
-                                Forms\Components\DatePicker::make('invoice_date')
-                                    ->label(__('Bill Date'))
-                                    ->default(now())
-                                    ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\TextInput::make('reference')
                                     ->label(__('Bill Reference'))
+                                    ->live()
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                Forms\Components\DatePicker::make('invoice_date')
+                                    ->label(__('Invoice Date'))
+                                    ->default(now())
+                                    ->native(false)
                                     ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('date')
                                     ->label(__('Accounting Date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                                Forms\Components\TextInput::make('payment_reference')
-                                    ->label(__('Payment Reference'))
                                     ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Select::make('partner_bank_id')
                                     ->relationship('partnerBank', 'account_number')
@@ -255,7 +253,7 @@ class BillResource extends Resource
                                 ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
                                 ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
                                 ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value),
+                                ->size(ActionSize::ExtraLarge->value)
                         ]),
                         Infolists\Components\Grid::make()
                             ->schema([
@@ -447,10 +445,10 @@ class BillResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListBills::route('/'),
-            'create' => Pages\CreateBill::route('/create'),
-            'edit'   => Pages\EditBill::route('/{record}/edit'),
-            'view'   => Pages\ViewBill::route('/{record}'),
+            'index'  => Pages\ListRefunds::route('/'),
+            'create' => Pages\CreateRefund::route('/create'),
+            'edit'   => Pages\EditRefund::route('/{record}/edit'),
+            'view'   => Pages\ViewRefund::route('/{record}'),
         ];
     }
 
@@ -586,8 +584,8 @@ class BillResource extends Resource
             'sort'                  => MoveLine::max('sort') + 1,
             'parent_state'          => $livewire->record->state ?? MoveState::DRAFT->value,
             'move_name'             => $livewire->record->name,
-            'debit'                 => floatval($data['price_subtotal']),
-            'credit'                => 0.00,
+            'debit'                 => 0.00,
+            'credit'                => floatval($data['price_subtotal']),
             'balance'               => floatval($data['price_subtotal']),
             'amount_currency'       => floatval($data['price_subtotal']),
         ]);
@@ -720,14 +718,14 @@ class BillResource extends Resource
             $record->amount_tax += floatval($line->price_tax);
             $record->amount_total += floatval($line->price_total);
 
-            $record->amount_untaxed_signed += -floatval($line->price_subtotal);
-            $record->amount_untaxed_in_currency_signed += -floatval($line->price_subtotal);
-            $record->amount_tax_signed += -floatval($line->price_tax);
-            $record->amount_total_signed += -floatval($line->price_total);
-            $record->amount_total_in_currency_signed += -floatval($line->price_total);
+            $record->amount_untaxed_signed += floatval($line->price_subtotal);
+            $record->amount_untaxed_in_currency_signed += floatval($line->price_subtotal);
+            $record->amount_tax_signed += floatval($line->price_tax);
+            $record->amount_total_signed += floatval($line->price_total);
+            $record->amount_total_in_currency_signed += floatval($line->price_total);
 
             $record->amount_residual += floatval($line->price_total);
-            $record->amount_residual_signed += -floatval($line->price_total);
+            $record->amount_residual_signed += floatval($line->price_total);
         }
 
         $record->save();
