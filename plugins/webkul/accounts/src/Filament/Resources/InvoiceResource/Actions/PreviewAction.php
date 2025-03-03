@@ -39,11 +39,11 @@ class PreviewAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Preview'))
+            ->label(__('accounts::filament/resources/invoice/actions/preview.title'))
             ->color('gray')
             ->visible(fn(Move $record) => $record->state == MoveState::POSTED->value)
             ->icon('heroicon-o-viewfinder-circle')
-            ->modalHeading(__('Preview Invoice'))
+            ->modalHeading(__('accounts::filament/resources/invoice/actions/preview.modal.title'))
             ->modalSubmitAction(false)
             ->modalContent(function ($record) {
                 return view($this->getTemplate(), ['record' => $record]);

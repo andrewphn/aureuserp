@@ -21,37 +21,37 @@ class ListInvoices extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'invoice' => PresetView::make(__('Invoices'))
+            'invoice' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.invoices'))
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::OUT_INVOICE->value)),
-            'draft' => PresetView::make(__('Draft'))
+            'draft' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.draft'))
                 ->favorite()
                 ->icon('heroicon-s-stop')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::DRAFT->value)),
-            'posted' => PresetView::make(__('Posted'))
+            'posted' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.posted'))
                 ->favorite()
                 ->icon('heroicon-s-play')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::POSTED->value)),
-            'cancelled' => PresetView::make(__('Cancelled'))
+            'cancelled' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.cancelled'))
                 ->favorite()
                 ->icon('heroicon-s-x-circle')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::CANCEL->value)),
-            'not_secured' => PresetView::make(__('Not Secured'))
+            'not_secured' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.not-secured'))
                 ->favorite()
                 ->icon('heroicon-s-shield-exclamation')
                 ->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('inalterable_hash')),
-            'in_refund' => PresetView::make(__('Refund'))
+            'in_refund' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.refund'))
                 ->icon('heroicon-s-receipt-refund')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
-            'to_check' => PresetView::make(__('To Check'))
+            'to_check' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.to-check'))
                 ->icon('heroicon-s-check-badge')
                 ->modifyQueryUsing(function (Builder $query) {
                     $query->whereNot('state', MoveState::DRAFT->value)
                         ->where('checked', false);
                 }),
-            'to_pay' => PresetView::make(__('To Pay'))
+            'to_pay' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.to-pay'))
                 ->icon('heroicon-s-banknotes')
                 ->modifyQueryUsing(function (Builder $query) {
                     $query->whereNot('state', MoveState::POSTED->value)
@@ -60,13 +60,13 @@ class ListInvoices extends ListRecords
                             PaymentState::PARTIAL->value,
                         ]);
                 }),
-            'in_payment' => PresetView::make(__('In Payment'))
+            'in_payment' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.in-payment'))
                 ->icon('heroicon-s-banknotes')
                 ->modifyQueryUsing(function (Builder $query) {
                     $query->whereNot('state', MoveState::POSTED->value)
                         ->where('payment_state', PaymentState::IN_PAYMENT->value);
                 }),
-            'overdue' => PresetView::make(__('Overdue'))
+            'overdue' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.overdue'))
                 ->icon('heroicon-s-banknotes')
                 ->modifyQueryUsing(function (Builder $query) {
                     $query->whereNot('state', MoveState::POSTED->value)

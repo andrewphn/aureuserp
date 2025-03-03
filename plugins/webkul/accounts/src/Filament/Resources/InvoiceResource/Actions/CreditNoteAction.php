@@ -31,20 +31,20 @@ class CreditNoteAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Credit Note'))
+            ->label(__('accounts::filament/resources/invoice/actions/credit-note.title'))
             ->color('gray')
             ->visible(fn(Move $record) => $record->state == MoveState::POSTED->value)
             ->icon('heroicon-o-receipt-refund')
-            ->modalHeading(__('Credit Note'));
+            ->modalHeading(__('accounts::filament/resources/invoice/actions/credit-note.modal.heading'));
 
         $this->form(
             function (Form $form) {
                 return $form->schema([
                     Forms\Components\Textarea::make('reason')
-                        ->label(__('Reason displayed on Credit Note'))
+                        ->label(__('accounts::filament/resources/invoice/actions/credit-note.modal.form.reason'))
                         ->required(),
                     Forms\Components\DatePicker::make('date')
-                        ->label(__('Reason displayed on Credit Note'))
+                        ->label(__('accounts::filament/resources/invoice/actions/credit-note.modal.form.date'))
                         ->default(now())
                         ->native(false)
                         ->required(),

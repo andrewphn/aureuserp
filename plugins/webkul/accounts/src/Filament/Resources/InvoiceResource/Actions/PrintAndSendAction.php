@@ -29,7 +29,7 @@ class PrintAndSendAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Print & Send'))
+            ->label(__('accounts::filament/resources/invoice/actions/print-and-send.title'))
             ->color('gray')
             ->visible(function (Move $record) {
                 return
@@ -60,17 +60,17 @@ class PrintAndSendAction extends Action
                     Forms\Components\Select::make('partners')
                         ->options(Partner::all()->pluck('name', 'id'))
                         ->multiple()
-                        ->label(__('Customer'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.partners'))
                         ->searchable()
                         ->preload(),
                     Forms\Components\TextInput::make('subject')
-                        ->label(__('Subject'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.subject'))
                         ->hiddenLabel(),
                     Forms\Components\RichEditor::make('description')
-                        ->label(__('Description'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.description'))
                         ->hiddenLabel(),
                     Forms\Components\FileUpload::make('files')
-                        ->label(__('Attachment'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.files'))
                         ->downloadable()
                         ->openable()
                         ->multiple()
@@ -80,12 +80,12 @@ class PrintAndSendAction extends Action
             }
         );
 
-        $this->modalSubmitActionLabel(__('Send'));
+        $this->modalSubmitActionLabel(__('accounts::filament/resources/invoice/actions/print-and-send.modal.action.submit.title'));
         $this->modalIcon('heroicon-m-paper-airplane');
         $this->icon('heroicon-o-envelope');
         $this->action(fn($record, array $data) => $this->handleSendByEmail($record, $data));
         $this->modalSubmitAction(function ($action) {
-            $action->label(__('Send'));
+            $action->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.action.submit.title'));
             $action->icon('heroicon-m-paper-airplane');
         });
     }
@@ -155,8 +155,8 @@ class PrintAndSendAction extends Action
 
         Notification::make()
             ->success()
-            ->title(__('Invoice sent'))
-            ->body(__('The invoice has been sent to the customer successfully.'))
+            ->title(__('accounts::filament/resources/invoice/actions/print-and-send.modal.notification.invoice-sent.title'))
+            ->body(__('accounts::filament/resources/invoice/actions/print-and-send.modal.notification.invoice-sent.body'))
             ->send();
     }
 }
