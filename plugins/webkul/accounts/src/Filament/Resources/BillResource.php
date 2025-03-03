@@ -723,9 +723,6 @@ class BillResource extends Resource
                 'quantity'       => $line->quantity,
                 'taxes'          => $line->taxes->pluck('id')->toArray(),
                 'discount'       => $line->discount,
-                'price_subtotal' => $line->price_subtotal,
-                'price_tax'      => $line->price_tax,
-                'price_total'    => $line->price_total,
             ];
 
             $updatedLine = app(MoveLineCalculationService::class)->calculateLineTotals($lineData);
