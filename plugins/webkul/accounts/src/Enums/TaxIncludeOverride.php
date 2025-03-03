@@ -16,8 +16,8 @@ enum TaxIncludeOverride: string implements HasLabel
     {
         return match ($this) {
             self::DEFAULT      => __('accounts::enums/tax-include-override.default'),
-            self::TAX_EXCLUDED => __('accounts::enums/tax-include-override.included'),
-            self::TAX_INCLUDED => __('accounts::enums/tax-include-override.excluded'),
+            self::TAX_EXCLUDED => __('accounts::enums/tax-include-override.excluded'),
+            self::TAX_INCLUDED => __('accounts::enums/tax-include-override.included'),
         };
     }
 
@@ -25,8 +25,8 @@ enum TaxIncludeOverride: string implements HasLabel
     {
         return [
             self::DEFAULT->value      => __('accounts::enums/tax-include-override.default'),
-            self::TAX_EXCLUDED->value => __('accounts::enums/tax-include-override.included'),
-            self::TAX_INCLUDED->value => __('accounts::enums/tax-include-override.excluded'),
+            self::TAX_EXCLUDED->value => __('accounts::enums/tax-include-override.excluded'),
+            self::TAX_INCLUDED->value => __('accounts::enums/tax-include-override.included'),
         ];
     }
 }

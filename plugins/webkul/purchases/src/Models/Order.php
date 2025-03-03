@@ -5,6 +5,7 @@ namespace Webkul\Purchase\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Incoterm;
@@ -19,6 +20,7 @@ use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
+use Webkul\Account\Models\Move;
 
 class Order extends Model
 {
@@ -37,13 +39,14 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
-        'access_token',
         'name',
         'description',
         'priority',
         'origin',
         'partner_reference',
         'state',
+        'invoice_status',
+        'receipt_status',
         'untaxed_amount',
         'tax_amount',
         'total_amount',
@@ -58,7 +61,6 @@ class Order extends Model
         'planned_at',
         'calendar_start_at',
         'incoterm_location',
-        'receipt_status',
         'effective_date',
         'report_grids',
         'requisition_id',
@@ -81,6 +83,8 @@ class Order extends Model
      */
     protected $casts = [
         'state'                    => Enums\OrderState::class,
+        'invoice_status'           => Enums\OrderInvoiceStatus::class,
+        'receipt_status'           => Enums\OrderReceiptStatus::class,
         'mail_reminder_confirmed'  => 'boolean',
         'mail_reception_confirmed' => 'boolean',
         'mail_reception_declined'  => 'boolean',
@@ -94,6 +98,15 @@ class Order extends Model
 
     protected array $logAttributes = [
     ];
+
+
+    /**
+     * Checks if new invoice is allow or not
+     */
+    public function getQtyToInvoiceAttribute()
+    {
+        return $this->lines->sum('qty_to_invoice');
+    }
 
     public function requisition(): BelongsTo
     {
@@ -153,6 +166,11 @@ class Order extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(OrderLine::class);
+    }
+
+    public function accountMoves(): BelongsToMany
+    {
+        return $this->belongsToMany(Move::class, 'purchases_order_account_moves', 'order_id', 'move_id');
     }
 
     /**

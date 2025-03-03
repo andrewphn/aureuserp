@@ -23,6 +23,7 @@ use Webkul\Purchase\Filament\Clusters\Orders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseAgreementResource\Pages;
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Purchase\Settings;
+use Webkul\Purchase\Settings\OrderSettings;
 
 class PurchaseAgreementResource extends Resource
 {
@@ -45,6 +46,15 @@ class PurchaseAgreementResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('purchases::filament/clusters/orders/resources/purchase-agreement.navigation.title');
+    }
+
+    public static function isDiscovered(): bool
+    {
+        if (app()->runningInConsole()) {
+            return true;
+        }
+
+        return app(OrderSettings::class)->enable_purchase_agreements;
     }
 
     public static function form(Form $form): Form

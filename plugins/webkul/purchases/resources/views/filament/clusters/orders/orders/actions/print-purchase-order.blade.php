@@ -153,7 +153,7 @@
                                     </td>
 
                                     <td>
-                                        {{ $item->product_qty.' '.$item->product->uom->name }}
+                                        {{ $item->product_qty.' '.$item->uom->name }}
                                     </td>
 
                                     <td>

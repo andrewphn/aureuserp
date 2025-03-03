@@ -4,8 +4,11 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
 use Filament\Pages\SubNavigationPosition;
 use Webkul\Purchase\Filament\Clusters\Orders;
+use Filament\Tables\Table;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResource\Pages;
 use Filament\Resources\Pages\Page;
+use Webkul\Purchase\Enums\OrderState;
+use Illuminate\Database\Eloquent\Builder;
 
 class PurchaseOrderResource extends OrderResource
 {
@@ -31,7 +34,14 @@ class PurchaseOrderResource extends OrderResource
         return $page->generateNavigationItems([
             Pages\ViewPurchaseOrder::class,
             Pages\EditPurchaseOrder::class,
+            Pages\ManageBills::class,
         ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return parent::table($table)
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('state', [OrderState::PURCHASE, OrderState::DONE]));
     }
 
     public static function getPages(): array
@@ -41,6 +51,7 @@ class PurchaseOrderResource extends OrderResource
             'create' => Pages\CreatePurchaseOrder::route('/create'),
             'view'   => Pages\ViewPurchaseOrder::route('/{record}'),
             'edit'   => Pages\EditPurchaseOrder::route('/{record}/edit'),
+            'bills'  => Pages\ManageBills::route('/{record}/bills'),
         ];
     }
 }

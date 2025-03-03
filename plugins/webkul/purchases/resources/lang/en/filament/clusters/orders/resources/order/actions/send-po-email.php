@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'label' => 'Send By Email',
-    'resend-label' => 'Re-Send By Email',
+    'label' => 'Send PO By Email',
 
     'form' => [
         'fields' => [
