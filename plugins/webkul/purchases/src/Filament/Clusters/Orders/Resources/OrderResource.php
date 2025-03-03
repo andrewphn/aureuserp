@@ -936,7 +936,7 @@ class OrderResource extends Resource
 
         $taxIds = $get('taxes') ?? [];
 
-        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $priceUnit, $quantity);
+        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $quantity);
 
         $set('price_subtotal', round($subTotal, 4));
 
@@ -986,7 +986,7 @@ class OrderResource extends Resource
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $line->price_unit, $line->product_qty);
+        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $line->product_qty);
 
         $line->price_subtotal = round($subTotal, 4);
 
@@ -999,32 +999,29 @@ class OrderResource extends Resource
         return $line;
     }
 
-    public static function collectionTaxes($taxIds, $subTotal, $priceUnit, $quantity)
+    public static function collectionTaxes($taxIds, $subTotal, $quantity)
     {
-        $baseAmount = $subTotal;
-
-        $taxAmount = 0;
-
         if (empty($taxIds)) {
-            return [
-                $subTotal,
-                $taxAmount,
-            ];
+            return [$subTotal, 0];
         }
 
         $taxes = Tax::whereIn('id', $taxIds)
             ->orderBy('sort')
             ->get();
-
+        
         $taxesComputed = [];
+
+        $totalTaxAmount = 0;
+
+        $adjustedSubTotal = $subTotal;
 
         foreach ($taxes as $tax) {
             $amount = floatval($tax->amount);
 
-            $currentTaxBase = $baseAmount;
-
             $tax->price_include_override ??= 'tax_excluded';
 
+            $currentTaxBase = $adjustedSubTotal;
+            
             if ($tax->is_base_affected) {
                 foreach ($taxesComputed as $prevTax) {
                     if ($prevTax['include_base_amount']) {
@@ -1032,39 +1029,43 @@ class OrderResource extends Resource
                     }
                 }
             }
-
+            
             $currentTaxAmount = 0;
-
+            
             if ($tax->price_include_override == 'tax_included') {
-                $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
+                if ($tax->amount_type == 'percent') {
+                    $taxFactor = $amount / 100;
 
-                $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-
-                if (empty($taxesComputed)) {
-                    $subTotal = $subTotal - $currentTaxAmount;
-
-                    $baseAmount = $subTotal;
+                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
+                } else {
+                    $currentTaxAmount = $amount * $quantity;
+                    
+                    if ($currentTaxAmount > $adjustedSubTotal) {
+                        $currentTaxAmount = $adjustedSubTotal;
+                    }
                 }
-            } elseif ($tax->price_include_override == 'tax_excluded') {
+                
+                $adjustedSubTotal -= $currentTaxAmount;
+            } else {
                 if ($tax->amount_type == 'percent') {
                     $currentTaxAmount = $currentTaxBase * $amount / 100;
                 } else {
                     $currentTaxAmount = $amount * $quantity;
                 }
             }
-
+            
             $taxesComputed[] = [
-                'tax_id'              => $tax->id,
-                'tax_amount'          => $currentTaxAmount,
+                'tax_id' => $tax->id,
+                'tax_amount' => $currentTaxAmount,
                 'include_base_amount' => $tax->include_base_amount,
             ];
-
-            $taxAmount += $currentTaxAmount;
+            
+            $totalTaxAmount += $currentTaxAmount;
         }
-
+        
         return [
-            round($subTotal, 4),
-            $taxAmount,
+            round($adjustedSubTotal, 4),
+            round($totalTaxAmount, 4)
         ];
     }
 }
