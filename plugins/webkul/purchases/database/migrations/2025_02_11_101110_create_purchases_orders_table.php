@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('purchases_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('access_token')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('priority')->default(0);

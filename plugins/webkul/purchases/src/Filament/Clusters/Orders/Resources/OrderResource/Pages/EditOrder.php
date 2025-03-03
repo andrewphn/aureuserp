@@ -53,6 +53,15 @@ class EditOrder extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (! empty($data['ordered_at'])) {
+            $data['calendar_start_at'] = $data['ordered_at'];
+        }
+
+        return $data;
+    }
+
     protected function afterSave(): void
     {
         OrderResource::collectTotals($this->getRecord());

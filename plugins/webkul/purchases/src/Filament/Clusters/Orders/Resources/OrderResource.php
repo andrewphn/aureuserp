@@ -117,6 +117,7 @@ class OrderResource extends Resource
                                 Forms\Components\DateTimePicker::make('ordered_at')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.order-deadline'))
                                     ->native(false)
+                                    ->required()
                                     ->suffixIcon('heroicon-o-calendar')
                                     ->default(now())
                                     ->hidden(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
@@ -161,6 +162,7 @@ class OrderResource extends Resource
                                             ->relationship('company', 'name')
                                             ->searchable()
                                             ->preload()
+                                            ->required()
                                             ->default(Auth::user()->default_company_id)
                                             ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                         Forms\Components\TextInput::make('reference')
@@ -598,7 +600,18 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.expected-arrival'))
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
+                                    ->required()
                                     ->default(now())
+                                    ->default(function(Forms\Get $get, Forms\Set $set) {
+                                        if (empty($get('../../planned_at'))) {
+                                            $set('../../planned_at', now());
+                                        }
+
+                                        return now();
+                                    })
+                                    ->afterStateUpdated(function (?string $state, Forms\Set $set) {
+                                        $set('../../planned_at', $state);
+                                    })
                                     ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
                                 Forms\Components\TextInput::make('product_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
@@ -707,8 +720,6 @@ class OrderResource extends Resource
                                 Forms\Components\Hidden::make('price_tax')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_total')
-                                    ->default(0),
-                                Forms\Components\Hidden::make('price_total_cc')
                                     ->default(0),
                             ]),
                     ])
@@ -906,18 +917,12 @@ class OrderResource extends Resource
 
             $set('price_total', 0);
 
-            $set('price_total_cc', 0);
-
             return;
         }
 
         $priceUnit = floatval($get('price_unit'));
 
         $quantity = floatval($get('product_qty') ?? 1);
-
-        $taxIds = $get('taxes') ?? [];
-
-        $taxAmount = 0;
 
         $subTotal = $priceUnit * $quantity;
 
@@ -929,65 +934,11 @@ class OrderResource extends Resource
             $subTotal = $subTotal - $discountAmount;
         }
 
-        if (! empty($taxIds)) {
-            $taxes = Tax::whereIn('id', $taxIds)
-                ->orderBy('sort')
-                ->get();
+        $taxIds = $get('taxes') ?? [];
 
-            $baseAmount = $subTotal;
-
-            $taxesComputed = [];
-
-            foreach ($taxes as $tax) {
-                $amount = floatval($tax->amount);
-
-                $currentTaxBase = $baseAmount;
-
-                $tax->price_include_override ??= 'tax_excluded';
-
-                if ($tax->is_base_affected) {
-                    foreach ($taxesComputed as $prevTax) {
-                        if ($prevTax['include_base_amount']) {
-                            $currentTaxBase += $prevTax['tax_amount'];
-                        }
-                    }
-                }
-
-                $currentTaxAmount = 0;
-
-                if ($tax->price_include_override == 'tax_included') {
-                    $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
-
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-
-                    if (empty($taxesComputed)) {
-                        $priceUnit = $priceUnit - ($currentTaxAmount / $quantity);
-
-                        $subTotal = $priceUnit * $quantity;
-
-                        $baseAmount = $subTotal;
-                    }
-                } elseif ($tax->price_include_override == 'tax_excluded') {
-                    if ($tax->amount_type == 'percent') {
-                        $currentTaxAmount = $currentTaxBase * $amount / 100;
-                    } else {
-                        $currentTaxAmount = $amount * $quantity;
-                    }
-                }
-
-                $taxesComputed[] = [
-                    'tax_id'              => $tax->id,
-                    'tax_amount'          => $currentTaxAmount,
-                    'include_base_amount' => $tax->include_base_amount,
-                ];
-
-                $taxAmount += $currentTaxAmount;
-            }
-        }
+        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $priceUnit, $quantity);
 
         $set('price_subtotal', round($subTotal, 4));
-
-        $set('price_total_cc', round($subTotal, 4));
 
         $set('price_tax', $taxAmount);
 
@@ -1023,8 +974,97 @@ class OrderResource extends Resource
 
         $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
 
+        $subTotal = $line->price_unit * $line->product_qty;
+
+        $discountAmount = 0;
+        
+        if ($line->discount > 0) {
+            $discountAmount = $subTotal * ($line->discount / 100);
+
+            $subTotal = $subTotal - $discountAmount;
+        }
+
+        $taxIds = $line->taxes->pluck('id')->toArray();
+
+        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $line->price_unit, $line->product_qty);
+
+        $line->price_subtotal = round($subTotal, 4);
+
+        $line->price_tax = $taxAmount;
+
+        $line->price_total = $subTotal + $taxAmount;
+
         $line->save();
 
         return $line;
+    }
+
+    public static function collectionTaxes($taxIds, $subTotal, $priceUnit, $quantity)
+    {
+        $baseAmount = $subTotal;
+
+        $taxAmount = 0;
+
+        if (empty($taxIds)) {
+            return [
+                $subTotal,
+                $taxAmount,
+            ];
+        }
+
+        $taxes = Tax::whereIn('id', $taxIds)
+            ->orderBy('sort')
+            ->get();
+
+        $taxesComputed = [];
+
+        foreach ($taxes as $tax) {
+            $amount = floatval($tax->amount);
+
+            $currentTaxBase = $baseAmount;
+
+            $tax->price_include_override ??= 'tax_excluded';
+
+            if ($tax->is_base_affected) {
+                foreach ($taxesComputed as $prevTax) {
+                    if ($prevTax['include_base_amount']) {
+                        $currentTaxBase += $prevTax['tax_amount'];
+                    }
+                }
+            }
+
+            $currentTaxAmount = 0;
+
+            if ($tax->price_include_override == 'tax_included') {
+                $taxFactor = ($tax->amount_type == 'percent') ? $amount / 100 : $amount;
+
+                $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
+
+                if (empty($taxesComputed)) {
+                    $subTotal = $subTotal - $currentTaxAmount;
+
+                    $baseAmount = $subTotal;
+                }
+            } elseif ($tax->price_include_override == 'tax_excluded') {
+                if ($tax->amount_type == 'percent') {
+                    $currentTaxAmount = $currentTaxBase * $amount / 100;
+                } else {
+                    $currentTaxAmount = $amount * $quantity;
+                }
+            }
+
+            $taxesComputed[] = [
+                'tax_id'              => $tax->id,
+                'tax_amount'          => $currentTaxAmount,
+                'include_base_amount' => $tax->include_base_amount,
+            ];
+
+            $taxAmount += $currentTaxAmount;
+        }
+
+        return [
+            round($subTotal, 4),
+            $taxAmount,
+        ];
     }
 }

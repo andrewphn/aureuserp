@@ -65,7 +65,7 @@ class CreateBillAction extends Action
             'payment_state' => AccountEnums\PaymentStatus::NOT_PAID,
             'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin' => $record->name,
-            'date' => $record->ordered_at,//Check: ordered_at or created_at
+            'date' => now(),
             'invoice_date_due' => now(),
             'invoice_currency_rate' => 1,
             'journal_id' => AccountJournal::where('code', AccountEnums\JournalType::PURCHASE)->first()?->id,
@@ -81,6 +81,8 @@ class CreateBillAction extends Action
             'creator_id' => Auth::id(),
         ]);
 
+        $record->accountMoves()->attach($accountMove->id);
+
         foreach ($record->lines as $line) {
             $this->createAccountMoveLine($accountMove, $line);
         }
@@ -93,14 +95,9 @@ class CreateBillAction extends Action
             'name' => $orderLine->name,
             'display_type' => AccountEnums\DisplayType::PRODUCT,
             'date' => $accountMove->date,
-            'debit' => 100,
-            'credit' => 0,
-            'amount_currency' => 100,
             'quantity' => $orderLine->qty_to_invoice,
             'price_unit' => $orderLine->price_unit,
-            'price_subtotal' => 100,
-            'price_total' => 100,
-            'discount' => 0,
+            'discount' => $orderLine->discount,
             'journal_id' => $accountMove->journal_id,
             'company_id' => $accountMove->company_id,
             'currency_id' => $accountMove->currency_id,

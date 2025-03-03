@@ -39,7 +39,6 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
-        'access_token',
         'name',
         'description',
         'priority',
