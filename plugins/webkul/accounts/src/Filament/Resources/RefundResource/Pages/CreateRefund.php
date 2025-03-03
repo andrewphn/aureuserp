@@ -11,7 +11,7 @@ use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\Move;
-use Webkul\Account\Services\MoveLineCalculationService;
+use Webkul\Account\Services\TaxService;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateBaseRefund;
 
 class CreateRefund extends CreateBaseRefund
@@ -98,7 +98,7 @@ class CreateRefund extends CreateBaseRefund
 
     private function createTaxLine($record): void
     {
-        $calculationService = app(MoveLineCalculationService::class);
+        $calculationService = app(TaxService::class);
         $lines = $record->lines->where('display_type', DisplayType::PRODUCT->value);
         $newTaxEntries = [];
 

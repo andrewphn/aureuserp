@@ -4,7 +4,7 @@ namespace Webkul\Account\Services;
 
 use Webkul\Account\Models\Tax;
 
-class MoveLineCalculationService
+class TaxService
 {
     /**
      * Calculate all line totals for an invoice line

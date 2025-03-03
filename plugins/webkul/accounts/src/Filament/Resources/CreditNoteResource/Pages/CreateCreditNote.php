@@ -12,7 +12,7 @@ use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Models\Move;
-use Webkul\Account\Services\MoveLineCalculationService;
+use Webkul\Account\Services\TaxService;
 
 class CreateCreditNote extends CreateRecord
 {
@@ -98,7 +98,7 @@ class CreateCreditNote extends CreateRecord
 
     private function createTaxLine($record): void
     {
-        $calculationService = app(MoveLineCalculationService::class);
+        $calculationService = app(TaxService::class);
         $lines = $record->lines->where('display_type', DisplayType::PRODUCT->value);
         $newTaxEntries = [];
 

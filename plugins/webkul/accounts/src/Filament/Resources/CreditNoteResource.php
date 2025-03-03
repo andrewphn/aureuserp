@@ -30,7 +30,7 @@ use Webkul\Support\Models\UOM;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\ActionSize;
 use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Services\MoveLineCalculationService;
+use Webkul\Account\Services\TaxService;
 
 class CreditNoteResource extends Resource
 {
@@ -712,7 +712,7 @@ class CreditNoteResource extends Resource
             'price_total'    => $get('price_total'),
         ];
 
-        $calculationService = app(MoveLineCalculationService::class);
+        $calculationService = app(TaxService::class);
 
         $updatedLineData = $calculationService->calculateLineTotals($lineData);
 

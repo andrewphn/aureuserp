@@ -32,7 +32,7 @@ use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Webkul\Account\Services\MoveLineCalculationService;
+use Webkul\Account\Services\TaxService;
 
 class InvoiceResource extends Resource
 {
@@ -936,7 +936,7 @@ class InvoiceResource extends Resource
 
         $taxIds = $get('taxes') ?? [];
 
-        [$subTotal, $taxAmount] = app(MoveLineCalculationService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
+        [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
 
         $set('price_subtotal', round($subTotal, 4));
 
@@ -997,7 +997,7 @@ class InvoiceResource extends Resource
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount, $taxesComputed] = app(MoveLineCalculationService::class)->collectionTaxes($taxIds, $subTotal, $line->quantity);
+        [$subTotal, $taxAmount, $taxesComputed] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $line->quantity);
 
         if ($taxAmount > 0) {
             static::updateOrCreateTaxLine($line, $subTotal, $taxesComputed, $newTaxEntries);
