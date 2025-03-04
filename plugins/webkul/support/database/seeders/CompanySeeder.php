@@ -20,9 +20,9 @@ class CompanySeeder extends Seeder
         DB::table('partners_partners')->delete();
         DB::table('company_addresses')->delete();
 
-        $currencyId = Currency::inRandomOrder()->first()?->id;
-        $stateId = State::inRandomOrder()->first()->id;
-        $countryId = Country::inRandomOrder()->first()->id;
+        $currencyId = Currency::find(1)->id;
+        $countryId = Country::find(233)->id;
+        $stateId = State::find(13)->id;
         $user = User::first();
 
         $now = now();
@@ -78,8 +78,8 @@ class CompanySeeder extends Seeder
 
         DB::table('partners_addresses')->insertGetId([
             'partner_id' => $partnerId,
-            'street1'    => '123 Placeholder Ave',
-            'city'       => 'Ave',
+            'street1'    => '456 California Blvd',
+            'city'       => 'Los Angeles',
             'name'       => 'DummyCorp LLC',
             'type'       => 'present',
             'creator_id' => $user?->id,
@@ -93,11 +93,11 @@ class CompanySeeder extends Seeder
         DB::table('company_addresses')->insert([
             'partner_address_id' => $partnerPermanentAddressId,
             'company_id'         => $companyId,
-            'street1'            => '123 Placeholder Ave',
-            'city'               => 'Ave',
-            'state_id'           => State::inRandomOrder()->first()->id,
-            'country_id'         => Country::inRandomOrder()->first()->id,
-            'zip'                => '000000',
+            'street1'            => '456 California Blvd',
+            'city'               => 'Los Angeles',
+            'state_id'           => $stateId,
+            'country_id'         => $countryId,
+            'zip'                => '90001',
             'is_primary'         => true,
             'created_at'         => $now,
             'updated_at'         => $now,
