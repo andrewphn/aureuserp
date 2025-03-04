@@ -33,7 +33,6 @@ class EditInvoice extends EditRecord
         return [
             ChatterActions\ChatterAction::make()
                 ->setResource($this->getResource()),
-            Actions\ViewAction::make(),
             BaseActions\PayAction::make(),
             BaseActions\ConfirmAction::make(),
             BaseActions\CancelAction::make(),

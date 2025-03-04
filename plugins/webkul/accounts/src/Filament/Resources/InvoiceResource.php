@@ -289,26 +289,44 @@ class InvoiceResource extends Resource
                     ->date()
                     ->placeholder('-')
                     ->label(__('accounts::filament/resources/invoice.table.columns.invoice-date'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('checked')
-                    ->boolean()
-                    ->placeholder('-')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.checked'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('date')
-                    ->date()
-                    ->placeholder('-')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.accounting-date'))
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_date_due')
                     ->date()
                     ->placeholder('-')
                     ->label(__('accounts::filament/resources/invoice.table.columns.due-date'))
-                    ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('amount_untaxed_in_currency_signed')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.tax-excluded'))
+                    ->searchable()
+                    ->placeholder('-')
+                    ->sortable()
+                    ->money(fn($record) => $record->currency->code)
+                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('amount_tax_signed')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.tax'))
+                    ->searchable()
+                    ->placeholder('-')
+                    ->sortable()
+                    ->money(fn($record) => $record->currency->code)
+                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('amount_total_in_currency_signed')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.total'))
+                    ->searchable()
+                    ->placeholder('-')
+                    ->sortable()
+                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
+                    ->money(fn($record) => $record->currency->code)
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('amount_residual_signed')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.amount-due'))
+                    ->searchable()
+                    ->placeholder('-')
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total'))
+                    ->money(fn($record) => $record->currency->code)
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('payment_state')
                     ->label(__('Payment State'))
                     ->placeholder('-')
@@ -316,6 +334,19 @@ class InvoiceResource extends Resource
                     ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
                     ->formatStateUsing(fn($state) => PaymentState::from($state)->getLabel())
                     ->badge()
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\IconColumn::make('checked')
+                    ->boolean()
+                    ->placeholder('-')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.checked'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('date')
+                    ->date()
+                    ->placeholder('-')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.accounting-date'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -336,39 +367,6 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('amount_untaxed_in_currency_signed')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.tax-excluded'))
-                    ->searchable()
-                    ->placeholder('-')
-                    ->sortable()
-                    ->money(fn($record) => $record->currency->name)
-                    ->summarize(Sum::make())
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('amount_tax_signed')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.tax'))
-                    ->searchable()
-                    ->placeholder('-')
-                    ->sortable()
-                    ->money(fn($record) => $record->currency->name)
-                    ->summarize(Sum::make())
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('amount_total_in_currency_signed')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.total'))
-                    ->searchable()
-                    ->placeholder('-')
-                    ->sortable()
-                    ->money(fn($record) => $record->currency->name)
-                    ->summarize(Sum::make())
-                    ->money(fn($record) => $record->currency->name)
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('amount_residual_signed')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.amount-due'))
-                    ->searchable()
-                    ->placeholder('-')
-                    ->sortable()
-                    ->money(fn($record) => $record->currency->name)
-                    ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('currency.id')
                     ->label(__('accounts::filament/resources/invoice.table.columns.invoice-currency'))
@@ -546,7 +544,7 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.unit-price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->code),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.discount-percentage'))
@@ -568,12 +566,13 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.sub-total'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->code),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
                                     return [
-                                        'currency' => $record->currency,
-                                        'products' => $record->lines->map(function ($item) {
+                                        'currency'   => $record->currency,
+                                        'amountTax'  => $record->amount_tax ?? 0,
+                                        'products'   => $record->lines->map(function ($item) {
                                             return [
                                                 ...$item->toArray(),
                                                 'taxes' => $item->taxes->pluck('id')->toArray() ?? [],
@@ -668,8 +667,7 @@ class InvoiceResource extends Resource
                                     ->html()
                                     ->hiddenLabel(),
                             ]),
-                    ])
-                    ->persistTabInQueryString(),
+                    ]),
             ]);
     }
 
@@ -703,7 +701,11 @@ class InvoiceResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.product'))
-                                    ->relationship('product', 'name')
+                                    ->relationship(
+                                        'product',
+                                        'name',
+                                        fn($query) => $query->where('is_configurable', null),
+                                    )
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -840,7 +842,7 @@ class InvoiceResource extends Resource
 
         $set('uom_id', $product->uom_id);
 
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->price ?? $product->cost);
 
         $set('price_unit', round($priceUnit, 2));
 
@@ -925,7 +927,7 @@ class InvoiceResource extends Resource
 
         $priceUnit = floatval($get('price_unit'));
 
-        $quantity = floatval($get('product_qty') ?? 1);
+        $quantity = floatval($get('quantity') ?? 1);
 
         $subTotal = $priceUnit * $quantity;
 
@@ -962,18 +964,16 @@ class InvoiceResource extends Resource
         $record->amount_residual_signed = 0;
         $newTaxEntries = [];
 
-        $lines = $record->lines->where('display_type', 'product');
-
-        foreach ($lines as $line) {
-            $line = static::collectLineTotals($line, $newTaxEntries);
+        foreach ($record->lines as $line) {
+            [$line, $amountTax] = static::collectLineTotals($line, $newTaxEntries);
 
             $record->amount_untaxed += floatval($line->price_subtotal);
-            $record->amount_tax += floatval($line->price_tax);
+            $record->amount_tax += floatval($amountTax);
             $record->amount_total += floatval($line->price_total);
 
             $record->amount_untaxed_signed += floatval($line->price_subtotal);
             $record->amount_untaxed_in_currency_signed += floatval($line->price_subtotal);
-            $record->amount_tax_signed += floatval($line->price_tax);
+            $record->amount_tax_signed += floatval($amountTax);
             $record->amount_total_signed += floatval($line->price_total);
             $record->amount_total_in_currency_signed += floatval($line->price_total);
 
@@ -986,7 +986,7 @@ class InvoiceResource extends Resource
         static::updateOrCreatePaymentTermLine($record);
     }
 
-    public static function collectLineTotals(MoveLine $line, &$newTaxEntries): MoveLine
+    public static function collectLineTotals(MoveLine $line, &$newTaxEntries): array
     {
         $subTotal = $line->price_unit * $line->quantity;
 
@@ -1008,13 +1008,14 @@ class InvoiceResource extends Resource
 
         $line->price_subtotal = round($subTotal, 4);
 
-        $line->price_tax = $taxAmount;
-
         $line->price_total = $subTotal + $taxAmount;
 
         $line->save();
 
-        return $line;
+        return [
+            $line,
+            $taxAmount,
+        ];
     }
 
     public static function updateOrCreatePaymentTermLine($move): void
@@ -1074,6 +1075,7 @@ class InvoiceResource extends Resource
             if (isset($newTaxEntries[$tax->id])) {
                 $newTaxEntries[$tax->id]['credit'] += $currentTaxAmount;
                 $newTaxEntries[$tax->id]['balance'] -= $currentTaxAmount;
+                $newTaxEntries[$tax->id]['tax_base_amount'] += $subTotal;
                 $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
             } else {
                 $newTaxEntries[$tax->id] = [

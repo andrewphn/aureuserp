@@ -2,7 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
-use Illuminate\Database\Eloquent\Model;
+use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\CreditNoteResource as BaseCreditNoteResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
@@ -17,22 +17,20 @@ class CreditNotesResource extends BaseCreditNoteResource
 
     public static function getModelLabel(): string
     {
-        return __('Credit Note');
+        return __('invoices::filament/clusters/customers/resources/credit-note.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Credit Notes');
+        return __('invoices::filament/clusters/customers/resources/credit-note.navigation.title');
     }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return [
-            __('accounts::filament/resources/invoice.navigation.global-search.number')           => $record?->name ?? '—',
-            __('accounts::filament/resources/invoice.navigation.global-search.customer')         => $record?->invoice_partner_display_name ?? '—',
-            __('accounts::filament/resources/invoice.navigation.global-search.invoice-date')     => $record?->invoice_date ?? '—',
-            __('accounts::filament/resources/invoice.navigation.global-search.invoice-date-due') => $record?->invoice_date_due ?? '—',
-        ];
+        return $page->generateNavigationItems([
+            Pages\ViewCreditNote::class,
+            Pages\EditCreditNotes::class,
+        ]);
     }
 
     public static function getPages(): array

@@ -19,7 +19,6 @@ class ViewBill extends ViewRecord
         return [
             ChatterActions\ChatterAction::make()
                 ->setResource($this->getResource()),
-            Actions\EditAction::make(),
             BaseActions\PayAction::make(),
             BaseActions\ConfirmAction::make(),
             BaseActions\CancelAction::make(),

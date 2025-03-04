@@ -2,6 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
@@ -13,6 +15,11 @@ class InvoiceResource extends BaseInvoiceResource
     protected static ?string $cluster = Customer::class;
 
     protected static ?int $navigationSort = 1;
+
+    public static function getSubNavigationPosition(): SubNavigationPosition
+    {
+        return SubNavigationPosition::Top;
+    }
 
     public static function getModelLabel(): string
     {
@@ -32,6 +39,14 @@ class InvoiceResource extends BaseInvoiceResource
             'invoice_date',
             'invoice_date_due',
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewInvoice::class,
+            Pages\EditInvoice::class,
+        ]);
     }
 
     public static function getPages(): array

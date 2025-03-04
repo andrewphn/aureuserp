@@ -18,6 +18,8 @@ class InvoiceSummary extends Component
 
     public $grandTotal = 0;
 
+    public $amountTax = 0;
+
     #[Reactive]
     public $currency = null;
 

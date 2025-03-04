@@ -2,6 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
+use Filament\Pages\SubNavigationPosition;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Webkul\Account\Enums\MoveType;
@@ -16,6 +17,11 @@ class ListRefunds extends BaseListInvoices
 
     protected static string $resource = RefundResource::class;
 
+    public function getSubNavigationPosition(): SubNavigationPosition
+    {
+        return SubNavigationPosition::Start;
+    }
+
     public function getPresetTableViews(): array
     {
         $predefinedViews = parent::getPresetTableViews();
@@ -25,7 +31,7 @@ class ListRefunds extends BaseListInvoices
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
             ...Arr::except($predefinedViews, ['invoice', 'in_refund']),
         ];
     }

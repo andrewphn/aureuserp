@@ -17,9 +17,9 @@ class ViewRefund extends ViewRecord
         return [
             ChatterActions\ChatterAction::make()
                 ->setResource($this->getResource()),
-            Actions\EditAction::make(),
             BaseActions\PayAction::make(),
             BaseActions\CancelAction::make(),
+            BaseActions\ConfirmAction::make(),
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
             Actions\DeleteAction::make(),
