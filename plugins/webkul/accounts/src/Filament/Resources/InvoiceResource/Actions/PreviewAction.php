@@ -11,9 +11,27 @@ class PreviewAction extends Action
 {
     use PDFHandler;
 
+    protected string $template = '';
+
     public static function getDefaultName(): ?string
     {
         return 'customers.invoice.preview';
+    }
+
+    public function getTemplate(): string
+    {
+        return (string) $this->template;
+    }
+
+    public function setTemplate(string $template): static
+    {
+        if (! view()->exists($template)) {
+            throw new \InvalidArgumentException("The view [{$template}] does not exist.");
+        }
+
+        $this->template = $template;
+
+        return $this;
     }
 
     protected function setUp(): void
@@ -21,14 +39,14 @@ class PreviewAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Preview'))
+            ->label(__('accounts::filament/resources/invoice/actions/preview.title'))
             ->color('gray')
-            ->visible(fn(Move $record) => $record->state == MoveState::POSTED->value)
+            ->visible(fn (Move $record) => $record->state == MoveState::POSTED->value)
             ->icon('heroicon-o-viewfinder-circle')
-            ->modalHeading(__('Preview Invoice'))
+            ->modalHeading(__('accounts::filament/resources/invoice/actions/preview.modal.title'))
             ->modalSubmitAction(false)
             ->modalContent(function ($record) {
-                return view('accounts::invoice/actions/preview.index', ['record' => $record]);
+                return view($this->getTemplate(), ['record' => $record]);
             });
     }
 }

@@ -21,7 +21,7 @@ class RespondQuotation extends SimplePage
             'body' => $this->action === 'accept'
                 ? 'The RFQ has been acknowledged by vendor.'
                 : 'The RFQ has been declined by vendor.',
-            'type'=>'comment',
+            'type'=> 'comment',
         ]);
     }
 

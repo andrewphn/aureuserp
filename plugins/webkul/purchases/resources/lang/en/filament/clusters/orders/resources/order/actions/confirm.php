@@ -7,7 +7,7 @@ return [
         'notification' => [
             'success' => [
                 'title' => 'Order confirmed',
-                'body' => 'The order has been confirmed successfully.',
+                'body'  => 'The order has been confirmed successfully.',
             ],
         ],
     ],

@@ -36,10 +36,10 @@ return new class extends Migration
             $table->timestamp('carried_over_days_expiration_date')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('already_accrued')->nullable();
-            $table->double('number_of_days')->nullable();
-            $table->double('number_of_hours_display')->nullable();
-            $table->double('yearly_accrued_amount')->nullable();
-            $table->double('expiring_carryover_days')->nullable();
+            $table->decimal('number_of_days', 15, 4)->nullable()->default(0);
+            $table->decimal('number_of_hours_display', 15, 4)->nullable()->default(0);
+            $table->decimal('yearly_accrued_amount', 15, 4)->nullable()->default(0);
+            $table->decimal('expiring_carryover_days', 15, 4)->nullable()->default(0);
             $table->timestamps();
         });
     }

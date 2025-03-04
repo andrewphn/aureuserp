@@ -3,7 +3,6 @@
 namespace Webkul\Product\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Webkul\Product\Models\ProductCombination;
 
 class DatabaseSeeder extends Seeder
 {

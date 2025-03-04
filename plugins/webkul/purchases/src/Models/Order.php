@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Incoterm;
+use Webkul\Account\Models\Move;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
@@ -20,7 +21,6 @@ use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
-use Webkul\Account\Models\Move;
 
 class Order extends Model
 {
@@ -131,7 +131,6 @@ class Order extends Model
         'company.name' => 'Company',
         'creator.name' => 'Creator',
     ];
-
 
     /**
      * Checks if new invoice is allow or not

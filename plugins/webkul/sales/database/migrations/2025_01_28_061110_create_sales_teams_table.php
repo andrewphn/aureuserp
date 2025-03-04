@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('creator_id')->nullable()->constrained('users')->nullOnDelete()->comment('Team Leader');
             $table->string('name')->comment('Name');
             $table->boolean('is_active')->nullable()->default(0)->comment('Is Active');
-            $table->double('invoiced_target')->nullable()->comment('Invoiced Target');
+            $table->decimal('invoiced_target', 15, 4)->nullable()->comment('Invoiced Target')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

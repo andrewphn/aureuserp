@@ -2,16 +2,16 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Actions;
 
-use Filament\Actions\Action;
-use Webkul\Purchase\Enums\OrderState;
-use Filament\Notifications\Notification;
-use Filament\Forms;
-use Webkul\Account\Models\Partner;
-use Livewire\Component;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\Action;
+use Filament\Forms;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
+use Webkul\Account\Models\Partner;
+use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
 use Webkul\Purchase\Models\Order;
 
@@ -34,9 +34,9 @@ class SendPOEmailAction extends Action
                 Forms\Components\Select::make('vendors')
                     ->label(__('purchases::filament/clusters/orders/resources/order/actions/send-po-email.form.fields.to'))
                     ->options(Partner::get()->mapWithKeys(fn ($partner) => [
-                        $partner->id => $partner->email 
-                            ? "{$partner->name} <{$partner->email}>" 
-                            : $partner->name
+                        $partner->id => $partner->email
+                            ? "{$partner->name} <{$partner->email}>"
+                            : $partner->name,
                     ])->toArray())
                     ->multiple()
                     ->searchable()
@@ -71,7 +71,7 @@ class SendPOEmailAction extends Action
                 Forms\Components\FileUpload::make('attachment')
                     ->hiddenLabel()
                     ->disk('public')
-                    ->default(function() {
+                    ->default(function () {
                         return $this->generatePdf($this->getRecord());
                     })
                     ->downloadable()
@@ -103,7 +103,7 @@ class SendPOEmailAction extends Action
 
                 $message = $record->addMessage([
                     'body' => $data['message'],
-                    'type'=>'comment',
+                    'type' => 'comment',
                 ]);
 
                 $record->addAttachments(

@@ -32,7 +32,12 @@ class PaymentsResource extends BasePaymentsResource
 
     public static function table(Table $table): Table
     {
-        return BasePaymentsResource::table($table);
+        return BasePaymentsResource::table($table)
+            ->modifyQueryUsing(function ($query) {
+                $query->whereHas('partner', function ($query) {
+                    $query->where('sub_type', 'supplier');
+                });
+            });
     }
 
     public static function getPages(): array

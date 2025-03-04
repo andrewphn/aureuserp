@@ -3,13 +3,13 @@
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Actions;
 
 use Filament\Actions\Action;
-use Livewire\Component;
-use Webkul\Purchase\Enums\OrderState;
 use Filament\Notifications\Notification;
 use Webkul\Purchase\Models\AccountMove;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Enums\OrderState;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
 
@@ -26,7 +26,7 @@ class CreateBillAction extends Action
 
         $this
             ->label(__('purchases::filament/clusters/orders/resources/order/actions/create-bill.label'))
-            ->color(function(Order $record): string {
+            ->color(function (Order $record): string {
                 if ($record->qty_to_invoice == 0) {
                     return 'gray';
                 }
@@ -97,20 +97,20 @@ class CreateBillAction extends Action
     private function createAccountMoveLine($accountMove, $orderLine): void
     {
         $accountMoveLine = $accountMove->lines()->create([
-            'state' => AccountEnums\MoveState::DRAFT,
-            'name' => $orderLine->name,
-            'display_type' => AccountEnums\DisplayType::PRODUCT,
-            'date' => $accountMove->date,
-            'quantity' => $orderLine->qty_to_invoice,
-            'price_unit' => $orderLine->price_unit,
-            'discount' => $orderLine->discount,
-            'journal_id' => $accountMove->journal_id,
-            'company_id' => $accountMove->company_id,
-            'currency_id' => $accountMove->currency_id,
-            'company_currency_id' => $accountMove->currency_id,
-            'partner_id' => $accountMove->partner_id,
-            'product_id' => $orderLine->product_id,
-            'product_uom_id' => $orderLine->uom_id,
+            'state'                  => AccountEnums\MoveState::DRAFT,
+            'name'                   => $orderLine->name,
+            'display_type'           => AccountEnums\DisplayType::PRODUCT,
+            'date'                   => $accountMove->date,
+            'quantity'               => $orderLine->qty_to_invoice,
+            'price_unit'             => $orderLine->price_unit,
+            'discount'               => $orderLine->discount,
+            'journal_id'             => $accountMove->journal_id,
+            'company_id'             => $accountMove->company_id,
+            'currency_id'            => $accountMove->currency_id,
+            'company_currency_id'    => $accountMove->currency_id,
+            'partner_id'             => $accountMove->partner_id,
+            'product_id'             => $orderLine->product_id,
+            'product_uom_id'         => $orderLine->uom_id,
             'purchase_order_line_id' => $orderLine->id,
         ]);
 

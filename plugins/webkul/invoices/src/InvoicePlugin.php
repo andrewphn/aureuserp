@@ -35,7 +35,7 @@ class InvoicePlugin implements Plugin
                     ->navigationItems([
                         NavigationItem::make('settings')
                             ->label('Settings')
-                            ->url(fn() => Products::getUrl())
+                            ->url(fn () => Products::getUrl())
                             ->icon('heroicon-o-wrench')
                             ->group('Invoices')
                             ->sort(4),
@@ -52,6 +52,6 @@ class InvoicePlugin implements Plugin
     {
         $reflector = new \ReflectionClass(get_class($this));
 
-        return dirname($reflector->getFileName()) . ($path ?? '');
+        return dirname($reflector->getFileName()).($path ?? '');
     }
 }

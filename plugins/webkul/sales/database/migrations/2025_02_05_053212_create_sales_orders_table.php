@@ -37,17 +37,17 @@ return new class extends Migration
             $table->string('invoice_status')->nullable()->comment('Invoice Status');
             $table->date('validity_date')->nullable()->comment('Expiration Date');
             $table->text('note')->nullable()->comment('Terms and conditions');
-            $table->double('currency_rate')->nullable()->comment('Currency Rate');
-            $table->double('amount_untaxed')->nullable()->comment('Untaxed Amount');
-            $table->double('amount_tax')->nullable()->comment('Taxes');
-            $table->double('amount_total')->nullable()->comment('Total');
+            $table->decimal('currency_rate', 15, 4)->nullable()->comment('Currency Rate')->default(0);
+            $table->decimal('amount_untaxed', 15, 4)->nullable()->comment('Untaxed Amount')->default(0);
+            $table->decimal('amount_tax', 15, 4)->nullable()->comment('Taxes')->default(0);
+            $table->decimal('amount_total', 15, 4)->nullable()->comment('Total')->default(0);
             $table->boolean('locked')->default(false)->comment('Locked');
             $table->boolean('require_signature')->default(false)->comment('Require Signature');
             $table->boolean('require_payment')->default(false)->comment('Require Payment');
             $table->date('commitment_date')->nullable()->comment('Commitment Date');
             $table->date('date_order')->comment('Order Date');
             $table->date('signed_on')->nullable()->comment('Signed On');
-            $table->double('prepayment_percent')->nullable()->comment('Prepayment Percentage');
+            $table->decimal('prepayment_percent', 15, 4)->nullable()->comment('Prepayment Percentage')->default(0);
 
             $table->softDeletes();
             $table->timestamps();

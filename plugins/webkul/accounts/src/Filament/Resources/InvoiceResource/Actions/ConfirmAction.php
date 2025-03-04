@@ -50,8 +50,8 @@ class ConfirmAction extends Action
         if (! $record->partner_id) {
             Notification::make()
                 ->warning()
-                ->title(__('Customer validation'))
-                ->body(__('Please provide a valid Customer to proceed with the Customer Invoice validation.'))
+                ->title(__('accounts::filament/resources/invoice/actions/confirm-action.customer.notification.customer-validation.title'))
+                ->body(__('accounts::filament/resources/invoice/actions/confirm-action.customer.notification.customer-validation.body'))
                 ->send();
 
             return false;
@@ -62,6 +62,9 @@ class ConfirmAction extends Action
                 ->warning()
                 ->title(__('Move Line validation'))
                 ->body(__('Please add at least one line to the invoice.'))
+
+                ->title(__('accounts::filament/resources/invoice/actions/confirm-action.customer.notification.move-line-validation.title'))
+                ->body(__('accounts::filament/resources/invoice/actions/confirm-action.customer.notification.move-line-validation.body'))
                 ->send();
 
             return false;

@@ -3,9 +3,9 @@
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource\Actions;
 
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
-use Filament\Notifications\Notification;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Settings\OrderSettings;
 
@@ -26,7 +26,7 @@ class ConfirmAction extends Action
             ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'gray' : 'primary')
             ->action(function (Order $record, Component $livewire, OrderSettings $orderSettings): void {
                 $record->update([
-                    'state' => $orderSettings->enable_lock_confirmed_orders ? OrderState::DONE : OrderState::PURCHASE,
+                    'state'       => $orderSettings->enable_lock_confirmed_orders ? OrderState::DONE : OrderState::PURCHASE,
                     'approved_at' => now(),
                 ]);
 

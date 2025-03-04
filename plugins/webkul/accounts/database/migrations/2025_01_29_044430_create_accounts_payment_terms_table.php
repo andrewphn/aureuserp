@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(false)->nullable()->comment('Active');
             $table->boolean('display_on_invoice')->default(false)->nullable()->comment('Display on Invoice');
             $table->boolean('early_discount')->default(false)->nullable()->comment('Early Discount');
-            $table->double('discount_percentage')->nullable()->comment('Discount Percentage');
+            $table->decimal('discount_percentage', 15, 4)->nullable()->comment('Discount Percentage')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

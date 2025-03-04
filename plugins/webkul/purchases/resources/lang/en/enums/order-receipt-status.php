@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'no' => 'Noting To Receive',
+    'no'          => 'Noting To Receive',
     'to-received' => 'Waiting Receptions',
-    'received' => 'Fully Received',
+    'received'    => 'Fully Received',
 ];

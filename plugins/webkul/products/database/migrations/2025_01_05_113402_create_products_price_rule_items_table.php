@@ -17,14 +17,14 @@ return new class extends Migration
             $table->string('display_apply_to');
             $table->string('base');
             $table->string('type');
-            $table->decimal('min_quantity', 15, 4)->nullable();
-            $table->decimal('fixed_price', 15, 4)->nullable();
-            $table->decimal('price_discount', 15, 4)->nullable();
-            $table->decimal('price_round', 15, 4)->nullable();
-            $table->decimal('price_surcharge', 15, 4)->nullable();
-            $table->decimal('price_markup', 15, 4)->nullable();
-            $table->decimal('price_min_margin', 15, 4)->nullable();
-            $table->double('percent_price')->nullable();
+            $table->decimal('min_quantity', 15, 4)->nullable()->default(0);
+            $table->decimal('fixed_price', 15, 4)->nullable()->default(0);
+            $table->decimal('price_discount', 15, 4)->nullable()->default(0);
+            $table->decimal('price_round', 15, 4)->nullable()->default(0);
+            $table->decimal('price_surcharge', 15, 4)->nullable()->default(0);
+            $table->decimal('price_markup', 15, 4)->nullable()->default(0);
+            $table->decimal('price_min_margin', 15, 4)->nullable()->default(0);
+            $table->decimal('percent_price', 15, 4)->nullable()->default(0);
             $table->datetime('starts_at')->nullable();
             $table->datetime('ends_at')->nullable();
 

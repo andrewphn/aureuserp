@@ -6,12 +6,12 @@ return [
     ],
 
     'tabs' => [
-        'my-agreements' => 'My Agreements',
-        'blanket-orders' => 'Blanket Orders',
+        'my-agreements'      => 'My Agreements',
+        'blanket-orders'     => 'Blanket Orders',
         'purchase-templates' => 'Purchase Templates',
-        'draft' => 'Draft',
-        'done' => 'Done',
-        'archived' => 'Archived',
+        'draft'              => 'Draft',
+        'done'               => 'Done',
+        'archived'           => 'Archived',
     ],
 
     'header-actions' => [
