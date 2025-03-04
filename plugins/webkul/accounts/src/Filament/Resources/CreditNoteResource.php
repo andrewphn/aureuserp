@@ -644,7 +644,7 @@ class CreditNoteResource extends Resource
 
         $set('uom_id', $product->uom_id);
 
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->price ?? $product->cost);
 
         $set('price_unit', round($priceUnit, 2));
 

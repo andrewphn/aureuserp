@@ -669,8 +669,7 @@ class InvoiceResource extends Resource
                                     ->html()
                                     ->hiddenLabel(),
                             ]),
-                    ])
-                    ->persistTabInQueryString(),
+                    ]),
             ]);
     }
 
@@ -704,7 +703,11 @@ class InvoiceResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.product'))
-                                    ->relationship('product', 'name')
+                                    ->relationship(
+                                        'product',
+                                        'name',
+                                        fn($query) => $query->where('is_configurable', null),
+                                    )
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -841,7 +844,7 @@ class InvoiceResource extends Resource
 
         $set('uom_id', $product->uom_id);
 
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->price ?? $product->cost);
 
         $set('price_unit', round($priceUnit, 2));
 

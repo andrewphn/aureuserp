@@ -2,6 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
+use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\BillResource as BaseBillResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages;
@@ -29,6 +30,14 @@ class BillResource extends BaseBillResource
     public static function getNavigationLabel(): string
     {
         return __('invoices::filament/clusters/vendors/resources/bill.navigation.title');
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewBill::class,
+            Pages\EditBill::class,
+        ]);
     }
 
     public static function getPages(): array

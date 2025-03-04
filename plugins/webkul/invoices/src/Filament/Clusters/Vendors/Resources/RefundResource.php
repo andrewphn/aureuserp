@@ -2,6 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
+use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\RefundResource as BaseRefundResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
@@ -27,6 +28,14 @@ class RefundResource extends BaseRefundResource
     public static function getNavigationLabel(): string
     {
         return __('invoices::filament/clusters/vendors/resources/refund.navigation.title');
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewRefund::class,
+            Pages\EditRefund::class,
+        ]);
     }
 
     public static function getPages(): array

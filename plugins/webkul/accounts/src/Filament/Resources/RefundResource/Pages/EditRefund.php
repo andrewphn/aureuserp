@@ -17,9 +17,9 @@ class EditRefund extends EditRecord
         return [
             ChatterActions\ChatterAction::make()
                 ->setResource($this->getResource()),
-            Actions\ViewAction::make(),
             BaseActions\PayAction::make(),
             BaseActions\CancelAction::make(),
+            BaseActions\ConfirmAction::make(),
             BaseActions\ResetToDraftAction::make(),
             BaseActions\SetAsCheckedAction::make(),
             Actions\DeleteAction::make(),
