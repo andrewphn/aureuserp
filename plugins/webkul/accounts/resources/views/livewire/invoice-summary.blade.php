@@ -66,7 +66,14 @@
                     foreach ($products as $product) {
                         $subTotal += floatval($product['price_subtotal']);
 
-                        $totalTax += $product['price_tax'];
+                        if (
+                            isset($amountTax)
+                            && $amountTax > 0
+                        ) {
+                            $totalTax = $amountTax;
+                        } else {
+                            $totalTax += $product['price_tax'] ?? 0;
+                        }
 
                         $totalDiscount += floatval($product['discount']);
 

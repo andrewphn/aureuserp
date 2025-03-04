@@ -58,7 +58,6 @@ class MoveLine extends Model
         'quantity',
         'price_unit',
         'price_subtotal',
-        'price_tax',
         'price_total',
         'discount',
         'discount_amount_currency',

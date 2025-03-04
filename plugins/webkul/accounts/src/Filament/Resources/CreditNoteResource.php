@@ -351,7 +351,7 @@ class CreditNoteResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.unit-price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->code),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.discount-percentage'))
@@ -373,12 +373,13 @@ class CreditNoteResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.sub-total'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->code),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
                                     return [
-                                        'currency' => $record->currency,
-                                        'products' => $record->lines->map(function ($item) {
+                                        'currency'   => $record->currency,
+                                        'amountTax'  => $record->amount_tax ?? 0,
+                                        'products'   => $record->lines->map(function ($item) {
                                             return [
                                                 ...$item->toArray(),
                                                 'taxes' => $item->taxes->pluck('id')->toArray() ?? [],
@@ -729,7 +730,7 @@ class CreditNoteResource extends Resource
 
         $priceUnit = floatval($get('price_unit'));
 
-        $quantity = floatval($get('product_qty') ?? 1);
+        $quantity = floatval($get('quantity') ?? 1);
 
         $subTotal = $priceUnit * $quantity;
 
@@ -767,15 +768,15 @@ class CreditNoteResource extends Resource
         $newTaxEntries = [];
 
         foreach ($record->lines as $line) {
-            $line = static::collectLineTotals($line, $newTaxEntries);
+            [$line, $amountTax] = static::collectLineTotals($line, $newTaxEntries);
 
             $record->amount_untaxed += floatval($line->price_subtotal);
-            $record->amount_tax += floatval($line->price_tax);
+            $record->amount_tax += floatval($amountTax);
             $record->amount_total += floatval($line->price_total);
 
             $record->amount_untaxed_signed += -floatval($line->price_subtotal);
             $record->amount_untaxed_in_currency_signed += -floatval($line->price_subtotal);
-            $record->amount_tax_signed += -floatval($line->price_tax);
+            $record->amount_tax_signed += -floatval($amountTax);
             $record->amount_total_signed += -floatval($line->price_total);
             $record->amount_total_in_currency_signed += -floatval($line->price_total);
 
@@ -788,7 +789,7 @@ class CreditNoteResource extends Resource
         static::updateOrCreatePaymentTermLine($record);
     }
 
-    public static function collectLineTotals(MoveLine $line, &$newTaxEntries): MoveLine
+    public static function collectLineTotals(MoveLine $line, &$newTaxEntries): array
     {
         $subTotal = $line->price_unit * $line->quantity;
 
@@ -810,13 +811,14 @@ class CreditNoteResource extends Resource
 
         $line->price_subtotal = round($subTotal, 4);
 
-        $line->price_tax = $taxAmount;
-
         $line->price_total = $subTotal + $taxAmount;
 
         $line->save();
 
-        return $line;
+        return [
+            $line,
+            $taxAmount,
+        ];
     }
 
     public static function updateOrCreatePaymentTermLine($move): void

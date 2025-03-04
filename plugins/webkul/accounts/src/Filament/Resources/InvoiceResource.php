@@ -343,7 +343,7 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn($record) => $record->currency->name)
+                    ->money(fn($record) => $record->currency->code)
                     ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_tax_signed')
@@ -351,7 +351,7 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn($record) => $record->currency->name)
+                    ->money(fn($record) => $record->currency->code)
                     ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_total_in_currency_signed')
@@ -359,16 +359,15 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn($record) => $record->currency->name)
                     ->summarize(Sum::make())
-                    ->money(fn($record) => $record->currency->name)
+                    ->money(fn($record) => $record->currency->code)
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount_residual_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.amount-due'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn($record) => $record->currency->name)
+                    ->money(fn($record) => $record->currency->code)
                     ->summarize(Sum::make())
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('currency.id')
@@ -547,7 +546,7 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.unit-price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->code),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.discount-percentage'))
@@ -569,12 +568,13 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.sub-total'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->code),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
                                     return [
-                                        'currency' => $record->currency,
-                                        'products' => $record->lines->map(function ($item) {
+                                        'currency'   => $record->currency,
+                                        'amountTax'  => $record->amount_tax ?? 0,
+                                        'products'   => $record->lines->map(function ($item) {
                                             return [
                                                 ...$item->toArray(),
                                                 'taxes' => $item->taxes->pluck('id')->toArray() ?? [],
@@ -929,7 +929,7 @@ class InvoiceResource extends Resource
 
         $priceUnit = floatval($get('price_unit'));
 
-        $quantity = floatval($get('product_qty') ?? 1);
+        $quantity = floatval($get('quantity') ?? 1);
 
         $subTotal = $priceUnit * $quantity;
 
@@ -969,15 +969,15 @@ class InvoiceResource extends Resource
         $lines = $record->lines->where('display_type', 'product');
 
         foreach ($lines as $line) {
-            $line = static::collectLineTotals($line, $newTaxEntries);
+            [$line, $amountTax] = static::collectLineTotals($line, $newTaxEntries);
 
             $record->amount_untaxed += floatval($line->price_subtotal);
-            $record->amount_tax += floatval($line->price_tax);
+            $record->amount_tax += floatval($amountTax);
             $record->amount_total += floatval($line->price_total);
 
             $record->amount_untaxed_signed += floatval($line->price_subtotal);
             $record->amount_untaxed_in_currency_signed += floatval($line->price_subtotal);
-            $record->amount_tax_signed += floatval($line->price_tax);
+            $record->amount_tax_signed += floatval($amountTax);
             $record->amount_total_signed += floatval($line->price_total);
             $record->amount_total_in_currency_signed += floatval($line->price_total);
 
@@ -990,7 +990,7 @@ class InvoiceResource extends Resource
         static::updateOrCreatePaymentTermLine($record);
     }
 
-    public static function collectLineTotals(MoveLine $line, &$newTaxEntries): MoveLine
+    public static function collectLineTotals(MoveLine $line, &$newTaxEntries): array
     {
         $subTotal = $line->price_unit * $line->quantity;
 
@@ -1012,13 +1012,14 @@ class InvoiceResource extends Resource
 
         $line->price_subtotal = round($subTotal, 4);
 
-        $line->price_tax = $taxAmount;
-
         $line->price_total = $subTotal + $taxAmount;
 
         $line->save();
 
-        return $line;
+        return [
+            $line,
+            $taxAmount,
+        ];
     }
 
     public static function updateOrCreatePaymentTermLine($move): void
@@ -1078,6 +1079,7 @@ class InvoiceResource extends Resource
             if (isset($newTaxEntries[$tax->id])) {
                 $newTaxEntries[$tax->id]['credit'] += $currentTaxAmount;
                 $newTaxEntries[$tax->id]['balance'] -= $currentTaxAmount;
+                $newTaxEntries[$tax->id]['tax_base_amount'] += $subTotal;
                 $newTaxEntries[$tax->id]['amount_currency'] -= $currentTaxAmount;
             } else {
                 $newTaxEntries[$tax->id] = [
