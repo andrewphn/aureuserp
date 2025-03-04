@@ -102,7 +102,7 @@ class ManageMoves extends ManageRelatedRecords
                 Tables\Columns\TextColumn::make('destinationLocation.full_name')
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-moves.table.columns.destination-location'))
                     ->visible(fn (WarehouseSettings $settings) => $settings->enable_locations),
-                Tables\Columns\TextColumn::make('qty')
+                Tables\Columns\TextColumn::make('uom_qty')
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-moves.table.columns.quantity'))
                     ->sortable()
                     ->color(fn ($record) => $record->destinationLocation->type == Enums\LocationType::INTERNAL ? 'success' : 'danger'),

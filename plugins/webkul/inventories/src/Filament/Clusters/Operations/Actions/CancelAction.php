@@ -26,7 +26,7 @@ class CancelAction extends Action
                 foreach ($record->moves as $move) {
                     $move->update([
                         'state'        => Enums\MoveState::CANCELED,
-                        'received_qty' => 0,
+                        'quantity' => 0,
                     ]);
 
                     $move->lines()->delete();
