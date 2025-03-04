@@ -74,7 +74,21 @@ class ReturnAction extends Action
 
         OperationResource::updateOperationState($newOperation);
 
-        $record->update(['return_id' => $newOperation->id]);
+        $record->update(['return_id' => $record->id]);
+
+        $url = OperationResource::getUrl('view', ['record' => $record]);
+
+        $newOperation->addMessage([
+            'body' => "This transfer has been created from <a href=\"{$url}\" target=\"_blank\" class=\"text-primary-600 dark:text-primary-400\">{$record->name}</a>.",
+            'type' => 'comment',
+        ]);
+
+        $url = OperationResource::getUrl('view', ['record' => $newOperation]);
+
+        $record->addMessage([
+            'body' => "The return <a href=\"{$url}\" target=\"_blank\" class=\"text-primary-600 dark:text-primary-400\">{$newOperation->name}</a> has been created.",
+            'type' => 'comment',
+        ]);
 
         return $newOperation;
     }
