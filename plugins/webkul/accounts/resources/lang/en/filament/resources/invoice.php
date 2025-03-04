@@ -103,6 +103,7 @@ return [
     ],
 
     'table' => [
+        'total'   => 'Total',
         'columns' => [
             'number'           => 'Number',
             'customer'         => 'Customer',
