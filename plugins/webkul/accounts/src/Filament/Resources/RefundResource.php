@@ -51,40 +51,40 @@ class RefundResource extends Resource
                     ->disabled()
                     ->live()
                     ->reactive(),
-                Forms\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
+                Forms\Components\Section::make(__('accounts::filament/resources/refund.form.section.general.title'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('payment_state')
-                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label(__('Vendor Credit Note'))
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.vendor-credit-note'))
                                     ->required()
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->placeholder('RBILL/2025/00001')
-                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber('RBILL'))
+                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('RBILL'))
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
                                         ignoreRecord: true,
                                     )
                                     ->columnSpan(1)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Group::make()
                                     ->schema([
                                         Forms\Components\Select::make('partner_id')
-                                            ->label(__('Vendor'))
+                                            ->label(__('accounts::filament/resources/refund.form.section.general.fields.vendor'))
                                             ->relationship(
                                                 'partner',
                                                 'name',
@@ -92,11 +92,11 @@ class RefundResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -114,7 +114,7 @@ class RefundResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', '.$address->street2 : '',
+                                                    $address->street2 ? ', ' . $address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -123,45 +123,45 @@ class RefundResource extends Resource
                                             }),
                                     ]),
                                 Forms\Components\TextInput::make('reference')
-                                    ->label(__('Bill Reference'))
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.bill-reference'))
                                     ->live()
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date')
-                                    ->label(__('Invoice Date'))
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.bill-date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('date')
-                                    ->label(__('Accounting Date'))
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.accounting-date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Select::make('partner_bank_id')
                                     ->relationship('partnerBank', 'account_number')
                                     ->searchable()
                                     ->preload()
-                                    ->label(__('Recipient Bank'))
-                                    ->createOptionForm(fn ($form) => BankAccountResource::form($form))
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.recipient-bank'))
+                                    ->createOptionForm(fn($form) => BankAccountResource::form($form))
+                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
                                     ->default(now())
                                     ->native(false)
                                     ->live()
-                                    ->hidden(fn (Get $get) => $get('invoice_payment_term_id') !== null)
-                                    ->label(__('Due Date')),
+                                    ->hidden(fn(Get $get) => $get('invoice_payment_term_id') !== null)
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.due-date')),
                                 Forms\Components\Select::make('invoice_payment_term_id')
                                     ->relationship('invoicePaymentTerm', 'name')
-                                    ->required(fn (Get $get) => $get('invoice_date_due') === null)
+                                    ->required(fn(Get $get) => $get('invoice_date_due') === null)
                                     ->live()
                                     ->searchable()
                                     ->preload()
-                                    ->label(__('Payment Term')),
+                                    ->label(__('accounts::filament/resources/refund.form.section.general.fields.payment-term')),
                             ])->columns(2),
                     ]),
                 Forms\Components\Tabs::make()
                     ->schema([
-                        Forms\Components\Tabs\Tab::make(__('Invoice Lines'))
+                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/refund.form.tabs.invoice-lines.title'))
                             ->icon('heroicon-o-list-bullet')
                             ->schema([
                                 static::getProductRepeater(),
@@ -174,45 +174,45 @@ class RefundResource extends Resource
                                     ->live()
                                     ->reactive(),
                             ]),
-                        Forms\Components\Tabs\Tab::make(__('Other Information'))
+                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/refund.form.tabs.other-information.title'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
-                                Forms\Components\Fieldset::make('Accounting')
+                                Forms\Components\Fieldset::make(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.accounting.title'))
                                     ->schema([
                                         Forms\Components\Select::make('invoice_incoterm_id')
                                             ->relationship('invoiceIncoterm', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->label(__('Incoterm')),
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.accounting.fields.incoterm')),
                                         Forms\Components\TextInput::make('incoterm_location')
-                                            ->label(__('Incoterm Location')),
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.accounting.fields.incoterm-location')),
                                     ]),
-                                Forms\Components\Fieldset::make('Secured')
+                                Forms\Components\Fieldset::make(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.secured.title'))
                                     ->schema([
                                         Forms\Components\Select::make('preferred_payment_method_line_id')
                                             ->relationship('paymentMethodLine', 'name')
                                             ->preload()
                                             ->searchable()
-                                            ->label(__('Payment Method')),
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.secured.fields.payment-method')),
                                         Forms\Components\Select::make('auto_post')
                                             ->options(AutoPost::class)
                                             ->default(AutoPost::NO->value)
-                                            ->label(__('Auto Post'))
-                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.secured.fields.auto-post'))
+                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
-                                            ->label(__('Checked')),
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.secured.fields.checked')),
                                     ]),
-                                Forms\Components\Fieldset::make('Additional Information')
+                                Forms\Components\Fieldset::make(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.additional-information.title'))
                                     ->schema([
                                         Forms\Components\Select::make('company_id')
-                                            ->label(__('Company'))
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.additional-information.fields.company'))
                                             ->relationship('company', 'name')
                                             ->searchable()
                                             ->preload()
                                             ->default(Auth::user()->default_company_id),
                                         Forms\Components\Select::make('currency_id')
-                                            ->label(__('Currency'))
+                                            ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.additional-information.fields.currency'))
                                             ->relationship('currency', 'name')
                                             ->required()
                                             ->searchable()
@@ -222,7 +222,7 @@ class RefundResource extends Resource
                                             ->default(Auth::user()->defaultCompany?->currency_id),
                                     ]),
                             ]),
-                        Forms\Components\Tabs\Tab::make(__('Term & Conditions'))
+                        Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/refund.form.tabs.term-and-conditions.title'))
                             ->icon('heroicon-o-clipboard-document-list')
                             ->schema([
                                 Forms\Components\RichEditor::make('narration')
@@ -243,22 +243,22 @@ class RefundResource extends Resource
     {
         return $infolist
             ->schema([
-                Infolists\Components\Section::make(__('purchases::filament/clusters/orders/resources/order.form.sections.general.title'))
+                Infolists\Components\Section::make(__('accounts::filament/resources/refund.infolist.section.general.title'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Infolists\Components\Actions::make([
                             Infolists\Components\Actions\Action::make('payment_state')
-                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Infolists\Components\Grid::make()
                             ->schema([
                                 Infolists\Components\TextEntry::make('name')
                                     ->placeholder('-')
-                                    ->label(__('Customer Invoice'))
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.vendor-invoice'))
                                     ->icon('heroicon-o-document')
                                     ->weight('bold')
                                     ->size(TextEntrySize::Large),
@@ -267,33 +267,46 @@ class RefundResource extends Resource
                             ->schema([
                                 Infolists\Components\TextEntry::make('partner.name')
                                     ->placeholder('-')
-                                    ->label(__('Customer'))
-                                    ->visible(fn ($record) => $record->partner_id !== null)
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.vendor'))
+                                    ->visible(fn($record) => $record->partner_id !== null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_partner_display_name')
                                     ->placeholder('-')
-                                    ->label(__('Customer'))
-                                    ->visible(fn ($record) => $record->partner_id === null)
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.vendor'))
+                                    ->visible(fn($record) => $record->partner_id === null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_date')
-                                    ->placeholder('-')
-                                    ->label(__('Invoice Date'))
+                                    ->date()
                                     ->icon('heroicon-o-calendar')
-                                    ->date(),
-                                Infolists\Components\TextEntry::make('invoice_date_due')
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.bill-date')),
+                                Infolists\Components\TextEntry::make('reference')
                                     ->placeholder('-')
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.bill-reference')),
+                                Infolists\Components\TextEntry::make('date')
+                                    ->icon('heroicon-o-calendar')
+                                    ->placeholder('-')
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.accounting-date')),
+                                Infolists\Components\TextEntry::make('payment_reference')
+                                    ->placeholder('-')
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.payment-reference')),
+                                Infolists\Components\TextEntry::make('partnerBank.account_number')
+                                    ->placeholder('-')
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.recipient-bank')),
+                                Infolists\Components\TextEntry::make('invoice_date_due')
                                     ->icon('heroicon-o-clock')
-                                    ->date(),
+                                    ->placeholder('-')
+                                    ->date()
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.due-date')),
                                 Infolists\Components\TextEntry::make('invoicePaymentTerm.name')
                                     ->placeholder('-')
-                                    ->label(__('Payment Term'))
-                                    ->icon('heroicon-o-calendar-days'),
+                                    ->icon('heroicon-o-calendar-days')
+                                    ->label(__('accounts::filament/resources/refund.infolist.section.general.entries.payment-term')),
                             ])->columns(2),
                     ]),
                 Infolists\Components\Tabs::make()
                     ->columnSpan('full')
                     ->tabs([
-                        Infolists\Components\Tabs\Tab::make(__('Invoice Lines'))
+                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.title'))
                             ->icon('heroicon-o-list-bullet')
                             ->schema([
                                 Infolists\Components\RepeatableEntry::make('lines')
@@ -301,49 +314,44 @@ class RefundResource extends Resource
                                     ->schema([
                                         Infolists\Components\TextEntry::make('product.name')
                                             ->placeholder('-')
-                                            ->label(__('Product'))
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.product'))
                                             ->icon('heroicon-o-cube'),
                                         Infolists\Components\TextEntry::make('quantity')
                                             ->placeholder('-')
-                                            ->label(__('Quantity'))
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.quantity'))
                                             ->icon('heroicon-o-hashtag'),
                                         Infolists\Components\TextEntry::make('uom.name')
                                             ->placeholder('-')
-                                            ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
-                                            ->label(__('Unit of Measure'))
+                                            ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.unit'))
                                             ->icon('heroicon-o-scale'),
                                         Infolists\Components\TextEntry::make('price_unit')
                                             ->placeholder('-')
-                                            ->label(__('Unit Price'))
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.unit-price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn ($record) => $record->currency->name),
+                                            ->money(fn($record) => $record->currency->name),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
-                                            ->label(__('Discount'))
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.discount-percentage'))
                                             ->icon('heroicon-o-tag')
                                             ->suffix('%'),
                                         Infolists\Components\TextEntry::make('taxes.name')
                                             ->badge()
                                             ->state(function ($record): array {
-                                                return $record->taxes->map(fn ($tax) => [
+                                                return $record->taxes->map(fn($tax) => [
                                                     'name' => $tax->name,
                                                 ])->toArray();
                                             })
                                             ->icon('heroicon-o-receipt-percent')
-                                            ->formatStateUsing(fn ($state) => $state['name'])
+                                            ->formatStateUsing(fn($state) => $state['name'])
                                             ->placeholder('-')
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.taxes'))
                                             ->weight(FontWeight::Bold),
                                         Infolists\Components\TextEntry::make('price_subtotal')
                                             ->placeholder('-')
-                                            ->label(__('Subtotal'))
+                                            ->label(__('accounts::filament/resources/refund.infolist.tabs.invoice-lines.repeater.products.entries.sub-total'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn ($record) => $record->currency->name),
-                                        Infolists\Components\TextEntry::make('price_total')
-                                            ->placeholder('-')
-                                            ->label(__('Total'))
-                                            ->icon('heroicon-o-banknotes')
-                                            ->money(fn ($record) => $record->currency->symbol)
-                                            ->weight('bold'),
+                                            ->money(fn($record) => $record->currency->name),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
                                     return [
@@ -357,84 +365,61 @@ class RefundResource extends Resource
                                     ];
                                 }),
                             ]),
-                        Infolists\Components\Tabs\Tab::make(__('Other Information'))
+                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/refund.infolist.tabs.other-information.title'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
-                                Infolists\Components\Section::make('Invoice')
-                                    ->icon('heroicon-o-document')
-                                    ->schema([
-                                        Infolists\Components\Grid::make()
-                                            ->schema([
-                                                Infolists\Components\TextEntry::make('reference')
-                                                    ->placeholder('-')
-                                                    ->label(__('Customer Reference'))
-                                                    ->icon('heroicon-o-hashtag'),
-                                                Infolists\Components\TextEntry::make('invoiceUser.name')
-                                                    ->placeholder('-')
-                                                    ->label(__('Sales Person'))
-                                                    ->icon('heroicon-o-user'),
-                                                Infolists\Components\TextEntry::make('partnerBank.account_number')
-                                                    ->placeholder('-')
-                                                    ->label(__('Recipient Bank'))
-                                                    ->icon('heroicon-o-building-library'),
-                                                Infolists\Components\TextEntry::make('payment_reference')
-                                                    ->placeholder('-')
-                                                    ->label(__('Payment Reference'))
-                                                    ->icon('heroicon-o-identification'),
-                                                Infolists\Components\TextEntry::make('delivery_date')
-                                                    ->placeholder('-')
-                                                    ->label(__('Delivery Date'))
-                                                    ->icon('heroicon-o-truck')
-                                                    ->date(),
-                                            ])->columns(2),
-                                    ]),
-                                Infolists\Components\Section::make('Accounting')
+                                Infolists\Components\Section::make(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.accounting.title'))
                                     ->icon('heroicon-o-calculator')
                                     ->schema([
                                         Infolists\Components\Grid::make()
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('invoiceIncoterm.name')
                                                     ->placeholder('-')
-                                                    ->label(__('Incoterm'))
+                                                    ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.accounting.entries.incoterm'))
                                                     ->icon('heroicon-o-globe-alt'),
                                                 Infolists\Components\TextEntry::make('incoterm_location')
                                                     ->placeholder('-')
-                                                    ->label(__('Incoterm Address'))
+                                                    ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.accounting.entries.incoterm-location'))
                                                     ->icon('heroicon-o-map-pin'),
-                                                Infolists\Components\TextEntry::make('paymentMethodLine.name')
-                                                    ->placeholder('-')
-                                                    ->label(__('Payment Method'))
-                                                    ->icon('heroicon-o-credit-card'),
-                                                Infolists\Components\TextEntry::make('auto_post')
-                                                    ->placeholder('-')
-                                                    ->label(__('Auto Post'))
-                                                    ->icon('heroicon-o-arrow-path')
-                                                    ->formatStateUsing(fn (string $state): string => AutoPost::from($state)->getLabel()),
-                                                Infolists\Components\IconEntry::make('checked')
-                                                    ->label(__('Checked'))
-                                                    ->icon('heroicon-o-check-circle')
-                                                    ->boolean(),
                                             ])->columns(2),
                                     ]),
-                                Infolists\Components\Section::make('Marketing')
-                                    ->icon('heroicon-o-megaphone')
+                                Infolists\Components\Section::make(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.secured.title'))
+                                    ->icon('heroicon-o-shield-check')
                                     ->schema([
                                         Infolists\Components\Grid::make()
                                             ->schema([
-                                                Infolists\Components\TextEntry::make('campaign.name')
+                                                Infolists\Components\TextEntry::make('paymentMethodLine.name')
                                                     ->placeholder('-')
-                                                    ->label(__('Campaign'))
-                                                    ->icon('heroicon-o-presentation-chart-line'),
-                                                Infolists\Components\TextEntry::make('medium.name')
+                                                    ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.secured.entries.payment-method'))
+                                                    ->icon('heroicon-o-credit-card'),
+                                                Infolists\Components\TextEntry::make('auto_post')
                                                     ->placeholder('-')
-                                                    ->label(__('Medium'))
-                                                    ->icon('heroicon-o-device-phone-mobile'),
-                                                Infolists\Components\TextEntry::make('source.name')
-                                                    ->placeholder('-')
-                                                    ->label(__('Source'))
-                                                    ->icon('heroicon-o-link'),
+                                                    ->icon('heroicon-o-arrow-path')
+                                                    ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.secured.entries.auto-post')),
                                             ])->columns(2),
                                     ]),
+                                Infolists\Components\Section::make(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.additional-information.title'))
+                                    ->icon('heroicon-o-puzzle-piece')
+                                    ->schema([
+                                        Infolists\Components\Grid::make()
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('company.name')
+                                                    ->placeholder('-')
+                                                    ->icon('heroicon-o-building-office')
+                                                    ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.additional-information.entries.company')),
+                                                Infolists\Components\TextEntry::make('currency.name')
+                                                    ->placeholder('-')
+                                                    ->icon('heroicon-o-arrow-path')
+                                                    ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.additional-information.entries.currency')),
+                                            ])->columns(2),
+                                    ]),
+                            ]),
+                        Infolists\Components\Tabs\Tab::make(__('accounts::filament/resources/refund.infolist.tabs.term-and-conditions.title'))
+                            ->icon('heroicon-o-clipboard-document-list')
+                            ->schema([
+                                Infolists\Components\TextEntry::make('narration')
+                                    ->html()
+                                    ->hiddenLabel(),
                             ]),
                     ])
                     ->persistTabInQueryString(),
@@ -462,8 +447,8 @@ class RefundResource extends Resource
             ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -476,8 +461,8 @@ class RefundResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
                                     ->label(__('Quantity'))
@@ -486,22 +471,22 @@ class RefundResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
+                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
                                     ->relationship(
@@ -515,9 +500,9 @@ class RefundResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
-                                    ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('Discount Percentage'))
@@ -525,8 +510,8 @@ class RefundResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('Unit Price'))
                                     ->numeric()
@@ -534,13 +519,13 @@ class RefundResource extends Resource
                                     ->required()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('Sub Total'))
                                     ->default(0)
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -551,8 +536,8 @@ class RefundResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
     public static function mutateProductRelationship(array $data, $record, $livewire): array

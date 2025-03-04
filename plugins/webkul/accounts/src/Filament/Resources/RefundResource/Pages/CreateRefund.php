@@ -24,8 +24,8 @@ class CreateRefund extends CreateBaseRefund
     {
         return Notification::make()
             ->success()
-            ->title(__('Refund Created'))
-            ->body(__('Refund has been created successfully.'));
+            ->title(__('accounts::filament/resources/refund/pages/create-refund.notification.title'))
+            ->body(__('accounts::filament/resources/refund/pages/create-refund.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
