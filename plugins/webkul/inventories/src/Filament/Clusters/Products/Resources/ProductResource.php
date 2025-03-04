@@ -17,6 +17,7 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Product;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 
 class ProductResource extends BaseProductResource
@@ -70,7 +71,7 @@ class ProductResource extends BaseProductResource
                             ->selectablePlaceholder(false)
                             ->options(Enums\ProductTracking::class)
                             ->default(Enums\ProductTracking::QTY->value)
-                            ->visible(fn (Forms\Get $get): bool => (bool) $get('is_storable'))
+                            ->visible(fn (Forms\Get $get, TraceabilitySettings $settings): bool => $settings->enable_lots_serial_numbers && (bool) $get('is_storable'))
                             ->live()
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                 if ($get('tracking') == Enums\ProductTracking::QTY->value) {

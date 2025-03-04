@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Support\Filament\Clusters\Settings;
+use Filament\Notifications\Notification;
+use Webkul\Inventory\Models\Product;
+use Webkul\Inventory\Enums\ProductTracking;
 
 class ManageTraceability extends SettingsPage
 {
@@ -68,5 +71,20 @@ class ManageTraceability extends SettingsPage
                     ->visible(fn (Forms\Get $get) => $get('enable_lots_serial_numbers'))
                     ->live(),
             ]);
+    }
+
+    protected function beforeSave(): void
+    {
+        if (Product::whereIn('tracking', [ProductTracking::SERIAL, ProductTracking::LOT])->exists()) {
+            Notification::make()
+                ->warning()
+                ->title('You have products in stock that have lot/serial number tracking enabled. ')
+                ->body('First switch off tracking on all the products before switching off this setting.')
+                ->send();
+
+            $this->fillForm();
+
+            $this->halt();
+        }
     }
 }

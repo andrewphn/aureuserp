@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Inventory\Enums;
-use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Product\Models\Product as BaseProduct;
 use Webkul\Security\Models\User;
 
@@ -38,7 +37,7 @@ class Product extends BaseProduct
         ]);
 
         $this->mergeCasts([
-            'tracking'            => ProductTracking::class,
+            'tracking'            => Enums\ProductTracking::class,
             'use_expiration_date' => 'boolean',
             'is_storable'         => 'boolean',
         ]);
