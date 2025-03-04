@@ -30,10 +30,10 @@ return new class extends Migration
             $table->string('payment_reference')->nullable()->comment('Payment Reference');
             $table->string('internal_index')->nullable()->comment('Internal Index');
             $table->json('transaction_details')->nullable()->comment('Transaction Details');
-            $table->decimal('amount', 20, 2)->nullable()->comment('Amount');
-            $table->decimal('amount_currency', 20, 2)->nullable()->comment('Amount Currency');
+            $table->decimal('amount', 15, 4)->nullable()->comment('Amount');
+            $table->decimal('amount_currency', 15, 4)->nullable()->comment('Amount Currency');
             $table->boolean('is_reconciled')->default(0)->comment('Is Reconciled');
-            $table->double('amount_residual')->nullable()->comment('Amount Residual');
+            $table->decimal('amount_residual', 15, 4)->nullable()->comment('Amount Residual');
 
             $table->timestamps();
         });

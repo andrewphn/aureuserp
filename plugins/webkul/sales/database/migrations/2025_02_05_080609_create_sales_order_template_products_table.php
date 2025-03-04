@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('creator_id')->nullable()->comment('Creator')->constrained('users')->nullOnDelete();
             $table->string('display_type')->nullable()->comment('Display Type');
             $table->string('name')->nullable()->comment('Name');
-            $table->double('quantity')->comment('Quantity');
+            $table->decimal('quantity', 15, 4)->comment('Quantity')->default(0);
             $table->timestamps();
         });
     }

@@ -22,9 +22,9 @@ return new class extends Migration
             $table->string('reference')->nullable()->comment('External Reference');
             $table->string('first_line_index')->nullable()->comment('First Line Index');
             $table->date('date')->nullable()->comment('Date');
-            $table->decimal('balance_start', 20, 6)->default(0)->comment('Starting Balance');
-            $table->decimal('balance_end', 20, 6)->default(0)->comment('Ending Balance');
-            $table->decimal('balance_end_real', 20, 6)->default(0)->comment('Real Ending Balance');
+            $table->decimal('balance_start', 15, 4)->default(0)->comment('Starting Balance');
+            $table->decimal('balance_end', 15, 4)->default(0)->comment('Ending Balance');
+            $table->decimal('balance_end_real', 15, 4)->default(0)->comment('Real Ending Balance');
             $table->boolean('is_completed')->default(0)->comment('Is Completed');
 
             $table->timestamps();

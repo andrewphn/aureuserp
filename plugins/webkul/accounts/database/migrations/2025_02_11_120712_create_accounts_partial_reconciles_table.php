@@ -23,9 +23,9 @@ return new class extends Migration
             $table->foreignId('company_id')->nullable()->comment('Company')->constrained('companies')->nullOnDelete();
             $table->foreignId('created_by')->nullable()->comment('Created By')->constrained('users')->nullOnDelete();
             $table->date('max_date')->nullable()->comment('Max Date');
-            $table->decimal('amount', 20, 2)->nullable()->comment('Amount');
-            $table->decimal('debit_amount_currency', 20, 2)->nullable()->comment('Debit Amount Currency');
-            $table->decimal('credit_amount_currency', 20, 2)->nullable()->comment('Credit Amount Currency');
+            $table->decimal('amount', 15, 4)->nullable()->comment('Amount');
+            $table->decimal('debit_amount_currency', 15, 4)->nullable()->comment('Debit Amount Currency');
+            $table->decimal('credit_amount_currency', 15, 4)->nullable()->comment('Credit Amount Currency');
 
             $table->timestamps();
         });

@@ -37,8 +37,8 @@ return new class extends Migration
             $table->string('memo')->nullable()->comment('Memo');
             $table->string('payment_reference')->nullable()->comment('Payment Reference');
             $table->date('date')->nullable()->comment('Date');
-            $table->decimal('amount', 20, 2)->nullable()->comment('Amount');
-            $table->decimal('amount_company_currency_signed', 20, 2)->nullable()->comment('Amount in Company Currency Signed');
+            $table->decimal('amount', 15, 4)->nullable()->comment('Amount');
+            $table->decimal('amount_company_currency_signed', 15, 4)->nullable()->comment('Amount in Company Currency Signed');
             $table->boolean('is_reconciled')->nullable()->comment('Is Reconciled');
             $table->boolean('is_matched')->nullable()->comment('Is Matched');
             $table->boolean('is_sent')->nullable()->comment('Is Sent');

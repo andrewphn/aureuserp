@@ -7,7 +7,7 @@ return [
         'notification' => [
             'success' => [
                 'title' => 'Order marked as draft',
-                'body' => 'The order has been marked as draft successfully.',
+                'body'  => 'The order has been marked as draft successfully.',
             ],
         ],
     ],

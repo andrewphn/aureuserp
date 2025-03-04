@@ -121,7 +121,7 @@ class QuotationResource extends Resource
                                                                             ->prefix('of')
                                                                             ->suffix('%')
                                                                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.sales.fields.fieldset.signature-and-payment.fields.prepayment-percentage'))
-                                                                            ->visible(fn(Get $get) => $get('require_payment') === true),
+                                                                            ->visible(fn (Get $get) => $get('require_payment') === true),
                                                                     ])->columns(1),
                                                                 Forms\Components\TextInput::make('client_order_ref')
                                                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.sales.fields.customer-reference')),
@@ -197,7 +197,7 @@ class QuotationResource extends Resource
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -215,7 +215,7 @@ class QuotationResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->street2 ? ', '.$address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -257,7 +257,7 @@ class QuotationResource extends Resource
                                                     $set('products', $initialProducts);
 
                                                     $initialSections = collect($orderTemplate->sections)
-                                                        ->map(fn($item) => [
+                                                        ->map(fn ($item) => [
                                                             'product_id' => $item->product_id ?? null,
                                                             'name'       => $item->name,
                                                             'quantity'   => $item->quantity ?? null,
@@ -267,7 +267,7 @@ class QuotationResource extends Resource
                                                     $set('sections', $initialSections);
 
                                                     $initialNotes = collect($orderTemplate->notes)
-                                                        ->map(fn($item) => [
+                                                        ->map(fn ($item) => [
                                                             'product_id' => $item->product_id ?? null,
                                                             'name'       => $item->name,
                                                             'quantity'   => $item->quantity ?? null,
@@ -335,9 +335,9 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn($state) => OrderState::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => OrderState::options()[$state] ?? $state)
                     ->badge()
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         OrderState::DRAFT->value  => 'gray',
                         OrderState::SENT->value   => 'primary',
                         OrderState::SALE->value   => 'success',
@@ -349,7 +349,7 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn($state) => InvoiceStatus::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => InvoiceStatus::options()[$state] ?? $state)
                     ->badge()
                     ->searchable()
                     ->sortable(),
@@ -663,7 +663,7 @@ class QuotationResource extends Resource
                                                             ->schema([
                                                                 Infolists\Components\TextEntry::make('name')
                                                                     ->badge()
-                                                                    ->tooltip(fn($state) => $state)
+                                                                    ->tooltip(fn ($state) => $state)
                                                                     ->icon('heroicon-o-receipt-percent')
                                                                     ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.taxes')),
                                                             ])
@@ -686,7 +686,7 @@ class QuotationResource extends Resource
                                                     ])
                                                     ->columns(6),
                                                 Infolists\Components\RepeatableEntry::make('salesOrderSectionLines')
-                                                    ->hidden(fn($record) => $record->salesOrderSectionLines->isEmpty())
+                                                    ->hidden(fn ($record) => $record->salesOrderSectionLines->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('product.name')
                                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
@@ -698,7 +698,7 @@ class QuotationResource extends Resource
                                                     ])
                                                     ->columns(3),
                                                 Infolists\Components\RepeatableEntry::make('salesOrderNoteLines')
-                                                    ->hidden(fn($record) => $record->salesOrderNoteLines->isEmpty())
+                                                    ->hidden(fn ($record) => $record->salesOrderNoteLines->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('product.name')
                                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
@@ -869,9 +869,9 @@ class QuotationResource extends Resource
             ->collapsible()
             ->defaultItems(0)
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -1038,9 +1038,9 @@ class QuotationResource extends Resource
             ->collapsible()
             ->defaultItems(0)
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -1081,9 +1081,9 @@ class QuotationResource extends Resource
             ->defaultItems(0)
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')

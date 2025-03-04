@@ -4,7 +4,6 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -137,7 +136,6 @@ class Move extends Model
 
     protected $casts = [
         'invoice_date_due' => 'datetime',
-        'payment_state'    => PaymentStatus::class,
     ];
 
     public function campaign()
@@ -283,7 +281,7 @@ class Move extends Model
             ? (int) substr($lastInvoice->name, strlen($prefix))
             : 0;
 
-        return $prefix . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
     }
 
     protected static function boot()

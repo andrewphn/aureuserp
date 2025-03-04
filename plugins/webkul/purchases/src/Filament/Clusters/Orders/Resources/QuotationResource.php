@@ -2,10 +2,10 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
-use Webkul\Purchase\Filament\Clusters\Orders;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
+use Webkul\Purchase\Filament\Clusters\Orders;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 
 class QuotationResource extends OrderResource
 {

@@ -3,7 +3,6 @@
 namespace Webkul\Support\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Webkul\Support\Models\UTMMedium;
 
 class DatabaseSeeder extends Seeder
 {

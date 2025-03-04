@@ -3,12 +3,12 @@
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
 use Filament\Pages\SubNavigationPosition;
-use Webkul\Purchase\Filament\Clusters\Orders;
-use Filament\Tables\Table;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResource\Pages;
 use Filament\Resources\Pages\Page;
-use Webkul\Purchase\Enums\OrderState;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Webkul\Purchase\Enums\OrderState;
+use Webkul\Purchase\Filament\Clusters\Orders;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResource\Pages;
 
 class PurchaseOrderResource extends OrderResource
 {

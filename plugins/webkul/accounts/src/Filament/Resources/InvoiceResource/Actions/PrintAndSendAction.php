@@ -3,11 +3,10 @@
 namespace Webkul\Account\Filament\Resources\InvoiceResource\Actions;
 
 use Filament\Actions\Action;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Mail\Invoice\Actions\InvoiceEmail;
 use Webkul\Account\Models\Move;
@@ -29,7 +28,7 @@ class PrintAndSendAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Print & Send'))
+            ->label(__('accounts::filament/resources/invoice/actions/print-and-send.title'))
             ->color('gray')
             ->visible(function (Move $record) {
                 return
@@ -41,15 +40,15 @@ class PrintAndSendAction extends Action
             $description = "
                     <p>Dear {$record->partner->name},</p>
                     <p>Your invoice <strong>{$record->name}</strong> from <strong>{$record->company->name}</strong> for <strong>{$record->currency->symbol} {$record->amount_total}</strong> is now available. Kindly arrange payment at your earliest convenience.</p>
-                    <p>When making the payment, please reference <strong>{$record->name}</strong> for account <strong>" . ($record->partnerBank->bank->name ?? 'N/A') . "</strong>.</p>
+                    <p>When making the payment, please reference <strong>{$record->name}</strong> for account <strong>".($record->partnerBank->bank->name ?? 'N/A').'</strong>.</p>
                     <p>If you have any questions, feel free to reach out.</p>
                     <p><strong>Best regards,</strong><br>Administrator</p>
-                ";
+                ';
 
             $action->fillForm([
                 'files'       => $this->prepareInvoice($record),
                 'partners'    => [$record->partner_id],
-                'subject'     => $record->partner->name . ' Invoice (Ref ' . $record->name . ')',
+                'subject'     => $record->partner->name.' Invoice (Ref '.$record->name.')',
                 'description' => $description,
             ]);
         });
@@ -60,17 +59,17 @@ class PrintAndSendAction extends Action
                     Forms\Components\Select::make('partners')
                         ->options(Partner::all()->pluck('name', 'id'))
                         ->multiple()
-                        ->label(__('Customer'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.partners'))
                         ->searchable()
                         ->preload(),
                     Forms\Components\TextInput::make('subject')
-                        ->label(__('Subject'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.subject'))
                         ->hiddenLabel(),
                     Forms\Components\RichEditor::make('description')
-                        ->label(__('Description'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.description'))
                         ->hiddenLabel(),
                     Forms\Components\FileUpload::make('files')
-                        ->label(__('Attachment'))
+                        ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.files'))
                         ->downloadable()
                         ->openable()
                         ->multiple()
@@ -80,12 +79,12 @@ class PrintAndSendAction extends Action
             }
         );
 
-        $this->modalSubmitActionLabel(__('Send'));
+        $this->modalSubmitActionLabel(__('accounts::filament/resources/invoice/actions/print-and-send.modal.action.submit.title'));
         $this->modalIcon('heroicon-m-paper-airplane');
         $this->icon('heroicon-o-envelope');
-        $this->action(fn($record, array $data) => $this->handleSendByEmail($record, $data));
+        $this->action(fn ($record, array $data) => $this->handleSendByEmail($record, $data));
         $this->modalSubmitAction(function ($action) {
-            $action->label(__('Send'));
+            $action->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.action.submit.title'));
             $action->icon('heroicon-m-paper-airplane');
         });
     }
@@ -94,7 +93,7 @@ class PrintAndSendAction extends Action
     {
         return $this->savePDF(
             view('accounts::invoice/actions/preview.index', compact('record'))->render(),
-            'invoice-' . $record->created_at->format('d-m-Y')
+            'invoice-'.$record->created_at->format('d-m-Y')
         );
     }
 
@@ -112,24 +111,29 @@ class PrintAndSendAction extends Action
         ];
     }
 
-
     private function handleSendByEmail(Move $record, array $data): void
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
 
+        $viewTemplate = 'accounts::mail/invoice/actions/invoice';
+
         foreach ($partners as $partner) {
+            if (! $partner->email) {
+                continue;
+            }
+
             $attachments = [];
 
             foreach ($data['files'] as $file) {
                 $attachments[] = [
-                    'path' => asset(Storage::url($file)),
+                    'path' => asset('storage/'.$file),
                     'name' => basename($file),
                 ];
             }
 
             app(EmailService::class)->send(
                 mailClass: InvoiceEmail::class,
-                view: $viewName = 'accounts::mail/invoice/actions/invoice',
+                view: $viewTemplate,
                 payload: $this->preparePayloadForSendByEmail($record, $partner, $data),
                 attachments: $attachments,
             );
@@ -139,7 +143,7 @@ class PrintAndSendAction extends Action
             'from' => [
                 'company' => Auth::user()->defaultCompany->toArray(),
             ],
-            'body' => view($viewName, [
+            'body' => view($viewTemplate, [
                 'payload' => $this->preparePayloadForSendByEmail($record, $partner, $data),
             ])->render(),
             'type' => 'comment',
@@ -149,8 +153,8 @@ class PrintAndSendAction extends Action
 
         Notification::make()
             ->success()
-            ->title(__('Invoice sent'))
-            ->body(__('The invoice has been sent to the customer successfully.'))
+            ->title(__('accounts::filament/resources/invoice/actions/print-and-send.modal.notification.invoice-sent.title'))
+            ->body(__('accounts::filament/resources/invoice/actions/print-and-send.modal.notification.invoice-sent.body'))
             ->send();
     }
 }

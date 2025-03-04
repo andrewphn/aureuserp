@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Enums;
 
-use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
 
-enum PaymentState: string implements HasLabel, HasColor, HasIcon
+enum PaymentState: string implements HasColor, HasIcon, HasLabel
 {
     case NOT_PAID = 'not_paid';
 
@@ -66,7 +66,7 @@ enum PaymentState: string implements HasLabel, HasColor, HasIcon
         return match ($this) {
             self::NOT_PAID         => 'heroicon-o-x-circle',
             self::IN_PAYMENT       => 'heroicon-o-clock',
-            self::PAID             => 'heroicon-o-check-circle',
+            self::PAID             => 'heroicon-o-check-badge',
             self::PARTIAL          => 'heroicon-o-currency-dollar',
             self::REVERSED         => 'heroicon-o-arrow-uturn-left',
             self::BLOCKED          => 'heroicon-o-x-circle',

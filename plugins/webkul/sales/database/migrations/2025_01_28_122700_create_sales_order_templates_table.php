@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('is_active')->nullable()->default(false)->comment('Status');
             $table->boolean('require_signature')->nullable()->default(false)->comment('Require Signature');
             $table->boolean('require_payment')->nullable()->default(false)->comment('Require Payment');
-            $table->double('prepayment_percentage')->nullable()->comment('Prepayment Percentage');
+            $table->decimal('prepayment_percentage', 15, 4)->nullable()->comment('Prepayment Percentage')->default(0);
             $table->timestamps();
         });
     }

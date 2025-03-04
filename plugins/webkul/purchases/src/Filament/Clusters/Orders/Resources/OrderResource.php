@@ -2,10 +2,10 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources;
 
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -16,19 +16,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Filament\Resources\IncoTermResource;
-use Webkul\Account\Models\Tax;
+use Webkul\Account\Models\Partner;
+use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
+use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
-use Webkul\Product\Models\Packaging;
-use Webkul\Account\Models\Partner;
-use Webkul\Support\Models\UOM;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
+use Webkul\Support\Models\UOM;
 
 class OrderResource extends Resource
 {
@@ -49,15 +49,15 @@ class OrderResource extends Resource
                     ->inline()
                     ->options(function ($record) {
                         $options = Enums\OrderState::options();
-                        
+
                         if ($record && $record->state !== Enums\OrderState::CANCELED) {
                             unset($options[Enums\OrderState::CANCELED->value]);
                         }
-                        
+
                         if ($record && $record->state !== Enums\OrderState::DONE) {
                             unset($options[Enums\OrderState::DONE->value]);
                         }
-                        
+
                         return $options;
                     })
                     ->default(Enums\OrderState::DRAFT)
@@ -71,12 +71,12 @@ class OrderResource extends Resource
                                     ->relationship(
                                         'partner',
                                         'name',
-                                        fn($query) => $query->where('sub_type', 'supplier')
+                                        fn ($query) => $query->where('sub_type', 'supplier')
                                     )
                                     ->searchable()
                                     ->required()
                                     ->preload()
-                                    ->createOptionForm(fn(Form $form) => VendorResource::form($form))
+                                    ->createOptionForm(fn (Form $form) => VendorResource::form($form))
                                     ->afterStateUpdated(function ($state, Forms\Set $set) {
                                         if ($state) {
                                             $vendor = Partner::find($state);
@@ -85,7 +85,7 @@ class OrderResource extends Resource
                                         }
                                     })
                                     ->live()
-                                    ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                    ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                 Forms\Components\TextInput::make('partner_reference')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.vendor-reference'))
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.vendor-reference-tooltip')),
@@ -102,7 +102,7 @@ class OrderResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->default(Auth::user()->defaultCompany?->currency_id)
-                                    ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                    ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                             ]),
 
                         Forms\Components\Group::make()
@@ -113,14 +113,14 @@ class OrderResource extends Resource
                                     ->suffixIcon('heroicon-o-calendar')
                                     ->default(now())
                                     ->disabled()
-                                    ->visible(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                    ->visible(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                 Forms\Components\DateTimePicker::make('ordered_at')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.order-deadline'))
                                     ->native(false)
                                     ->required()
                                     ->suffixIcon('heroicon-o-calendar')
                                     ->default(now())
-                                    ->hidden(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                    ->hidden(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                 Forms\Components\DateTimePicker::make('planned_at')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.sections.general.fields.expected-arrival'))
                                     ->native(false)
@@ -156,7 +156,7 @@ class OrderResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->default(Auth::id())
-                                            ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                                         Forms\Components\Select::make('company_id')
                                             ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.company'))
                                             ->relationship('company', 'name')
@@ -164,7 +164,7 @@ class OrderResource extends Resource
                                             ->preload()
                                             ->required()
                                             ->default(Auth::user()->default_company_id)
-                                            ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                         Forms\Components\TextInput::make('reference')
                                             ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.source-document')),
                                         Forms\Components\Select::make('incoterm_id')
@@ -172,12 +172,12 @@ class OrderResource extends Resource
                                             ->relationship('incoterm', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->createOptionForm(fn(Form $form) => IncoTermResource::form($form))
+                                            ->createOptionForm(fn (Form $form) => IncoTermResource::form($form))
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.incoterm-tooltip'))
-                                            ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                                         Forms\Components\TextInput::make('reference')
                                             ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.additional.fields.incoterm-location'))
-                                            ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                                     ]),
 
                                 Forms\Components\Group::make()
@@ -187,7 +187,7 @@ class OrderResource extends Resource
                                             ->relationship('paymentTerm', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->disabled(fn($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                                     ]),
                             ]))
                             ->columns(2),
@@ -208,8 +208,8 @@ class OrderResource extends Resource
             ->columns(static::mergeCustomTableColumns([
                 Tables\Columns\IconColumn::make('priority')
                     ->label('')
-                    ->icon(fn(Order $record): string => $record->priority ? 'heroicon-s-star' : 'heroicon-o-star')
-                    ->color(fn(Order $record): string => $record->priority ? 'warning' : 'gray')
+                    ->icon(fn (Order $record): string => $record->priority ? 'heroicon-s-star' : 'heroicon-o-star')
+                    ->color(fn (Order $record): string => $record->priority ? 'warning' : 'gray')
                     ->action(function (Order $record): void {
                         $record->update([
                             'priority' => ! $record->priority,
@@ -254,12 +254,12 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('untaxed_amount')
                     ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.untaxed-amount'))
                     ->sortable()
-                    ->money(fn(Order $record) => $record->currency->code)
+                    ->money(fn (Order $record) => $record->currency->code)
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.total-amount'))
                     ->sortable()
-                    ->money(fn(Order $record) => $record->currency->code)
+                    ->money(fn (Order $record) => $record->currency->code)
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.billing-status'))
@@ -364,7 +364,7 @@ class OrderResource extends Resource
                     ]))->filter()->values()->all()),
             ], layout: \Filament\Tables\Enums\FiltersLayout::Modal)
             ->filtersTriggerAction(
-                fn(Tables\Actions\Action $action) => $action
+                fn (Tables\Actions\Action $action) => $action
                     ->slideOver(),
             )
             ->filtersFormColumns(2)
@@ -391,7 +391,7 @@ class OrderResource extends Resource
                     ),
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn(Model $record): bool => static::can('delete', $record) && $record->state !== Enums\RequisitionState::CLOSED,
+                fn (Model $record): bool => static::can('delete', $record) && $record->state !== Enums\RequisitionState::CLOSED,
             );
     }
 
@@ -433,12 +433,12 @@ class OrderResource extends Resource
                                         ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.confirmation-date'))
                                         ->dateTime()
                                         ->icon('heroicon-o-calendar')
-                                        ->visible(fn($record): bool => ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                        ->visible(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                     Infolists\Components\TextEntry::make('ordered_at')
                                         ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.order-deadline'))
                                         ->dateTime()
                                         ->icon('heroicon-o-calendar')
-                                        ->hidden(fn($record): bool => ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                        ->hidden(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                     Infolists\Components\TextEntry::make('planned_at')
                                         ->label(__('purchases::filament/clusters/orders/resources/order.infolist.sections.general.entries.expected-arrival'))
                                         ->dateTime()
@@ -504,7 +504,7 @@ class OrderResource extends Resource
                                             ]),
                                     ])
                                     ->columnSpanFull(),
-                                
+
                                 Infolists\Components\Group::make([
                                     Infolists\Components\TextEntry::make('untaxed_amount')
                                         ->label(__('purchases::filament/clusters/orders/resources/order.table.columns.untaxed-amount'))
@@ -602,7 +602,7 @@ class OrderResource extends Resource
                                     ->suffixIcon('heroicon-o-calendar')
                                     ->required()
                                     ->default(now())
-                                    ->default(function(Forms\Get $get, Forms\Set $set) {
+                                    ->default(function (Forms\Get $get, Forms\Set $set) {
                                         if (empty($get('../../planned_at'))) {
                                             $set('../../planned_at', now());
                                         }
@@ -641,7 +641,7 @@ class OrderResource extends Resource
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
@@ -895,7 +895,7 @@ class OrderResource extends Resource
         foreach ($packagings as $packaging) {
             if ($quantity && $quantity % $packaging->qty == 0) {
                 return [
-                    'packaging_id' => $packaging->id,
+                    'packaging_id'  => $packaging->id,
                     'packaging_qty' => round($quantity / $packaging->qty, 2),
                 ];
             }
@@ -936,7 +936,7 @@ class OrderResource extends Resource
 
         $taxIds = $get('taxes') ?? [];
 
-        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $quantity);
+        [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
 
         $set('price_subtotal', round($subTotal, 4));
 
@@ -977,7 +977,7 @@ class OrderResource extends Resource
         $subTotal = $line->price_unit * $line->product_qty;
 
         $discountAmount = 0;
-        
+
         if ($line->discount > 0) {
             $discountAmount = $subTotal * ($line->discount / 100);
 
@@ -986,7 +986,7 @@ class OrderResource extends Resource
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount] = static::collectionTaxes($taxIds, $subTotal, $line->product_qty);
+        [$subTotal, $taxAmount] = app(MoveLineCalculationService::class)->collectionTaxes($taxIds, $subTotal, $line->product_qty);
 
         $line->price_subtotal = round($subTotal, 4);
 
@@ -997,75 +997,5 @@ class OrderResource extends Resource
         $line->save();
 
         return $line;
-    }
-
-    public static function collectionTaxes($taxIds, $subTotal, $quantity)
-    {
-        if (empty($taxIds)) {
-            return [$subTotal, 0];
-        }
-
-        $taxes = Tax::whereIn('id', $taxIds)
-            ->orderBy('sort')
-            ->get();
-        
-        $taxesComputed = [];
-
-        $totalTaxAmount = 0;
-
-        $adjustedSubTotal = $subTotal;
-
-        foreach ($taxes as $tax) {
-            $amount = floatval($tax->amount);
-
-            $tax->price_include_override ??= 'tax_excluded';
-
-            $currentTaxBase = $adjustedSubTotal;
-            
-            if ($tax->is_base_affected) {
-                foreach ($taxesComputed as $prevTax) {
-                    if ($prevTax['include_base_amount']) {
-                        $currentTaxBase += $prevTax['tax_amount'];
-                    }
-                }
-            }
-            
-            $currentTaxAmount = 0;
-            
-            if ($tax->price_include_override == 'tax_included') {
-                if ($tax->amount_type == 'percent') {
-                    $taxFactor = $amount / 100;
-
-                    $currentTaxAmount = $currentTaxBase - ($currentTaxBase / (1 + $taxFactor));
-                } else {
-                    $currentTaxAmount = $amount * $quantity;
-                    
-                    if ($currentTaxAmount > $adjustedSubTotal) {
-                        $currentTaxAmount = $adjustedSubTotal;
-                    }
-                }
-                
-                $adjustedSubTotal -= $currentTaxAmount;
-            } else {
-                if ($tax->amount_type == 'percent') {
-                    $currentTaxAmount = $currentTaxBase * $amount / 100;
-                } else {
-                    $currentTaxAmount = $amount * $quantity;
-                }
-            }
-            
-            $taxesComputed[] = [
-                'tax_id' => $tax->id,
-                'tax_amount' => $currentTaxAmount,
-                'include_base_amount' => $tax->include_base_amount,
-            ];
-            
-            $totalTaxAmount += $currentTaxAmount;
-        }
-        
-        return [
-            round($adjustedSubTotal, 4),
-            round($totalTaxAmount, 4)
-        ];
     }
 }

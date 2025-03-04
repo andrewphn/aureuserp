@@ -5,12 +5,12 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseAgreementRe
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
-use Webkul\TableViews\Filament\Components\PresetView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseAgreementResource;
-use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseAgreementResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListPurchaseAgreements extends ListRecords
 {
@@ -30,22 +30,22 @@ class ListPurchaseAgreements extends ListRecords
                 ->icon('heroicon-o-document-check')
                 ->favorite()
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('user_id', Auth::id())),
-                
+
             'blanket_orders' => PresetView::make(__('purchases::filament/clusters/orders/resources/purchase-agreement/pages/list-purchase-agreements.tabs.blanket-orders'))
                 ->icon('heroicon-o-clipboard-document')
                 ->favorite()
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', Enums\RequisitionType::BLANKET_ORDER)),
-                
+
             'purchase_templates' => PresetView::make(__('purchases::filament/clusters/orders/resources/purchase-agreement/pages/list-purchase-agreements.tabs.purchase-templates'))
                 ->icon('heroicon-o-document-plus')
                 ->favorite()
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', Enums\RequisitionType::PURCHASE_TEMPLATE)),
-                
+
             'draft' => PresetView::make(__('purchases::filament/clusters/orders/resources/purchase-agreement/pages/list-purchase-agreements.tabs.draft'))
                 ->icon('heroicon-o-pencil-square')
                 ->favorite()
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('state', Enums\RequisitionState::DRAFT)),
-                
+
             'done' => PresetView::make(__('purchases::filament/clusters/orders/resources/purchase-agreement/pages/list-purchase-agreements.tabs.done'))
                 ->icon('heroicon-o-check-circle')
                 ->favorite()
