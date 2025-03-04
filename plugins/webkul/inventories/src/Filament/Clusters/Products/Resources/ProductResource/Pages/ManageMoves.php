@@ -36,11 +36,6 @@ class ManageMoves extends ManageRelatedRecords
             'todo_moves' => PresetView::make(__('inventories::filament/clusters/products/resources/product/pages/manage-moves.tabs.todo'))
                 ->favorite()
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('location', function (Builder $query) {
-                        $query->where('type', Enums\LocationType::INTERNAL);
-                    });
-                })
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotIn('state', [Enums\MoveState::DRAFT, Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
             'done_moves' => PresetView::make(__('inventories::filament/clusters/products/resources/product/pages/manage-moves.tabs.done'))
                 ->favorite()
@@ -78,6 +73,11 @@ class ManageMoves extends ManageRelatedRecords
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('product.name')
+                    ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-moves.table.columns.product'))
+                    ->sortable()
+                    ->placeholder('—')
+                    ->visible((bool) $this->getOwnerRecord()->is_configurable),
                 Tables\Columns\TextColumn::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-moves.table.columns.date'))
                     ->sortable()

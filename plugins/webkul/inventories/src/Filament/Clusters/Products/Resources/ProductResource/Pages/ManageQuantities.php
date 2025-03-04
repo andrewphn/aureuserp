@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Enums;
@@ -24,6 +25,8 @@ use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
+use Webkul\Inventory\Models\Product;
+use Illuminate\Database\Eloquent\Model;
 
 class ManageQuantities extends ManageRelatedRecords
 {
@@ -43,6 +46,10 @@ class ManageQuantities extends ManageRelatedRecords
         $canAccess = parent::canAccess($parameters);
 
         if (! $canAccess) {
+            return false;
+        }
+
+        if (! $parameters['record']->is_storable) {
             return false;
         }
 
@@ -82,7 +89,6 @@ class ManageQuantities extends ManageRelatedRecords
             'on_hand' => PresetView::make(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.tabs.on-hand'))
                 ->favorite()
                 ->icon('heroicon-s-clipboard-document-list')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('quantity', '>', 0))
                 ->modifyQueryUsing(function (Builder $query) {
                     $query
                         ->where('quantity', '>', 0)
@@ -105,6 +111,21 @@ class ManageQuantities extends ManageRelatedRecords
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('product_id')
+                    ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.form.fields.product'))
+                    ->relationship(
+                        name: 'product',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->where('parent_id', $this->getOwnerRecord()->id),
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                        $set('package_id', null);
+                    })
+                    ->visible((bool) $this->getOwnerRecord()->is_configurable),
                 Forms\Components\Select::make('location_id')
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.form.fields.location'))
                     ->relationship(
@@ -125,16 +146,20 @@ class ManageQuantities extends ManageRelatedRecords
                     ->relationship(
                         name: 'lot',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query) => $query->where('product_id', $this->getOwnerRecord()->id),
+                        modifyQueryUsing: function (Builder $query, Forms\Get $get) {
+                            $productId = $get('product_id') ?? $this->getOwnerRecord()->id;
+                            
+                            return $query->where('product_id', $productId);
+                        },
                     )
                     ->required()
                     ->searchable()
                     ->preload()
                     ->createOptionForm(fn (Form $form): Form => LotResource::form($form))
-                    ->createOptionAction(function (Action $action) {
+                    ->createOptionAction(function (Action $action, Forms\Get $get) {
                         $action
-                            ->mutateFormDataUsing(function (array $data) {
-                                $data['product_id'] = $this->getOwnerRecord()->id;
+                            ->mutateFormDataUsing(function (array $data) use ($get) {
+                                $data['product_id'] = $get('product_id') ?? $this->getOwnerRecord()->id;
 
                                 return $data;
                             });
@@ -176,6 +201,11 @@ class ManageQuantities extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('name')
             ->columns([
+                Tables\Columns\TextColumn::make('product.name')
+                    ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.table.columns.product'))
+                    ->searchable()
+                    ->sortable()
+                    ->visible((bool) $this->getOwnerRecord()->is_configurable),
                 Tables\Columns\TextColumn::make('location.full_name')
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.table.columns.location'))
                     ->searchable()
@@ -270,6 +300,8 @@ class ManageQuantities extends ManageRelatedRecords
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
+                        $data['product_id'] ??= $this->getOwnerRecord()->id;
+                        
                         $data['location_id'] = $data['location_id'] ?? Warehouse::first()->lot_stock_location_id;
 
                         $data['creator_id'] = Auth::id();
@@ -285,8 +317,10 @@ class ManageQuantities extends ManageRelatedRecords
                         return $data;
                     })
                     ->before(function (array $data) {
+                        $productId = $data['product_id'] ?? $this->getOwnerRecord()->id;
+
                         $existingQuantity = ProductQuantity::where('location_id', $data['location_id'] ?? Warehouse::first()->lot_stock_location_id)
-                            ->where('product_id', $this->getOwnerRecord()->id)
+                            ->where('product_id', $productId)
                             ->where('package_id', $data['package_id'] ?? null)
                             ->where('lot_id', $data['lot_id'] ?? null)
                             ->exists();
@@ -301,7 +335,15 @@ class ManageQuantities extends ManageRelatedRecords
                             $this->halt();
                         }
                     })
-                    ->after(function ($record) {
+                    ->action(function (array $data) {
+                        if ($this->getOwnerRecord()->is_configurable) {
+                            $record = ProductQuantity::create($data);
+                        } else {
+                            $data['product_id'] = $this->getOwnerRecord()->id;
+
+                            $record = $this->getOwnerRecord()->quantities()->create($data);
+                        }
+
                         $adjustmentLocation = Location::where('type', Enums\LocationType::INVENTORY)
                             ->where('is_scrap', false)
                             ->first();
@@ -333,6 +375,8 @@ class ManageQuantities extends ManageRelatedRecords
                         }
 
                         ProductResource::createMove($record, $record->quantity, $adjustmentLocation->id, $record->location_id);
+
+                        return $record;
                     })
                     ->successNotification(
                         Notification::make()

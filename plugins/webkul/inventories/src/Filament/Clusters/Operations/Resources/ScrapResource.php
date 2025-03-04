@@ -78,7 +78,7 @@ class ScrapResource extends Resource
                                             ->relationship(
                                                 'product',
                                                 'name',
-                                                fn ($query) => $query->where('type', ProductType::GOODS),
+                                                fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
                                             )
                                             ->searchable()
                                             ->preload()

@@ -70,7 +70,7 @@ class QuantityResource extends Resource
                     ->relationship(
                         name: 'product',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query) => $query->where('is_storable', true),
+                        modifyQueryUsing: fn (Builder $query) => $query->where('is_storable', true)->whereNull('is_configurable'),
                     )
                     ->searchable()
                     ->preload()
