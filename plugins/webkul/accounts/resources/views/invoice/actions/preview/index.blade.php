@@ -252,6 +252,11 @@
                             <td>{{ $record->currency->symbol }} {{ number_format($record->amount_untaxed, 2) }}</td>
                         </tr>
                         <tr>
+                            <td>Tax</td>
+                            <td>-</td>
+                            <td>{{ $record->currency->symbol }} {{ number_format($record->amount_tax, 2) }}</td>
+                        </tr>
+                        <tr>
                             <td>Discount</td>
                             <td>-</td>
                             <td>-{{ $record->currency->symbol }} {{ number_format($record->total_discount, 2) }}</td>
