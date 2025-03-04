@@ -24,17 +24,17 @@ return new class extends Migration
             $table->double('price_tax')->nullable();
             $table->decimal('discount', 15, 2)->default(0);
             $table->decimal('price_unit', 15, 2)->default(0);
-            $table->decimal('price_subtotal', 15, 2)->nullable()->default(0);
-            $table->decimal('price_total', 15, 2)->nullable()->default(0);
-            $table->decimal('qty_invoiced', 15, 2)->nullable()->default(0);
-            $table->decimal('qty_received', 15, 2)->nullable()->default(0);
-            $table->decimal('qty_received_manual', 15, 2)->nullable()->default(0);
-            $table->decimal('qty_to_invoice', 15, 2)->nullable()->default(0);
-            $table->boolean('is_downpayment')->nullable()->default(0);
+            $table->decimal('price_subtotal', 15, 2)->default(0);
+            $table->decimal('price_total', 15, 2)->default(0);
+            $table->decimal('qty_invoiced', 15, 2)->default(0);
+            $table->decimal('qty_received', 15, 2)->default(0);
+            $table->decimal('qty_received_manual', 15, 2)->default(0);
+            $table->decimal('qty_to_invoice', 15, 2)->default(0);
+            $table->boolean('is_downpayment')->default(0);
             $table->timestamp('planned_at')->nullable();
             $table->string('product_description_variants')->nullable();
             $table->boolean('propagate_cancel')->nullable();
-            $table->decimal('price_total_cc', 15, 2)->nullable()->default(0);
+            $table->decimal('price_total_cc', 15, 2)->default(0);
 
             // Indexes
             $table->index('planned_at');
