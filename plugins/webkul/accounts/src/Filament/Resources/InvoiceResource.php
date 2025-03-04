@@ -966,9 +966,7 @@ class InvoiceResource extends Resource
         $record->amount_residual_signed = 0;
         $newTaxEntries = [];
 
-        $lines = $record->lines->where('display_type', 'product');
-
-        foreach ($lines as $line) {
+        foreach ($record->lines as $line) {
             [$line, $amountTax] = static::collectLineTotals($line, $newTaxEntries);
 
             $record->amount_untaxed += floatval($line->price_subtotal);
