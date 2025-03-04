@@ -44,7 +44,22 @@ class RefundResource extends Resource
                 ProgressStepper::make('state')
                     ->hiddenLabel()
                     ->inline()
-                    ->options(MoveState::class)
+                    ->options(function ($record) {
+                        $options = MoveState::options();
+
+                        if (
+                            $record
+                            && $record->state != MoveState::CANCEL->value
+                        ) {
+                            unset($options[MoveState::CANCEL->value]);
+                        }
+
+                        if ($record == null) {
+                            unset($options[MoveState::CANCEL->value]);
+                        }
+
+                        return $options;
+                    })
                     ->default(MoveState::DRAFT->value)
                     ->columnSpan('full')
                     ->disabled()

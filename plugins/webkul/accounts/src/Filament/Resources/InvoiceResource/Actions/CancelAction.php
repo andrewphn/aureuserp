@@ -36,7 +36,7 @@ class CancelAction extends Action
             ->hidden(function (Move $record) {
                 return
                     $record->state != MoveState::DRAFT->value
-                    || $record->move_type != MoveType::OUT_INVOICE->value;
+                    || $record->move_type == MoveType::ENTRY->value;
             });
     }
 }
