@@ -56,19 +56,39 @@ class Product extends BaseProduct
         return $this->belongsToMany(Route::class, 'inventories_product_routes', 'product_id', 'route_id');
     }
 
+    public function variants(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
     public function quantities(): HasMany
     {
-        return $this->hasMany(ProductQuantity::class);
+        if ($this->is_configurable) {
+            return $this->hasMany(ProductQuantity::class)
+                ->orWhereIn('product_id', $this->variants()->pluck('id'));
+        } else {
+            return $this->hasMany(ProductQuantity::class);
+        }
     }
 
     public function moves(): HasMany
     {
-        return $this->hasMany(Move::class);
+        if ($this->is_configurable) {
+            return $this->hasMany(Move::class)
+                ->orWhereIn('product_id', $this->variants()->pluck('id'));
+        } else {
+            return $this->hasMany(Move::class);
+        }
     }
 
     public function moveLines(): HasMany
     {
-        return $this->hasMany(MoveLine::class);
+        if ($this->is_configurable) {
+            return $this->hasMany(MoveLine::class)
+                ->orWhereIn('product_id', $this->variants()->pluck('id'));
+        } else {
+            return $this->hasMany(MoveLine::class);
+        }
     }
 
     public function storageCategoryCapacities(): BelongsToMany

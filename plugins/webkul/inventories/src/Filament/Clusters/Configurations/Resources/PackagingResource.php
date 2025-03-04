@@ -13,6 +13,7 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResourc
 use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\ProductSettings;
+use Webkul\Product\Enums\ProductType;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 
@@ -54,6 +55,17 @@ class PackagingResource extends BasePackagingResource
         $form = BasePackagingResource::form($form);
 
         $components = $form->getComponents();
+
+        $components[2] = Forms\Components\Select::make('product_id')
+            ->label(__('products::filament/resources/packaging.form.product'))
+            ->relationship(
+                'product',
+                'name',
+                fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
+            )
+            ->required()
+            ->searchable()
+            ->preload();
 
         $components[] = Forms\Components\Select::make('package_type_id')
             ->label(__('inventories::filament/clusters/configurations/resources/packaging.form.package-type'))

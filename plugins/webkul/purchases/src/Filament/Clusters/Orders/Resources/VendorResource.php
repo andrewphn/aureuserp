@@ -10,10 +10,13 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource as BaseVen
 use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
 use Webkul\Purchase\Filament\Clusters\Orders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Pages;
+use Webkul\Purchase\Models\Partner;
 
 class VendorResource extends BaseVendorResource
 {
     use HasCustomFields;
+
+    protected static ?string $model = Partner::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
@@ -39,6 +42,8 @@ class VendorResource extends BaseVendorResource
             Pages\EditVendor::class,
             Pages\ManageContacts::class,
             Pages\ManageAddresses::class,
+            Pages\ManageBills::class,
+            Pages\ManagePurchases::class,
         ]);
     }
 
@@ -66,6 +71,8 @@ class VendorResource extends BaseVendorResource
             'edit'      => Pages\EditVendor::route('/{record}/edit'),
             'contacts'  => Pages\ManageContacts::route('/{record}/contacts'),
             'addresses' => Pages\ManageAddresses::route('/{record}/addresses'),
+            'bills'     => Pages\ManageBills::route('/{record}/bills'),
+            'purchases' => Pages\ManagePurchases::route('/{record}/purchases'),
         ];
     }
 }

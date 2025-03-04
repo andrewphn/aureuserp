@@ -35,6 +35,7 @@ class EditProduct extends BaseEditProduct
                         ->default($record->on_hand_quantity),
                 ])
                 ->modalSubmitActionLabel(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-submit-action-label'))
+                ->visible($this->getRecord()->is_storable)
                 ->beforeFormFilled(function (
                     OperationSettings $operationSettings,
                     TraceabilitySettings $traceabilitySettings,

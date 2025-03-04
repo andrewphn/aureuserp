@@ -25,7 +25,13 @@ class ValidateAction extends Action
         parent::setUp();
 
         $this->label(__('inventories::filament/clusters/operations/actions/validate.label'))
-            ->color('gray')
+            ->color(function($record) {
+                if (in_array($record->state, [Enums\OperationState::DRAFT, Enums\OperationState::CONFIRMED])) {
+                    return 'gray';
+                }
+
+                return 'primary';
+            })
             ->requiresConfirmation(function (Operation $record) {
                 return $record->operationType->create_backorder === Enums\CreateBackorder::ASK
                     && $this->canProcessBackOrder($record);
@@ -358,6 +364,20 @@ class ValidateAction extends Action
         }
 
         OperationResource::updateOperationState($newOperation);
+
+        $url = OperationResource::getUrl('view', ['record' => $record]);
+
+        $newOperation->addMessage([
+            'body' => "This transfer has been created from <a href=\"{$url}\" target=\"_blank\" class=\"text-primary-600 dark:text-primary-400\">{$record->name}</a>.",
+            'type' => 'comment',
+        ]);
+
+        $url = OperationResource::getUrl('view', ['record' => $newOperation]);
+
+        $record->addMessage([
+            'body' => "The backorder <a href=\"{$url}\" target=\"_blank\" class=\"text-primary-600 dark:text-primary-400\">{$newOperation->name}</a> has been created.",
+            'type' => 'comment',
+        ]);
 
         $record->update(['back_order_id' => $newOperation->id]);
     }

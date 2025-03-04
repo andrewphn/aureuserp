@@ -77,7 +77,7 @@ class LotResource extends Resource
                                     ->relationship(
                                         name: 'product',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Builder $query) => $query->where('tracking', Enums\ProductTracking::LOT),
+                                        modifyQueryUsing: fn (Builder $query) => $query->where('tracking', Enums\ProductTracking::LOT)->whereNull('is_configurable'),
                                     )
                                     ->required()
                                     ->searchable()

@@ -69,9 +69,9 @@ class SendEmailAction extends Action
                             
                             <br><br>
                             
-                            <a href=\"{$acceptRespondUrl}\">Accept</a>
+                            <a href=\"{$acceptRespondUrl}\" target=\"_blank\">Accept</a>
                             
-                            <a href=\"{$declineRespondUrl}\">Decline</a>
+                            <a href=\"{$declineRespondUrl}\" target=\"_blank\">Decline</a>
                             
                             <br><br>
                             

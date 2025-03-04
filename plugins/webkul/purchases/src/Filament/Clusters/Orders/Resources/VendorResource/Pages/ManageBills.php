@@ -6,32 +6,32 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 
-class ManagePurchases extends ManageRelatedRecords
+class ManageBills extends ManageRelatedRecords
 {
     protected static string $resource = VendorResource::class;
 
-    protected static string $relationship = 'orders';
+    protected static string $relationship = 'accountMoves';
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
     public static function getNavigationLabel(): string
     {
-        return __('purchases::filament/clusters/orders/resources/vendor/pages/manage-purchases.navigation.title');
+        return __('purchases::filament/clusters/orders/resources/vendor/pages/manage-bills.navigation.title');
     }
 
     public function table(Table $table): Table
     {
-        return QuotationResource::table($table)
+        return BillResource::table($table)
             ->modifyQueryUsing(fn ($query) => $query->where('partner_id', $this->record->getKey()))
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->url(fn ($record) => QuotationResource::getUrl('view', ['record' => $record]))
+                    ->url(fn ($record) => BillResource::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 
                 Tables\Actions\EditAction::make()
-                    ->url(fn ($record) => QuotationResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn ($record) => BillResource::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
             ]);
     }

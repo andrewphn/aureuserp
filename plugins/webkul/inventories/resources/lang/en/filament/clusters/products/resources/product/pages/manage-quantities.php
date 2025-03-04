@@ -13,6 +13,7 @@ return [
 
     'form' => [
         'fields' => [
+            'product'          => 'Product',
             'location'         => 'Location',
             'package'          => 'Package',
             'lot'              => 'Lot / Serial Numbers',
@@ -23,6 +24,7 @@ return [
 
     'table' => [
         'columns' => [
+            'product'           => 'Product',
             'location'          => 'Location',
             'lot'               => 'Lot / Serial Numbers',
             'storage-category'  => 'Storage Category',

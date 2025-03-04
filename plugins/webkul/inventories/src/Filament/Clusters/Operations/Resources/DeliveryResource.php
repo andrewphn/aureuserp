@@ -4,6 +4,7 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources;
 
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -74,6 +75,11 @@ class DeliveryResource extends Resource
                     $query->where('type', Enums\OperationType::OUTGOING);
                 });
             });
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return OperationResource::infolist($infolist);
     }
 
     public static function getRecordSubNavigation(Page $page): array

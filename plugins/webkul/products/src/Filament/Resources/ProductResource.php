@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Category;
@@ -413,7 +414,10 @@ class ProductResource extends Resource
                                 ->body(__('products::filament/resources/product.table.bulk-actions.force-delete.notification.body')),
                         ),
                 ]),
-            ]);
+            ])
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->whereNull('parent_id');
+            });
     }
 
     public static function infolist(Infolist $infolist): Infolist
