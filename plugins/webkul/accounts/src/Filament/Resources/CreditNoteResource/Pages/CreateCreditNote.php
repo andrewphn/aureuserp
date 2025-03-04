@@ -6,13 +6,10 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateRecord;
 use Webkul\Account\Enums;
-use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Models\Move;
-use Webkul\Account\Services\TaxService;
 
 class CreateCreditNote extends CreateRecord
 {
@@ -27,8 +24,8 @@ class CreateCreditNote extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('Credit Note Created'))
-            ->body(__('Credit Note has been created successfully.'));
+            ->title(__('accounts::filament/resources/credit-note/pages/create-credit-note.notification.title'))
+            ->body(__('accounts::filament/resources/credit-note/pages/create-credit-note.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

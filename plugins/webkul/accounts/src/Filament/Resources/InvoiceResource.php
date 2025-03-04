@@ -666,6 +666,7 @@ class InvoiceResource extends Resource
                             ->icon('heroicon-o-clipboard-document-list')
                             ->schema([
                                 Infolists\Components\TextEntry::make('narration')
+                                    ->html()
                                     ->hiddenLabel(),
                             ]),
                     ])

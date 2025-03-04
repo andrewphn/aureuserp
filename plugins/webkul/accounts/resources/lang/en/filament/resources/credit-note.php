@@ -20,7 +20,7 @@ return [
             'general' => [
                 'title' => 'General',
                 'fields' => [
-                    'customer-invoice' => 'Customer Invoice',
+                    'customer-invoice' => 'Customer Credit Note',
                     'customer' => 'Customer',
                     'invoice-date' => 'Invoice Date',
                     'due-date' => 'Due Date',
@@ -68,7 +68,7 @@ return [
                     'accounting' => [
                         'title' => 'Accounting',
 
-                        'fieldset' => [
+                        'fields' => [
                             'incoterm' => 'Incoterm',
                             'incoterm-location' => 'Incoterm Location',
                             'payment-method' => 'Payment Method',
@@ -102,74 +102,12 @@ return [
         ]
     ],
 
-    'table' => [
-        'columns' => [
-            'number'           => 'Number',
-            'customer'         => 'Customer',
-            'invoice-date'     => 'Invoice Date',
-            'checked'          => 'Checked',
-            'accounting-date'  => 'Accounting',
-            'due-date'         => 'Due Date',
-            'source-document'  => 'Source Document',
-            'reference'        => 'Reference',
-            'sales-person'     => 'Sales Person',
-            'tax-excluded'     => 'Tax Excluded',
-            'tax'              => 'Tax',
-            'total'            => 'Total',
-            'amount-due'       => 'Amount Due',
-            'invoice-currency' => 'Invoice Currency',
-        ],
-
-        'groups' => [
-            'name'                         => 'Name',
-            'invoice-partner-display-name' => 'Invoice Partner Display Name',
-            'invoice-date'                 => 'Invoice Date',
-            'checked'                      => 'Checked',
-            'date'                         => 'Date',
-            'invoice-due-date'             => 'Invoice Due Date',
-            'invoice-origin'               => 'Invoice Origin',
-            'sales-person'                 => 'Sales Person',
-            'currency'                     => 'Currency',
-            'created-at'                   => 'Created At',
-            'updated-at'                   => 'Updated At',
-        ],
-
-        'filters' => [
-            'number'                       => 'Number',
-            'invoice-partner-display-name' => 'Invoice Partner Display Name',
-            'invoice-date'                 => 'Invoice Date',
-            'invoice-due-date'             => 'Invoice Due Date',
-            'invoice-origin'               => 'Invoice Origin',
-            'reference'                    => 'Reference',
-            'created-at'                   => 'Created At',
-            'updated-at'                   => 'Updated At',
-        ],
-
-        'actions' => [
-            'delete' => [
-                'notification' => [
-                    'title' => 'Payment deleted',
-                    'body'  => 'The payment has been deleted successfully.',
-                ],
-            ],
-        ],
-
-        'bulk-actions' => [
-            'delete' => [
-                'notification' => [
-                    'title' => 'Payments deleted',
-                    'body'  => 'The payments has been deleted successfully.',
-                ],
-            ],
-        ],
-    ],
-
     'infolist' => [
         'section' => [
             'general' => [
                 'title' => 'General',
                 'entries' => [
-                    'customer-invoice' => 'Customer Invoice',
+                    'customer-invoice' => 'Customer Credit Note',
                     'customer' => 'Customer',
                     'invoice-date' => 'Invoice Date',
                     'due-date' => 'Due Date',
@@ -248,5 +186,4 @@ return [
             ]
         ]
     ],
-
 ];

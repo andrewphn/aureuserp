@@ -22,7 +22,7 @@ class ViewCreditNote extends ViewRecord
         })->map(function ($action) {
             if ($action->getName() == 'customers.invoice.preview') {
                 return BaseActions\PreviewAction::make()
-                    ->modalHeading(__('Preview Credit Note'))
+                    ->modalHeading(__('accounts::filament/resources/credit-note/pages/view-credit-note.header-actions.preview.modal-heading'))
                     ->setTemplate('accounts::credit-note/actions/preview.index');
             }
 

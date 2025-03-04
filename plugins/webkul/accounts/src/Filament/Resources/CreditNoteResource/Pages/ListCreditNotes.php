@@ -21,7 +21,7 @@ class ListCreditNotes extends ListRecords
         $predefinedViews = parent::getPresetTableViews();
 
         return [
-            'out_refund' => PresetView::make(__('Credit Notes'))
+            'out_refund' => PresetView::make(__('accounts::filament/resources/credit-note/pages/list-credit-note.tabs.credit-notes'))
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')

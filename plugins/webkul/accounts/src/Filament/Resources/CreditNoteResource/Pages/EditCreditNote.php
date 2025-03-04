@@ -5,8 +5,6 @@ namespace Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as EditRecord;
-use Webkul\Account\Enums\DisplayType;
-use Webkul\Account\Models\MoveLine;
 use Webkul\Partner\Models\Partner;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
@@ -24,8 +22,8 @@ class EditCreditNote extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('Credit Note updated'))
-            ->body(__('Credit Note has been updated successfully.'));
+            ->title(__('accounts::filament/resources/credit-note/pages/edit-credit-note.notification.title'))
+            ->body(__('accounts::filament/resources/credit-note/pages/edit-credit-note.notification.body'));
     }
 
     protected function getHeaderActions(): array
@@ -40,16 +38,14 @@ class EditCreditNote extends EditRecord
         })->map(function ($action) {
             if ($action->getName() == 'customers.invoice.preview') {
                 return BaseActions\PreviewAction::make()
-                    ->modalHeading(__('Preview Credit Note'))
+                    ->modalHeading(__('accounts::filament/resources/credit-note/pages/edit-credit-note.header-actions.preview.modal-heading'))
                     ->setTemplate('accounts::credit-note/actions/preview.index');
             }
 
             return $action;
         })->toArray();
 
-        return [
-            ...$predefinedActions,
-        ];
+        return $predefinedActions;
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
