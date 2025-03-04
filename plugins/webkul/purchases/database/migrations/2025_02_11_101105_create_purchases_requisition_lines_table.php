@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('purchases_requisition_lines', function (Blueprint $table) {
             $table->id();
-            $table->decimal('qty', 15, 2)->nullable()->default(0);
-            $table->decimal('price_unit', 15, 2)->nullable()->default(0);
+            $table->decimal('qty', 15, 4)->nullable()->default(0);
+            $table->decimal('price_unit', 15, 4)->nullable()->default(0);
 
             $table->foreignId('requisition_id')
                 ->constrained('purchases_requisitions')

@@ -21,12 +21,12 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('invoice_status')->default('no');
             $table->string('receipt_status')->default('no');
-            $table->decimal('untaxed_amount', 15, 2)->nullable();
-            $table->decimal('tax_amount', 15, 2)->nullable();
-            $table->decimal('total_amount', 15, 2)->nullable();
-            $table->decimal('total_cc_amount', 15, 2)->nullable();
-            $table->decimal('currency_rate', 15, 6)->nullable();
-            $table->integer('invoice_count')->nullable()->default(0);
+            $table->decimal('untaxed_amount', 15, 4)->default(0);
+            $table->decimal('tax_amount', 15, 4)->default(0);
+            $table->decimal('total_amount', 15, 4)->default(0);
+            $table->decimal('total_cc_amount', 15, 4)->default(0);
+            $table->decimal('currency_rate', 15, 6)->default(0);
+            $table->integer('invoice_count')->default(0);
             $table->datetime('ordered_at');
             $table->datetime('approved_at')->nullable();
             $table->datetime('planned_at')->nullable();

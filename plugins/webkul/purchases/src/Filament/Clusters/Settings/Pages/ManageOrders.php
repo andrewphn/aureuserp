@@ -15,6 +15,8 @@ class ManageOrders extends SettingsPage
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
+    protected static ?string $slug = 'purchase/manage-orders';
+
     protected static ?string $navigationGroup = 'Purchase';
 
     protected static ?int $navigationSort = 1;

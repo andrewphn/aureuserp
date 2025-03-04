@@ -17,6 +17,8 @@ class ManageTraceability extends SettingsPage
 
     protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass-circle';
 
+    protected static ?string $slug = 'inventory/manage-traceability';
+
     protected static ?string $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 4;

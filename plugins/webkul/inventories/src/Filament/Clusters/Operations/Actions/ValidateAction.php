@@ -228,16 +228,17 @@ class ValidateAction extends Action
             ->first();
 
         if ($sourceQuantity) {
-            $remainingQty = $sourceQuantity->quantity - $moveLine->qty;
+            $remainingQty = $sourceQuantity->quantity - $moveLine->uom_qty;
 
             if ($remainingQty == 0) {
                 $sourceQuantity->delete();
             } else {
-                $reservedQty = $this->calculateReservedQty($moveLine->sourceLocation, $moveLine->qty);
+                $reservedQty = $this->calculateReservedQty($moveLine->sourceLocation, $moveLine->uom_qty);
+
                 $sourceQuantity->update([
                     'quantity'                => $remainingQty,
                     'reserved_quantity'       => $sourceQuantity->reserved_quantity - $reservedQty,
-                    'inventory_diff_quantity' => $sourceQuantity->inventory_diff_quantity + $moveLine->qty,
+                    'inventory_diff_quantity' => $sourceQuantity->inventory_diff_quantity + $moveLine->uom_qty,
                 ]);
             }
         } else {
@@ -246,8 +247,8 @@ class ValidateAction extends Action
                 'location_id'             => $moveLine->source_location_id,
                 'lot_id'                  => $moveLine->lot_id,
                 'package_id'              => $moveLine->package_id,
-                'quantity'                => -$moveLine->qty,
-                'inventory_diff_quantity' => $moveLine->qty,
+                'quantity'                => -$moveLine->uom_qty,
+                'inventory_diff_quantity' => $moveLine->uom_qty,
                 'company_id'              => $moveLine->sourceLocation->company_id,
                 'creator_id'              => Auth::id(),
                 'incoming_at'             => now(),
@@ -261,13 +262,13 @@ class ValidateAction extends Action
             ->where('package_id', $moveLine->result_package_id)
             ->first();
 
-        $reservedQty = $this->calculateReservedQty($moveLine->destinationLocation, $moveLine->qty);
+        $reservedQty = $this->calculateReservedQty($moveLine->destinationLocation, $moveLine->uom_qty);
 
         if ($destinationQuantity) {
             $destinationQuantity->update([
-                'quantity'                => $destinationQuantity->quantity + $moveLine->qty,
+                'quantity'                => $destinationQuantity->quantity + $moveLine->uom_qty,
                 'reserved_quantity'       => $destinationQuantity->reserved_quantity + $reservedQty,
-                'inventory_diff_quantity' => $destinationQuantity->inventory_diff_quantity - $moveLine->qty,
+                'inventory_diff_quantity' => $destinationQuantity->inventory_diff_quantity - $moveLine->uom_qty,
             ]);
         } else {
             ProductQuantity::create([
@@ -275,9 +276,9 @@ class ValidateAction extends Action
                 'location_id'             => $moveLine->destination_location_id,
                 'package_id'              => $moveLine->result_package_id,
                 'lot_id'                  => $moveLine->lot_id,
-                'quantity'                => $moveLine->qty,
+                'quantity'                => $moveLine->uom_qty,
                 'reserved_quantity'       => $reservedQty,
-                'inventory_diff_quantity' => -$moveLine->qty,
+                'inventory_diff_quantity' => -$moveLine->uom_qty,
                 'incoming_at'             => now(),
                 'creator_id'              => Auth::id(),
                 'company_id'              => $moveLine->destinationLocation->company_id,
@@ -294,7 +295,7 @@ class ValidateAction extends Action
 
         if ($moveLine->lot_id && $moveLine->lot) {
             $moveLine->lot->update([
-                'location_id' => $moveLine->lot->total_quantity >= $moveLine->qty
+                'location_id' => $moveLine->lot->total_quantity >= $moveLine->uom_qty
                     ? $moveLine->destination_location_id
                     : null,
             ]);
@@ -332,16 +333,19 @@ class ValidateAction extends Action
         $newOperation->save();
 
         foreach ($record->moves as $move) {
-            if ($move->requested_qty <= $move->received_qty) {
+            if ($move->product_uom_qty <= $move->quantity) {
                 continue;
             }
 
+            $remainingQty = round($move->product_uom_qty - $move->quantity, 4);
+
             $newMove = $move->replicate()->fill([
-                'operation_id'      => $newOperation->id,
-                'reference'         => $newOperation->name,
-                'state'             => Enums\MoveState::DRAFT,
-                'requested_qty'     => $move->requested_qty - $move->received_qty,
-                'requested_uom_qty' => $move->requested_qty - $move->received_qty,
+                'operation_id'    => $newOperation->id,
+                'reference'       => $newOperation->name,
+                'state'           => Enums\MoveState::DRAFT,
+                'product_qty'     => OperationResource::calculateProductQuantity($move->uom_id, $remainingQty),
+                'product_uom_qty' => $remainingQty,
+                'quantity'        => $remainingQty,
             ]);
 
             $newMove->save();
@@ -367,7 +371,7 @@ class ValidateAction extends Action
             return false;
         }
 
-        return $record->moves->sum('requested_qty') > $record->moves->sum('received_qty');
+        return $record->moves->sum('product_uom_qty') > $record->moves->sum('quantity');
     }
 
     /**
@@ -479,8 +483,8 @@ class ValidateAction extends Action
         $newMove = $move->replicate()->fill([
             'state'                   => Enums\MoveState::DRAFT,
             'reference'               => null,
-            'requested_qty'           => $move->received_qty,
-            'requested_uom_qty'       => $move->received_qty,
+            'product_qty'             => OperationResource::calculateProductQuantity($move->uom_id, $move->quantity),
+            'product_uom_qty'         => $move->quantity,
             'origin'                  => $move->origin ?? $move->operation->name ?? '/',
             'operation_id'            => null,
             'source_location_id'      => $move->destination_location_id,

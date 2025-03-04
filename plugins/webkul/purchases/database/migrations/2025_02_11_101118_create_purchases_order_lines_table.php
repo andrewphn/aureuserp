@@ -18,23 +18,23 @@ return new class extends Migration
             $table->integer('sort')->nullable();
             $table->string('qty_received_method')->nullable();
             $table->string('display_type')->nullable();
-            $table->decimal('product_qty', 15, 4)->default(0);
-            $table->decimal('product_uom_qty', 15, 4)->nullable()->default(0);
-            $table->decimal('product_packaging_qty', 15, 4)->nullable()->default(0);
-            $table->decimal('price_tax', 15, 4)->nullable()->default(0);
-            $table->decimal('discount', 15, 4)->default(0);
-            $table->decimal('price_unit', 15, 4)->default(0);
-            $table->decimal('price_subtotal', 15, 4)->nullable()->default(0);
-            $table->decimal('price_total', 15, 4)->nullable()->default(0);
-            $table->decimal('qty_invoiced', 15, 4)->nullable()->default(0);
-            $table->decimal('qty_received', 15, 4)->nullable()->default(0);
-            $table->decimal('qty_received_manual', 15, 4)->nullable()->default(0);
-            $table->decimal('qty_to_invoice', 15, 4)->nullable()->default(0);
-            $table->boolean('is_downpayment')->nullable()->default(0);
+            $table->decimal('product_qty', 15, 2);
+            $table->double('product_uom_qty')->nullable();
+            $table->double('product_packaging_qty')->nullable();
+            $table->double('price_tax')->nullable();
+            $table->decimal('discount', 15, 2)->default(0);
+            $table->decimal('price_unit', 15, 2)->default(0);
+            $table->decimal('price_subtotal', 15, 2)->default(0);
+            $table->decimal('price_total', 15, 2)->default(0);
+            $table->decimal('qty_invoiced', 15, 2)->default(0);
+            $table->decimal('qty_received', 15, 2)->default(0);
+            $table->decimal('qty_received_manual', 15, 2)->default(0);
+            $table->decimal('qty_to_invoice', 15, 2)->default(0);
+            $table->boolean('is_downpayment')->default(0);
             $table->timestamp('planned_at')->nullable();
             $table->string('product_description_variants')->nullable();
             $table->boolean('propagate_cancel')->nullable();
-            $table->decimal('price_total_cc', 15, 4)->nullable()->default(0);
+            $table->decimal('price_total_cc', 15, 2)->default(0);
 
             // Indexes
             $table->index('planned_at');

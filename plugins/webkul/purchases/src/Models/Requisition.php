@@ -59,6 +59,18 @@ class Requisition extends Model
     ];
 
     protected array $logAttributes = [
+        'name',
+        'type',
+        'state',
+        'reference',
+        'starts_at',
+        'ends_at',
+        'description',
+        'currency.name' => 'Currency',
+        'partner.name' => 'Partner',
+        'user.name' => 'Buyer',
+        'company.name' => 'Company',
+        'creator.name' => 'Creator',
     ];
 
     public function partner(): BelongsTo

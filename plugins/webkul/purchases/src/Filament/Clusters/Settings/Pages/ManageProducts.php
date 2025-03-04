@@ -17,6 +17,8 @@ class ManageProducts extends SettingsPage
 
     protected static ?string $navigationIcon = 'heroicon-o-cube';
 
+    protected static ?string $slug = 'purchase/manage-products';
+
     protected static ?string $navigationGroup = 'Purchase';
 
     protected static ?int $navigationSort = 2;
