@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Resources\RefundResource\Pages;
 
-use Webkul\Account\Filament\Resources\RefundResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Account\Filament\Resources\RefundResource;
 
 class ViewRefund extends ViewRecord
 {

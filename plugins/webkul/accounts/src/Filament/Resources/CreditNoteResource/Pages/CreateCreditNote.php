@@ -4,12 +4,12 @@ namespace Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
 
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateRecord;
 use Webkul\Account\Enums;
 use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Models\Partner;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateRecord;
 use Webkul\Account\Models\Move;
+use Webkul\Account\Models\Partner;
 
 class CreateCreditNote extends CreateRecord
 {

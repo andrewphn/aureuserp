@@ -4,8 +4,8 @@ namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Filament\Resources\CreditNoteResource as BaseCreditNoteResource;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
 use Webkul\Invoice\Filament\Clusters\Customer;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
 
 class CreditNotesResource extends BaseCreditNoteResource
 {

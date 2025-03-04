@@ -35,9 +35,9 @@ class PayAction extends Action
                         ->schema([
                             Forms\Components\TextInput::make('amount')
                                 ->label(__('accounts::filament/resources/invoice/actions/pay-action.form.fields.amount'))
-                                ->prefix(fn($record) => $record->currency->symbol ?? '')
-                                ->formatStateUsing(fn($record) => number_format($record->lines->sum('price_total'), 2, '.', ''))
-                                ->dehydrateStateUsing(fn($state) => (float) str_replace(',', '', $state))
+                                ->prefix(fn ($record) => $record->currency->symbol ?? '')
+                                ->formatStateUsing(fn ($record) => number_format($record->lines->sum('price_total'), 2, '.', ''))
+                                ->dehydrateStateUsing(fn ($state) => (float) str_replace(',', '', $state))
                                 ->required(),
                             Forms\Components\Select::make('payment_method_line_id')
                                 ->relationship(
@@ -45,8 +45,8 @@ class PayAction extends Action
                                     titleAttribute: 'name',
                                     modifyQueryUsing: function ($query) {
                                         return $query
-                                            ->whereHas('paymentMethod', fn($q) => $q->where('payment_type', 'inbound'))
-                                            ->whereHas('journal', fn($q) => $q->where('type', 'bank'));
+                                            ->whereHas('paymentMethod', fn ($q) => $q->where('payment_type', 'inbound'))
+                                            ->whereHas('journal', fn ($q) => $q->where('type', 'bank'));
                                     }
                                 )
                                 ->required()
@@ -148,7 +148,7 @@ class PayAction extends Action
             'payment_type'                   => $record->paymentMethodLine()->findOrFail($data['payment_method_line_id'])->paymentMethod->payment_type,
             'source_amount'                  => $data['amount'],
             'source_amount_currency'         => $data['amount'],
-            'name'                           => str_replace('INV', 'P' . $paymentMethodLine?->journal?->code, $record->name),
+            'name'                           => str_replace('INV', 'P'.$paymentMethodLine?->journal?->code, $record->name),
             'state'                          => PaymentState::PAID->value,
             'payment_type'                   => $paymentMethodLine?->paymentMethod?->payment_type,
             'partner_type'                   => $record->partner->sub_type,
@@ -174,8 +174,8 @@ class PayAction extends Action
             'origin_payment_id'                 => $payment->id,
             'partner_shipping_id'               => null,
             'invoice_user_id'                   => null,
-            'sequence_prefix'                   => str_replace('INV', 'P' . $paymentMethodLine?->journal?->code, $record->name),
-            'name'                              => str_replace('INV', 'P' . $paymentMethodLine?->journal?->code, $record->name),
+            'sequence_prefix'                   => str_replace('INV', 'P'.$paymentMethodLine?->journal?->code, $record->name),
+            'name'                              => str_replace('INV', 'P'.$paymentMethodLine?->journal?->code, $record->name),
             'reference'                         => $record->reference,
             'move_type'                         => MoveType::ENTRY->value,
             'state'                             => MoveState::POSTED->value,

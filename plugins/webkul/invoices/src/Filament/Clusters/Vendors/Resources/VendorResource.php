@@ -136,12 +136,12 @@ class VendorResource extends BaseVendorResource
                                 Forms\Components\Select::make('peppol_eas')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.peppol-eas'))
                                     ->live()
-                                    ->visible(fn(Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store')))
+                                    ->visible(fn (Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store')))
                                     ->options(Enums\PartyIdentificationScheme::class),
                                 Forms\Components\TextInput::make('peppol_endpoint')
                                     ->label(__('invoices::filament/clusters/vendors/resources/vendor.form.tabs.invoicing.fields.endpoint'))
                                     ->live()
-                                    ->visible(fn(Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store'))),
+                                    ->visible(fn (Get $get) => $get('invoice_edi_format_store') !== Enums\InvoiceFormat::FACTURX_X_CII->value && ! empty($get('invoice_edi_format_store'))),
                             ])->columns(2),
                     ]),
 
@@ -187,7 +187,7 @@ class VendorResource extends BaseVendorResource
             '2xl' => 3,
         ]);
 
-        $table->modifyQueryUsing(fn($query) => $query->where('sub_type', 'supplier'));
+        $table->modifyQueryUsing(fn ($query) => $query->where('sub_type', 'supplier'));
 
         return $table;
     }

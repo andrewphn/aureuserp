@@ -6,9 +6,9 @@ return [
     ],
 
     'tabs' => [
-        'my-orders' => 'My Orders',
-        'starred'      => 'Starred',
-        'waiting-bills' => 'Waiting Bills',
+        'my-orders'      => 'My Orders',
+        'starred'        => 'Starred',
+        'waiting-bills'  => 'Waiting Bills',
         'received-bills' => 'Bills Received',
     ],
 

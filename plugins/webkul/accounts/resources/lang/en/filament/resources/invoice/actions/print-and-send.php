@@ -7,23 +7,23 @@ return [
         'title' => 'Preview Invoice',
 
         'form' => [
-            'partners' => 'Customer',
-            'subject' => 'Subject',
+            'partners'    => 'Customer',
+            'subject'     => 'Subject',
             'description' => 'Description',
-            'files' => 'Attachment'
+            'files'       => 'Attachment',
         ],
 
         'action' => [
             'submit' => [
-                'title' => 'Send'
-            ]
+                'title' => 'Send',
+            ],
         ],
 
         'notification' => [
             'invoice-sent' => [
                 'title' => 'Invoice Sent',
-                'body' => 'Invoice has been sent successfully.'
-            ]
-        ]
-    ]
+                'body'  => 'Invoice has been sent successfully.',
+            ],
+        ],
+    ],
 ];

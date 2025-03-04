@@ -7,7 +7,7 @@ return [
         'notification' => [
             'success' => [
                 'title' => 'Order locked',
-                'body' => 'The order has been locked successfully.',
+                'body'  => 'The order has been locked successfully.',
             ],
         ],
     ],

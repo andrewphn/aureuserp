@@ -132,17 +132,17 @@ class TaxResource extends Resource
                 Tables\Columns\TextColumn::make('type_tax_use')
                     ->label(__('accounts::filament/resources/tax.table.columns.type-tax-use'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Enums\TypeTaxUse::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\TypeTaxUse::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_scope')
                     ->label(__('accounts::filament/resources/tax.table.columns.tax-scope'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Enums\TaxScope::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\TaxScope::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_type')
                     ->label(__('accounts::filament/resources/tax.table.columns.amount-type'))
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Enums\AmountType::options()[$state])
+                    ->formatStateUsing(fn ($state) => Enums\AmountType::options()[$state])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_label')
                     ->label(__('accounts::filament/resources/tax.table.columns.invoice-label'))

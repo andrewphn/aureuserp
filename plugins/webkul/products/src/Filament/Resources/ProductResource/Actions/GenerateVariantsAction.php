@@ -40,7 +40,7 @@ class GenerateVariantsAction extends Action
                 $this->record->is_configurable = true;
                 $this->record->save();
             })
-            ->hidden(fn(ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
+            ->hidden(fn (ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
     }
 
     protected function generateVariants(): void
@@ -190,8 +190,8 @@ class GenerateVariantsAction extends Action
 
     protected function createVariant(Product $parent, array $attributeValues): Product
     {
-        $variantName = $parent->name . ' - ' . collect($attributeValues)
-            ->map(fn($value) => $value->attributeOption->name)
+        $variantName = $parent->name.' - '.collect($attributeValues)
+            ->map(fn ($value) => $value->attributeOption->name)
             ->implode(' / ');
 
         $extraPrice = collect($attributeValues)->sum('extra_price');
@@ -217,7 +217,7 @@ class GenerateVariantsAction extends Action
             'description_purchase' => $parent->description_purchase,
             'description_sale'     => $parent->description_sale,
             'barcode'              => null,
-            'reference'            => $parent->reference . '-' . strtolower(str_replace(' ', '-', $variantName)),
+            'reference'            => $parent->reference.'-'.strtolower(str_replace(' ', '-', $variantName)),
             'images'               => $parent->images,
         ]);
 
@@ -228,8 +228,8 @@ class GenerateVariantsAction extends Action
 
     protected function updateVariant(Product $variant, array $attributeValues): void
     {
-        $variantName = $this->record->name . ' - ' . collect($attributeValues)
-            ->map(fn($value) => $value->attributeOption->name)
+        $variantName = $this->record->name.' - '.collect($attributeValues)
+            ->map(fn ($value) => $value->attributeOption->name)
             ->implode(' / ');
 
         $extraPrice = collect($attributeValues)->sum('extra_price');

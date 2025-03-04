@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\EloquentSortable\SortableTrait;
+use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
@@ -16,7 +17,6 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Webkul\Account\Models\MoveLine;
 
 class OrderLine extends Model
 {

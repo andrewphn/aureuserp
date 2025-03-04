@@ -7,7 +7,7 @@ return [
         'notification' => [
             'success' => [
                 'title' => 'Order unlock',
-                'body' => 'The order has been unlock successfully.',
+                'body'  => 'The order has been unlock successfully.',
             ],
         ],
     ],

@@ -25,8 +25,8 @@ class EditBill extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('Bill updated'))
-            ->body(__('Bill updated has been updated successfully.'));
+            ->title(__('accounts::filament/resources/bill/pages/edit-bill.notification.title'))
+            ->body(__('accounts::filament/resources/bill/pages/edit-bill.notification.body'));
     }
 
     protected function getHeaderActions(): array

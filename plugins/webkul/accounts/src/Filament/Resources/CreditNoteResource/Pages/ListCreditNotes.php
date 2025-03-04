@@ -2,13 +2,13 @@
 
 namespace Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
 
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as ListRecords;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Webkul\Account\Enums\MoveType;
 
 class ListCreditNotes extends ListRecords
 {
@@ -25,7 +25,7 @@ class ListCreditNotes extends ListRecords
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::OUT_REFUND->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::OUT_REFUND->value)),
             ...Arr::except($predefinedViews, ['invoice']),
         ];
     }

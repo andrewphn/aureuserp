@@ -4,8 +4,8 @@ namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pa
 
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors as BaseListPartners;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors as BaseListPartners;
 
 class ListPartners extends BaseListPartners
 {

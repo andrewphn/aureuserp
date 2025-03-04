@@ -6,8 +6,8 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\BillResource;
-use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Filament\Resources\BillResource\Actions\CreditNoteAction;
+use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
 class ViewBill extends ViewRecord
@@ -30,8 +30,8 @@ class ViewBill extends ViewRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('Bill deleted'))
-                        ->body(__('Bill has been deleted successfully.'))
+                        ->title(__('accounts::filament/resources/bill/pages/view-bill.header-actions.delete.notification.title'))
+                        ->body(__('accounts::filament/resources/bill/pages/view-bill.header-actions.delete.notification.body'))
                 ),
         ];
     }

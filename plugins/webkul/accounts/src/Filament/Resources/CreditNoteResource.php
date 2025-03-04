@@ -4,33 +4,32 @@ namespace Webkul\Account\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Enums\MoveState;
-use Webkul\Account\Models\Move as AccountMove;
-use Webkul\Account\Models\MoveLine;
-use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
-use Webkul\Invoice\Models\Product;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
-use Webkul\Account\Filament\Resources\BankAccountResource;
+use Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
 use Webkul\Account\Livewire\InvoiceSummary;
+use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Models\Tax;
+use Webkul\Account\Services\TaxService;
+use Webkul\Field\Filament\Forms\Components\ProgressStepper;
+use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Filament\Resources\Resource;
-use Filament\Support\Enums\ActionSize;
-use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Services\TaxService;
 
 class CreditNoteResource extends Resource
 {
@@ -39,6 +38,16 @@ class CreditNoteResource extends Resource
     protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            __('accounts::filament/resources/credit-note.global-search.number')           => $record?->name ?? '—',
+            __('accounts::filament/resources/credit-note.global-search.customer')         => $record?->invoice_partner_display_name ?? '—',
+            __('accounts::filament/resources/credit-note.global-search.invoice-date')     => $record?->invoice_date ?? '—',
+            __('accounts::filament/resources/credit-note.global-search.invoice-date-due') => $record?->invoice_date_due ?? '—',
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -58,11 +67,11 @@ class CreditNoteResource extends Resource
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('payment_state')
-                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value)
+                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
@@ -72,14 +81,14 @@ class CreditNoteResource extends Resource
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->placeholder('RINV/2025/00001')
-                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('RINV'))
+                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber('RINV'))
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
                                         ignoreRecord: true,
                                     )
                                     ->columnSpan(1)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
@@ -94,11 +103,11 @@ class CreditNoteResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -116,7 +125,7 @@ class CreditNoteResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->street2 ? ', '.$address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -128,17 +137,17 @@ class CreditNoteResource extends Resource
                                     ->label(__('accounts::filament/resources/credit-note.form.section.general.fields.invoice-date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
                                     ->default(now())
                                     ->native(false)
                                     ->live()
-                                    ->hidden(fn(Get $get) => $get('invoice_payment_term_id') !== null)
+                                    ->hidden(fn (Get $get) => $get('invoice_payment_term_id') !== null)
                                     ->label(__('accounts::filament/resources/credit-note.form.section.general.fields.due-date')),
                                 Forms\Components\Select::make('invoice_payment_term_id')
                                     ->relationship('invoicePaymentTerm', 'name')
-                                    ->required(fn(Get $get) => $get('invoice_date_due') === null)
+                                    ->required(fn (Get $get) => $get('invoice_date_due') === null)
                                     ->live()
                                     ->searchable()
                                     ->preload()
@@ -178,14 +187,14 @@ class CreditNoteResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->label(__('accounts::filament/resources/credit-note.form.tabs.other-information.fieldset.invoice.fields.recipient-bank'))
-                                            ->createOptionForm(fn($form) => BankAccountResource::form($form))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->createOptionForm(fn ($form) => BankAccountResource::form($form))
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\TextInput::make('payment_reference')
                                             ->label(__('accounts::filament/resources/credit-note.form.tabs.other-information.fieldset.invoice.fields.payment-reference')),
                                         Forms\Components\DatePicker::make('delivery_date')
                                             ->native(false)
                                             ->label(__('accounts::filament/resources/credit-note.form.tabs.other-information.fieldset.invoice.fields.delivery-date'))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                     ]),
                                 Forms\Components\Fieldset::make(__('accounts::filament/resources/credit-note.form.tabs.other-information.fieldset.accounting.title'))
                                     ->schema([
@@ -205,7 +214,7 @@ class CreditNoteResource extends Resource
                                             ->options(AutoPost::class)
                                             ->default(AutoPost::NO->value)
                                             ->label(__('accounts::filament/resources/credit-note.form.tabs.other-information.fieldset.accounting.fields.auto-post'))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
                                             ->label(__('accounts::filament/resources/credit-note.form.tabs.other-information.fieldset.accounting.fields.checked')),
@@ -273,10 +282,10 @@ class CreditNoteResource extends Resource
                     ->schema([
                         Infolists\Components\Actions::make([
                             Infolists\Components\Actions\Action::make('payment_state')
-                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Infolists\Components\Grid::make()
@@ -293,12 +302,12 @@ class CreditNoteResource extends Resource
                                 Infolists\Components\TextEntry::make('partner.name')
                                     ->placeholder('-')
                                     ->label(__('accounts::filament/resources/credit-note.infolist.section.general.entries.customer'))
-                                    ->visible(fn($record) => $record->partner_id !== null)
+                                    ->visible(fn ($record) => $record->partner_id !== null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_partner_display_name')
                                     ->placeholder('-')
                                     ->label(__('accounts::filament/resources/credit-note.infolist.section.general.entries.customer'))
-                                    ->visible(fn($record) => $record->partner_id === null)
+                                    ->visible(fn ($record) => $record->partner_id === null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_date')
                                     ->placeholder('-')
@@ -335,14 +344,14 @@ class CreditNoteResource extends Resource
                                             ->icon('heroicon-o-hashtag'),
                                         Infolists\Components\TextEntry::make('uom.name')
                                             ->placeholder('-')
-                                            ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
+                                            ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.unit'))
                                             ->icon('heroicon-o-scale'),
                                         Infolists\Components\TextEntry::make('price_unit')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.unit-price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn ($record) => $record->currency->name),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.discount-percentage'))
@@ -351,12 +360,12 @@ class CreditNoteResource extends Resource
                                         Infolists\Components\TextEntry::make('taxes.name')
                                             ->badge()
                                             ->state(function ($record): array {
-                                                return $record->taxes->map(fn($tax) => [
+                                                return $record->taxes->map(fn ($tax) => [
                                                     'name' => $tax->name,
                                                 ])->toArray();
                                             })
                                             ->icon('heroicon-o-receipt-percent')
-                                            ->formatStateUsing(fn($state) => $state['name'])
+                                            ->formatStateUsing(fn ($state) => $state['name'])
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.taxes'))
                                             ->weight(FontWeight::Bold),
@@ -364,7 +373,7 @@ class CreditNoteResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/credit-note.infolist.tabs.invoice-lines.repeater.products.entries.sub-total'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn ($record) => $record->currency->name),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
                                     return [
@@ -430,7 +439,7 @@ class CreditNoteResource extends Resource
                                                     ->placeholder('-')
                                                     ->label(__('accounts::filament/resources/credit-note.infolist.tabs.other-information.fieldset.accounting.fieldset.auto-post'))
                                                     ->icon('heroicon-o-arrow-path')
-                                                    ->formatStateUsing(fn(string $state): string => AutoPost::from($state)->getLabel()),
+                                                    ->formatStateUsing(fn (string $state): string => AutoPost::from($state)->getLabel()),
                                                 Infolists\Components\IconEntry::make('checked')
                                                     ->label(__('accounts::filament/resources/credit-note.infolist.tabs.other-information.fieldset.accounting.fieldset.checked'))
                                                     ->icon('heroicon-o-check-circle')
@@ -468,6 +477,7 @@ class CreditNoteResource extends Resource
                     ->persistTabInQueryString(),
             ]);
     }
+
     public static function getPages(): array
     {
         return [
@@ -489,8 +499,8 @@ class CreditNoteResource extends Resource
             ->addActionLabel(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.add-product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -503,8 +513,8 @@ class CreditNoteResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
                                     ->label(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.fields.quantity'))
@@ -513,22 +523,22 @@ class CreditNoteResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.fields.unit'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.fields.taxes'))
                                     ->relationship(
@@ -542,9 +552,9 @@ class CreditNoteResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
-                                    ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.fields.discount-percentage'))
@@ -552,8 +562,8 @@ class CreditNoteResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.fields.unit-price'))
                                     ->numeric()
@@ -561,13 +571,13 @@ class CreditNoteResource extends Resource
                                     ->required()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('accounts::filament/resources/credit-note.form.tabs.invoice-lines.repeater.products.fields.sub-total'))
                                     ->default(0)
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -578,8 +588,8 @@ class CreditNoteResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
     public static function mutateProductRelationship(array $data, $record, $livewire): array

@@ -2,11 +2,11 @@
 
 namespace Webkul\Account\Enums;
 
-use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
 
-enum PaymentState: string implements HasLabel, HasColor, HasIcon
+enum PaymentState: string implements HasColor, HasIcon, HasLabel
 {
     case NOT_PAID = 'not_paid';
 

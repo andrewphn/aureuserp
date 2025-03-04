@@ -3,8 +3,8 @@
 namespace Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
 
 use Webkul\Account\Filament\Resources\CreditNoteResource;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ViewInvoice as ViewRecord;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ViewInvoice as ViewRecord;
 
 class ViewCreditNote extends ViewRecord
 {

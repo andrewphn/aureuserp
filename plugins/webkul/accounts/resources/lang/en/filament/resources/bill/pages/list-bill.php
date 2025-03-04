@@ -2,6 +2,6 @@
 
 return [
     'tabs' => [
-        'credit-notes' => 'Credit Notes',
+        'bills' => 'Bills',
     ],
 ];

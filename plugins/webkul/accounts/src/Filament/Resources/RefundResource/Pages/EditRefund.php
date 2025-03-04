@@ -2,9 +2,9 @@
 
 namespace Webkul\Account\Filament\Resources\RefundResource\Pages;
 
-use Webkul\Account\Filament\Resources\RefundResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Account\Filament\Resources\RefundResource;
 
 class EditRefund extends EditRecord
 {

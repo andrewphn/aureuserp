@@ -4,8 +4,6 @@ namespace Webkul\Account\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
@@ -340,7 +338,7 @@ class PaymentsResource extends Resource
                             ->schema([
                                 Infolists\Components\TextEntry::make('state')
                                     ->badge()
-                                    ->color(fn(string $state): string => match ($state) {
+                                    ->color(fn (string $state): string => match ($state) {
                                         PaymentStatus::DRAFT->value      => 'gray',
                                         PaymentStatus::IN_PROCESS->value => 'warning',
                                         PaymentStatus::PAID->value       => 'success',
@@ -348,13 +346,13 @@ class PaymentsResource extends Resource
                                         default                          => 'gray',
                                     })
                                     ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.state'))
-                                    ->formatStateUsing(fn(string $state): string => PaymentStatus::options()[$state]),
+                                    ->formatStateUsing(fn (string $state): string => PaymentStatus::options()[$state]),
                                 Infolists\Components\TextEntry::make('payment_type')
                                     ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.payment-type'))
                                     ->badge()
-                                    ->icon(fn(string $state): string => PaymentType::from($state)->getIcon())
-                                    ->color(fn(string $state): string => PaymentType::from($state)->getColor())
-                                    ->formatStateUsing(fn(string $state): string => PaymentType::from($state)->getLabel()),
+                                    ->icon(fn (string $state): string => PaymentType::from($state)->getIcon())
+                                    ->color(fn (string $state): string => PaymentType::from($state)->getColor())
+                                    ->formatStateUsing(fn (string $state): string => PaymentType::from($state)->getLabel()),
                                 Infolists\Components\TextEntry::make('partnerBank.account_number')
                                     ->label(__('accounts::filament/resources/payment.infolist.sections.payment-information.entries.customer-bank-account'))
                                     ->icon('heroicon-o-building-library')

@@ -30,7 +30,7 @@ class CreditNoteAction extends Action
         $this
             ->label(__('Credit Note'))
             ->color('gray')
-            ->visible(fn(Move $record) => $record->state == MoveState::POSTED->value)
+            ->visible(fn (Move $record) => $record->state == MoveState::POSTED->value)
             ->icon('heroicon-o-receipt-refund')
             ->modalHeading(__('Credit Note'));
 
@@ -131,8 +131,8 @@ class CreditNoteAction extends Action
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
             $newMoveLine->debit = 0.00;
             $newMoveLine->credit = $line->debit;
-            $newMoveLine->balance = - ($line->balance);
-            $newMoveLine->amount_currency = - ($line->amount_currency);
+            $newMoveLine->balance = -($line->balance);
+            $newMoveLine->amount_currency = -($line->amount_currency);
 
             $newMoveLine->save();
         });
@@ -175,8 +175,8 @@ class CreditNoteAction extends Action
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
             $newMoveLine->debit = 0.00;
             $newMoveLine->credit = $line->debit;
-            $newMoveLine->balance = - ($line->balance);
-            $newMoveLine->amount_currency = - ($line->amount_currency);
+            $newMoveLine->balance = -($line->balance);
+            $newMoveLine->amount_currency = -($line->amount_currency);
 
             $newMoveLine->save();
         });

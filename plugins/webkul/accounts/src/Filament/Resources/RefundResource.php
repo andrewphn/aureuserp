@@ -2,34 +2,33 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Webkul\Account\Filament\Resources\RefundResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Enums\MoveState;
-use Webkul\Account\Models\Move as AccountMove;
-use Webkul\Account\Models\MoveLine;
-use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Invoice\Models\Product;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AutoPost;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
-use Webkul\Account\Filament\Resources\BankAccountResource;
+use Webkul\Account\Filament\Resources\RefundResource\Pages;
 use Webkul\Account\Livewire\InvoiceSummary;
+use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
+use Webkul\Account\Services\TaxService;
+use Webkul\Field\Filament\Forms\Components\ProgressStepper;
+use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Filament\Support\Enums\ActionSize;
-use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Services\TaxService;
 
 class RefundResource extends Resource
 {
@@ -57,11 +56,11 @@ class RefundResource extends Resource
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('payment_state')
-                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value)
+                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
@@ -71,14 +70,14 @@ class RefundResource extends Resource
                                     ->maxLength(255)
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->placeholder('RBILL/2025/00001')
-                                    ->default(fn() => AccountMove::generateNextInvoiceAndCreditNoteNumber('RBILL'))
+                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber('RBILL'))
                                     ->unique(
                                         table: 'accounts_account_moves',
                                         column: 'name',
                                         ignoreRecord: true,
                                     )
                                     ->columnSpan(1)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
@@ -93,11 +92,11 @@ class RefundResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -115,7 +114,7 @@ class RefundResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->street2 ? ', '.$address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -126,34 +125,34 @@ class RefundResource extends Resource
                                 Forms\Components\TextInput::make('reference')
                                     ->label(__('Bill Reference'))
                                     ->live()
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date')
                                     ->label(__('Invoice Date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('date')
                                     ->label(__('Accounting Date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Select::make('partner_bank_id')
                                     ->relationship('partnerBank', 'account_number')
                                     ->searchable()
                                     ->preload()
                                     ->label(__('Recipient Bank'))
-                                    ->createOptionForm(fn($form) => BankAccountResource::form($form))
-                                    ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->createOptionForm(fn ($form) => BankAccountResource::form($form))
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
                                     ->default(now())
                                     ->native(false)
                                     ->live()
-                                    ->hidden(fn(Get $get) => $get('invoice_payment_term_id') !== null)
+                                    ->hidden(fn (Get $get) => $get('invoice_payment_term_id') !== null)
                                     ->label(__('Due Date')),
                                 Forms\Components\Select::make('invoice_payment_term_id')
                                     ->relationship('invoicePaymentTerm', 'name')
-                                    ->required(fn(Get $get) => $get('invoice_date_due') === null)
+                                    ->required(fn (Get $get) => $get('invoice_date_due') === null)
                                     ->live()
                                     ->searchable()
                                     ->preload()
@@ -199,7 +198,7 @@ class RefundResource extends Resource
                                             ->options(AutoPost::class)
                                             ->default(AutoPost::NO->value)
                                             ->label(__('Auto Post'))
-                                            ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
                                             ->label(__('Checked')),
@@ -249,11 +248,11 @@ class RefundResource extends Resource
                     ->schema([
                         Infolists\Components\Actions::make([
                             Infolists\Components\Actions\Action::make('payment_state')
-                                ->icon(fn($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value)
+                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
+                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
+                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->size(ActionSize::ExtraLarge->value),
                         ]),
                         Infolists\Components\Grid::make()
                             ->schema([
@@ -269,12 +268,12 @@ class RefundResource extends Resource
                                 Infolists\Components\TextEntry::make('partner.name')
                                     ->placeholder('-')
                                     ->label(__('Customer'))
-                                    ->visible(fn($record) => $record->partner_id !== null)
+                                    ->visible(fn ($record) => $record->partner_id !== null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_partner_display_name')
                                     ->placeholder('-')
                                     ->label(__('Customer'))
-                                    ->visible(fn($record) => $record->partner_id === null)
+                                    ->visible(fn ($record) => $record->partner_id === null)
                                     ->icon('heroicon-o-user'),
                                 Infolists\Components\TextEntry::make('invoice_date')
                                     ->placeholder('-')
@@ -310,14 +309,14 @@ class RefundResource extends Resource
                                             ->icon('heroicon-o-hashtag'),
                                         Infolists\Components\TextEntry::make('uom.name')
                                             ->placeholder('-')
-                                            ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
+                                            ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
                                             ->label(__('Unit of Measure'))
                                             ->icon('heroicon-o-scale'),
                                         Infolists\Components\TextEntry::make('price_unit')
                                             ->placeholder('-')
                                             ->label(__('Unit Price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn ($record) => $record->currency->name),
                                         Infolists\Components\TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('Discount'))
@@ -326,24 +325,24 @@ class RefundResource extends Resource
                                         Infolists\Components\TextEntry::make('taxes.name')
                                             ->badge()
                                             ->state(function ($record): array {
-                                                return $record->taxes->map(fn($tax) => [
+                                                return $record->taxes->map(fn ($tax) => [
                                                     'name' => $tax->name,
                                                 ])->toArray();
                                             })
                                             ->icon('heroicon-o-receipt-percent')
-                                            ->formatStateUsing(fn($state) => $state['name'])
+                                            ->formatStateUsing(fn ($state) => $state['name'])
                                             ->placeholder('-')
                                             ->weight(FontWeight::Bold),
                                         Infolists\Components\TextEntry::make('price_subtotal')
                                             ->placeholder('-')
                                             ->label(__('Subtotal'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn($record) => $record->currency->name),
+                                            ->money(fn ($record) => $record->currency->name),
                                         Infolists\Components\TextEntry::make('price_total')
                                             ->placeholder('-')
                                             ->label(__('Total'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->money(fn($record) => $record->currency->symbol)
+                                            ->money(fn ($record) => $record->currency->symbol)
                                             ->weight('bold'),
                                     ])->columns(5),
                                 Infolists\Components\Livewire::make(InvoiceSummary::class, function ($record) {
@@ -410,7 +409,7 @@ class RefundResource extends Resource
                                                     ->placeholder('-')
                                                     ->label(__('Auto Post'))
                                                     ->icon('heroicon-o-arrow-path')
-                                                    ->formatStateUsing(fn(string $state): string => AutoPost::from($state)->getLabel()),
+                                                    ->formatStateUsing(fn (string $state): string => AutoPost::from($state)->getLabel()),
                                                 Infolists\Components\IconEntry::make('checked')
                                                     ->label(__('Checked'))
                                                     ->icon('heroicon-o-check-circle')
@@ -452,7 +451,6 @@ class RefundResource extends Resource
         ];
     }
 
-
     public static function getProductRepeater(): Forms\Components\Repeater
     {
         return Forms\Components\Repeater::make('products')
@@ -464,8 +462,8 @@ class RefundResource extends Resource
             ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -478,8 +476,8 @@ class RefundResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
                                     ->label(__('Quantity'))
@@ -488,22 +486,22 @@ class RefundResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
                                     ->relationship(
@@ -517,9 +515,9 @@ class RefundResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
-                                    ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('Discount Percentage'))
@@ -527,8 +525,8 @@ class RefundResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('Unit Price'))
                                     ->numeric()
@@ -536,13 +534,13 @@ class RefundResource extends Resource
                                     ->required()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('Sub Total'))
                                     ->default(0)
                                     ->dehydrated()
-                                    ->disabled(fn($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -553,8 +551,8 @@ class RefundResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
     public static function mutateProductRelationship(array $data, $record, $livewire): array

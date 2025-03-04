@@ -4,10 +4,10 @@ namespace Webkul\Account\Filament\Resources\CreditNoteResource\Pages;
 
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as EditRecord;
-use Webkul\Partner\Models\Partner;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as EditRecord;
+use Webkul\Partner\Models\Partner;
 
 class EditCreditNote extends EditRecord
 {
@@ -31,7 +31,7 @@ class EditCreditNote extends EditRecord
         $predefinedActions = parent::getHeaderActions();
 
         $predefinedActions = collect($predefinedActions)->filter(function ($action) {
-            return !in_array($action->getName(), [
+            return ! in_array($action->getName(), [
                 'customers.invoice.set-as-checked',
                 'customers.invoice.credit-note',
             ]);

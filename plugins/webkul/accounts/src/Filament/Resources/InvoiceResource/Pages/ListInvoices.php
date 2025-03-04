@@ -25,26 +25,26 @@ class ListInvoices extends ListRecords
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::OUT_INVOICE->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::OUT_INVOICE->value)),
             'draft' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.draft'))
                 ->favorite()
                 ->icon('heroicon-s-stop')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::DRAFT->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('state', MoveState::DRAFT->value)),
             'posted' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.posted'))
                 ->favorite()
                 ->icon('heroicon-s-play')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::POSTED->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('state', MoveState::POSTED->value)),
             'cancelled' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.cancelled'))
                 ->favorite()
                 ->icon('heroicon-s-x-circle')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('state', MoveState::CANCEL->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('state', MoveState::CANCEL->value)),
             'not_secured' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.not-secured'))
                 ->favorite()
                 ->icon('heroicon-s-shield-exclamation')
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('inalterable_hash')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('inalterable_hash')),
             'in_refund' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.refund'))
                 ->icon('heroicon-s-receipt-refund')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
             'to_check' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.to-check'))
                 ->icon('heroicon-s-check-badge')
                 ->modifyQueryUsing(function (Builder $query) {

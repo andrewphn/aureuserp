@@ -5,17 +5,17 @@ return [
 
     'form' => [
         'fields' => [
-            'to' => 'To',
+            'to'      => 'To',
             'subject' => 'Subject',
             'message' => 'Message',
-        ]
+        ],
     ],
 
     'action' => [
         'notification' => [
             'success' => [
                 'title' => 'Email sent',
-                'body' => 'The email has been sent successfully.',
+                'body'  => 'The email has been sent successfully.',
             ],
         ],
     ],

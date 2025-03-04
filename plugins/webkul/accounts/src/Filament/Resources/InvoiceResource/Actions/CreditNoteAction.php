@@ -33,7 +33,7 @@ class CreditNoteAction extends Action
         $this
             ->label(__('accounts::filament/resources/invoice/actions/credit-note.title'))
             ->color('gray')
-            ->visible(fn(Move $record) => $record->state == MoveState::POSTED->value)
+            ->visible(fn (Move $record) => $record->state == MoveState::POSTED->value)
             ->icon('heroicon-o-receipt-refund')
             ->modalHeading(__('accounts::filament/resources/invoice/actions/credit-note.modal.heading'));
 
@@ -134,8 +134,8 @@ class CreditNoteAction extends Action
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
             $newMoveLine->debit = $line->credit;
             $newMoveLine->credit = 0.00;
-            $newMoveLine->balance = - ($line->balance);
-            $newMoveLine->amount_currency = - ($line->amount_currency);
+            $newMoveLine->balance = -($line->balance);
+            $newMoveLine->amount_currency = -($line->amount_currency);
 
             $newMoveLine->save();
         });
@@ -178,8 +178,8 @@ class CreditNoteAction extends Action
             $newMoveLine->sort = $newMove->lines->max('sort') + 1;
             $newMoveLine->debit = $line->credit;
             $newMoveLine->credit = 0.00;
-            $newMoveLine->balance = - ($line->balance);
-            $newMoveLine->amount_currency = - ($line->amount_currency);
+            $newMoveLine->balance = -($line->balance);
+            $newMoveLine->amount_currency = -($line->amount_currency);
 
             $newMoveLine->save();
         });

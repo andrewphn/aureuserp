@@ -5,5 +5,5 @@ return [
 
     'modal' => [
         'title' => 'Preview Invoice',
-    ]
+    ],
 ];

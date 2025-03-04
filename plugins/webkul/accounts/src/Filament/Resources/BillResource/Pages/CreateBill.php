@@ -24,8 +24,8 @@ class CreateBill extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('Bill Created'))
-            ->body(__('Bill created has been successfully.'));
+            ->title(__('accounts::filament/resources/bill/pages/create-bill.notification.title'))
+            ->body(__('accounts::filament/resources/bill/pages/create-bill.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
