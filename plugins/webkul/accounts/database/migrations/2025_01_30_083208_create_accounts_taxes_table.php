@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('description')->comment('Description')->nullable();
             $table->string('invoice_label')->comment('Invoice Label')->nullable();
             $table->text('invoice_legal_notes')->comment('Invoice Legal Notes')->nullable();
-            $table->double('amount')->comment('Amount')->nullable();
+            $table->decimal('amount', 15, 4)->comment('Amount')->nullable()->default(0);
             $table->boolean('is_active')->default(0)->comment('Active')->nullable();
             $table->boolean('include_base_amount')->default(0)->comment('Include Base Amount')->nullable();
             $table->boolean('is_base_affected')->default(0)->comment('Base Affected')->nullable();

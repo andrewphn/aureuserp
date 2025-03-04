@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\UTMMediumResource\Pages;
-use Webkul\Recruitment\Models\UTMMedium;
+use Webkul\Support\Models\UTMMedium;
 
 class UTMMediumResource extends Resource
 {

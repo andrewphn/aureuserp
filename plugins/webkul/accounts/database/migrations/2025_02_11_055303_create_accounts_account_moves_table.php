@@ -42,7 +42,7 @@ return new class extends Migration
             $table->string('reference')->nullable()->comment('Reference');
             $table->string('state')->comment('State');
             $table->string('move_type')->comment('Move Type');
-            $table->string('auto_post')->comment('Auto Post');
+            $table->boolean('auto_post')->comment('Auto Post')->default(0);
             $table->string('inalterable_hash')->nullable()->comment('Inalterable Hash');
             $table->string('payment_reference')->nullable()->comment('Payment Reference');
             $table->string('qr_code_method')->nullable()->comment('QR Code Method');

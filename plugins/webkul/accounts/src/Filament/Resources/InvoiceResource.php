@@ -213,9 +213,9 @@ class InvoiceResource extends Resource
                                             ->preload()
                                             ->searchable()
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.payment-method')),
-                                        Forms\Components\Select::make('auto_post')
-                                            ->options(AutoPost::class)
-                                            ->default(AutoPost::NO->value)
+                                        Forms\Components\Toggle::make('auto_post')
+                                            ->default(0)
+                                            ->inline(false)
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.auto-post'))
                                             ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
@@ -631,7 +631,8 @@ class InvoiceResource extends Resource
                                                     ->placeholder('-')
                                                     ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.accounting.fieldset.payment-method'))
                                                     ->icon('heroicon-o-credit-card'),
-                                                Infolists\Components\TextEntry::make('auto_post')
+                                                Infolists\Components\IconEntry::make('auto_post')
+                                                    ->boolean()
                                                     ->placeholder('-')
                                                     ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.accounting.fieldset.auto-post'))
                                                     ->icon('heroicon-o-arrow-path')

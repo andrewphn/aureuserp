@@ -15,7 +15,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -209,9 +208,9 @@ class BillResource extends Resource
                                             ->preload()
                                             ->searchable()
                                             ->label(__('accounts::filament/resources/bill.form.tabs.other-information.fieldset.secured.fields.payment-method')),
-                                        Forms\Components\Select::make('auto_post')
-                                            ->options(AutoPost::class)
-                                            ->default(AutoPost::NO->value)
+                                        Forms\Components\Toggle::make('auto_post')
+                                            ->default(0)
+                                            ->inline(false)
                                             ->label(__('accounts::filament/resources/bill.form.tabs.other-information.fieldset.secured.fields.auto-post'))
                                             ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
@@ -407,7 +406,8 @@ class BillResource extends Resource
                                                     ->placeholder('-')
                                                     ->label(__('accounts::filament/resources/bill.infolist.tabs.other-information.fieldset.secured.entries.payment-method'))
                                                     ->icon('heroicon-o-credit-card'),
-                                                Infolists\Components\TextEntry::make('auto_post')
+                                                Infolists\Components\IconEntry::make('auto_post')
+                                                    ->boolean()
                                                     ->placeholder('-')
                                                     ->icon('heroicon-o-arrow-path')
                                                     ->label(__('accounts::filament/resources/bill.infolist.tabs.other-information.fieldset.secured.entries.auto-post')),

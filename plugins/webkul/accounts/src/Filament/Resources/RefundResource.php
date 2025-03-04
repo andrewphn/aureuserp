@@ -14,7 +14,6 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -194,9 +193,9 @@ class RefundResource extends Resource
                                             ->preload()
                                             ->searchable()
                                             ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.secured.fields.payment-method')),
-                                        Forms\Components\Select::make('auto_post')
-                                            ->options(AutoPost::class)
-                                            ->default(AutoPost::NO->value)
+                                        Forms\Components\Toggle::make('auto_post')
+                                            ->inline(false)
+                                            ->default(0)
                                             ->label(__('accounts::filament/resources/refund.form.tabs.other-information.fieldset.secured.fields.auto-post'))
                                             ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
                                         Forms\Components\Toggle::make('checked')
@@ -392,8 +391,9 @@ class RefundResource extends Resource
                                                     ->placeholder('-')
                                                     ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.secured.entries.payment-method'))
                                                     ->icon('heroicon-o-credit-card'),
-                                                Infolists\Components\TextEntry::make('auto_post')
+                                                Infolists\Components\IconEntry::make('auto_post')
                                                     ->placeholder('-')
+                                                    ->boolean()
                                                     ->icon('heroicon-o-arrow-path')
                                                     ->label(__('accounts::filament/resources/refund.infolist.tabs.other-information.fieldset.secured.entries.auto-post')),
                                             ])->columns(2),

@@ -38,10 +38,10 @@ return new class extends Migration
             $table->boolean('request_unit_hours')->nullable();
             $table->timestamp('date_from')->nullable();
             $table->timestamp('date_to')->nullable();
-            $table->double('number_of_days')->nullable();
-            $table->double('number_of_hours')->nullable();
-            $table->double('request_hour_from')->nullable();
-            $table->double('request_hour_to')->nullable();
+            $table->decimal('number_of_days', 15, 4)->nullable()->default(0);
+            $table->decimal('number_of_hours', 15, 4)->nullable()->default(0);
+            $table->decimal('request_hour_from', 15, 4)->nullable()->default(0);
+            $table->decimal('request_hour_to', 15, 4)->nullable()->default(0);
 
             $table->timestamps();
         });

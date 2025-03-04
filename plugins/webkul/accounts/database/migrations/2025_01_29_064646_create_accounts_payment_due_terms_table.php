@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('value')->comment('Value');
             $table->string('delay_type')->comment('Delay Type');
             $table->string('days_next_month')->nullable()->comment('Days Next Month');
-            $table->double('value_amount')->nullable()->comment('Value Amount');
+            $table->decimal('value_amount', 15, 4)->nullable()->comment('Value Amount')->default(0);
             $table->timestamps();
         });
     }

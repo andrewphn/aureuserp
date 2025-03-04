@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('repartition_type')->comment('Repartition Type');
             $table->string('document_type')->comment('Document Type');
             $table->string('use_in_tax_closing')->nullable()->comment('Use in Tax Closing');
-            $table->double('factor')->nullable()->comment('Factor');
-            $table->double('factor_percent')->nullable()->comment('Factor Percent');
+            $table->decimal('factor', 15, 4)->nullable()->comment('Factor')->default(0);
+            $table->decimal('factor_percent')->nullable()->comment('Factor Percent')->default(0);
             $table->timestamps();
         });
     }

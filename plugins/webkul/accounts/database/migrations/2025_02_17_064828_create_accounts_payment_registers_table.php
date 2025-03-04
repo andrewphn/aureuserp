@@ -32,10 +32,10 @@ return new class extends Migration
             $table->string('payment_difference_handling')->nullable()->comment('Payment Difference Handling');
             $table->string('writeoff_label')->nullable()->comment('Writeoff Label');
             $table->date('payment_date')->nullable()->comment('Payment Date');
-            $table->decimal('amount', 20, 2)->nullable()->comment('Amount');
-            $table->decimal('custom_user_amount', 20, 2)->nullable()->comment('Custom User Amount');
-            $table->decimal('source_amount', 20, 2)->nullable()->comment('Source Amount');
-            $table->decimal('source_amount_currency', 20, 2)->nullable()->comment('Source Amount Currency');
+            $table->decimal('amount', 15, 4)->nullable()->comment('Amount');
+            $table->decimal('custom_user_amount', 15, 4)->nullable()->comment('Custom User Amount');
+            $table->decimal('source_amount', 15, 4)->nullable()->comment('Source Amount');
+            $table->decimal('source_amount_currency', 15, 4)->nullable()->comment('Source Amount Currency');
             $table->boolean('group_payment')->nullable()->comment('Group Payment')->default(false);
             $table->boolean('can_group_payments')->nullable()->comment('Can Group Payments')->default(false);
             $table->integer('payment_token_id')->nullable()->comment('Payment Token');

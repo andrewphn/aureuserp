@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('type');
             $table->string('name');
-            $table->double('factor')->nullable();
-            $table->double('rounding')->nullable();
+            $table->decimal('factor', 15, 4)->nullable()->default(0);
+            $table->decimal('rounding', 15, 4)->nullable()->default(0);
 
             $table->foreignId('category_id')
                 ->constrained('unit_of_measure_categories')

@@ -40,10 +40,10 @@ return new class extends Migration
             $table->timestamp('date_last_stage_updated')->nullable()->comment('Last Stage Updated');
             $table->timestamp('refuse_date')->nullable()->comment('Refused Date');
 
-            $table->double('probability')->nullable()->comment('Probability');
-            $table->double('salary_proposed')->nullable()->comment('Salary Proposed');
-            $table->double('salary_expected')->nullable()->comment('Salary Expected');
-            $table->double('delay_close')->nullable()->comment('Delay Close');
+            $table->decimal('probability', 15, 4)->nullable()->default(0)->comment('Probability');
+            $table->decimal('salary_proposed', 15, 4)->nullable()->default(0)->comment('Salary Proposed');
+            $table->decimal('salary_expected', 15, 4)->nullable()->default(0)->comment('Salary Expected');
+            $table->decimal('delay_close', 15, 4)->nullable()->default(0)->comment('Delay Close');
 
             $table->softDeletes();
             $table->timestamps();

@@ -7,7 +7,6 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
@@ -84,7 +83,7 @@ class CreditNoteAction extends Action
             'state'                             => MoveState::DRAFT->value,
             'name'                              => Move::generateNextInvoiceAndCreditNoteNumber('RBILL'),
             'move_type'                         => MoveType::IN_REFUND->value,
-            'auto_post'                         => AutoPost::NO->value,
+            'auto_post'                         => 0,
             'payment_state'                     => PaymentState::NOT_PAID->value,
             'invoice_partner_display_name'      => $record->invoice_partner_display_name,
             'date'                              => $creditNote->date,
