@@ -301,7 +301,7 @@ class InvoiceResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->money(fn($record) => $record->currency->code)
-                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total'))->money(fn($livewire) => dd($livewire)))
+                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('amount_tax_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.tax'))
@@ -309,14 +309,14 @@ class InvoiceResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->money(fn($record) => $record->currency->code)
-                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total'))->money(fn($livewire) => $livewire->record->currency->code))
+                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('amount_total_in_currency_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.total'))
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total'))->money(fn($livewire) => $livewire->record->currency->code))
+                    ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
                     ->money(fn($record) => $record->currency->code)
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('amount_residual_signed')
