@@ -520,7 +520,15 @@ class OrderResource extends Resource
                                                     ->money(fn ($record) => $record->order->currency->code),
                                                 Infolists\Components\TextEntry::make('taxes.name')
                                                     ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.taxes'))
-                                                    ->bulleted(),
+                                                    ->badge()
+                                                    ->state(function ($record): array {
+                                                        return $record->taxes->map(fn($tax) => [
+                                                            'name' => $tax->name,
+                                                        ])->toArray();
+                                                    })
+                                                    ->icon('heroicon-o-receipt-percent')
+                                                    ->formatStateUsing(fn($state) => $state['name'])
+                                                    ->placeholder('-'),
                                                 Infolists\Components\TextEntry::make('discount')
                                                     ->label(__('purchases::filament/clusters/orders/resources/order.infolist.tabs.products.repeater.products.entries.discount-percentage'))
                                                     ->suffix('%'),
@@ -1019,7 +1027,7 @@ class OrderResource extends Resource
 
     public static function collectLineTotals(OrderLine $line): OrderLine
     {
-        $line->qty_received_manual = $line->qty_received;
+        $line->qty_received_manual = $line->qty_received ?? 0;
 
         $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
 

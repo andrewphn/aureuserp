@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\OrderResource;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 
 class CreateBillAction extends Action
 {
@@ -65,7 +66,6 @@ class CreateBillAction extends Action
     private function createAccountMove($record): void
     {
         $accountMove = AccountMove::create([
-            'auto_post' => 'no',
             'state' => AccountEnums\MoveState::DRAFT,
             'move_type' => AccountEnums\MoveType::IN_INVOICE,
             'payment_state' => AccountEnums\PaymentStatus::NOT_PAID,
@@ -92,6 +92,8 @@ class CreateBillAction extends Action
         foreach ($record->lines as $line) {
             $this->createAccountMoveLine($accountMove, $line);
         }
+
+        BillResource::collectTotals($accountMove);
     }
 
     private function createAccountMoveLine($accountMove, $orderLine): void
@@ -110,7 +112,7 @@ class CreateBillAction extends Action
             'company_currency_id'    => $accountMove->currency_id,
             'partner_id'             => $accountMove->partner_id,
             'product_id'             => $orderLine->product_id,
-            'product_uom_id'         => $orderLine->uom_id,
+            'uom_id'                 => $orderLine->uom_id,
             'purchase_order_line_id' => $orderLine->id,
         ]);
 

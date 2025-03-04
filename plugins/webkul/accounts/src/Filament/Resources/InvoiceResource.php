@@ -320,7 +320,6 @@ class InvoiceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_origin')
-                    ->date()
                     ->placeholder('-')
                     ->label(__('accounts::filament/resources/invoice.table.columns.source-document'))
                     ->searchable()

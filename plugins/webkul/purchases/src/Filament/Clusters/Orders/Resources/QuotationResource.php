@@ -31,6 +31,7 @@ class QuotationResource extends OrderResource
         return $page->generateNavigationItems([
             Pages\ViewQuotation::class,
             Pages\EditQuotation::class,
+            Pages\ManageBills::class,
         ]);
     }
 
@@ -41,6 +42,7 @@ class QuotationResource extends OrderResource
             'create' => Pages\CreateQuotation::route('/create'),
             'view'   => Pages\ViewQuotation::route('/{record}'),
             'edit'   => Pages\EditQuotation::route('/{record}/edit'),
+            'bills'  => Pages\ManageBills::route('/{record}/bills'),
         ];
     }
 }
