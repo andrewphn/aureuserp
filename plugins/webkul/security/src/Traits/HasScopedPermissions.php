@@ -22,30 +22,33 @@ trait HasScopedPermissions
      */
     protected function hasGroupAccess(User $user, Model $model, string $ownerAttribute = 'user'): bool
     {
-        $hasGroupAccess = $user->resource_permission === PermissionType::GROUP->value;
-
-        if (! $hasGroupAccess) {
+        if ($user->resource_permission !== PermissionType::GROUP->value) {
             return false;
         }
 
         $owner = $model->{$ownerAttribute};
 
-        if (
-            $owner
-            && $hasGroupAccess
-        ) {
-            $userTeamIds = $user->teams->pluck('id');
-
-            if ($owner instanceof Collection) {
-                $ownerTeamIds = $owner->pluck('teams')->flatten()->pluck('id');
-            } else {
-                $ownerTeamIds = $owner->teams->pluck('id');
-            }
-
-            return $ownerTeamIds->intersect($userTeamIds)->isNotEmpty();
+        if (! $owner) {
+            return false;
         }
 
-        return false;
+        if ($owner instanceof Collection) {
+            if ($owner->pluck('id')->contains($user->id)) {
+                return true;
+            }
+
+            $ownerTeamIds = $owner->pluck('teams')->flatten()->pluck('id');
+        } else {
+            if ($owner->id === $user->id) {
+                return true;
+            }
+
+            $ownerTeamIds = $owner->teams->pluck('id');
+        }
+
+        $userTeamIds = $user->teams->pluck('id');
+
+        return $ownerTeamIds->intersect($userTeamIds)->isNotEmpty();
     }
 
     /**
@@ -53,17 +56,19 @@ trait HasScopedPermissions
      */
     protected function hasIndividualAccess(User $user, Model $model, $ownerAttribute = 'user'): bool
     {
-        $hasIndividualAccess = $user->resource_permission === PermissionType::INDIVIDUAL->value;
-
-        if (! $hasIndividualAccess) {
+        if ($user->resource_permission !== PermissionType::INDIVIDUAL->value) {
             return false;
         }
 
         $owner = $model->{$ownerAttribute};
 
-        return $hasIndividualAccess
-            && $owner
-            && $owner instanceof Collection ? $owner->pluck('id')->contains($user->id) : $owner->id === $user->id;
+        if (! $owner) {
+            return false;
+        }
+
+        return $owner instanceof Collection
+            ? $owner->pluck('id')->contains($user->id)
+            : $owner->id === $user->id;
     }
 
     /**

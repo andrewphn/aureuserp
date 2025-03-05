@@ -84,9 +84,12 @@
                                                 Product
                                             </th>
 
-                                            <th>
-                                                Lot/Serial Number
-                                            </th>
+
+                                            @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers && app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->display_on_delivery_slips)
+                                                <th>
+                                                    Lot/Serial Number
+                                                </th>
+                                            @endif
 
                                             <th>
                                                 Quantity
@@ -101,14 +104,14 @@
                                                     {{ $item->product->name }}
                                                 </td>
 
-                                                @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers)
+                                                @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers && app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->display_on_delivery_slips)
                                                     <td>
                                                         {{ $item->lot?->name }}
                                                     </td>
                                                 @endif
 
                                                 <td>
-                                                    {{ $item->qty.' '.$item->product->uom->name }}
+                                                    {{ $item->qty.' '.$item->uom->name }}
                                                 </td>
                                             </tr>
                                         @endforeach

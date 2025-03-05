@@ -141,7 +141,7 @@
                                                 </td>
 
                                                 <td>
-                                                    {{ $item->qty.' '.$item->product->uom->name }}
+                                                    {{ $item->qty.' '.$item->uom->name }}
                                                 </td>
 
                                                 <td>

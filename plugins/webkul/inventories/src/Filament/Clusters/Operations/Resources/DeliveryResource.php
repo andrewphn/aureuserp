@@ -14,11 +14,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource\Pages;
-use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\Delivery;
 
 class DeliveryResource extends Resource
 {
-    protected static ?string $model = Operation::class;
+    protected static ?string $model = Delivery::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
@@ -29,6 +29,11 @@ class DeliveryResource extends Resource
     protected static ?string $cluster = Operations::class;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getModelLabel(): string
+    {
+        return __('inventories::filament/clusters/operations/resources/delivery.navigation.title');
+    }
 
     public static function getNavigationLabel(): string
     {
