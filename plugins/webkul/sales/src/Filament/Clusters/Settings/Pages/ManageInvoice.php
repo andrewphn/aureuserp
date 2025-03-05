@@ -48,7 +48,7 @@ class ManageInvoice extends SettingsPage
             ->schema([
                 Forms\Components\Radio::make('invoice_policy')
                     ->options([
-                        'order' => 'Invoice what is ordered',
+                        'order'    => 'Invoice what is ordered',
                         'delivery' => 'Invoice what is delivered',
                     ])
                     ->default('delivery')

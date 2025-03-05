@@ -15,7 +15,7 @@ class Tag extends Model
     protected $fillable = [
         'color',
         'name',
-        'creator_id'
+        'creator_id',
     ];
 
     public function createdBy()

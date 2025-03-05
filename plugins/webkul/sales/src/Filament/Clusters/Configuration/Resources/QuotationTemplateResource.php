@@ -121,7 +121,7 @@ class QuotationTemplateResource extends Resource
                                                     ->prefix('of')
                                                     ->suffix('%')
                                                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.sections.signature-and-payment.fields.prepayment-percentage'))
-                                                    ->visible(fn(Get $get) => $get('require_payment') === true),
+                                                    ->visible(fn (Get $get) => $get('require_payment') === true),
                                             ])->columns(1),
                                     ]),
                             ])
@@ -272,9 +272,9 @@ class QuotationTemplateResource extends Resource
             ->reorderable()
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -322,9 +322,9 @@ class QuotationTemplateResource extends Resource
             ->reorderable()
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -365,9 +365,9 @@ class QuotationTemplateResource extends Resource
             ->reorderable()
             ->collapsible()
             ->cloneable()
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deleteAction(
-                fn(Action $action) => $action->requiresConfirmation(),
+                fn (Action $action) => $action->requiresConfirmation(),
             )
             ->extraItemActions([
                 Action::make('view')
@@ -435,7 +435,7 @@ class QuotationTemplateResource extends Resource
 
                                                 Infolists\Components\RepeatableEntry::make('sections')
                                                     ->hiddenLabel()
-                                                    ->hidden(fn($record) => $record->sections->isEmpty())
+                                                    ->hidden(fn ($record) => $record->sections->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('name')
                                                             ->placeholder('-')
@@ -448,7 +448,7 @@ class QuotationTemplateResource extends Resource
 
                                                 Infolists\Components\RepeatableEntry::make('notes')
                                                     ->hiddenLabel()
-                                                    ->hidden(fn($record) => $record->notes->isEmpty())
+                                                    ->hidden(fn ($record) => $record->notes->isEmpty())
                                                     ->schema([
                                                         Infolists\Components\TextEntry::make('name')
                                                             ->placeholder('-')
@@ -499,7 +499,7 @@ class QuotationTemplateResource extends Resource
                                                 Infolists\Components\TextEntry::make('prepayment_percentage')
                                                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.infolist.entries.prepayment-percentage'))
                                                     ->suffix('%')
-                                                    ->visible(fn($record) => $record->require_payment === true),
+                                                    ->visible(fn ($record) => $record->require_payment === true),
                                             ]),
                                     ]),
                             ])

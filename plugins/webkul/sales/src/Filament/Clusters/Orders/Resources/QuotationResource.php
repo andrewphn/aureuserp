@@ -5,14 +5,16 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
@@ -24,8 +26,8 @@ use Webkul\Sale\Filament\Clusters\Orders;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
-use Webkul\Sale\Settings;
 use Webkul\Sale\Models\Product;
+use Webkul\Sale\Settings;
 use Webkul\Support\Models\UOM;
 
 class QuotationResource extends Resource
@@ -148,9 +150,11 @@ class QuotationResource extends Resource
                             ]),
                         Forms\Components\Tabs\Tab::make(__('Optional Products'))
                             ->icon('heroicon-o-arrow-path-rounded-square')
-                            ->schema([
-                                static::getOptionalProductRepeater(),
-                            ]),
+                            ->schema(function (Set $set, Get $get) {
+                                return [
+                                    static::getOptionalProductRepeater($get, $set),
+                                ];
+                            }),
                         Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/invoice.form.tabs.other-information.title'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
@@ -761,7 +765,7 @@ class QuotationResource extends Resource
     //         ]);
     // }
 
-    public static function getOptionalProductRepeater(): Forms\Components\Repeater
+    public static function getOptionalProductRepeater(Get $parentGet, Set $parentSet): Forms\Components\Repeater
     {
         return Forms\Components\Repeater::make('optionalProducts')
             ->relationship('optionalLines')
@@ -836,6 +840,40 @@ class QuotationResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->dehydrated(),
+                                Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('add_order_line')
+                                        ->tooltip(__('Add Order Line'))
+                                        ->hiddenLabel()
+                                        ->icon('heroicon-o-shopping-cart')
+                                        ->action(function ($state, $livewire, $record) use ($parentSet, $parentGet) {
+                                            $data = [
+                                                'product_id'     => $state['product_id'],
+                                                'product_qty'    => $state['quantity'],
+                                                'uom_id'         => $state['uom_id'] ?? null,
+                                                'price_unit'     => $state['price_unit'],
+                                                'discount'       => $state['discount'],
+                                                'name' => $state['name'],
+                                                'customer_lead'  => 0,
+                                                'purchase_price' => 0
+                                            ];
+
+                                            $parentSet('products', [
+                                                ...$parentGet('products'),
+                                                $data,
+                                            ]);
+
+                                            $data['order_id'] = $livewire->record->id;
+
+                                            $orderLine = OrderLine::create($data);
+
+                                            $record->line_id = $orderLine->id;
+
+                                            $record->save();
+                                        })
+                                        ->extraAttributes([
+                                            'style' => 'margin-top: 2rem;',
+                                        ]),
+                                ])->hidden(fn($record) => ! $record ?? false),
                             ]),
                     ])
                     ->columns(2),
@@ -855,8 +893,8 @@ class QuotationResource extends Resource
             ->defaultItems(0)
             ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
             ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
-            // ->deletable(fn($record): bool => ! in_array($record?->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]))
-            // ->addable(fn($record): bool => ! in_array($record?->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]))
+            // ->deletable(fn($record): bool => ! in_array($record?->state, [OrderState::SALE, OrderState::CANCELED]))
+            // ->addable(fn($record): bool => ! in_array($record?->state, [OrderState::SALE, OrderState::CANCELED]))
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -888,11 +926,9 @@ class QuotationResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterProductUpdated($set, $get);
-                                    })
+                                    ->afterStateHydrated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
-
                                 Forms\Components\TextInput::make('product_qty')
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
                                     ->required()
@@ -924,6 +960,7 @@ class QuotationResource extends Resource
                                     ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging-qty'))
                                     ->live()
                                     ->numeric()
+                                    ->default(0)
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductPackagingQtyUpdated($set, $get);
                                     })
@@ -963,7 +1000,6 @@ class QuotationResource extends Resource
                                     ->label(__('Margin'))
                                     ->numeric()
                                     ->default(0)
-                                    ->required()
                                     ->live()
                                     ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
@@ -973,7 +1009,6 @@ class QuotationResource extends Resource
                                     ->label(__('Margin(%)'))
                                     ->numeric()
                                     ->default(0)
-                                    ->required()
                                     ->live()
                                     ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
@@ -1217,7 +1252,7 @@ class QuotationResource extends Resource
 
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get, ?string $prefix = ''): void
     {
-        if (!$get($prefix . 'product_id')) {
+        if (! $get($prefix . 'product_id')) {
             $set($prefix . 'price_unit', 0);
 
             $set($prefix . 'discount', 0);
@@ -1284,7 +1319,7 @@ class QuotationResource extends Resource
 
         return [
             $totalMargin,
-            $marginPercentage
+            $marginPercentage,
         ];
     }
 
@@ -1349,6 +1384,14 @@ class QuotationResource extends Resource
         $line->save();
 
         return $line;
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewQuotation::class,
+            Pages\EditQuotation::class,
+        ]);
     }
 
     public static function getPages(): array

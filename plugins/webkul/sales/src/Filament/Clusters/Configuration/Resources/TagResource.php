@@ -11,9 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Sale\Models\Tag;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource\Pages;
+use Webkul\Sale\Models\Tag;
 
 class TagResource extends Resource
 {

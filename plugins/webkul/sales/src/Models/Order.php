@@ -196,9 +196,9 @@ class Order extends Model
 
         static::creating(function ($order) {
             if ($order->state === 'sale') {
-                $order->name = 'ORD-TMP-' . time();
+                $order->name = 'ORD-TMP-'.time();
             } else {
-                $order->name = 'QT-TMP-' . time();
+                $order->name = 'QT-TMP-'.time();
             }
         });
 
@@ -218,9 +218,9 @@ class Order extends Model
     public function updateName()
     {
         if ($this->state === OrderState::SALE->value) {
-            $this->name = 'ORD-' . $this->id;
+            $this->name = 'ORD-'.$this->id;
         } else {
-            $this->name = 'QT-' . $this->id;
+            $this->name = 'QT-'.$this->id;
         }
     }
 }

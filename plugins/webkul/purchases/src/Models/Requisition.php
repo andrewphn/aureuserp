@@ -67,10 +67,10 @@ class Requisition extends Model
         'ends_at',
         'description',
         'currency.name' => 'Currency',
-        'partner.name' => 'Partner',
-        'user.name' => 'Buyer',
-        'company.name' => 'Company',
-        'creator.name' => 'Creator',
+        'partner.name'  => 'Partner',
+        'user.name'     => 'Buyer',
+        'company.name'  => 'Company',
+        'creator.name'  => 'Creator',
     ];
 
     public function partner(): BelongsTo

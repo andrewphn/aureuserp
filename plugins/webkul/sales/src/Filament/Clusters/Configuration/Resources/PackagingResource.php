@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
+use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\PackagingResource\Pages;
-use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 use Webkul\Sale\Settings\ProductSettings;
 
 class PackagingResource extends BasePackagingResource
@@ -23,7 +23,6 @@ class PackagingResource extends BasePackagingResource
 
         return app(ProductSettings::class)->enable_packagings;
     }
-
 
     public static function getNavigationGroup(): string
     {

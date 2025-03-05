@@ -31,10 +31,10 @@ class CreateQuotation extends CreateRecord
     {
         $user = Auth::user();
 
-        $data['creator_id']     = $user->id;
-        $data['user_id']        = $user->id;
-        $data['company_id']     = $user->default_company_id;
-        $data['state']          = OrderState::DRAFT->value;
+        $data['creator_id'] = $user->id;
+        $data['user_id'] = $user->id;
+        $data['company_id'] = $user->default_company_id;
+        $data['state'] = OrderState::DRAFT->value;
         $data['invoice_status'] = InvoiceStatus::NO->value;
 
         if ($data['partner_id']) {

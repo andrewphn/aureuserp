@@ -5,14 +5,14 @@ namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Illuminate\Support\Facades\Route;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
+use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Support\Filament\Clusters\Settings;
-use Filament\Notifications\Notification;
-use Webkul\Inventory\Models\Product;
-use Webkul\Inventory\Enums\ProductTracking;
 
 class ManageTraceability extends SettingsPage
 {
