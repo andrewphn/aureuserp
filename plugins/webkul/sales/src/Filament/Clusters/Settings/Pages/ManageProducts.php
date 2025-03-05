@@ -54,6 +54,9 @@ class ManageProducts extends SettingsPage
                     ->helperText(__('Sell and purchase products in different units of measure')),
                 Forms\Components\Toggle::make('enable_packagings')
                     ->label(__('Packagings')),
+                Forms\Components\Toggle::make('enable_deliver_content_by_email')
+                    ->label(__('Deliver Content by Email'))
+                    ->helperText('Send a product-specific email once the invoice is validated'),
             ]);
     }
 }

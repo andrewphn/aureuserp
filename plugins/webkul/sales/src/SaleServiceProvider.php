@@ -33,6 +33,8 @@ class SaleServiceProvider extends PackageServiceProvider
             ->hasSettings([
                 '2025_02_05_094022_create_sales_product_settings',
                 '2025_02_05_094025_create_sales_price_settings',
+                '2025_02_05_095000_create_sales_invoice_settings',
+                '2025_02_05_095005_create_sales_quotation_and_order_settings',
             ])
             ->runsSettings()
             ->hasDependencies([

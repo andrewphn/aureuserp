@@ -4,14 +4,12 @@ namespace Webkul\Sale\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
-class PriceSettings extends Settings
+class InvoiceSettings extends Settings
 {
-    public bool $enable_discount;
-
-    public bool $enable_margin;
+    public string $invoice_policy;
 
     public static function group(): string
     {
-        return 'sales_price';
+        return 'sales_invoicing';
     }
 }
