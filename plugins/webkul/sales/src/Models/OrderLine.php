@@ -9,7 +9,7 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
-class SaleOrderLine extends Model
+class OrderLine extends Model
 {
     protected $table = 'sales_order_lines';
 
@@ -91,7 +91,7 @@ class SaleOrderLine extends Model
 
     public function linkedSaleOrderSale()
     {
-        return $this->belongsTo(SaleOrderLine::class, 'linked_sale_order_sale_id');
+        return $this->belongsTo(self::class, 'linked_sale_order_sale_id');
     }
 
     public function createdBy()
