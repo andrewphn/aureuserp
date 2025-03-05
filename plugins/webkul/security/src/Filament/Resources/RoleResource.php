@@ -212,6 +212,7 @@ class RoleResource extends Resource implements HasShieldPermissions
             ->sortKeys()
             ->map(function ($plugin, $key) {
                 return Forms\Components\Section::make($key)
+                    ->collapsible()
                     ->schema([
                         Forms\Components\Grid::make()
                             ->schema(function () use ($plugin) {
