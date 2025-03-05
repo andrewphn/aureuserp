@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('analytic_distribution')->nullable()->comment('Analytic Distribution Status');
             $table->string('name')->comment('Name');
             $table->decimal('product_uom_qty', 15, 4)->comment('Product UOM Quantity')->default(0);
+            $table->decimal('product_qty', 15, 4)->comment('Product Quantity')->default(0);
             $table->decimal('price_unit', 15, 4)->comment('Price Unit')->default(0);
             $table->decimal('discount', 15, 4)->nullable()->comment('Discount')->default(0);
             $table->decimal('price_subtotal', 15, 4)->nullable()->comment('Price Subtotal')->default(0);

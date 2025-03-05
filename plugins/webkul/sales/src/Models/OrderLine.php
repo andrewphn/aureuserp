@@ -53,6 +53,7 @@ class OrderLine extends Model
         'write_date',
         'technical_price_unit',
         'price_tax',
+        'product_qty',
         'product_packaging_qty',
         'product_packaging_id',
         'customer_lead',

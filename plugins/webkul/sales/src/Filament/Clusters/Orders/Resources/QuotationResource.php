@@ -3,44 +3,29 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources;
 
 use Filament\Forms;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Infolists;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Infolists\Components\TextEntry\TextEntrySize;
-use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Webkul\Sale\Settings;
-use Filament\Support\Facades\FilamentView;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Enums\TypeTaxUse;
-use Webkul\Account\Models\Tax;
 use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Sale\Enums\InvoiceStatus;
-use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
-use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
-use Webkul\Sale\Livewire\Summary;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
-use Webkul\Sale\Models\OrderTemplate;
+use Webkul\Sale\Settings;
 use Webkul\Sale\Models\Product;
-use Webkul\Sale\Models\SaleOrderLine;
-use Webkul\Security\Models\User;
-use Webkul\Support\Models\Company;
-use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
 class QuotationResource extends Resource
@@ -178,9 +163,6 @@ class QuotationResource extends Resource
                                             ->label(__('Salesperson')),
                                         Forms\Components\TextInput::make('client_order_ref')
                                             ->label(__('Customer Reference')),
-                                        Forms\Components\DatePicker::make('delivery_date')
-                                            ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.delivery-date'))
-                                            ->native(false),
                                         Forms\Components\Select::make('sales_order_tags')
                                             ->label(__('Tags'))
                                             ->relationship('tags', 'name')
@@ -1043,13 +1025,10 @@ class QuotationResource extends Resource
     {
         $product = Product::find($data['product_id']);
 
-        $data['quantity'] ??= $record->product_uom_qty;
-
         $data = [
             ...$data,
             'name'         => $product->name,
             'uom_id'       => $data['uom_id'] ?? $product->uom_id,
-            'product_qty'  => $data['product_uom_qty'] ?? 1,
             'currency_id'  => $record->currency_id,
             'partner_id'   => $record->partner_id,
             'creator_id'   => Auth::id(),
@@ -1328,15 +1307,15 @@ class QuotationResource extends Resource
 
         $record->invoice_count = $record->accountMoves->count();
 
-        // if ($record->qty_to_invoice != 0) {
-        //     $record->invoice_status = Enums\OrderInvoiceStatus::TO_INVOICED;
-        // } else {
-        //     if ($record->invoice_count) {
-        //         $record->invoice_status = Enums\OrderInvoiceStatus::INVOICED;
-        //     } else {
-        //         $record->invoice_status = Enums\OrderInvoiceStatus::NO;
-        //     }
-        // }
+        if ($record->qty_to_invoice != 0) {
+            $record->invoice_status = InvoiceStatus::TO_INVOICE;
+        } else {
+            if ($record->invoice_count) {
+                $record->invoice_status = InvoiceStatus::INVOICED;
+            } else {
+                $record->invoice_status = InvoiceStatus::NO;
+            }
+        }
 
         $record->save();
     }
