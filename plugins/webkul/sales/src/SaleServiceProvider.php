@@ -30,6 +30,11 @@ class SaleServiceProvider extends PackageServiceProvider
                 '2025_02_05_102851_create_sales_order_lines_table',
             ])
             ->runsMigrations()
+            ->hasSettings([
+                '2025_02_05_094022_create_sales_product_settings',
+                '2025_02_05_094025_create_sales_price_settings',
+            ])
+            ->runsSettings()
             ->hasDependencies([
                 'invoices',
                 'payments',
