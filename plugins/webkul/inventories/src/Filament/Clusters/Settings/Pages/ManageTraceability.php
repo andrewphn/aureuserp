@@ -78,8 +78,8 @@ class ManageTraceability extends SettingsPage
         if (Product::whereIn('tracking', [ProductTracking::SERIAL, ProductTracking::LOT])->exists()) {
             Notification::make()
                 ->warning()
-                ->title('You have products in stock that have lot/serial number tracking enabled. ')
-                ->body('First switch off tracking on all the products before switching off this setting.')
+                ->title(__('inventories::filament/clusters/settings/pages/manage-traceability.before-save.notification.warning.title'))
+                ->body(__('inventories::filament/clusters/settings/pages/manage-traceability.before-save.notification.warning.body'))
                 ->send();
 
             $this->fillForm();
