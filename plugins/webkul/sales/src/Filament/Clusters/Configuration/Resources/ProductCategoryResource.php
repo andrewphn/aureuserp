@@ -19,7 +19,7 @@ class ProductCategoryResource extends BaseProductCategoryResource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Products');
+        return __('sales::filament/clusters/configurations/resources/product-category.navigation.group');
     }
 
     public static function getPages(): array
