@@ -26,7 +26,8 @@ class SaleServiceProvider extends PackageServiceProvider
                 '2025_02_05_053212_create_sales_orders_table',
                 '2025_02_05_080609_create_sales_order_template_products_table',
                 '2025_02_05_102851_create_sales_order_lines_table',
-                '2025_03_05_073635_create_sales_order_options_table'
+                '2025_03_05_073635_create_sales_order_options_table',
+                '2025_03_05_124300_create_sales_order_line_taxes_table'
             ])
             ->runsMigrations()
             ->hasSettings([

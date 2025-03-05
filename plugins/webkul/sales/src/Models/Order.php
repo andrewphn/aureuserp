@@ -12,7 +12,6 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
@@ -164,25 +163,14 @@ class Order extends Model
         return $this->belongsTo(UTMMedium::class);
     }
 
-    public function salesOrderLines()
+    public function lines()
     {
-        return $this
-            ->hasMany(SaleOrderLine::class)
-            ->whereNull('display_type');
+        return $this->hasMany(OrderLine::class);
     }
 
-    public function salesOrderSectionLines()
+    public function optionalLines()
     {
-        return $this
-            ->hasMany(SaleOrderLine::class)
-            ->where('display_type', OrderDisplayType::SECTION->value);
-    }
-
-    public function salesOrderNoteLines()
-    {
-        return $this
-            ->hasMany(SaleOrderLine::class)
-            ->where('display_type', OrderDisplayType::NOTE->value);
+        return $this->hasMany(OrderOption::class);
     }
 
     public function quotationTemplate()
@@ -196,9 +184,9 @@ class Order extends Model
 
         static::creating(function ($order) {
             if ($order->state === 'sale') {
-                $order->name = 'ORD-TMP-'.time();
+                $order->name = 'ORD-TMP-' . time();
             } else {
-                $order->name = 'QT-TMP-'.time();
+                $order->name = 'QT-TMP-' . time();
             }
         });
 
@@ -218,9 +206,9 @@ class Order extends Model
     public function updateName()
     {
         if ($this->state === OrderState::SALE->value) {
-            $this->name = 'ORD-'.$this->id;
+            $this->name = 'ORD-' . $this->id;
         } else {
-            $this->name = 'QT-'.$this->id;
+            $this->name = 'QT-' . $this->id;
         }
     }
 }
