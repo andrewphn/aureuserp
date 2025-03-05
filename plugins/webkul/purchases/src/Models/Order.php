@@ -197,7 +197,7 @@ class Order extends Model
 
     public function lines(): HasMany
     {
-        return $this->hasMany(OrderLine::class);
+        return $this->hasMany(OrderLine::class, 'order_id');
     }
 
     public function accountMoves(): BelongsToMany

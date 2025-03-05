@@ -6,9 +6,12 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Webkul\Purchase\Filament\Clusters\Orders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
+use Webkul\Purchase\Models\Quotation;
 
 class QuotationResource extends OrderResource
 {
+    protected static ?string $model = Quotation::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static bool $shouldRegisterNavigation = true;
@@ -22,6 +25,11 @@ class QuotationResource extends OrderResource
     protected static ?string $cluster = Orders::class;
 
     public static function getNavigationLabel(): string
+    {
+        return __('purchases::filament/clusters/orders/resources/quotation.navigation.title');
+    }
+
+    public static function getModelLabel(): string
     {
         return __('purchases::filament/clusters/orders/resources/quotation.navigation.title');
     }
