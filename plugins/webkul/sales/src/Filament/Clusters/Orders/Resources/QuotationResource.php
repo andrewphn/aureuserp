@@ -136,33 +136,17 @@ class QuotationResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/invoice.form.tabs.other-information.title'))
                             ->icon('heroicon-o-information-circle')
                             ->schema([
-                                Forms\Components\Fieldset::make(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.title'))
+                                Forms\Components\Fieldset::make(__('Sales'))
                                     ->schema([
-                                        Forms\Components\TextInput::make('reference')
-                                            ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.customer-reference'))
+                                        Forms\Components\TextInput::make('user_id')
+                                            ->label(__('Salesperson'))
                                             ->maxLength(255),
-                                        Forms\Components\TextInput::make('payment_reference')
-                                            ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.payment-reference')),
+                                        Forms\Components\TextInput::make('client_order_ref')
+                                            ->label(__('Customer Reference')),
                                         Forms\Components\DatePicker::make('delivery_date')
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.delivery-date'))
                                             ->native(false),
                                     ]),
-                                Forms\Components\Fieldset::make(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.title'))
-                                    ->schema([
-                                        Forms\Components\TextInput::make('incoterm_location')
-                                            ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.incoterm-location')),
-                                        Forms\Components\Toggle::make('auto_post')
-                                            ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.auto-post'))
-                                            ->default(0)
-                                            ->inline(false),
-                                        Forms\Components\Toggle::make('checked')
-                                            ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.checked'))
-                                            ->inline(false),
-                                    ]),
-                                Forms\Components\Fieldset::make(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.additional-information.title'))
-                                    ->schema([]),
-                                Forms\Components\Fieldset::make(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.marketing.title'))
-                                    ->schema([]),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('accounts::filament/resources/invoice.form.tabs.term-and-conditions.title'))
                             ->icon('heroicon-o-clipboard-document-list')
