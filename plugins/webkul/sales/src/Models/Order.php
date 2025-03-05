@@ -16,6 +16,7 @@ use Webkul\Sale\Enums\OrderState;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
+use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
 
@@ -40,6 +41,7 @@ class Order extends Model
         'user_id',
         'team_id',
         'creator_id',
+        'campaign_id',
         'access_token',
         'name',
         'state',
@@ -108,6 +110,11 @@ class Order extends Model
         return $this->belongsTo(Partner::class);
     }
 
+    public function campaign()
+    {
+        return $this->belongsTo(UtmCampaign::class, 'campaign_id');
+    }
+
     public function journal()
     {
         return $this->belongsTo(Journal::class);
@@ -116,6 +123,11 @@ class Order extends Model
     public function partnerInvoice()
     {
         return $this->belongsTo(Partner::class, 'partner_invoice_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'sales_order_tags', 'order_id', 'tag_id');
     }
 
     public function partnerShipping()
@@ -155,7 +167,7 @@ class Order extends Model
 
     public function utmSource()
     {
-        return $this->belongsTo(UTMSource::class);
+        return $this->belongsTo(UTMSource::class, 'utm_source_id');
     }
 
     public function medium()

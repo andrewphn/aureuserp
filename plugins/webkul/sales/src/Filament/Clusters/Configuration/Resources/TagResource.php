@@ -11,7 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Product\Models\Tag;
+use Webkul\Sale\Models\Tag;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource\Pages;
 
@@ -57,7 +57,7 @@ class TagResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label(__('sal\Infolist;es::filament/clusters/configurations/resources/tag.form.fields.name'))
+                    ->label(__('sales::filament/clusters/configurations/resources/tag.form.fields.name'))
                     ->required()
                     ->placeholder(__('Name')),
                 Forms\Components\ColorPicker::make('color')
