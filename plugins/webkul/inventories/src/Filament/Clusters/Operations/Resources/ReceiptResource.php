@@ -14,11 +14,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource\Pages;
-use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\Receipt;
 
 class ReceiptResource extends Resource
 {
-    protected static ?string $model = Operation::class;
+    protected static ?string $model = Receipt::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-tray';
 
@@ -29,6 +29,11 @@ class ReceiptResource extends Resource
     protected static ?string $cluster = Operations::class;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    public static function getModelLabel(): string
+    {
+        return __('inventories::filament/clusters/operations/resources/receipt.navigation.title');
+    }
 
     public static function getNavigationLabel(): string
     {
@@ -53,7 +58,7 @@ class ReceiptResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
-                        ->hidden(fn (Operation $record): bool => $record->state == Enums\OperationState::DONE)
+                        ->hidden(fn (Receipt $record): bool => $record->state == Enums\OperationState::DONE)
                         ->successNotification(
                             Notification::make()
                                 ->success()

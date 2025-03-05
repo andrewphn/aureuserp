@@ -14,12 +14,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource\Pages;
-use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\InternalTransfer;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
 class InternalResource extends Resource
 {
-    protected static ?string $model = Operation::class;
+    protected static ?string $model = InternalTransfer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
@@ -38,6 +38,11 @@ class InternalResource extends Resource
         }
 
         return app(WarehouseSettings::class)->enable_locations;
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('inventories::filament/clusters/operations/resources/internal.navigation.title');
     }
 
     public static function getNavigationLabel(): string

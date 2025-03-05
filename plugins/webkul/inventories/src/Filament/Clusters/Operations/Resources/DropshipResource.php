@@ -14,12 +14,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource\Pages;
-use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\Dropship;
 use Webkul\Inventory\Settings\LogisticSettings;
 
 class DropshipResource extends Resource
 {
-    protected static ?string $model = Operation::class;
+    protected static ?string $model = Dropship::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
@@ -38,6 +38,11 @@ class DropshipResource extends Resource
         }
 
         return app(LogisticSettings::class)->enable_dropshipping;
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('inventories::filament/clusters/operations/resources/dropship.navigation.title');
     }
 
     public static function getNavigationLabel(): string
@@ -63,7 +68,7 @@ class DropshipResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
-                        ->hidden(fn (Operation $record): bool => $record->state == Enums\OperationState::DONE)
+                        ->hidden(fn (Dropship $record): bool => $record->state == Enums\OperationState::DONE)
                         ->successNotification(
                             Notification::make()
                                 ->success()
