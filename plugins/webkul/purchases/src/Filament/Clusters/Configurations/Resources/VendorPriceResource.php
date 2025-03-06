@@ -11,9 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Purchase\Models\ProductSupplier;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\VendorPriceResource\Pages;
+use Webkul\Purchase\Models\ProductSupplier;
 
 class VendorPriceResource extends Resource
 {
@@ -45,7 +45,7 @@ class VendorPriceResource extends Resource
                                     ->relationship(
                                         'partner',
                                         'name',
-                                        fn($query) => $query->where('sub_type', 'supplier')
+                                        fn ($query) => $query->where('sub_type', 'supplier')
                                     )
                                     ->searchable()
                                     ->required()
@@ -194,7 +194,7 @@ class VendorPriceResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('partner_id')
                     ->label(__('purchases::filament/clusters/configurations/resources/vendor-price.table.filters.vendor'))
-                    ->relationship('partner', 'name', fn($query) => $query->where('sub_type', 'supplier'))
+                    ->relationship('partner', 'name', fn ($query) => $query->where('sub_type', 'supplier'))
                     ->searchable()
                     ->preload()
                     ->multiple(),
@@ -239,11 +239,11 @@ class VendorPriceResource extends Resource
                         return $query
                             ->when(
                                 $data['price_from'],
-                                fn(Builder $query, $price): Builder => $query->where('price', '>=', $price),
+                                fn (Builder $query, $price): Builder => $query->where('price', '>=', $price),
                             )
                             ->when(
                                 $data['price_to'],
-                                fn(Builder $query, $price): Builder => $query->where('price', '<=', $price),
+                                fn (Builder $query, $price): Builder => $query->where('price', '<=', $price),
                             );
                     }),
 
@@ -266,11 +266,11 @@ class VendorPriceResource extends Resource
                         return $query
                             ->when(
                                 $data['min_qty_from'],
-                                fn(Builder $query, $qty): Builder => $query->where('min_qty', '>=', $qty),
+                                fn (Builder $query, $qty): Builder => $query->where('min_qty', '>=', $qty),
                             )
                             ->when(
                                 $data['min_qty_to'],
-                                fn(Builder $query, $qty): Builder => $query->where('min_qty', '<=', $qty),
+                                fn (Builder $query, $qty): Builder => $query->where('min_qty', '<=', $qty),
                             );
                     }),
 
@@ -291,11 +291,11 @@ class VendorPriceResource extends Resource
                         return $query
                             ->when(
                                 $data['starts_from'],
-                                fn(Builder $query, $date): Builder => $query->where('starts_at', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->where('starts_at', '>=', $date),
                             )
                             ->when(
                                 $data['ends_before'],
-                                fn(Builder $query, $date): Builder => $query->where('ends_at', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->where('ends_at', '<=', $date),
                             );
                     }),
 
@@ -316,11 +316,11 @@ class VendorPriceResource extends Resource
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
             ])
@@ -397,7 +397,7 @@ class VendorPriceResource extends Resource
                                         Infolists\Components\TextEntry::make('price')
                                             ->label(__('purchases::filament/clusters/configurations/resources/vendor-price.infolist.sections.prices.entries.unit-price'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->money(fn($record) => $record->currency->code ?? 'USD'),
+                                            ->money(fn ($record) => $record->currency->code ?? 'USD'),
 
                                         Infolists\Components\TextEntry::make('currency.name')
                                             ->label(__('purchases::filament/clusters/configurations/resources/vendor-price.infolist.sections.prices.entries.currency'))

@@ -28,18 +28,18 @@ class ManagePricing extends SettingsPage
     public function getBreadcrumbs(): array
     {
         return [
-            __('Manage Pricing'),
+            __('sales::filament/clusters/settings/pages/manage-pricing.breadcrumb'),
         ];
     }
 
     public function getTitle(): string
     {
-        return __('Manage Pricing');
+        return __('sales::filament/clusters/settings/pages/manage-pricing.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Manage Pricing');
+        return __('sales::filament/clusters/settings/pages/manage-pricing.navigation.title');
     }
 
     public function form(Form $form): Form
@@ -47,11 +47,11 @@ class ManagePricing extends SettingsPage
         return $form
             ->schema([
                 Forms\Components\Toggle::make('enable_discount')
-                    ->label(__('Discounts'))
-                    ->helperText(__('Apply discounts to sales order line items.')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-pricing.form.fields.discount'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-pricing.form.fields.discount-help')),
                 Forms\Components\Toggle::make('enable_margin')
-                    ->label(__('Margins'))
-                    ->helperText(__('Show margins on orders.')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-pricing.form.fields.margins'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-pricing.form.fields.margins-help')),
             ]);
     }
 }

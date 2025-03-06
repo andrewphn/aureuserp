@@ -28,18 +28,18 @@ class ManageQuotationAndOrder extends SettingsPage
     public function getBreadcrumbs(): array
     {
         return [
-            __('Manage Quotation & Order'),
+            __('sales::filament/clusters/settings/pages/manage-quotation-and-order.breadcrumb'),
         ];
     }
 
     public function getTitle(): string
     {
-        return __('Manage Quotation & Order');
+        return __('sales::filament/clusters/settings/pages/manage-quotation-and-order.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Manage Quotation & Order');
+        return __('sales::filament/clusters/settings/pages/manage-quotation-and-order.navigation.title');
     }
 
     public function form(Form $form): Form
@@ -47,13 +47,13 @@ class ManageQuotationAndOrder extends SettingsPage
         return $form
             ->schema([
                 Forms\Components\TextInput::make('default_quotation_validity')
-                    ->suffix('Days')
+                    ->suffix(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.validity-suffix'))
                     ->default(30)
-                    ->label(__('Default Quotation Validity'))
-                    ->helperText(__('Default period during which the quote is valid and can still be accepted by the customer. The default can be changed per order or template.')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.validity'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.validity-help')),
                 Forms\Components\Toggle::make('enable_lock_confirm_sales')
-                    ->label(__('Lock Confirmed Sales'))
-                    ->helperText(__('No longer edit orders once confirmed.')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.lock-confirm-sales'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.lock-confirm-sales-help')),
             ]);
     }
 }

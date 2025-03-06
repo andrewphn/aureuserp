@@ -28,18 +28,18 @@ class ManageProducts extends SettingsPage
     public function getBreadcrumbs(): array
     {
         return [
-            __('Manage Products'),
+            __('sales::filament/clusters/settings/pages/manage-products.breadcrumb'),
         ];
     }
 
     public function getTitle(): string
     {
-        return __('Manage Products');
+        return __('sales::filament/clusters/settings/pages/manage-products.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Manage Products');
+        return __('sales::filament/clusters/settings/pages/manage-products.navigation.title');
     }
 
     public function form(Form $form): Form
@@ -47,16 +47,17 @@ class ManageProducts extends SettingsPage
         return $form
             ->schema([
                 Forms\Components\Toggle::make('enable_variants')
-                    ->label(__('Variants'))
-                    ->helperText(__('Set product attributes (e.g. color, size) to manage variants')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-products.form.fields.variants'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-products.form.fields.variants-help')),
                 Forms\Components\Toggle::make('enable_uom')
-                    ->label(__('Unit of Measure'))
-                    ->helperText(__('Sell and purchase products in different units of measure')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-products.form.fields.uom'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-products.form.fields.uom-help')),
                 Forms\Components\Toggle::make('enable_packagings')
-                    ->label(__('Packagings')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-products.form.fields.packagings'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-products.form.fields.packagings-help')),
                 Forms\Components\Toggle::make('enable_deliver_content_by_email')
-                    ->label(__('Deliver Content by Email'))
-                    ->helperText('Send a product-specific email once the invoice is validated'),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-products.form.fields.deliver-content-by-email'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-products.form.fields.deliver-content-by-email-help')),
             ]);
     }
 }

@@ -28,18 +28,18 @@ class ManageInvoice extends SettingsPage
     public function getBreadcrumbs(): array
     {
         return [
-            __('Manage Invoice'),
+            __('sales::filament/clusters/settings/pages/manage-invoice.breadcrumb'),
         ];
     }
 
     public function getTitle(): string
     {
-        return __('Manage Invoice');
+        return __('sales::filament/clusters/settings/pages/manage-invoice.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Manage Invoice');
+        return __('sales::filament/clusters/settings/pages/manage-invoice.navigation.title');
     }
 
     public function form(Form $form): Form
@@ -48,12 +48,12 @@ class ManageInvoice extends SettingsPage
             ->schema([
                 Forms\Components\Radio::make('invoice_policy')
                     ->options([
-                        'order'    => 'Invoice what is ordered',
-                        'delivery' => 'Invoice what is delivered',
+                        'order'    => __('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.options.order'),
+                        'delivery' => __('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.options.delivery'),
                     ])
                     ->default('delivery')
-                    ->label(__('Invoice Policy'))
-                    ->helperText(__('Quantities to invoice from sales orders.')),
+                    ->label(__('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.label'))
+                    ->helperText(__('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.label-help')),
             ]);
     }
 }
