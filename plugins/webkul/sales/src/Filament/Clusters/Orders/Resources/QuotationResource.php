@@ -24,10 +24,12 @@ use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
+use Webkul\Sale\Livewire\Summary;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Sale\Models\Product;
 use Webkul\Sale\Settings;
+use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
 class QuotationResource extends Resource
@@ -96,7 +98,7 @@ class QuotationResource extends Resource
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -114,7 +116,7 @@ class QuotationResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', ' . $address->street2 : '',
+                                                    $address->street2 ? ', '.$address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -147,6 +149,14 @@ class QuotationResource extends Resource
                             ->icon('heroicon-o-list-bullet')
                             ->schema([
                                 static::getProductRepeater(),
+                                Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get) {
+                                    return [
+                                        'currency' => Currency::find($get('currency_id')),
+                                        'products' => $get('products'),
+                                    ];
+                                })
+                                    ->live()
+                                    ->reactive(),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('Optional Products'))
                             ->icon('heroicon-o-arrow-path-rounded-square')
@@ -242,9 +252,9 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn($state) => OrderState::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => OrderState::options()[$state] ?? $state)
                     ->badge()
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         OrderState::DRAFT->value  => 'gray',
                         OrderState::SENT->value   => 'primary',
                         OrderState::SALE->value   => 'success',
@@ -256,7 +266,7 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn($state) => InvoiceStatus::options()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => InvoiceStatus::options()[$state] ?? $state)
                     ->badge()
                     ->searchable()
                     ->sortable(),
@@ -543,228 +553,6 @@ class QuotationResource extends Resource
             ]);
     }
 
-    // public static function infolist(Infolist $infolist): Infolist
-    // {
-    //     return $infolist
-    //         ->schema([
-    //             Infolists\Components\Grid::make(['default' => 3])
-    //                 ->schema([
-    //                     Infolists\Components\Group::make()
-    //                         ->schema([
-    //                             Infolists\Components\Tabs::make('Tabs')
-    //                                 ->tabs([
-    //                                     Infolists\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.title'))
-    //                                         ->schema([
-    //                                             Infolists\Components\RepeatableEntry::make('salesOrderLines')
-    //                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product'))
-    //                                                 ->schema([
-    //                                                     Infolists\Components\TextEntry::make('product.name')
-    //                                                         ->icon('heroicon-o-shopping-bag')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
-    //                                                     Infolists\Components\TextEntry::make('name')
-    //                                                         ->icon('heroicon-o-document')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.name')),
-    //                                                     Infolists\Components\RepeatableEntry::make('product.productTaxes')
-    //                                                         ->contained(false)
-    //                                                         ->hiddenLabel()
-    //                                                         ->schema([
-    //                                                             Infolists\Components\TextEntry::make('name')
-    //                                                                 ->badge()
-    //                                                                 ->tooltip(fn($state) => $state)
-    //                                                                 ->icon('heroicon-o-receipt-percent')
-    //                                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.taxes')),
-    //                                                         ])
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.tax')),
-    //                                                     Infolists\Components\TextEntry::make('product_uom_qty')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.quantity'))
-    //                                                         ->numeric(),
-    //                                                     Infolists\Components\TextEntry::make('price_unit')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.unit-price'))
-    //                                                         ->icon('heroicon-o-banknotes')
-    //                                                         ->money('USD'),
-    //                                                     Infolists\Components\TextEntry::make('price_subtotal')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.subtotal'))
-    //                                                         ->icon('heroicon-o-banknotes')
-    //                                                         ->money('USD'),
-    //                                                     Infolists\Components\TextEntry::make('price_total')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.total'))
-    //                                                         ->icon('heroicon-o-banknotes')
-    //                                                         ->money('USD'),
-    //                                                 ])
-    //                                                 ->columns(6),
-    //                                             Infolists\Components\RepeatableEntry::make('salesOrderSectionLines')
-    //                                                 ->hidden(fn($record) => $record->salesOrderSectionLines->isEmpty())
-    //                                                 ->schema([
-    //                                                     Infolists\Components\TextEntry::make('product.name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
-    //                                                     Infolists\Components\TextEntry::make('name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.name')),
-    //                                                     Infolists\Components\TextEntry::make('quantity')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.quantity'))
-    //                                                         ->numeric(),
-    //                                                 ])
-    //                                                 ->columns(3),
-    //                                             Infolists\Components\RepeatableEntry::make('salesOrderNoteLines')
-    //                                                 ->hidden(fn($record) => $record->salesOrderNoteLines->isEmpty())
-    //                                                 ->schema([
-    //                                                     Infolists\Components\TextEntry::make('product.name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.product')),
-    //                                                     Infolists\Components\TextEntry::make('name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.name')),
-    //                                                     Infolists\Components\TextEntry::make('quantity')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.products.fields.quantity'))
-    //                                                         ->numeric(),
-    //                                                 ])
-    //                                                 ->columns(3),
-    //                                             // Infolists\Components\Livewire::make(Summary::class, function ($record) {
-    //                                             //     return [
-    //                                             //         'products' => $record->salesOrderLines->map(function ($item) {
-    //                                             //             return [
-    //                                             //                 ...$item->toArray(),
-    //                                             //                 'tax' => $item?->product?->productTaxes->pluck('id')->toArray() ?? [],
-    //                                             //             ];
-    //                                             //         })->toArray(),
-    //                                             //     ];
-    //                                             // }),
-    //                                         ]),
-    //                                     Infolists\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.title'))
-    //                                         ->schema([
-    //                                             Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.title'))
-    //                                                 ->schema([
-    //                                                     Infolists\Components\Grid::make()
-    //                                                         ->schema([
-    //                                                             Infolists\Components\TextEntry::make('user.name')
-    //                                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fields.sales-person'))
-    //                                                                 ->placeholder('—')
-    //                                                                 ->icon('heroicon-o-user'),
-    //                                                             Infolists\Components\TextEntry::make('team.name')
-    //                                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fields.sales-team'))
-    //                                                                 ->placeholder('—')
-    //                                                                 ->icon('heroicon-o-users'),
-    //                                                             Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fieldset.signature-and-payment.title'))
-    //                                                                 ->schema([
-    //                                                                     Infolists\Components\IconEntry::make('require_signature')
-    //                                                                         ->boolean()
-    //                                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fieldset.signature-and-payment.fields.online-signature'))
-    //                                                                         ->placeholder('—'),
-    //                                                                     Infolists\Components\IconEntry::make('require_payment')
-    //                                                                         ->boolean()
-    //                                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fieldset.signature-and-payment.fields.online-payment'))
-    //                                                                         ->placeholder('—'),
-    //                                                                     Infolists\Components\IconEntry::make('prepayment_percentage')
-    //                                                                         ->boolean()
-    //                                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fieldset.signature-and-payment.fields.prepayment-percentage'))
-    //                                                                         ->placeholder('—'),
-    //                                                                 ]),
-    //                                                             Infolists\Components\TextEntry::make('client_order_ref')
-    //                                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.sales.fields.customer-reference'))
-    //                                                                 ->placeholder('—')
-    //                                                                 ->icon('heroicon-o-document'),
-    //                                                         ])->columns(2),
-    //                                                 ]),
-    //                                             Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.invoicing.title'))
-    //                                                 ->schema([
-    //                                                     Infolists\Components\TextEntry::make('fiscalPosition.name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.invoicing.fields.fiscal-position'))
-    //                                                         ->placeholder('—')
-    //                                                         ->icon('heroicon-o-receipt-percent'),
-    //                                                     Infolists\Components\TextEntry::make('journal.name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.invoicing.fields.invoicing-journal'))
-    //                                                         ->placeholder('—')
-    //                                                         ->icon('heroicon-o-book-open'),
-    //                                                 ]),
-    //                                             Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.shipping.title'))
-    //                                                 ->schema([
-    //                                                     Infolists\Components\TextEntry::make('commitment_date')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.shipping.fields.commitment-date'))
-    //                                                         ->placeholder('—')
-    //                                                         ->icon('heroicon-o-calendar'),
-    //                                                 ]),
-    //                                             Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.tracking.title'))
-    //                                                 ->schema([
-    //                                                     Infolists\Components\TextEntry::make('origin')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.tracking.fields.source-document'))
-    //                                                         ->placeholder('—')
-    //                                                         ->icon('heroicon-o-globe-alt'),
-    //                                                     Infolists\Components\TextEntry::make('medium.name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.tracking.fields.medium'))
-    //                                                         ->placeholder('—'),
-    //                                                     Infolists\Components\TextEntry::make('source.name')
-    //                                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.other-information.fieldset.tracking.fields.source'))
-    //                                                         ->placeholder('—'),
-    //                                                 ]),
-    //                                         ]),
-    //                                     Infolists\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.term-and-conditions.title'))
-    //                                         ->schema([
-    //                                             Infolists\Components\TextEntry::make('note')
-    //                                                 ->markdown()
-    //                                                 ->columnSpanFull()
-    //                                                 ->icon('heroicon-o-information-circle'),
-    //                                         ]),
-    //                                 ])->persistTabInQueryString(),
-    //                         ])->columnSpan(2),
-    //                     Infolists\Components\Group::make()
-    //                         ->schema([
-    //                             Infolists\Components\Section::make()
-    //                                 ->schema([
-    //                                     Infolists\Components\TextEntry::make('name')
-    //                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fields.customer'))
-    //                                         ->placeholder('—')
-    //                                         ->size(TextEntrySize::Large)
-    //                                         ->icon('heroicon-o-identification'),
-    //                                     Infolists\Components\TextEntry::make('partner.name')
-    //                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fields.customer'))
-    //                                         ->placeholder('—')
-    //                                         ->icon('heroicon-o-user-circle'),
-    //                                     Infolists\Components\TextEntry::make('partner_address')
-    //                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fields.partner-address'))
-    //                                         ->placeholder('—')
-    //                                         ->icon('heroicon-o-map'),
-    //                                     Infolists\Components\TextEntry::make('paymentTerm.name')
-    //                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fields.payment-terms'))
-    //                                         ->placeholder('—')
-    //                                         ->icon('heroicon-o-credit-card'),
-    //                                     Infolists\Components\TextEntry::make('quotationTemplate.name')
-    //                                         ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fields.quotation-template'))
-    //                                         ->placeholder('—')
-    //                                         ->icon('heroicon-o-document-duplicate'),
-    //                                 ]),
-    //                             Infolists\Components\Section::make()
-    //                                 ->schema([
-    //                                     Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.fieldset.invoice-and-delivery-addresses.title'))
-    //                                         ->schema([
-    //                                             Infolists\Components\TextEntry::make('partnerInvoice.name')
-    //                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fieldset.invoice-and-delivery-addresses.fields.invoice-address'))
-    //                                                 ->placeholder('—')
-    //                                                 ->icon('heroicon-o-home'),
-    //                                             Infolists\Components\TextEntry::make('partnerShipping.name')
-    //                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fieldset.invoice-and-delivery-addresses.fields.delivery-address'))
-    //                                                 ->placeholder('—')
-    //                                                 ->icon('heroicon-o-truck'),
-    //                                         ]),
-    //                                 ]),
-    //                             Infolists\Components\Section::make()
-    //                                 ->schema([
-    //                                     Infolists\Components\Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.infolist.fieldset.expiration-and-quotation-date.title'))
-    //                                         ->schema([
-    //                                             Infolists\Components\TextEntry::make('validity_date')
-    //                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fieldset.expiration-and-quotation-date.fields.expiration-date'))
-    //                                                 ->date()
-    //                                                 ->placeholder('—')
-    //                                                 ->icon('heroicon-o-clock'),
-    //                                             Infolists\Components\TextEntry::make('date_order')
-    //                                                 ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.fieldset.expiration-and-quotation-date.fields.quotation-date'))
-    //                                                 ->date()
-    //                                                 ->placeholder('—')
-    //                                                 ->icon('heroicon-o-calendar'),
-    //                                         ]),
-    //                                 ]),
-    //                         ])
-    //                         ->columnSpan(['lg' => 1]),
-    //                 ]),
-    //         ]);
-    // }
-
     public static function getOptionalProductRepeater(Get $parentGet, Set $parentSet): Forms\Components\Repeater
     {
         return Forms\Components\Repeater::make('optionalProducts')
@@ -776,8 +564,8 @@ class QuotationResource extends Resource
             ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -788,7 +576,7 @@ class QuotationResource extends Resource
                                     ->relationship(
                                         'product',
                                         'name',
-                                        fn($query) => $query->where('is_configurable', null),
+                                        fn ($query) => $query->where('is_configurable', null),
                                     )
                                     ->searchable()
                                     ->preload()
@@ -819,13 +607,13 @@ class QuotationResource extends Resource
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.unit-price'))
                                     ->numeric()
@@ -847,14 +635,15 @@ class QuotationResource extends Resource
                                         ->icon('heroicon-o-shopping-cart')
                                         ->action(function ($state, $livewire, $record) use ($parentSet, $parentGet) {
                                             $data = [
-                                                'product_id'     => $state['product_id'],
-                                                'product_qty'    => $state['quantity'],
-                                                'uom_id'         => $state['uom_id'] ?? null,
-                                                'price_unit'     => $state['price_unit'],
-                                                'discount'       => $state['discount'],
-                                                'name' => $state['name'],
-                                                'customer_lead'  => 0,
-                                                'purchase_price' => 0
+                                                'product_id'      => $state['product_id'],
+                                                'product_qty'     => $state['quantity'],
+                                                'uom_id'          => $state['uom_id'] ?? null,
+                                                'price_unit'      => $state['price_unit'],
+                                                'discount'        => $state['discount'],
+                                                'name'            => $state['name'],
+                                                'customer_lead'   => 0,
+                                                'purchase_price'  => 0,
+                                                'product_uom_qty' => 0,
                                             ];
 
                                             $parentSet('products', [
@@ -863,17 +652,25 @@ class QuotationResource extends Resource
                                             ]);
 
                                             $data['order_id'] = $livewire->record->id;
-
+                                            $data['sort'] = OrderLine::max('sort') + 1;
                                             $orderLine = OrderLine::create($data);
 
                                             $record->line_id = $orderLine->id;
 
                                             $record->save();
+
+                                            $livewire->refreshFormData(['products']);
+
+                                            $products = collect($parentGet('products'))->values();
+
+                                            $orderLineEntry = $products->first(fn ($product) => $product['id'] == $orderLine->id);
+
+                                            $orderLine->update($orderLineEntry);
                                         })
                                         ->extraAttributes([
                                             'style' => 'margin-top: 2rem;',
                                         ]),
-                                ])->hidden(fn($record) => ! $record ?? false),
+                                ])->hidden(fn ($record) => ! $record ?? false),
                             ]),
                     ])
                     ->columns(2),
@@ -887,21 +684,19 @@ class QuotationResource extends Resource
             ->hiddenLabel()
             ->live()
             ->reactive()
-            ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.title'))
-            ->addActionLabel(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.add-product-line'))
+            ->label(__('Products'))
+            ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
-            // ->deletable(fn($record): bool => ! in_array($record?->state, [OrderState::SALE, OrderState::CANCELED]))
-            // ->addable(fn($record): bool => ! in_array($record?->state, [OrderState::SALE, OrderState::CANCELED]))
+            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
                         Forms\Components\Grid::make(4)
                             ->schema([
                                 Forms\Components\Select::make('product_id')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
+                                    ->label(fn (Settings\ProductSettings $settings) => $settings->enable_variants ? __('Product Variants') : __('Product (Simple)'))
                                     ->relationship(
                                         'product',
                                         'name',
@@ -926,47 +721,41 @@ class QuotationResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateHydrated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
-                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('product_qty')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.quantity'))
+                                    ->label(__('Quantity'))
                                     ->required()
                                     ->default(1)
                                     ->numeric()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterProductQtyUpdated($set, $get);
-                                    }),
+                                    ->afterStateHydrated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get))
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit'))
+                                    ->label(__('Unit of Measure'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterUOMUpdated($set, $get);
-                                    })
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\TextInput::make('customer_lead')
                                     ->label(__('Lead Time'))
                                     ->default(0)
                                     ->required(),
                                 Forms\Components\TextInput::make('product_packaging_qty')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging-qty'))
+                                    ->label(__('Packaging Qty'))
                                     ->live()
                                     ->numeric()
                                     ->default(0)
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterProductPackagingQtyUpdated($set, $get);
-                                    })
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductPackagingQtyUpdated($set, $get))
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
                                 Forms\Components\Select::make('product_packaging_id')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging'))
+                                    ->label(__('Packaging'))
                                     ->relationship(
                                         'productPackaging',
                                         'name',
@@ -974,72 +763,57 @@ class QuotationResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        static::afterProductPackagingUpdated($set, $get);
-                                    })
-                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductPackagingUpdated($set, $get))
+                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
                                 Forms\Components\TextInput::make('price_unit')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
+                                    ->label(__('Unit Price'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('purchase_price')
                                     ->label(__('Cost'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('margin')
                                     ->label(__('Margin'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('margin_percent')
                                     ->label(__('Margin(%)'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\Select::make('taxes')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.taxes'))
+                                    ->label(__('Taxes'))
                                     ->relationship(
                                         'taxes',
                                         'name',
-                                        function (Builder $query) {
-                                            return $query->where('type_tax_use', TypeTaxUse::SALE->value);
-                                        },
+                                        fn (Builder $query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
                                     )
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
-                                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
-                                        self::calculateLineTotals($set, $get);
-                                    })
+                                    ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
+                                    ->label(__('Discount (%)'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                        self::calculateLineTotals($set, $get);
-                                    }),
+                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
-                                    ->label(__('purchases::filament/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.amount'))
+                                    ->label(__('Amount'))
                                     ->default(0)
                                     ->readOnly(),
                                 Forms\Components\Hidden::make('product_uom_qty')
@@ -1052,22 +826,22 @@ class QuotationResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
-    public static function mutateProductRelationship(array $data, $record, $livewire): array
+    public static function mutateProductRelationship(array $data, $record): array
     {
         $product = Product::find($data['product_id']);
 
         $data = [
-            ...$data,
             'name'         => $product->name,
             'uom_id'       => $data['uom_id'] ?? $product->uom_id,
             'currency_id'  => $record->currency_id,
             'partner_id'   => $record->partner_id,
             'creator_id'   => Auth::id(),
             'company_id'   => Auth::user()->default_company_id,
+            ...$data,
         ];
 
         return $data;
@@ -1252,33 +1026,33 @@ class QuotationResource extends Resource
 
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get, ?string $prefix = ''): void
     {
-        if (! $get($prefix . 'product_id')) {
-            $set($prefix . 'price_unit', 0);
+        if (! $get($prefix.'product_id')) {
+            $set($prefix.'price_unit', 0);
 
-            $set($prefix . 'discount', 0);
+            $set($prefix.'discount', 0);
 
-            $set($prefix . 'price_tax', 0);
+            $set($prefix.'price_tax', 0);
 
-            $set($prefix . 'price_subtotal', 0);
+            $set($prefix.'price_subtotal', 0);
 
-            $set($prefix . 'price_total', 0);
+            $set($prefix.'price_total', 0);
 
-            $set($prefix . 'purchase_price', 0);
+            $set($prefix.'purchase_price', 0);
 
-            $set($prefix . 'margin', 0);
+            $set($prefix.'margin', 0);
 
-            $set($prefix . 'margin_percent', 0);
+            $set($prefix.'margin_percent', 0);
 
             return;
         }
 
-        $priceUnit = floatval($get($prefix . 'price_unit') ?? 0);
+        $priceUnit = floatval($get($prefix.'price_unit') ?? 0);
 
-        $quantity = floatval($get($prefix . 'product_qty') ?? 1);
+        $quantity = floatval($get($prefix.'product_qty') ?? 1);
 
-        $purchasePrice = floatval($get($prefix . 'purchase_price') ?? 0);
+        $purchasePrice = floatval($get($prefix.'purchase_price') ?? 0);
 
-        $discountValue = floatval($get($prefix . 'discount') ?? 0);
+        $discountValue = floatval($get($prefix.'discount') ?? 0);
 
         $subTotal = $priceUnit * $quantity;
 
@@ -1288,23 +1062,23 @@ class QuotationResource extends Resource
             $subTotal -= $discountAmount;
         }
 
-        $taxIds = $get($prefix . 'taxes') ?? [];
+        $taxIds = $get($prefix.'taxes') ?? [];
 
         [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
 
         $total = $subTotal + $taxAmount;
 
-        $set($prefix . 'price_subtotal', round($subTotal, 4));
+        $set($prefix.'price_subtotal', round($subTotal, 4));
 
-        $set($prefix . 'price_tax', round($taxAmount, 4));
+        $set($prefix.'price_tax', round($taxAmount, 4));
 
-        $set($prefix . 'price_total', round($total, 4));
+        $set($prefix.'price_total', round($total, 4));
 
         [$margin, $marginPercentage] = static::calculateMargin($priceUnit, $purchasePrice, $quantity, $discountValue);
 
-        $set($prefix . 'margin', round($margin, 4));
+        $set($prefix.'margin', round($margin, 4));
 
-        $set($prefix . 'margin_percent', round($marginPercentage, 4));
+        $set($prefix.'margin_percent', round($marginPercentage, 4));
     }
 
     public static function calculateMargin($sellingPrice, $costPrice, $quantity, $discount = 0)

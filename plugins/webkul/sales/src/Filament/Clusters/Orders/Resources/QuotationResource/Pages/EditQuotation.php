@@ -2,16 +2,16 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 
+use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
-use Webkul\Sale\Traits\HasSaleOrderActions;
+use Webkul\Chatter\Filament\Actions as ChatterActions;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions as BaseActions;
 
 class EditQuotation extends EditRecord
 {
-    use HasSaleOrderActions;
-
     protected static string $resource = QuotationResource::class;
 
     protected function getRedirectUrl(): string
@@ -30,5 +30,20 @@ class EditQuotation extends EditRecord
             ->success()
             ->title(__('sales::filament/clusters/orders/resources/quotation/pages/edit-quotation.notification.title'))
             ->body(__('sales::filament/clusters/orders/resources/quotation/pages/edit-quotation.notification.body'));
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ChatterActions\ChatterAction::make()
+                ->setResource($this->getResource()),
+            BaseActions\BackToQuotationAction::make(),
+            BaseActions\CancelQuotationAction::make(),
+            BaseActions\ConfirmAction::make(),
+            BaseActions\CreateInvoiceAction::make(),
+            BaseActions\PreviewAction::make(),
+            BaseActions\SendByEmailAction::make(),
+            Actions\DeleteAction::make(),
+        ];
     }
 }

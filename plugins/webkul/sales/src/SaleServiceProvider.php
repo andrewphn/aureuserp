@@ -2,6 +2,8 @@
 
 namespace Webkul\Sale;
 
+use Livewire\Livewire;
+use Webkul\Sale\Livewire\Summary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -55,6 +57,6 @@ class SaleServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Livewire::component('quotation-summary', Summary::class);
+        Livewire::component('summary', Summary::class);
     }
 }
