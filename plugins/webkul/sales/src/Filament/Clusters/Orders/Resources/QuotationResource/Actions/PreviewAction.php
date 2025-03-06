@@ -17,6 +17,7 @@ class PreviewAction extends Action
         parent::setUp();
 
         $this
+            ->label(__('Preview'))
             ->modalIcon('heroicon-s-document-text')
             ->modalHeading(__('Preview Quotation'))
             ->modalWidth(MaxWidth::SevenExtraLarge)

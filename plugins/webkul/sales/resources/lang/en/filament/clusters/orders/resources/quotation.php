@@ -8,20 +8,70 @@ return [
     ],
 
     'form' => [
-        'tabs' => [
-            'products' => [
-                'title' => 'Products',
-
+        'section' => [
+            'general' => [
+                'title'  => 'General',
                 'fields' => [
-                    'product'      => 'Product',
-                    'total'        => 'Total',
-                    'subtotal'     => 'Sub Total',
-                    'unit-price'   => 'Unit Price',
-                    'lead-time'    => 'Lead Time',
-                    'taxes'        => 'Taxes',
-                    'quantity'     => 'Quantity',
-                    'display-type' => 'Display Type',
-                    'name'         => 'Name',
+                    'customer'       => 'Customer',
+                    'expiration'     => 'Expiration',
+                    'quotation-date' => 'Quotation Date',
+                    'payment-term'   => 'Payment Term',
+                ],
+            ],
+        ],
+
+        'tabs' => [
+            'order-line' => [
+                'title' => 'Order Line',
+
+                'repeater' => [
+                    'products' => [
+                        'title'       => 'Products',
+                        'add-product' => 'Add Product',
+                        'fields'      => [
+                            'product'             => 'Product',
+                            'product-variants'    => 'Product Variants',
+                            'product-simple'      => 'Product Simple',
+                            'quantity'            => 'Quantity',
+                            'uom'                 => 'Unit Of Measure',
+                            'lead-time'           => 'Lead Time',
+                            'packaging-qty'       => 'Packaging Quantity',
+                            'packaging'           => 'Packaging',
+                            'unit-price'          => 'Unit Price',
+                            'cost'                => 'Cost',
+                            'margin'              => 'Margin',
+                            'taxes'               => 'Taxes',
+                            'amount'              => 'Amount',
+                            'margin-percentage'   => 'Margin (%)',
+                            'discount-percentage' => 'Discount (%)',
+                        ],
+                    ],
+
+                    'product-optional' => [
+                        'title'       => 'Optional Products',
+                        'add-product' => 'Add Product',
+                        'fields'      => [
+                            'product'             => 'Product',
+                            'description'         => 'Description',
+                            'quantity'            => 'Quantity',
+                            'uom'                 => 'Unit Of Measure',
+                            'unit-price'          => 'Unit Price',
+                            'discount-percentage' => 'Discount (%)',
+
+                            'actions' => [
+                                'tooltip' => [
+                                    'add-order-line' => 'Add Order Line',
+                                ],
+
+                                'notifications' => [
+                                    'product-added' => [
+                                        'title' => 'Product added',
+                                        'body'  => 'The product has been added successfully.',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
             ],
             'other-information' => [
@@ -33,76 +83,41 @@ return [
 
                         'fields' => [
                             'sales-person'       => 'Sales Person',
-                            'sales-team'         => 'Sales Team',
                             'customer-reference' => 'Customer Reference',
-
-                            'fieldset' => [
-                                'signature-and-payment' => [
-                                    'title'  => 'Signature & Payment',
-                                    'fields' => [
-                                        'online-signature'      => 'Online Signature',
-                                        'online-payment'        => 'Online Payment',
-                                        'prepayment-percentage' => 'Prepayment Percentage',
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    'invoicing' => [
-                        'title' => 'Invoicing',
-
-                        'fields' => [
-                            'fiscal-position'   => 'Fiscal Position',
-                            'invoicing-journal' => 'Invoicing Journal',
+                            'tags'               => 'Tags',
                         ],
                     ],
 
                     'shipping' => [
-                        'title' => 'Shipping',
-
+                        'title'  => 'Shipping',
                         'fields' => [
                             'commitment-date' => 'Delivery Date',
                         ],
                     ],
 
                     'tracking' => [
-                        'title' => 'Tracking',
-
+                        'title'  => 'Tracking',
                         'fields' => [
                             'source-document' => 'Source Document',
                             'medium'          => 'Medium',
                             'source'          => 'Source',
+                            'campaign'        => 'Campaign',
+                        ],
+                    ],
+
+                    'additional-information' => [
+                        'title' => 'Additional Information',
+
+                        'fields' => [
+                            'company'  => 'Company',
+                            'currency' => 'Currency',
                         ],
                     ],
                 ],
             ],
+
             'term-and-conditions' => [
-                'title' => 'Term & Conditions',
-            ],
-        ],
-
-        'fields' => [
-            'customer'           => 'Customer',
-            'payment-terms'      => 'Payment Terms',
-            'quotation-template' => 'Quotation Template',
-        ],
-
-        'fieldset' => [
-            'invoice-and-delivery-addresses' => [
-                'title' => 'Invoice & Delivery Addresses',
-
-                'fields' => [
-                    'invoice-address'  => 'Invoice Address',
-                    'delivery-address' => 'Delivery Address',
-                ],
-            ],
-            'expiration-and-quotation-date' => [
-                'title' => 'Expiration & Quotation Date',
-
-                'fields' => [
-                    'expiration-date' => 'Expiration Date',
-                    'quotation-date'  => 'Quotation Date',
-                ],
+                'title' => 'Terms & Conditions',
             ],
         ],
     ],
@@ -208,89 +223,118 @@ return [
     ],
 
     'infolist' => [
-        'tabs' => [
-            'products' => [
-                'title'  => 'Products',
-                'fields' => [
-                    'product'      => 'Product',
-                    'total'        => 'Total',
-                    'subtotal'     => 'Sub Total',
-                    'unit-price'   => 'Unit Price',
-                    'lead-time'    => 'Lead Time',
-                    'taxes'        => 'Taxes',
-                    'quantity'     => 'Quantity',
-                    'display-type' => 'Display Type',
-                    'name'         => 'Name',
+        'section' => [
+            'general' => [
+                'title'   => 'General',
+                'entries' => [
+                    'customer'       => 'Customer',
+                    'expiration'     => 'Expiration',
+                    'quotation-date' => 'Quotation Date',
+                    'payment-term'   => 'Payment Term',
                 ],
             ],
-            'other-information' => [
-                'title'    => 'Other Information',
-                'fieldset' => [
-                    'sales' => [
-                        'title'  => 'Sales',
-                        'fields' => [
-                            'sales-person'       => 'Sales Person',
-                            'sales-team'         => 'Sales Team',
-                            'customer-reference' => 'Customer Reference',
-                            'fieldset'           => [
-                                'signature-and-payment' => [
-                                    'title'  => 'Signature & Payment',
-                                    'fields' => [
-                                        'online-signature'      => 'Online Signature',
-                                        'online-payment'        => 'Online Payment',
-                                        'prepayment-percentage' => 'Prepayment Percentage',
+        ],
+
+        'tabs' => [
+            'order-line' => [
+                'title' => 'Order Line',
+
+                'repeater' => [
+                    'products' => [
+                        'title'       => 'Products',
+                        'add-product' => 'Add Product',
+                        'entries'     => [
+                            'product'             => 'Product',
+                            'product-variants'    => 'Product Variants',
+                            'product-simple'      => 'Product Simple',
+                            'quantity'            => 'Quantity',
+                            'uom'                 => 'Unit Of Measure',
+                            'lead-time'           => 'Lead Time',
+                            'packaging-qty'       => 'Packaging Quantity',
+                            'packaging'           => 'Packaging',
+                            'unit-price'          => 'Unit Price',
+                            'cost'                => 'Cost',
+                            'margin'              => 'Margin',
+                            'taxes'               => 'Taxes',
+                            'amount'              => 'Amount',
+                            'margin-percentage'   => 'Margin (%)',
+                            'discount-percentage' => 'Discount (%)',
+                            'sub-total'           => 'Sub Total',
+                        ],
+                    ],
+
+                    'product-optional' => [
+                        'title'       => 'Optional Products',
+                        'add-product' => 'Add Product',
+                        'entries'     => [
+                            'product'             => 'Product',
+                            'description'         => 'Description',
+                            'quantity'            => 'Quantity',
+                            'uom'                 => 'Unit Of Measure',
+                            'unit-price'          => 'Unit Price',
+                            'discount-percentage' => 'Discount (%)',
+                            'sub-total'           => 'Sub Total',
+
+                            'actions' => [
+                                'tooltip' => [
+                                    'add-order-line' => 'Add Order Line',
+                                ],
+
+                                'notifications' => [
+                                    'product-added' => [
+                                        'title' => 'Product added',
+                                        'body'  => 'The product has been added successfully.',
                                     ],
                                 ],
                             ],
                         ],
                     ],
-                    'invoicing' => [
-                        'title'  => 'Invoicing',
-                        'fields' => [
-                            'fiscal-position'   => 'Fiscal Position',
-                            'invoicing-journal' => 'Invoicing Journal',
+                ],
+            ],
+            'other-information' => [
+                'title' => 'Other Information',
+
+                'fieldset' => [
+                    'sales' => [
+                        'title' => 'Sales',
+
+                        'entries' => [
+                            'sales-person'       => 'Sales Person',
+                            'customer-reference' => 'Customer Reference',
+                            'tags'               => 'Tags',
                         ],
                     ],
+
                     'shipping' => [
-                        'title'  => 'Shipping',
-                        'fields' => [
+                        'title'   => 'Shipping',
+                        'entries' => [
                             'commitment-date' => 'Delivery Date',
                         ],
                     ],
+
                     'tracking' => [
-                        'title'  => 'Tracking',
-                        'fields' => [
+                        'title'   => 'Tracking',
+                        'entries' => [
                             'source-document' => 'Source Document',
                             'medium'          => 'Medium',
                             'source'          => 'Source',
+                            'campaign'        => 'Campaign',
+                        ],
+                    ],
+
+                    'additional-information' => [
+                        'title' => 'Additional Information',
+
+                        'entries' => [
+                            'company'  => 'Company',
+                            'currency' => 'Currency',
                         ],
                     ],
                 ],
             ],
+
             'term-and-conditions' => [
                 'title' => 'Terms & Conditions',
-            ],
-        ],
-        'fields' => [
-            'customer'           => 'Customer',
-            'payment-terms'      => 'Payment Terms',
-            'partner-address'    => 'Partner Address',
-            'quotation-template' => 'Quotation Template',
-        ],
-        'fieldset' => [
-            'invoice-and-delivery-addresses' => [
-                'title'  => 'Invoice & Delivery Addresses',
-                'fields' => [
-                    'invoice-address'  => 'Invoice Address',
-                    'delivery-address' => 'Delivery Address',
-                ],
-            ],
-            'expiration-and-quotation-date' => [
-                'title'  => 'Expiration & Quotation Date',
-                'fields' => [
-                    'expiration-date' => 'Expiration Date',
-                    'quotation-date'  => 'Quotation Date',
-                ],
             ],
         ],
     ],

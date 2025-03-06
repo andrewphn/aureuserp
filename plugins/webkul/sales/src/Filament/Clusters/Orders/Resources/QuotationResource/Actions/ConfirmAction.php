@@ -23,7 +23,7 @@ class ConfirmAction extends Action
         $this
             ->color('primary')
             ->label(__('sales::traits/sale-order-action.header-actions.confirm.title'))
-            ->hidden(fn($record) => $record->state != OrderState::DRAFT->value)
+            ->hidden(fn ($record) => $record->state != OrderState::DRAFT->value)
             ->action(function ($record, $livewire) {
                 $record->update([
                     'state'          => OrderState::SALE->value,
