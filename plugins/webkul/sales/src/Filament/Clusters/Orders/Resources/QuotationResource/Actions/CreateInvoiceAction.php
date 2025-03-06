@@ -86,6 +86,10 @@ class CreateInvoiceAction extends Action
         }
 
         InvoiceResource::collectTotals($accountMove);
+
+        $record->update([
+            'invoice_status' => InvoiceStatus::INVOICED->value,
+        ]);
     }
 
     private function createAccountMoveLine($accountMove, $orderLine): void

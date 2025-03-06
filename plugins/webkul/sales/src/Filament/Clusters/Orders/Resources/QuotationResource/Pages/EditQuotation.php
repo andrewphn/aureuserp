@@ -43,6 +43,7 @@ class EditQuotation extends EditRecord
             BaseActions\CreateInvoiceAction::make(),
             BaseActions\PreviewAction::make(),
             BaseActions\SendByEmailAction::make(),
+            BaseActions\LockAndUnlockAction::make(),
             Actions\DeleteAction::make(),
         ];
     }
