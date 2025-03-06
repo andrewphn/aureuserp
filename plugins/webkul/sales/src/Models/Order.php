@@ -4,9 +4,11 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Journal;
+use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
@@ -108,6 +110,16 @@ class Order extends Model
     public function partner()
     {
         return $this->belongsTo(Partner::class);
+    }
+
+    public function getQtyToInvoiceAttribute()
+    {
+        return $this->lines->sum('qty_to_invoice');
+    }
+
+    public function accountMoves(): BelongsToMany
+    {
+        return $this->belongsToMany(Move::class, 'sales_order_line_invoices', 'order_id', 'move_id');
     }
 
     public function campaign()

@@ -31,6 +31,7 @@ class SaleServiceProvider extends PackageServiceProvider
                 '2025_03_05_073635_create_sales_order_options_table',
                 '2025_03_05_124300_create_sales_order_line_taxes_table',
                 '2025_03_05_124300_create_sales_tag_table',
+                '2025_03_05_124400_create_sales_order_line_invoices_table',
                 '2025_03_05_124400_create_sales_order_tags_table',
             ])
             ->runsMigrations()
