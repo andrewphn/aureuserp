@@ -13,7 +13,7 @@ class ManagePricing extends SettingsPage
 {
     use HasPageShield;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cube';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static ?string $slug = 'sale/manage-pricing';
 

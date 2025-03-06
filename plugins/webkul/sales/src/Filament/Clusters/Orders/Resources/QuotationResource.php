@@ -130,7 +130,7 @@ class QuotationResource extends Resource
                                 Forms\Components\DatePicker::make('validity_date')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.expiration'))
                                     ->native(false)
-                                    ->default(now())
+                                    ->default(fn (Settings\QuotationAndOrderSettings $settings) => now()->addDays($settings->default_quotation_validity))
                                     ->required()
                                     ->hidden(fn ($record) => $record)
                                     ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL->value])),

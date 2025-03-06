@@ -13,7 +13,7 @@ class ManageInvoice extends SettingsPage
 {
     use HasPageShield;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cube';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $slug = 'sale/manage-invoicing';
 
