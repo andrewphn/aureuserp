@@ -35,6 +35,8 @@ return [
                             'quantity'            => 'Quantity',
                             'uom'                 => 'Unit Of Measure',
                             'lead-time'           => 'Lead Time',
+                            'qty-delivered'       => 'Quantity Delivered',
+                            'qty-invoiced'        => 'Quantity Invoiced',
                             'packaging-qty'       => 'Packaging Quantity',
                             'packaging'           => 'Packaging',
                             'unit-price'          => 'Unit Price',
