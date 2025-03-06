@@ -46,4 +46,11 @@ class EditQuotation extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        $record = $this->getRecord();
+
+        $this->getResource()::collectTotals($record);
+    }
 }

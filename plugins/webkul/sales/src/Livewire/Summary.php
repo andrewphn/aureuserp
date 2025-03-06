@@ -20,6 +20,8 @@ class Summary extends Component
 
     public $amountTax = 0;
 
+    public $enableMargin = false;
+
     #[Reactive]
     public $currency = null;
 

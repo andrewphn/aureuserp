@@ -62,16 +62,22 @@
                     $totalDiscount = 0;
                     $totalTax = 0;
                     $grandTotal = 0;
+                    $margin = 0;
+                    $marginPercentage = 0;
 
                     foreach ($products as $product) {
                         $subTotal += floatval($product['price_subtotal']);
 
-                        $totalTax += $product['price_tax'] ?? 0;
+                        $totalTax += floatval($product['price_tax'] ?? 0);
 
                         $totalDiscount += floatval($product['discount']);
 
                         $grandTotal += floatval($product['price_total']);
+
+                        $margin += floatval($product['margin']);
                     }
+
+                    $marginPercentage = ($subTotal > 0) ? ($margin / $subTotal) * 100 : 0;
                 @endphp
 
                <div class="invoice-item">
@@ -99,6 +105,13 @@
                     <span>Grand Total</span>
                     <span>{{ $currency->symbol }} {{ number_format($grandTotal, 2) }}</span>
                 </div>
+
+                @if ($enableMargin)
+                    <div class="font-bold invoice-item">
+                        <span>Margin</span>
+                        <span>{{ number_format($margin, 2) }} ({{ number_format($marginPercentage, 2) }})</span>
+                    </div>
+                @endif
             </div>
         </div>
     @endif

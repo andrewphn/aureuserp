@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 
@@ -35,17 +34,20 @@ class CreateQuotation extends CreateRecord
         $data['user_id'] = $user->id;
         $data['company_id'] = $user->default_company_id;
         $data['state'] = OrderState::DRAFT->value;
-        $data['invoice_status'] = InvoiceStatus::NO->value;
 
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);
             $data['commercial_partner_id'] = $partner->id;
             $data['partner_shipping_id'] = $partner->id;
             $data['partner_invoice_id'] = $partner->id;
+            $data['order_partner_id'] = $partner->id;
         }
 
         return $data;
     }
 
-    protected function afterCreate(): void {}
+    protected function afterCreate(): void
+    {
+        $this->getResource()::collectTotals($this->getRecord());
+    }
 }

@@ -98,7 +98,7 @@ class QuotationResource extends Resource
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
-                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
+                                                fn(Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
                                             )
                                             ->content(function (Get $get) {
                                                 $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
@@ -116,7 +116,7 @@ class QuotationResource extends Resource
                                                     "%s\n%s%s\n%s, %s %s\n%s",
                                                     $address->name ?? '',
                                                     $address->street1 ?? '',
-                                                    $address->street2 ? ', '.$address->street2 : '',
+                                                    $address->street2 ? ', ' . $address->street2 : '',
                                                     $address->city ?? '',
                                                     $address->state ? $address->state->name : '',
                                                     $address->zip ?? '',
@@ -149,10 +149,11 @@ class QuotationResource extends Resource
                             ->icon('heroicon-o-list-bullet')
                             ->schema([
                                 static::getProductRepeater(),
-                                Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get) {
+                                Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get, Settings\PriceSettings $settings) {
                                     return [
-                                        'currency' => Currency::find($get('currency_id')),
-                                        'products' => $get('products'),
+                                        'currency'     => Currency::find($get('currency_id')),
+                                        'products'     => $get('products'),
+                                        'enableMargin' => $settings->enable_margin,
                                     ];
                                 })
                                     ->live()
@@ -252,9 +253,9 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn ($state) => OrderState::options()[$state] ?? $state)
+                    ->formatStateUsing(fn($state) => OrderState::options()[$state] ?? $state)
                     ->badge()
-                    ->color(fn ($state) => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         OrderState::DRAFT->value  => 'gray',
                         OrderState::SENT->value   => 'primary',
                         OrderState::SALE->value   => 'success',
@@ -266,7 +267,7 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
                     ->placeholder('-')
-                    ->formatStateUsing(fn ($state) => InvoiceStatus::options()[$state] ?? $state)
+                    ->formatStateUsing(fn($state) => InvoiceStatus::options()[$state] ?? $state)
                     ->badge()
                     ->searchable()
                     ->sortable(),
@@ -564,8 +565,8 @@ class QuotationResource extends Resource
             ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
@@ -576,7 +577,7 @@ class QuotationResource extends Resource
                                     ->relationship(
                                         'product',
                                         'name',
-                                        fn ($query) => $query->where('is_configurable', null),
+                                        fn($query) => $query->where('is_configurable', null),
                                     )
                                     ->searchable()
                                     ->preload()
@@ -607,13 +608,13 @@ class QuotationResource extends Resource
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.unit-price'))
                                     ->numeric()
@@ -637,7 +638,6 @@ class QuotationResource extends Resource
                                             $data = [
                                                 'product_id'      => $state['product_id'],
                                                 'product_qty'     => $state['quantity'],
-                                                'uom_id'          => $state['uom_id'] ?? null,
                                                 'price_unit'      => $state['price_unit'],
                                                 'discount'        => $state['discount'],
                                                 'name'            => $state['name'],
@@ -651,8 +651,14 @@ class QuotationResource extends Resource
                                                 $data,
                                             ]);
 
+                                            $user = Auth::user();
+
                                             $data['order_id'] = $livewire->record->id;
+                                            $data['creator_id'] = $user->id;
                                             $data['sort'] = OrderLine::max('sort') + 1;
+                                            $data['company_id'] = $user?->default_company_id;
+                                            $data['currency_id'] = $livewire->record->currency_id;
+                                            $data['product_uom_id'] = $state['uom_id'];
                                             $orderLine = OrderLine::create($data);
 
                                             $record->line_id = $orderLine->id;
@@ -663,14 +669,20 @@ class QuotationResource extends Resource
 
                                             $products = collect($parentGet('products'))->values();
 
-                                            $orderLineEntry = $products->first(fn ($product) => $product['id'] == $orderLine->id);
+                                            $orderLineEntry = $products->first(fn($product) => $product['id'] == $orderLine->id);
 
                                             $orderLine->update($orderLineEntry);
+
+                                            Notification::make()
+                                                ->success()
+                                                ->title(__('Product added'))
+                                                ->body(__('Product has been added to the order successfully.'))
+                                                ->send();
                                         })
                                         ->extraAttributes([
                                             'style' => 'margin-top: 2rem;',
                                         ]),
-                                ])->hidden(fn ($record) => ! $record ?? false),
+                                ])->hidden(fn($record) => ! $record ?? false),
                             ]),
                     ])
                     ->columns(2),
@@ -688,15 +700,15 @@ class QuotationResource extends Resource
             ->addActionLabel(__('Add Product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
+            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->deleteAction(fn(Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
                         Forms\Components\Grid::make(4)
                             ->schema([
                                 Forms\Components\Select::make('product_id')
-                                    ->label(fn (Settings\ProductSettings $settings) => $settings->enable_variants ? __('Product Variants') : __('Product (Simple)'))
+                                    ->label(fn(Settings\ProductSettings $settings) => $settings->enable_variants ? __('Product Variants') : __('Product (Simple)'))
                                     ->relationship(
                                         'product',
                                         'name',
@@ -721,7 +733,7 @@ class QuotationResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('product_qty')
                                     ->label(__('Quantity'))
@@ -729,20 +741,20 @@ class QuotationResource extends Resource
                                     ->default(1)
                                     ->numeric()
                                     ->live()
-                                    ->afterStateHydrated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get))
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
+                                    ->afterStateHydrated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get))
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('Unit of Measure'))
                                     ->relationship(
                                         'uom',
                                         'name',
-                                        fn ($query) => $query->where('category_id', 1)->orderBy('id'),
+                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
                                     )
                                     ->required()
                                     ->live()
                                     ->selectablePlaceholder(false)
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
+                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\TextInput::make('customer_lead')
                                     ->label(__('Lead Time'))
                                     ->default(0)
@@ -752,8 +764,8 @@ class QuotationResource extends Resource
                                     ->live()
                                     ->numeric()
                                     ->default(0)
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductPackagingQtyUpdated($set, $get))
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductPackagingQtyUpdated($set, $get))
+                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings),
                                 Forms\Components\Select::make('product_packaging_id')
                                     ->label(__('Packaging'))
                                     ->relationship(
@@ -763,55 +775,55 @@ class QuotationResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductPackagingUpdated($set, $get))
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings),
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => static::afterProductPackagingUpdated($set, $get))
+                                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('Unit Price'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('purchase_price')
                                     ->label(__('Cost'))
                                     ->numeric()
                                     ->default(0)
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('margin')
                                     ->label(__('Margin'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('margin_percent')
                                     ->label(__('Margin(%)'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('Taxes'))
                                     ->relationship(
                                         'taxes',
                                         'name',
-                                        fn (Builder $query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
+                                        fn(Builder $query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
                                     )
                                     ->searchable()
                                     ->multiple()
                                     ->preload()
-                                    ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
-                                    ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateHydrated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
+                                    ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
                                     ->live(),
                                 Forms\Components\TextInput::make('discount')
                                     ->label(__('Discount (%)'))
                                     ->numeric()
                                     ->default(0)
                                     ->live()
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
+                                    ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('Amount'))
                                     ->default(0)
@@ -826,8 +838,8 @@ class QuotationResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
+            ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
     }
 
     public static function mutateProductRelationship(array $data, $record): array
@@ -1026,33 +1038,33 @@ class QuotationResource extends Resource
 
     private static function calculateLineTotals(Forms\Set $set, Forms\Get $get, ?string $prefix = ''): void
     {
-        if (! $get($prefix.'product_id')) {
-            $set($prefix.'price_unit', 0);
+        if (! $get($prefix . 'product_id')) {
+            $set($prefix . 'price_unit', 0);
 
-            $set($prefix.'discount', 0);
+            $set($prefix . 'discount', 0);
 
-            $set($prefix.'price_tax', 0);
+            $set($prefix . 'price_tax', 0);
 
-            $set($prefix.'price_subtotal', 0);
+            $set($prefix . 'price_subtotal', 0);
 
-            $set($prefix.'price_total', 0);
+            $set($prefix . 'price_total', 0);
 
-            $set($prefix.'purchase_price', 0);
+            $set($prefix . 'purchase_price', 0);
 
-            $set($prefix.'margin', 0);
+            $set($prefix . 'margin', 0);
 
-            $set($prefix.'margin_percent', 0);
+            $set($prefix . 'margin_percent', 0);
 
             return;
         }
 
-        $priceUnit = floatval($get($prefix.'price_unit') ?? 0);
+        $priceUnit = floatval($get($prefix . 'price_unit') ?? 0);
 
-        $quantity = floatval($get($prefix.'product_qty') ?? 1);
+        $quantity = floatval($get($prefix . 'product_qty') ?? 1);
 
-        $purchasePrice = floatval($get($prefix.'purchase_price') ?? 0);
+        $purchasePrice = floatval($get($prefix . 'purchase_price') ?? 0);
 
-        $discountValue = floatval($get($prefix.'discount') ?? 0);
+        $discountValue = floatval($get($prefix . 'discount') ?? 0);
 
         $subTotal = $priceUnit * $quantity;
 
@@ -1062,23 +1074,23 @@ class QuotationResource extends Resource
             $subTotal -= $discountAmount;
         }
 
-        $taxIds = $get($prefix.'taxes') ?? [];
+        $taxIds = $get($prefix . 'taxes') ?? [];
 
         [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
 
         $total = $subTotal + $taxAmount;
 
-        $set($prefix.'price_subtotal', round($subTotal, 4));
+        $set($prefix . 'price_subtotal', round($subTotal, 4));
 
-        $set($prefix.'price_tax', round($taxAmount, 4));
+        $set($prefix . 'price_tax', round($taxAmount, 4));
 
-        $set($prefix.'price_total', round($total, 4));
+        $set($prefix . 'price_total', round($total, 4));
 
         [$margin, $marginPercentage] = static::calculateMargin($priceUnit, $purchasePrice, $quantity, $discountValue);
 
-        $set($prefix.'margin', round($margin, 4));
+        $set($prefix . 'margin', round($margin, 4));
 
-        $set($prefix.'margin_percent', round($marginPercentage, 4));
+        $set($prefix . 'margin_percent', round($marginPercentage, 4));
     }
 
     public static function calculateMargin($sellingPrice, $costPrice, $quantity, $discount = 0)
@@ -1099,31 +1111,16 @@ class QuotationResource extends Resource
 
     public static function collectTotals(Order $record): void
     {
-        $record->untaxed_amount = 0;
-        $record->tax_amount = 0;
-        $record->total_amount = 0;
-        $record->total_cc_amount = 0;
-        $record->invoice_count = 0;
+        $record->amount_untaxed = 0;
+        $record->amount_tax = 0;
+        $record->amount_total = 0;
 
         foreach ($record->lines as $line) {
             $line = static::collectLineTotals($line);
 
-            $record->untaxed_amount += $line->price_subtotal;
-            $record->tax_amount += $line->price_tax;
-            $record->total_amount += $line->price_total;
-            $record->total_cc_amount += $line->price_total;
-        }
-
-        $record->invoice_count = $record->accountMoves->count();
-
-        if ($record->qty_to_invoice != 0) {
-            $record->invoice_status = InvoiceStatus::TO_INVOICE;
-        } else {
-            if ($record->invoice_count) {
-                $record->invoice_status = InvoiceStatus::INVOICED;
-            } else {
-                $record->invoice_status = InvoiceStatus::NO;
-            }
+            $record->amount_untaxed += $line->price_subtotal;
+            $record->amount_tax += $line->price_tax;
+            $record->amount_total += $line->price_total;
         }
 
         $record->save();
@@ -1131,8 +1128,6 @@ class QuotationResource extends Resource
 
     public static function collectLineTotals(OrderLine $line): OrderLine
     {
-        $line->qty_received_manual = $line->qty_received ?? 0;
-
         $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
 
         $subTotal = $line->price_unit * $line->product_qty;
@@ -1154,6 +1149,16 @@ class QuotationResource extends Resource
         $line->price_tax = $taxAmount;
 
         $line->price_total = $subTotal + $taxAmount;
+
+        $line->sort = $line->sort ?? OrderLine::max('sort') + 1;
+
+        $line->create_date = $line->create_date ?? now();
+
+        $line->technical_price_unit = $line->price_unit;
+
+        $line->price_reduce_taxexcl = $line->price_unit - ($line->price_unit * ($line->discount / 100));
+
+        $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2);
 
         $line->save();
 
