@@ -576,6 +576,7 @@ class QuotationResource extends Resource
                 Infolists\Components\Section::make()
                     ->schema([
                         Infolists\Components\TextEntry::make('state')
+                            ->formatStateUsing(fn ($state) => OrderState::options()[$state] ?? $state)
                             ->badge(),
                     ])
                     ->compact(),
@@ -617,7 +618,7 @@ class QuotationResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.product'))
                                             ->icon('heroicon-o-cube'),
-                                        Infolists\Components\TextEntry::make('quantity')
+                                        Infolists\Components\TextEntry::make('product_uom_qty')
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.quantity'))
                                             ->icon('heroicon-o-hashtag'),
@@ -1021,7 +1022,8 @@ class QuotationResource extends Resource
                                     ->default(1)
                                     ->numeric()
                                     ->live()
-                                    ->hidden(fn ($record): bool => $record && $record?->order?->state != OrderState::SALE->value),
+                                    ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL->value]))
+                                    ->visible(fn ($record): bool => in_array($record?->order->state, [OrderState::SALE->value])),
                                 Forms\Components\TextInput::make('qty_invoiced')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.qty-invoiced'))
                                     ->required()
@@ -1029,7 +1031,8 @@ class QuotationResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->disabled(true)
-                                    ->hidden(fn ($record): bool => $record && $record?->order?->state != OrderState::SALE->value),
+                                    ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL->value]))
+                                    ->visible(fn ($record): bool => in_array($record?->order->state, [OrderState::SALE->value])),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.uom'))
                                     ->relationship(

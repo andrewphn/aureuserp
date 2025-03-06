@@ -8,6 +8,7 @@ use Filament\Support\Facades\FilamentView;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource;
+use Webkul\Sale\Settings\QuotationAndOrderSettings;
 
 class ConfirmAction extends Action
 {
@@ -22,22 +23,28 @@ class ConfirmAction extends Action
 
         $this
             ->color('primary')
-            ->label(__('sales::traits/sale-order-action.header-actions.confirm.title'))
+            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.title'))
             ->hidden(fn ($record) => $record->state != OrderState::DRAFT->value)
-            ->action(function ($record, $livewire) {
-                $record->update([
+            ->action(function ($record, $livewire, QuotationAndOrderSettings $settings) {
+                $data = [
                     'state'          => OrderState::SALE->value,
                     'invoice_status' => InvoiceStatus::TO_INVOICE->value,
-                ]);
+                ];
+
+                if ($settings->enable_lock_confirm_sales) {
+                    $data['locked'] = true;
+                }
+
+                $record->update($data);
 
                 $livewire->refreshFormData(['state']);
 
-                $livewire->redirect(OrdersResource::getUrl('view', ['record' => $record]), navigate: FilamentView::hasSpaMode());
+                $livewire->redirect(OrdersResource::getUrl('edit', ['record' => $record]), navigate: FilamentView::hasSpaMode());
 
                 Notification::make()
                     ->success()
-                    ->title(__('sales::traits/sale-order-action.header-actions.confirm.notification.confirmed.title'))
-                    ->body(__('sales::traits/sale-order-action.header-actions.confirm.notification.confirmed.body'))
+                    ->title(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.confirmed.title'))
+                    ->body(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.confirmed.body'))
                     ->send();
             });
     }

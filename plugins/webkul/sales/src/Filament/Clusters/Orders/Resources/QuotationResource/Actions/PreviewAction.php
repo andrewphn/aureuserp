@@ -16,8 +16,7 @@ class PreviewAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Preview'))
-            ->modalHeading(__('Preview Quotation'))
+            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/preview.title'))
             ->modalFooterActions(fn ($record) => [])
             ->modalContent(fn ($record) => view('sales::sales.quotation', ['record' => $record]))
             ->color('gray');

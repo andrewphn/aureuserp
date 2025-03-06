@@ -19,7 +19,7 @@ class BackToQuotationAction extends Action
         parent::setUp();
 
         $this
-            ->label(__('Back To Quotation'))
+            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/back-to-quotation.title'))
             ->color('gray')
             ->hidden(fn ($record) => $record->state != OrderState::CANCEL->value)
             ->action(function ($record, $livewire) {
@@ -32,8 +32,8 @@ class BackToQuotationAction extends Action
 
                 Notification::make()
                     ->success()
-                    ->title(__('sales::traits/sale-order-action.header-actions.back-to-quotation.notification.back-to-quotation.title'))
-                    ->body(__('sales::traits/sale-order-action.header-actions.back-to-quotation.notification.back-to-quotation.body'))
+                    ->title(__('sales::filament/clusters/orders/resources/quotation/actions/back-to-quotation.notification.back-to-quotation.title'))
+                    ->body(__('sales::filament/clusters/orders/resources/quotation/actions/back-to-quotation.notification.back-to-quotation.body'))
                     ->send();
             });
     }

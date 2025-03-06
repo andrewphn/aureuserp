@@ -6,6 +6,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Webkul\Invoice\Enums\InvoicePolicy;
 use Webkul\Sale\Settings\InvoiceSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
@@ -47,10 +48,7 @@ class ManageInvoice extends SettingsPage
         return $form
             ->schema([
                 Forms\Components\Radio::make('invoice_policy')
-                    ->options([
-                        'order'    => __('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.options.order'),
-                        'delivery' => __('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.options.delivery'),
-                    ])
+                    ->options(InvoicePolicy::class)
                     ->default('delivery')
                     ->label(__('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.label'))
                     ->helperText(__('sales::filament/clusters/settings/pages/manage-invoice.form.invoice-policy.label-help')),

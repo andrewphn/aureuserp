@@ -4,6 +4,7 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\OrderState;
@@ -47,6 +48,14 @@ class OrdersResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return QuotationResource::infolist($infolist);
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewOrders::class,
+            Pages\EditOrders::class,
+        ]);
     }
 
     public static function getPages(): array

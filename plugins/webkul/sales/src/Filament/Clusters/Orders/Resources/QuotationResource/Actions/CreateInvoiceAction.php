@@ -4,14 +4,18 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actio
 
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Move;
+use Webkul\Invoice\Enums\InvoicePolicy;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Sale\Models\Order;
+use Webkul\Sale\Models\OrderLine;
+use Webkul\Sale\Settings\InvoiceSettings;
 
 class CreateInvoiceAction extends Action
 {
@@ -32,13 +36,13 @@ class CreateInvoiceAction extends Action
 
                 return 'primary';
             })
-            ->label(__('sales::traits/sale-order-action.header-actions.create-invoice.title'))
+            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.title'))
             ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
-            ->action(function (Order $record) {
+            ->action(function (Order $record, $livewire) {
                 if ($record->qty_to_invoice == 0) {
                     Notification::make()
-                        ->title(__('No invoiceable lines'))
-                        ->body(__('There is no invoiceable line, please make sure that a quantity has been received.'))
+                        ->title(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.no-invoiceable-lines.title'))
+                        ->body(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.no-invoiceable-lines.body'))
                         ->warning()
                         ->send();
 
@@ -50,14 +54,16 @@ class CreateInvoiceAction extends Action
                 QuotationResource::collectTotals($record);
 
                 Notification::make()
-                    ->title(__('Invoice Created'))
-                    ->body(__('Invoice has been created successfully.'))
+                    ->title(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.invoice-created.title'))
+                    ->body(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.invoice-created.body'))
                     ->success()
                     ->send();
+
+                $livewire->redirect(InvoiceResource::getUrl('edit', ['record' => $record]), navigate: FilamentView::hasSpaMode());
             });
     }
 
-    private function createAccountMove($record)
+    private function createAccountMove(Order $record)
     {
         $accountMove = Move::create([
             'state'                        => AccountEnums\MoveState::DRAFT->value,
@@ -92,16 +98,23 @@ class CreateInvoiceAction extends Action
         ]);
     }
 
-    private function createAccountMoveLine($accountMove, $orderLine): void
+    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
     {
-        $accountMoveLine = $accountMove->lines()->create([
+        $productInvoicePolicy = $orderLine->product?->invoice_policy;
+        $invoiceSetting = app(InvoiceSettings::class)->invoice_policy;
+
+        $quantity = ($productInvoicePolicy ?? $invoiceSetting) === InvoicePolicy::ORDER->value
+            ? $orderLine->qty_to_invoice
+            : $orderLine->product_uom_qty;
+
+        $moveLineData = [
             'state'                  => AccountEnums\MoveState::DRAFT,
             'name'                   => $orderLine->name,
             'display_type'           => AccountEnums\DisplayType::PRODUCT,
             'date'                   => $accountMove->date,
             'creator_id'             => $accountMove?->creator_id,
             'parent_state'           => $accountMove->state,
-            'quantity'               => $orderLine->qty_to_invoice,
+            'quantity'               => $quantity,
             'price_unit'             => $orderLine->price_unit,
             'discount'               => $orderLine->discount,
             'journal_id'             => $accountMove->journal_id,
@@ -116,7 +129,9 @@ class CreateInvoiceAction extends Action
             'credit'                 => 0.00,
             'balance'                => $orderLine?->price_subtotal,
             'amount_currency'        => $orderLine?->price_subtotal,
-        ]);
+        ];
+
+        $accountMoveLine = $accountMove->lines()->create($moveLineData);
 
         $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
 

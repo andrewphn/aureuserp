@@ -43,24 +43,24 @@ class SendByEmailAction extends Action
                     'description' => 'Dear '.$record->partner->name.', <br/><br/>Your quotation <strong>'.$record->name.'</strong> amounting in <strong>'.$record->currency->symbol.' '.$record->amount_total.'</strong> is ready for review.<br/><br/>Should you have any questions or require further assistance, please feel free to reach out to us.',
                 ]);
             })
-            ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.title'))
+            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.title'))
             ->form(
                 function (Form $form, $record) {
                     return $form->schema([
                         Forms\Components\Select::make('partners')
                             ->options(Partner::all()->pluck('name', 'id'))
                             ->multiple()
-                            ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.partners'))
+                            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.form.fields.partners'))
                             ->searchable()
                             ->preload(),
                         Forms\Components\TextInput::make('subject')
-                            ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.subject'))
+                            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.form.fields.subject'))
                             ->hiddenLabel(),
                         Forms\Components\RichEditor::make('description')
-                            ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.description'))
+                            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.form.fields.description'))
                             ->hiddenLabel(),
                         Forms\Components\FileUpload::make('file')
-                            ->label(__('sales::traits/sale-order-action.header-actions.send-by-email.form.fields.attachment'))
+                            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.form.fields.attachment'))
                             ->downloadable()
                             ->openable()
                             ->disk('public')
@@ -69,7 +69,7 @@ class SendByEmailAction extends Action
                 }
             )
             ->modalIcon('heroicon-s-envelope')
-            ->modalHeading(__('sales::traits/sale-order-action.header-actions.send-by-email.modal.heading'))
+            ->modalHeading(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.modal.heading'))
             ->hidden(fn ($record) => $record->state != OrderState::SALE->value)
             ->action(function ($record, array $data) {
                 $this->handleSendByEmail($record, $data);
@@ -129,8 +129,8 @@ class SendByEmailAction extends Action
 
         Notification::make()
             ->success()
-            ->title(__('sales::traits/sale-order-action.header-actions.send-by-email.actions.notification.title'))
-            ->body(__('sales::traits/sale-order-action.header-actions.send-by-email.actions.notification.body'))
+            ->title(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.actions.notification.title'))
+            ->body(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.actions.notification.body'))
             ->send();
     }
 }
