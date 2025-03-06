@@ -3,6 +3,7 @@
 namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -37,8 +38,8 @@ class AdvancedPaymentInvoice extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function orders()
+    public function orders(): BelongsToMany
     {
-        return $this->hasMany(AdvancePaymentInvoiceOrderSale::class, 'advance_payment_invoice_id');
+        return $this->belongsToMany(Order::class, 'sales_advance_payment_invoice_order_sales', 'advance_payment_invoice_id', 'order_id');
     }
 }

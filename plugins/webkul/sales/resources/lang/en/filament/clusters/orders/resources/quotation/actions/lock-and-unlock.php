@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'lock' => 'Lock',
+    'lock'   => 'Lock',
     'unlock' => 'Unlock',
 ];

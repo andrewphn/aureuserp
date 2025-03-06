@@ -3,8 +3,6 @@
 namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Sale\Models\AdvancePaymentInvoice;
-use Webkul\Sale\Models\Order;
 
 class AdvancePaymentInvoiceOrderSale extends Model
 {

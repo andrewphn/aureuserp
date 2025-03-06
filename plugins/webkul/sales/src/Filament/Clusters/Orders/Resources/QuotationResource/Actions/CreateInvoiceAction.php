@@ -2,12 +2,12 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions;
 
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Actions\Action;
+use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Support\Facades\FilamentView;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Models\Journal as AccountJournal;
@@ -17,10 +17,10 @@ use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
+use Webkul\Sale\Models\AdvancedPaymentInvoice;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Sale\Settings\InvoiceSettings;
-use Webkul\Sale\Models\AdvancedPaymentInvoice;
 
 class CreateInvoiceAction extends Action
 {
@@ -45,25 +45,32 @@ class CreateInvoiceAction extends Action
             ->form([
                 Forms\Components\Radio::make('advance_payment_method')
                     ->inline(false)
-                    ->options(AdvancedPayment::class)
+                    ->label(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.form.fields.create-invoice'))
+                    ->options(function () {
+                        $options = AdvancedPayment::options();
+
+                        return Arr::only($options, [
+                            AdvancedPayment::DELIVERED->value,
+                        ]);
+                    })
                     ->default(AdvancedPayment::DELIVERED->value)
                     ->live(),
                 Forms\Components\Group::make()
                     ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('amount')
-                            ->visible(fn(Get $get) => $get('advance_payment_method') == AdvancedPayment::PERCENTAGE->value)
+                            ->visible(fn (Get $get) => $get('advance_payment_method') == AdvancedPayment::PERCENTAGE->value)
                             ->rules('required', 'numeric')
                             ->default(0.00)
                             ->suffix('%'),
                         Forms\Components\TextInput::make('amount')
-                            ->visible(fn(Get $get) => $get('advance_payment_method') == AdvancedPayment::FIXED->value)
+                            ->visible(fn (Get $get) => $get('advance_payment_method') == AdvancedPayment::FIXED->value)
                             ->rules('required', 'numeric')
                             ->default(0.00)
-                            ->prefix(fn($record) => $record->currency->symbol)
-                    ])
+                            ->prefix(fn ($record) => $record->currency->symbol),
+                    ]),
             ])
-            ->hidden(fn($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
+            ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
             ->action(function (Order $record, $livewire, $data) {
                 if ($record->qty_to_invoice == 0) {
                     Notification::make()
@@ -75,7 +82,7 @@ class CreateInvoiceAction extends Action
                     return;
                 }
 
-                AdvancedPaymentInvoice::create([
+                $advancedPaymentInvoice = AdvancedPaymentInvoice::create([
                     ...$data,
                     'currency_id'          => $record->currency_id,
                     'company_id'           => $record->company_id,
@@ -83,6 +90,8 @@ class CreateInvoiceAction extends Action
                     'deduct_down_payments' => true,
                     'consolidated_billing' => true,
                 ]);
+
+                $advancedPaymentInvoice->orders()->attach($record->id);
 
                 $invoice = $this->createAccountMove($record);
 

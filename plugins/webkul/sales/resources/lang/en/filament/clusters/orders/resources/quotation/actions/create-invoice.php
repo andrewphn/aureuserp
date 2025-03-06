@@ -18,4 +18,10 @@ return [
             'body'  => 'There is no invoiceable line, please make sure that a quantity has been received.',
         ],
     ],
+
+    'form' => [
+        'fields' => [
+            'create-invoice' => 'Create Invoice',
+        ],
+    ],
 ];

@@ -15,18 +15,18 @@ enum AdvancedPayment: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::DELIVERED => __('sales::enums/advanced-payment.delivered'),
+            self::DELIVERED  => __('sales::enums/advanced-payment.delivered'),
             self::PERCENTAGE => __('sales::enums/advanced-payment.percentage'),
-            self::FIXED => __('sales::enums/advanced-payment.fixed'),
+            self::FIXED      => __('sales::enums/advanced-payment.fixed'),
         };
     }
 
-    public function options(): array
+    public static function options(): array
     {
         return [
-            self::DELIVERED->value => __('sales::enums/advanced-payment.delivered'),
+            self::DELIVERED->value  => __('sales::enums/advanced-payment.delivered'),
             self::PERCENTAGE->value => __('sales::enums/advanced-payment.percentage'),
-            self::FIXED->value => __('sales::enums/advanced-payment.fixed'),
+            self::FIXED->value      => __('sales::enums/advanced-payment.fixed'),
         ];
     }
 }
