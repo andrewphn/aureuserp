@@ -1,0 +1,44 @@
+<?php
+
+namespace Webkul\Sale\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Currency;
+
+class AdvancedPaymentInvoice extends Model
+{
+    protected $table = 'sales_advance_payment_invoices';
+
+    protected $fillable = [
+        'currency_id',
+        'company_id',
+        'creator_id',
+        'advance_payment_method',
+        'fixed_amount',
+        'deduct_down_payments',
+        'consolidated_billing',
+        'amount',
+    ];
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(AdvancePaymentInvoiceOrderSale::class, 'advance_payment_invoice_id');
+    }
+}

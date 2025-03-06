@@ -2,20 +2,25 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions;
 
+use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Actions\Action;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums as AccountEnums;
-use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Move;
 use Webkul\Invoice\Enums\InvoicePolicy;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
+use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Sale\Settings\InvoiceSettings;
+use Webkul\Sale\Models\AdvancedPaymentInvoice;
 
 class CreateInvoiceAction extends Action
 {
@@ -36,30 +41,70 @@ class CreateInvoiceAction extends Action
 
                 return 'primary';
             })
-            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.title'))
-            ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
-            ->action(function (Order $record, $livewire) {
+            ->label(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.title'))
+            ->form([
+                Forms\Components\Radio::make('advance_payment_method')
+                    ->inline(false)
+                    ->options(AdvancedPayment::class)
+                    ->default(AdvancedPayment::DELIVERED->value)
+                    ->live(),
+                Forms\Components\Group::make()
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('amount')
+                            ->visible(fn(Get $get) => $get('advance_payment_method') == AdvancedPayment::PERCENTAGE->value)
+                            ->rules('required', 'numeric')
+                            ->default(0.00)
+                            ->suffix('%'),
+                        Forms\Components\TextInput::make('amount')
+                            ->visible(fn(Get $get) => $get('advance_payment_method') == AdvancedPayment::FIXED->value)
+                            ->rules('required', 'numeric')
+                            ->default(0.00)
+                            ->prefix(fn($record) => $record->currency->symbol)
+                    ])
+            ])
+            ->hidden(fn($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
+            ->action(function (Order $record, $livewire, $data) {
                 if ($record->qty_to_invoice == 0) {
                     Notification::make()
-                        ->title(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.no-invoiceable-lines.title'))
-                        ->body(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.no-invoiceable-lines.body'))
+                        ->title(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.notification.no-invoiceable-lines.title'))
+                        ->body(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.notification.no-invoiceable-lines.body'))
                         ->warning()
                         ->send();
 
                     return;
                 }
 
-                $this->createAccountMove($record);
+                AdvancedPaymentInvoice::create([
+                    ...$data,
+                    'currency_id'          => $record->currency_id,
+                    'company_id'           => $record->company_id,
+                    'creator_id'           => Auth::id(),
+                    'deduct_down_payments' => true,
+                    'consolidated_billing' => true,
+                ]);
+
+                $invoice = $this->createAccountMove($record);
 
                 QuotationResource::collectTotals($record);
 
+                if ($data['advance_payment_method'] == AdvancedPayment::DELIVERED->value) {
+                    $record->update([
+                        'invoice_status' => InvoiceStatus::INVOICED->value,
+                    ]);
+                } else {
+                    $record->update([
+                        'invoice_status' => InvoiceStatus::TO_INVOICE->value,
+                    ]);
+                }
+
                 Notification::make()
-                    ->title(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.invoice-created.title'))
-                    ->body(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.notification.invoice-created.body'))
+                    ->title(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.notification.invoice-created.title'))
+                    ->body(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.notification.invoice-created.body'))
                     ->success()
                     ->send();
 
-                $livewire->redirect(InvoiceResource::getUrl('edit', ['record' => $record]), navigate: FilamentView::hasSpaMode());
+                $livewire->redirect(InvoiceResource::getUrl('edit', ['record' => $invoice]), navigate: FilamentView::hasSpaMode());
             });
     }
 
@@ -93,9 +138,7 @@ class CreateInvoiceAction extends Action
 
         InvoiceResource::collectTotals($accountMove);
 
-        $record->update([
-            'invoice_status' => InvoiceStatus::INVOICED->value,
-        ]);
+        return $accountMove;
     }
 
     private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
