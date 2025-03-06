@@ -54,8 +54,8 @@ class CustomerResource extends BaseCustomerResource
     {
         return [
             'index'        => Pages\ListCustomers::route('/'),
-            'view'         => Pages\ViewCustomer::route('/{record}'),
             'create'       => Pages\CreateCustomer::route('/create'),
+            'view'         => Pages\ViewCustomer::route('/{record}'),
             'edit'         => Pages\EditCustomer::route('/{record}/edit'),
             'contacts'     => Pages\ManageContacts::route('/{record}/contacts'),
             'addresses'    => Pages\ManageAddresses::route('/{record}/addresses'),
