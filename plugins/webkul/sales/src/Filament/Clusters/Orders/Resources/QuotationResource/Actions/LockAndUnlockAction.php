@@ -21,6 +21,7 @@ class LockAndUnlockAction extends Action
         $this
             ->label(fn ($record) => $record->locked ? __('Unlock') : __('Lock'))
             ->color(fn ($record) => $record->locked ? 'primary' : 'gray')
+            ->icon(fn ($record) => ! $record->locked ? 'heroicon-o-lock-closed' : 'heroicon-o-lock-open')
             ->action(function (Order $record): void {
                 $record->update(['locked' => ! $record->locked]);
 

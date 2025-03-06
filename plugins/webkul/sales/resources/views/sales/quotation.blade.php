@@ -50,6 +50,15 @@
         .small-text {
             font-size: 7px;
         }
+
+        .options {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
         table {
             width: 100%;
             border-spacing: 1px 0;
@@ -218,7 +227,7 @@
                 </tbody>
             </table>
 
-            <!-- Items -->
+            <!-- Products Items -->
             <div class="items">
                 <table class="ltr">
                     <thead>
@@ -273,6 +282,36 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Optional Product Items Items -->
+            @if ($record->optionalLines)
+                <div class="items">
+                    <span class="options">Product Options</span>
+
+                    <table class="ltr">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($record->optionalLines as $line)
+                                <tr>
+                                    <td>{{ $line?->name ?? '-' }}</td>
+                                    <td>{{ $line?->name ?? '-' }}</td>
+                                    <td>{{ $record->currency->symbol }}{{ number_format($line->price_unit, 2) }}</td>
+                                    <td>{{ $line?->product_uom_qty ?? '-' }}</td>
+                                    <td>{{ $record->currency->symbol }}{{ number_format($line->price_total, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
 
             <!-- Payment Information Section -->
             @if ($record->name)
