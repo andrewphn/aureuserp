@@ -133,9 +133,14 @@ class QuotationResource extends Resource
                                     ->native(false)
                                     ->default(now())
                                     ->required()
+                                    ->hidden(fn ($record) => $record)
                                     ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL->value])),
                                 Forms\Components\DatePicker::make('date_order')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.quotation-date'))
+                                    ->label(function ($record) {
+                                        return $record?->state == OrderState::SALE->value
+                                            ? __('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.order-date')
+                                            : __('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.quotation-date');
+                                    })
                                     ->default(now())
                                     ->native(false)
                                     ->required()

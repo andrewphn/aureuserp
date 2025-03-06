@@ -49,6 +49,6 @@ class CreateQuotation extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $this->getResource()::collectTotals($this->getRecord());
+        QuotationResource::collectTotals($this->getRecord());
     }
 }

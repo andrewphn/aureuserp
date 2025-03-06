@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Quotations',
+    'title' => 'Quotation',
 
     'navigation' => [
         'title' => 'Quotations',
@@ -15,6 +15,7 @@ return [
                     'customer'       => 'Customer',
                     'expiration'     => 'Expiration',
                     'quotation-date' => 'Quotation Date',
+                    'order-date'     => 'Order Date',
                     'payment-term'   => 'Payment Term',
                 ],
             ],

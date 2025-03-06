@@ -52,6 +52,6 @@ class EditQuotation extends EditRecord
     {
         $record = $this->getRecord();
 
-        $this->getResource()::collectTotals($record);
+        QuotationResource::collectTotals($record);
     }
 }
