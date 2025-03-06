@@ -10,7 +10,7 @@ class CreateInvoiceAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'orders.sales.preview-quotation';
+        return 'orders.sales.create-invoice';
     }
 
     protected function setUp(): void

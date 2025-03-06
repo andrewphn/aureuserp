@@ -70,7 +70,7 @@ class SendByEmailAction extends Action
             )
             ->modalIcon('heroicon-s-envelope')
             ->modalHeading(__('sales::traits/sale-order-action.header-actions.send-by-email.modal.heading'))
-            ->visible(fn ($record) => $record->state != OrderState::DRAFT->value)
+            ->hidden(fn ($record) => $record->state != OrderState::DRAFT->value)
             ->action(function ($record, array $data) {
                 $this->handleSendByEmail($record, $data);
             });
@@ -81,7 +81,6 @@ class SendByEmailAction extends Action
         $modalName = OrderState::options()[$record->state];
 
         return [
-            'record_url'     => $this->getRedirectUrl() ?? '',
             'record_name'    => $record->name,
             'model_name'     => $modalName,
             'subject'        => $data['subject'],

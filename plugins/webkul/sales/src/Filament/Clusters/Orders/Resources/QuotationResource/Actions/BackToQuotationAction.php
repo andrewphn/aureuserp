@@ -22,13 +22,13 @@ class BackToQuotationAction extends Action
             ->label(__('Back To Quotation'))
             ->color('gray')
             ->hidden(fn ($record) => $record->state != OrderState::CANCEL->value)
-            ->action(function ($record) {
+            ->action(function ($record, $livewire) {
                 $record->update([
                     'state'          => OrderState::DRAFT->value,
                     'invoice_status' => InvoiceStatus::NO->value,
                 ]);
 
-                $this->refreshFormData(['state']);
+                $livewire->refreshFormData(['state']);
 
                 Notification::make()
                     ->success()

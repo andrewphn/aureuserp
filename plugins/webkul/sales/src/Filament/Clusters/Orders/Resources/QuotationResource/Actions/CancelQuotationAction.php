@@ -17,7 +17,7 @@ class CancelQuotationAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'orders.sales.confirm';
+        return 'orders.sales.cancel';
     }
 
     protected function setUp(): void
@@ -46,7 +46,7 @@ class CancelQuotationAction extends Action
                                 $this->handleCancelAndSendEmail($record, $livewire?->mountedActionsData[0]);
                             }
 
-                            $this->refreshFormData(['state']);
+                            $livewire->refreshFormData(['state']);
 
                             Notification::make()
                                 ->success()
@@ -59,13 +59,13 @@ class CancelQuotationAction extends Action
                         ->label(__('sales::traits/sale-order-action.header-actions.cancel.footer-actions.cancel.title'))
                         ->icon('heroicon-o-x-circle')
                         ->modalIcon('heroicon-s-x-circle')
-                        ->action(function () use ($record) {
+                        ->action(function () use ($record, $livewire) {
                             $record->update([
                                 'state'          => OrderState::CANCEL->value,
                                 'invoice_status' => InvoiceStatus::NO->value,
                             ]);
 
-                            $this->refreshFormData(['state']);
+                            $livewire->refreshFormData(['state']);
 
                             Notification::make()
                                 ->success()
@@ -116,7 +116,6 @@ class CancelQuotationAction extends Action
     private function preparePayloadForCancelAndSendEmail($record, $partner, $data): array
     {
         return [
-            'record_url'     => $this->getRedirectUrl() ?? '',
             'record_name'    => $record->name,
             'model_name'     => 'Quotation',
             'subject'        => $data['subject'],
