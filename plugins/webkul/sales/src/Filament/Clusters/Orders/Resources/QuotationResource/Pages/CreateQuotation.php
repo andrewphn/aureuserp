@@ -34,6 +34,7 @@ class CreateQuotation extends CreateRecord
         $data['user_id'] = $user->id;
         $data['company_id'] = $user->default_company_id;
         $data['state'] = OrderState::DRAFT->value;
+        $data['create_date'] = now();
 
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);

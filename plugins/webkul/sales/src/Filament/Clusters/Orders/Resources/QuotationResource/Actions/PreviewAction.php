@@ -3,7 +3,6 @@
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions;
 
 use Filament\Actions\Action;
-use Filament\Support\Enums\MaxWidth;
 
 class PreviewAction extends Action
 {
@@ -18,15 +17,9 @@ class PreviewAction extends Action
 
         $this
             ->label(__('Preview'))
-            ->modalIcon('heroicon-s-document-text')
             ->modalHeading(__('Preview Quotation'))
-            ->modalWidth(MaxWidth::SevenExtraLarge)
-            ->modalFooterActions(function ($record) {
-                return [];
-            })
-            ->modalContent(function ($record) {
-                return view('sales::sales.quotation', ['record' => $record]);
-            })
+            ->modalFooterActions(fn ($record) => [])
+            ->modalContent(fn ($record) => view('sales::sales.quotation', ['record' => $record]))
             ->color('gray');
     }
 }

@@ -1402,8 +1402,6 @@ class QuotationResource extends Resource
 
         $line->sort = $line->sort ?? OrderLine::max('sort') + 1;
 
-        $line->create_date = $line->create_date ?? now();
-
         $line->technical_price_unit = $line->price_unit;
 
         $line->price_reduce_taxexcl = $line->price_unit - ($line->price_unit * ($line->discount / 100));
