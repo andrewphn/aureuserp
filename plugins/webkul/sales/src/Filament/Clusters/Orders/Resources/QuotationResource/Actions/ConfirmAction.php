@@ -23,14 +23,14 @@ class ConfirmAction extends Action
         $this
             ->color('primary')
             ->label(__('sales::traits/sale-order-action.header-actions.confirm.title'))
-            ->hidden(fn ($record) => $record->state != OrderState::DRAFT->value)
+            ->hidden(fn($record) => $record->state != OrderState::DRAFT->value)
             ->action(function ($record, $livewire) {
                 $record->update([
                     'state'          => OrderState::SALE->value,
                     'invoice_status' => InvoiceStatus::TO_INVOICE->value,
                 ]);
 
-                $this->refreshFormData(['state']);
+                $livewire->refreshFormData(['state']);
 
                 $livewire->redirect(OrdersResource::getUrl('view', ['record' => $record]), navigate: FilamentView::hasSpaMode());
 

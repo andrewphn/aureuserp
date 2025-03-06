@@ -18,9 +18,11 @@ class CreateInvoiceAction extends Action
         parent::setUp();
 
         $this
+            ->color('primary')
+            ->label(__('sales::traits/sale-order-action.header-actions.create-invoice.title'))
             ->modalIcon('heroicon-s-receipt-percent')
             ->modalHeading(__('sales::traits/sale-order-action.header-actions.create-invoice.modal.heading'))
-            ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
+            ->hidden(fn($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
             ->action(function () {})
             ->modalWidth(MaxWidth::SevenExtraLarge);
     }
