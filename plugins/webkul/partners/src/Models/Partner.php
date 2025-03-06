@@ -2,8 +2,12 @@
 
 namespace Webkul\Partner\Models;
 
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,10 +18,11 @@ use Webkul\Partner\Database\Factories\PartnerFactory;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Illuminate\Support\Facades\Storage;
 
-class Partner extends Model
+class Partner extends Authenticatable implements FilamentUser
 {
-    use HasChatter, HasFactory, HasLogActivity, SoftDeletes;
+    use HasChatter, HasFactory, HasLogActivity, SoftDeletes, Notifiable;
 
     /**
      * Table name.
@@ -62,6 +67,28 @@ class Partner extends Model
         'account_type' => AccountType::class,
         'is_active'    => 'boolean',
     ];
+
+    /**
+     * Determine if the user can access the Filament panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get image url for the product image.
+     *
+     * @return string
+     */
+    public function getAvatarUrlAttribute()
+    {
+        if (! $this->avatar) {
+            return;
+        }
+
+        return Storage::url($this->avatar);
+    }
 
     public function parent(): BelongsTo
     {
