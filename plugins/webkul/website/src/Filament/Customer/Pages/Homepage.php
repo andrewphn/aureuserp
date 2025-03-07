@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Website\Filament\Front\Pages;
+namespace Webkul\Website\Filament\Customer\Pages;
 
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Pages\Page;
@@ -14,7 +14,7 @@ class Homepage extends Page
     /**
      * @var view-string
      */
-    protected static string $view = 'website::filament.front.pages.homepage';
+    protected static string $view = 'website::filament.customer.pages.homepage';
 
     public static function getNavigationLabel(): string
     {

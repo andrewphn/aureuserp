@@ -1,4 +1,4 @@
-@guest
+@if (! filament()->auth()->check())
     <ul class="me-4 hidden items-center gap-x-4 lg:flex">
         @foreach ($navigationItems as $item)
             @if ($item->isVisible())
@@ -17,4 +17,4 @@
             @endif
         @endforeach
     </ul>
-@endguest
+@endif

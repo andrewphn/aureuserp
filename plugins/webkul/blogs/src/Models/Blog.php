@@ -5,10 +5,13 @@ namespace Webkul\Blog\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Security\Models\User;
 
 class Blog extends Model
 {
+    use SoftDeletes;
+
     /**
      * Table name.
      *

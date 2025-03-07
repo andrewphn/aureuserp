@@ -45,7 +45,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-                +
+            
+            $table->softDeletes();
             $table->timestamps();
         });
     }

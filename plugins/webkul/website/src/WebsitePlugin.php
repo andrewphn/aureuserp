@@ -9,7 +9,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Collection;
 use Filament\Navigation\NavigationItem;
 use Filament\Navigation\MenuItem;
-use Webkul\Website\Filament\Front\Clusters\Account;
+use Webkul\Website\Filament\Customer\Clusters\Account;
 
 class WebsitePlugin implements Plugin
 {
@@ -30,15 +30,12 @@ class WebsitePlugin implements Plugin
         }
 
         $panel
-            ->when($panel->getId() == 'front', function (Panel $panel) {
+            ->when($panel->getId() == 'customer', function (Panel $panel) {
                 $panel
-                    ->login()
-                    ->registration()
-                    ->profile(isSimple: false)
-                    ->discoverResources(in: $this->getPluginBasePath('/Filament/Front/Resources'), for: 'Webkul\\Website\\Filament\\Front\\Resources')
-                    ->discoverPages(in: $this->getPluginBasePath('/Filament/Front/Pages'), for: 'Webkul\\Website\\Filament\\Front\\Pages')
-                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Front/Clusters'), for: 'Webkul\\Website\\Filament\\Front\\Clusters')
-                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Front/Widgets'), for: 'Webkul\\Website\\Filament\\Front\\Widgets')
+                    ->discoverResources(in: $this->getPluginBasePath('/Filament/Customer/Resources'), for: 'Webkul\\Website\\Filament\\Customer\\Resources')
+                    ->discoverPages(in: $this->getPluginBasePath('/Filament/Customer/Pages'), for: 'Webkul\\Website\\Filament\\Customer\\Pages')
+                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Clusters'), for: 'Webkul\\Website\\Filament\\Customer\\Clusters')
+                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Widgets'), for: 'Webkul\\Website\\Filament\\Customer\\Widgets')
                     ->userMenuItems([
                         'my_account' => MenuItem::make()->label('My Account')
                             ->url(fn (): string => Account::getUrl())
@@ -46,13 +43,13 @@ class WebsitePlugin implements Plugin
                     ]) 
                     ->renderHook(
                         PanelsRenderHook::TOPBAR_END,
-                        fn (): string => view('website::filament.front.header.auth-links', [
+                        fn (): string => view('website::filament.customer.header.auth-links', [
                             'navigationItems' => $this->getTopNavigationItems(),
                         ])->render(),
                     )
                     ->renderHook(
                         PanelsRenderHook::FOOTER,
-                        fn (): string => view('website::filament.front.footer.index', [
+                        fn (): string => view('website::filament.customer.footer.index', [
                             'navigationItems' => $this->getFooterNavigationItems(),
                         ])->render(),
                     );

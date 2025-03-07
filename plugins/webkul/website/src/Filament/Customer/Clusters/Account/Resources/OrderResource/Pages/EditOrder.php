@@ -1,8 +1,8 @@
 <?php
 
-namespace Webkul\Website\Filament\Front\Clusters\Account\Resources\OrderResource\Pages;
+namespace Webkul\Website\Filament\Customer\Clusters\Account\Resources\OrderResource\Pages;
 
-use Webkul\Website\Filament\Front\Clusters\Account\Resources\OrderResource;
+use Webkul\Website\Filament\Customer\Clusters\Account\Resources\OrderResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

@@ -25,12 +25,12 @@ class BlogPlugin implements Plugin
         }
 
         $panel
-            ->when($panel->getId() == 'front', function (Panel $panel) {
+            ->when($panel->getId() == 'customer', function (Panel $panel) {
                 $panel
-                    ->discoverResources(in: $this->getPluginBasePath('/Filament/Front/Resources'), for: 'Webkul\\Blog\\Filament\\Front\\Resources')
-                    ->discoverPages(in: $this->getPluginBasePath('/Filament/Front/Pages'), for: 'Webkul\\Blog\\Filament\\Front\\Pages')
-                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Front/Clusters'), for: 'Webkul\\Blog\\Filament\\Front\\Clusters')
-                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Front/Widgets'), for: 'Webkul\\Blog\\Filament\\Front\\Widgets');
+                    ->discoverResources(in: $this->getPluginBasePath('/Filament/Customer/Resources'), for: 'Webkul\\Blog\\Filament\\Customer\\Resources')
+                    ->discoverPages(in: $this->getPluginBasePath('/Filament/Customer/Pages'), for: 'Webkul\\Blog\\Filament\\Customer\\Pages')
+                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Clusters'), for: 'Webkul\\Blog\\Filament\\Customer\\Clusters')
+                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Widgets'), for: 'Webkul\\Blog\\Filament\\Customer\\Widgets');
             })
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel

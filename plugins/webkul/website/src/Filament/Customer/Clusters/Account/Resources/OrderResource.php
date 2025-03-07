@@ -1,10 +1,10 @@
 <?php
 
-namespace Webkul\Website\Filament\Front\Clusters\Account\Resources;
+namespace Webkul\Website\Filament\Customer\Clusters\Account\Resources;
 
-use Webkul\Website\Filament\Front\Clusters\Account;
-use Webkul\Website\Filament\Front\Clusters\Account\Resources\OrderResource\Pages;
-use Webkul\Website\Filament\Front\Clusters\Account\Resources\OrderResource\RelationManagers;
+use Webkul\Website\Filament\Customer\Clusters\Account;
+use Webkul\Website\Filament\Customer\Clusters\Account\Resources\OrderResource\Pages;
+use Webkul\Website\Filament\Customer\Clusters\Account\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -66,9 +66,9 @@ class OrderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrders::route('/'),
+            'index'  => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrder::route('/create'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
+            'edit'   => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
 }

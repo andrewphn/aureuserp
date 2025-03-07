@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Website\Filament\Front\Clusters;
+namespace Webkul\Website\Filament\Customer\Clusters;
 
 use Filament\Clusters\Cluster;
 use Filament\Panel;
@@ -13,7 +13,7 @@ class Account extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return __('website::filament/front/clusters/account.navigation.title');
+        return __('website::filament/customer/clusters/account.navigation.title');
     }
     
     // public static function canAccess(): bool

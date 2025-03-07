@@ -9,7 +9,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 use Livewire\Livewire;
-use Webkul\Blog\Livewire\Front\ListBlogs;
+use Webkul\Blog\Livewire\Customer\ListBlogs;
 
 class BlogServiceProvider extends PackageServiceProvider
 {

@@ -18,14 +18,17 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Webkul\Support\PluginManager;
 use Filament\Navigation\MenuItem;
 
-class FrontPanelProvider extends PanelProvider
+class CustomerPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('front')
+            ->id('customer')
             ->path('/')
             ->homeUrl('/')
+            ->login()
+            ->registration()
+            ->profile(isSimple: false)
             ->favicon(asset('images/favicon.ico'))
             ->brandLogo(asset('images/logo-light.svg'))
             ->darkMode(false)
@@ -35,10 +38,6 @@ class FrontPanelProvider extends PanelProvider
             ])
             ->passwordReset()
             ->topNavigation()
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([])
             ->plugins([
                 PluginManager::make(),
             ])
