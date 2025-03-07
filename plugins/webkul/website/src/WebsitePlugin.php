@@ -53,6 +53,13 @@ class WebsitePlugin implements Plugin
                             'navigationItems' => $this->getFooterNavigationItems(),
                         ])->render(),
                     );
+            })
+            ->when($panel->getId() == 'admin', function (Panel $panel) {
+                $panel
+                    ->discoverResources(in: $this->getPluginBasePath('/Filament/Admin/Resources'), for: 'Webkul\\Website\\Filament\\Admin\\Resources')
+                    ->discoverPages(in: $this->getPluginBasePath('/Filament/Admin/Pages'), for: 'Webkul\\Website\\Filament\\Admin\\Pages')
+                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Admin/Clusters'), for: 'Webkul\\Website\\Filament\\Admin\\Clusters')
+                    ->discoverClusters(in: $this->getPluginBasePath('/Filament/Admin/Widgets'), for: 'Webkul\\Website\\Filament\\Admin\\Widgets');
             });
     }
 

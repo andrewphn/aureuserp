@@ -11,17 +11,37 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('blogs_categories', function (Blueprint $table) {
+        Schema::create('blogs_posts', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('title');
             $table->text('sub_title')->nullable();
+            $table->text('content');
             $table->string('slug')->unique();
             $table->string('image')->nullable();
+            $table->string('author_name')->nullable();
+            $table->boolean('is_published')->default(0);
+            $table->datetime('published_at')->nullable();
+            $table->integer('visits')->default(0);
             $table->string('meta_title')->nullable();
             $table->string('meta_keywords')->nullable();
             $table->text('meta_description')->nullable();
 
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('blogs_categories')
+                ->nullOnDelete();
+
+            $table->foreignId('author_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->foreignId('creator_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->foreignId('last_editor_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
@@ -36,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('blogs_categories');
+        Schema::dropIfExists('blogs_posts');
     }
 };

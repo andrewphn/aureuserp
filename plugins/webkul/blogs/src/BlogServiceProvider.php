@@ -8,8 +8,6 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
-use Livewire\Livewire;
-use Webkul\Blog\Livewire\Customer\ListBlogs;
 
 class BlogServiceProvider extends PackageServiceProvider
 {
@@ -24,7 +22,9 @@ class BlogServiceProvider extends PackageServiceProvider
             ->hasTranslations()
             ->hasMigrations([
                 '2025_03_06_093011_create_blogs_categories_table',
-                '2025_03_06_094011_create_blogs_blogs_table',
+                '2025_03_06_094011_create_blogs_posts_table',
+                '2025_03_07_065635_create_blogs_tags_table',
+                '2025_03_07_065715_create_blogs_post_tags_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -46,7 +46,5 @@ class BlogServiceProvider extends PackageServiceProvider
         FilamentAsset::register([
             Css::make('blogs', __DIR__ . '/../resources/dist/blogs.css'),
         ], 'blogs');
-        
-        Livewire::component('list-blogs', ListBlogs::class);
     }
 }
