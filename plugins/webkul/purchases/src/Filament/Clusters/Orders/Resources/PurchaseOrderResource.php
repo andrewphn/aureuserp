@@ -9,12 +9,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Filament\Clusters\Orders;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\PurchaseOrderResource\Pages;
-use Webkul\Purchase\Models\PurchaseOrder;
 
 class PurchaseOrderResource extends OrderResource
 {
-    protected static ?string $model = PurchaseOrder::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
     protected static bool $shouldRegisterNavigation = true;
@@ -28,11 +25,6 @@ class PurchaseOrderResource extends OrderResource
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
-    {
-        return __('purchases::filament/clusters/orders/resources/purchase-order.navigation.title');
-    }
-
-    public static function getModelLabel(): string
     {
         return __('purchases::filament/clusters/orders/resources/purchase-order.navigation.title');
     }

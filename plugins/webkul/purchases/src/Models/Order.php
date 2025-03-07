@@ -120,16 +120,16 @@ class Order extends Model
         'calendar_start_at',
         'incoterm_location',
         'effective_date',
-        'requisition.name' => 'Requisition',
-        'partner.name' => 'Vendor',
+        'requisition.name'    => 'Requisition',
+        'partner.name'        => 'Vendor',
         'partnerAddress.name' => 'Partner Address',
-        'currency.name' => 'Currency',
-        'fiscalPosition' => 'Fiscal Position',
-        'paymentTerm.name' => 'Payment Term',
-        'incoterm.name' => 'Buyer',
-        'user.name' => 'Buyer',
-        'company.name' => 'Company',
-        'creator.name' => 'Creator',
+        'currency.name'       => 'Currency',
+        'fiscalPosition'      => 'Fiscal Position',
+        'paymentTerm.name'    => 'Payment Term',
+        'incoterm.name'       => 'Buyer',
+        'user.name'           => 'Buyer',
+        'company.name'        => 'Company',
+        'creator.name'        => 'Creator',
     ];
 
     /**
@@ -197,7 +197,7 @@ class Order extends Model
 
     public function lines(): HasMany
     {
-        return $this->hasMany(OrderLine::class, 'order_id');
+        return $this->hasMany(OrderLine::class);
     }
 
     public function accountMoves(): BelongsToMany

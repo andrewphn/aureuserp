@@ -7,12 +7,9 @@ use Filament\Resources\Pages\Page;
 use Webkul\Product\Filament\Resources\CategoryResource;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
-use Webkul\Purchase\Models\Category;
 
 class ProductCategoryResource extends CategoryResource
 {
-    protected static ?string $model = Category::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-folder';
 
     protected static bool $shouldRegisterNavigation = true;
@@ -35,15 +32,9 @@ class ProductCategoryResource extends CategoryResource
 
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
-        $route = request()->route()?->getName() ?? session('current_route');
+        $currentRoute = request()->route()?->getName();
 
-        if ($route && $route != 'livewire.update') {
-            session(['current_route' => $route]);
-        } else {
-            $route = session('current_route');
-        }
-
-        if ($route === self::getRouteBaseName().'.index') {
+        if ($currentRoute === self::getRouteBaseName().'.index') {
             return SubNavigationPosition::Start;
         }
 

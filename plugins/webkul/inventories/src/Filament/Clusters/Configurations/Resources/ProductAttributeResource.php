@@ -6,7 +6,7 @@ use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
 use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Product\Filament\Resources\AttributeResource;
-use Webkul\Inventory\Models\Attribute;
+use Webkul\Product\Models\Attribute;
 
 class ProductAttributeResource extends AttributeResource
 {

@@ -5,14 +5,14 @@ namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Illuminate\Support\Facades\Route;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
+use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Support\Filament\Clusters\Settings;
-use Filament\Notifications\Notification;
-use Webkul\Inventory\Models\Product;
-use Webkul\Inventory\Enums\ProductTracking;
 
 class ManageTraceability extends SettingsPage
 {
@@ -78,8 +78,8 @@ class ManageTraceability extends SettingsPage
         if (Product::whereIn('tracking', [ProductTracking::SERIAL, ProductTracking::LOT])->exists()) {
             Notification::make()
                 ->warning()
-                ->title(__('inventories::filament/clusters/settings/pages/manage-traceability.before-save.notification.warning.title'))
-                ->body(__('inventories::filament/clusters/settings/pages/manage-traceability.before-save.notification.warning.body'))
+                ->title('You have products in stock that have lot/serial number tracking enabled. ')
+                ->body('First switch off tracking on all the products before switching off this setting.')
                 ->send();
 
             $this->fillForm();

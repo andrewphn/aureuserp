@@ -2,7 +2,7 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Account\Models\Move as Move;
+use Webkul\Account\Models\Move;
 
 class AccountMove extends Move
 {

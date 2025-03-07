@@ -4,6 +4,7 @@ namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\InvoiceStatus;
@@ -48,10 +49,20 @@ class OrderToInvoiceResource extends Resource
         return QuotationResource::infolist($infolist);
     }
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewOrderToInvoice::class,
+            Pages\EditOrderToInvoice::class,
+        ]);
+    }
+
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListOrderToInvoices::route('/'),
+            'index' => Pages\ListOrderToInvoices::route('/'),
+            'view'  => Pages\ViewOrderToInvoice::route('/{record}'),
+            'edit'  => Pages\EditOrderToInvoice::route('/{record}/edit'),
         ];
     }
 }

@@ -395,15 +395,9 @@ class LocationResource extends Resource
 
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
-        $route = request()->route()?->getName() ?? session('current_route');
+        $currentRoute = request()->route()?->getName();
 
-        if ($route && $route != 'livewire.update') {
-            session(['current_route' => $route]);
-        } else {
-            $route = session('current_route');
-        }
-
-        if ($route === self::getRouteBaseName().'.index') {
+        if ($currentRoute === self::getRouteBaseName().'.index') {
             return SubNavigationPosition::Start;
         }
 

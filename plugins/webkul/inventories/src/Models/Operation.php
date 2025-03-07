@@ -159,12 +159,12 @@ class Operation extends Model
 
     public function moves(): HasMany
     {
-        return $this->hasMany(Move::class, 'operation_id');
+        return $this->hasMany(Move::class);
     }
 
     public function moveLines(): HasMany
     {
-        return $this->hasMany(MoveLine::class, 'operation_id');
+        return $this->hasMany(MoveLine::class);
     }
 
     public function packages(): HasManyThrough

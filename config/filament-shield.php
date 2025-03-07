@@ -8,7 +8,7 @@ return [
         'navigation_badge'           => false,
         'navigation_group'           => true,
         'is_globally_searchable'     => false,
-        'show_model_path'            => false,
+        'show_model_path'            => true,
         'is_scoped_to_tenant'        => true,
         'cluster'                    => null,
     ],
