@@ -17,6 +17,7 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\PaymentTerm;
@@ -522,6 +523,7 @@ class QuotationResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
+                        ->hidden(fn () => $this->getRecord()->state == OrderState::SALE->value)
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -568,7 +570,10 @@ class QuotationResource extends Resource
                                 ->body(__('sales::filament/clusters/orders/resources/quotation.table.bulk-actions.restore.notification.body'))
                         ),
                 ]),
-            ]);
+            ])
+            ->checkIfRecordIsSelectableUsing(
+                fn (Model $record): bool => static::can('delete', $record) && $record->state !== OrderState::SALE->value,
+            );
     }
 
     public static function infolist(Infolist $infolist): Infolist
