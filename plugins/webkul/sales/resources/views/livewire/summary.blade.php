@@ -58,95 +58,60 @@
         <div class="flex justify-end">
             <div class="invoice-container">
                 @php
-                    $subtotal = 0;
+                    $subTotal = 0;
                     $totalDiscount = 0;
-                    $totalIncludedTax = 0;
-                    $totalAdditionalTax = 0;
+                    $totalTax = 0;
                     $grandTotal = 0;
+                    $margin = 0;
+                    $marginPercentage = 0;
 
                     foreach ($products as $product) {
-                        $quantity = floatval(($product['product_uom_qty'] ?? $product['quantity'])  ?? 1);
-                        $price = floatval($product['price_unit'] ?? 0);
-                        $discount = floatval($product['discount'] ?? 0);
-                        $taxIds = $product['tax'] ?? [];
+                        $subTotal += floatval($product['price_subtotal']);
 
-                        $lineBaseAmount = $quantity * $price;
+                        $totalTax += floatval($product['price_tax'] ?? 0);
 
-                        $lineDiscountAmount = $lineBaseAmount * ($discount / 100);
-                        $lineSubtotalBeforeTax = $lineBaseAmount - $lineDiscountAmount;
+                        $totalDiscount += floatval($product['discount']);
 
-                        $totalDiscount += $lineDiscountAmount;
+                        $grandTotal += floatval($product['price_total']);
 
-                        $lineIncludedTax = 0;
-                        $lineAdditionalTax = 0;
-                        $adjustedSubtotal = $lineSubtotalBeforeTax;
-
-                        if (!empty($taxIds)) {
-                            $taxes = \Webkul\Account\Models\Tax::whereIn('id', $taxIds)->get();
-
-                            foreach ($taxes as $tax) {
-                                $taxValue = floatval($tax->amount);
-                                if ($tax->include_base_amount) {
-                                    $includedTaxRate = $taxValue / 100;
-                                    $includedTaxAmount = $adjustedSubtotal - ($adjustedSubtotal / (1 + $includedTaxRate));
-                                    $lineIncludedTax += $includedTaxAmount;
-                                    $adjustedSubtotal -= $includedTaxAmount;
-                                }
-                            }
-
-                            foreach ($taxes as $tax) {
-                                $taxValue = floatval($tax->amount);
-                                if (!$tax->include_base_amount) {
-                                    $lineAdditionalTax += $adjustedSubtotal * ($taxValue / 100);
-                                }
-                            }
-                        }
-
-                        $subtotal += $adjustedSubtotal;
-                        $totalIncludedTax += $lineIncludedTax;
-                        $totalAdditionalTax += $lineAdditionalTax;
+                        $margin += floatval($product['margin']);
                     }
 
-                    $totalTax = $totalIncludedTax + $totalAdditionalTax;
-                    $grandTotal = $subtotal + $totalAdditionalTax;
+                    $marginPercentage = ($subTotal > 0) ? ($margin / $subTotal) * 100 : 0;
                 @endphp
 
-                <div class="invoice-item">
-                    <span>Subtotal (Before Discount)</span>
-                    <span>{{ number_format($subtotal + $totalDiscount, 2) }}</span>
+               <div class="invoice-item">
+                    <span>Subtotal</span>
+                    <span>{{ $currency->symbol }} {{ number_format($subTotal, 2) }}</span>
                 </div>
 
                 @if ($totalDiscount > 0)
                     <div class="invoice-item">
                         <span>Discount</span>
-                        <span>-{{ number_format($totalDiscount, 2) }}</span>
+                        <span>- {{ $currency->symbol }} {{ number_format($totalDiscount, 2) }}</span>
                     </div>
                 @endif
 
-                <div class="invoice-item">
-                    <span>Subtotal (After Discount)</span>
-                    <span>{{ number_format($subtotal, 2) }}</span>
-                </div>
-
-                @if ($totalIncludedTax > 0)
+                @if ($totalTax > 0)
                     <div class="invoice-item">
-                        <span>Included Tax</span>
-                        <span>{{ number_format($totalIncludedTax, 2) }}</span>
-                    </div>
-                @endif
-
-                @if ($totalAdditionalTax > 0)
-                    <div class="invoice-item">
-                        <span>Additional Tax</span>
-                        <span>{{ number_format($totalAdditionalTax, 2) }}</span>
+                        <span>Tax Amount</span>
+                        <span>{{ $currency->symbol }} {{ number_format($totalTax, 2) }}</span>
                     </div>
                 @endif
 
                 <div class="divider"></div>
+
                 <div class="font-bold invoice-item">
                     <span>Grand Total</span>
-                    <span>{{ number_format($grandTotal, 2) }}</span>
+                    <span>{{ $currency->symbol }} {{ number_format($grandTotal, 2) }}</span>
                 </div>
+
+                @if ($enableMargin)
+                    <div class="font-bold invoice-item">
+                        <span>Margin</span>
+                        <span>{{ number_format($margin, 2) }} ({{ number_format($marginPercentage, 2) }} %)</span>
+                    </div>
+                @endif
             </div>
         </div>
     @endif

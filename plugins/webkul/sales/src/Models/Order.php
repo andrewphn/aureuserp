@@ -4,19 +4,21 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Journal;
+use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
+use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
 
@@ -41,6 +43,7 @@ class Order extends Model
         'user_id',
         'team_id',
         'creator_id',
+        'campaign_id',
         'access_token',
         'name',
         'state',
@@ -109,6 +112,21 @@ class Order extends Model
         return $this->belongsTo(Partner::class);
     }
 
+    public function getQtyToInvoiceAttribute()
+    {
+        return $this->lines->sum('qty_to_invoice');
+    }
+
+    public function accountMoves(): BelongsToMany
+    {
+        return $this->belongsToMany(Move::class, 'sales_order_line_invoices', 'order_id', 'move_id');
+    }
+
+    public function campaign()
+    {
+        return $this->belongsTo(UtmCampaign::class, 'campaign_id');
+    }
+
     public function journal()
     {
         return $this->belongsTo(Journal::class);
@@ -117,6 +135,11 @@ class Order extends Model
     public function partnerInvoice()
     {
         return $this->belongsTo(Partner::class, 'partner_invoice_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'sales_order_tags', 'order_id', 'tag_id');
     }
 
     public function partnerShipping()
@@ -156,7 +179,7 @@ class Order extends Model
 
     public function utmSource()
     {
-        return $this->belongsTo(UTMSource::class);
+        return $this->belongsTo(UTMSource::class, 'utm_source_id');
     }
 
     public function medium()
@@ -164,25 +187,14 @@ class Order extends Model
         return $this->belongsTo(UTMMedium::class);
     }
 
-    public function salesOrderLines()
+    public function lines()
     {
-        return $this
-            ->hasMany(SaleOrderLine::class)
-            ->whereNull('display_type');
+        return $this->hasMany(OrderLine::class);
     }
 
-    public function salesOrderSectionLines()
+    public function optionalLines()
     {
-        return $this
-            ->hasMany(SaleOrderLine::class)
-            ->where('display_type', OrderDisplayType::SECTION->value);
-    }
-
-    public function salesOrderNoteLines()
-    {
-        return $this
-            ->hasMany(SaleOrderLine::class)
-            ->where('display_type', OrderDisplayType::NOTE->value);
+        return $this->hasMany(OrderOption::class);
     }
 
     public function quotationTemplate()
