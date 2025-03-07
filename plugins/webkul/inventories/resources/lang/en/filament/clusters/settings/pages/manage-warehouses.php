@@ -11,4 +11,13 @@ return [
         'enable-multi-steps-routes-helper-text' => 'Use your own routes to manage the transfer of products between warehouses',
         'configure-routes'                      => 'Configure Warehouse Routes',
     ],
+
+    'before-save' => [
+        'notification' => [
+            'warning' => [
+                'title' => 'Have multiple warehouses',
+                'body'  => 'You can\'t deactivate the multi-location if you have more than onc warehouse.',
+            ],
+        ],
+    ],
 ];

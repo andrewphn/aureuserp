@@ -10,10 +10,13 @@ use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 use Webkul\Purchase\Filament\Clusters\Products;
 use Webkul\Purchase\Filament\Clusters\Products\Resources\ProductResource\Pages;
+use Webkul\Purchase\Models\Product;
 
 class ProductResource extends BaseProductResource
 {
     use HasCustomFields;
+
+    protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 

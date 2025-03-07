@@ -13,8 +13,8 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackagingResourc
 use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\ProductSettings;
-use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 
 class PackagingResource extends BasePackagingResource

@@ -19,8 +19,6 @@ class OrderTemplateProductResource extends Resource
 {
     protected static ?string $model = OrderTemplateProduct::class;
 
-    protected static bool $shouldRegisterNavigation = false;
-
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
 
     public static function getModelLabel(): string

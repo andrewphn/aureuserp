@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Enums;
@@ -24,6 +25,8 @@ use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
+use Webkul\Inventory\Models\Product;
+use Illuminate\Database\Eloquent\Model;
 
 class ManageQuantities extends ManageRelatedRecords
 {
@@ -145,7 +148,7 @@ class ManageQuantities extends ManageRelatedRecords
                         titleAttribute: 'name',
                         modifyQueryUsing: function (Builder $query, Forms\Get $get) {
                             $productId = $get('product_id') ?? $this->getOwnerRecord()->id;
-
+                            
                             return $query->where('product_id', $productId);
                         },
                     )
@@ -298,7 +301,7 @@ class ManageQuantities extends ManageRelatedRecords
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['product_id'] ??= $this->getOwnerRecord()->id;
-
+                        
                         $data['location_id'] = $data['location_id'] ?? Warehouse::first()->lot_stock_location_id;
 
                         $data['creator_id'] = Auth::id();

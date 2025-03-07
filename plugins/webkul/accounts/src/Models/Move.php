@@ -247,7 +247,7 @@ class Move extends Model
 
     public function lines()
     {
-        return $this->hasMany(MoveLine::class, 'move_id')
+        return $this->hasMany(MoveLine::class)
             ->where('display_type', 'product');
     }
 

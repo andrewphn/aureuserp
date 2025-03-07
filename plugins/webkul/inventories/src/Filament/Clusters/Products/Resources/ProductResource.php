@@ -16,8 +16,8 @@ use Webkul\Inventory\Filament\Clusters\Products;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Product;
-use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 
 class ProductResource extends BaseProductResource
@@ -292,7 +292,7 @@ class ProductResource extends BaseProductResource
             'destination_location_id' => $destinationLocationId,
             'product_qty'             => abs($currentQuantity),
             'product_uom_qty'         => abs($currentQuantity),
-            'quantity'                => abs($currentQuantity),
+            'quantity'               => abs($currentQuantity),
             'reference'               => 'Product Quantity Updated',
             'scheduled_at'            => now(),
             'uom_id'                  => $record->product->uom_id,

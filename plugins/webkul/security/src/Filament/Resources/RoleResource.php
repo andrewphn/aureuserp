@@ -15,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 use Webkul\Security\Filament\Resources\RoleResource\Pages;
 
@@ -205,26 +206,98 @@ class RoleResource extends Resource implements HasShieldPermissions
         return Utils::isResourceGloballySearchable() && count(static::getGloballySearchableAttributes()) && static::canViewAny();
     }
 
-    public static function getResourceEntitiesSchema(): ?array
+    public static function getPluginResourceEntitiesSchema(): ?array
     {
-        return collect(FilamentShield::getResources())
+        return collect(static::getPluginResources())
             ->sortKeys()
-            ->map(function ($entity) {
-                $sectionLabel = strval(
-                    static::shield()->hasLocalizedPermissionLabels()
-                        ? FilamentShield::getLocalizedResourceLabel($entity['fqcn'])
-                        : $entity['model']
-                );
-
-                return Forms\Components\Section::make($sectionLabel)
-                    ->description(fn () => new HtmlString('<span style="word-break: break-word;">'.Utils::showModelPath($entity['fqcn']).'</span>'))
-                    ->compact()
+            ->map(function ($plugin, $key) {
+                return Forms\Components\Section::make($key)
+                    ->collapsible()
                     ->schema([
-                        static::getCheckBoxListComponentForResource($entity),
-                    ])
-                    ->columnSpan(static::shield()->getSectionColumnSpan())
-                    ->collapsible();
+                        Forms\Components\Grid::make()
+                            ->schema(function () use ($plugin) {
+                                return collect($plugin)
+                                    ->map(function ($entity) {
+                                        $fieldsetLabel = strval(
+                                            static::shield()->hasLocalizedPermissionLabels()
+                                                ? FilamentShield::getLocalizedResourceLabel($entity['fqcn'])
+                                                : $entity['model']
+                                        );
+
+                                        return Forms\Components\Fieldset::make($fieldsetLabel)
+                                            ->schema([
+                                                Forms\Components\Placeholder::make('model')
+                                                    ->inlineLabel()
+                                                    ->content(fn (): HtmlString => new HtmlString('<span style="word-break: break-word;">'.$entity['fqcn'].'</span>'))
+                                                    ->columnSpan(2)
+                                                    ->visible(config('filament-shield.shield_resource.show_model_path', false)),
+                                                static::getCheckBoxListComponentForResource($entity),
+                                            ])
+                                            ->columnSpan(static::shield()->getSectionColumnSpan());
+                                    })
+                                    ->toArray();
+                            })
+                            ->columns(static::shield()->getGridColumns())
+                    ]);
             })
+            ->toArray();
+    }
+
+    /**
+     * Transform filament resources to key value pair for shield
+     */
+    public static function getPluginResources(): ?array
+    {
+        return collect(static::getResources())
+            ->groupBy(function ($value, $key) {
+                return explode('\\', $key)[1] ?? 'Unknown';
+            })
+            ->toArray();
+    }
+
+    /**
+     * Transform filament resources to key value pair for shield
+     */
+    public static function getResources(): ?array
+    {
+        $resources = Filament::getResources();
+        if (Utils::discoverAllResources()) {
+            $resources = [];
+            foreach (Filament::getPanels() as $panel) {
+                $resources = array_merge($resources, $panel->getResources());
+            }
+            $resources = array_unique($resources);
+        }
+
+        return collect($resources)
+            ->reject(function ($resource) {
+                if (! $resource::shouldRegisterNavigation()) {
+                    return true;
+                }
+
+                if ($resource == 'BezhanSalleh\FilamentShield\Resources\RoleResource') {
+                    return true;
+                }
+
+                if (Utils::isGeneralExcludeEnabled()) {
+                    return in_array(
+                        Str::of($resource)->afterLast('\\'),
+                        Utils::getExcludedResouces()
+                    );
+                }
+            })
+            ->mapWithKeys(function ($resource) {
+                $name = FilamentShield::getPermissionIdentifier($resource);
+
+                return [
+                    $resource => [
+                        'resource' => "{$name}",
+                        'model' => str($resource::getModel())->afterLast('\\')->toString(),
+                        'fqcn' => $resource,
+                    ],
+                ];
+            })
+            ->sortKeys()
             ->toArray();
     }
 
@@ -310,11 +383,7 @@ class RoleResource extends Resource implements HasShieldPermissions
                 ->label(__('filament-shield::filament-shield.resources'))
                 ->visible(fn (): bool => (bool) Utils::isResourceEntityEnabled())
                 ->badge(static::getResourceTabBadgeCount())
-                ->schema([
-                    Forms\Components\Grid::make()
-                        ->schema(static::getResourceEntitiesSchema())
-                        ->columns(static::shield()->getGridColumns()),
-                ]);
+                ->schema(static::getPluginResourceEntitiesSchema());
     }
 
     public static function getCheckBoxListComponentForResource(array $entity): Component
