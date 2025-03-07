@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
+use Webkul\Account\Models\PaymentTerm;
 use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Partner\Models\Partner;
@@ -150,6 +151,7 @@ class QuotationResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->default(PaymentTerm::find(10)?->id)
                                     ->columnSpan(1),
                             ])->columns(2),
                     ]),
@@ -246,7 +248,7 @@ class QuotationResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.form.tabs.term-and-conditions.title'))
                             ->icon('heroicon-o-clipboard-document-list')
                             ->schema([
-                                Forms\Components\RichEditor::make('narration')
+                                Forms\Components\RichEditor::make('note')
                                     ->hiddenLabel(),
                             ]),
                     ]),
@@ -816,7 +818,7 @@ class QuotationResource extends Resource
                         Infolists\Components\Tabs\Tab::make(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.term-and-conditions.title'))
                             ->icon('heroicon-o-clipboard-document-list')
                             ->schema([
-                                Infolists\Components\TextEntry::make('narration')
+                                Infolists\Components\TextEntry::make('note')
                                     ->html()
                                     ->hiddenLabel(),
                             ]),
@@ -882,6 +884,7 @@ class QuotationResource extends Resource
                                     )
                                     ->required()
                                     ->live()
+                                    ->default(UOM::first()?->id)
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
                                     ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
@@ -1042,6 +1045,7 @@ class QuotationResource extends Resource
                                     )
                                     ->required()
                                     ->live()
+                                    ->default(UOM::first()?->id)
                                     ->selectablePlaceholder(false)
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
                                     ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
