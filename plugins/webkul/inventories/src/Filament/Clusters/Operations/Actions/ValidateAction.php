@@ -25,7 +25,7 @@ class ValidateAction extends Action
         parent::setUp();
 
         $this->label(__('inventories::filament/clusters/operations/actions/validate.label'))
-            ->color(function ($record) {
+            ->color(function($record) {
                 if (in_array($record->state, [Enums\OperationState::DRAFT, Enums\OperationState::CONFIRMED])) {
                     return 'gray';
                 }

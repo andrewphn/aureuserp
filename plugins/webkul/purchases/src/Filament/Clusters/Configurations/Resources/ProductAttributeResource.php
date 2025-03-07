@@ -6,9 +6,12 @@ use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
 use Webkul\Purchase\Settings\ProductSettings;
+use Webkul\Purchase\Models\Attribute;
 
 class ProductAttributeResource extends AttributeResource
 {
+    protected static ?string $model = Attribute::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-swatch';
 
     protected static bool $shouldRegisterNavigation = true;

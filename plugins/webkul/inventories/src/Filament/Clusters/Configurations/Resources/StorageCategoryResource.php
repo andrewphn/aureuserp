@@ -201,9 +201,15 @@ class StorageCategoryResource extends Resource
 
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
-        $currentRoute = request()->route()?->getName();
+        $route = request()->route()?->getName() ?? session('current_route');
 
-        if (in_array($currentRoute, [self::getRouteBaseName().'.index', self::getRouteBaseName().'.create'])) {
+        if ($route && $route != 'livewire.update') {
+            session(['current_route' => $route]);
+        } else {
+            $route = session('current_route');
+        }
+
+        if ($route === self::getRouteBaseName().'.index') {
             return SubNavigationPosition::Start;
         }
 

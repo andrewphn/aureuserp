@@ -4,24 +4,19 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages
 
 use Filament\Actions;
 use Filament\Notifications\Notification;
-use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
-use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
-use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions as BaseActions;
+use Webkul\Sale\Traits\HasSaleOrderActions;
 
 class EditQuotation extends EditRecord
 {
+    use HasSaleOrderActions;
+
     protected static string $resource = QuotationResource::class;
 
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
-    }
-
-    public function getSubNavigationPosition(): SubNavigationPosition
-    {
-        return SubNavigationPosition::Top;
     }
 
     protected function getSavedNotification(): ?Notification
@@ -32,26 +27,17 @@ class EditQuotation extends EditRecord
             ->body(__('sales::filament/clusters/orders/resources/quotation/pages/edit-quotation.notification.body'));
     }
 
-    protected function getHeaderActions(): array
+    protected function getAdditionalHeaderActions(): array
     {
         return [
-            ChatterActions\ChatterAction::make()
-                ->setResource($this->getResource()),
-            BaseActions\BackToQuotationAction::make(),
-            BaseActions\CancelQuotationAction::make(),
-            BaseActions\ConfirmAction::make(),
-            BaseActions\CreateInvoiceAction::make(),
-            BaseActions\PreviewAction::make(),
-            BaseActions\SendByEmailAction::make(),
-            BaseActions\LockAndUnlockAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title(__('sales::filament/clusters/orders/resources/quotation/pages/edit-quotation.header-actions.notification.delete.title'))
+                        ->body(__('sales::filament/clusters/orders/resources/quotation/pages/edit-quotation.header-actions.notification.delete.body'))
+                ),
         ];
-    }
-
-    protected function afterSave(): void
-    {
-        $record = $this->getRecord();
-
-        QuotationResource::collectTotals($record);
     }
 }

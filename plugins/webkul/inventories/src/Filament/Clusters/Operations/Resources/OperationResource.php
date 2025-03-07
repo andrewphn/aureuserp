@@ -23,15 +23,15 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\OperationType;
-use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
 use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
-use Webkul\Support\Models\UOM;
 use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\Inventory\Models\Packaging;
+use Webkul\Support\Models\UOM;
 
 class OperationResource extends Resource
 {
@@ -53,11 +53,11 @@ class OperationResource extends Resource
                     ->options(Enums\OperationState::options())
                     ->options(function ($record) {
                         $options = Enums\OperationState::options();
-
+                        
                         if ($record && $record->state !== Enums\OperationState::CANCELED) {
                             unset($options[Enums\OperationState::CANCELED->value]);
                         }
-
+                        
                         return $options;
                     })
                     ->default(Enums\OperationState::DRAFT)
@@ -760,7 +760,7 @@ class OperationResource extends Resource
 
                                 $component->state($productQuantity?->id);
                             })
-                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) use ($move) {
+                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) use($move) {
                                 $productQuantity = ProductQuantity::find($get('quantity_id'));
 
                                 $set('lot_id', $productQuantity?->lot_id);
@@ -853,7 +853,7 @@ class OperationResource extends Resource
                             ->minValue(0)
                             ->maxValue(fn () => $move->product->tracking == Enums\ProductTracking::SERIAL ? 1 : 999999999)
                             ->required()
-                            ->suffix(function () use ($move) {
+                            ->suffix(function() use($move) {
                                 if (! app(Settings\ProductSettings::class)->enable_uom) {
                                     return false;
                                 }
@@ -1036,7 +1036,7 @@ class OperationResource extends Resource
         foreach ($packagings as $packaging) {
             if ($quantity && $quantity % $packaging->qty == 0) {
                 return [
-                    'packaging_id'  => $packaging->id,
+                    'packaging_id' => $packaging->id,
                     'packaging_qty' => round($quantity / $packaging->qty, 2),
                 ];
             }
@@ -1108,7 +1108,7 @@ class OperationResource extends Resource
                         'state'   => Enums\MoveState::ASSIGNED,
                     ]);
                 }
-
+                
                 $updatedLines->push($line->source_location_id.'-'.$line->lot_id.'-'.$line->package_id);
 
                 $remainingQty = round($remainingQty - $newQty, 4);

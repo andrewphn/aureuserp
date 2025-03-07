@@ -2,7 +2,7 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Account\Models\MoveLine;
+use Webkul\Account\Models\MoveLine as MoveLine;
 
 class AccountMoveLine extends MoveLine
 {

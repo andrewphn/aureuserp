@@ -5,8 +5,8 @@ namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Page
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;
+use Webkul\Purchase\Filament\Clusters\Orders\Resources\QuotationResource;
 
 class ManagePurchases extends ManageRelatedRecords
 {
@@ -29,7 +29,7 @@ class ManagePurchases extends ManageRelatedRecords
                 Tables\Actions\ViewAction::make()
                     ->url(fn ($record) => QuotationResource::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
-
+                
                 Tables\Actions\EditAction::make()
                     ->url(fn ($record) => QuotationResource::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),

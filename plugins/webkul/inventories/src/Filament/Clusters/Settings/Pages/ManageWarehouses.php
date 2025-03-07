@@ -13,6 +13,7 @@ use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Support\Filament\Clusters\Settings;
+use Filament\Notifications\Notification;
 
 class ManageWarehouses extends SettingsPage
 {
@@ -82,10 +83,27 @@ class ManageWarehouses extends SettingsPage
             ]);
     }
 
+    protected function beforeSave(): void
+    {
+        if (Warehouse::count() > 1) {
+            Notification::make()
+                ->warning()
+                ->title(__('inventories::filament/clusters/settings/pages/manage-warehouses.before-save.notification.warning.title'))
+                ->body(__('inventories::filament/clusters/settings/pages/manage-warehouses.before-save.notification.warning.body'))
+                ->send();
+
+            $this->fillForm();
+
+            $this->halt();
+        }
+    }
+
     protected function afterSave(): void
     {
         foreach (Warehouse::all() as $warehouse) {
-            OperationType::withTrashed()->whereIn('id', [$warehouse->internal_type_id])->update(['deleted_at' => $this->data['enable_locations'] ? null : now()]);
+            OperationType::withTrashed()
+                ->whereIn('id', [$warehouse->internal_type_id])
+                ->update(['deleted_at' => $this->data['enable_locations'] ? null : now()]);
         }
     }
 }

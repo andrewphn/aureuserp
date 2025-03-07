@@ -16,4 +16,13 @@ return [
         'enable-consignments'                                    => 'Consignments',
         'enable-consignments-helper-text'                        => 'Set owner on stored products',
     ],
+
+    'before-save' => [
+        'notification' => [
+            'warning' => [
+                'title' => 'You have products in stock that have lot/serial number tracking enabled. ',
+                'body'  => 'First switch off tracking on all the products before switching off this setting.',
+            ],
+        ],
+    ],
 ];
