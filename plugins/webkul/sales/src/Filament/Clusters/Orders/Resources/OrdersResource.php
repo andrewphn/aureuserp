@@ -55,16 +55,18 @@ class OrdersResource extends Resource
         return $page->generateNavigationItems([
             Pages\ViewOrders::class,
             Pages\EditOrders::class,
+            Pages\ManageInvoices::class,
         ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrders::route('/create'),
-            'view'   => Pages\ViewOrders::route('/{record}'),
-            'edit'   => Pages\EditOrders::route('/{record}/edit'),
+            'index'           => Pages\ListOrders::route('/'),
+            'create'          => Pages\CreateOrders::route('/create'),
+            'view'            => Pages\ViewOrders::route('/{record}'),
+            'edit'            => Pages\EditOrders::route('/{record}/edit'),
+            'manage-invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
         ];
     }
 }

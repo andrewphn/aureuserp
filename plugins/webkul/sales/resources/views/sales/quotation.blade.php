@@ -284,7 +284,7 @@
             </div>
 
             <!-- Optional Product Items Items -->
-            @if ($record->optionalLines)
+            @if (! $record->optionalLines->isEmpty())
                 <div class="items">
                     <span class="options">Product Options</span>
 
