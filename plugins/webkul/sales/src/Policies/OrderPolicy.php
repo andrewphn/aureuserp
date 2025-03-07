@@ -5,10 +5,11 @@ namespace Webkul\Sale\Policies;
 use Webkul\Security\Models\User;
 use Webkul\Sale\Models\Order;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Security\Traits\HasScopedPermissions;
 
 class OrderPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, HasScopedPermissions;
 
     /**
      * Determine whether the user can view any models.
@@ -39,7 +40,11 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return $user->can('update_quotation');
+        if (! $user->can('update_quotation')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $order);
     }
 
     /**
@@ -47,7 +52,11 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
-        return $user->can('delete_quotation');
+        if (! $user->can('delete_quotation')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $order);
     }
 
     /**
@@ -63,7 +72,11 @@ class OrderPolicy
      */
     public function forceDelete(User $user, Order $order): bool
     {
-        return $user->can('force_delete_quotation');
+        if (! $user->can('force_delete_quotation')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $order);
     }
 
     /**
@@ -79,7 +92,11 @@ class OrderPolicy
      */
     public function restore(User $user, Order $order): bool
     {
-        return $user->can('restore_quotation');
+        if (! $user->can('restore_quotation')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $order);
     }
 
     /**
@@ -95,7 +112,11 @@ class OrderPolicy
      */
     public function replicate(User $user, Order $order): bool
     {
-        return $user->can('replicate_quotation');
+        if (! $user->can('replicate_quotation')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $order);
     }
 
     /**

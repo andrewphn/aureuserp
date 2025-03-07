@@ -5,10 +5,11 @@ namespace Webkul\Recruitment\Policies;
 use Webkul\Security\Models\User;
 use Webkul\Recruitment\Models\Applicant;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Security\Traits\HasScopedPermissions;
 
 class ApplicantPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, HasScopedPermissions;
 
     /**
      * Determine whether the user can view any models.
@@ -39,7 +40,11 @@ class ApplicantPolicy
      */
     public function update(User $user, Applicant $applicant): bool
     {
-        return $user->can('update_applicant');
+        if (! $user->can('update_applicant')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $applicant, 'recruiter');
     }
 
     /**
@@ -47,7 +52,11 @@ class ApplicantPolicy
      */
     public function delete(User $user, Applicant $applicant): bool
     {
-        return $user->can('delete_applicant');
+        if (! $user->can('delete_applicant')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $applicant, 'recruiter');
     }
 
     /**
@@ -63,7 +72,11 @@ class ApplicantPolicy
      */
     public function forceDelete(User $user, Applicant $applicant): bool
     {
-        return $user->can('force_delete_applicant');
+        if (! $user->can('force_delete_applicant')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $applicant, 'recruiter');
     }
 
     /**
@@ -79,7 +92,11 @@ class ApplicantPolicy
      */
     public function restore(User $user, Applicant $applicant): bool
     {
-        return $user->can('restore_applicant');
+        if (! $user->can('restore_applicant')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $applicant, 'recruiter');
     }
 
     /**
@@ -95,7 +112,11 @@ class ApplicantPolicy
      */
     public function replicate(User $user, Applicant $applicant): bool
     {
-        return $user->can('replicate_applicant');
+        if (! $user->can('replicate_applicant')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $applicant, 'recruiter');
     }
 
     /**

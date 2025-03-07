@@ -5,10 +5,11 @@ namespace Webkul\Recruitment\Policies;
 use Webkul\Security\Models\User;
 use Webkul\Recruitment\Models\Candidate;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Security\Traits\HasScopedPermissions;
 
 class CandidatePolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, HasScopedPermissions;
 
     /**
      * Determine whether the user can view any models.
@@ -39,7 +40,11 @@ class CandidatePolicy
      */
     public function update(User $user, Candidate $candidate): bool
     {
-        return $user->can('update_candidate');
+        if (! $user->can('update_candidate')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $candidate, 'manager');
     }
 
     /**
@@ -47,7 +52,11 @@ class CandidatePolicy
      */
     public function delete(User $user, Candidate $candidate): bool
     {
-        return $user->can('delete_candidate');
+        if (! $user->can('delete_candidate')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $candidate, 'manager');
     }
 
     /**
@@ -63,7 +72,11 @@ class CandidatePolicy
      */
     public function forceDelete(User $user, Candidate $candidate): bool
     {
-        return $user->can('force_delete_candidate');
+        if (! $user->can('force_delete_candidate')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $candidate, 'manager');
     }
 
     /**
@@ -79,7 +92,11 @@ class CandidatePolicy
      */
     public function restore(User $user, Candidate $candidate): bool
     {
-        return $user->can('restore_candidate');
+        if (! $user->can('restore_candidate')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $candidate, 'manager');
     }
 
     /**
@@ -95,7 +112,11 @@ class CandidatePolicy
      */
     public function replicate(User $user, Candidate $candidate): bool
     {
-        return $user->can('replicate_candidate');
+        if (! $user->can('replicate_candidate')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $candidate, 'manager');
     }
 
     /**

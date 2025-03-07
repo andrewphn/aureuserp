@@ -399,7 +399,7 @@ class OrderResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
-                        ->hidden(fn() => $this->getRecord()->state == Enums\OrderState::DONE)
+                        ->hidden(fn(Model $record) => $record->state == Enums\OrderState::DONE)
                         ->successNotification(
                             Notification::make()
                                 ->success()

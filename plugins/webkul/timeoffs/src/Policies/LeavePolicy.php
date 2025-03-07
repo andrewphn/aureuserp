@@ -5,10 +5,11 @@ namespace Webkul\TimeOff\Policies;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\Leave;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Security\Traits\HasScopedPermissions;
 
 class LeavePolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, HasScopedPermissions;
 
     /**
      * Determine whether the user can view any models.
@@ -39,7 +40,11 @@ class LeavePolicy
      */
     public function update(User $user, Leave $leave): bool
     {
-        return $user->can('update_time::off');
+        if (! $user->can('update_time::off')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $leave, 'employee');
     }
 
     /**
@@ -47,7 +52,11 @@ class LeavePolicy
      */
     public function delete(User $user, Leave $leave): bool
     {
-        return $user->can('delete_time::off');
+        if (! $user->can('delete_time::off')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $leave, 'employee');
     }
 
     /**
@@ -63,7 +72,11 @@ class LeavePolicy
      */
     public function forceDelete(User $user, Leave $leave): bool
     {
-        return $user->can('force_delete_time::off');
+        if (! $user->can('force_delete_time::off')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $leave, 'employee');
     }
 
     /**
@@ -79,7 +92,11 @@ class LeavePolicy
      */
     public function restore(User $user, Leave $leave): bool
     {
-        return $user->can('restore_time::off');
+        if (! $user->can('restore_time::off')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $leave, 'employee');
     }
 
     /**
@@ -95,7 +112,11 @@ class LeavePolicy
      */
     public function replicate(User $user, Leave $leave): bool
     {
-        return $user->can('replicate_time::off');
+        if (! $user->can('replicate_time::off')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $leave, 'employee');
     }
 
     /**

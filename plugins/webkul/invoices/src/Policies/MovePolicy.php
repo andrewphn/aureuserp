@@ -5,10 +5,11 @@ namespace Webkul\Invoice\Policies;
 use Webkul\Security\Models\User;
 use Webkul\Invoice\Models\Move;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Security\Traits\HasScopedPermissions;
 
 class MovePolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, HasScopedPermissions;
 
     /**
      * Determine whether the user can view any models.
@@ -39,7 +40,11 @@ class MovePolicy
      */
     public function update(User $user, Move $move): bool
     {
-        return $user->can('update_refund');
+        if (! $user->can('update_refund')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $move, 'invoiceUser');
     }
 
     /**
@@ -47,7 +52,11 @@ class MovePolicy
      */
     public function delete(User $user, Move $move): bool
     {
-        return $user->can('delete_refund');
+        if (! $user->can('delete_refund')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $move, 'invoiceUser');
     }
 
     /**
@@ -63,7 +72,11 @@ class MovePolicy
      */
     public function forceDelete(User $user, Move $move): bool
     {
-        return $user->can('force_delete_refund');
+        if (! $user->can('force_delete_refund')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $move, 'invoiceUser');
     }
 
     /**
@@ -79,7 +92,11 @@ class MovePolicy
      */
     public function restore(User $user, Move $move): bool
     {
-        return $user->can('restore_refund');
+        if (! $user->can('restore_refund')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $move, 'invoiceUser');
     }
 
     /**
@@ -95,7 +112,11 @@ class MovePolicy
      */
     public function replicate(User $user, Move $move): bool
     {
-        return $user->can('replicate_refund');
+        if (! $user->can('replicate_refund')) {
+            return false;
+        }
+
+        return $this->hasAccess($user, $move, 'invoiceUser');
     }
 
     /**
