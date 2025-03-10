@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Illuminate\Support\Str;
 
 class PostResource extends Resource
 {
@@ -50,7 +51,14 @@ class PostResource extends Resource
                                     ->required()
                                     ->live(onBlur: true)
                                     ->placeholder(__('blogs::filament/admin/resources/post.form.sections.general.fields.title-placeholder'))
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;']),
+                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
+                                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                                Forms\Components\TextInput::make('slug')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique(Post::class, 'slug', ignoreRecord: true),
                                 Forms\Components\Textarea::make('sub_title')
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.general.fields.sub-title')),
                                 Forms\Components\RichEditor::make('content')

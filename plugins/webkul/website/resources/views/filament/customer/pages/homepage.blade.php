@@ -1,3 +1,3 @@
 <x-filament-panels::page class="fi-home-page">
-    This is home page
+    {!! $this->getContent() !!}
 </x-filament-panels::page>

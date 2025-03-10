@@ -3,7 +3,6 @@
 namespace Webkul\Blog\Filament\Customer\Resources\PostResource\Pages;
 
 use Webkul\Blog\Filament\Customer\Resources\PostResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 

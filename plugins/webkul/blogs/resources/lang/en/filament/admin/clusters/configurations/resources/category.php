@@ -9,6 +9,7 @@ return [
     'form' => [
         'fields' => [
             'name' => 'Name',
+            'name-placeholder' => 'Category title ...',
             'sub-title' => 'Sub Title',
         ],
     ],

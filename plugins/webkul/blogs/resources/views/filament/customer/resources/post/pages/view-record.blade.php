@@ -1,4 +1,30 @@
 <x-filament-panels::page>
+    @push('styles')
+        <meta name="description" content="{{ trim($record->meta_description) != "" ? $record->meta_description : \Illuminate\Support\Str::limit(strip_tags($record->content), 120, '') }}"/>
+
+        <meta name="keywords" content="{{ $record->meta_keywords }}"/>
+
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <meta name="twitter:title" content="{{ $record->name }}" />
+
+        <meta name="twitter:description" content="{!! htmlspecialchars(trim(strip_tags($record->content))) !!}" />
+
+        <meta name="twitter:image:alt" content="" />
+
+        <meta name="twitter:image" content="{{ $record->image_url }}" />
+
+        <meta property="og:type" content="og:product" />
+
+        <meta property="og:title" content="{{ $record->name }}" />
+
+        <meta property="og:image" content="{{ $record->image_url }}" />
+
+        <meta property="og:description" content="{!! htmlspecialchars(trim(strip_tags($record->content))) !!}" />
+
+        <meta property="og:url" content="{{ self::getResource()::$parentResource::getUrl('posts.view', ['parent' => $record->category->slug, 'record' => $record->slug]) }}" />
+    @endPush
+
     <div class="md:shrink-0">
         <img class="h-48 w-full rounded-md object-cover md:h-full md:w-48" src="{{$record->image_url}}" alt="Blog post featured image" style="aspect-ratio: 3 / 1"/>
     </div>

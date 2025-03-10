@@ -3,6 +3,7 @@
 namespace Webkul\Blog\Filament\Customer\Resources;
 
 use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages;
+use  Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Category;
 use Filament\Resources\Resource;
 
@@ -24,6 +25,7 @@ class CategoryResource extends Resource
         return [
             'index' => Pages\ListCategories::route('/'),
             'view' => Pages\ViewCategory::route('/{record}'),
+            'posts.view' => ViewPost::route('/{parent}/{record}'),
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 return [
     'navigation' => [
-        'title' => 'Posts',
+        'title' => 'Blog Posts',
         'group' => 'Website',
     ],
 

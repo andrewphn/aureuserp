@@ -15,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class CategoryResource extends Resource
 {
@@ -43,7 +44,17 @@ class CategoryResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label(__('blogs::filament/admin/clusters/configurations/resources/category.form.fields.name'))
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->placeholder(__('blogs::filament/admin/clusters/configurations/resources/category.form.fields.name-placeholder'))
+                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
+                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                Forms\Components\TextInput::make('slug')
+                    ->disabled()
+                    ->dehydrated()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(Category::class, 'slug', ignoreRecord: true),
                 Forms\Components\TextInput::make('sub_title')
                     ->label(__('blogs::filament/admin/clusters/configurations/resources/category.form.fields.sub-title'))
                     ->maxLength(255),

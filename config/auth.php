@@ -72,7 +72,7 @@ return [
 
         'customers' => [
             'driver' => 'eloquent',
-            'model'  => env('AUTH_MODEL', Webkul\Partner\Models\Partner::class),
+            'model'  => env('AUTH_MODEL', Webkul\Website\Models\Partner::class),
         ],
 
         // 'users' => [

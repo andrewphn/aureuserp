@@ -1,9 +1,5 @@
-<x-filament-panels::page>
-    <?php
-        $records = $this->getRecords();
-    ?>
-    
-    <div class="my-8 grid grid-cols-1 gap-8 md:grid-cols-3">
+@if ($records->count())    
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         @foreach ($records as $record)
             <div class="mx-auto max-w-md overflow-hidden rounded-xl bg-white shadow-md md:max-w-2xl">
                 <div class="md:shrink-0">
@@ -15,7 +11,7 @@
                         {{ $record->category?->name }}
                     </div>
                     
-                    <a href="{{ self::getResource()::getUrl('view', ['record' => $record->slug]) }}" class="mt-1 block text-lg font-medium leading-tight text-black hover:underline">
+                    <a href="{{ self::getResource()::getUrl('posts.view', ['parent' => $record->category->slug, 'record' => $record->slug]) }}" class="mt-1 block text-lg font-medium leading-tight text-black hover:underline">
                         {{ $record->title }}
                     </a>
 
@@ -57,4 +53,12 @@
     </div>
 
     <x-filament::pagination :paginator="$records" />
-</x-filament-panels::page>
+@else
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+        <svg class="h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.5 3.75A.75.75 0 0 1 5.25 3h13.5a.75.75 0 0 1 .75.75v16.5a.75.75 0 0 1-1.28.53L12 15.81l-6.22 4.97a.75.75 0 0 1-1.28-.53V3.75ZM6 4.5v14.69l5.47-4.38a.75.75 0 0 1 .92 0l5.47 4.38V4.5H6Z" clip-rule="evenodd"/>
+        </svg>
+        <p class="mt-4 text-lg font-semibold text-gray-700">No blog posts found</p>
+        <p class="mt-2 text-gray-500">Check back later for new content.</p>
+    </div>
+@endif

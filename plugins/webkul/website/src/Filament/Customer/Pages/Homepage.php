@@ -4,6 +4,7 @@ namespace Webkul\Website\Filament\Customer\Pages;
 
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Pages\Page;
+use Webkul\Website\Models\Page as PageModel;
 
 class Homepage extends Page
 {
@@ -29,5 +30,12 @@ class Homepage extends Page
     public function getTitle(): string | Htmlable
     {
         return 'Homepage';
+    }
+
+    public function getContent(): string | Htmlable
+    {
+        $homePage = PageModel::where('slug', 'home')->first();
+
+        return $homePage?->content ?? '';
     }
 }

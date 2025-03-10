@@ -27,6 +27,8 @@ class CustomerPanelProvider extends PanelProvider
             ->path('/')
             ->homeUrl('/')
             ->login()
+            ->authPasswordBroker('customers')
+            ->passwordReset()
             ->registration()
             ->profile(isSimple: false)
             ->favicon(asset('images/favicon.ico'))
@@ -36,7 +38,6 @@ class CustomerPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
-            ->passwordReset()
             ->topNavigation()
             ->plugins([
                 PluginManager::make(),
