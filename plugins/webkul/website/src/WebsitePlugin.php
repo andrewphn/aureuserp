@@ -37,11 +37,11 @@ class WebsitePlugin implements Plugin
         }
 
         $panel
-            ->login(Login::class)
-            ->registration(Register::class)
-            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->when($panel->getId() == 'customer', function (Panel $panel) {
                 $panel
+                    ->login(Login::class)
+                    ->registration(Register::class)
+                    ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
                     ->discoverResources(in: $this->getPluginBasePath('/Filament/Customer/Resources'), for: 'Webkul\\Website\\Filament\\Customer\\Resources')
                     ->discoverPages(in: $this->getPluginBasePath('/Filament/Customer/Pages'), for: 'Webkul\\Website\\Filament\\Customer\\Pages')
                     ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Clusters'), for: 'Webkul\\Website\\Filament\\Customer\\Clusters')
