@@ -63,6 +63,10 @@ class Post extends Model
      */
     public function getImageUrlAttribute()
     {
+        if (! $this->image) {
+            return null;
+        }
+
         return Storage::url($this->image);
     }
 

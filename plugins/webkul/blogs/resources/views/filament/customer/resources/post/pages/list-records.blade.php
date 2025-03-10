@@ -1,9 +1,13 @@
 @if ($records->count())    
     <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         @foreach ($records as $record)
-            <div class="mx-auto max-w-md overflow-hidden rounded-xl bg-white shadow-md md:max-w-2xl">
+            <div class="max-w-md overflow-hidden rounded-xl bg-white shadow-md md:max-w-2xl">
                 <div class="md:shrink-0">
-                    <img class="h-48 w-full object-cover md:h-full md:w-48" src="{{$record->image_url}}" alt="Blog post featured image" style="aspect-ratio: 2 / 1" />
+                    @if ($record->image_url)
+                        <img class="h-48 w-full object-cover md:h-full md:w-48" src="{{$record->image_url}}" alt="Blog post featured image" style="aspect-ratio: 2 / 1" />
+                    @else
+                        <div class="h-48 w-full rounded-md bg-primary-500 object-cover md:h-full md:w-48" style="aspect-ratio: 2 / 1"></div>
+                    @endif
                 </div>
 
                 <div class="p-6">
@@ -16,7 +20,7 @@
                     </a>
 
                     <p class="mt-2 text-gray-500">
-                        {{ \Illuminate\Support\Str::limit($record->sub_title ?? $record->content, 150, $end='...') }}
+                        {!! \Illuminate\Support\Str::limit($record->sub_title ?? $record->content, 150, $end='...') !!}
                     </p>
 
                     @if ($record->tags->count())
