@@ -1,0 +1,40 @@
+<?php
+
+namespace Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
+
+use Webkul\Website\Filament\Admin\Resources\PageResource;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
+use Filament\Resources\Components\Tab;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
+
+class ListPages extends ListRecords
+{
+    use HasTableViews;
+
+    protected static string $resource = PageResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'archived' => PresetView::make(__('website::filament/admin/resources/page/pages/list-records.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->favorite()
+                ->modifyQueryUsing(function ($query) {
+                    return $query->onlyTrashed();
+                }),
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make()
+                ->label(__('website::filament/admin/resources/page/pages/list-records.header-actions.create.label'))
+                ->icon('heroicon-o-plus-circle'),
+        ];
+    }
+}

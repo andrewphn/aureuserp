@@ -39,6 +39,16 @@ class User extends BaseUser implements FilamentUser
     }
 
     /**
+     * Get image url for the product image.
+     *
+     * @return string
+     */
+    public function getAvatarUrlAttribute()
+    {
+        return $this->partner?->avatar_url;
+    }
+
+    /**
      * The teams that belong to the user.
      */
     public function teams(): BelongsToMany
