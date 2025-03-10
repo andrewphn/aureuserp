@@ -13,6 +13,10 @@ use Webkul\Website\Filament\Customer\Clusters\Account;
 use Webkul\Website\Filament\Customer\Resources\PageResource;
 use Webkul\Website\Models\Page;
 use Webkul\Website\Settings\ContactSettings;
+use Webkul\Website\Filament\Customer\Auth\Login;
+use Webkul\Website\Filament\Customer\Auth\Register;
+use Webkul\Website\Filament\Customer\Auth\PasswordReset\RequestPasswordReset;
+use Webkul\Website\Filament\Customer\Auth\PasswordReset\ResetPassword;
 
 class WebsitePlugin implements Plugin
 {
@@ -33,6 +37,9 @@ class WebsitePlugin implements Plugin
         }
 
         $panel
+            ->login(Login::class)
+            ->registration(Register::class)
+            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->when($panel->getId() == 'customer', function (Panel $panel) {
                 $panel
                     ->discoverResources(in: $this->getPluginBasePath('/Filament/Customer/Resources'), for: 'Webkul\\Website\\Filament\\Customer\\Resources')
