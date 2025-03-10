@@ -3,6 +3,7 @@
 namespace Webkul\Blog\Filament\Customer\Resources;
 
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages;
 use Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Category;
@@ -14,6 +15,21 @@ class CategoryResource extends Resource
     protected static ?string $slug = 'blog';
 
     protected static ?string $recordRouteKeyName = 'slug';
+
+    public static function canAccess(): bool
+    {
+        return true;
+    }
+
+    public static function canReorder(): bool
+    {
+        return true;
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return true;
+    }
 
     public static function getNavigationLabel(): string
     {
