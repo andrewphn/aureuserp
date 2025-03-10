@@ -10,11 +10,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Purchase\Models\ProductSupplier;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\VendorPriceResource\Pages;
+use Webkul\Purchase\Models\ProductSupplier;
 
 class VendorPriceResource extends Resource
 {

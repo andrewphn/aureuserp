@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Sale\Models\Tag;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Sale\Models\Tag;
+use Webkul\Security\Models\User;
 
 class TagPolicy
 {

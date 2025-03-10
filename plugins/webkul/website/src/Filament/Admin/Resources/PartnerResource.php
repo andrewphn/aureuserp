@@ -5,9 +5,9 @@ namespace Webkul\Website\Filament\Admin\Resources;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages;
 use Webkul\Partner\Filament\Resources\PartnerResource as BasePartnerResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages;
 use Webkul\Website\Models\Partner;
 
 class PartnerResource extends BasePartnerResource

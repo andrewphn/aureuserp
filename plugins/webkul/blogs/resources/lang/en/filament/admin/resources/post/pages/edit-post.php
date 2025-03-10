@@ -15,7 +15,7 @@ return [
                 'body'  => 'The post has been set as draft successfully.',
             ],
         ],
-        
+
         'publish' => [
             'label' => 'Publish',
 

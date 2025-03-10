@@ -18,18 +18,18 @@ return [
                 'title' => 'Social Links',
 
                 'fields' => [
-                    'twitter' => 'Twitter',
-                    'facebook' => 'Facebook',
+                    'twitter'   => 'Twitter',
+                    'facebook'  => 'Facebook',
                     'instagram' => 'Instagram',
-                    'linkedin' => 'LinkedIn',
+                    'linkedin'  => 'LinkedIn',
                     'pinterest' => 'Pinterest',
-                    'tiktok' => 'TikTok',
-                    'github' => 'GitHub',
-                    'slack' => 'Slack',
-                    'whatsapp' => 'WhatsApp',
-                    'youtube' => 'YouTube',
+                    'tiktok'    => 'TikTok',
+                    'github'    => 'GitHub',
+                    'slack'     => 'Slack',
+                    'whatsapp'  => 'WhatsApp',
+                    'youtube'   => 'YouTube',
                 ],
             ],
         ],
-    ]
+    ],
 ];

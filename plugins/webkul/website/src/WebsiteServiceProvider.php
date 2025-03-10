@@ -2,14 +2,14 @@
 
 namespace Webkul\Website;
 
-use Webkul\Support\Console\Commands\InstallCommand;
-use Webkul\Support\Console\Commands\UninstallCommand;
-use Webkul\Support\PackageServiceProvider;
-use Webkul\Support\Package;
+use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Route;
-use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
+use Webkul\Support\Console\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\UninstallCommand;
+use Webkul\Support\Package;
+use Webkul\Support\PackageServiceProvider;
 use Webkul\Website\Http\Responses\LogoutResponse;
 
 class WebsiteServiceProvider extends PackageServiceProvider
@@ -43,7 +43,7 @@ class WebsiteServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         FilamentAsset::register([
-            Css::make('website', __DIR__ . '/../resources/dist/website.css'),
+            Css::make('website', __DIR__.'/../resources/dist/website.css'),
         ], 'website');
 
         if (! Package::isPluginInstalled(self::$name)) {

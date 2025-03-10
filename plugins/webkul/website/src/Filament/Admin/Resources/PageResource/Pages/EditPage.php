@@ -2,10 +2,10 @@
 
 namespace Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
 
-use Webkul\Website\Filament\Admin\Resources\PageResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Website\Filament\Admin\Resources\PageResource;
 use Webkul\Website\Models\Page;
 
 class EditPage extends EditRecord

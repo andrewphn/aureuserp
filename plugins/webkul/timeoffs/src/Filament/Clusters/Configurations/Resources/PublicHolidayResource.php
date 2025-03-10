@@ -11,9 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\TimeOff\Models\CalendarLeave;
 use Webkul\TimeOff\Filament\Clusters\Configurations;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResource\Pages;
+use Webkul\TimeOff\Models\CalendarLeave;
 
 class PublicHolidayResource extends Resource
 {

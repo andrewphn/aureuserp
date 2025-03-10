@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Sale\Models\Order;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Sale\Models\Order;
+use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
 class OrderPolicy

@@ -14,9 +14,9 @@ use Filament\Forms\Form;
 use Filament\Notifications\Auth\ResetPassword as ResetPasswordNotification;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Contracts\Auth\CanResetPassword;
-use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Password;
 
@@ -143,18 +143,18 @@ class RequestPasswordReset extends Page
             ->link()
             ->label(__('filament-panels::pages/auth/password-reset/request-password-reset.actions.login.label'))
             ->icon(match (__('filament-panels::layout.direction')) {
-                'rtl' => FilamentIcon::resolve('panels::pages.password-reset.request-password-reset.actions.login.rtl') ?? 'heroicon-m-arrow-right',
+                'rtl'   => FilamentIcon::resolve('panels::pages.password-reset.request-password-reset.actions.login.rtl') ?? 'heroicon-m-arrow-right',
                 default => FilamentIcon::resolve('panels::pages.password-reset.request-password-reset.actions.login') ?? 'heroicon-m-arrow-left',
             })
             ->url(filament()->getLoginUrl());
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('filament-panels::pages/auth/password-reset/request-password-reset.title');
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return '';
     }

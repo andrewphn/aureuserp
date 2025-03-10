@@ -2,14 +2,13 @@
 
 namespace Webkul\Blog\Filament\Admin\Resources\PostResource\Pages;
 
-use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Filament\Resources\Components\Tab;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
 
 class ListPosts extends ListRecords
 {

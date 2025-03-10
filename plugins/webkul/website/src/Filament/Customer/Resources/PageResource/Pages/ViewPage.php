@@ -2,9 +2,9 @@
 
 namespace Webkul\Website\Filament\Customer\Resources\PageResource\Pages;
 
-use Webkul\Website\Filament\Customer\Resources\PageResource;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Webkul\Website\Filament\Customer\Resources\PageResource;
 
 class ViewPage extends ViewRecord
 {
@@ -17,7 +17,7 @@ class ViewPage extends ViewRecord
         return [];
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return $this->getRecord()->title;
     }

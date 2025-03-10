@@ -2,9 +2,9 @@
 
 namespace Webkul\Recruitment\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Recruitment\Models\Applicant;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Recruitment\Models\Applicant;
+use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
 class ApplicantPolicy

@@ -16,8 +16,8 @@ use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource\Pages;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource\RelationManagers;
 use Webkul\Employee\Filament\Resources\DepartmentResource;
-use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Employee\Models\ActivityPlan;
+use Webkul\Security\Filament\Resources\CompanyResource;
 
 class ActivityPlanResource extends Resource
 {

@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Webkul\Security\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Webkul\Blog\Database\Factories\PostFactory;
+use Webkul\Security\Models\User;
 
 class Post extends Model
 {
@@ -72,7 +72,7 @@ class Post extends Model
 
         $minutes = ceil($wordCount / 200);
 
-        return $minutes . ' min read';
+        return $minutes.' min read';
     }
 
     public function tags(): BelongsToMany

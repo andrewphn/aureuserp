@@ -2,8 +2,4 @@
 
 namespace Webkul\Inventory\Models;
 
-use Webkul\Inventory\Models\Operation;
-
-class InternalTransfer extends Operation
-{
-}
+class InternalTransfer extends Operation {}

@@ -134,9 +134,9 @@ class ActivityPlanResource extends BaseActivityPlanResource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->hidden(fn($record) => $record->trashed()),
+                    ->hidden(fn ($record) => $record->trashed()),
                 Tables\Actions\EditAction::make()
-                    ->hidden(fn($record) => $record->trashed()),
+                    ->hidden(fn ($record) => $record->trashed()),
                 Tables\Actions\RestoreAction::make()
                     ->successNotification(
                         Notification::make()

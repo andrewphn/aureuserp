@@ -2,10 +2,10 @@
 
 namespace Webkul\TimeOff\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\TimeOff\Models\Leave;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
+use Webkul\TimeOff\Models\Leave;
 
 class LeavePolicy
 {

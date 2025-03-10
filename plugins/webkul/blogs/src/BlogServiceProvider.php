@@ -2,10 +2,10 @@
 
 namespace Webkul\Blog;
 
-use Webkul\Support\Console\Commands\InstallCommand;
-use Webkul\Support\Console\Commands\UninstallCommand;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
+use Webkul\Support\Console\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
@@ -44,7 +44,7 @@ class BlogServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         FilamentAsset::register([
-            Css::make('blogs', __DIR__ . '/../resources/dist/blogs.css'),
+            Css::make('blogs', __DIR__.'/../resources/dist/blogs.css'),
         ], 'blogs');
     }
 }

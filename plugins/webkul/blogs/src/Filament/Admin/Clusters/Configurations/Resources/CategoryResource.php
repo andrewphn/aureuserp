@@ -2,20 +2,16 @@
 
 namespace Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources;
 
-use Webkul\Website\Filament\Admin\Clusters\Configurations;
-use Filament\Pages\SubNavigationPosition;
-use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource\Pages;
-use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource\RelationManagers;
-use Webkul\Blog\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
+use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource\Pages;
+use Webkul\Blog\Models\Category;
+use Webkul\Website\Filament\Admin\Clusters\Configurations;
 
 class CategoryResource extends Resource
 {

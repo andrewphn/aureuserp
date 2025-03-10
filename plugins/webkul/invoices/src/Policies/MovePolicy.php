@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Invoice\Models\Move;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Invoice\Models\Move;
+use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
 class MovePolicy

@@ -9,8 +9,8 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Oper
 use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
-use Webkul\Product\Filament\Resources\CategoryResource as BaseProductCategoryResource;
 use Webkul\Invoice\Models\Category;
+use Webkul\Product\Filament\Resources\CategoryResource as BaseProductCategoryResource;
 
 class ProductCategoryResource extends BaseProductCategoryResource
 {

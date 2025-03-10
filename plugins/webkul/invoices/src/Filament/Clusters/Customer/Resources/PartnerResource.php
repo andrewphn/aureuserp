@@ -44,7 +44,7 @@ class PartnerResource extends BasePartnerResource
             '2xl' => 3,
         ]);
 
-        $table->modifyQueryUsing(fn($query) => $query->where('sub_type', 'customer'));
+        $table->modifyQueryUsing(fn ($query) => $query->where('sub_type', 'customer'));
 
         return $table;
     }

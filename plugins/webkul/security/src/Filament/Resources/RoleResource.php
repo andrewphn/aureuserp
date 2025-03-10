@@ -7,6 +7,7 @@ use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
 use BezhanSalleh\FilamentShield\Support\Utils;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Form;
@@ -15,7 +16,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
-use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 use Webkul\Security\Filament\Resources\RoleResource\Pages;
 
@@ -237,7 +237,7 @@ class RoleResource extends Resource implements HasShieldPermissions
                                     })
                                     ->toArray();
                             })
-                            ->columns(static::shield()->getGridColumns())
+                            ->columns(static::shield()->getGridColumns()),
                     ]);
             })
             ->toArray();
@@ -292,8 +292,8 @@ class RoleResource extends Resource implements HasShieldPermissions
                 return [
                     $resource => [
                         'resource' => "{$name}",
-                        'model' => str($resource::getModel())->afterLast('\\')->toString(),
-                        'fqcn' => $resource,
+                        'model'    => str($resource::getModel())->afterLast('\\')->toString(),
+                        'fqcn'     => $resource,
                     ],
                 ];
             })
