@@ -10,10 +10,10 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
-use Webkul\Recruitment\Models\JobPosition;
 use Webkul\Recruitment\Filament\Clusters\Applications;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\JobByPositionResource\Pages;
 use Webkul\Recruitment\Models\Applicant;
+use Webkul\Recruitment\Models\JobPosition;
 
 class JobByPositionResource extends Resource
 {
@@ -72,7 +72,7 @@ class JobByPositionResource extends Resource
                                 ->icon('heroicon-m-building-office-2')
                                 ->searchable(),
                         ])
-                            ->visible(fn($record) => filled($record?->company?->name)),
+                            ->visible(fn ($record) => filled($record?->company?->name)),
                     ])->space(1),
                 ])->space(4),
             ])

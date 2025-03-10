@@ -3,10 +3,10 @@
 namespace Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource\Pages;
 
 use Filament\Actions;
-use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource;
 
 class ManageCategories extends ManageRecords
 {

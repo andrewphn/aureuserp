@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Sale\Models\OrderTemplate;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Sale\Models\OrderTemplate;
+use Webkul\Security\Models\User;
 
 class OrderTemplatePolicy
 {

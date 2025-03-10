@@ -2,11 +2,11 @@
 
 namespace Webkul\Blog\Filament\Admin\Resources\PostResource\Pages;
 
-use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Webkul\Blog\Models\Post;
 
 class EditPost extends EditRecord
@@ -42,8 +42,8 @@ class EditPost extends EditRecord
                 ->action(function (Post $record) {
                     $record->update([
                         'last_editor_id' => Auth::id(),
-                        'published_at' => now(),
-                        'is_published' => true,
+                        'published_at'   => now(),
+                        'is_published'   => true,
                     ]);
 
                     Notification::make()

@@ -2,9 +2,9 @@
 
 namespace Webkul\Employee\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Employee\Models\Employee;
 use Webkul\Security\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Traits\HasScopedPermissions;
 
 class EmployeePolicy

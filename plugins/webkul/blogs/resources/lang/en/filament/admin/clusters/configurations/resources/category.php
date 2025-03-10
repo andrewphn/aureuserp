@@ -8,25 +8,25 @@ return [
 
     'form' => [
         'fields' => [
-            'name' => 'Name',
+            'name'             => 'Name',
             'name-placeholder' => 'Category title ...',
-            'sub-title' => 'Sub Title',
+            'sub-title'        => 'Sub Title',
         ],
     ],
 
     'table' => [
         'columns' => [
-            'name' => 'name',
-            'sub-title' => 'Sub Title',
-            'posts' => 'Posts',
+            'name'       => 'name',
+            'sub-title'  => 'Sub Title',
+            'posts'      => 'Posts',
             'created-at' => 'Created At',
         ],
 
         'filters' => [
             'is-published' => 'Is Published',
-            'author'     => 'Author',
-            'creator'    => 'Created By',
-            'category'   => 'Category',
+            'author'       => 'Author',
+            'creator'      => 'Created By',
+            'category'     => 'Category',
         ],
 
         'actions' => [

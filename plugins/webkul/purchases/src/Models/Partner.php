@@ -2,9 +2,9 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Account\Models\Partner as BasePartner;
-use Webkul\Account\Models\Move;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Account\Models\Move;
+use Webkul\Account\Models\Partner as BasePartner;
 
 class Partner extends BasePartner
 {

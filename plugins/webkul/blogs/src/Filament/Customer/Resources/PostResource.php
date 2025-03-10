@@ -2,15 +2,15 @@
 
 namespace Webkul\Blog\Filament\Customer\Resources;
 
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Webkul\Blog\Filament\Customer\Resources\PostResource\Pages;
 use Webkul\Blog\Models\Post;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Resources\Resource;
 
 class PostResource extends Resource
 {
-    public static string $parentResource = CategoryResource::class; 
+    public static string $parentResource = CategoryResource::class;
 
     protected static ?string $model = Post::class;
 

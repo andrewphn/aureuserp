@@ -17,6 +17,7 @@ use Filament\Notifications\Auth\VerifyEmail;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -24,7 +25,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Filament\Pages\Page;
 
 /**
  * @property Form $form
@@ -234,12 +234,12 @@ class Register extends Page
         return $this->userModel = $provider->getModel();
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('filament-panels::pages/auth/register.title');
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return '';
     }

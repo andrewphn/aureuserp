@@ -2,9 +2,9 @@
 
 namespace Webkul\TimeOff\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\ActivityType;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ActivityTypePolicy
 {

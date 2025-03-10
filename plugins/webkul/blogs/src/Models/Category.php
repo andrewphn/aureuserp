@@ -4,12 +4,12 @@ namespace Webkul\Blog\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Webkul\Blog\Database\Factories\CategoryFactory;
 use Webkul\Security\Models\User;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {

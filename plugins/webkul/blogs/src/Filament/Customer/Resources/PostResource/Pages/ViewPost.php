@@ -2,9 +2,9 @@
 
 namespace Webkul\Blog\Filament\Customer\Resources\PostResource\Pages;
 
-use Webkul\Blog\Filament\Customer\Resources\PostResource;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Webkul\Blog\Filament\Customer\Resources\PostResource;
 
 class ViewPost extends ViewRecord
 {
@@ -17,7 +17,7 @@ class ViewPost extends ViewRecord
         return [];
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return $this->getRecord()->title;
     }

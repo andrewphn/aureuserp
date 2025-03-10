@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\Pages;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\RelationManagers;
-use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Sale\Models\ActivityPlan;
+use Webkul\Security\Filament\Resources\CompanyResource;
 
 class ActivityPlanResource extends Resource
 {
@@ -67,8 +67,8 @@ class ActivityPlanResource extends Resource
                             ->relationship(name: 'company', titleAttribute: 'name')
                             ->searchable()
                             ->preload()
-                            ->createOptionForm(fn(Form $form) => CompanyResource::form($form))
-                            ->editOptionForm(fn(Form $form) => CompanyResource::form($form)),
+                            ->createOptionForm(fn (Form $form) => CompanyResource::form($form))
+                            ->editOptionForm(fn (Form $form) => CompanyResource::form($form)),
                         Forms\Components\Toggle::make('is_active')
                             ->label(__('sales::filament/clusters/configurations/resources/activity-plan.form.sections.general.fields.status'))
                             ->default(true)
@@ -189,9 +189,9 @@ class ActivityPlanResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->hidden(fn($record) => $record->trashed()),
+                    ->hidden(fn ($record) => $record->trashed()),
                 Tables\Actions\EditAction::make()
-                    ->hidden(fn($record) => $record->trashed()),
+                    ->hidden(fn ($record) => $record->trashed()),
                 Tables\Actions\RestoreAction::make()
                     ->successNotification(
                         Notification::make()

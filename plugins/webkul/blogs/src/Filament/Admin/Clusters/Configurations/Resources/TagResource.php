@@ -8,9 +8,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Website\Filament\Admin\Clusters\Configurations;
 use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\TagResource\Pages;
 use Webkul\Blog\Models\Tag;
+use Webkul\Website\Filament\Admin\Clusters\Configurations;
 
 class TagResource extends Resource
 {

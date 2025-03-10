@@ -2,14 +2,11 @@
 
 namespace Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
 
-use Webkul\Website\Filament\Admin\Resources\PageResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Filament\Resources\Components\Tab;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
+use Webkul\Website\Filament\Admin\Resources\PageResource;
 
 class ListPages extends ListRecords
 {

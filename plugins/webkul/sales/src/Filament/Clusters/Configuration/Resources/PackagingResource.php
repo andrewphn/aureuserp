@@ -5,8 +5,8 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\PackagingResource\Pages;
-use Webkul\Sale\Settings\ProductSettings;
 use Webkul\Sale\Models\Packaging;
+use Webkul\Sale\Settings\ProductSettings;
 
 class PackagingResource extends BasePackagingResource
 {

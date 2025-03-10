@@ -5,6 +5,7 @@ namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
@@ -13,7 +14,6 @@ use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Support\Filament\Clusters\Settings;
-use Filament\Notifications\Notification;
 
 class ManageWarehouses extends SettingsPage
 {

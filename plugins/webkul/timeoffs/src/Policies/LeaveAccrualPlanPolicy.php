@@ -2,9 +2,9 @@
 
 namespace Webkul\TimeOff\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\LeaveAccrualPlan;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class LeaveAccrualPlanPolicy
 {

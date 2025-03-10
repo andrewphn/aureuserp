@@ -2,9 +2,9 @@
 
 namespace Webkul\Recruitment\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Recruitment\Models\JobPosition;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Recruitment\Models\JobPosition;
+use Webkul\Security\Models\User;
 
 class JobPositionPolicy
 {

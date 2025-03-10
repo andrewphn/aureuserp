@@ -78,9 +78,9 @@ class ResetPassword extends Page
 
         $status = Password::broker(Filament::getAuthPasswordBroker())->reset(
             $data,
-            function (CanResetPassword | Model | Authenticatable $user) use ($data) {
+            function (CanResetPassword|Model|Authenticatable $user) use ($data) {
                 $user->forceFill([
-                    'password' => Hash::make($data['password']),
+                    'password'       => Hash::make($data['password']),
                     'remember_token' => Str::random(60),
                 ])->save();
 
@@ -159,12 +159,12 @@ class ResetPassword extends Page
             ->dehydrated(false);
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('filament-panels::pages/auth/password-reset/reset-password.title');
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return '';
     }

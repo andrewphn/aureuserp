@@ -2,9 +2,9 @@
 
 namespace Webkul\Recruitment\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Recruitment\Models\UTMMedium;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Recruitment\Models\UTMMedium;
+use Webkul\Security\Models\User;
 
 class UTMMediumPolicy
 {

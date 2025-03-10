@@ -2,19 +2,19 @@
 
 namespace Webkul\Blog\Filament\Admin\Resources;
 
-use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages;
-use Filament\Pages\SubNavigationPosition;
-use Webkul\Blog\Models\Post;
-use Filament\Resources\Pages\Page;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
 use Illuminate\Support\Str;
+use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages;
+use Webkul\Blog\Models\Post;
 
 class PostResource extends Resource
 {
@@ -68,7 +68,7 @@ class PostResource extends Resource
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.general.fields.banner'))
                                     ->image(),
                             ]),
-                            
+
                         Forms\Components\Section::make(__('blogs::filament/admin/resources/post.form.sections.seo.title'))
                             ->schema([
                                 Forms\Components\TextInput::make('meta_title')
@@ -206,7 +206,7 @@ class PostResource extends Resource
                                 ->title(__('blogs::filament/admin/resources/post.table.actions.force-delete.notification.title'))
                                 ->body(__('blogs::filament/admin/resources/post.table.actions.force-delete.notification.body')),
                         ),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -255,7 +255,7 @@ class PostResource extends Resource
                                 Infolists\Components\ImageEntry::make('image')
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.general.fields.banner')),
                             ]),
-                            
+
                         Infolists\Components\Section::make(__('blogs::filament/admin/resources/post.form.sections.seo.title'))
                             ->schema([
                                 Infolists\Components\TextEntry::make('meta_title')
@@ -310,7 +310,7 @@ class PostResource extends Resource
                                 Infolists\Components\IconEntry::make('is_published')
                                     ->label(__('blogs::filament/admin/resources/post.table.columns.is-published'))
                                     ->boolean(),
-                                    
+
                                 Infolists\Components\TextEntry::make('category.name')
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.settings.fields.category'))
                                     ->icon('heroicon-o-rectangle-stack')

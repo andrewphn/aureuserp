@@ -5,8 +5,8 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 use Filament\Tables\Table;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityTypeResource\Pages;
-use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 use Webkul\Recruitment\Models\ActivityType;
+use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
 class ActivityTypeResource extends BaseActivityTypeResource
 {

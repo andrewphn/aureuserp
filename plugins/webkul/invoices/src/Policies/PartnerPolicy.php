@@ -2,9 +2,9 @@
 
 namespace Webkul\Invoice\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Invoice\Models\Partner;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Invoice\Models\Partner;
+use Webkul\Security\Models\User;
 
 class PartnerPolicy
 {

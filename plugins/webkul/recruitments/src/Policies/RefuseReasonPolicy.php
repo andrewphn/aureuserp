@@ -2,9 +2,9 @@
 
 namespace Webkul\Recruitment\Policies;
 
-use Webkul\Security\Models\User;
-use Webkul\Recruitment\Models\RefuseReason;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Webkul\Recruitment\Models\RefuseReason;
+use Webkul\Security\Models\User;
 
 class RefuseReasonPolicy
 {

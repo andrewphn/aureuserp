@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Webkul\Website\Database\Factories\PageFactory;
 use Webkul\Security\Models\User;
+use Webkul\Website\Database\Factories\PageFactory;
 
 class Page extends Model
 {
@@ -45,10 +45,10 @@ class Page extends Model
      * @var string
      */
     protected $casts = [
-        'is_published' => 'boolean',
+        'is_published'      => 'boolean',
         'is_header_visible' => 'boolean',
         'is_footer_visible' => 'boolean',
-        'published_at' => 'datetime',
+        'published_at'      => 'datetime',
     ];
 
     public function creator(): BelongsTo

@@ -15,10 +15,10 @@ use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
-use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -161,12 +161,12 @@ class Login extends Page
             ->url(filament()->getRegistrationUrl());
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('filament-panels::pages/auth/login.title');
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return '';
     }
@@ -200,7 +200,7 @@ class Login extends Page
     protected function getCredentialsFromFormData(array $data): array
     {
         return [
-            'email' => $data['email'],
+            'email'    => $data['email'],
             'password' => $data['password'],
         ];
     }

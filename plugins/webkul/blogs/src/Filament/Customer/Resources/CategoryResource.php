@@ -2,10 +2,10 @@
 
 namespace Webkul\Blog\Filament\Customer\Resources;
 
-use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages;
-use  Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
-use Webkul\Blog\Models\Category;
 use Filament\Resources\Resource;
+use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages;
+use Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
+use Webkul\Blog\Models\Category;
 
 class CategoryResource extends Resource
 {
@@ -23,8 +23,8 @@ class CategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
-            'view' => Pages\ViewCategory::route('/{record}'),
+            'index'      => Pages\ListCategories::route('/'),
+            'view'       => Pages\ViewCategory::route('/{record}'),
             'posts.view' => ViewPost::route('/{parent}/{record}'),
         ];
     }

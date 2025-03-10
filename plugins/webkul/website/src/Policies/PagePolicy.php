@@ -3,8 +3,8 @@
 namespace Webkul\Website\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Webkul\Website\Models\Page;
 use Webkul\Security\Models\User;
+use Webkul\Website\Models\Page;
 
 class PagePolicy
 {

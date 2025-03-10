@@ -12,12 +12,12 @@ return [
                 'title' => 'General',
 
                 'fields' => [
-                    'title' => 'Title',
-                    'sub-title' => 'Sub Title',
+                    'title'             => 'Title',
+                    'sub-title'         => 'Sub Title',
                     'title-placeholder' => 'Post title ...',
-                    'slug' => 'Slug',
-                    'content' => 'Content',
-                    'banner' => 'Banner',
+                    'slug'              => 'Slug',
+                    'content'           => 'Content',
+                    'banner'            => 'Banner',
                 ],
             ],
 
@@ -25,8 +25,8 @@ return [
                 'title' => 'SEO',
 
                 'fields' => [
-                    'meta-title' => 'Meta Title',
-                    'meta-keywords' => 'Meta Keywords',
+                    'meta-title'       => 'Meta Title',
+                    'meta-keywords'    => 'Meta Keywords',
                     'meta-description' => 'Meta Description',
                 ],
             ],
@@ -35,10 +35,10 @@ return [
                 'title' => 'Settings',
 
                 'fields' => [
-                    'category' => 'Category',
-                    'tags' => 'Tags',
-                    'name' => 'Name',
-                    'color' => 'Color',
+                    'category'     => 'Category',
+                    'tags'         => 'Tags',
+                    'name'         => 'Name',
+                    'color'        => 'Color',
                     'is-published' => 'Is Published',
                 ],
             ],
@@ -47,14 +47,14 @@ return [
 
     'table' => [
         'columns' => [
-            'title' => 'Title',
-            'slug' => 'Slug',
-            'author' => 'Author',
-            'category' => 'Category',
-            'creator' => 'Created By',
+            'title'        => 'Title',
+            'slug'         => 'Slug',
+            'author'       => 'Author',
+            'category'     => 'Category',
+            'creator'      => 'Created By',
             'is-published' => 'Is Published',
-            'created-at' => 'Created At',
-            'updated-at' => 'Updated At',
+            'created-at'   => 'Created At',
+            'updated-at'   => 'Updated At',
         ],
 
         'groups' => [
@@ -131,10 +131,10 @@ return [
                 'title' => 'General',
 
                 'entries' => [
-                    'title' => 'Title',
-                    'slug' => 'Slug',
+                    'title'   => 'Title',
+                    'slug'    => 'Slug',
                     'content' => 'Content',
-                    'banner' => 'Banner',
+                    'banner'  => 'Banner',
                 ],
             ],
 
@@ -142,8 +142,8 @@ return [
                 'title' => 'SEO',
 
                 'entries' => [
-                    'meta-title' => 'Meta Title',
-                    'meta-keywords' => 'Meta Keywords',
+                    'meta-title'       => 'Meta Title',
+                    'meta-keywords'    => 'Meta Keywords',
                     'meta-description' => 'Meta Description',
                 ],
             ],
@@ -152,12 +152,12 @@ return [
                 'title' => 'Record Information',
 
                 'entries' => [
-                    'author' => 'Author',
-                    'created-by' => 'Created By',
-                    'published-at' => 'Published At',
+                    'author'          => 'Author',
+                    'created-by'      => 'Created By',
+                    'published-at'    => 'Published At',
                     'last-updated-by' => 'Last Updated By',
-                    'last-updated' => 'Last Updated At',
-                    'created-at' => 'Created At',
+                    'last-updated'    => 'Last Updated At',
+                    'created-at'      => 'Created At',
                 ],
             ],
 
@@ -165,10 +165,10 @@ return [
                 'title' => 'Settings',
 
                 'entries' => [
-                    'category' => 'Category',
-                    'tags' => 'Tags',
-                    'name' => 'Name',
-                    'color' => 'Color',
+                    'category'     => 'Category',
+                    'tags'         => 'Tags',
+                    'name'         => 'Name',
+                    'color'        => 'Color',
                     'is-published' => 'Is Published',
                 ],
             ],

@@ -2,19 +2,19 @@
 
 namespace Webkul\Website\Filament\Admin\Resources;
 
-use Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
-use Filament\Pages\SubNavigationPosition;
-use Webkul\Website\Models\Page as PageModel;
-use Filament\Resources\Pages\Page;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
 use Illuminate\Support\Str;
+use Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
+use Webkul\Website\Models\Page as PageModel;
 
 class PageResource extends Resource
 {
@@ -63,7 +63,7 @@ class PageResource extends Resource
                                     ->label(__('website::filament/admin/resources/page.form.sections.general.fields.content'))
                                     ->required(),
                             ]),
-                            
+
                         Forms\Components\Section::make(__('website::filament/admin/resources/page.form.sections.seo.title'))
                             ->schema([
                                 Forms\Components\TextInput::make('meta_title')
@@ -169,7 +169,7 @@ class PageResource extends Resource
                                 ->title(__('website::filament/admin/resources/page.table.actions.force-delete.notification.title'))
                                 ->body(__('website::filament/admin/resources/page.table.actions.force-delete.notification.body')),
                         ),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -215,7 +215,7 @@ class PageResource extends Resource
                                     ->label(__('website::filament/admin/resources/page.form.sections.general.fields.content'))
                                     ->markdown(),
                             ]),
-                            
+
                         Infolists\Components\Section::make(__('website::filament/admin/resources/page.form.sections.seo.title'))
                             ->schema([
                                 Infolists\Components\TextEntry::make('meta_title')
@@ -259,11 +259,11 @@ class PageResource extends Resource
                                     ->label(__('website::filament/admin/resources/page.infolist.sections.record-information.entries.last-updated'))
                                     ->dateTime()
                                     ->icon('heroicon-m-calendar-days'),
-                                    
+
                                 Infolists\Components\IconEntry::make('is_published')
                                     ->label(__('website::filament/admin/resources/page.table.columns.is-published'))
                                     ->boolean(),
-                                    
+
                             ]),
 
                         Infolists\Components\Section::make(__('website::filament/admin/resources/page.infolist.sections.settings.title'))

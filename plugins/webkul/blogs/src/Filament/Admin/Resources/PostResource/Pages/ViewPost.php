@@ -2,10 +2,10 @@
 
 namespace Webkul\Blog\Filament\Admin\Resources\PostResource\Pages;
 
-use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
+use Webkul\Blog\Filament\Admin\Resources\PostResource;
 
 class ViewPost extends ViewRecord
 {

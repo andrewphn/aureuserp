@@ -2,8 +2,8 @@
 
 namespace Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource\Pages;
 
-use Filament\Tables\Table;
 use Filament\Pages\SubNavigationPosition;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors as BaseListVendors;
 use Webkul\Purchase\Filament\Clusters\Orders\Resources\VendorResource;

@@ -5,8 +5,8 @@ namespace Webkul\Purchase\Filament\Clusters\Configurations\Resources;
 use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Purchase\Filament\Clusters\Configurations;
 use Webkul\Purchase\Filament\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
-use Webkul\Purchase\Settings\ProductSettings;
 use Webkul\Purchase\Models\Attribute;
+use Webkul\Purchase\Settings\ProductSettings;
 
 class ProductAttributeResource extends AttributeResource
 {

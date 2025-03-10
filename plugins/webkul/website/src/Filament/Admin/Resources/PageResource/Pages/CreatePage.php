@@ -2,10 +2,10 @@
 
 namespace Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
 
-use Webkul\Website\Filament\Admin\Resources\PageResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Website\Filament\Admin\Resources\PageResource;
 
 class CreatePage extends CreateRecord
 {
