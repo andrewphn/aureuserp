@@ -27,12 +27,24 @@ class EditProduct extends BaseEditProduct
                 ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.label'))
                 ->modalHeading(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-heading'))
                 ->form(fn (Product $record): array => [
+                    Forms\Components\Select::make('product_id')
+                        ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.form.fields.product'))
+                        ->required()
+                        ->options($record->variants->pluck('name', 'id'))
+                        ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                            $product = Product::find($get('product_id'));
+
+                            $set('quantity', $product?->on_hand_quantity ?? 0);
+                        })
+                        ->visible((bool) $record->is_configurable),
                     Forms\Components\TextInput::make('quantity')
                         ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.form.fields.on-hand-qty'))
                         ->numeric()
-                        ->minValue(0)
                         ->required()
-                        ->default($record->on_hand_quantity),
+                        ->live()
+                        ->default(fn () => ! $record->is_configurable ? $record->on_hand_quantity: 0),
                 ])
                 ->modalSubmitActionLabel(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-submit-action-label'))
                 ->visible($this->getRecord()->is_storable)
@@ -54,6 +66,10 @@ class EditProduct extends BaseEditProduct
                     }
                 })
                 ->action(function (Product $record, array $data): void {
+                    if (isset($data['product_id'])) {
+                        $record = Product::find($data['product_id']);
+                    }
+
                     $previousQuantity = $record->on_hand_quantity;
 
                     if ($previousQuantity == $data['quantity']) {
