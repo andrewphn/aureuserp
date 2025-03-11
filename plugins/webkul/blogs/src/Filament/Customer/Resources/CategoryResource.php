@@ -16,17 +16,7 @@ class CategoryResource extends Resource
 
     protected static ?string $recordRouteKeyName = 'slug';
 
-    public static function canAccess(): bool
-    {
-        return true;
-    }
-
-    public static function canReorder(): bool
-    {
-        return true;
-    }
-
-    public static function canView(Model $record): bool
+    public static function can(string $action, ?Model $record = null): bool
     {
         return true;
     }

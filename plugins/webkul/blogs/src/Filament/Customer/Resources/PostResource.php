@@ -42,17 +42,7 @@ class PostResource extends Resource
         return parent::getGlobalSearchEloquentQuery()->with(['category'])->where('is_published', true);
     }
 
-    public static function canAccess(): bool
-    {
-        return true;
-    }
-
-    public static function canView(Model $record): bool
-    {
-        return true;
-    }
-
-    public static function canReorder(): bool
+    public static function can(string $action, ?Model $record = null): bool
     {
         return true;
     }
