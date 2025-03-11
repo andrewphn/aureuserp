@@ -26,8 +26,6 @@ class VendorPriceResource extends Resource
 
     protected static ?string $cluster = Configurations::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     public static function getNavigationLabel(): string
     {
         return __('purchases::filament/clusters/configurations/resources/vendor-price.navigation.title');
