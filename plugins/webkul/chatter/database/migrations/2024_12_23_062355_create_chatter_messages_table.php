@@ -16,7 +16,6 @@ return new class extends Migration
 
             $table->unsignedBigInteger('company_id')->nullable()->comment('Company');
             $table->unsignedBigInteger('activity_type_id')->nullable()->comment('Activity Type');
-            $table->unsignedBigInteger('creator_id')->nullable()->comment('Created By');
             $table->unsignedBigInteger('assigned_to')->nullable()->comment('Assigned To');
             $table->morphs('messageable');
             $table->string('type')->nullable()->comment('Message Type');

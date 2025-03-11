@@ -7,25 +7,25 @@
     :component="$getEntryWrapperView()"
     :entry="$entry"
 >
-    <div {{ $attributes->merge($getExtraAttributes())->class('rounded-lg shadow-md') }}>
+    <div {{ $attributes->merge($getExtraAttributes())->class('') }}>
         @if($record->body)
             <div class="text-sm">
                 {!! $record->body !!}
             </div>
         @endif
 
-        <div class="mt-2 rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-800 dark:ring-white/10">
-            <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+        <div class="mt-2 bg-white rounded-lg shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-800 dark:ring-white/10">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <x-heroicon-m-clipboard-document-check class="text-primary-500 h-5 w-5"/>
+                        <x-heroicon-m-clipboard-document-check class="w-5 h-5 text-primary-500"/>
 
                         <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
                             @lang('chatter::views/filament/infolists/components/activities/content-text-entry.activity-details')
                         </h3>
                     </div>
 
-                    <span class="bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 inline-flex items-center rounded-md px-2 py-1 text-xs font-bold">
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-bold rounded-md bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300">
                         {{ ucfirst($record->activityType?->name) }}
                     </span>
                 </div>
@@ -35,15 +35,15 @@
                 <!-- Left Column -->
                 <div class="space-y-3">
                     <!-- Created By -->
-                    @if($record->createdBy)
+                    @if($record->causer)
                         <div class="flex items-center gap-3">
-                            <x-heroicon-m-user-circle class="h-5 w-5 text-gray-400"/>
+                            <x-heroicon-m-user-circle class="w-5 h-5 text-gray-400"/>
 
                             <div>
                                 <span class="block text-xs font-medium text-gray-500 dark:text-gray-400">
                                     @lang('chatter::views/filament/infolists/components/activities/content-text-entry.created-by')
                                 </span>
-                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $record->createdBy->name }}</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $record->causer?->name }}</span>
                             </div>
                         </div>
                     @endif
@@ -51,7 +51,7 @@
                     <!-- Summary -->
                     @if($record->summary)
                         <div class="flex items-center gap-3">
-                            <x-heroicon-m-document class="h-5 w-5 text-gray-400"/>
+                            <x-heroicon-m-document class="w-5 h-5 text-gray-400"/>
 
                             <div>
                                 <span class="block text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -68,7 +68,7 @@
                     <!-- Due Date -->
                     @if($record->date_deadline)
                         <div class="flex items-center gap-3">
-                            <x-heroicon-m-calendar class="h-5 w-5 text-gray-400"/>
+                            <x-heroicon-m-calendar class="w-5 h-5 text-gray-400"/>
 
                             <div>
                                 <span class="block text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -121,7 +121,7 @@
                     <!-- Assigned To -->
                     @if($record->assignedTo)
                         <div class="flex items-center gap-3">
-                            <x-heroicon-m-user-group class="h-5 w-5 text-gray-400"/>
+                            <x-heroicon-m-user-group class="w-5 h-5 text-gray-400"/>
 
                             <div>
                                 <span class="block text-xs font-medium text-gray-500 dark:text-gray-400">

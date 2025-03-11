@@ -7,7 +7,7 @@
     :component="$getEntryWrapperView()"
     :entry="$entry"
 >
-    <div {{ $attributes->merge($getExtraAttributes())->class('rounded-lg shadow-md') }}>
+    <div {{ $attributes->merge($getExtraAttributes())->class('') }}>
         @switch($record->type)
             @case('note')
             @case('comment')
@@ -26,9 +26,9 @@
                     </div>
                 @endif
 
-                <section class="mt-2 overflow-hidden text-gray-700">
-                    <div class="container mx-auto px-5 py-2 lg:px-32 lg:pt-24">
-                        <div class="-m-1 flex flex-wrap md:-m-2">
+                <section class="mt-2 text-gray-700">
+                    <div class="container px-5 py-2 mx-auto lg:px-32 lg:pt-24">
+                        <div class="flex flex-wrap -m-1 md:-m-2">
                             @foreach($record->attachments->chunk(4) as $chunk)
                                 <div class="grid gap-2">
                                     @foreach($chunk as $attachment)
@@ -53,16 +53,16 @@
                                             }
                                         @endphp
 
-                                        <div class="flex gap-2 rounded-md bg-gray-100 px-3 py-2">
-                                            <div class="flex h-8 w-8 items-center justify-center rounded-md">
+                                        <div class="flex gap-2 px-3 py-2 bg-gray-100 rounded-md">
+                                            <div class="flex items-center justify-center w-8 h-8 rounded-md">
                                                 <x-filament::icon
                                                     :icon="$icon"
-                                                    class="h-5 w-5"
+                                                    class="w-5 h-5"
                                                 />
                                             </div>
 
                                             <div class="flex flex-col gap-2">
-                                                <div class="flex flex-1 flex-col">
+                                                <div class="flex flex-col flex-1">
                                                     <span class="text-sm font-medium text-gray-900">
                                                         {{ $attachment->original_file_name }}
                                                     </span>
@@ -116,10 +116,10 @@
                     count($changes) > 0
                     && $record->event !== 'created'
                 )
-                    <div class="mt-2 rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-800 dark:ring-white/10">
-                        <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+                    <div class="mt-2 bg-white rounded-lg shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-800 dark:ring-white/10">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center gap-2">
-                                <x-heroicon-m-arrow-path class="text-primary-500 h-5 w-5"/>
+                                <x-heroicon-m-arrow-path class="w-5 h-5 text-primary-500"/>
 
                                 <h3 class="text-sm font-medium leading-6 text-gray-950 dark:text-white">
                                     @lang('chatter::views/filament/infolists/components/messages/content-text-entry.changes-made')
@@ -131,13 +131,13 @@
                             @foreach($changes as $field => $change)
                                 @if(is_array($change))
                                     <div class="p-4">
-                                        <div class="mb-3 flex items-center gap-2">
+                                        <div class="flex items-center gap-2 mb-3">
                                             @if($field === 'title')
-                                                <x-heroicon-m-pencil-square class="h-4 w-4 text-gray-500"/>
+                                                <x-heroicon-m-pencil-square class="w-4 h-4 text-gray-500"/>
                                             @elseif($field === 'due_date')
-                                                <x-heroicon-m-calendar class="h-4 w-4 text-gray-500"/>
+                                                <x-heroicon-m-calendar class="w-4 h-4 text-gray-500"/>
                                             @else
-                                                <x-heroicon-m-arrow-path class="h-4 w-4 text-gray-500"/>
+                                                <x-heroicon-m-arrow-path class="w-4 h-4 text-gray-500"/>
                                             @endif
 
                                             <span class="text-sm font-medium leading-6 text-gray-950 dark:text-white">
@@ -146,19 +146,19 @@
                                                 ])
 
                                                 @isset($change['type'])
-                                                    <span class="inline-flex items-center rounded-md text-xs">
+                                                    <span class="inline-flex items-center text-xs rounded-md">
                                                         {{ ucfirst($change['type']) }}
                                                     </span>
                                                 @endisset
                                             </span>
                                         </div>
 
-                                        <div class="mt-2 space-y-2 pl-6">
+                                        <div class="pl-6 mt-2 space-y-2">
                                             @if(isset($change['old_value']))
-                                                <div class="group flex items-center gap-2">
+                                                <div class="flex items-center gap-2 group">
                                                     <span class="flex-shrink-0">
                                                         <x-heroicon-m-minus-circle
-                                                            class="h-4 w-4"
+                                                            class="w-4 h-4"
                                                             @style([
                                                                 'color: rgb(var(--danger-500))',
                                                             ])
@@ -185,10 +185,10 @@
                                             @endif
 
                                             @if(isset($change['new_value']))
-                                                <div class="group flex items-center gap-2">
+                                                <div class="flex items-center gap-2 group">
                                                     <span class="flex-shrink-0">
                                                         <x-heroicon-m-plus-circle
-                                                            class="h-4 w-4 text-green-500"
+                                                            class="w-4 h-4 text-green-500"
                                                             @style([
                                                                 'color: rgb(var(--success-500))',
                                                             ])
