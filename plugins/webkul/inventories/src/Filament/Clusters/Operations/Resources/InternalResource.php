@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -68,6 +69,7 @@ class InternalResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
+                        ->hidden(fn (InternalTransfer $record): bool => $record->state == Enums\OperationState::DONE)
                         ->successNotification(
                             Notification::make()
                                 ->success()
