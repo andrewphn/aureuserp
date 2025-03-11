@@ -4,7 +4,7 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AdvancePaymentInvoiceOrderSale extends Model
+class AdvancedPaymentInvoiceOrderSale extends Model
 {
     protected $table = 'sales_advance_payment_invoice_order_sales';
 
@@ -17,7 +17,7 @@ class AdvancePaymentInvoiceOrderSale extends Model
 
     public function advancePaymentInvoice()
     {
-        return $this->belongsTo(AdvancePaymentInvoice::class, 'advance_payment_invoice_id');
+        return $this->belongsTo(AdvancedPaymentInvoice::class, 'advance_payment_invoice_id');
     }
 
     public function order()
