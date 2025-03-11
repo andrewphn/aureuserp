@@ -30,7 +30,7 @@ class MessageAction extends Action
         return $this;
     }
 
-    public function setMessageMailView(string $mailView): self
+    public function setMessageMailView(?string $mailView): self
     {
         $mailView = $this->evaluate($mailView);
 
