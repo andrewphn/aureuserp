@@ -35,7 +35,7 @@
                 <!-- Left Column -->
                 <div class="space-y-3">
                     <!-- Created By -->
-                    @if($record->createdBy)
+                    @if($record->causer)
                         <div class="flex items-center gap-3">
                             <x-heroicon-m-user-circle class="w-5 h-5 text-gray-400"/>
 
@@ -43,7 +43,7 @@
                                 <span class="block text-xs font-medium text-gray-500 dark:text-gray-400">
                                     @lang('chatter::views/filament/infolists/components/activities/content-text-entry.created-by')
                                 </span>
-                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $record->createdBy->name }}</span>
+                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $record->causer?->name }}</span>
                             </div>
                         </div>
                     @endif
