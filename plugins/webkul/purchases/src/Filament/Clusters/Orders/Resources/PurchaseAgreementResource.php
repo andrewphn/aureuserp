@@ -348,6 +348,7 @@ class PurchaseAgreementResource extends Resource
                                 ->body(__('purchases::filament/clusters/orders/resources/purchase-agreement.table.actions.restore.notification.body')),
                         ),
                     Tables\Actions\DeleteAction::make()
+                        ->hidden(fn (Model $record) => $record->state == Enums\RequisitionState::CLOSED)
                         ->successNotification(
                             Notification::make()
                                 ->success()
