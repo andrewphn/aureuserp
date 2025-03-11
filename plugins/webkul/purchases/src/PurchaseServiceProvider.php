@@ -51,5 +51,7 @@ class PurchaseServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         Livewire::component('order-summary', Summary::class);
+
+        Livewire::component('list-products', \Webkul\Purchase\Livewire\Customer\ListProducts::class);
     }
 }

@@ -15,10 +15,7 @@ class PageResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function can(string $action, ?Model $record = null): bool
-    {
-        return true;
-    }
+    protected static bool $shouldSkipAuthorization = true;
 
     public static function getPages(): array
     {

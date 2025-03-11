@@ -16,10 +16,7 @@ class CategoryResource extends Resource
 
     protected static ?string $recordRouteKeyName = 'slug';
 
-    public static function can(string $action, ?Model $record = null): bool
-    {
-        return true;
-    }
+    protected static bool $shouldSkipAuthorization = true;
 
     public static function getNavigationLabel(): string
     {

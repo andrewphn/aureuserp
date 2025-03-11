@@ -20,6 +20,8 @@ class PostResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static bool $shouldSkipAuthorization = true;
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['title', 'category.name'];
@@ -40,11 +42,6 @@ class PostResource extends Resource
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()->with(['category'])->where('is_published', true);
-    }
-
-    public static function can(string $action, ?Model $record = null): bool
-    {
-        return true;
     }
 
     public static function getPages(): array

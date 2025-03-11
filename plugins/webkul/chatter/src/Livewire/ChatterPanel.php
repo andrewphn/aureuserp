@@ -57,10 +57,10 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
 
     public function mount(
         Model $record,
-        mixed $activityPlans,
-        string $resource,
-        string|Closure|null $followerViewMail,
-        string|Closure|null $messageViewMail,
+        string $resource = '',
+        mixed $activityPlans = [],
+        string|Closure|null $followerViewMail = null,
+        string|Closure|null $messageViewMail = null,
     ): void {
         $this->record = $record;
 
@@ -370,9 +370,9 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
     public function placeholder()
     {
         return <<<'HTML'
-            <div class="flex items-center justify-center w-full">
+            <div class="flex w-full items-center justify-center">
                 <div class="flex flex-col items-center space-y-4">
-                    <x-filament::loading-indicator class="w-10 h-10 text-primary-500 animate-spin" />
+                    <x-filament::loading-indicator class="text-primary-500 h-10 w-10 animate-spin" />
                     <p class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">
                         {{ __('chatter::livewire/chatter-panel.placeholders.loading') }}
                     </p>
