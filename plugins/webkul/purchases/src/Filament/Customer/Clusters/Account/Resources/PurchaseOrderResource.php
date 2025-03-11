@@ -5,6 +5,7 @@ namespace Webkul\Purchase\Filament\Customer\Clusters\Account\Resources;
 use Webkul\Website\Filament\Customer\Clusters\Account;
 use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderResource\Pages;
 use Webkul\Purchase\Models\CustomerPurchaseOrder as PurchaseOrder;
+use Webkul\Purchase\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Resource;
 use Filament\Infolists;
@@ -157,11 +158,13 @@ class PurchaseOrderResource extends Resource
                                         return 'Communication History';
                                     }),
 
-                                Infolists\Components\Livewire::make('chatter-panel', [
-                                        'activityPlans' => [],
-                                        'resource' => '',
-                                        'followerViewMail' => '',
-                                    ]),
+                                Infolists\Components\Livewire::make('chatter-panel', function(Order $record) {
+                                    $record = Order::findOrFail($record->id);
+
+                                    return [
+                                        'record' => $record,
+                                    ];
+                                }),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),

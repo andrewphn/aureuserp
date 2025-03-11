@@ -2,6 +2,7 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -9,6 +10,7 @@ use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Actions as OrderActions;
+use Webkul\Purchase\Models\Order;
 
 class EditOrder extends EditRecord
 {
@@ -27,11 +29,20 @@ class EditOrder extends EditRecord
             ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.notification.body'));
     }
 
+    protected function configureAction(Action $action): void
+    {
+        $order = Order::find($this->getRecord()->id);
+
+        $action
+            ->record($order)
+            ->recordTitle($this->getRecordTitle());
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             ChatterAction::make()
-                ->setResource(static::$resource),
+                ->setResource(self::$resource),
             OrderActions\SendEmailAction::make(),
             OrderActions\SendPOEmailAction::make(),
             OrderActions\PrintRFQAction::make(),
