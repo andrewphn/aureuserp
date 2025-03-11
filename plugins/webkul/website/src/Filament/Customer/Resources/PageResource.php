@@ -15,12 +15,7 @@ class PageResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function canAccess(): bool
-    {
-        return true;
-    }
-
-    public static function canView(Model $record): bool
+    public static function can(string $action, ?Model $record = null): bool
     {
         return true;
     }
