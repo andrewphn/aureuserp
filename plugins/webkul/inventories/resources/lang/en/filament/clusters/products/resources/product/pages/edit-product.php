@@ -9,6 +9,7 @@ return [
 
             'form' => [
                 'fields' => [
+                    'product'     => 'Product',
                     'on-hand-qty' => 'On Hand Quantity',
                 ],
             ],
