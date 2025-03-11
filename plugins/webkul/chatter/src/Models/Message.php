@@ -19,7 +19,6 @@ class Message extends Model
         'activity_type_id',
         'messageable_type',
         'messageable_id',
-        'creator_id',
         'type',
         'name',
         'subject',
@@ -54,11 +53,6 @@ class Message extends Model
     public function activityType()
     {
         return $this->belongsTo(ActivityType::class, 'activity_type_id');
-    }
-
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'creator_id');
     }
 
     public function causer()

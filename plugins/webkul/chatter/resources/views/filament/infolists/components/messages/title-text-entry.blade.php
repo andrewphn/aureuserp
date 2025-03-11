@@ -12,8 +12,8 @@
         <div class="flex-grow space-y-2 pt-[6px]">
             <div class="flex items-center justify-between gap-x-2">
                 <div class="flex items-center gap-x-2">
-                    <div class="cursor-pointer text-sm font-medium text-gray-950 dark:text-white">
-                        {{ $getRecord()->createdBy->name }}
+                    <div class="text-sm font-medium cursor-pointer text-gray-950 dark:text-white">
+                        {{ $getRecord()->causer?->name }}
                     </div>
 
                     <div class="text-xs font-medium text-gray-400 dark:text-gray-500">
