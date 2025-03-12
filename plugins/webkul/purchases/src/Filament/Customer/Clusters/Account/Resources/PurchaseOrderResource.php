@@ -54,7 +54,7 @@ class PurchaseOrderResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label(__('purchases::filament/customer/clusters/account/resources/purchase-order.table.columns.total-amount'))
                     ->sortable()
-                    ->money(fn (PurchaseOrder $record) => $record->currency->code),
+                    ->money(fn(PurchaseOrder $record) => $record->currency->code),
             ])
             ->filters([
                 //
@@ -79,31 +79,28 @@ class PurchaseOrderResource extends Resource
                                     ->hiddenLabel()
                                     ->size('text-3xl')
                                     ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                    ->money(fn (PurchaseOrder $record) => $record->currency->code),
+                                    ->money(fn(PurchaseOrder $record) => $record->currency->code),
 
                                 Infolists\Components\Actions::make([
-                                        Infolists\Components\Actions\Action::make('accept')
-                                            ->label('Accept')
-                                            ->color('success')
-                                            ->icon('heroicon-o-check-circle')
-                                            ->action(function (PurchaseOrder $order) {
-                                            }),
-                                        Infolists\Components\Actions\Action::make('decline')
-                                            ->label('Decline')
-                                            ->color('danger')
-                                            ->icon('heroicon-o-x-circle')
-                                            ->action(function (PurchaseOrder $order) {
-                                            }),
-                                    ])
+                                    Infolists\Components\Actions\Action::make('accept')
+                                        ->label('Accept')
+                                        ->color('success')
+                                        ->icon('heroicon-o-check-circle')
+                                        ->action(function (PurchaseOrder $order) {}),
+                                    Infolists\Components\Actions\Action::make('decline')
+                                        ->label('Decline')
+                                        ->color('danger')
+                                        ->icon('heroicon-o-x-circle')
+                                        ->action(function (PurchaseOrder $order) {}),
+                                ])
                                     ->fullWidth(),
 
                                 Infolists\Components\Actions::make([
-                                        Infolists\Components\Actions\Action::make('print')
-                                            ->label('Download/Print')
-                                            ->icon('heroicon-o-printer')
-                                            ->action(function (PurchaseOrder $order) {
-                                            }),
-                                    ])
+                                    Infolists\Components\Actions\Action::make('print')
+                                        ->label('Download/Print')
+                                        ->icon('heroicon-o-printer')
+                                        ->action(function (PurchaseOrder $order) {}),
+                                ])
                                     ->fullWidth(),
                                 Infolists\Components\TextEntry::make('user.name')
                                     ->label('Buyer')
@@ -120,7 +117,7 @@ class PurchaseOrderResource extends Resource
                                     ->size('text-3xl')
                                     ->weight(\Filament\Support\Enums\FontWeight::Bold)
                                     ->formatStateUsing(function (PurchaseOrder $record) {
-                                        return 'Purchase Order '.$record->name;
+                                        return 'Purchase Order ' . $record->name;
                                     }),
                                 Infolists\Components\TextEntry::make('ordered_at')
                                     ->label('Order Date'),
@@ -134,7 +131,7 @@ class PurchaseOrderResource extends Resource
                                     ->label('Confirmation Date'),
                                 Infolists\Components\TextEntry::make('ordered_at')
                                     ->label('Receipt Date'),
-                                
+
                                 Infolists\Components\TextEntry::make('name')
                                     ->hiddenLabel()
                                     ->size('text-2xl')
@@ -144,12 +141,12 @@ class PurchaseOrderResource extends Resource
                                     }),
 
                                 Infolists\Components\Livewire::make('list-products', [
-                                        'recordId' => 1,
-                                    ])
+                                    'recordId' => 1,
+                                ])
                                     ->extraAttributes([
                                         'wire:key' => 1,
                                     ]),
-                                
+
                                 Infolists\Components\TextEntry::make('name')
                                     ->hiddenLabel()
                                     ->size('text-2xl')
@@ -158,11 +155,19 @@ class PurchaseOrderResource extends Resource
                                         return 'Communication History';
                                     }),
 
-                                Infolists\Components\Livewire::make('chatter-panel', function(Order $record) {
+                                Infolists\Components\Livewire::make('chatter-panel', function (Order $record) {
                                     $record = Order::findOrFail($record->id);
 
                                     return [
                                         'record' => $record,
+                                        'showMessageAction'  => true,
+                                        'showActivityAction' => false,
+                                        'showFollowerAction' => false,
+                                        'showLogAction'      => false,
+                                        'showFileAction'     => false,
+                                        'filters' => [
+                                            'type' => 'order',
+                                        ]
                                     ];
                                 }),
                             ]),

@@ -55,12 +55,30 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
 
     public mixed $messageViewMail = null;
 
+    public bool $showMessageAction;
+
+    public bool $showActivityAction;
+
+    public bool $showFollowerAction;
+
+    public bool $showLogAction;
+
+    public bool $showFileAction;
+
+    public array $filters;
+
     public function mount(
         Model $record,
         string $resource = '',
         mixed $activityPlans = [],
         string|Closure|null $followerViewMail = null,
         string|Closure|null $messageViewMail = null,
+        bool $showMessageAction = true,
+        bool $showActivityAction = true,
+        bool $showFollowerAction = true,
+        bool $showLogAction = true,
+        bool $showFileAction = true,
+        array $filters = [],
     ): void {
         $this->record = $record;
 
@@ -71,11 +89,24 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         $this->messageViewMail = $messageViewMail;
 
         $this->resource = $resource;
+
+        $this->showMessageAction = $showMessageAction;
+
+        $this->showActivityAction = $showActivityAction;
+
+        $this->showFollowerAction = $showFollowerAction;
+
+        $this->showLogAction = $showLogAction;
+
+        $this->showFileAction = $showFileAction;
+
+        $this->filters = $filters;
     }
 
     public function messageAction(): MessageAction
     {
         return MessageAction::make('message')
+            ->visible($this->showMessageAction)
             ->setMessageMailView($this->messageViewMail)
             ->setResource($this->resource)
             ->record($this->record);
@@ -84,12 +115,14 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
     public function logAction(): LogAction
     {
         return LogAction::make('log')
+            ->visible($this->showLogAction)
             ->record($this->record);
     }
 
     public function fileAction(): FileAction
     {
         return FileAction::make('file')
+            ->visible($this->showFileAction)
             ->hiddenLabel()
             ->record($this->record);
     }
@@ -97,6 +130,7 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
     public function followerAction(): FollowerAction
     {
         return FollowerAction::make('follower')
+            ->visible($this->showFollowerAction)
             ->setFollowerMailView($this->followerViewMail)
             ->setResource($this->resource)
             ->record($this->record);
@@ -105,6 +139,7 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
     public function activityAction(): ActivityAction
     {
         return ActivityAction::make('activity')
+            ->visible($this->showActivityAction)
             ->setActivityPlans($this->activityPlans)
             ->record($this->record);
     }

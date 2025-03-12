@@ -2,6 +2,7 @@
 
 namespace Webkul\Chatter\Filament\Actions\Chatter;
 
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -59,6 +60,7 @@ class MessageAction extends Action
         $this
             ->color('gray')
             ->outlined()
+            ->visible(false)
             ->form([
                 Forms\Components\Group::make([
                     Forms\Components\Actions::make([

@@ -1,24 +1,27 @@
-<div class="flex h-full w-full flex-col space-y-4">
+<div class="flex flex-col w-full h-full space-y-4">
     <!-- Actions -->
-    <div class="flex w-full justify-between gap-3">
+    <div class="flex justify-between w-full gap-3">
         <div class="flex gap-3">
-            {{ $this->messageAction }}
-
-            {{ $this->logAction }}
-
-            {{ $this->activityAction }}
+            @foreach (['messageAction', 'logAction', 'activityAction'] as $action)
+                @if ($this->{$action}->isVisible())
+                    {{ $this->{$action} }}
+                @endif
+            @endforeach
         </div>
 
         <div class="flex gap-3">
-            {{ $this->fileAction }}
-
-            {{ $this->followerAction }}
+            @foreach (['fileAction', 'followerAction'] as $action)
+                @if ($this->{$action}->isVisible())
+                    {{ $this->{$action} }}
+                @endif
+            @endforeach
         </div>
     </div>
 
-
-    <!-- Activities -->
-    {{ $this->activityInfolist }}
+    @if ($this->activityInfolist->isVisible())
+        <!-- Activities -->
+        {{ $this->activityInfolist }}
+    @endif
 
     <!-- Messages -->
     {{ $this->chatInfolist }}
