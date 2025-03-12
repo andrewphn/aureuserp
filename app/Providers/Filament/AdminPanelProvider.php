@@ -24,8 +24,6 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        set_time_limit(300);
-
         return $panel
             ->default()
             ->id('admin')
