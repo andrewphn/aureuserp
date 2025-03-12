@@ -8,7 +8,6 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\ActivityPlan;
@@ -125,7 +124,9 @@ class ActivityAction extends Action
             })
             ->action(function (array $data, ?Model $record = null) {
                 try {
-                    $data['assigned_to'] = $data['assigned_to'] ?? Auth::id();
+                    $user = filament()->auth()->user();
+
+                    $data['assigned_to'] = $data['assigned_to'] ?? $user->id;
 
                     if (isset($data['activity_plan_id'])) {
                         $activityPlan = ActivityPlan::find($data['activity_plan_id']);
@@ -137,8 +138,8 @@ class ActivityAction extends Action
                                 ...$data,
                                 ...$activityPlanTemplate->toArray(),
                                 'body'        => $activityPlanTemplate['note'] ?? null,
-                                'causer_type' => Auth::user()?->getMorphClass(),
-                                'causer_id'   => Auth::id(),
+                                'causer_type' => $user?->getMorphClass(),
+                                'causer_id'   => $user->id,
                             ];
 
                             $body .= '<div class="space-y-2" style="margin-left: 20px;">
@@ -151,19 +152,19 @@ class ActivityAction extends Action
                                 </div>
                             </div>';
 
-                            $record->addMessage($data, Auth::user()->id);
+                            $record->addMessage($data, $user->id);
                         }
 
                         $data['type'] = 'comment';
                         $data['body'] = $body;
 
-                        $record->addMessage($data, Auth::user()->id);
+                        $record->addMessage($data, $user->id);
                     } else {
                         $data['content'] = $activityPlanTemplate['note'] ?? null;
-                        $data['causer_type'] = Auth::user()?->getMorphClass();
-                        $data['causer_id'] = Auth::id();
+                        $data['causer_type'] = $user?->getMorphClass();
+                        $data['causer_id'] = $user->id;
 
-                        $record->addMessage($data, Auth::user()->id);
+                        $record->addMessage($data, $user->id);
                     }
 
                     Notification::make()

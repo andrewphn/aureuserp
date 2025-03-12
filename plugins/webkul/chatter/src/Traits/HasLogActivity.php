@@ -3,7 +3,6 @@
 namespace Webkul\Chatter\Traits;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -14,8 +13,8 @@ trait HasLogActivity
      */
     public static function bootHasLogActivity()
     {
-        static::created(fn (Model $model) => $model->logModelActivity('created'));
-        static::updated(fn (Model $model) => $model->logModelActivity('updated'));
+        static::created(fn(Model $model) => $model->logModelActivity('created'));
+        static::updated(fn(Model $model) => $model->logModelActivity('updated'));
 
         if (method_exists(static::class, 'bootSoftDeletes')) {
             static::deleted(function (Model $model) {
@@ -25,9 +24,9 @@ trait HasLogActivity
                     $model->logModelActivity('hard_deleted');
                 }
             });
-            static::restored(fn (Model $model) => $model->logModelActivity('restored'));
+            static::restored(fn(Model $model) => $model->logModelActivity('restored'));
         } else {
-            static::deleting(fn (Model $model) => $model->logModelActivity('deleted'));
+            static::deleting(fn(Model $model) => $model->logModelActivity('deleted'));
         }
     }
 
@@ -36,9 +35,7 @@ trait HasLogActivity
      */
     public function logModelActivity(string $event): ?Model
     {
-        if (! Auth::check()) {
-            return null;
-        }
+        $user = filament()->auth()->user();
 
         try {
             $changes = $this->determineChanges($event);
@@ -53,8 +50,8 @@ trait HasLogActivity
                 'body'         => $this->generateActivityDescription($event),
                 'subject_type' => $this->getMorphClass(),
                 'subject_id'   => $this->getKey(),
-                'causer_type'  => Auth::user()?->getMorphClass(),
-                'causer_id'    => Auth::id(),
+                'causer_type'  => $user->getMorphClass(),
+                'causer_id'    => $user->id,
                 'event'        => $event,
                 'properties'   => $changes,
             ]);
@@ -114,7 +111,7 @@ trait HasLogActivity
 
             return $instance ? $instance->$attribute : null;
         } catch (\Exception $e) {
-            Log::error("Error getting related value for {$relation}.{$attribute}: ".$e->getMessage());
+            Log::error("Error getting related value for {$relation}.{$attribute}: " . $e->getMessage());
 
             return null;
         }
@@ -169,7 +166,7 @@ trait HasLogActivity
                 }
             }
         } catch (\Exception $e) {
-            Log::error("Error tracking relationship changes for {$relation}.{$attribute}: ".$e->getMessage());
+            Log::error("Error tracking relationship changes for {$relation}.{$attribute}: " . $e->getMessage());
         }
 
         return null;
