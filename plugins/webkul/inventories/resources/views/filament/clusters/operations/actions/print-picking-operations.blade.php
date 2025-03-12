@@ -1,191 +1,347 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html>
-    <head>
-        <!-- meta tags -->
-        <meta http-equiv="Cache-control" content="no-cache">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 14px;
+            color: #333333;
+            line-height: 1.6;
+            margin: 0;
+        }
 
-        <!-- lang supports inclusion -->
-        <style type="text/css">
-            body {
-                font-size: 16px;
-                color: #091341;
-            }
+        .packing-slip {
+            margin-bottom: 50px;
+            page-break-after: always;
+        }
 
-            .page-content {
-                padding: 12px;
-            }
+        .packing-slip:last-child {
+            page-break-after: auto;
+        }
 
-            table {
-                width: 100%;
-                border-spacing: 1px 0;
-                border-collapse: separate;
-                margin-bottom: 20px;
-            }
-            
-            table thead th {
-                background-color: #E9EFFC;
-                padding: 6px 18px;
-                text-align: left;
-            }
+        .header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
 
-            table.rtl thead tr th {
-                text-align: right;
-            }
+        .left-info {
+            width: 50%;
+            float: left;
+        }
 
-            table tbody td {
-                padding: 9px 18px;
-                border-bottom: 1px solid #E9EFFC;
-                text-align: left;
-                vertical-align: top;
-            }
+        .right-info {
+            width: 45%;
+            float: right;
+            text-align: right;
+            border-left: 2px solid #f0f0f0;
+            padding-left: 20px;
+        }
 
-            table.rtl tbody tr td {
-                text-align: right;
-            }
+        .clearfix {
+            clear: both;
+        }
 
-            .barcode-container {
-                display: inline-block;
-            }
+        .slip-title {
+            font-size: 24px;
+            color: #1a4587;
+            margin: 25px 0;
+            padding: 15px 0;
+            border-bottom: 2px solid #1a4587;
+            display: inline-block;
+            width: 100%;
+        }
 
-            .barcode > div {
-                display: inline-block;
-            }
+        .barcode-container {
+            display: inline-block;
+            text-align: center;
+            margin: 10px 0;
+        }
 
-            .barcode-container .name {
-                font-size: 14px;
-                text-align: center;
-            }
-        </style>
-    </head>
+        .barcode-text {
+            font-size: 12px;
+            margin-top: 5px;
+        }
 
-    <body>
-        <div class="page">
-            <div class="page-content">
-                @foreach ($records as $record)
-                    <div style="margin-bottom: 20px">
-                        <!-- Information -->
-                        <table style="margin-bottom: 40px">
-                            <tbody>
-                                <tr>
-                                    <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
-                                        <b>
-                                            {{ $record->name }}
-                                        </b>
-                                    </td>
+        .details-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
 
-                                    <td style="width: 50%; padding: 2px 18px;border:none;">
-                                        <div class="barcode">
-                                            {!! DNS1D::getBarcodeHTML($record->name, 'C128', 2, 44) !!}
-                                        </div>
-                                    </td>
-                                </tr>
+        .details-table td {
+            padding: 10px;
+            vertical-align: top;
+        }
 
-                                <tr>
-                                    <td style="width: 50%; padding: 2px 18px;border:none;">
-                                        <b>
-                                            Status:
-                                        </b>
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
 
-                                        <div>
-                                            {{ $record->state->name }}
-                                        </div>
-                                    </td>
+        .items-table th {
+            background: #1a4587;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
 
-                                    <td style="width: 50%; padding: 2px 18px;border:none;">
-                                        <b>
-                                            Scheduled At:
-                                        </b>
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
 
-                                        <div>
-                                            {{ $record->scheduled_at }}
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+        .items-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
 
-                        <!-- Items -->
-                        @if (! $record->moveLines->isEmpty())
-                            <div class="items">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                Product
-                                            </th>
+        .note {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
 
-                                            <th>
-                                                Quantity
-                                            </th>
+<body>
+    @foreach ($records as $record)
+        <div class="packing-slip">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="left-info">
+                    <div style="font-size: 28px; color: #1a4587; margin-bottom: 10px;">{{ $record->company->name }}</div>
 
-                                            <th>
-                                                To
-                                            </th>
+                    @if ($record->company->address)
+                        <div>
+                            {{ $record->company->address->street1 }}
 
-                                            <th>
-                                                Lot/Serial Number
-                                            </th>
+                            @if ($record->company->address->street2)
+                                ,{{ $record->company->address->street2 }}
+                            @endif
+                        </div>
+                        
+                        <div>
+                            {{ $record->company->address->city }},
 
-                                            <th>
-                                                Product Barcode
-                                            </th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        @foreach ($record->moveLines as $item)
-                                            <tr>
-                                                <td>
-                                                    {{ $item->product->name }}
-                                                </td>
-
-                                                <td>
-                                                    {{ $item->qty.' '.$item->uom->name }}
-                                                </td>
-
-                                                <td>
-                                                    {{ $item->destinationLocation->full_name }}
-
-                                                    @if ($item->result_package_id)
-                                                        - {{ $item->resultPackage->name }}
-                                                    @endif
-                                                </td>
-
-                                                @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers)
-                                                    <td>
-                                                        @if ($item->lot)
-                                                            <div class="barcode-container">
-                                                                <div class="barcode">
-                                                                    {!! DNS1D::getBarcodeHTML($item->lot->name, 'C128', 1.5, 33) !!}
-                                                                </div>
-
-                                                                <div class="name">{{ $item->lot->name }}</div>
-                                                            </div>
-                                                        @endif
-                                                    </td>
-                                                @endif
-
-                                                <td>
-                                                    @if ($item->product->barcode)
-                                                        <div class="barcode-container">
-                                                            <div class="barcode">
-                                                                {!! DNS1D::getBarcodeHTML($item->product->barcode, 'C128', 1.5, 33) !!}
-                                                            </div>
-
-                                                            <div class="name">{{ $item->product->barcode }}</div>
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                            @if ($record->company->address->state)
+                                {{ $record->company->address->state->name }},
+                            @endif
+                            
+                            {{ $record->company->address->zip }}
+                        </div>
+                        
+                        @if ($record->company->address->country)
+                            <div>
+                                {{ $record->company->address->country->name }}
                             </div>
                         @endif
-                    </div>
-                @endforeach
+                        
+                        @if ($record->company->email)
+                            <div>
+                                Email: 
+                                {{ $record->company->email }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->company->phone)
+                            <div>
+                                Phone: 
+                                {{ $record->company->phone }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                
+                <div class="clearfix"></div>
+            </div>
+            
+            <!-- Header Section -->
+            <div class="header">
+                <div class="left-info">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Warehouse Address</div>
+                    
+                    @if ($record->destinationLocation->warehouse->partnerAddress)
+                        <?php $address = $record->destinationLocation->warehouse->partnerAddress ?>
+
+                        <div style="margin-top: 15px;">
+                            <div>
+                                {{ $address->street1 }}
+
+                                @if ($address->street2)
+                                    ,{{ $address->street2 }}
+                                @endif
+                            </div>
+                            
+                            <div>
+                                {{ $address->city }},
+
+                                @if ($address->state)
+                                    {{ $address->state->name }},
+                                @endif
+                                
+                                {{ $address->zip }}
+                            </div>
+                            
+                            @if ($address->country)
+                                <div>
+                                    {{ $address->country->name }}
+                                </div>
+                            @endif
+                            
+                            @if ($address->email)
+                                <div>
+                                    Email: 
+                                    {{ $address->email }}
+                                </div>
+                            @endif
+                            
+                            @if ($address->phone)
+                                <div>
+                                    Phone: 
+                                    {{ $address->phone }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                <div class="right-info">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Vendor Address</div>
+                    
+                    @if($record->partner && $record->partner->addresses->count())
+                        <div style="margin-top: 15px;">
+                            <div>{{ $record->partner->name }}</div>
+                            
+                            <div>
+                                {{ $record->partner->addresses->first()->street1 }}
+
+                                @if ($record->partner->addresses->first()->street2)
+                                    ,{{ $record->partner->addresses->first()->street2 }}
+                                @endif
+                            </div>
+                            
+                            <div>
+                                {{ $record->partner->addresses->first()->city }},
+
+                                @if ($record->partner->addresses->first()->state)
+                                    {{ $record->partner->addresses->first()->state->name }},
+                                @endif
+                                
+                                {{ $record->partner->addresses->first()->zip }}
+                            </div>
+                            
+                            @if ($record->partner->addresses->first()->country)
+                                <div>
+                                    {{ $record->partner->addresses->first()->country->name }}
+                                </div>
+                            @endif
+                            
+                            @if ($record->partner->addresses->first()->email)
+                                <div>
+                                    Email: 
+                                    {{ $record->partner->addresses->first()->email }}
+                                </div>
+                            @endif
+                            
+                            @if ($record->partner->addresses->first()->phone)
+                                <div>
+                                    Phone: 
+                                    {{ $record->partner->addresses->first()->phone }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+                
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- Slip Title -->
+            <div class="slip-title">
+                <span>Packing Slip #{{ $record->name }}</span>
+                
+                <div class="barcode-container" style="float: right;">
+                    {!! DNS1D::getBarcodeHTML($record->name, 'C128', 2, 44) !!}
+                    <div class="barcode-text">{{ $record->name }}</div>
+                </div>
+            </div>
+
+            <!-- Details Table -->
+            <table class="details-table">
+                <tr>
+                    <td width="50%">
+                        <strong>Status:</strong><br>
+                        {{ $record->state->name }}
+                    </td>
+                    
+                    <td width="50%" style="text-align: right;">
+                        <strong>Scheduled At:</strong><br>
+                        {{ $record->scheduled_at }}
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Items Table -->
+            @if (! $record->moveLines->isEmpty())
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>To</th>
+                            
+                            @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers)
+                                <th>Lot/Serial Number</th>
+                            @endif
+                            
+                            <th>Product Barcode</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($record->moveLines as $item)
+                            <tr>
+                                <td>{{ $item->product->name }}</td>
+                                <td>{{ number_format($item->qty) }} {{ $item->uom->name }}</td>
+                                <td>
+                                    {{ $item->destinationLocation->full_name }}
+                                    
+                                    @if ($item->result_package_id)
+                                        - {{ $item->resultPackage->name }}
+                                    @endif
+                                </td>
+
+                                @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers)
+                                    <td>
+                                        @if ($item->lot)
+                                        <div class="barcode-container">
+                                            {!! DNS1D::getBarcodeHTML($item->lot->name, 'C128', 1.5, 33) !!}
+                                            <div class="barcode-text">{{ $item->lot->name }}</div>
+                                        </div>
+                                        @endif
+                                    </td>
+                                @endif
+
+                                <td>
+                                    @if ($item->product->barcode)
+                                        <div class="barcode-container">
+                                            {!! DNS1D::getBarcodeHTML($item->product->barcode, 'C128', 1.5, 33) !!}
+                                            <div class="barcode-text">{{ $item->product->barcode }}</div>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+
+            <div class="note">
+                All items have been checked and packed according to quality standards.
             </div>
         </div>
-    </body>
+    @endforeach
+</body>
 </html>

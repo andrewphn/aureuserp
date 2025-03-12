@@ -29,7 +29,7 @@ class ViewLot extends ViewRecord
 
                     return response()->streamDownload(function () use ($pdf) {
                         echo $pdf->output();
-                    }, 'Lot-'.$record->name.'.pdf');
+                    }, 'Lot-'.str_replace('/', '_', $record->name).'.pdf');
                 }),
             Actions\DeleteAction::make()
                 ->successNotification(

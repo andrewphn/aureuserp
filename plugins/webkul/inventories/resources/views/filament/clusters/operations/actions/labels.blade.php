@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
         @page {
             margin: 0;
@@ -10,7 +11,8 @@
         body {
             margin: 0;
             padding: 15px;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background: #ffffff;
         }
 
         table {
@@ -22,69 +24,69 @@
 
         td {
             vertical-align: top;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #e9ecef;
             background: white;
             overflow: hidden;
-        }
-
-        .format-4x7_price td,
-        .format-4x12 td,
-        .format-4x12_price td {
-            width: 22%;
-        }
-
-        .format-2x7_price td {
-            width: 47%;
+            page-break-inside: avoid;
         }
 
         .record-name {
             font-size: 12px;
             font-weight: bold;
+            color: #1a4587;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
             text-align: center;
+            letter-spacing: 0.5px;
         }
 
-        .format-2x7_price .barcode img {
-            height: 40px !important;
+        .barcode-container {
+            margin: 8px 0;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .barcode-text {
+            font-size: 11px;
+            color: #333;
+            margin-top: 4px;
+            word-break: break-all;
         }
 
         .price {
             font-size: 12px;
             font-weight: bold;
+            color: #1a4587;
             text-align: center;
-            margin-top: 3px;
+            margin-top: 6px;
         }
 
-        .price::before {
-            content: '$ ';
+        /* Column specific styles */
+        .format-4x7_price td,
+        .format-4x12 td,
+        .format-4x12_price td {
+            width: 22%;
+            min-height: 80px;
+        }
+
+        .format-2x7_price td {
+            width: 47%;
+            min-height: 120px;
+        }
+
+        .format-dymo table {
+            border-spacing: 5px;
         }
         
-        .format-dymo table {
-            border-spacing: 0;
-        }
         .format-dymo td {
-            padding: 5px;
-        }
-
-        .barcode-container {
-            margin-top: 5px;
-            display: inline-block;
-        }
-
-        .barcode > div {
-            display: inline-block;
-        }
-
-        .barcode-container .name {
-            font-size: 14px;
-            text-align: center;
+            padding: 8px;
+            min-height: 60px;
         }
     </style>
 </head>
 
-<body>
+<body class="format-{{ $format }}">
     @php
         $columns = match ($format) {
             'dymo' => 1,
@@ -104,15 +106,12 @@
         $flatRecords = [];
 
         foreach ($records as $record) {
-            if ($quantityType == 'operation') {
-                $quantity = $record->qty;
-            } elseif ($quantityType == 'custom') {
-                $quantity = $quantity;
-            } elseif ($quantityType == 'per_lot') {
-                $quantity = 1;
-            } else {
-                $quantity = $record->qty;
-            }
+            $quantity = match ($quantityType) {
+                'operation' => $record->qty,
+                'custom' => $quantity,
+                'per_lot' => 1,
+                default => $record->qty,
+            };
 
             for ($i = 0; $i < $quantity; $i++) {
                 $flatRecords[] = $record;
@@ -120,8 +119,7 @@
         }
 
         $totalRecords = count($flatRecords);
-        
-        $barcodeScale = $columns == 4 ? 1 : 2;
+        $barcodeScale = $columns == 4 ? 1.2 : 2;
     @endphp
 
     <table>
@@ -130,23 +128,26 @@
                 @for ($j = 0; $j < $columns && ($i + $j) < $totalRecords; $j++)
                     @php
                         $currentRecord = $flatRecords[$i + $j];
+                        $barcode = $currentRecord->lot?->name ?? $currentRecord->product->barcode;
                     @endphp
 
                     <td style="text-align: center;">
-                        <div class="record-name">{{ $currentRecord->product->name }}</div>
+                        <div class="record-name">
+                            {{ strtoupper($currentRecord->product->name) }}
+                        </div>
 
-                        @if ($barcode = $currentRecord->lot?->name ?? $currentRecord->product->barcode)
+                        @if ($barcode)
                             <div class="barcode-container">
-                                <div class="barcode">
-                                    {!! DNS1D::getBarcodeHTML($barcode, 'C128', 2, 33) !!}
-                                </div>
-
-                                <div class="name">{{ $barcode }}</div>
+                                {!! DNS1D::getBarcodeHTML($barcode, 'C128', $barcodeScale, 33) !!}
+                                
+                                <div class="barcode-text">{{ $barcode }}</div>
                             </div>
                         @endif
 
                         @if ($showPrice)
-                            <div class="price">{{ number_format($currentRecord->price, 2) }}</div>
+                            <div class="price">
+                                {{ number_format($currentRecord->price, 2) }}
+                            </div>
                         @endif
                     </td>
                 @endfor

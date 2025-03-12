@@ -1,127 +1,298 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html>
-    <head>
-        <!-- meta tags -->
-        <meta http-equiv="Cache-control" content="no-cache">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 14px;
+            color: #333333;
+            line-height: 1.6;
+            margin: 0;
+        }
 
-        <!-- lang supports inclusion -->
-        <style type="text/css">
-            body {
-                font-size: 16px;
-                color: #091341;
-            }
+        .delivery-slip {
+            margin-bottom: 50px;
+            page-break-after: always;
+        }
 
-            .page-content {
-                padding: 12px;
-            }
+        .delivery-slip:last-child {
+            page-break-after: auto;
+        }
 
-            table {
-                width: 100%;
-                border-spacing: 1px 0;
-                border-collapse: separate;
-                margin-bottom: 20px;
-            }
-            
-            table thead th {
-                background-color: #E9EFFC;
-                padding: 6px 18px;
-                text-align: left;
-            }
+        .header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
 
-            table.rtl thead tr th {
-                text-align: right;
-            }
+        .left-info {
+            width: 50%;
+            float: left;
+        }
 
-            table tbody td {
-                padding: 9px 18px;
-                border-bottom: 1px solid #E9EFFC;
-                text-align: left;
-                vertical-align: top;
-            }
+        .right-info {
+            width: 45%;
+            float: right;
+            text-align: right;
+            border-left: 2px solid #f0f0f0;
+            padding-left: 20px;
+        }
 
-            table.rtl tbody tr td {
-                text-align: right;
-            }
-        </style>
-    </head>
+        .clearfix {
+            clear: both;
+        }
 
-    <body>
-        <div class="page">
-            <div class="page-content">
-                @foreach ($records as $record)
-                    <div style="margin-bottom: 20px">
-                        <!-- Information -->
-                        <table style="margin-bottom: 40px">
-                            <tbody>
-                                <tr>
-                                    <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
-                                        <b>
-                                            {{ $record->name }}
-                                        </b>
-                                    </td>
+        .slip-title {
+            font-size: 24px;
+            color: #1a4587;
+            margin: 25px 0;
+            padding: 15px 0;
+            border-bottom: 2px solid #1a4587;
+        }
 
-                                    <td style="width: 50%; padding: 2px 18px;border:none;">
-                                        <b>
-                                            Shipping Date:
-                                        </b>
+        .details-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
 
-                                        <div>
-                                            {{ $record->scheduled_at }}
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+        .details-table td {
+            padding: 10px;
+            vertical-align: top;
+        }
 
-                        <!-- Items -->
-                        @if (! $record->moveLines->isEmpty())
-                            <div class="items">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                Product
-                                            </th>
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
 
+        .items-table th {
+            background: #1a4587;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
 
-                                            @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers && app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->display_on_delivery_slips)
-                                                <th>
-                                                    Lot/Serial Number
-                                                </th>
-                                            @endif
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
 
-                                            <th>
-                                                Quantity
-                                            </th>
-                                        </tr>
-                                    </thead>
+        .items-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
 
-                                    <tbody>
-                                        @foreach ($record->moveLines as $item)
-                                            <tr>
-                                                <td>
-                                                    {{ $item->product->name }}
-                                                </td>
+        .note {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
 
-                                                @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers && app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->display_on_delivery_slips)
-                                                    <td>
-                                                        {{ $item->lot?->name }}
-                                                    </td>
-                                                @endif
+<body>
+    @foreach ($records as $record)
+        <div class="delivery-slip">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="left-info">
+                    <div style="font-size: 28px; color: #1a4587; margin-bottom: 10px;">{{ $record->company->name }}</div>
 
-                                                <td>
-                                                    {{ $item->qty.' '.$item->uom->name }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                    @if ($record->company->address)
+                        <div>
+                            {{ $record->company->address->street1 }}
+
+                            @if ($record->company->address->street2)
+                                ,{{ $record->company->address->street2 }}
+                            @endif
+                        </div>
+                        
+                        <div>
+                            {{ $record->company->address->city }},
+
+                            @if ($record->company->address->state)
+                                {{ $record->company->address->state->name }},
+                            @endif
+                            
+                            {{ $record->company->address->zip }}
+                        </div>
+                        
+                        @if ($record->company->address->country)
+                            <div>
+                                {{ $record->company->address->country->name }}
                             </div>
                         @endif
-                    </div>
-                @endforeach
+                        
+                        @if ($record->company->email)
+                            <div>
+                                Email: 
+                                {{ $record->company->email }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->company->phone)
+                            <div>
+                                Phone: 
+                                {{ $record->company->phone }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                
+                <div class="clearfix"></div>
+            </div>
+            
+            <!-- Header Section -->
+            <div class="header">
+                <div class="left-info">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Vendor Address</div>
+                    
+                    @if ($record->destinationLocation->warehouse->partnerAddress)
+                        <div style="margin-top: 15px;">
+                            <div>{{ $record->partner->name }}</div>
+                            
+                            <div>
+                                {{ $record->partner->addresses->first()->street1 }}
+
+                                @if ($record->partner->addresses->first()->street2)
+                                    ,{{ $record->partner->addresses->first()->street2 }}
+                                @endif
+                            </div>
+                            
+                            <div>
+                                {{ $record->partner->addresses->first()->city }},
+
+                                @if ($record->partner->addresses->first()->state)
+                                    {{ $record->partner->addresses->first()->state->name }},
+                                @endif
+                                
+                                {{ $record->partner->addresses->first()->zip }}
+                            </div>
+                            
+                            @if ($record->partner->addresses->first()->country)
+                                <div>
+                                    {{ $record->partner->addresses->first()->country->name }}
+                                </div>
+                            @endif
+                            
+                            @if ($record->partner->addresses->first()->email)
+                                <div>
+                                    Email: 
+                                    {{ $record->partner->addresses->first()->email }}
+                                </div>
+                            @endif
+                            
+                            @if ($record->partner->addresses->first()->phone)
+                                <div>
+                                    Phone: 
+                                    {{ $record->partner->addresses->first()->phone }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                <div class="right-info">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Warehouse Address</div>
+                    
+                    @if($record->partner && $record->partner->addresses->count())
+                        <div style="margin-top: 15px;">
+                            <div>
+                                {{ $record->destinationLocation->warehouse->partnerAddress->street1 }}
+
+                                @if ($record->destinationLocation->warehouse->partnerAddress->street2)
+                                    ,{{ $record->destinationLocation->warehouse->partnerAddress->street2 }}
+                                @endif
+                            </div>
+                            
+                            <div>
+                                {{ $record->destinationLocation->warehouse->partnerAddress->city }},
+
+                                @if ($record->destinationLocation->warehouse->partnerAddress->state)
+                                    {{ $record->destinationLocation->warehouse->partnerAddress->state->name }},
+                                @endif
+                                
+                                {{ $record->destinationLocation->warehouse->partnerAddress->zip }}
+                            </div>
+                            
+                            @if ($record->destinationLocation->warehouse->partnerAddress->country)
+                                <div>
+                                    {{ $record->destinationLocation->warehouse->partnerAddress->country->name }}
+                                </div>
+                            @endif
+                            
+                            @if ($record->destinationLocation->warehouse->partnerAddress->email)
+                                <div>
+                                    Email: 
+                                    {{ $record->destinationLocation->warehouse->partnerAddress->email }}
+                                </div>
+                            @endif
+                            
+                            @if ($record->destinationLocation->warehouse->partnerAddress->phone)
+                                <div>
+                                    Phone: 
+                                    {{ $record->destinationLocation->warehouse->partnerAddress->phone }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+                
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- Delivery Slip Title -->
+            <div class="slip-title">
+                Delivery Slip #{{ $record->name }}
+            </div>
+
+            <!-- Details Table -->
+            <table class="details-table">
+                <tr>
+                    <td width="25%">
+                        <strong>Shipping Date:</strong><br>
+                        {{ $record->scheduled_at }}
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Items Table -->
+            @if (! $record->moveLines->isEmpty())
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+
+                            @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers && app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->display_on_delivery_slips)
+                                <th>Lot/Serial Number</th>
+                            @endif
+
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        @foreach ($record->moveLines as $item)
+                            <tr>
+                                <td>{{ $item->product->name }}</td>
+
+                                @if (app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->enable_lots_serial_numbers && app(\Webkul\Inventory\Settings\TraceabilitySettings::class)->display_on_delivery_slips)
+                                    <td>{{ $item->lot?->name }}</td>
+                                @endif
+                                
+                                <td>{{ number_format($item->qty) }} {{ $item->uom->name }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+
+            <div class="note">
+                Please inspect all items upon delivery. Report any discrepancies within 24 hours.
             </div>
         </div>
-    </body>
+    @endforeach
+</body>
 </html>

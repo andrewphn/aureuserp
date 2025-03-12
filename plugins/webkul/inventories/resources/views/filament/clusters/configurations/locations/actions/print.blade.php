@@ -6,49 +6,55 @@
             margin: 0;
             padding: 0;
         }
+
         body {
             margin: 0;
             padding: 15px;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background: #ffffff;
         }
+
         table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 8px;
+            border-spacing: 10px;
             table-layout: fixed;
         }
+
         td {
-            width: 22%; /* Fixed width regardless of content */
             vertical-align: top;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #e9ecef;
             background: white;
             overflow: hidden;
+            page-break-inside: avoid;
         }
-        /* Empty cell styling */
+
         td.empty {
             border: none;
-            background: transparent;
         }
+
         .record-name {
             font-size: 12px;
             font-weight: bold;
+            color: #1a4587;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
             text-align: center;
+            letter-spacing: 0.5px;
         }
+
         .barcode-container {
-            margin-top: 5px;
-            display: inline-block;
-        }
-
-        .barcode > div {
-            display: inline-block;
-        }
-
-        .barcode-container .name {
-            font-size: 14px;
+            margin: 8px 0;
             text-align: center;
+            display: inline-block;
+        }
+
+        .barcode-text {
+            font-size: 11px;
+            color: #333;
+            margin-top: 4px;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -59,15 +65,15 @@
             <tr>
                 @foreach ($chunk as $record)
                     <td style="text-align: center;">
-                        <div class="record-name">{{ $record->name }}</div>
+                        <div class="record-name">
+                            {{ strtoupper($record->name) }}
+                        </div>
                         
                         @if ($record->barcode)
                             <div class="barcode-container">
-                                <div class="barcode">
-                                    {!! DNS1D::getBarcodeHTML($record->barcode, 'C128', 1, 30) !!}
-                                </div>
+                                {!! DNS1D::getBarcodeHTML($record->barcode, 'C128', 1, 30) !!}
 
-                                <div class="name">{{ $record->barcode }}</div>
+                                <div class="barcode-text">{{ $record->barcode }}</div>
                             </div>
                         @endif
                     </td>

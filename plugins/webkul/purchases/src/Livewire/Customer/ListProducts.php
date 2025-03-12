@@ -16,30 +16,37 @@ class ListProducts extends Component implements HasTable, HasForms
     use InteractsWithTable;
     use InteractsWithForms;
     
-    public $recordId;
+    public $record;
     
-    public function mount($recordId)
+    public function mount($record)
     {
-        $this->recordId = $recordId;
+        $this->record = $record;
     }
     
     public function table(Table $table): Table
     {
         return $table
             ->query(
-                OrderLine::query()->where('order_id', $this->recordId)
+                OrderLine::query()->where('order_id', $this->record->id)
             )
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->label('Product'),
                 TextColumn::make('product_qty')
+                    ->label('Quantity')
                     ->formatStateUsing(fn (string $state): string => $state . ' Units'),
                 TextColumn::make('price_unit')
+                    ->label('Unit Price')
                     ->money(fn (OrderLine $record) => $record->currency->code),
                 TextColumn::make('taxes.name')
-                    ->badge(),
+                    ->label('Taxes')
+                    ->badge()
+                    ->placeholder('—'),
                 TextColumn::make('discount')
+                    ->label('Discount %')
                     ->suffix('%'),
                 TextColumn::make('price_subtotal')
+                    ->label('Amount')
                     ->money(fn (OrderLine $record) => $record->currency->code),
             ])
             ->paginated(false);
@@ -47,6 +54,6 @@ class ListProducts extends Component implements HasTable, HasForms
     
     public function render()
     {
-        return view('purchases::livewire.customer.products');
+        return view('purchases::livewire.customer.account.clusters.order.pages.view-record.products');
     }
 }

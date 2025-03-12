@@ -68,7 +68,7 @@ class Package extends Model
         return $this->hasManyThrough(
             Operation::class,
             MoveLine::class,
-            'package_id',
+            'result_package_id',
             'id',
             'id',
             'operation_id'

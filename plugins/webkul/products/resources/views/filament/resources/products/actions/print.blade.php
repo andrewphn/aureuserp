@@ -6,73 +6,81 @@
             margin: 0;
             padding: 0;
         }
+
         body {
             margin: 0;
             padding: 15px;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background: #ffffff;
         }
+
         table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 10px;
             table-layout: fixed;
         }
+
         td {
             vertical-align: top;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #e9ecef;
             background: white;
             overflow: hidden;
+            page-break-inside: avoid;
         }
+
+        .record-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1a4587;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .barcode-container {
+            margin: 8px 0;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .barcode-text {
+            font-size: 11px;
+            color: #333;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .price {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1a4587;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        /* Column specific styles */
         .format-4x7_price td,
         .format-4x12 td,
         .format-4x12_price td {
             width: 22%;
+            min-height: 80px;
         }
+
         .format-2x7_price td {
             width: 47%;
-        }
-        .record-name {
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-            text-align: center;
-        }
-        .barcode-container {
-            margin-top: 5px;
-            display: inline-block;
+            min-height: 120px;
         }
 
-        .barcode > div {
-            display: inline-block;
-        }
-
-        .barcode-container .name {
-            font-size: 14px;
-            text-align: center;
-        }
-        .format-2x7_price .barcode img {
-            height: 40px !important;
-        }
-        .price {
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 3px;
-        }
-        .price::before {
-            content: '$ ';
+        .format-dymo table {
+            border-spacing: 5px;
         }
         
-        .format-dymo table {
-            border-spacing: 0;
-        }
         .format-dymo td {
-            padding: 5px;
-        }
-        .format-dymo .barcode img {
-            height: 40px !important;
+            padding: 8px;
+            min-height: 60px;
         }
     </style>
 </head>
@@ -111,15 +119,15 @@
                     @endphp
 
                     <td style="text-align: center">
-                        <div class="record-name">{{ $currentRecord->name }}</div>
+                        <div class="record-name">
+                            {{ strtoupper($currentRecord->name) }}
+                        </div>
 
                         @if ($currentRecord->barcode)
                             <div class="barcode-container">
-                                <div class="barcode">
-                                    {!! DNS1D::getBarcodeHTML($currentRecord->barcode, 'C128', $barcodeScale, 33) !!}
-                                </div>
+                                {!! DNS1D::getBarcodeHTML($currentRecord->barcode, 'C128', $barcodeScale, 33) !!}
 
-                                <div class="name">{{ $currentRecord->barcode }}</div>
+                                <div class="barcode-text">{{ $currentRecord->barcode }}</div>
                             </div>
                         @endif
 

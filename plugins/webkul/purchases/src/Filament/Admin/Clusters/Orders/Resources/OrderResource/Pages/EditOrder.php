@@ -31,11 +31,17 @@ class EditOrder extends EditRecord
 
     protected function configureAction(Action $action): void
     {
-        $order = Order::find($this->getRecord()->id);
+        if ($action instanceof ChatterAction) {
+            $order = Order::find($this->getRecord()->id);
 
-        $action
-            ->record($order)
-            ->recordTitle($this->getRecordTitle());
+            $action
+                ->record($order)
+                ->recordTitle($this->getRecordTitle());
+
+            return;
+        }
+
+        parent::configureAction($action);
     }
 
     protected function getHeaderActions(): array
