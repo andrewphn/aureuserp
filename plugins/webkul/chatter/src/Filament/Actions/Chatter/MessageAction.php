@@ -2,13 +2,13 @@
 
 namespace Webkul\Chatter\Filament\Actions\Chatter;
 
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Mail\MessageMail;
 use Webkul\Support\Services\EmailService;
 
@@ -60,6 +60,7 @@ class MessageAction extends Action
         $this
             ->color('gray')
             ->outlined()
+            ->visible(false)
             ->form([
                 Forms\Components\Group::make([
                     Forms\Components\Actions::make([
@@ -78,7 +79,7 @@ class MessageAction extends Action
                             })
                             ->link()
                             ->size('sm')
-                            ->icon(fn (Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
+                            ->icon(fn(Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
                     ])
                         ->columnSpan('full')
                         ->alignRight(),
@@ -86,7 +87,7 @@ class MessageAction extends Action
                 Forms\Components\TextInput::make('subject')
                     ->placeholder(__('chatter::filament/resources/actions/chatter/message-action.setup.form.fields.subject'))
                     ->live()
-                    ->visible(fn ($get) => $get('showSubject')),
+                    ->visible(fn($get) => $get('showSubject')),
                 Forms\Components\RichEditor::make('body')
                     ->hiddenLabel()
                     ->placeholder(__('chatter::filament/resources/actions/chatter/message-action.setup.form.fields.write-message-here'))
@@ -120,7 +121,7 @@ class MessageAction extends Action
                 try {
                     $data['name'] = $record->name;
 
-                    $message = $record->addMessage($data, Auth::user()->id);
+                    $message = $record->addMessage($data, filament()->auth()->id());
 
                     if (! empty($data['attachments'])) {
                         $record->addAttachments(

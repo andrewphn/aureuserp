@@ -8,7 +8,6 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 class LogAction extends Action
 {
@@ -28,7 +27,7 @@ class LogAction extends Action
                 $form->fill();
             })
             ->form(
-                fn ($form) => $form->schema([
+                fn($form) => $form->schema([
                     Forms\Components\Group::make([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('add_subject')
@@ -46,7 +45,7 @@ class LogAction extends Action
                                 })
                                 ->link()
                                 ->size('sm')
-                                ->icon(fn (Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
+                                ->icon(fn(Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
                         ])
                             ->columnSpan('full')
                             ->alignRight(),
@@ -54,7 +53,7 @@ class LogAction extends Action
                     Forms\Components\TextInput::make('subject')
                         ->placeholder(__('chatter::filament/resources/actions/chatter/log-action.setup.form.fields.subject'))
                         ->live()
-                        ->visible(fn ($get) => $get('showSubject'))
+                        ->visible(fn($get) => $get('showSubject'))
                         ->columnSpanFull(),
                     Forms\Components\RichEditor::make('body')
                         ->hiddenLabel()
@@ -90,11 +89,14 @@ class LogAction extends Action
             )
             ->action(function (array $data, ?Model $record = null) {
                 try {
-                    $data['name'] = $record->name;
-                    $data['causer_type'] = Auth::user()?->getMorphClass();
-                    $data['causer_id'] = Auth::id();
+                    $user = filament()->auth()->user();
 
-                    $message = $record->addMessage($data, Auth::user()->id);
+                    $data['name'] = $record->name;
+                    $data['causer_type'] = $user->getMorphClass();
+                    $data['causer_id'] = $user->id;
+                    $data['is_internal'] = true;
+
+                    $message = $record->addMessage($data, $user->id);
 
                     if (! empty($data['attachments'])) {
                         $record->addAttachments(

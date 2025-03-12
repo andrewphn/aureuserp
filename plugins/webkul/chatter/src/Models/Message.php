@@ -4,7 +4,6 @@ namespace Webkul\Chatter\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\ActivityType;
@@ -74,16 +73,18 @@ class Message extends Model
     {
         parent::boot();
 
-        static::creating(function ($data) {
-            DB::transaction(function () use ($data) {
-                $data->causer_type = Auth::user()?->getMorphClass();
-                $data->causer_id = Auth::id();
+        $user = filament()->auth()->user();
+
+        static::creating(function ($data) use ($user) {
+            DB::transaction(function () use ($data, $user) {
+                $data->causer_type = $user->getMorphClass();
+                $data->causer_id = $user->id;
             });
         });
 
-        static::updating(function ($data) {
-            $data->causer_type = Auth::user()?->getMorphClass();
-            $data->causer_id = Auth::id();
+        static::updating(function ($data) use ($user) {
+            $data->causer_type = $user->getMorphClass();
+            $data->causer_id = $user->id;
         });
     }
 

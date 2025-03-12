@@ -5,7 +5,6 @@ namespace Webkul\Chatter\Traits;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Models\Attachment;
 use Webkul\Chatter\Models\Follower;
@@ -22,6 +21,88 @@ trait HasChatter
         return $this->morphMany(Message::class, 'messageable')
             ->whereNot('type', 'activity')
             ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get all messages with filters
+     */
+    public function withFilters($filters)
+    {
+        $query = $this->messages();
+
+        $this->applyMessageFilters($query, $filters);
+
+        return $query->get();
+    }
+
+    /**
+     * Apply filters to the query
+     */
+    private function applyMessageFilters($query, array $filters)
+    {
+        if (! empty($filters['type'])) {
+            $query->whereIn('type', $filters['type']);
+        }
+
+        if (isset($filters['is_internal'])) {
+            $query->where('is_internal', $filters['is_internal']);
+        }
+
+        if (! empty($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if (! empty($filters['causer_id'])) {
+            $query->where('causer_id', $filters['causer_id']);
+
+            if (! empty($filters['causer_type'])) {
+                $query->where('causer_type', $filters['causer_type']);
+            }
+        }
+
+        if (! empty($filters['assigned_to'])) {
+            $query->where('assigned_to', $filters['assigned_to']);
+        }
+
+        if (! empty($filters['activity_type_id'])) {
+            $query->where('activity_type_id', $filters['activity_type_id']);
+        }
+
+        if (! empty($filters['company_id'])) {
+            $query->where('company_id', $filters['company_id']);
+        }
+
+        if (! empty($filters['search'])) {
+            $searchTerm = '%' . $filters['search'] . '%';
+            $query->where(function ($query) use ($searchTerm) {
+                $query->where('subject', 'like', $searchTerm)
+                    ->orWhere('body', 'like', $searchTerm)
+                    ->orWhere('summary', 'like', $searchTerm)
+                    ->orWhere('name', 'like', $searchTerm);
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Get all read messages
+     */
+    public function unRead()
+    {
+        return $this->messages()->where('is_read', false)->get();
+    }
+
+    /**
+     * Mark all unread messages as read.
+     */
+    public function markAsRead(): int
+    {
+        return $this->messages()->where('is_read', false)->update(['is_read' => true]);
     }
 
     /**
@@ -57,7 +138,7 @@ trait HasChatter
     {
         $message = new Message;
 
-        $user = Auth::user();
+        $user = filament()->auth()->user();
 
         $message->fill(array_merge($data, [
             'creator_id'    => $user->id,
@@ -197,12 +278,12 @@ trait HasChatter
         return $this->attachments()
             ->createMany(
                 collect($files)
-                    ->map(fn ($filePath) => [
+                    ->map(fn($filePath) => [
                         'file_path'          => $filePath,
                         'original_file_name' => basename($filePath),
-                        'mime_type'          => mime_content_type($storagePath = storage_path('app/public/'.$filePath)) ?: 'application/octet-stream',
+                        'mime_type'          => mime_content_type($storagePath = storage_path('app/public/' . $filePath)) ?: 'application/octet-stream',
                         'file_size'          => filesize($storagePath) ?: 0,
-                        'creator_id'         => Auth::id(),
+                        'creator_id'         => filament()->auth()->user()->id,
                         ...$additionalData,
                     ])
                     ->filter()
@@ -225,8 +306,8 @@ trait HasChatter
             return false;
         }
 
-        if (Storage::exists('public/'.$attachment->file_path)) {
-            Storage::delete('public/'.$attachment->file_path);
+        if (Storage::exists('public/' . $attachment->file_path)) {
+            Storage::delete('public/' . $attachment->file_path);
         }
 
         return $attachment->delete();
@@ -238,7 +319,7 @@ trait HasChatter
     public function getAttachmentsByType(string $mimeType): Collection
     {
         return $this->attachments()
-            ->where('mime_type', 'LIKE', $mimeType.'%')
+            ->where('mime_type', 'LIKE', $mimeType . '%')
             ->get();
     }
 
@@ -277,7 +358,7 @@ trait HasChatter
     {
         $attachment = $this->attachments()->find($attachmentId);
 
-        return $attachment && Storage::exists('public/'.$attachment->file_path);
+        return $attachment && Storage::exists('public/' . $attachment->file_path);
     }
 
     /*
