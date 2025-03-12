@@ -90,6 +90,22 @@ trait HasChatter
     }
 
     /**
+     * Get all read messages
+     */
+    public function unRead()
+    {
+        return $this->messages()->where('is_read', false)->get();
+    }
+
+    /**
+     * Mark all unread messages as read.
+     */
+    public function markAsRead(): int
+    {
+        return $this->messages()->where('is_read', false)->update(['is_read' => true]);
+    }
+
+    /**
      * Get all activity messages for this model
      */
     public function activities(): MorphMany
