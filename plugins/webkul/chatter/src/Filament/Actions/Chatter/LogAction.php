@@ -94,6 +94,7 @@ class LogAction extends Action
                     $data['name'] = $record->name;
                     $data['causer_type'] = $user->getMorphClass();
                     $data['causer_id'] = $user->id;
+                    $data['is_internal'] = true;
 
                     $message = $record->addMessage($data, $user->id);
 

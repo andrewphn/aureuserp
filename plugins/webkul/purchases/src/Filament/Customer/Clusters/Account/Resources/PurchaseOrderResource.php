@@ -161,12 +161,16 @@ class PurchaseOrderResource extends Resource
                                     return [
                                         'record' => $record,
                                         'showMessageAction'  => true,
-                                        'showActivityAction' => false,
-                                        'showFollowerAction' => false,
-                                        'showLogAction'      => false,
-                                        'showFileAction'     => false,
+                                        'showActivityAction' => true,
+                                        'showFollowerAction' => true,
+                                        'showLogAction'      => true,
+                                        'showFileAction'     => true,
                                         'filters' => [
-                                            'type' => 'order',
+                                            'type' => [
+                                                'comment',
+                                                'notification',
+                                                'note',
+                                            ],
                                         ]
                                     ];
                                 }),

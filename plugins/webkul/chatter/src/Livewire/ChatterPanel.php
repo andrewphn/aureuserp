@@ -358,10 +358,15 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
 
     public function chatInfolist(Infolist $infolist): Infolist
     {
+        $record = $this->record;
+
+        $state = $record->withFilters($this->filters);
+
         return $infolist
-            ->record($this->record)
+            ->record($record)
             ->schema([
                 MessageRepeatableEntry::make('messages')
+                    ->state($state)
                     ->hiddenLabel()
                     ->schema([
                         MessageTitleTextEntry::make('user')

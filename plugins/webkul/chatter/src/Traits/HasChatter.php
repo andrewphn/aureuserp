@@ -24,6 +24,72 @@ trait HasChatter
     }
 
     /**
+     * Get all messages with filters
+     */
+    public function withFilters($filters)
+    {
+        $query = $this->messages();
+
+        $this->applyMessageFilters($query, $filters);
+
+        return $query->get();
+    }
+
+    /**
+     * Apply filters to the query
+     */
+    private function applyMessageFilters($query, array $filters)
+    {
+        if (! empty($filters['type'])) {
+            $query->whereIn('type', $filters['type']);
+        }
+
+        if (isset($filters['is_internal'])) {
+            $query->where('is_internal', $filters['is_internal']);
+        }
+
+        if (! empty($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if (! empty($filters['causer_id'])) {
+            $query->where('causer_id', $filters['causer_id']);
+
+            if (! empty($filters['causer_type'])) {
+                $query->where('causer_type', $filters['causer_type']);
+            }
+        }
+
+        if (! empty($filters['assigned_to'])) {
+            $query->where('assigned_to', $filters['assigned_to']);
+        }
+
+        if (! empty($filters['activity_type_id'])) {
+            $query->where('activity_type_id', $filters['activity_type_id']);
+        }
+
+        if (! empty($filters['company_id'])) {
+            $query->where('company_id', $filters['company_id']);
+        }
+
+        if (! empty($filters['search'])) {
+            $searchTerm = '%' . $filters['search'] . '%';
+            $query->where(function ($query) use ($searchTerm) {
+                $query->where('subject', 'like', $searchTerm)
+                    ->orWhere('body', 'like', $searchTerm)
+                    ->orWhere('summary', 'like', $searchTerm)
+                    ->orWhere('name', 'like', $searchTerm);
+            });
+        }
+
+        return $query;
+    }
+
+    /**
      * Get all activity messages for this model
      */
     public function activities(): MorphMany
