@@ -71,13 +71,13 @@ class LabelsAction extends Action
                                         ->maxValue(100)
                                         ->visible(fn (Forms\Get $get): bool => $get('quantity_type') === 'custom'),
                                     Forms\Components\Radio::make('format')
-                                        ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format'))
+                                        ->label(__('inventories::filament/clusters/operations/actions/print/labels.form.fields.format'))
                                         ->options([
-                                            'dymo'       => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.dymo'),
-                                            '2x7_price'  => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.2x7_price'),
-                                            '4x7_price'  => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x7_price'),
-                                            '4x12'       => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x12'),
-                                            '4x12_price' => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x12_price'),
+                                            'dymo'       => __('inventories::filament/clusters/operations/actions/print/labels.form.fields.format-options.dymo'),
+                                            '2x7_price'  => __('inventories::filament/clusters/operations/actions/print/labels.form.fields.format-options.2x7_price'),
+                                            '4x7_price'  => __('inventories::filament/clusters/operations/actions/print/labels.form.fields.format-options.4x7_price'),
+                                            '4x12'       => __('inventories::filament/clusters/operations/actions/print/labels.form.fields.format-options.4x12'),
+                                            '4x12_price' => __('inventories::filament/clusters/operations/actions/print/labels.form.fields.format-options.4x12_price'),
                                         ])
                                         ->default('2x7_price')
                                         ->required(),
@@ -95,9 +95,9 @@ class LabelsAction extends Action
                                         ->required()
                                         ->live(),
                                     Forms\Components\Radio::make('format')
-                                        ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format'))
+                                        ->label(__('inventories::filament/clusters/operations/actions/print/labels.form.fields.format'))
                                         ->options([
-                                            '4x12' => __('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.print.form.fields.format-options.4x12'),
+                                            '4x12' => __('inventories::filament/clusters/operations/actions/print/labels.form.fields.format-options.4x12'),
                                         ])
                                         ->required()
                                         ->default('4x12'),
@@ -108,7 +108,7 @@ class LabelsAction extends Action
             ])
             ->action(function (array $data, $record) {
                 $pdf = PDF::loadView('inventories::filament.clusters.operations.actions.labels', [
-                    'type'         => $data['type'],
+                    'type'         => $data['type'] ?? 'product',
                     'quantityType' => $data['quantity_type'] ?? 1,
                     'quantity'     => $data['quantity'] ?? 1,
                     'format'       => $data['format'],

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
         @page {
             margin: 0;
@@ -10,50 +11,60 @@
         body {
             margin: 0;
             padding: 15px;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background: #ffffff;
         }
 
         table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 8px;
+            border-spacing: 10px;
             table-layout: fixed;
         }
 
         td {
-            width: 33%; /* Fixed width regardless of content */
+            width: 33%;
             vertical-align: top;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #e9ecef;
             background: white;
             overflow: hidden;
+            page-break-inside: avoid;
         }
 
-        /* Empty cell styling */
-        td.empty {
+        .empty {
             border: none;
             background: transparent;
         }
 
         .record-name {
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 3px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #1a4587;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .package-info {
+            font-size: 11px;
+            color: #666;
+            margin: 4px 0;
             text-align: center;
         }
 
         .barcode-container {
-            margin-top: 5px;
-            display: inline-block;
-        }
-
-        .barcode > div {
-            display: inline-block;
-        }
-
-        .barcode-container .name {
-            font-size: 14px;
+            margin: 12px 0 8px;
             text-align: center;
+            display: inline-block;
+        }
+
+        .barcode-text {
+            font-size: 12px;
+            color: #333;
+            margin-top: 6px;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -64,22 +75,19 @@
             <tr>
                 @foreach ($chunk as $record)
                     <td style="text-align: center">
-                        <div class="record-name">{{ $record->name }}</div>
+                        <div class="record-name">{{ strtoupper($record->name) }}</div>
 
                         @if ($record->packageType)
-                            <div class="record-name">Package Type: {{ $record->packageType->name }}</div>
+                            <div class="package-info">Package Type: {{ $record->packageType->name }}</div>
                         @endif
 
                         @if ($record->pack_date)
-                            <div class="record-name">Pack Date: {{ $record->pack_date }}</div>
+                            <div class="package-info">Pack Date: {{ $record->pack_date }}</div>
                         @endif
                         
                         <div class="barcode-container">
-                            <div class="barcode">
-                                {!! DNS1D::getBarcodeHTML($record->name, 'C128', 2, 33) !!}
-                            </div>
-
-                            <div class="name">{{ $record->name }}</div>
+                            {!! DNS1D::getBarcodeHTML($record->name, 'C128', 1.5, 33) !!}
+                            <div class="barcode-text">{{ $record->name }}</div>
                         </div>
                     </td>
                 @endforeach

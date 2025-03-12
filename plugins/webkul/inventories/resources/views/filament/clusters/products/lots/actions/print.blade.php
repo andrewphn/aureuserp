@@ -10,50 +10,51 @@
         body {
             margin: 0;
             padding: 15px;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background: #ffffff;
         }
 
         table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 8px;
+            border-spacing: 10px;
             table-layout: fixed;
         }
 
         td {
-            width: 33%;
             vertical-align: top;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #e9ecef;
             background: white;
             overflow: hidden;
+            page-break-inside: avoid;
         }
 
-        /* Empty cell styling */
         td.empty {
             border: none;
-            background: transparent;
         }
 
         .record-name {
             font-size: 12px;
             font-weight: bold;
+            color: #1a4587;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
             text-align: center;
+            letter-spacing: 0.5px;
         }
 
         .barcode-container {
-            display: inline-block;
-        }
-
-        .barcode > div {
-            display: inline-block;
-        }
-
-        .barcode-container .name {
-            font-size: 14px;
+            margin: 8px 0;
             text-align: center;
+            display: inline-block;
+        }
+
+        .barcode-text {
+            font-size: 11px;
+            color: #333;
+            margin-top: 4px;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -65,15 +66,15 @@
                 @foreach ($chunk as $record)
                     <td style="text-align: center">
                         @if ($record->product_id)
-                            <div class="record-name">{{ $record->product->name }}</div>
+                            <div class="record-name">
+                                {{ strtoupper($record->product->name) }}
+                            </div>
                         @endif
 
                         <div class="barcode-container">
-                            <div class="barcode">
-                                {!! DNS1D::getBarcodeHTML($record->name, 'C128', 2, 33) !!}
-                            </div>
+                            {!! DNS1D::getBarcodeHTML($record->name, 'C128', 2, 33) !!}
 
-                            <div class="name">{{ $record->name }}</div>
+                            <div class="barcode-text">{{ $record->name }}</div>
                         </div>
                     </td>
                 @endforeach

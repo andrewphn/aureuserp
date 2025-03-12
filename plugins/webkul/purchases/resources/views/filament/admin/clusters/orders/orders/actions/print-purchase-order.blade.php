@@ -1,224 +1,310 @@
-@component('support::layouts.pdf')
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 14px;
+            color: #333333;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .purchase-order {
+            margin-bottom: 50px;
+            page-break-after: always;
+        }
+
+        .purchase-order:last-child {
+            page-break-after: auto;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .company-info {
+            width: 50%;
+            float: left;
+        }
+
+        .vendor-info {
+            width: 45%;
+            float: right;
+            text-align: right;
+            border-left: 2px solid #f0f0f0;
+            padding-left: 20px;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+        .po-number {
+            font-size: 24px;
+            color: #1a4587;
+            margin: 25px 0;
+            padding: 15px 0;
+            border-bottom: 2px solid #1a4587;
+        }
+
+        .details-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .details-table td {
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .items-table th {
+            background: #1a4587;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-table {
+            width: 300px;
+            float: right;
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-collapse: collapse;
+        }
+
+        .summary-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .total-row {
+            font-weight: bold;
+            border-top: 2px solid #1a4587;
+        }
+
+        .terms {
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .note {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
     @foreach ($records as $record)
-        <div style="margin-bottom: 20px">
-            <!-- Information -->
-            <table style="margin-bottom: 40px">
-                <tbody>
-                    <tr>
-                        <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
-                        </td>
+        <div class="purchase-order">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="company-info">
+                    <div style="font-size: 28px; color: #1a4587; margin-bottom: 10px;">{{ $record->company->name }}</div>
 
-                        <td style="width: 50%; padding: 2px 18px;border:none;">
-                            <div>
-                                {{ $record->partner->name }}
-                            </div>
+                    @if ($record->company->address)
+                        <div>
+                            {{ $record->company->address->street1 }}
 
-                            @if ($record->partner->addresses->count())
-                                <div>
-                                    {{ $record->partner->addresses->first()->street1 }}
-                                </div>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->street2 }}
-                                </div>
-                                
-                                <div>
-                                    {{ $record->partner->addresses->first()->city.' '.$record->partner->addresses->first()->zip }}
-                                </div>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->state?->name }}
-                                </div>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->country?->name }}
-                                </div>
-
-                                </br>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->phone }}
-                                </div>
+                            @if ($record->company->address->street2)
+                                ,{{ $record->company->address->street2 }}
                             @endif
+                        </div>
+                        
+                        <div>
+                            {{ $record->company->address->city }},
+
+                            @if ($record->company->address->state)
+                                {{ $record->company->address->state->name }},
+                            @endif
+                            
+                            {{ $record->company->address->zip }}
+                        </div>
+                        
+                        @if ($record->company->address->country)
+                            <div>
+                                {{ $record->company->address->country->name }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->company->email)
+                            <div>
+                                Email: 
+                                {{ $record->company->email }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->company->phone)
+                            <div>
+                                Phone: 
+                                {{ $record->company->phone }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+
+                <div class="vendor-info">
+                    <div>{{ $record->partner->name }}</div>
+
+                    @if ($record->partner->addresses->count())
+                        <div>
+                            {{ $record->partner->addresses->first()->street1 }}
+
+                            @if ($record->partner->addresses->first()->street2)
+                                ,{{ $record->partner->addresses->first()->street2 }}
+                            @endif
+                        </div>
+                        
+                        <div>
+                            {{ $record->partner->addresses->first()->city }},
+
+                            @if ($record->partner->addresses->first()->state)
+                                {{ $record->partner->addresses->first()->state->name }},
+                            @endif
+                            
+                            {{ $record->partner->addresses->first()->zip }}
+                        </div>
+                        
+                        @if ($record->partner->addresses->first()->country)
+                            <div>
+                                {{ $record->partner->addresses->first()->country->name }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->partner->addresses->first()->email)
+                            <div>
+                                Email: 
+                                {{ $record->partner->addresses->first()->email }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->partner->addresses->first()->phone)
+                            <div>
+                                Phone: 
+                                {{ $record->partner->addresses->first()->phone }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- PO Number -->
+            <div class="po-number">
+                Purchase Order #{{ $record->name }}
+            </div>
+
+            <!-- Details Table -->
+            <table class="details-table">
+                <tr>
+                    @if ($record->user_id)
+                        <td width="25%">
+                            <strong>Buyer</strong><br>
+                            {{ $record->user->name }}
                         </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Information -->
-            <table style="margin-bottom: 40px">
-                <tbody>
-                    <tr>
-                        <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
-                            <b>
-                                Request for Quotation #{{ $record->name }}
-                            </b>
+                    @endif
+                    
+                    @if ($record->partner_reference)
+                        <td width="25%">
+                            <strong>Order Reference</strong><br>
+                            {{ $record->partner_reference }}
                         </td>
-                    </tr>
-                </tbody>
+                    @endif
+
+                    @if ($record->ordered_at)
+                        <td width="25%">
+                            <strong>Order Deadline</strong><br>
+                            {{ $record->ordered_at }}
+                        </td>
+                    @endif
+
+                    @if ($record->planned_at)
+                        <td width="25%">
+                            <strong>Expected Arrival</strong><br>
+                            {{ $record->planned_at }}
+                        </td>
+                    @endif
+                </tr>
             </table>
 
-            <!-- Information -->
-            <table style="margin-bottom: 40px">
-                <tbody>
-                    <tr>
-                        @if ($record->user_id)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Buyer:
-                                </b>
-
-                                <div>
-                                    {{ $record->user->name }}
-                                </div>
-                            </td>
-                        @endif
-
-                        @if ($record->partner_reference)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Your Order Reference:
-                                </b>
-
-                                <div>
-                                    {{ $record->partner_reference }}
-                                </div>
-                            </td>
-                        @endif
-
-                        @if ($record->ordered_at)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Order Deadline:
-                                </b>
-
-                                <div>
-                                    {{ $record->ordered_at }}
-                                </div>
-                            </td>
-                        @endif
-
-                        @if ($record->planned_at)
-                            <td style="padding: 2px 18px;border:none;font-size: 16px;">
-                                <b>
-                                    Expected Arrival:
-                                </b>
-
-                                <div>
-                                    {{ $record->planned_at }}
-                                </div>
-                            </td>
-                        @endif
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Items -->
+            <!-- Items Table -->
             @if (! $record->lines->isEmpty())
-                <div class="items">
-                    <table>
-                        <thead>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Discount</th>
+                            <th>Taxes</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($record->lines as $item)
                             <tr>
-                                <th>
-                                    Description
-                                </th>
-
-                                <th>
-                                    Quantity
-                                </th>
-
-                                <th>
-                                    Unit Price
-                                </th>
-
-                                <th>
-                                    Discount
-                                </th>
-
-                                <th>
-                                    Taxes
-                                </th>
-
-                                <th>
-                                    Amount
-                                </th>
+                                <td>{{ $item->name }}</td>
+                                <td>{{ $item->product_qty.' '.$item->uom->name }}</td>
+                                <td>{{ number_format($item->price_unit, 2) }}</td>
+                                <td>{{ round($item->discount, 2) }}%</td>
+                                <td>{{ $item->taxes->pluck('name')->implode(', ') }}</td>
+                                <td>{{ number_format($item->price_subtotal, 2) }}</td>
                             </tr>
-                        </thead>
+                        @endforeach
+                    </tbody>
+                </table>
 
-                        <tbody>
-                            @foreach ($record->lines as $item)
-                                <tr>
-                                    <td>
-                                        {{ $item->name }}
-                                    </td>
+                <!-- Summary Table -->
+                <table class="summary-table">
+                    <tr>
+                        <td>Untaxed Amount</td>
+                        <td style="text-align: right;">{{ number_format($record->untaxed_amount, 2) }}</td>
+                    </tr>
 
-                                    <td>
-                                        {{ $item->product_qty.' '.$item->uom->name }}
-                                    </td>
+                    <tr>
+                        <td>Tax</td>
+                        <td style="text-align: right;">{{ number_format($record->tax_amount, 2) }}</td>
+                    </tr>
 
-                                    <td>
-                                        {{ $item->price_unit }}
-                                    </td>
+                    <tr class="total-row">
+                        <td>Total</td>
+                        <td style="text-align: right;">{{ number_format($record->total_amount, 2) }}</td>
+                    </tr>
+                </table>
+                
+                <div class="clearfix"></div>
+            @endif
 
-                                    <td>
-                                        {{ round($item->discount, 2) }}%
-                                    </td>
-
-                                    <td>
-                                        {{ $item->taxes->pluck('name')->implode(', ') }}
-                                    </td>
-
-                                    <td>
-                                        {{ $item->price_subtotal }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-                    <!-- Summary Table -->
-                    <div class="summary">
-                        <table class="{{ app()->getLocale   () }}">
-                            <tbody>
-                                <tr>
-                                    <td>Untaxed Amount</td>
-                                    <td>-</td>
-                                    <td>{{ $record->untaxed_amount }}</td>
-                                </tr>
-            
-                                <tr>
-                                    <td>Tax</td>
-                                    <td>-</td>
-                                    <td>{{ $record->tax_amount }}</td>
-                                </tr>
-            
-                                <tr>
-                                    <td><strong>Total</strong></td>
-                                    <td><strong>-</strong></td>
-                                    <td><strong>{{ $record->total_amount }}</strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            @if ($record->payment_term_id)
+                <div class="terms">
+                    <strong>Payment Terms:</strong><br>
+                    {{ $record->paymentTerm->name }}
                 </div>
             @endif
 
-            <!-- Information -->
-            @if ($record->payment_term_id)
-                <table style="margin-bottom: 40px">
-                    <tbody>
-                        <tr>
-                            <td style="width: 50%; padding: 2px 18px;border:none;">
-                                <b>
-                                    Payment Terms:
-                                </b>
-
-                                {{ $record->paymentTerm->name }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            @endif
+            <div class="note">
+                Thank you for your business! Please contact us if you have any questions.
+            </div>
         </div>
     @endforeach
-@endcomponent
+</body>
+</html>

@@ -57,7 +57,7 @@ class PurchaseOrderResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label(__('purchases::filament/customer/clusters/account/resources/purchase-order.table.columns.total-amount'))
                     ->sortable()
-                    ->money(fn (PurchaseOrder $record) => $record->currency->code),
+                    ->money(fn(PurchaseOrder $record) => $record->currency->code),
             ])
             ->filters([
                 //
@@ -82,31 +82,28 @@ class PurchaseOrderResource extends Resource
                                     ->hiddenLabel()
                                     ->size('text-3xl')
                                     ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                    ->money(fn (PurchaseOrder $record) => $record->currency->code),
+                                    ->money(fn(PurchaseOrder $record) => $record->currency->code),
 
                                 Infolists\Components\Actions::make([
-                                        Infolists\Components\Actions\Action::make('accept')
-                                            ->label('Accept')
-                                            ->color('success')
-                                            ->icon('heroicon-o-check-circle')
-                                            ->action(function (PurchaseOrder $order) {
-                                            }),
-                                        Infolists\Components\Actions\Action::make('decline')
-                                            ->label('Decline')
-                                            ->color('danger')
-                                            ->icon('heroicon-o-x-circle')
-                                            ->action(function (PurchaseOrder $order) {
-                                            }),
-                                    ])
+                                    Infolists\Components\Actions\Action::make('accept')
+                                        ->label('Accept')
+                                        ->color('success')
+                                        ->icon('heroicon-o-check-circle')
+                                        ->action(function (PurchaseOrder $order) {}),
+                                    Infolists\Components\Actions\Action::make('decline')
+                                        ->label('Decline')
+                                        ->color('danger')
+                                        ->icon('heroicon-o-x-circle')
+                                        ->action(function (PurchaseOrder $order) {}),
+                                ])
                                     ->fullWidth(),
 
                                 Infolists\Components\Actions::make([
-                                        Infolists\Components\Actions\Action::make('print')
-                                            ->label('Download/Print')
-                                            ->icon('heroicon-o-printer')
-                                            ->action(function (PurchaseOrder $order) {
-                                            }),
-                                    ])
+                                    Infolists\Components\Actions\Action::make('print')
+                                        ->label('Download/Print')
+                                        ->icon('heroicon-o-printer')
+                                        ->action(function (PurchaseOrder $order) {}),
+                                ])
                                     ->fullWidth(),
 
                                 Infolists\Components\ViewEntry::make('user')
@@ -162,30 +159,26 @@ class PurchaseOrderResource extends Resource
                                 Infolists\Components\Group::make()
                                     ->extraAttributes(['class' => 'flex justify-end'])
                                     ->schema([
+                                        Infolists\Components\TextEntry::make('untaxed_amount')
+                                            ->label('Untaxed Amount')
+                                            ->extraAttributes(['class' => 'flex justify-end'])
+                                            ->inlineLabel()
+                                            ->money(fn ($record) => $record->currency->code),
+
+                                        Infolists\Components\TextEntry::make('tax_amount')
+                                            ->label('Tax Amount')
+                                            ->extraAttributes(['class' => 'flex justify-end'])
+                                            ->inlineLabel()
+                                            ->money(fn ($record) => $record->currency->code),
+
                                         Infolists\Components\Group::make()
-                                            ->extraAttributes(['class' => 'custom-test'])
+                                            ->extraAttributes(['class' => 'border-t pt-4 font-bold'])
                                             ->schema([
-                                                Infolists\Components\TextEntry::make('untaxed_amount')
-                                                    ->label('Untaxed Amount')
+                                                Infolists\Components\TextEntry::make('total_amount')
+                                                    ->label('Total')
                                                     ->extraAttributes(['class' => 'flex justify-end'])
                                                     ->inlineLabel()
                                                     ->money(fn ($record) => $record->currency->code),
-
-                                                Infolists\Components\TextEntry::make('tax_amount')
-                                                    ->label('Tax Amount')
-                                                    ->extraAttributes(['class' => 'flex justify-end'])
-                                                    ->inlineLabel()
-                                                    ->money(fn ($record) => $record->currency->code),
-
-                                                Infolists\Components\Group::make()
-                                                    ->extraAttributes(['class' => 'border-t pt-4 font-bold'])
-                                                    ->schema([
-                                                        Infolists\Components\TextEntry::make('total_amount')
-                                                            ->label('Total')
-                                                            ->extraAttributes(['class' => 'flex justify-end'])
-                                                            ->inlineLabel()
-                                                            ->money(fn ($record) => $record->currency->code),
-                                                    ]),
                                             ]),
                                     ]),
                                 
@@ -200,11 +193,21 @@ class PurchaseOrderResource extends Resource
                                                 return 'Communication History';
                                             }),
 
-                                        Infolists\Components\Livewire::make('chatter-panel', function(Order $record) {
+                                        Infolists\Components\Livewire::make('chatter-panel', function (Order $record) {
                                             $record = Order::findOrFail($record->id);
 
                                             return [
                                                 'record' => $record,
+                                                'showMessageAction'  => true,
+                                                'showActivityAction' => false,
+                                                'showFollowerAction' => false,
+                                                'showLogAction'      => false,
+                                                'showFileAction'     => false,
+                                                'filters' => [
+                                                    'type' => [
+                                                        'comment',
+                                                    ],
+                                                ]
                                             ];
                                         }),
                                     ]),

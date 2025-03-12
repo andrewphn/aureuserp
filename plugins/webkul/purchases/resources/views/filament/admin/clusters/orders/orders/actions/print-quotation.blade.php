@@ -1,103 +1,228 @@
-@component('support::layouts.pdf')
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 14px;
+            color: #333333;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .quotation {
+            margin-bottom: 50px;
+            page-break-after: always;
+        }
+
+        .quotation:last-child {
+            page-break-after: auto;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .company-info {
+            width: 50%;
+            float: left;
+        }
+
+        .vendor-info {
+            width: 45%;
+            float: right;
+            text-align: right;
+            border-left: 2px solid #f0f0f0;
+            padding-left: 20px;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+        .quote-number {
+            font-size: 24px;
+            color: #1a4587;
+            margin: 25px 0;
+            padding: 15px 0;
+            border-bottom: 2px solid #1a4587;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .items-table th {
+            background: #1a4587;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .items-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .terms {
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .note {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
     @foreach ($records as $record)
-        <div style="margin-bottom: 20px">
-            <!-- Information -->
-            <table style="margin-bottom: 40px">
-                <tbody>
-                    <tr>
-                        <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
-                        </td>
+        <div class="quotation">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="company-info">
+                    <div style="font-size: 28px; color: #1a4587; margin-bottom: 10px;">{{ $record->company->name }}</div>
 
-                        <td style="width: 50%; padding: 2px 18px;border:none;">
-                            <div>
-                                {{ $record->partner->name }}
-                            </div>
+                    @if ($record->company->address)
+                        <div>
+                            {{ $record->company->address->street1 }}
 
-                            @if ($record->partner->addresses->count())
-                                <div>
-                                    {{ $record->partner->addresses->first()->street1 }}
-                                </div>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->street2 }}
-                                </div>
-                                
-                                <div>
-                                    {{ $record->partner->addresses->first()->city.' '.$record->partner->addresses->first()->zip }}
-                                </div>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->state?->name }}
-                                </div>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->country?->name }}
-                                </div>
-
-                                </br>
-
-                                <div>
-                                    {{ $record->partner->addresses->first()->phone }}
-                                </div>
+                            @if ($record->company->address->street2)
+                                ,{{ $record->company->address->street2 }}
                             @endif
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
+                        
+                        <div>
+                            {{ $record->company->address->city }},
 
-            <!-- Information -->
-            <table style="margin-bottom: 40px">
-                <tbody>
-                    <tr>
-                        <td style="width: 50%; padding: 2px 18px;border:none;font-size: 28px;">
-                            <b>
-                                Request for Quotation #{{ $record->name }}
-                            </b>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            @if ($record->company->address->state)
+                                {{ $record->company->address->state->name }},
+                            @endif
+                            
+                            {{ $record->company->address->zip }}
+                        </div>
+                        
+                        @if ($record->company->address->country)
+                            <div>
+                                {{ $record->company->address->country->name }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->company->email)
+                            <div>
+                                Email: 
+                                {{ $record->company->email }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->company->phone)
+                            <div>
+                                Phone: 
+                                {{ $record->company->phone }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
 
-            <!-- Items -->
+                <div class="vendor-info">
+                    <div>{{ $record->partner->name }}</div>
+
+                    @if ($record->partner->addresses->count())
+                        <div>
+                            {{ $record->partner->addresses->first()->street1 }}
+
+                            @if ($record->partner->addresses->first()->street2)
+                                ,{{ $record->partner->addresses->first()->street2 }}
+                            @endif
+                        </div>
+                        
+                        <div>
+                            {{ $record->partner->addresses->first()->city }},
+
+                            @if ($record->partner->addresses->first()->state)
+                                {{ $record->partner->addresses->first()->state->name }},
+                            @endif
+                            
+                            {{ $record->partner->addresses->first()->zip }}
+                        </div>
+                        
+                        @if ($record->partner->addresses->first()->country)
+                            <div>
+                                {{ $record->partner->addresses->first()->country->name }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->partner->addresses->first()->email)
+                            <div>
+                                Email: 
+                                {{ $record->partner->addresses->first()->email }}
+                            </div>
+                        @endif
+                        
+                        @if ($record->partner->addresses->first()->phone)
+                            <div>
+                                Phone: 
+                                {{ $record->partner->addresses->first()->phone }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- Quote Number -->
+            <div class="quote-number">
+                Request for Quotation #{{ $record->name }}
+            </div>
+
+            <!-- Items Table -->
             @if (! $record->lines->isEmpty())
-                <div class="items">
-                    <table>
-                        <thead>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Expected Date</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($record->lines as $item)
                             <tr>
-                                <th>
-                                    Description
-                                </th>
-
-                                <th>
-                                    Expected Date
-                                </th>
-
-                                <th>
-                                    Qty
-                                </th>
+                                <td>{{ $item->name }}</td>
+                                <td>{{ $item->planned_at }}</td>
+                                <td>{{ $item->product_qty.' '.$item->uom->name }}</td>
                             </tr>
-                        </thead>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
 
-                        <tbody>
-                            @foreach ($record->lines as $item)
-                                <tr>
-                                    <td>
-                                        {{ $item->name }}
-                                    </td>
-
-                                    <td>
-                                        {{ $item->planned_at }}
-                                    </td>
-
-                                    <td>
-                                        {{ $item->product_qty.' '.$item->uom->name }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+            <!-- Additional Information -->
+            @if ($record->valid_until)
+                <div class="terms">
+                    <strong>Quotation Valid Until:</strong><br>
+                    {{ $record->valid_until }}
                 </div>
             @endif
+
+            <div class="note">
+                We look forward to your response. Please contact us for any clarifications.
+            </div>
         </div>
     @endforeach
-@endcomponent
+</body>
+</html>
