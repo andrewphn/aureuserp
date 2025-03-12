@@ -206,6 +206,28 @@ class Order extends Model
     }
 
     /**
+     * Add a new message
+     */
+    public function addMessage(array $data): \Webkul\Chatter\Models\Message
+    {
+        $message = new \Webkul\Chatter\Models\Message;
+
+        $user = filament()->auth()->user();
+
+        $message->fill(array_merge($data, [
+            'creator_id'    => $user->id,
+            'date_deadline' => $data['date_deadline'] ?? now(),
+            'company_id'    => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
+            'messageable_type' => Order::class,
+            'messageable_id' => $this->id,
+        ]));
+
+        $message->save();
+
+        return $message;
+    }
+
+    /**
      * Bootstrap any application services.
      */
     protected static function boot()

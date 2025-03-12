@@ -13,9 +13,12 @@ use Filament\Infolists\Infolist;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Columns\Concerns\CanFormatState;
 
 class PurchaseOrderResource extends Resource
 {
+    use CanFormatState;
+
     protected static ?string $model = PurchaseOrder::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
@@ -105,8 +108,11 @@ class PurchaseOrderResource extends Resource
                                             }),
                                     ])
                                     ->fullWidth(),
-                                Infolists\Components\TextEntry::make('user.name')
+
+                                Infolists\Components\ViewEntry::make('user')
                                     ->label('Buyer')
+                                    ->view('purchases::filament.customer.clusters.account.order.pages.view-record.buyer-card')
+                                    ->visible(fn (Order $record): bool => (bool) $record->user_id),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
@@ -115,56 +121,93 @@ class PurchaseOrderResource extends Resource
                     ->schema([
                         Infolists\Components\Section::make()
                             ->schema([
-                                Infolists\Components\TextEntry::make('name')
-                                    ->hiddenLabel()
-                                    ->size('text-3xl')
-                                    ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                    ->formatStateUsing(function (PurchaseOrder $record) {
-                                        return 'Purchase Order '.$record->name;
-                                    }),
-                                Infolists\Components\TextEntry::make('ordered_at')
-                                    ->label('Order Date'),
-                                Infolists\Components\TextEntry::make('user')
-                                    ->label('From')
-                                    ->formatStateUsing(function (PurchaseOrder $record) {
-                                        return 'My Company (San Francisco)<br/>250 Executive Park Blvd, Suite 3400<br/>San Francisco CA 94134<br/>United States';
-                                    })
-                                    ->html(),
-                                Infolists\Components\TextEntry::make('approved_at')
-                                    ->label('Confirmation Date'),
-                                Infolists\Components\TextEntry::make('ordered_at')
-                                    ->label('Receipt Date'),
-                                
-                                Infolists\Components\TextEntry::make('name')
-                                    ->hiddenLabel()
-                                    ->size('text-2xl')
-                                    ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                    ->formatStateUsing(function (PurchaseOrder $record) {
-                                        return 'Products';
-                                    }),
-
-                                Infolists\Components\Livewire::make('list-products', [
-                                        'recordId' => 1,
-                                    ])
-                                    ->extraAttributes([
-                                        'wire:key' => 1,
+                                Infolists\Components\Group::make()
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('name')
+                                            ->hiddenLabel()
+                                            ->size('text-3xl')
+                                            ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                                            ->formatStateUsing(function (PurchaseOrder $record) {
+                                                return 'Purchase Order '.$record->name;
+                                            }),
+                                        Infolists\Components\TextEntry::make('ordered_at')
+                                            ->label('Order Date'),
+                                        Infolists\Components\ViewEntry::make('company')
+                                            ->label('From')
+                                            ->view('purchases::filament.customer.clusters.account.order.pages.view-record.from'),
+                                        Infolists\Components\TextEntry::make('approved_at')
+                                            ->label('Confirmation Date'),
+                                        Infolists\Components\TextEntry::make('ordered_at')
+                                            ->label('Receipt Date'),
                                     ]),
                                 
-                                Infolists\Components\TextEntry::make('name')
-                                    ->hiddenLabel()
-                                    ->size('text-2xl')
-                                    ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                    ->formatStateUsing(function (PurchaseOrder $record) {
-                                        return 'Communication History';
-                                    }),
+                                Infolists\Components\Group::make()
+                                    ->extraAttributes(['class' => 'mt-8'])
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('name')
+                                            ->hiddenLabel()
+                                            ->size('text-2xl')
+                                            ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                                            ->formatStateUsing(function (PurchaseOrder $record) {
+                                                return 'Products';
+                                            }),
 
-                                Infolists\Components\Livewire::make('chatter-panel', function(Order $record) {
-                                    $record = Order::findOrFail($record->id);
+                                        Infolists\Components\Livewire::make('list-products', function(Order $record) {
+                                            return [
+                                                'record' => $record,
+                                            ];
+                                        }),
+                                    ]),
 
-                                    return [
-                                        'record' => $record,
-                                    ];
-                                }),
+                                Infolists\Components\Group::make()
+                                    ->extraAttributes(['class' => 'flex justify-end'])
+                                    ->schema([
+                                        Infolists\Components\Group::make()
+                                            ->extraAttributes(['class' => 'custom-test'])
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('untaxed_amount')
+                                                    ->label('Untaxed Amount')
+                                                    ->extraAttributes(['class' => 'flex justify-end'])
+                                                    ->inlineLabel()
+                                                    ->money(fn ($record) => $record->currency->code),
+
+                                                Infolists\Components\TextEntry::make('tax_amount')
+                                                    ->label('Tax Amount')
+                                                    ->extraAttributes(['class' => 'flex justify-end'])
+                                                    ->inlineLabel()
+                                                    ->money(fn ($record) => $record->currency->code),
+
+                                                Infolists\Components\Group::make()
+                                                    ->extraAttributes(['class' => 'border-t pt-4 font-bold'])
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('total_amount')
+                                                            ->label('Total')
+                                                            ->extraAttributes(['class' => 'flex justify-end'])
+                                                            ->inlineLabel()
+                                                            ->money(fn ($record) => $record->currency->code),
+                                                    ]),
+                                            ]),
+                                    ]),
+                                
+                                Infolists\Components\Group::make()
+                                    ->extraAttributes(['class' => 'mt-8'])
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('name')
+                                            ->hiddenLabel()
+                                            ->size('text-2xl')
+                                            ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                                            ->formatStateUsing(function (PurchaseOrder $record) {
+                                                return 'Communication History';
+                                            }),
+
+                                        Infolists\Components\Livewire::make('chatter-panel', function(Order $record) {
+                                            $record = Order::findOrFail($record->id);
+
+                                            return [
+                                                'record' => $record,
+                                            ];
+                                        }),
+                                    ]),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
