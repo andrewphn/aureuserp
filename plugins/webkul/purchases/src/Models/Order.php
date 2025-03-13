@@ -106,14 +106,7 @@ class Order extends Model
         'invoice_status',
         'receipt_status',
         'untaxed_amount',
-        'tax_amount',
-        'total_amount',
-        'total_cc_amount',
         'currency_rate',
-        'mail_reminder_confirmed' => 'Confirm Receipt Date',
-        'mail_reception_confirmed',
-        'mail_reception_declined',
-        'invoice_count',
         'ordered_at',
         'approved_at',
         'planned_at',
@@ -214,13 +207,13 @@ class Order extends Model
 
         $user = filament()->auth()->user();
 
-        $message->fill(array_merge($data, [
-            'creator_id'    => $user->id,
+        $message->fill(array_merge([
+            'creator_id'    => $user?->id,
             'date_deadline' => $data['date_deadline'] ?? now(),
             'company_id'    => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
             'messageable_type' => Order::class,
             'messageable_id' => $this->id,
-        ]));
+        ], $data));
 
         $message->save();
 

@@ -3,7 +3,7 @@
 <div class="flex items-center justify-between gap-x-3">
     <dt class="fi-in-entry-wrp-label inline-flex items-center gap-x-3">
         <span class="text-sm font-medium leading-6 text-gray-950 dark:text-white">
-            From
+            {{ __('purchases::filament/customer/clusters/account/resources/order.infolist.general.entries.from') }}
         </span>
     </dt>
 </div>

@@ -264,7 +264,6 @@
                 
                 <div class="barcode-container" style="float: right;">
                     {!! DNS1D::getBarcodeHTML($record->name, 'C128', 2, 44) !!}
-                    <div class="barcode-text">{{ $record->name }}</div>
                 </div>
             </div>
 

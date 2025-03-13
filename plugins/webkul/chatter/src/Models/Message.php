@@ -75,17 +75,19 @@ class Message extends Model
 
         $user = filament()->auth()->user();
 
-        static::creating(function ($data) use ($user) {
-            DB::transaction(function () use ($data, $user) {
+        if ($user) {
+            static::creating(function ($data) use ($user) {
+                DB::transaction(function () use ($data, $user) {
+                    $data->causer_type = $user->getMorphClass();
+                    $data->causer_id = $user->id;
+                });
+            });
+
+            static::updating(function ($data) use ($user) {
                 $data->causer_type = $user->getMorphClass();
                 $data->causer_id = $user->id;
             });
-        });
-
-        static::updating(function ($data) use ($user) {
-            $data->causer_type = $user->getMorphClass();
-            $data->causer_id = $user->id;
-        });
+        }
     }
 
     public function attachments()

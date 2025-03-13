@@ -140,11 +140,11 @@ trait HasChatter
 
         $user = filament()->auth()->user();
 
-        $message->fill(array_merge($data, [
+        $message->fill(array_merge([
             'creator_id'    => $user->id,
             'date_deadline' => $data['date_deadline'] ?? now(),
             'company_id'    => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
-        ]));
+        ], $data));
 
         $this->messages()->save($message);
 
