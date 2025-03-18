@@ -9,6 +9,7 @@ use Filament\Forms\Set;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
@@ -46,6 +47,8 @@ class QuotationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $cluster = Orders::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
