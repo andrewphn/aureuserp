@@ -13,6 +13,7 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UOM;
+use Webkul\Purchase\Models\OrderLine;
 
 class Move extends Model
 {
@@ -64,6 +65,7 @@ class Move extends Model
         'scrap_id',
         'company_id',
         'creator_id',
+        'purchase_line_id',
     ];
 
     /**
@@ -181,6 +183,11 @@ class Move extends Model
     public function shouldBypassReservation(): bool
     {
         return $this->sourceLocation->shouldBypassReservation() || ! $this->product->is_storable;
+    }
+
+    public function purchaseOrderLine(): BelongsTo
+    {
+        return $this->belongsTo(OrderLine::class, 'purchase_line_id');
     }
 
     protected static function newFactory(): MoveFactory

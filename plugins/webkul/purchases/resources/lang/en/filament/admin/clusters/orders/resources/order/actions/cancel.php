@@ -6,8 +6,15 @@ return [
     'action' => [
         'notification' => [
             'warning' => [
-                'title' => 'Cannot cancel order',
-                'body'  => 'The order cannot be canceled. You must first cancel their related vendor bills.',
+                'receipts' => [
+                    'title' => 'Cannot cancel order',
+                    'body'  => 'The order cannot be canceled since they have receipts that are already done.',
+                ],
+
+                'bills' => [
+                    'title' => 'Cannot cancel order',
+                    'body'  => 'The order cannot be canceled. You must first cancel their related vendor bills.',
+                ],
             ],
 
             'success' => [

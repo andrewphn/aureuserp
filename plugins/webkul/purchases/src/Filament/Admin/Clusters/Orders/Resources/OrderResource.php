@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Webkul\Support\Package;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -671,7 +672,7 @@ class OrderResource extends Resource
                                     ->default(0)
                                     ->numeric()
                                     ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
-                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]) || $record?->qty_received_method == Enums\QtyReceivedMethod::STOCK_MOVE),
                                 Forms\Components\TextInput::make('qty_invoiced')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.billed'))
                                     ->default(0)
@@ -770,10 +771,16 @@ class OrderResource extends Resource
             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
                 $product = Product::find($data['product_id']);
 
+                $qtyReceivedMethod = Enums\QtyReceivedMethod::MANUAL;
+
+                if (Package::isPluginInstalled('inventories')) {
+                    $qtyReceivedMethod = Enums\QtyReceivedMethod::STOCK_MOVE;
+                }
+
                 $data = array_merge($data, [
                     'name'                => $product->name,
                     'state'               => $record->state->value,
-                    'qty_received_method' => 'manual',
+                    'qty_received_method' => $qtyReceivedMethod,
                     'uom_id'              => $data['uom_id'] ?? $product->uom_id,
                     'currency_id'         => $record->currency_id,
                     'partner_id'          => $record->partner_id,
