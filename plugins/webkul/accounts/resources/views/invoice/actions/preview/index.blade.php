@@ -182,40 +182,44 @@
 
                 @if ($record->partner->addresses->count())
                     <div>
-                        {{ $record->partner->addresses->first()->street1 }}
+                        @php
+                            $partnerAddress = $record->partner->addresses->first();
+                        @endphp
 
-                        @if ($record->partner->addresses->first()->street2)
-                            ,{{ $record->partner->addresses->first()->street2 }}
+                        {{ $partnerAddress->street1 }}
+
+                        @if ($partnerAddress->street2)
+                            ,{{ $partnerAddress->street2 }}
                         @endif
                     </div>
 
                     <div>
-                        {{ $record->partner->addresses->first()->city }},
+                        {{ $partnerAddress->city }},
 
-                        @if ($record->partner->addresses->first()->state)
-                            {{ $record->partner->addresses->first()->state->name }},
+                        @if ($partnerAddress->state)
+                            {{ $partnerAddress->state->name }},
                         @endif
 
-                        {{ $record->partner->addresses->first()->zip }}
+                        {{ $partnerAddress->zip }}
                     </div>
 
-                    @if ($record->partner->addresses->first()->country)
+                    @if ($partnerAddress->country)
                         <div>
-                            {{ $record->partner->addresses->first()->country->name }}
+                            {{ $partnerAddress->country->name }}
                         </div>
                     @endif
 
-                    @if ($record->partner->addresses->first()->email)
+                    @if ($partnerAddress->email)
                         <div>
                             Email:
-                            {{ $record->partner->addresses->first()->email }}
+                            {{ $partnerAddress->email }}
                         </div>
                     @endif
 
-                    @if ($record->partner->addresses->first()->phone)
+                    @if ($partnerAddress->phone)
                         <div>
                             Phone:
-                            {{ $record->partner->addresses->first()->phone }}
+                            {{ $partnerAddress->phone }}
                         </div>
                     @endif
                 @endif
@@ -268,7 +272,7 @@
                     @foreach ($record->lines as $item)
                     <tr>
                         <td>{{ $item->product->name }}</td>
-                        <td>{{ number_format($item->qty) }}</td>
+                        <td>{{ number_format($item->quantity) }}</td>
 
                         @if (app(\Webkul\Invoice\Settings\ProductSettings::class)->enable_uom)
                             <td>{{ $item->product->uom->name }}</td>
