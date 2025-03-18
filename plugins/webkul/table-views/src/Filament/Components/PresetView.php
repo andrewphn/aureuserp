@@ -22,6 +22,23 @@ class PresetView extends Tab
 
     protected bool|Closure $isDeletable = false;
 
+    protected static mixed $cachedFavoriteTableViews;
+
+    /**
+     * @return array<string | int, Tab>
+     */
+    public function getFavoriteTableViews(): mixed
+    {
+        return TableViewFavorite::query()
+            ->where('user_id', auth()->id())
+            ->get();
+    }
+
+    public function getCachedFavoriteTableViews(): mixed
+    {
+        return self::$cachedFavoriteTableViews ??= $this->getFavoriteTableViews();
+    }
+
     public function color(string|Closure|null $color): static
     {
         $this->color = $color;
@@ -55,8 +72,7 @@ class PresetView extends Tab
 
     public function isFavorite(string|int|null $id = null): bool
     {
-        $tableViewFavorite = TableViewFavorite::query()
-            ->where('user_id', auth()->id())
+        $tableViewFavorite = $this->getCachedFavoriteTableViews()
             ->where('view_type', 'preset')
             ->where('view_key', $id)
             ->first();
