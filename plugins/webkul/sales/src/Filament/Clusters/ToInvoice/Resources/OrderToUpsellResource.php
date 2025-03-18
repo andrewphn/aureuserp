@@ -4,6 +4,7 @@ namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\InvoiceStatus;
@@ -19,6 +20,8 @@ class OrderToUpsellResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-arrow-up';
 
     protected static ?string $cluster = ToInvoice::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {

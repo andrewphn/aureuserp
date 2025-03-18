@@ -27,7 +27,7 @@ class ProductResource extends BaseProductResource
         return __('invoices::filament/clusters/customers/resources/products.title');
     }
 
-    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
     {
