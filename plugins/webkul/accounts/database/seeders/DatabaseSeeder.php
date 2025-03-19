@@ -31,9 +31,9 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             PaymentMethodLineSeeder::class,
             ReconcileSeeder::class,
-            TaxSeeder::class,
-            TaxPartitionSeeder::class,
             TaxGroupSeeder::class,
+            TaxPartitionSeeder::class,
+            TaxSeeder::class,
         ]);
     }
 }
