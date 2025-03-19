@@ -15,6 +15,8 @@ class TaxGroupSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('accounts_taxes')->delete();
+
         DB::table('accounts_tax_groups')->delete();
 
         $user = User::first();
