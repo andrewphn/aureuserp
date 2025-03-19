@@ -525,10 +525,12 @@ class InvoiceResource extends Resource
                                     ->placeholder('-')
                                     ->label(__('accounts::filament/resources/invoice.infolist.section.general.entries.due-date'))
                                     ->icon('heroicon-o-clock')
+                                    ->hidden(fn ($record) => $record->invoice_payment_term_id !== null)
                                     ->date(),
                                 Infolists\Components\TextEntry::make('invoicePaymentTerm.name')
                                     ->placeholder('-')
                                     ->label(__('accounts::filament/resources/invoice.infolist.section.general.entries.payment-term'))
+                                    ->hidden(fn ($record) => $record->invoice_payment_term_id === null)
                                     ->icon('heroicon-o-calendar-days'),
                             ])->columns(2),
                     ]),
