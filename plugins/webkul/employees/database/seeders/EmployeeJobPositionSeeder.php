@@ -4,6 +4,7 @@ namespace Webkul\Employee\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
 
 class EmployeeJobPositionSeeder extends Seeder
 {
@@ -13,6 +14,8 @@ class EmployeeJobPositionSeeder extends Seeder
     public function run(): void
     {
         DB::table('employees_job_positions')->delete();
+
+        $user = User::first();
 
         $jobPositions = [
             [
@@ -26,7 +29,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 2,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -42,7 +45,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 1,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -58,7 +61,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 2,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -74,7 +77,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 0,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -90,7 +93,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 1,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -106,7 +109,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 1,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -122,7 +125,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 2,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -138,7 +141,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 1,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -154,7 +157,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 2,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),
@@ -170,7 +173,7 @@ class EmployeeJobPositionSeeder extends Seeder
                 'no_of_recruitment'  => 0,
                 'department_id'      => null,
                 'company_id'         => null,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'employment_type_id' => null,
                 'created_at'         => now(),
                 'updated_at'         => now(),

@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Inventory\Enums\DeliveryStep;
 use Webkul\Inventory\Enums\ReceptionStep;
+use Webkul\Partner\Models\Address;
 use Webkul\Security\Models\User;
 
 class WarehouseSeeder extends Seeder
@@ -17,6 +18,8 @@ class WarehouseSeeder extends Seeder
     {
         $user = User::first();
 
+        $partnerAddress = Address::first();
+
         DB::table('inventories_warehouses')->delete();
 
         DB::table('inventories_warehouses')->insert([
@@ -27,7 +30,7 @@ class WarehouseSeeder extends Seeder
                 'sort'                     => 1,
                 'reception_steps'          => ReceptionStep::ONE_STEP,
                 'delivery_steps'           => DeliveryStep::ONE_STEP,
-                'partner_address_id'       => 1,
+                'partner_address_id'       => $partnerAddress?->id,
                 'company_id'               => $user->default_company_id,
                 'creator_id'               => $user->id,
                 'created_at'               => now(),
@@ -62,7 +65,8 @@ class WarehouseSeeder extends Seeder
             [
                 'warehouse_id' => 1,
                 'route_id'     => 2,
-            ], [
+            ],
+            [
                 'warehouse_id' => 1,
                 'route_id'     => 3,
             ],
