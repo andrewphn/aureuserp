@@ -5,6 +5,8 @@ namespace Webkul\Account\Database\Seeders;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
 
 class TaxGroupSeeder extends Seeder
 {
@@ -15,14 +17,19 @@ class TaxGroupSeeder extends Seeder
     {
         DB::table('accounts_tax_groups')->delete();
 
+        $user = User::first();
+
+        $company = Company::first();
+
         $now = Carbon::now();
 
         $taxGroups = [
             [
+                'id'                 => 1,
                 'sort'               => 1,
-                'company_id'         => 1,
+                'company_id'         => $company?->id,
                 'country_id'         => 104,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'name'               => 'Tax 15%',
                 'preceding_subtotal' => null,
                 'created_at'         => $now,

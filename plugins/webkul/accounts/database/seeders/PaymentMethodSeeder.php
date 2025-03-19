@@ -2,6 +2,7 @@
 
 namespace Webkul\Account\Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +15,8 @@ class PaymentMethodSeeder extends Seeder
     {
         DB::table('accounts_payment_methods')->delete();
 
+        $user = User::first();
+
         $now = now();
 
         $paymentMethods = [
@@ -22,7 +25,7 @@ class PaymentMethodSeeder extends Seeder
                 'code'         => 'manual',
                 'payment_type' => 'inbound',
                 'name'         => 'Manual Payment',
-                'created_by'   => 1,
+                'created_by'   => $user->id,
                 'created_at'   => $now,
                 'updated_at'   => $now,
             ],
@@ -31,7 +34,7 @@ class PaymentMethodSeeder extends Seeder
                 'code'         => 'manual',
                 'payment_type' => 'outbound',
                 'name'         => 'Manual Payment',
-                'created_by'   => 1,
+                'created_by'   => $user->id,
                 'created_at'   => $now,
                 'updated_at'   => $now,
             ],
