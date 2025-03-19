@@ -37,7 +37,7 @@ class TagResource extends Resource
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
                 Forms\Components\ColorPicker::make('color')
-                    ->required()
+                    ->default('#808080')
                     ->label(__('projects::filament/clusters/configurations/resources/tag.form.color')),
             ]);
     }
@@ -55,7 +55,14 @@ class TagResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->hidden(fn($record) => $record->trashed())
+                    ->hidden(fn ($record) => $record->trashed())
+                    ->mutateFormDataUsing(function (array $data, Tag $record): array {
+                        if (empty($data['color'])) {
+                            $data['color'] = '#808080';
+                        }
+
+                        return $data;
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
