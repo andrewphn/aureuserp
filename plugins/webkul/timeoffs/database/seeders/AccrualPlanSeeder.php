@@ -4,6 +4,8 @@ namespace Webkul\TimeOff\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
 
 class AccrualPlanSeeder extends Seeder
 {
@@ -16,10 +18,14 @@ class AccrualPlanSeeder extends Seeder
     {
         DB::table('time_off_leave_accrual_plans')->delete();
 
+        $user = User::first();
+
+        $company = Company::first();
+
         $leaveAccrualPlans = [
             [
-                'company_id'        => 1,
-                'creator_id'        => 1,
+                'company_id'        => $company?->id,
+                'creator_id'        => $user?->id,
                 'name'              => 'Seniority Plan',
                 'transition_mode'   => 'immediately',
                 'accrued_gain_time' => 'end',
