@@ -9,34 +9,34 @@ enum OrderReceiptStatus: string implements HasColor, HasLabel
 {
     case NO = 'no';
 
-    case TO_RECEIVED = 'to_received';
+    case PARTIAL = 'partial';
 
-    case RECEIVED = 'received';
+    case FULL = 'full';
 
     public static function options(): array
     {
         return [
-            self::NO->value          => __('purchases::enums/order-receipt-status.no'),
-            self::TO_RECEIVED->value => __('purchases::enums/order-receipt-status.to-received'),
-            self::RECEIVED->value    => __('purchases::enums/order-receipt-status.received'),
+            self::NO->value      => __('purchases::enums/order-receipt-status.no'),
+            self::PARTIAL->value => __('purchases::enums/order-receipt-status.partial'),
+            self::FULL->value    => __('purchases::enums/order-receipt-status.full'),
         ];
     }
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::NO          => __('purchases::enums/order-receipt-status.no'),
-            self::TO_RECEIVED => __('purchases::enums/order-receipt-status.to-received'),
-            self::RECEIVED    => __('purchases::enums/order-receipt-status.received'),
+            self::NO      => __('purchases::enums/order-receipt-status.no'),
+            self::PARTIAL => __('purchases::enums/order-receipt-status.partial'),
+            self::FULL    => __('purchases::enums/order-receipt-status.full'),
         };
     }
 
     public function getColor(): string
     {
         return match ($this) {
-            self::NO          => 'gray',
-            self::TO_RECEIVED => 'warning',
-            self::RECEIVED    => 'success',
+            self::NO      => 'gray',
+            self::PARTIAL => 'warning',
+            self::FULL    => 'success',
         };
     }
 }

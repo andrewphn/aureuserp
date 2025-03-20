@@ -8,6 +8,7 @@ use Livewire\Component;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\Operation;
+use Webkul\Support\Package;
 
 class ReturnAction extends Action
 {
@@ -56,11 +57,13 @@ class ReturnAction extends Action
                 'operation_id'            => $newOperation->id,
                 'reference'               => $newOperation->name,
                 'state'                   => Enums\MoveState::DRAFT,
+                'is_refund'               => true,
                 'product_qty'             => $move->product_qty,
                 'product_uom_qty'         => $move->product_uom_qty,
                 'source_location_id'      => $move->destination_location_id,
                 'destination_location_id' => $move->source_location_id,
                 'origin_returned_move_id' => $move->id,
+                'operation_type_id'       => $newOperation->operation_type_id,
             ]);
 
             $newMove->save();
@@ -75,6 +78,10 @@ class ReturnAction extends Action
         OperationResource::updateOperationState($newOperation);
 
         $record->update(['return_id' => $record->id]);
+
+        if (Package::isPluginInstalled('purchases')) {
+            $newOperation->purchaseOrders()->attach($record->return->purchaseOrders->pluck('id'));
+        }
 
         $url = OperationResource::getUrl('view', ['record' => $record]);
 

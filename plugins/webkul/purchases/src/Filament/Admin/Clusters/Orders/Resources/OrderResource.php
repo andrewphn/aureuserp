@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Webkul\Support\Package;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -22,12 +23,14 @@ use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums;
+use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
+use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
 
 class OrderResource extends Resource
@@ -629,7 +632,11 @@ class OrderResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
-                                    ->relationship('product', 'name')
+                                    ->relationship(
+                                        'product',
+                                        'name',
+                                        fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
+                                    )
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -671,7 +678,7 @@ class OrderResource extends Resource
                                     ->default(0)
                                     ->numeric()
                                     ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
-                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED])),
+                                    ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]) || $record?->qty_received_method == Enums\QtyReceivedMethod::STOCK_MOVE),
                                 Forms\Components\TextInput::make('qty_invoiced')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.billed'))
                                     ->default(0)
@@ -770,10 +777,16 @@ class OrderResource extends Resource
             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
                 $product = Product::find($data['product_id']);
 
+                $qtyReceivedMethod = Enums\QtyReceivedMethod::MANUAL;
+
+                if (Package::isPluginInstalled('inventories')) {
+                    $qtyReceivedMethod = Enums\QtyReceivedMethod::STOCK_MOVE;
+                }
+
                 $data = array_merge($data, [
                     'name'                => $product->name,
                     'state'               => $record->state->value,
-                    'qty_received_method' => 'manual',
+                    'qty_received_method' => $qtyReceivedMethod,
                     'uom_id'              => $data['uom_id'] ?? $product->uom_id,
                     'currency_id'         => $record->currency_id,
                     'partner_id'          => $record->partner_id,
@@ -1035,7 +1048,11 @@ class OrderResource extends Resource
 
     public static function collectLineTotals(OrderLine $line): OrderLine
     {
-        $line->qty_received_manual = $line->qty_received ?? 0;
+        $line = static::computeQtyReceived($line);
+
+        if ($line->qty_received_method == Enums\QtyReceivedMethod::MANUAL) {
+            $line->qty_received_manual = $line->qty_received ?? 0;
+        }
 
         $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
 
@@ -1060,6 +1077,63 @@ class OrderResource extends Resource
         $line->price_total = $subTotal + $taxAmount;
 
         $line->save();
+
+        return $line;
+    }
+
+    public static function computeQtyReceived(OrderLine $line): OrderLine
+    {
+        $line->qty_received = 0.0;
+
+        if ($line->qty_received_method == Enums\QtyReceivedMethod::MANUAL) {
+            $line->qty_received = $line->qty_received_manual ?? 0.0;
+        }
+
+        if ($line->qty_received_method == Enums\QtyReceivedMethod::STOCK_MOVE) {
+            $total = 0.0;
+
+            foreach ($line->inventoryMoves as $move) {
+                if ($move->state !== InventoryEnums\MoveState::DONE) {
+                    continue;
+                }
+
+                if ($move->isPurchaseReturn()) {
+                    if (! $move->originReturnedMove || $move->is_refund) {
+                        $total -= $move->uom->computeQuantity(
+                            $move->quantity, 
+                            $line->uom, 
+                            true, 
+                            'HALF-UP'
+                        );
+                    }
+                } elseif (
+                    $move->originReturnedMove
+                    && $move->originReturnedMove->isDropshipped()
+                    && ! $move->isDropshippedReturned()
+                ) {
+                    // Edge case: The dropship is returned to the stock, not to the supplier.
+                    // In this case, the received quantity on the Purchase order is set although we didn't
+                    // receive the product physically in our stock. To avoid counting the
+                    // quantity twice, we do nothing.
+                    continue;
+                } elseif (
+                    $move->originReturnedMove
+                    && $move->originReturnedMove->isPurchaseReturn()
+                    && ! $move->is_refund
+                ) {
+                    continue;
+                } else {
+                    $total += $move->uom->computeQuantity(
+                        $move->quantity, 
+                        $line->uom, 
+                        true, 
+                        'HALF-UP'
+                    );
+                }
+
+                $line->qty_received = $total;
+            }
+        }
 
         return $line;
     }

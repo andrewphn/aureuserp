@@ -7,6 +7,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
+use Livewire\Livewire;
 
 class ManageBills extends ManageRelatedRecords
 {
@@ -19,6 +20,11 @@ class ManageBills extends ManageRelatedRecords
     public static function getNavigationLabel(): string
     {
         return __('purchases::filament/admin/clusters/orders/resources/order/pages/manage-bills.navigation.title');
+    }
+
+    public static function getNavigationBadge($parameters = []): ?string
+    {
+        return Livewire::current()->getRecord()->accountMoves()->count();
     }
 
     public function table(Table $table): Table

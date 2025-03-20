@@ -17,6 +17,10 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\OrderPoint;
+use Webkul\Inventory\Models\Move as InventoryMove;
+use Webkul\Purchase\Enums;
 
 class OrderLine extends Model
 {
@@ -65,6 +69,8 @@ class OrderLine extends Model
         'currency_id',
         'company_id',
         'creator_id',
+        'final_location_id',
+        'order_point_id',
     ];
 
     /**
@@ -73,6 +79,7 @@ class OrderLine extends Model
      * @var string
      */
     protected $casts = [
+        'qty_received_method' => Enums\QtyReceivedMethod::class,
         'planned_at'       => 'datetime',
         'is_downpayment'   => 'boolean',
         'propagate_cancel' => 'boolean',
@@ -136,6 +143,21 @@ class OrderLine extends Model
     public function accountMoveLines(): HasMany
     {
         return $this->hasMany(MoveLine::class);
+    }
+
+    public function inventoryMoves(): HasMany
+    {
+        return $this->hasMany(InventoryMove::class, 'purchase_line_id');
+    }
+
+    public function finalLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'final_location_id');
+    }
+
+    public function orderPoint(): BelongsTo
+    {
+        return $this->belongsTo(OrderPoint::class, 'order_point_id');
     }
 
     protected static function newFactory(): OrderLineFactory
