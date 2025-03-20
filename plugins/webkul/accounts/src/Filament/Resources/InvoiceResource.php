@@ -90,23 +90,22 @@ class InvoiceResource extends Resource
                                 ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
-                        Forms\Components\Group::make()
-                            ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('accounts::filament/resources/invoice.form.section.general.fields.customer-invoice'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
-                                    ->placeholder('INV/2025/00001')
-                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber())
-                                    ->unique(
-                                        table: 'accounts_account_moves',
-                                        column: 'name',
-                                        ignoreRecord: true,
-                                    )
-                                    ->columnSpan(1)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                            ])->columns(2),
+                        // Forms\Components\Group::make()
+                        //     ->schema([
+                        //         Forms\Components\TextInput::make('name')
+                        //             ->label(__('accounts::filament/resources/invoice.form.section.general.fields.customer-invoice'))
+                        //             ->required()
+                        //             ->maxLength(255)
+                        //             ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
+                        //             ->placeholder('INV/1')
+                        //             ->unique(
+                        //                 table: 'accounts_account_moves',
+                        //                 column: 'name',
+                        //                 ignoreRecord: true,
+                        //             )
+                        //             ->columnSpan(1)
+                        //             ->disabled(fn($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                        //     ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Group::make()
