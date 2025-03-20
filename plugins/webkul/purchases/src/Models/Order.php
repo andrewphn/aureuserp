@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Incoterm;
-use Webkul\Account\Models\Move;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
@@ -198,7 +197,7 @@ class Order extends Model
 
     public function accountMoves(): BelongsToMany
     {
-        return $this->belongsToMany(Move::class, 'purchases_order_account_moves', 'order_id', 'move_id');
+        return $this->belongsToMany(AccountMove::class, 'purchases_order_account_moves', 'order_id', 'move_id');
     }
 
     public function operationType(): BelongsTo

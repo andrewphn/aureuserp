@@ -57,5 +57,7 @@ class PurchaseServiceProvider extends PackageServiceProvider
         Livewire::component('order-summary', Summary::class);
 
         Livewire::component('list-products', \Webkul\Purchase\Livewire\Customer\ListProducts::class);
+
+        \Webkul\Invoice\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
     }
 }

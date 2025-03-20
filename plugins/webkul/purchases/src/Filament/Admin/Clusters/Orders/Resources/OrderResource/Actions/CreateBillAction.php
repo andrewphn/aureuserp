@@ -68,7 +68,7 @@ class CreateBillAction extends Action
     {
         $accountMove = AccountMove::create([
             'state'                        => AccountEnums\MoveState::DRAFT,
-            'move_type'                    => $record->qty_to_invoice >=0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::OUT_INVOICE,
+            'move_type'                    => $record->qty_to_invoice >=0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::IN_REFUND,
             'payment_state'                => AccountEnums\PaymentStatus::NOT_PAID,
             'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin'               => $record->name,

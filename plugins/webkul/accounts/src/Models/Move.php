@@ -276,16 +276,11 @@ class Move extends Model
     {
         parent::boot();
 
-        static::saving(function ($model) {
-            $model->updateName();
-
-            $model->sequence_prefix = self::extractPrefixFromName($model->name);
-        });
-
         static::created(function ($model) {
+            $model->updateSequencePrefix();
+
             $model->updateQuietly([
-                'name'            => $model->name,
-                'sequence_prefix' => $model->sequence_prefix,
+                'name' => $model->sequence_prefix.'/'.$model->id,
             ]);
         });
     }
@@ -293,34 +288,31 @@ class Move extends Model
     /**
      * Update the full name without triggering additional events
      */
-    public function updateName()
+    public function updateSequencePrefix()
     {
+        $suffix = date('Y').'/'.date('m');
+
         switch ($this->move_type) {
-            case MoveType::OUT_INVOICE->value:
-                $this->name = 'INV/'.$this->id;
+            case MoveType::OUT_INVOICE:
+                $this->sequence_prefix = 'INV/'.$suffix;
 
                 break;
-            case MoveType::OUT_REFUND->value:
-                $this->name = 'RINV/'.$this->id;
+            case MoveType::OUT_REFUND:
+                $this->sequence_prefix = 'RINV/'.$suffix;
 
                 break;
-            case MoveType::IN_INVOICE->value:
-                $this->name = 'BILL/'.$this->id;
+            case MoveType::IN_INVOICE:
+                $this->sequence_prefix = 'BILL/'.$suffix;
 
                 break;
-            case MoveType::IN_REFUND->value:
-                $this->name = 'RBILL/'.$this->id;
+            case MoveType::IN_REFUND:
+                $this->sequence_prefix = 'RBILL/'.$suffix;
 
                 break;
             default:
-                $this->name = $this->id;
+                $this->sequence_prefix = $suffix;
 
                 break;
         }
-    }
-
-    protected static function extractPrefixFromName(string $name): string
-    {
-        return substr($name, 0, strrpos($name, '/') + 1);
     }
 }
