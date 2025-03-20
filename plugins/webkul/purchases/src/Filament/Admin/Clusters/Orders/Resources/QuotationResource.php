@@ -40,17 +40,19 @@ class QuotationResource extends OrderResource
             Pages\ViewQuotation::class,
             Pages\EditQuotation::class,
             Pages\ManageBills::class,
+            Pages\ManageReceipts::class,
         ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListQuotations::route('/'),
-            'create' => Pages\CreateQuotation::route('/create'),
-            'view'   => Pages\ViewQuotation::route('/{record}'),
-            'edit'   => Pages\EditQuotation::route('/{record}/edit'),
-            'bills'  => Pages\ManageBills::route('/{record}/bills'),
+            'index'    => Pages\ListQuotations::route('/'),
+            'create'   => Pages\CreateQuotation::route('/create'),
+            'view'     => Pages\ViewQuotation::route('/{record}'),
+            'edit'     => Pages\EditQuotation::route('/{record}/edit'),
+            'bills'    => Pages\ManageBills::route('/{record}/bills'),
+            'receipts' => Pages\ManageReceipts::route('/{record}/receipts'),
         ];
     }
 }

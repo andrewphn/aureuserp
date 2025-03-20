@@ -7,7 +7,10 @@ use Filament\Notifications\Notification;
 use Livewire\Component;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Purchase\Enums\OrderState;
+use Illuminate\Support\Facades\Schema;
 use Webkul\Purchase\Models\Order;
+use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Enums as InventoryEnums;
 
 class CancelAction extends Action
 {
@@ -25,11 +28,23 @@ class CancelAction extends Action
             ->color('gray')
             ->requiresConfirmation()
             ->action(function (Order $record, Component $livewire): void {
+                $record->lines->each(function ($move) {
+                    if ($move->qty_received > 0) {
+                        Notification::make()
+                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.receipts.title'))
+                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.receipts.body'))
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+                });
+
                 $record->accountMoves->each(function ($move) {
                     if ($move->state !== MoveState::CANCEL) {
                         Notification::make()
-                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.title'))
-                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.body'))
+                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.bills.title'))
+                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.bills.body'))
                             ->warning()
                             ->send();
 
@@ -47,6 +62,8 @@ class CancelAction extends Action
                     ]);
                 }
 
+                $this->cancelInventoryOperations($record);
+
                 $livewire->updateForm();
 
                 Notification::make()
@@ -59,5 +76,29 @@ class CancelAction extends Action
                 OrderState::DONE,
                 OrderState::CANCELED,
             ]));
+    }
+
+    protected function cancelInventoryOperations(Order $record): void
+    {
+        if (! Schema::hasTable('inventories_operations')) {
+            return;
+        }
+
+        if ($record->operations->isEmpty()) {
+            return;
+        }
+
+        $record->operations->each(function ($operation) {
+            foreach ($operation->moves as $move) {
+                $move->update([
+                    'state'    => InventoryEnums\MoveState::CANCELED,
+                    'quantity' => 0,
+                ]);
+
+                $move->lines()->delete();
+            }
+
+            OperationResource::updateOperationState($operation);
+        });
     }
 }

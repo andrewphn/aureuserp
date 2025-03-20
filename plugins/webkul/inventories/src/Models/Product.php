@@ -95,6 +95,11 @@ class Product extends BaseProduct
         return $this->belongsToMany(StorageCategoryCapacity::class, 'inventories_storage_category_capacities', 'storage_category_id', 'package_type_id');
     }
 
+    public function orderPoints(): HasMany
+    {
+        return $this->hasMany(OrderPoint::class);
+    }
+
     public function responsible(): BelongsTo
     {
         return $this->belongsTo(User::class);
