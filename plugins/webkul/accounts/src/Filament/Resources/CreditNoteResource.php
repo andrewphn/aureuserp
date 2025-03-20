@@ -89,23 +89,6 @@ class CreditNoteResource extends Resource
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('accounts::filament/resources/credit-note.form.section.general.fields.customer-invoice'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
-                                    ->placeholder('RINV/2025/00001')
-                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber('RINV'))
-                                    ->unique(
-                                        table: 'accounts_account_moves',
-                                        column: 'name',
-                                        ignoreRecord: true,
-                                    )
-                                    ->columnSpan(1)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                            ])->columns(2),
-                        Forms\Components\Group::make()
-                            ->schema([
                                 Forms\Components\Group::make()
                                     ->schema([
                                         Forms\Components\Select::make('partner_id')
@@ -634,10 +617,6 @@ class CreditNoteResource extends Resource
             'sort'                  => MoveLine::max('sort') + 1,
             'parent_state'          => $livewire->record->state ?? MoveState::DRAFT->value,
             'move_name'             => $livewire->record->name,
-            'debit'                 => floatval($data['price_subtotal']),
-            'credit'                => 0.00,
-            'balance'               => floatval($data['price_subtotal']),
-            'amount_currency'       => floatval($data['price_subtotal']),
         ]);
 
         if ($data['discount'] > 0) {
@@ -826,6 +805,14 @@ class CreditNoteResource extends Resource
         $line->price_subtotal = round($subTotal, 4);
 
         $line->price_total = $subTotal + $taxAmount;
+
+        $line->debit = round($subTotal, 4);
+
+        $line->credit = 0.00;
+
+        $line->balance = round($subTotal, 4);
+
+        $line->amount_currency = round($subTotal, 4);
 
         $line->save();
 
