@@ -4,6 +4,7 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\MoveType;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -268,38 +269,56 @@ class Move extends Model
             ->where('display_type', 'payment_term');
     }
 
-    public static function generateNextInvoiceAndCreditNoteNumber(string $type = 'INV'): string
-    {
-        $year = date('Y');
-        $prefix = "{$type}/{$year}/";
-
-        $lastInvoice = self::whereRaw('name LIKE ?', ["{$prefix}%"])
-            ->latest('name')
-            ->first();
-
-        $lastNumber = optional($lastInvoice)->name
-            ? (int) substr($lastInvoice->name, strlen($prefix))
-            : 0;
-
-        return $prefix.str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
-    }
-
+    /**
+     * Bootstrap any application services.
+     */
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            if (empty($model->name)) {
-                $model->name = self::generateNextInvoiceAndCreditNoteNumber();
-            }
+        static::saving(function ($model) {
+            $model->updateName();
 
             $model->sequence_prefix = self::extractPrefixFromName($model->name);
+        });
+
+        static::created(function ($model) {
+            $model->updateQuietly([
+                'name'            => $model->name,
+                'sequence_prefix' => $model->sequence_prefix,
+            ]);
         });
     }
 
     /**
-     * Extracts the prefix (e.g., "INV or RINV/2025/") from the given invoice and credit Note name.
+     * Update the full name without triggering additional events
      */
+    public function updateName()
+    {
+        switch ($this->move_type) {
+            case MoveType::OUT_INVOICE->value:
+                $this->name = 'INV/'.$this->id;
+
+                break;
+            case MoveType::OUT_REFUND->value:
+                $this->name = 'RINV/'.$this->id;
+
+                break;
+            case MoveType::IN_INVOICE->value:
+                $this->name = 'BILL/'.$this->id;
+
+                break;
+            case MoveType::IN_REFUND->value:
+                $this->name = 'RBILL/'.$this->id;
+
+                break;
+            default:
+                $this->name = $this->id;
+
+                break;
+        }
+    }
+
     protected static function extractPrefixFromName(string $name): string
     {
         return substr($name, 0, strrpos($name, '/') + 1);

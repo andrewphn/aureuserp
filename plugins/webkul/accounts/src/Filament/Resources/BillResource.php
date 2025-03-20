@@ -90,23 +90,6 @@ class BillResource extends Resource
                         ]),
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('accounts::filament/resources/bill.form.section.general.fields.vendor-bill'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
-                                    ->placeholder('BILL/2025/00001')
-                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber('BILL'))
-                                    ->unique(
-                                        table: 'accounts_account_moves',
-                                        column: 'name',
-                                        ignoreRecord: true,
-                                    )
-                                    ->columnSpan(1)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                            ])->columns(2),
-                        Forms\Components\Group::make()
-                            ->schema([
                                 Forms\Components\Group::make()
                                     ->schema([
                                         Forms\Components\Select::make('partner_id')
