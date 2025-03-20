@@ -1039,7 +1039,7 @@ class QuotationResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->disabled(true)
-                                    ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL->value]))
+                                    ->disabled()
                                     ->visible(fn ($record): bool => in_array($record?->order->state, [OrderState::SALE->value])),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.uom'))
