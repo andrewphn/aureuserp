@@ -58,30 +58,23 @@ class SendEmailAction extends Action
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-email.form.fields.subject'))
                     ->required()
                     ->default("Purchase Order #{$this->getRecord()->name}"),
-                Forms\Components\RichEditor::make('message')
+                Forms\Components\MarkdownEditor::make('message')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-email.form.fields.message'))
                     ->required()
-                    ->default("<p>Dear {$this->getRecord()->partner->name} <br><br>Here is in attachment a request for quotation <strong>{$this->getRecord()->name}</strong>.
-                            
-                            <br><br>
-                            
-                            If you have any questions, please do not hesitate to contact us.
-                            
-                            <br><br>
-                            
-                            <a href=\"{$acceptRespondUrl}\" target=\"_blank\">Accept</a>
-                            
-                            <a href=\"{$declineRespondUrl}\" target=\"_blank\">Decline</a>
-                            
-                            <br><br>
-                            
-                            Best regards,
-                            
-                            <br><br>
-                            --<br>
-                            {$userName}
-                        </p>
-                    "),
+                    ->default(<<<MD
+Dear {$this->getRecord()->partner->name}  
+
+Here is in attachment a request for quotation **{$this->getRecord()->name}**.  
+
+If you have any questions, please do not hesitate to contact us.  
+
+[Accept]({$acceptRespondUrl}) | [Decline]({$declineRespondUrl})  
+
+Best regards,  
+
+--  
+{$userName}  
+MD),
                 Forms\Components\FileUpload::make('attachment')
                     ->hiddenLabel()
                     ->disk('public')

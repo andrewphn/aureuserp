@@ -23,12 +23,14 @@ use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums;
+use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
+use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
 
 class OrderResource extends Resource
@@ -630,7 +632,11 @@ class OrderResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.product'))
-                                    ->relationship('product', 'name')
+                                    ->relationship(
+                                        'product',
+                                        'name',
+                                        fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
+                                    )
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -1042,7 +1048,11 @@ class OrderResource extends Resource
 
     public static function collectLineTotals(OrderLine $line): OrderLine
     {
-        $line->qty_received_manual = $line->qty_received ?? 0;
+        $line = static::computeQtyReceived($line);
+
+        if ($line->qty_received_method == Enums\QtyReceivedMethod::MANUAL) {
+            $line->qty_received_manual = $line->qty_received ?? 0;
+        }
 
         $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
 
@@ -1067,6 +1077,63 @@ class OrderResource extends Resource
         $line->price_total = $subTotal + $taxAmount;
 
         $line->save();
+
+        return $line;
+    }
+
+    public static function computeQtyReceived(OrderLine $line): OrderLine
+    {
+        $line->qty_received = 0.0;
+
+        if ($line->qty_received_method == Enums\QtyReceivedMethod::MANUAL) {
+            $line->qty_received = $line->qty_received_manual ?? 0.0;
+        }
+
+        if ($line->qty_received_method == Enums\QtyReceivedMethod::STOCK_MOVE) {
+            $total = 0.0;
+
+            foreach ($line->inventoryMoves as $move) {
+                if ($move->state !== InventoryEnums\MoveState::DONE) {
+                    continue;
+                }
+
+                if ($move->isPurchaseReturn()) {
+                    if (! $move->originReturnedMove || $move->is_refund) {
+                        $total -= $move->uom->computeQuantity(
+                            $move->quantity, 
+                            $line->uom, 
+                            true, 
+                            'HALF-UP'
+                        );
+                    }
+                } elseif (
+                    $move->originReturnedMove
+                    && $move->originReturnedMove->isDropshipped()
+                    && ! $move->isDropshippedReturned()
+                ) {
+                    // Edge case: The dropship is returned to the stock, not to the supplier.
+                    // In this case, the received quantity on the Purchase order is set although we didn't
+                    // receive the product physically in our stock. To avoid counting the
+                    // quantity twice, we do nothing.
+                    continue;
+                } elseif (
+                    $move->originReturnedMove
+                    && $move->originReturnedMove->isPurchaseReturn()
+                    && ! $move->is_refund
+                ) {
+                    continue;
+                } else {
+                    $total += $move->uom->computeQuantity(
+                        $move->quantity, 
+                        $line->uom, 
+                        true, 
+                        'HALF-UP'
+                    );
+                }
+
+                $line->qty_received = $total;
+            }
+        }
 
         return $line;
     }

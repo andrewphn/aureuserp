@@ -158,7 +158,12 @@ class Product extends Model
 
     public function supplierInformation(): HasMany
     {
-        return $this->hasMany(ProductSupplier::class);
+        if ($this->is_configurable) {
+            return $this->hasMany(ProductSupplier::class)
+                ->orWhereIn('product_id', $this->variants()->pluck('id'));
+        } else {
+            return $this->hasMany(ProductSupplier::class);
+        }
     }
 
     protected static function newFactory(): ProductFactory

@@ -5,7 +5,7 @@ namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
+use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Livewire\Livewire;
 use Webkul\Support\Package;
@@ -44,14 +44,14 @@ class ManageReceipts extends ManageRelatedRecords
 
     public function table(Table $table): Table
     {
-        return ReceiptResource::table($table)
+        return OperationResource::table($table)
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->url(fn ($record) => ReceiptResource::getUrl('view', ['record' => $record]))
+                    ->url(fn ($record) => OperationResource::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
 
                 Tables\Actions\EditAction::make()
-                    ->url(fn ($record) => ReceiptResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn ($record) => OperationResource::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
             ])
             ->bulkActions([]);

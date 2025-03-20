@@ -19,6 +19,7 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\OrderPoint;
+use Webkul\Inventory\Models\Move as InventoryMove;
 use Webkul\Purchase\Enums;
 
 class OrderLine extends Model
@@ -142,6 +143,11 @@ class OrderLine extends Model
     public function accountMoveLines(): HasMany
     {
         return $this->hasMany(MoveLine::class);
+    }
+
+    public function inventoryMoves(): HasMany
+    {
+        return $this->hasMany(InventoryMove::class, 'purchase_line_id');
     }
 
     public function finalLocation(): BelongsTo

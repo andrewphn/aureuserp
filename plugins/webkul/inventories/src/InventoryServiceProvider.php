@@ -55,6 +55,7 @@ class InventoryServiceProvider extends PackageServiceProvider
                 '2025_03_17_101814_add_inventories_columns_to_purchases_order_lines_table_from_inventories',
                 '2025_03_17_111610_add_purchases_columns_to_inventories_moves_table_from_inventories',
                 '2025_03_17_115707_create_purchases_order_operations_table_from_inventories',
+                '2025_03_19_100337_add_is_refund_column_in_inventories_moves_table',
             ])
             ->runsMigrations()
             ->hasSettings([

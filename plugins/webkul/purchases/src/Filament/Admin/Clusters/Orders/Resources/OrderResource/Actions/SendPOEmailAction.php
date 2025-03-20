@@ -46,28 +46,23 @@ class SendPOEmailAction extends Action
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.subject'))
                     ->required()
                     ->default("Purchase Order #{$this->getRecord()->name}"),
-                Forms\Components\RichEditor::make('message')
+                Forms\Components\MarkdownEditor::make('message')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.message'))
                     ->required()
-                    ->default("<p>Dear {$this->getRecord()->partner->name} <br><br>Here is in attachment a purchase order <strong>{$this->getRecord()->name}</strong> amounting in <strong>{$this->getRecord()->total_amount}</strong>.
-                            
-                            <br><br>
-                            
-                            The receipt is expected for <strong>{$this->getRecord()->planned_at}</strong>.
-                            
-                            <br><br>
+                    ->default(<<<MD
+Dear **{$this->getRecord()->partner->name}**  
 
-                            Could you please acknowledge the receipt of this order?
-                            
-                            <br><br>
-                            
-                            Best regards,
-                            
-                            <br><br>
-                            --<br>
-                            {$userName}
-                        </p>
-                    "),
+Here is in attachment a purchase order **{$this->getRecord()->name}** amounting to **{$this->getRecord()->total_amount}**.  
+
+The receipt is expected for **{$this->getRecord()->planned_at}**.  
+
+Could you please acknowledge the receipt of this order?  
+
+Best regards,  
+
+--  
+{$userName}  
+MD),
                 Forms\Components\FileUpload::make('attachment')
                     ->hiddenLabel()
                     ->disk('public')

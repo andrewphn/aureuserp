@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Rule;
+use Webkul\Support\Package;
 
 class ValidateAction extends Action
 {
@@ -110,6 +112,12 @@ class ValidateAction extends Action
         }
 
         OperationResource::updateOperationState($record);
+
+        if (Package::isPluginInstalled('purchases')) {
+            foreach ($record->purchaseOrders as $purchaseOrder) {
+                OrderResource::collectTotals($purchaseOrder);
+            }
+        }
 
         $this->applyPushRules($record);
     }
@@ -331,7 +339,7 @@ class ValidateAction extends Action
 
         $newOperation = $record->replicate()->fill([
             'state'      => Enums\OperationState::DRAFT,
-            'origin'     => $record->name,
+            'origin'     => $record->origin ?? $record->name,
             'user_id'    => Auth::id(),
             'creator_id' => Auth::id(),
         ]);
@@ -364,6 +372,14 @@ class ValidateAction extends Action
         }
 
         OperationResource::updateOperationState($newOperation);
+
+        if (Package::isPluginInstalled('purchases')) {
+            $newOperation->purchaseOrders()->attach($record->purchaseOrders->pluck('id'));
+
+            foreach ($record->purchaseOrders as $purchaseOrder) {
+                OrderResource::collectTotals($purchaseOrder);
+            }
+        }
 
         $url = OperationResource::getUrl('view', ['record' => $record]);
 

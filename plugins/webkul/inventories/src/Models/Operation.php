@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -16,6 +17,7 @@ use Webkul\Partner\Models\Address;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Purchase\Models\Order;
 
 class Operation extends Model
 {
@@ -170,6 +172,11 @@ class Operation extends Model
     public function packages(): HasManyThrough
     {
         return $this->hasManyThrough(Package::class, MoveLine::class, 'operation_id', 'id', 'id', 'result_package_id');
+    }
+
+    public function purchaseOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'purchases_order_operations', 'inventory_operation_id', 'purchase_order_id');
     }
 
     /**

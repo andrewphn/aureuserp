@@ -17,6 +17,7 @@ use Webkul\Inventory\Models\Location;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Enums as InventoryEnums;
+use Webkul\Product\Enums\ProductType;
 
 class ConfirmAction extends Action
 {
@@ -65,6 +66,10 @@ class ConfirmAction extends Action
     protected function createReceipt(Order $record): void
     {
         if (! in_array($record->state, [OrderState::PURCHASE, OrderState::DONE])) {
+            return;
+        }
+
+        if (! $record->lines->contains(fn ($line) => $line->product->type === ProductType::GOODS)) {
             return;
         }
 
@@ -119,6 +124,7 @@ class ConfirmAction extends Action
                 'warehouse_id'            => $operation->destinationLocation->warehouse_id,
                 'source_location_id'      => $operation->source_location_id,
                 'destination_location_id' => $operation->destination_location_id,
+                'operation_type_id'       => $operation->operation_type_id,
                 'final_location_id'       => $line->final_location_id,
                 'company_id'              => $operation->destinationLocation->company_id,
                 'purchase_line_id'        => $line->id,
@@ -138,7 +144,7 @@ class ConfirmAction extends Action
         $url = PurchaseOrderResource::getUrl('view', ['record' => $record]);
 
         $operation->addMessage([
-            'body' => "This transfer has been created from: <a href=\"{$url}\" target=\"_blank\" class=\"text-primary-600 dark:text-primary-400\">{$record->name}</a>.",
+            'body' => "This transfer has been created from <a href=\"{$url}\" target=\"_blank\" class=\"text-primary-600 dark:text-primary-400\">{$record->name}</a>.",
             'type' => 'comment',
         ]);
     }

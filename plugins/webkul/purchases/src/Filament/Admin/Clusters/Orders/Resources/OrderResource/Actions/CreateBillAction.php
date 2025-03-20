@@ -9,6 +9,7 @@ use Livewire\Component;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Purchase\Models\AccountMove;
@@ -67,7 +68,7 @@ class CreateBillAction extends Action
     {
         $accountMove = AccountMove::create([
             'state'                        => AccountEnums\MoveState::DRAFT,
-            'move_type'                    => AccountEnums\MoveType::IN_INVOICE,
+            'move_type'                    => $record->qty_to_invoice >=0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::OUT_INVOICE,
             'payment_state'                => AccountEnums\PaymentStatus::NOT_PAID,
             'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin'               => $record->name,
@@ -93,7 +94,11 @@ class CreateBillAction extends Action
             $this->createAccountMoveLine($accountMove, $line);
         }
 
-        BillResource::collectTotals($accountMove);
+        if ($record->qty_to_invoice >= 0) {
+            BillResource::collectTotals($accountMove);
+        } else {
+            RefundResource::collectTotals($accountMove);
+        }
     }
 
     private function createAccountMoveLine($accountMove, $orderLine): void
@@ -105,7 +110,7 @@ class CreateBillAction extends Action
             'date'                   => $accountMove->date,
             'creator_id'             => $accountMove?->creator_id,
             'parent_state'           => $accountMove->state,
-            'quantity'               => $orderLine->qty_to_invoice,
+            'quantity'               => abs($orderLine->qty_to_invoice),
             'price_unit'             => $orderLine->price_unit,
             'discount'               => $orderLine->discount,
             'journal_id'             => $accountMove->journal_id,
@@ -116,10 +121,6 @@ class CreateBillAction extends Action
             'product_id'             => $orderLine->product_id,
             'uom_id'                 => $orderLine->uom_id,
             'purchase_order_line_id' => $orderLine->id,
-            'debit'                  => $orderLine?->price_subtotal,
-            'credit'                 => 0.00,
-            'balance'                => $orderLine?->price_subtotal,
-            'amount_currency'        => $orderLine?->price_subtotal,
         ]);
 
         $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
