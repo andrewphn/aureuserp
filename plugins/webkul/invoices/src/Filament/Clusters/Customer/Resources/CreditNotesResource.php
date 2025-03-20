@@ -6,11 +6,11 @@ use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\CreditNoteResource as BaseCreditNoteResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
-use Webkul\Invoice\Models\Move;
+use Webkul\Invoice\Models\CreditNote;
 
 class CreditNotesResource extends BaseCreditNoteResource
 {
-    protected static ?string $model = Move::class;
+    protected static ?string $model = CreditNote::class;
 
     protected static bool $shouldRegisterNavigation = true;
 
