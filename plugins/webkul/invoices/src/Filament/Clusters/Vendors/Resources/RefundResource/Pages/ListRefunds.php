@@ -31,7 +31,7 @@ class ListRefunds extends BaseListInvoices
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_REFUND)),
             ...Arr::except($predefinedViews, ['invoice', 'in_refund']),
         ];
     }
