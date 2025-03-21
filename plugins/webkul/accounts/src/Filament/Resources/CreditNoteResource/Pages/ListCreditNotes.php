@@ -25,7 +25,7 @@ class ListCreditNotes extends ListRecords
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::OUT_REFUND->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::OUT_REFUND)),
             ...Arr::except($predefinedViews, ['invoice']),
         ];
     }
