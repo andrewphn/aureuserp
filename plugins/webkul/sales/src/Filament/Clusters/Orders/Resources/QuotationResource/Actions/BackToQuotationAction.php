@@ -21,12 +21,17 @@ class BackToQuotationAction extends Action
         $this
             ->label(__('sales::filament/clusters/orders/resources/quotation/actions/back-to-quotation.title'))
             ->color('gray')
-            ->hidden(fn ($record) => $record->state != OrderState::CANCEL->value)
+            ->hidden(fn ($record) => $record->state != OrderState::CANCEL)
             ->action(function ($record, $livewire) {
                 $record->update([
-                    'state'          => OrderState::DRAFT->value,
-                    'invoice_status' => InvoiceStatus::NO->value,
+                    'state'          => OrderState::DRAFT,
+                    'invoice_status' => InvoiceStatus::NO,
                 ]);
+
+                $record->lines->each(function ($line) {
+                    $line->state = OrderState::DRAFT;
+                    $line->save();
+                });
 
                 $livewire->refreshFormData(['state']);
 

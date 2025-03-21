@@ -70,7 +70,7 @@ class CreateInvoiceAction extends Action
                             ->prefix(fn ($record) => $record->currency->symbol),
                     ]),
             ])
-            ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE->value)
+            ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE)
             ->action(function (Order $record, $livewire, $data) {
                 if ($record->qty_to_invoice == 0) {
                     Notification::make()
@@ -99,11 +99,11 @@ class CreateInvoiceAction extends Action
 
                 if ($data['advance_payment_method'] == AdvancedPayment::DELIVERED->value) {
                     $record->update([
-                        'invoice_status' => InvoiceStatus::INVOICED->value,
+                        'invoice_status' => InvoiceStatus::INVOICED,
                     ]);
                 } else {
                     $record->update([
-                        'invoice_status' => InvoiceStatus::TO_INVOICE->value,
+                        'invoice_status' => InvoiceStatus::TO_INVOICE,
                     ]);
                 }
 
@@ -120,9 +120,9 @@ class CreateInvoiceAction extends Action
     private function createAccountMove(Order $record)
     {
         $accountMove = Move::create([
-            'state'                        => AccountEnums\MoveState::DRAFT->value,
-            'move_type'                    => AccountEnums\MoveType::OUT_INVOICE->value,
-            'payment_state'                => AccountEnums\PaymentStatus::NOT_PAID->value,
+            'state'                        => AccountEnums\MoveState::DRAFT,
+            'move_type'                    => AccountEnums\MoveType::OUT_INVOICE,
+            'payment_state'                => AccountEnums\PaymentStatus::NOT_PAID,
             'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin'               => $record->name,
             'date'                         => now(),

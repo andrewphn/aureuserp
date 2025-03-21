@@ -24,11 +24,11 @@ class ConfirmAction extends Action
         $this
             ->color('primary')
             ->label(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.title'))
-            ->hidden(fn ($record) => $record->state != OrderState::DRAFT->value)
+            ->hidden(fn ($record) => $record->state != OrderState::DRAFT)
             ->action(function ($record, $livewire, QuotationAndOrderSettings $settings) {
                 $data = [
-                    'state'          => OrderState::SALE->value,
-                    'invoice_status' => InvoiceStatus::TO_INVOICE->value,
+                    'state'          => OrderState::SALE,
+                    'invoice_status' => InvoiceStatus::TO_INVOICE,
                 ];
 
                 if ($settings->enable_lock_confirm_sales) {
@@ -36,6 +36,11 @@ class ConfirmAction extends Action
                 }
 
                 $record->update($data);
+
+                $record->lines->each(function ($line) {
+                    $line->state = OrderState::SALE;
+                    $line->save();
+                });
 
                 $livewire->refreshFormData(['state']);
 

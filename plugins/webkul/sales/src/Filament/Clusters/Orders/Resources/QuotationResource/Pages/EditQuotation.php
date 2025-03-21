@@ -46,7 +46,7 @@ class EditQuotation extends EditRecord
             BaseActions\SendByEmailAction::make(),
             BaseActions\LockAndUnlockAction::make(),
             Actions\DeleteAction::make()
-                ->hidden(fn () => $this->getRecord()->state == OrderState::SALE->value)
+                ->hidden(fn () => $this->getRecord()->state == OrderState::SALE)
                 ->successNotification(
                     Notification::make()
                         ->success()

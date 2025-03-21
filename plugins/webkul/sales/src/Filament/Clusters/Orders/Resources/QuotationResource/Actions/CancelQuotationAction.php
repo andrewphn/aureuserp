@@ -38,9 +38,14 @@ class CancelQuotationAction extends Action
                         ->modalIcon('heroicon-s-envelope')
                         ->action(function () use ($record, $livewire) {
                             $record->update([
-                                'state'          => OrderState::CANCEL->value,
-                                'invoice_status' => InvoiceStatus::NO->value,
+                                'state'          => OrderState::CANCEL,
+                                'invoice_status' => InvoiceStatus::NO,
                             ]);
+
+                            $record->lines->each(function ($line) {
+                                $line->state = OrderState::CANCEL;
+                                $line->save();
+                            });
 
                             if ($livewire?->mountedActionsData[0]) {
                                 $this->handleCancelAndSendEmail($record, $livewire?->mountedActionsData[0]);
@@ -61,9 +66,14 @@ class CancelQuotationAction extends Action
                         ->modalIcon('heroicon-s-x-circle')
                         ->action(function () use ($record, $livewire) {
                             $record->update([
-                                'state'          => OrderState::CANCEL->value,
-                                'invoice_status' => InvoiceStatus::NO->value,
+                                'state'          => OrderState::CANCEL,
+                                'invoice_status' => InvoiceStatus::NO,
                             ]);
+
+                            $record->lines->each(function ($line) {
+                                $line->state = OrderState::CANCEL;
+                                $line->save();
+                            });
 
                             $livewire->refreshFormData(['state']);
 
@@ -110,7 +120,7 @@ class CancelQuotationAction extends Action
                     ]);
                 }
             )
-            ->hidden(fn ($record) => ! in_array($record->state, [OrderState::DRAFT->value, OrderState::SENT->value, OrderState::SALE->value]));
+            ->hidden(fn ($record) => ! in_array($record->state, [OrderState::DRAFT, OrderState::SENT, OrderState::SALE]));
     }
 
     private function preparePayloadForCancelAndSendEmail($record, $partner, $data): array

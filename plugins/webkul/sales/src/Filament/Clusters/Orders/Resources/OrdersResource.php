@@ -41,7 +41,7 @@ class OrdersResource extends Resource
     {
         return QuotationResource::table($table)
             ->modifyQueryUsing(function ($query) {
-                $query->where('state', OrderState::SALE->value);
+                $query->where('state', OrderState::SALE);
             });
     }
 

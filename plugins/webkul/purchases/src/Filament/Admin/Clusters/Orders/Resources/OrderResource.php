@@ -12,7 +12,6 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Support\Package;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -21,17 +20,18 @@ use Webkul\Account\Models\Partner;
 use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
+use Webkul\Inventory\Enums as InventoryEnums;
+use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums;
-use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
-use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
+use Webkul\Support\Package;
 
 class OrderResource extends Resource
 {
@@ -1100,9 +1100,9 @@ class OrderResource extends Resource
                 if ($move->isPurchaseReturn()) {
                     if (! $move->originReturnedMove || $move->is_refund) {
                         $total -= $move->uom->computeQuantity(
-                            $move->quantity, 
-                            $line->uom, 
-                            true, 
+                            $move->quantity,
+                            $line->uom,
+                            true,
                             'HALF-UP'
                         );
                     }
@@ -1124,9 +1124,9 @@ class OrderResource extends Resource
                     continue;
                 } else {
                     $total += $move->uom->computeQuantity(
-                        $move->quantity, 
-                        $line->uom, 
-                        true, 
+                        $move->quantity,
+                        $line->uom,
+                        true,
                         'HALF-UP'
                     );
                 }
