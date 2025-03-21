@@ -101,17 +101,22 @@ class InstallERP extends Command
         $userModel = app(config('filament-shield.auth_provider_model.fqcn'));
 
         $adminData = [
-            'name'  => text('Name', required: true),
+            'name'  => text(
+                'Name',
+                default: 'Example',
+                required: true
+            ),
             'email' => text(
                 'Email address',
+                default: 'admin@example.com',
                 required: true,
-                validate: fn ($email) => $this->validateAdminEmail($email, $userModel)
+                validate: fn($email) => $this->validateAdminEmail($email, $userModel)
             ),
             'password' => Hash::make(
                 password(
                     'Password',
                     required: true,
-                    validate: fn ($value) => $this->validateAdminPassword($value)
+                    validate: fn($value) => $this->validateAdminPassword($value)
                 )
             ),
             'resource_permission' => 'global',

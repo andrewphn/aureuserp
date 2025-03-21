@@ -28,10 +28,12 @@ class WebsiteServiceProvider extends PackageServiceProvider
                 '2025_03_10_064655_alter_partners_partners_table',
             ])
             ->runsMigrations()
+            ->hasSeeder('Webkul\\Website\\Database\Seeders\\DatabaseSeeder')
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->installDependencies()
-                    ->runsMigrations();
+                    ->runsMigrations()
+                    ->runsSeeders();
             })
             ->hasSettings([
                 '2025_03_10_094021_create_website_contact_settings',
@@ -43,7 +45,7 @@ class WebsiteServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         FilamentAsset::register([
-            Css::make('website', __DIR__.'/../resources/dist/website.css'),
+            Css::make('website', __DIR__ . '/../resources/dist/website.css'),
         ], 'website');
 
         if (! Package::isPluginInstalled(self::$name)) {

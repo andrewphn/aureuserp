@@ -29,7 +29,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'Dozens',
                 'category_id' => 1,
@@ -38,7 +39,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::REFERENCE,
                 'name'        => 'kg',
                 'category_id' => 2,
@@ -47,7 +49,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'g',
                 'category_id' => 2,
@@ -56,7 +59,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 't',
                 'category_id' => 2,
@@ -65,7 +69,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'lb',
                 'category_id' => 2,
@@ -74,7 +79,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'oz',
                 'category_id' => 2,
@@ -83,7 +89,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::REFERENCE,
                 'name'        => 'Days',
                 'category_id' => 3,
@@ -92,7 +99,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'Hours',
                 'category_id' => 3,
@@ -101,7 +109,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::REFERENCE,
                 'name'        => 'm',
                 'category_id' => 4,
@@ -110,7 +119,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'mm',
                 'category_id' => 4,
@@ -119,7 +129,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'km',
                 'category_id' => 4,
@@ -128,7 +139,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'cm',
                 'category_id' => 4,
@@ -137,7 +149,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'in',
                 'category_id' => 4,
@@ -146,7 +159,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'ft',
                 'category_id' => 4,
@@ -155,7 +169,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'yd',
                 'category_id' => 4,
@@ -164,7 +179,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'mi',
                 'category_id' => 4,
@@ -173,7 +189,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::REFERENCE,
                 'name'        => 'm²',
                 'category_id' => 5,
@@ -182,7 +199,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'ft²',
                 'category_id' => 5,
@@ -191,7 +209,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::REFERENCE,
                 'name'        => 'L',
                 'category_id' => 6,
@@ -200,7 +219,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'm³',
                 'category_id' => 6,
@@ -209,7 +229,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'fl oz (US)',
                 'category_id' => 6,
@@ -218,7 +239,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'qt (US)',
                 'category_id' => 6,
@@ -227,7 +249,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'gal (US)',
                 'category_id' => 6,
@@ -236,7 +259,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::SMALLER,
                 'name'        => 'in³',
                 'category_id' => 6,
@@ -245,7 +269,8 @@ class UOMSeeder extends Seeder
                 'creator_id'  => $user?->id,
                 'created_at'  => Carbon::now(),
                 'updated_at'  => Carbon::now(),
-            ], [
+            ],
+            [
                 'type'        => UOMType::BIGGER,
                 'name'        => 'ft³',
                 'category_id' => 6,

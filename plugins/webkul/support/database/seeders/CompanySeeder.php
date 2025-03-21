@@ -16,6 +16,7 @@ class CompanySeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('users')->delete();
         DB::table('companies')->delete();
         DB::table('partners_partners')->delete();
         DB::table('company_addresses')->delete();
