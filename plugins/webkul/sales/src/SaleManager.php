@@ -4,15 +4,24 @@ namespace Webkul\Sale;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Webkul\Account\Enums as AccountEnums;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Facades\Tax;
+use Webkul\Account\Models\Journal as AccountJournal;
+use Webkul\Account\Models\Move;
 use Webkul\Invoice\Enums\InvoicePolicy;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
 use Webkul\Sale\Mail\SaleOrderQuotation;
+use Webkul\Sale\Models\AdvancedPaymentInvoice;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
+use Webkul\Sale\Settings\InvoiceSettings;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Services\EmailService;
 
@@ -22,9 +31,6 @@ class SaleManager
         protected QuotationAndOrderSettings $quotationAndOrderSettings
     ) {}
 
-    /**
-     * Send quotation or order by email.
-     */
     public function sendQuotationOrOrderByEmail(Order $record, array $data = []): Order
     {
         $record = $this->sendByEmail($record, $data);
@@ -34,9 +40,6 @@ class SaleManager
         return $record;
     }
 
-    /**
-     * Lock and unlock the sale order.
-     */
     public function lockAndUnlock(Order $record): Order
     {
         $record->update(['locked' => ! $record->locked]);
@@ -46,9 +49,6 @@ class SaleManager
         return $record;
     }
 
-    /**
-     * Confirm the sale order.
-     */
     public function confirmSaleOrder(Order $record): Order
     {
         $record->update([
@@ -62,9 +62,6 @@ class SaleManager
         return $record;
     }
 
-    /**
-     * Confirm the sale order.
-     */
     public function backToQuotation(Order $record): Order
     {
         $record->update([
@@ -77,9 +74,6 @@ class SaleManager
         return $record;
     }
 
-    /**
-     * Cancel the sale order.
-     */
     public function cancelSaleOrder(Order $record, array $data = []): Order
     {
         $record->update([
@@ -94,6 +88,24 @@ class SaleManager
         $record = $this->computeSaleOrder($record);
 
         return $record;
+    }
+
+    public function createInvoice(Order $record, array $data = [])
+    {
+        $advancedPaymentInvoice = AdvancedPaymentInvoice::create([
+            ...$data,
+            'currency_id'          => $record->currency_id,
+            'company_id'           => $record->company_id,
+            'creator_id'           => Auth::id(),
+            'deduct_down_payments' => true,
+            'consolidated_billing' => true,
+        ]);
+
+        $advancedPaymentInvoice->orders()->attach($record->id);
+
+        $this->createAccountMove($record);
+
+        return $this->computeSaleOrder($record);
     }
 
     /**
@@ -162,18 +174,15 @@ class SaleManager
 
         $line = $this->computerDeliveryMethod($line);
 
-        // $line = $this->computeInvoiceStatus($line);
+        $line = $this->computeInvoiceStatus($line);
+
+        $line = $this->computeQtyInvoiced($line);
 
         $line->save();
 
         return $line;
     }
 
-    /**
-     * Compute the delivery method.
-     *
-     * @param  OrderLine  $record
-     */
     public function computerDeliveryMethod(OrderLine $line): OrderLine
     {
         $line->qty_delivered_method = 'manual';
@@ -181,9 +190,32 @@ class SaleManager
         return $line;
     }
 
-    /**
-     * Compute the invoice status.
-     */
+    public function computeQtyInvoiced(OrderLine $line): OrderLine
+    {
+        $qtyInvoiced = 0.000;
+
+        foreach ($line->accountMoveLines as $accountMoveLine) {
+            $move = $accountMoveLine->move;
+
+            if (
+                $move->state !== MoveState::CANCEL
+                || $move->payment_state === PaymentState::INVOICING_LEGACY->value
+            ) {
+                $convertedQty = $accountMoveLine->uom->computeQuantity($accountMoveLine->quantity, $line->uom);
+
+                if ($move->move_type === MoveType::OUT_INVOICE) {
+                    $qtyInvoiced += $convertedQty;
+                } elseif ($move->move_type === MoveType::OUT_REFUND) {
+                    $qtyInvoiced -= $convertedQty;
+                }
+            }
+        }
+
+        $line->qty_invoiced = $qtyInvoiced;
+
+        return $line;
+    }
+
     public function computeInvoiceStatus(OrderLine $line): OrderLine
     {
         if ($line->state !== OrderState::SALE) {
@@ -214,9 +246,6 @@ class SaleManager
         return $line;
     }
 
-    /**
-     * Send quotation or order by email.
-     */
     public function sendByEmail(Order $record, array $data): Order
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
@@ -260,11 +289,6 @@ class SaleManager
         return $record;
     }
 
-    /**
-     * Handle cancel and send email.
-     *
-     * @return void
-     */
     public function cancelAndSendEmail(Order $record, array $data)
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
@@ -295,5 +319,81 @@ class SaleManager
                 'type' => 'comment',
             ]);
         }
+    }
+
+    private function createAccountMove(Order $record)
+    {
+        $accountMove = Move::create([
+            'state'                        => AccountEnums\MoveState::DRAFT,
+            'move_type'                    => AccountEnums\MoveType::OUT_INVOICE,
+            'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
+            'invoice_partner_display_name' => $record->partner->name,
+            'invoice_origin'               => $record->name,
+            'date'                         => now(),
+            'invoice_date_due'             => now(),
+            'invoice_currency_rate'        => 1,
+            'journal_id'                   => AccountJournal::where('type', AccountEnums\JournalType::SALE->value)->first()?->id,
+            'company_id'                   => $record->company_id,
+            'currency_id'                  => $record->currency_id,
+            'invoice_payment_term_id'      => $record->payment_term_id,
+            'partner_id'                   => $record->partner_id,
+            'commercial_partner_id'        => $record->partner_id,
+            'partner_shipping_id'          => $record->partner->addresses->where('type', 'present')->first()?->id,
+            'fiscal_position_id'           => $record->fiscal_position_id,
+            'creator_id'                   => Auth::id(),
+        ]);
+
+        $record->accountMoves()->attach($accountMove->id);
+
+        foreach ($record->lines as $line) {
+            $this->createAccountMoveLine($accountMove, $line);
+        }
+
+        // TODO: Update sales updated
+        InvoiceResource::collectTotals($accountMove);
+
+        return $accountMove;
+    }
+
+    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
+    {
+        $productInvoicePolicy = $orderLine->product?->invoice_policy;
+        $invoiceSetting = app(InvoiceSettings::class)->invoice_policy;
+
+        $quantity = ($productInvoicePolicy ?? $invoiceSetting) === InvoicePolicy::ORDER->value
+            ? $orderLine->qty_to_invoice
+            : $orderLine->product_uom_qty;
+
+        $moveLineData = [
+            'state'                  => AccountEnums\MoveState::DRAFT,
+            'name'                   => $orderLine->name,
+            'display_type'           => AccountEnums\DisplayType::PRODUCT,
+            'date'                   => $accountMove->date,
+            'creator_id'             => $accountMove?->creator_id,
+            'parent_state'           => $accountMove->state,
+            'quantity'               => $quantity,
+            'price_unit'             => $orderLine->price_unit,
+            'discount'               => $orderLine->discount,
+            'journal_id'             => $accountMove->journal_id,
+            'company_id'             => $accountMove->company_id,
+            'currency_id'            => $accountMove->currency_id,
+            'company_currency_id'    => $accountMove->currency_id,
+            'partner_id'             => $accountMove->partner_id,
+            'product_id'             => $orderLine->product_id,
+            'uom_id'                 => $orderLine->uom_id,
+            'purchase_order_line_id' => $orderLine->id,
+            'debit'                  => $orderLine?->price_subtotal,
+            'credit'                 => 0.00,
+            'balance'                => $orderLine?->price_subtotal,
+            'amount_currency'        => $orderLine?->price_subtotal,
+        ];
+
+        $accountMoveLine = $accountMove->lines()->create($moveLineData);
+
+        $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
+
+        $orderLine->save();
+
+        $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
     }
 }
