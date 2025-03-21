@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\EloquentSortable\SortableTrait;
-use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
@@ -142,12 +141,12 @@ class OrderLine extends Model
 
     public function accountMoveLines(): HasMany
     {
-        return $this->hasMany(MoveLine::class);
+        return $this->hasMany(AccountMoveLine::class, 'purchase_order_line_id');
     }
 
     public function inventoryMoves(): HasMany
     {
-        return $this->hasMany(InventoryMove::class, 'purchase_line_id');
+        return $this->hasMany(InventoryMove::class, 'purchase_order_line_id');
     }
 
     public function finalLocation(): BelongsTo
