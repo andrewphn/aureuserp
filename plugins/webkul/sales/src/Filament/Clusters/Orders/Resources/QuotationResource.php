@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\TypeTaxUse;
+use Webkul\Account\Facades\Tax;
 use Webkul\Account\Models\PaymentTerm;
-use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
@@ -1376,7 +1376,7 @@ class QuotationResource extends Resource
 
         $taxIds = $get($prefix.'taxes') ?? [];
 
-        [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
+        [$subTotal, $taxAmount] = Tax::collect($taxIds, $subTotal, $quantity);
 
         $total = $subTotal + $taxAmount;
 
@@ -1444,7 +1444,7 @@ class QuotationResource extends Resource
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $line->product_qty);
+        [$subTotal, $taxAmount] = Tax::collect($taxIds, $subTotal, $line->product_qty);
 
         $line->price_subtotal = round($subTotal, 4);
 

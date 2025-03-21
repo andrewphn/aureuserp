@@ -2,7 +2,9 @@
 
 namespace Webkul\Account;
 
+use Illuminate\Foundation\AliasLoader;
 use Livewire\Livewire;
+use Webkul\Account\Facades\Tax as TaxFacade;
 use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
@@ -80,5 +82,14 @@ class AccountServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         Livewire::component('invoice-summary', InvoiceSummary::class);
+    }
+
+    public function packageRegistered(): void
+    {
+        $loader = AliasLoader::getInstance();
+
+        $loader->alias('tax', TaxFacade::class);
+
+        $this->app->singleton('tax', TaxManager::class);
     }
 }
