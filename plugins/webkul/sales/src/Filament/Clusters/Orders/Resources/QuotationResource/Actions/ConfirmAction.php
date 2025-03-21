@@ -5,8 +5,8 @@ namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actio
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Facades\FilamentView;
-use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 
@@ -26,21 +26,7 @@ class ConfirmAction extends Action
             ->label(__('sales::filament/clusters/orders/resources/quotation/actions/confirm.title'))
             ->hidden(fn ($record) => $record->state != OrderState::DRAFT)
             ->action(function ($record, $livewire, QuotationAndOrderSettings $settings) {
-                $data = [
-                    'state'          => OrderState::SALE,
-                    'invoice_status' => InvoiceStatus::TO_INVOICE,
-                ];
-
-                if ($settings->enable_lock_confirm_sales) {
-                    $data['locked'] = true;
-                }
-
-                $record->update($data);
-
-                $record->lines->each(function ($line) {
-                    $line->state = OrderState::SALE;
-                    $line->save();
-                });
+                $record = SaleOrder::confirmSaleOrder($record);
 
                 $livewire->refreshFormData(['state']);
 

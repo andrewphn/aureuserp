@@ -2,41 +2,39 @@
 
 namespace Webkul\Purchase;
 
-use Webkul\Purchase\Models\Order;
-use Webkul\Purchase\Models\OrderLine;
-use Webkul\Inventory\Enums as InventoryEnums;
-use Webkul\Inventory\Models\Receipt;
-use Webkul\Purchase\Enums\OrderState;
-use Webkul\Inventory\Models\OperationType;
-use Illuminate\Support\Facades\Mail;
-use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
-use Illuminate\Support\Facades\Schema;
-use Webkul\Purchase\Settings\OrderSettings;
-use Webkul\Account\Models\Journal as AccountJournal;
-use Webkul\Account\Enums as AccountEnums;
-use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Webkul\Account\Services\TaxService;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Inventory\Models\Move;
-use Webkul\Purchase\Models\AccountMove;
-use Webkul\Inventory\Models\Location;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Webkul\Account\Enums as AccountEnums;
+use Webkul\Account\Models\Journal as AccountJournal;
+use Webkul\Account\Models\Partner;
+use Webkul\Account\Services\TaxService;
+use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Move;
+use Webkul\Inventory\Models\OperationType;
+use Webkul\Inventory\Models\Receipt;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Purchase\Enums\OrderState;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
+use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
+use Webkul\Purchase\Models\AccountMove;
+use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Models\OrderLine;
+use Webkul\Purchase\Settings\OrderSettings;
 use Webkul\Support\Package;
-use Webkul\Account\Models\Partner;
 
 class PurchaseOrder
 {
     public function __construct(
         protected TaxService $taxService,
         protected OrderSettings $orderSettings
-    )
-    {
-    }
+    ) {}
 
     public function sendRFQ(Order $record, array $data): Order
     {
@@ -284,9 +282,9 @@ class PurchaseOrder
                 if ($move->isPurchaseReturn()) {
                     if (! $move->originReturnedMove || $move->is_refund) {
                         $total -= $move->uom->computeQuantity(
-                            $move->quantity, 
-                            $line->uom, 
-                            true, 
+                            $move->quantity,
+                            $line->uom,
+                            true,
                             'HALF-UP'
                         );
                     }
@@ -308,9 +306,9 @@ class PurchaseOrder
                     continue;
                 } else {
                     $total += $move->uom->computeQuantity(
-                        $move->quantity, 
-                        $line->uom, 
-                        true, 
+                        $move->quantity,
+                        $line->uom,
+                        true,
                         'HALF-UP'
                     );
                 }
@@ -465,11 +463,11 @@ class PurchaseOrder
     protected function getInventoryOperationType(Order $record): ?OperationType
     {
         $operationType = OperationType::where('type', '=', InventoryEnums\OperationType::INCOMING)
-            ->whereHas('warehouse', function($query) use ($record) {
+            ->whereHas('warehouse', function ($query) use ($record) {
                 $query->where('company_id', '=', $record->company_id);
             })
             ->first();
-        
+
         if (! $operationType) {
             $operationType = OperationType::where('type', '=', InventoryEnums\OperationType::INCOMING)
                 ->whereDoesntHave('warehouse')
@@ -488,7 +486,7 @@ class PurchaseOrder
     {
         $accountMove = AccountMove::create([
             'state'                        => AccountEnums\MoveState::DRAFT,
-            'move_type'                    => $record->qty_to_invoice >=0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::IN_REFUND,
+            'move_type'                    => $record->qty_to_invoice >= 0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::IN_REFUND,
             'payment_state'                => AccountEnums\PaymentStatus::NOT_PAID,
             'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin'               => $record->name,

@@ -1409,64 +1409,6 @@ class QuotationResource extends Resource
         ];
     }
 
-    public static function collectTotals(Order $record): void
-    {
-        $record->amount_untaxed = 0;
-        $record->amount_tax = 0;
-        $record->amount_total = 0;
-
-        foreach ($record->lines as $line) {
-            $line = static::collectLineTotals($line);
-
-            $record->amount_untaxed += $line->price_subtotal;
-            $record->amount_tax += $line->price_tax;
-            $record->amount_total += $line->price_total;
-        }
-
-        $record->save();
-    }
-
-    public static function collectLineTotals(OrderLine $line): OrderLine
-    {
-        $qtyDelivered = $line->qty_delivered ?? 0;
-
-        $line->qty_to_invoice = $qtyDelivered - $line->qty_invoiced;
-
-        $subTotal = $line->price_unit * $line->product_qty;
-
-        $discountAmount = 0;
-
-        if ($line->discount > 0) {
-            $discountAmount = $subTotal * ($line->discount / 100);
-
-            $subTotal = $subTotal - $discountAmount;
-        }
-
-        $taxIds = $line->taxes->pluck('id')->toArray();
-
-        [$subTotal, $taxAmount] = Tax::collect($taxIds, $subTotal, $line->product_qty);
-
-        $line->price_subtotal = round($subTotal, 4);
-
-        $line->price_tax = $taxAmount;
-
-        $line->price_total = $subTotal + $taxAmount;
-
-        $line->sort = $line->sort ?? OrderLine::max('sort') + 1;
-
-        $line->technical_price_unit = $line->price_unit;
-
-        $line->price_reduce_taxexcl = $line->price_unit - ($line->price_unit * ($line->discount / 100));
-
-        $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2);
-
-        $line->state = $line->order->state;
-
-        $line->save();
-
-        return $line;
-    }
-
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
