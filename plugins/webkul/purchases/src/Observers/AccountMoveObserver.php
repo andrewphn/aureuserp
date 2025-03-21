@@ -12,13 +12,13 @@ class AccountMoveObserver
      */
     public function updated(Move $move): void
     {
-        // if ($move->isDirty('state')) {
-        //     $accountMove = AccountMove::find($move->id);
+        if ($move->isDirty('state')) {
+            $accountMove = AccountMove::find($move->id);
 
-        //     $oldValue = $move->getOriginal('state');
-        //     $newValue = $move->state;
+            $oldValue = $move->getOriginal('state');
+            $newValue = $move->state;
 
-        //     dd($accountMove, $oldValue, $newValue);
-        // }
+            dd($accountMove, $oldValue, $newValue);
+        }
     }
 }

@@ -66,7 +66,7 @@ class Move extends Model
         'scrap_id',
         'company_id',
         'creator_id',
-        'purchase_line_id',
+        'purchase_order_line_id',
     ];
 
     /**
@@ -237,7 +237,7 @@ class Move extends Model
 
     public function purchaseOrderLine(): BelongsTo
     {
-        return $this->belongsTo(OrderLine::class, 'purchase_line_id');
+        return $this->belongsTo(OrderLine::class, 'purchase_order_line_id');
     }
 
     protected static function newFactory(): MoveFactory

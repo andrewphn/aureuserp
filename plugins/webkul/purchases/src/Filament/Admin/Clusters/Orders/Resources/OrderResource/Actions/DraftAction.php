@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
 class DraftAction extends Action
@@ -23,15 +24,7 @@ class DraftAction extends Action
             ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/draft.label'))
             ->color('gray')
             ->action(function (Order $record, Component $livewire): void {
-                $record->update([
-                    'state' => OrderState::DRAFT,
-                ]);
-
-                foreach ($record->lines as $move) {
-                    $move->update([
-                        'state' => OrderState::DRAFT,
-                    ]);
-                }
+                $record = PurchaseOrder::draftPurchaseOrder($record);
 
                 $livewire->updateForm();
 

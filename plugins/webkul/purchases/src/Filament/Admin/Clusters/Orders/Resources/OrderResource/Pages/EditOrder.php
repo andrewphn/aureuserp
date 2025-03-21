@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Actions as OrderActions;
 use Webkul\Purchase\Models\Order;
@@ -81,7 +82,7 @@ class EditOrder extends EditRecord
 
     protected function afterSave(): void
     {
-        OrderResource::collectTotals($this->getRecord());
+        PurchaseOrder::computePurchaseOrder($this->getRecord());
     }
 
     public function updateForm(): void

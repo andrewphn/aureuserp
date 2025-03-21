@@ -2,17 +2,14 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Actions;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Livewire\Component;
 use Webkul\Account\Models\Partner;
 use Webkul\Purchase\Enums\OrderState;
-use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
 use Webkul\Purchase\Models\Order;
 
 class SendPOEmailAction extends Action
@@ -67,46 +64,22 @@ MD),
                     ->hiddenLabel()
                     ->disk('public')
                     ->default(function () {
-                        return $this->generatePdf($this->getRecord());
+                        return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
                     })
                     ->downloadable()
                     ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
-                $pdfPath = $this->generatePdf($record);
+                try {
+                    $record = PurchaseOrder::sendPurchaseOrder($record, $data);
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
 
-                foreach ($data['vendors'] as $vendorId) {
-                    $vendor = Partner::find($vendorId);
-
-                    if ($vendor?->email) {
-                        try {
-                            Mail::to($vendor->email)->send(new VendorPurchaseOrderMail(
-                                $data['subject'],
-                                $data['message'],
-                                $pdfPath
-                            ));
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-
-                            return;
-                        }
-                    }
+                    return;
                 }
-
-                $message = $record->addMessage([
-                    'body' => $data['message'],
-                    'type' => 'comment',
-                ]);
-
-                $record->addAttachments(
-                    [$pdfPath],
-                    ['message_id' => $message->id],
-                );
-
-                Storage::delete($pdfPath);
 
                 $livewire->updateForm();
 
@@ -118,20 +91,5 @@ MD),
             })
             ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
             ->visible(fn () => $this->getRecord()->state == OrderState::PURCHASE);
-    }
-
-    private function generatePdf($record)
-    {
-        $pdfPath = 'Purchase Order-'.str_replace('/', '_', $record->name).'.pdf';
-
-        if (! Storage::exists($pdfPath)) {
-            $pdf = PDF::loadView('purchases::filament.admin.clusters.orders.orders.actions.print-purchase-order', [
-                'records'  => [$record],
-            ]);
-
-            Storage::disk('public')->put($pdfPath, $pdf->output());
-        }
-
-        return $pdfPath;
     }
 }

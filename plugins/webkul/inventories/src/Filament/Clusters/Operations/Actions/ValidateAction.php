@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
@@ -115,7 +115,7 @@ class ValidateAction extends Action
 
         if (Package::isPluginInstalled('purchases')) {
             foreach ($record->purchaseOrders as $purchaseOrder) {
-                OrderResource::collectTotals($purchaseOrder);
+                PurchaseOrder::computePurchaseOrder($purchaseOrder);
             }
         }
 
@@ -377,7 +377,7 @@ class ValidateAction extends Action
             $newOperation->purchaseOrders()->attach($record->purchaseOrders->pluck('id'));
 
             foreach ($record->purchaseOrders as $purchaseOrder) {
-                OrderResource::collectTotals($purchaseOrder);
+                PurchaseOrder::computePurchaseOrder($purchaseOrder);
             }
         }
 

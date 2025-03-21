@@ -2,6 +2,7 @@
 
 namespace Webkul\Purchase\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Account\Models\MoveLine as MoveLine;
 
 class AccountMoveLine extends MoveLine
@@ -25,8 +26,8 @@ class AccountMoveLine extends MoveLine
         return $this->belongsTo(AccountMove::class);
     }
 
-    public function orderLine()
+    public function purchaseOrderLine(): BelongsTo
     {
-        return $this->belongsTo(OrderLine::class);
+        return $this->belongsTo(OrderLine::class, 'purchase_order_line_id');
     }
 }
