@@ -6,7 +6,7 @@ use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\OrderLine;
 use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Models\Receipt;
-use Webkul\Purchase\Enums\OrderState;
+use Webkul\Purchase\Enums as PurchaseEnums;
 use Webkul\Inventory\Models\OperationType;
 use Illuminate\Support\Facades\Mail;
 use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
@@ -51,7 +51,7 @@ class PurchaseOrder
         }
 
         $record->update([
-            'state' => OrderState::SENT,
+            'state' => PurchaseEnums\OrderState::SENT,
         ]);
 
         $record = $this->computePurchaseOrder($record);
@@ -75,8 +75,8 @@ class PurchaseOrder
     {
         $record->update([
             'state'       => $this->orderSettings->enable_lock_confirmed_orders
-                ? OrderState::DONE
-                : OrderState::PURCHASE,
+                ? PurchaseEnums\OrderState::DONE
+                : PurchaseEnums\OrderState::PURCHASE,
             'approved_at' => now(),
         ]);
 
@@ -121,7 +121,7 @@ class PurchaseOrder
     public function cancelPurchaseOrder(Order $record): Order
     {
         $record->update([
-            'state' => OrderState::CANCELED,
+            'state' => PurchaseEnums\OrderState::CANCELED,
         ]);
 
         $record = $this->computePurchaseOrder($record);
@@ -134,7 +134,7 @@ class PurchaseOrder
     public function draftPurchaseOrder(Order $record): Order
     {
         $record->update([
-            'state' => OrderState::DRAFT,
+            'state' => PurchaseEnums\OrderState::DRAFT,
         ]);
 
         $record = $this->computePurchaseOrder($record);
@@ -145,7 +145,7 @@ class PurchaseOrder
     public function lockPurchaseOrder(Order $record): Order
     {
         $record->update([
-            'state' => OrderState::DONE,
+            'state' => PurchaseEnums\OrderState::DONE,
         ]);
 
         $record = $this->computePurchaseOrder($record);
@@ -156,7 +156,7 @@ class PurchaseOrder
     public function unlockPurchaseOrder(Order $record): Order
     {
         $record->update([
-            'state' => OrderState::PURCHASE,
+            'state' => PurchaseEnums\OrderState::PURCHASE,
         ]);
 
         $record = $this->computePurchaseOrder($record);
@@ -240,21 +240,55 @@ class PurchaseOrder
 
     public function computeReceiptStatus(Order $order): Order
     {
+        if (! Package::isPluginInstalled('inventories')) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::NO;
+
+            return $order;
+        }
+
+        if ($order->operations->isEmpty() || $order->operations->every(function($receipt) {
+            return $receipt->state == InventoryEnums\OperationState::CANCELED;
+        })) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::NO;
+        } elseif ($order->operations->every(function($receipt) {
+            return in_array($receipt->state, [InventoryEnums\OperationState::DONE, InventoryEnums\OperationState::CANCELED]);
+        })) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::FULL;
+        } elseif ($order->operations->contains(function($receipt) {
+            return $receipt->state == InventoryEnums\OperationState::DONE;
+        })) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::PARTIAL;
+        } else {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::PENDING;
+        }
+
         return $order;
     }
 
     public function computeInvoiceStatus(Order $order): Order
     {
-        $order->invoice_count = $order->accountMoves->count();
+        if (! in_array($order->state, [PurchaseEnums\OrderState::PURCHASE, PurchaseEnums\OrderState::DONE])) {
+            $order->invoice_status = PurchaseEnums\OrderInvoiceStatus::NO;
+            
+            return $order;
+        }
 
-        if ($order->invoice_count != 0) {
-            $order->invoice_status = Enums\OrderInvoiceStatus::TO_INVOICED;
+        $floatIsZero = function($value, $precision) {
+            return abs($value) < pow(10, -$precision);
+        };
+
+        $precision = 4;
+
+        if ($order->lines->contains(function($line) use($floatIsZero, $precision) {
+            return ! $floatIsZero($line->qty_to_invoice, $precision);
+        })) {
+            $order->invoice_status = PurchaseEnums\OrderInvoiceStatus::TO_INVOICED;
+        } elseif ($order->lines->every(function($line) use($floatIsZero, $precision) {
+            return $floatIsZero($line->qty_to_invoice, $precision);
+        }) && $order->accountMoves->isNotEmpty()) {
+            $order->invoice_status = PurchaseEnums\OrderInvoiceStatus::INVOICED;
         } else {
-            if ($order->invoice_count) {
-                $order->invoice_status = Enums\OrderInvoiceStatus::INVOICED;
-            } else {
-                $order->invoice_status = Enums\OrderInvoiceStatus::NO;
-            }
+            $order->invoice_status = PurchaseEnums\OrderInvoiceStatus::NO;
         }
 
         return $order;
@@ -262,6 +296,33 @@ class PurchaseOrder
 
     public function computeQtyBilled(OrderLine $line): OrderLine
     {
+        $qty = 0.0;
+
+        foreach ($line->accountMoveLines as $accountMoveLine) {
+            if (
+                $accountMoveLine->move->state != AccountEnums\MoveState::CANCEL
+                || $accountMoveLine->move->payment_state == AccountEnums\PaymentState::INVOICING_LEGACY
+            ) {
+                if ($accountMoveLine->move->move_type == AccountEnums\MoveType::IN_INVOICE) {
+                    $qty += $accountMoveLine->uom->computeQuantity($accountMoveLine->quantity, $line->uom);
+                } elseif ($accountMoveLine->move->move_type == AccountEnums\MoveType::IN_REFUND) {
+                    $qty -= $accountMoveLine->uom->computeQuantity($accountMoveLine->quantity, $line->uom);
+                }
+            }
+        }
+
+        $line->qty_invoiced = $qty;
+
+        if (in_array($line->order->state, [PurchaseEnums\OrderState::PURCHASE, PurchaseEnums\OrderState::DONE])) {
+            if ($line->product->purchase_method == 'purchase') {
+                $line->qty_to_invoice = $line->product_qty - $line->qty_invoiced;
+            } else {
+                $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
+            }
+        } else {
+            $line->qty_to_invoice = 0;
+        }
+
         return $line;
     }
 
@@ -354,7 +415,7 @@ class PurchaseOrder
 
     protected function createInventoryReceipt(Order $record): void
     {
-        if (! in_array($record->state, [OrderState::PURCHASE, OrderState::DONE])) {
+        if (! in_array($record->state, [PurchaseEnums\OrderState::PURCHASE, PurchaseEnums\OrderState::DONE])) {
             return;
         }
 
@@ -489,7 +550,7 @@ class PurchaseOrder
         $accountMove = AccountMove::create([
             'state'                        => AccountEnums\MoveState::DRAFT,
             'move_type'                    => $record->qty_to_invoice >=0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::IN_REFUND,
-            'payment_state'                => AccountEnums\PaymentStatus::NOT_PAID,
+            'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
             'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin'               => $record->name,
             'date'                         => now(),
@@ -542,10 +603,6 @@ class PurchaseOrder
             'uom_id'                 => $orderLine->uom_id,
             'purchase_order_line_id' => $orderLine->id,
         ]);
-
-        $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
-
-        $orderLine->save();
 
         $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
     }

@@ -28,7 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasTable('inventories_moves')) {
+        if (Schema::hasTable('purchases_orders')) {
             Schema::table('purchases_orders', function (Blueprint $table) {
                 if (Schema::hasColumn('purchases_orders', 'operation_type_id')) {
                     $table->dropForeign(['operation_type_id']);
