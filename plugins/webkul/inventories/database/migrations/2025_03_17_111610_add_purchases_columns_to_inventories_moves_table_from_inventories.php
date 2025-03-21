@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('inventories_moves', function (Blueprint $table) {
-            if (Schema::hasTable('purchases_order_lines') && ! Schema::hasColumn('inventories_moves', 'purchase_line_id')) {
-                $table->foreignId('purchase_line_id')
+            if (Schema::hasTable('purchases_order_lines') && ! Schema::hasColumn('inventories_moves', 'purchase_order_line_id')) {
+                $table->foreignId('purchase_order_line_id')
                     ->nullable()
                     ->constrained('purchases_order_lines')
                     ->restrictOnDelete();
@@ -27,9 +27,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('inventories_moves', function (Blueprint $table) {
-            if (Schema::hasColumn('inventories_moves', 'purchase_line_id')) {
-                $table->dropForeign(['purchase_line_id']);
-                $table->dropColumn('purchase_line_id');
+            if (Schema::hasColumn('inventories_moves', 'purchase_order_line_id')) {
+                $table->dropForeign(['purchase_order_line_id']);
+                $table->dropColumn('purchase_order_line_id');
             }
         });
     }

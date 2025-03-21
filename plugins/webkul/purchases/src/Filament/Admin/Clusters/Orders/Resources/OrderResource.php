@@ -23,10 +23,8 @@ use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums;
-use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Purchase\Models\Order;
-use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
@@ -1012,129 +1010,5 @@ class OrderResource extends Resource
         $set($prefix.'price_tax', $taxAmount);
 
         $set($prefix.'price_total', $subTotal + $taxAmount);
-    }
-
-    public static function collectTotals(Order $record): void
-    {
-        $record->untaxed_amount = 0;
-        $record->tax_amount = 0;
-        $record->total_amount = 0;
-        $record->total_cc_amount = 0;
-        $record->invoice_count = 0;
-
-        foreach ($record->lines as $line) {
-            $line = static::collectLineTotals($line);
-
-            $record->untaxed_amount += $line->price_subtotal;
-            $record->tax_amount += $line->price_tax;
-            $record->total_amount += $line->price_total;
-            $record->total_cc_amount += $line->price_total;
-        }
-
-        $record->invoice_count = $record->accountMoves->count();
-
-        if ($record->qty_to_invoice != 0) {
-            $record->invoice_status = Enums\OrderInvoiceStatus::TO_INVOICED;
-        } else {
-            if ($record->invoice_count) {
-                $record->invoice_status = Enums\OrderInvoiceStatus::INVOICED;
-            } else {
-                $record->invoice_status = Enums\OrderInvoiceStatus::NO;
-            }
-        }
-
-        $record->save();
-    }
-
-    public static function collectLineTotals(OrderLine $line): OrderLine
-    {
-        $line = static::computeQtyReceived($line);
-
-        if ($line->qty_received_method == Enums\QtyReceivedMethod::MANUAL) {
-            $line->qty_received_manual = $line->qty_received ?? 0;
-        }
-
-        $line->qty_to_invoice = $line->qty_received - $line->qty_invoiced;
-
-        $subTotal = $line->price_unit * $line->product_qty;
-
-        $discountAmount = 0;
-
-        if ($line->discount > 0) {
-            $discountAmount = $subTotal * ($line->discount / 100);
-
-            $subTotal = $subTotal - $discountAmount;
-        }
-
-        $taxIds = $line->taxes->pluck('id')->toArray();
-
-        [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $line->product_qty);
-
-        $line->price_subtotal = round($subTotal, 4);
-
-        $line->price_tax = $taxAmount;
-
-        $line->price_total = $subTotal + $taxAmount;
-
-        $line->save();
-
-        return $line;
-    }
-
-    public static function computeQtyReceived(OrderLine $line): OrderLine
-    {
-        $line->qty_received = 0.0;
-
-        if ($line->qty_received_method == Enums\QtyReceivedMethod::MANUAL) {
-            $line->qty_received = $line->qty_received_manual ?? 0.0;
-        }
-
-        if ($line->qty_received_method == Enums\QtyReceivedMethod::STOCK_MOVE) {
-            $total = 0.0;
-
-            foreach ($line->inventoryMoves as $move) {
-                if ($move->state !== InventoryEnums\MoveState::DONE) {
-                    continue;
-                }
-
-                if ($move->isPurchaseReturn()) {
-                    if (! $move->originReturnedMove || $move->is_refund) {
-                        $total -= $move->uom->computeQuantity(
-                            $move->quantity, 
-                            $line->uom, 
-                            true, 
-                            'HALF-UP'
-                        );
-                    }
-                } elseif (
-                    $move->originReturnedMove
-                    && $move->originReturnedMove->isDropshipped()
-                    && ! $move->isDropshippedReturned()
-                ) {
-                    // Edge case: The dropship is returned to the stock, not to the supplier.
-                    // In this case, the received quantity on the Purchase order is set although we didn't
-                    // receive the product physically in our stock. To avoid counting the
-                    // quantity twice, we do nothing.
-                    continue;
-                } elseif (
-                    $move->originReturnedMove
-                    && $move->originReturnedMove->isPurchaseReturn()
-                    && ! $move->is_refund
-                ) {
-                    continue;
-                } else {
-                    $total += $move->uom->computeQuantity(
-                        $move->quantity, 
-                        $line->uom, 
-                        true, 
-                        'HALF-UP'
-                    );
-                }
-
-                $line->qty_received = $total;
-            }
-        }
-
-        return $line;
     }
 }

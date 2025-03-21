@@ -6,6 +6,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Enums;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 
 class CreateOrder extends CreateRecord
@@ -38,6 +39,6 @@ class CreateOrder extends CreateRecord
 
     protected function afterCreate(): void
     {
-        OrderResource::collectTotals($this->getRecord());
+        PurchaseOrder::computePurchaseOrder($this->getRecord());
     }
 }
