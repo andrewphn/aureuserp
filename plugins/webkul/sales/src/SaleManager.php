@@ -22,6 +22,10 @@ class SaleManager
 
     /**
      * Send quotation or order by email.
+     *
+     * @param  Order  $record
+     * @param  array  $data
+     * @return Order
      */
     public function sendQuotationOrOrderByEmail(Order $record, array $data = []): Order
     {
@@ -34,6 +38,9 @@ class SaleManager
 
     /**
      * Lock and unlock the sale order.
+     *
+     * @param  Order  $record
+     * @return Order
      */
     public function lockAndUnlock(Order $record): Order
     {
@@ -46,13 +53,16 @@ class SaleManager
 
     /**
      * Confirm the sale order.
+     *
+     * @param  Order  $record
+     * @return Order
      */
     public function confirmSaleOrder(Order $record): Order
     {
         $record->update([
             'state'          => Enums\OrderState::SALE,
             'invoice_status' => Enums\InvoiceStatus::TO_INVOICE,
-            'locked'         => $this->quotationAndOrderSettings->enable_lock_confirm_sales_order,
+            'locked'         => $this->quotationAndOrderSettings->enable_lock_confirm_sales,
         ]);
 
         $record = $this->computeSaleOrder($record);
@@ -62,6 +72,9 @@ class SaleManager
 
     /**
      * Confirm the sale order.
+     *
+     * @param  Order  $record
+     * @return Order
      */
     public function backToQuotation(Order $record): Order
     {
@@ -77,6 +90,9 @@ class SaleManager
 
     /**
      * Cancel the sale order.
+     *
+     * @param  Order  $record
+     * @return Order
      */
     public function cancelSaleOrder(Order $record, array $data = []): Order
     {
@@ -96,6 +112,9 @@ class SaleManager
 
     /**
      * Compute the sale order.
+     *
+     * @param  Order  $record
+     * @return Order
      */
     public static function computeSaleOrder(Order $record): Order
     {
@@ -121,6 +140,9 @@ class SaleManager
 
     /**
      * Compute the sale order line.
+     *
+     * @param  OrderLine  $line
+     * @return OrderLine
      */
     public static function computeSaleOrderLine(OrderLine $line): OrderLine
     {
@@ -166,7 +188,9 @@ class SaleManager
     /**
      * Send quotation or order by email.
      *
-     * @param  Order  $data
+     * @param Order $record
+     * @param array $data
+     * @return Order
      */
     public function sendByEmail(Order $record, array $data): Order
     {
@@ -214,6 +238,8 @@ class SaleManager
     /**
      * Handle cancel and send email.
      *
+     * @param Order $record
+     * @param array $data
      * @return void
      */
     public function cancelAndSendEmail(Order $record, array $data)
