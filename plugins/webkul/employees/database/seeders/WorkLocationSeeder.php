@@ -4,6 +4,7 @@ namespace Webkul\Employee\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
 class WorkLocationSeeder extends Seeder
@@ -15,33 +16,35 @@ class WorkLocationSeeder extends Seeder
     {
         DB::table('employees_work_locations')->delete();
 
-        $company = Company::find(1) ?? Company::factory()->create();
+        $company = Company::first();
+
+        $user = User::first();
 
         $workLocations = [
             [
                 'name'               => 'Home',
-                'company_id'         => $company->id,
+                'company_id'         => $company?->id,
                 'location_type'      => 'home',
                 'is_active'          => 1,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'created_at'         => now(),
                 'updated_at'         => now(),
             ],
             [
                 'name'               => 'Building 1, Second Floor',
-                'company_id'         => $company->id,
+                'company_id'         => $company?->id,
                 'location_type'      => 'office',
                 'is_active'          => 1,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'created_at'         => now(),
                 'updated_at'         => now(),
             ],
             [
                 'name'               => 'Other',
-                'company_id'         => $company->id,
+                'company_id'         => $company?->id,
                 'location_type'      => 'other',
                 'is_active'          => 1,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'created_at'         => now(),
                 'updated_at'         => now(),
             ],

@@ -4,6 +4,8 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
 
 class JournalSeeder extends Seeder
 {
@@ -14,17 +16,22 @@ class JournalSeeder extends Seeder
     {
         DB::table('accounts_journals')->delete();
 
+        $user = User::first();
+
+        $company = Company::first();
+
         $journals = [
             [
+                'id'                       => 1,
                 'default_account_id'       => 27,
                 'suspense_account_id'      => null,
                 'sort'                     => 5,
                 'currency_id'              => null,
-                'company_id'               => 1,
+                'company_id'               => $company?->id,
                 'profit_account_id'        => null,
                 'loss_account_id'          => null,
                 'bank_account_id'          => null,
-                'creator_id'               => 1,
+                'creator_id'               => $user?->id,
                 'color'                    => 11,
                 'access_token'             => null,
                 'code'                     => 'INV',
@@ -42,15 +49,16 @@ class JournalSeeder extends Seeder
                 'show_on_dashboard'        => true,
             ],
             [
+                'id'                       => 2,
                 'default_account_id'       => 33,
                 'suspense_account_id'      => null,
                 'sort'                     => 6,
                 'currency_id'              => null,
-                'company_id'               => 1,
+                'company_id'               => $company?->id,
                 'profit_account_id'        => null,
                 'loss_account_id'          => null,
                 'bank_account_id'          => null,
-                'creator_id'               => 1,
+                'creator_id'               => $user?->id,
                 'color'                    => 11,
                 'access_token'             => null,
                 'code'                     => 'BILL',
@@ -68,15 +76,16 @@ class JournalSeeder extends Seeder
                 'show_on_dashboard'        => true,
             ],
             [
+                'id'                       => 3,
                 'default_account_id'       => null,
                 'suspense_account_id'      => null,
                 'sort'                     => 9,
                 'currency_id'              => null,
-                'company_id'               => 1,
+                'company_id'               => $company?->id,
                 'profit_account_id'        => null,
                 'loss_account_id'          => null,
                 'bank_account_id'          => null,
-                'creator_id'               => 1,
+                'creator_id'               => $user?->id,
                 'color'                    => 0,
                 'access_token'             => null,
                 'code'                     => 'MISC',
@@ -94,15 +103,16 @@ class JournalSeeder extends Seeder
                 'show_on_dashboard'        => false,
             ],
             [
+                'id'                       => 4,
                 'default_account_id'       => null,
                 'suspense_account_id'      => null,
                 'sort'                     => 10,
                 'currency_id'              => null,
-                'company_id'               => 1,
+                'company_id'               => $company?->id,
                 'profit_account_id'        => null,
                 'loss_account_id'          => null,
                 'bank_account_id'          => null,
-                'creator_id'               => 1,
+                'creator_id'               => $user?->id,
                 'color'                    => 0,
                 'access_token'             => null,
                 'code'                     => 'EXCH',
@@ -120,15 +130,16 @@ class JournalSeeder extends Seeder
                 'show_on_dashboard'        => false,
             ],
             [
+                'id'                       => 5,
                 'default_account_id'       => 46,
                 'suspense_account_id'      => 47,
                 'sort'                     => null,
                 'currency_id'              => null,
-                'company_id'               => 1,
+                'company_id'               => $company?->id,
                 'profit_account_id'        => null,
                 'loss_account_id'          => null,
                 'bank_account_id'          => null,
-                'creator_id'               => null,
+                'creator_id'               => $user?->id,
                 'color'                    => null,
                 'access_token'             => null,
                 'code'                     => 'BANK',
@@ -147,15 +158,16 @@ class JournalSeeder extends Seeder
             ],
 
             [
+                'id'                       => 6,
                 'default_account_id'       => null,
                 'suspense_account_id'      => null,
                 'sort'                     => null,
                 'currency_id'              => null,
-                'company_id'               => 1,
+                'company_id'               => $company?->id,
                 'profit_account_id'        => null,
                 'loss_account_id'          => null,
                 'bank_account_id'          => null,
-                'creator_id'               => null,
+                'creator_id'               => $user?->id,
                 'color'                    => null,
                 'access_token'             => null,
                 'code'                     => 'CASH',

@@ -38,6 +38,7 @@ class RecruitmentServiceProvider extends PackageServiceProvider
             ->hasDependencies([
                 'employees',
             ])
+            ->hasSeeder('Webkul\\Recruitment\\Database\Seeders\\DatabaseSeeder')
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->installDependencies()

@@ -2,6 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
+use Filament\Pages\SubNavigationPosition;
 use Filament\Tables\Table;
 use Webkul\Account\Filament\Resources\PaymentsResource as BasePaymentsResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
@@ -17,6 +18,8 @@ class PaymentsResource extends BasePaymentsResource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $cluster = Vendors::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {

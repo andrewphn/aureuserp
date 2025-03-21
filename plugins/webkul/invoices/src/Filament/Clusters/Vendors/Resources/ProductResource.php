@@ -32,9 +32,9 @@ class ProductResource extends BaseProductResource
 
     protected static ?int $navigationSort = 5;
 
-    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
-
     protected static ?string $cluster = Vendors::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
     {

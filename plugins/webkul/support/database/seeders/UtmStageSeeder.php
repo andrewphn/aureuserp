@@ -13,6 +13,7 @@ class UtmStageSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('utm_campaigns')->delete();
         DB::table('utm_stages')->delete();
 
         $now = now();

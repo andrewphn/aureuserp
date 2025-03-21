@@ -4,6 +4,7 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
 
 class PaymentMethodLineSeeder extends Seeder
 {
@@ -14,6 +15,8 @@ class PaymentMethodLineSeeder extends Seeder
     {
         DB::table('accounts_payment_method_lines')->delete();
 
+        $user = User::first();
+
         $now = now();
 
         $paymentMethodLines = [
@@ -23,7 +26,7 @@ class PaymentMethodLineSeeder extends Seeder
                 'payment_method_id'  => 1,
                 'payment_account_id' => null,
                 'journal_id'         => 6,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'name'               => 'Manual Payment',
                 'created_at'         => $now,
                 'updated_at'         => $now,
@@ -34,7 +37,7 @@ class PaymentMethodLineSeeder extends Seeder
                 'payment_method_id'  => 2,
                 'payment_account_id' => null,
                 'journal_id'         => 6,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'name'               => 'Manual Payment',
                 'created_at'         => $now,
                 'updated_at'         => $now,
@@ -45,7 +48,7 @@ class PaymentMethodLineSeeder extends Seeder
                 'payment_method_id'  => 2,
                 'payment_account_id' => null,
                 'journal_id'         => 6,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'name'               => 'Manual Payment',
                 'created_at'         => $now,
                 'updated_at'         => $now,
@@ -56,7 +59,7 @@ class PaymentMethodLineSeeder extends Seeder
                 'payment_method_id'  => 1,
                 'payment_account_id' => null,
                 'journal_id'         => 6,
-                'creator_id'         => 1,
+                'creator_id'         => $user?->id,
                 'name'               => 'Manual Payment',
                 'created_at'         => $now,
                 'updated_at'         => $now,
