@@ -9,6 +9,8 @@ enum OrderReceiptStatus: string implements HasColor, HasLabel
 {
     case NO = 'no';
 
+    case PENDING = 'pending';
+
     case PARTIAL = 'partial';
 
     case FULL = 'full';
@@ -17,6 +19,7 @@ enum OrderReceiptStatus: string implements HasColor, HasLabel
     {
         return [
             self::NO->value      => __('purchases::enums/order-receipt-status.no'),
+            self::PENDING->value => __('purchases::enums/order-receipt-status.pending'),
             self::PARTIAL->value => __('purchases::enums/order-receipt-status.partial'),
             self::FULL->value    => __('purchases::enums/order-receipt-status.full'),
         ];
@@ -26,6 +29,7 @@ enum OrderReceiptStatus: string implements HasColor, HasLabel
     {
         return match ($this) {
             self::NO      => __('purchases::enums/order-receipt-status.no'),
+            self::PENDING => __('purchases::enums/order-receipt-status.pending'),
             self::PARTIAL => __('purchases::enums/order-receipt-status.partial'),
             self::FULL    => __('purchases::enums/order-receipt-status.full'),
         };
@@ -35,6 +39,7 @@ enum OrderReceiptStatus: string implements HasColor, HasLabel
     {
         return match ($this) {
             self::NO      => 'gray',
+            self::PENDING => 'info',
             self::PARTIAL => 'warning',
             self::FULL    => 'success',
         };
