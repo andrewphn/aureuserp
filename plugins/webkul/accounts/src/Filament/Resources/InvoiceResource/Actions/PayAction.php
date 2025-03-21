@@ -89,17 +89,17 @@ class PayAction extends Action
 
                 if (
                     $record->reversedEntry
-                    && $record->reversedEntry->payment_state == PaymentState::NOT_PAID->value
+                    && $record->reversedEntry->payment_state == PaymentState::NOT_PAID
                 ) {
-                    $record->reversedEntry->update(['payment_state' => PaymentState::REVERSED->value]);
+                    $record->reversedEntry->update(['payment_state' => PaymentState::REVERSED]);
                 }
 
-                $record->update(['payment_state' => PaymentState::PAID->value]);
+                $record->update(['payment_state' => PaymentState::PAID]);
             })
             ->hidden(function (Move $record) {
                 return
-                    $record->state != MoveState::POSTED->value
-                    || ! in_array($record->payment_state, [PaymentState::NOT_PAID->value, PaymentState::PARTIAL->value, PaymentState::IN_PAYMENT->value]);
+                    $record->state != MoveState::POSTED
+                    || ! in_array($record->payment_state, [PaymentState::NOT_PAID, PaymentState::PARTIAL, PaymentState::IN_PAYMENT]);
             });
     }
 
@@ -149,7 +149,7 @@ class PayAction extends Action
             'source_amount'                  => $data['amount'],
             'source_amount_currency'         => $data['amount'],
             'name'                           => str_replace('INV', 'P'.$paymentMethodLine?->journal?->code, $record->name),
-            'state'                          => PaymentState::PAID->value,
+            'state'                          => PaymentState::PAID,
             'payment_type'                   => $paymentMethodLine?->paymentMethod?->payment_type,
             'partner_type'                   => $record->partner->sub_type,
             'memo'                           => $data['communication'],
@@ -169,7 +169,7 @@ class PayAction extends Action
         $paymentMethodLine = $record->paymentMethodLine()->findOrFail($data['payment_method_line_id']);
 
         $move->fill([
-            'state'                             => MoveState::POSTED->value,
+            'state'                             => MoveState::POSTED,
             'date'                              => now(),
             'origin_payment_id'                 => $payment->id,
             'partner_shipping_id'               => null,
@@ -177,8 +177,8 @@ class PayAction extends Action
             'sequence_prefix'                   => str_replace('INV', 'P'.$paymentMethodLine?->journal?->code, $record->name),
             'name'                              => str_replace('INV', 'P'.$paymentMethodLine?->journal?->code, $record->name),
             'reference'                         => $record->reference,
-            'move_type'                         => MoveType::ENTRY->value,
-            'state'                             => MoveState::POSTED->value,
+            'move_type'                         => MoveType::ENTRY,
+            'state'                             => MoveState::POSTED,
             'payment_date'                      => now(),
             'amount_untaxed'                    => 0.00,
             'amount_tax'                        => 0.00,
@@ -190,7 +190,7 @@ class PayAction extends Action
             'amount_total_signed'               => $record->amount_total_signed,
             'amount_total_in_currency_signed'   => $record->amount_total_in_currency_signed,
             'amount_residual_signed'            => 0.00,
-            'payment_state'                     => PaymentState::NOT_PAID->value,
+            'payment_state'                     => PaymentState::NOT_PAID,
             'company_id'                        => $record->company_id,
             'partner_id'                        => $record->partner_id,
             'partner_bank_id'                   => $data['partner_bank_id'],
@@ -216,7 +216,7 @@ class PayAction extends Action
             'parent_state'             => $newMove->state,
             'reference'                => $newMove->reference,
             'name'                     => "{$payment->name} - {$newMove->name}",
-            'display_type'             => DisplayType::PRODUCT->value,
+            'display_type'             => DisplayType::PRODUCT,
             'date'                     => now(),
             'date_maturity'            => $record->paymentTermLine->date_maturity,
             'debit'                    => $data['amount'],
@@ -242,7 +242,7 @@ class PayAction extends Action
             'parent_state'             => $newMove->state,
             'reference'                => $newMove->reference,
             'name'                     => "{$payment->name} - {$newMove->name}",
-            'display_type'             => DisplayType::PRODUCT->value,
+            'display_type'             => DisplayType::PRODUCT,
             'date'                     => now(),
             'date_maturity'            => $record->paymentTermLine->date_maturity,
             'debit'                    => 0.00,

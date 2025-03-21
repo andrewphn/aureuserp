@@ -58,6 +58,6 @@ class PurchaseServiceProvider extends PackageServiceProvider
 
         Livewire::component('list-products', \Webkul\Purchase\Livewire\Customer\ListProducts::class);
 
-        \Webkul\Invoice\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
+        \Webkul\Account\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
     }
 }

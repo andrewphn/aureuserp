@@ -28,11 +28,11 @@ class ConfirmAction extends Action
                     return;
                 }
 
-                $record->state = MoveState::POSTED->value;
+                $record->state = MoveState::POSTED;
                 $record->save();
 
                 $record->allLines->each(function ($moveLine) {
-                    $moveLine->parent_state = MoveState::POSTED->value;
+                    $moveLine->parent_state = MoveState::POSTED;
                     $moveLine->save();
                 });
 
@@ -40,8 +40,8 @@ class ConfirmAction extends Action
             })
             ->hidden(function (Move $record) {
                 return
-                    $record->state !== MoveState::DRAFT->value ||
-                    ($record->auto_post !== AutoPost::NO->value && $record->date > now());
+                    $record->state !== MoveState::DRAFT ||
+                    ($record->auto_post !== AutoPost::NO && $record->date > now());
             });
     }
 
