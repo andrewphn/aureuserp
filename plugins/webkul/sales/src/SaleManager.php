@@ -3,29 +3,58 @@
 namespace Webkul\Sale;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Facades\Tax;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
+use Webkul\Sale\Mail\SaleOrderQuotation;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
+use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Services\EmailService;
 
 class SaleManager
 {
+    public function __construct(
+        protected QuotationAndOrderSettings $quotationAndOrderSettings
+    ) {}
+
+    /**
+     * Send quotation or order by email.
+     */
+    public function sendQuotationOrOrderByEmail(Order $record, array $data = []): Order
+    {
+        $record = $this->sendByEmail($record, $data);
+
+        $record = $this->computeSaleOrder($record);
+
+        return $record;
+    }
+
+    /**
+     * Lock and unlock the sale order.
+     */
+    public function lockAndUnlock(Order $record): Order
+    {
+        $record->update(['locked' => ! $record->locked]);
+
+        $record = $this->computeSaleOrder($record);
+
+        return $record;
+    }
+
+    /**
+     * Confirm the sale order.
+     */
     public function confirmSaleOrder(Order $record): Order
     {
-        $data = [
-            'state'          => OrderState::SALE,
-            'invoice_status' => InvoiceStatus::TO_INVOICE,
-        ];
+        $record->update([
+            'state'          => Enums\OrderState::SALE,
+            'invoice_status' => Enums\InvoiceStatus::TO_INVOICE,
+            'locked'         => $this->quotationAndOrderSettings->enable_lock_confirm_sales_order,
+        ]);
 
-        if ($settings->enable_lock_confirm_sales) {
-            $data['locked'] = true;
-        }
-
-        $record->update($data);
         $record = $this->computeSaleOrder($record);
 
         return $record;
@@ -37,8 +66,8 @@ class SaleManager
     public function backToQuotation(Order $record): Order
     {
         $record->update([
-            'state'          => OrderState::DRAFT,
-            'invoice_status' => InvoiceStatus::NO,
+            'state'          => Enums\OrderState::DRAFT,
+            'invoice_status' => Enums\InvoiceStatus::NO,
         ]);
 
         $record = $this->computeSaleOrder($record);
@@ -52,8 +81,8 @@ class SaleManager
     public function cancelSaleOrder(Order $record, array $data = []): Order
     {
         $record->update([
-            'state'          => OrderState::CANCEL,
-            'invoice_status' => InvoiceStatus::NO,
+            'state'          => Enums\OrderState::CANCEL,
+            'invoice_status' => Enums\InvoiceStatus::NO,
         ]);
 
         if (! empty($data)) {
@@ -76,6 +105,7 @@ class SaleManager
 
         foreach ($record->lines as $line) {
             $line->state = $record->state;
+            $line->invoice_status = $record->invoice_status;
 
             $line = static::computeSaleOrderLine($line);
 
@@ -134,6 +164,54 @@ class SaleManager
     }
 
     /**
+     * Send quotation or order by email.
+     *
+     * @param  Order  $data
+     */
+    public function sendByEmail(Order $record, array $data): Order
+    {
+        $partners = Partner::whereIn('id', $data['partners'])->get();
+
+        foreach ($partners as $key => $partner) {
+            $payload = [
+                'record_name'    => $record->name,
+                'model_name'     => OrderState::options()[$record->state],
+                'subject'        => $data['subject'],
+                'description'    => $data['description'],
+                'to'             => [
+                    'address' => $partner?->email,
+                    'name'    => $partner?->name,
+                ],
+            ];
+
+            app(EmailService::class)->send(
+                mailClass: SaleOrderQuotation::class,
+                view: $viewName = 'sales::mails.sale-order-quotation',
+                payload: $payload,
+                attachments: [
+                    [
+                        'path' => asset(Storage::url($data['file'])),
+                        'name' => basename($data['file']),
+                    ],
+                ]
+            );
+
+            $record->addMessage([
+                'from' => [
+                    'company' => Auth::user()->defaultCompany->toArray(),
+                ],
+                'body' => view($viewName, compact('payload'))->render(),
+                'type' => 'comment',
+            ]);
+        }
+
+        $record->state = OrderState::SENT;
+        $record->save();
+
+        return $record;
+    }
+
+    /**
      * Handle cancel and send email.
      *
      * @return void
@@ -164,9 +242,7 @@ class SaleManager
                 'from' => [
                     'company' => Auth::user()->defaultCompany->toArray(),
                 ],
-                'body' => view($viewName, [
-                    'payload' => $payload,
-                ])->render(),
+                'body' => view($viewName, compact('payload'))->render(),
                 'type' => 'comment',
             ]);
         }
