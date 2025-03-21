@@ -2,7 +2,6 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
 
-use Filament\Pages\SubNavigationPosition;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Webkul\Account\Enums\MoveType;
@@ -16,11 +15,6 @@ class ListRefunds extends BaseListInvoices
     use HasTableViews;
 
     protected static string $resource = RefundResource::class;
-
-    public function getSubNavigationPosition(): SubNavigationPosition
-    {
-        return SubNavigationPosition::Start;
-    }
 
     public function getPresetTableViews(): array
     {

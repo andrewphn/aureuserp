@@ -2,6 +2,7 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\BillResource as BaseBillResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
@@ -19,6 +20,8 @@ class BillResource extends BaseBillResource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $cluster = Vendors::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationGroup(): ?string
     {

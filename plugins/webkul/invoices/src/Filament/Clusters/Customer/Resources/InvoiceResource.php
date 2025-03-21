@@ -19,10 +19,7 @@ class InvoiceResource extends BaseInvoiceResource
 
     protected static ?int $navigationSort = 1;
 
-    public static function getSubNavigationPosition(): SubNavigationPosition
-    {
-        return SubNavigationPosition::Top;
-    }
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
