@@ -7,11 +7,11 @@ use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\RefundResource as BaseRefundResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages;
-use Webkul\Invoice\Models\Move;
+use Webkul\Invoice\Models\Refund;
 
 class RefundResource extends BaseRefundResource
 {
-    protected static ?string $model = Move::class;
+    protected static ?string $model = Refund::class;
 
     protected static ?int $navigationSort = 2;
 

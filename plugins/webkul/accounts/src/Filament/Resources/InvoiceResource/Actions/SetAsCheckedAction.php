@@ -30,7 +30,7 @@ class SetAsCheckedAction extends Action
             ->hidden(function (Move $record) {
                 return
                     $record->checked
-                    || $record->state == MoveState::DRAFT->value;
+                    || $record->state == MoveState::DRAFT;
             });
     }
 }

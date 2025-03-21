@@ -70,7 +70,7 @@ class SendByEmailAction extends Action
             )
             ->modalIcon('heroicon-s-envelope')
             ->modalHeading(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.modal.heading'))
-            ->hidden(fn ($record) => $record->state != OrderState::SALE->value)
+            ->hidden(fn ($record) => $record->state != OrderState::SALE)
             ->action(function ($record, array $data) {
                 $this->handleSendByEmail($record, $data);
             });
@@ -110,7 +110,7 @@ class SendByEmailAction extends Action
             );
         }
 
-        $record->state = OrderState::SENT->value;
+        $record->state = OrderState::SENT;
         $record->save();
 
         $messageData = [

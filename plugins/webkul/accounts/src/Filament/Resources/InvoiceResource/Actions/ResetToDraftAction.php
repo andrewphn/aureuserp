@@ -24,11 +24,11 @@ class ResetToDraftAction extends Action
             ->color('gray')
             ->icon('heroicon-o-arrow-path')
             ->action(function (Move $record, Component $livewire): void {
-                $record->state = MoveState::DRAFT->value;
-                $record->payment_state = PaymentState::NOT_PAID->value;
+                $record->state = MoveState::DRAFT;
+                $record->payment_state = PaymentState::NOT_PAID;
 
                 $record->lines->each(function ($moveLine) {
-                    $moveLine->parent_state = MoveState::DRAFT->value;
+                    $moveLine->parent_state = MoveState::DRAFT;
                     $moveLine->save();
                 });
 
@@ -38,8 +38,8 @@ class ResetToDraftAction extends Action
             })
             ->visible(function (Move $record) {
                 return
-                    $record->state == MoveState::CANCEL->value
-                    || $record->state == MoveState::POSTED->value;
+                    $record->state == MoveState::CANCEL
+                    || $record->state == MoveState::POSTED;
             });
     }
 }

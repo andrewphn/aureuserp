@@ -32,8 +32,8 @@ class PrintAndSendAction extends Action
             ->color('gray')
             ->visible(function (Move $record) {
                 return
-                    $record->state == MoveState::CANCEL->value
-                    || $record->state == MoveState::POSTED->value;
+                    $record->state == MoveState::CANCEL
+                    || $record->state == MoveState::POSTED;
             });
 
         $this->beforeFormFilled(function ($record, Action $action) {

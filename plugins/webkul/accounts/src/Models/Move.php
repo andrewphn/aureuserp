@@ -4,7 +4,9 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -137,21 +139,24 @@ class Move extends Model
 
     protected $casts = [
         'invoice_date_due' => 'datetime',
+        'state'            => MoveState::class,
+        'payment_state'    => PaymentState::class,
+        'move_type'        => MoveType::class,
     ];
 
     public function campaign()
     {
-        return $this->belongsTo(UtmCampaign::class);
+        return $this->belongsTo(UtmCampaign::class, 'campaign_id');
     }
 
     public function journal()
     {
-        return $this->belongsTo(Journal::class);
+        return $this->belongsTo(Journal::class, 'journal_id');
     }
 
     public function company()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function taxCashBasisOriginMove()
@@ -171,17 +176,17 @@ class Move extends Model
 
     public function partner()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'partner_id');
     }
 
     public function commercialPartner()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'commercial_partner_id');
     }
 
     public function partnerShipping()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'partner_shipping_id');
     }
 
     public function partnerBank()
@@ -191,12 +196,12 @@ class Move extends Model
 
     public function fiscalPosition()
     {
-        return $this->belongsTo(FiscalPosition::class);
+        return $this->belongsTo(FiscalPosition::class, 'fiscal_position_id');
     }
 
     public function currency()
     {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function reversedEntry()
@@ -226,7 +231,7 @@ class Move extends Model
 
     public function source()
     {
-        return $this->belongsTo(UTMSource::class);
+        return $this->belongsTo(UTMSource::class, 'source_id');
     }
 
     public function medium()
@@ -254,12 +259,12 @@ class Move extends Model
 
     public function allLines()
     {
-        return $this->hasMany(MoveLine::class);
+        return $this->hasMany(MoveLine::class, 'move_id');
     }
 
     public function taxLines()
     {
-        return $this->hasMany(MoveLine::class)
+        return $this->hasMany(MoveLine::class, 'move_id')
             ->where('display_type', 'tax');
     }
 

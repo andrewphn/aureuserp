@@ -43,7 +43,7 @@ class OrderToInvoiceResource extends Resource
     {
         return QuotationResource::table($table)
             ->modifyQueryUsing(function ($query) {
-                $query->where('invoice_status', InvoiceStatus::TO_INVOICE->value);
+                $query->where('invoice_status', InvoiceStatus::TO_INVOICE);
             });
     }
 

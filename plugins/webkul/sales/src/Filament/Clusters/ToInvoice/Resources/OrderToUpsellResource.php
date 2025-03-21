@@ -47,7 +47,7 @@ class OrderToUpsellResource extends Resource
     {
         return QuotationResource::table($table)
             ->modifyQueryUsing(function ($query) {
-                $query->where('invoice_status', InvoiceStatus::UP_SELLING->value);
+                $query->where('invoice_status', InvoiceStatus::UP_SELLING);
             });
     }
 

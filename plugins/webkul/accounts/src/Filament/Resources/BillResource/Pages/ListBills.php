@@ -32,7 +32,7 @@ class ListBills extends BaseListBills
                 ->favorite()
                 ->default()
                 ->icon('heroicon-s-receipt-percent')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_INVOICE->value)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_INVOICE)),
             ...Arr::except(parent::getPresetTableViews(), 'invoice'),
         ];
     }
