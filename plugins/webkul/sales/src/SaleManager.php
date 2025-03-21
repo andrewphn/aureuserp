@@ -5,7 +5,9 @@ namespace Webkul\Sale;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Facades\Tax;
+use Webkul\Invoice\Enums\InvoicePolicy;
 use Webkul\Partner\Models\Partner;
+use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
 use Webkul\Sale\Mail\SaleOrderQuotation;
@@ -22,10 +24,6 @@ class SaleManager
 
     /**
      * Send quotation or order by email.
-     *
-     * @param  Order  $record
-     * @param  array  $data
-     * @return Order
      */
     public function sendQuotationOrOrderByEmail(Order $record, array $data = []): Order
     {
@@ -38,9 +36,6 @@ class SaleManager
 
     /**
      * Lock and unlock the sale order.
-     *
-     * @param  Order  $record
-     * @return Order
      */
     public function lockAndUnlock(Order $record): Order
     {
@@ -53,9 +48,6 @@ class SaleManager
 
     /**
      * Confirm the sale order.
-     *
-     * @param  Order  $record
-     * @return Order
      */
     public function confirmSaleOrder(Order $record): Order
     {
@@ -72,9 +64,6 @@ class SaleManager
 
     /**
      * Confirm the sale order.
-     *
-     * @param  Order  $record
-     * @return Order
      */
     public function backToQuotation(Order $record): Order
     {
@@ -90,9 +79,6 @@ class SaleManager
 
     /**
      * Cancel the sale order.
-     *
-     * @param  Order  $record
-     * @return Order
      */
     public function cancelSaleOrder(Order $record, array $data = []): Order
     {
@@ -112,11 +98,8 @@ class SaleManager
 
     /**
      * Compute the sale order.
-     *
-     * @param  Order  $record
-     * @return Order
      */
-    public static function computeSaleOrder(Order $record): Order
+    public function computeSaleOrder(Order $record): Order
     {
         $record->amount_untaxed = 0;
         $record->amount_tax = 0;
@@ -126,7 +109,7 @@ class SaleManager
             $line->state = $record->state;
             $line->invoice_status = $record->invoice_status;
 
-            $line = static::computeSaleOrderLine($line);
+            $line = $this->computeSaleOrderLine($line);
 
             $record->amount_untaxed += $line->price_subtotal;
             $record->amount_tax += $line->price_tax;
@@ -140,11 +123,8 @@ class SaleManager
 
     /**
      * Compute the sale order line.
-     *
-     * @param  OrderLine  $line
-     * @return OrderLine
      */
-    public static function computeSaleOrderLine(OrderLine $line): OrderLine
+    public function computeSaleOrderLine(OrderLine $line): OrderLine
     {
         $qtyDelivered = $line->qty_delivered ?? 0;
 
@@ -180,17 +160,62 @@ class SaleManager
 
         $line->state = $line->order->state;
 
+        $line = $this->computerDeliveryMethod($line);
+
+        // $line = $this->computeInvoiceStatus($line);
+
         $line->save();
 
         return $line;
     }
 
     /**
-     * Send quotation or order by email.
+     * Compute the delivery method.
      *
-     * @param Order $record
-     * @param array $data
-     * @return Order
+     * @param  OrderLine  $record
+     */
+    public function computerDeliveryMethod(OrderLine $line): OrderLine
+    {
+        $line->qty_delivered_method = 'manual';
+
+        return $line;
+    }
+
+    /**
+     * Compute the invoice status.
+     */
+    public function computeInvoiceStatus(OrderLine $line): OrderLine
+    {
+        if ($line->state !== OrderState::SALE) {
+            $line->invoice_status = InvoiceStatus::NO;
+
+            return $line;
+        }
+
+        if (
+            $line->is_downpayment
+            && $line->untaxed_amount_to_invoice == 0
+        ) {
+            $line->invoice_status = InvoiceStatus::INVOICED;
+        } elseif ($line->qty_to_invoice != 0) {
+            $line->invoice_status = InvoiceStatus::TO_INVOICE;
+        } elseif (
+            $line->product->invoice_policy === InvoicePolicy::ORDER->value &&
+            $line->product_uom_qty >= 0 &&
+            $line->qty_delivered > $line->product_uom_qty
+        ) {
+            $line->invoice_status = InvoiceStatus::UP_SELLING;
+        } elseif ($line->qty_invoiced >= $line->product_uom_qty) {
+            $line->invoice_status = InvoiceStatus::INVOICED;
+        } else {
+            $line->invoice_status = InvoiceStatus::NO;
+        }
+
+        return $line;
+    }
+
+    /**
+     * Send quotation or order by email.
      */
     public function sendByEmail(Order $record, array $data): Order
     {
@@ -238,8 +263,6 @@ class SaleManager
     /**
      * Handle cancel and send email.
      *
-     * @param Order $record
-     * @param array $data
      * @return void
      */
     public function cancelAndSendEmail(Order $record, array $data)

@@ -699,6 +699,7 @@ class QuotationResource extends Resource
                             ]),
                         Infolists\Components\Tabs\Tab::make(__('Optional Products'))
                             ->icon('heroicon-o-arrow-path-rounded-square')
+                            ->hidden(fn (Order $record) => $record->optionalLines->isEmpty())
                             ->schema([
                                 Infolists\Components\RepeatableEntry::make('optionalLines')
                                     ->hiddenLabel()
@@ -1146,17 +1147,15 @@ class QuotationResource extends Resource
     {
         $product = Product::find($data['product_id']);
 
-        $data = [
-            'name'         => $product->name,
-            'uom_id'       => $data['uom_id'] ?? $product->uom_id,
-            'currency_id'  => $record->currency_id,
-            'partner_id'   => $record->partner_id,
-            'creator_id'   => Auth::id(),
-            'company_id'   => Auth::user()->default_company_id,
+        return [
+            'name'        => $product->name,
+            'uom_id'      => $data['uom_id'] ?? $product->uom_id,
+            'currency_id' => $record->currency_id,
+            'partner_id'  => $record->partner_id,
+            'creator_id'  => Auth::id(),
+            'company_id'  => Auth::user()->default_company_id,
             ...$data,
         ];
-
-        return $data;
     }
 
     private static function afterProductUpdated(Forms\Set $set, Forms\Get $get): void
