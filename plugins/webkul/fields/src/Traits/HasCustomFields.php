@@ -37,11 +37,15 @@ trait HasCustomFields
      */
     protected function loadCustomFields()
     {
-        $customFields = $this->getCustomFields();
+        try {
+            $customFields = $this->getCustomFields();
 
-        $this->mergeFillable(self::$customFillable ??= $customFields->pluck('code')->toArray());
+            $this->mergeFillable(self::$customFillable ??= $customFields->pluck('code')->toArray());
 
-        $this->mergeCasts(self::$customCasts ??= $customFields->select('code', 'type', 'is_multiselect')->get());
+            $this->mergeCasts(self::$customCasts ??= $customFields->select('code', 'type', 'is_multiselect')->get());
+        } catch (\Exception $e) {
+            // do nothing
+        }
     }
 
     /**
