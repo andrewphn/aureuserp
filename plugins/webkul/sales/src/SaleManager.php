@@ -126,6 +126,8 @@ class SaleManager
 
         foreach ($record->lines as $line) {
             $line->state = $record->state;
+            $line->salesman_id = $record->user_id;
+            $line->order_partner_id = $record->partner_id;
             $line->invoice_status = $record->invoice_status;
 
             $line = $this->computeSaleOrderLine($line);
