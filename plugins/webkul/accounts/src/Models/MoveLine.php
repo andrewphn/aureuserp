@@ -136,7 +136,7 @@ class MoveLine extends Model
 
     public function uom()
     {
-        return $this->belongsTo(UOM::class);
+        return $this->belongsTo(UOM::class, 'uom_id');
     }
 
     public function createdBy()

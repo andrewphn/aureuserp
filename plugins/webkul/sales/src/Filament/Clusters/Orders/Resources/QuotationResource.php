@@ -872,7 +872,7 @@ class QuotationResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->dehydrated(),
-                                Forms\Components\Select::make('uom_id')
+                                Forms\Components\Select::make('product_uom_id')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.fields.uom'))
                                     ->relationship(
                                         'uom',
@@ -927,7 +927,7 @@ class QuotationResource extends Resource
                                             $data['sort'] = OrderLine::max('sort') + 1;
                                             $data['company_id'] = $user?->default_company_id;
                                             $data['currency_id'] = $livewire->record->currency_id;
-                                            $data['product_uom_id'] = $state['uom_id'];
+                                            $data['product_uom_id'] = $state['product_uom_id'];
                                             $orderLine = OrderLine::create($data);
 
                                             $record->line_id = $orderLine->id;
@@ -1033,7 +1033,7 @@ class QuotationResource extends Resource
                                     ->disabled(true)
                                     ->disabled()
                                     ->visible(fn ($record): bool => in_array($record?->order->state, [OrderState::SALE])),
-                                Forms\Components\Select::make('uom_id')
+                                Forms\Components\Select::make('product_uom_id')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.uom'))
                                     ->relationship(
                                         'uom',
@@ -1148,12 +1148,12 @@ class QuotationResource extends Resource
         $product = Product::find($data['product_id']);
 
         return [
-            'name'        => $product->name,
-            'uom_id'      => $data['uom_id'] ?? $product->uom_id,
-            'currency_id' => $record->currency_id,
-            'partner_id'  => $record->partner_id,
-            'creator_id'  => Auth::id(),
-            'company_id'  => Auth::user()->default_company_id,
+            'name'                => $product->name,
+            'product_uom_id'      => $data['product_uom_id'] ?? $product->uom_id,
+            'currency_id'         => $record->currency_id,
+            'partner_id'          => $record->partner_id,
+            'creator_id'          => Auth::id(),
+            'company_id'          => Auth::user()->default_company_id,
             ...$data,
         ];
     }
@@ -1166,9 +1166,9 @@ class QuotationResource extends Resource
 
         $product = Product::find($get('product_id'));
 
-        $set('uom_id', $product->uom_id);
+        $set('product_uom_id', $product->uom_id);
 
-        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+        $uomQuantity = static::calculateUnitQuantity($get('product_uom_id'), $get('product_qty'));
 
         $set('product_uom_qty', round($uomQuantity, 2));
 
@@ -1195,7 +1195,7 @@ class QuotationResource extends Resource
             return;
         }
 
-        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+        $uomQuantity = static::calculateUnitQuantity($get('product_uom_id'), $get('product_qty'));
 
         $set('product_uom_qty', round($uomQuantity, 2));
 
@@ -1214,7 +1214,7 @@ class QuotationResource extends Resource
             return;
         }
 
-        $uomQuantity = static::calculateUnitQuantity($get('uom_id'), $get('product_qty'));
+        $uomQuantity = static::calculateUnitQuantity($get('product_uom_id'), $get('product_qty'));
 
         $set('product_uom_qty', round($uomQuantity, 2));
 
@@ -1246,7 +1246,7 @@ class QuotationResource extends Resource
 
             $set('product_uom_qty', round($productUOMQty, 2));
 
-            $uom = Uom::find($get('uom_id'));
+            $uom = Uom::find($get('product_uom_id'));
 
             $productQty = $uom ? $productUOMQty * $uom->factor : $productUOMQty;
 
@@ -1308,11 +1308,11 @@ class QuotationResource extends Resource
             $vendorPrice = $product->price ?? $product->cost;
         }
 
-        if (! $get('uom_id')) {
+        if (! $get('product_uom_id')) {
             return $vendorPrice;
         }
 
-        $uom = Uom::find($get('uom_id'));
+        $uom = Uom::find($get('product_uom_id'));
 
         return (float) ($vendorPrice / $uom->factor);
     }

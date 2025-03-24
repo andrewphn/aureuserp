@@ -402,7 +402,6 @@ class SaleManager
             $this->createAccountMoveLine($accountMove, $line);
         }
 
-        // TODO: Update sales updated
         InvoiceResource::collectTotals($accountMove);
 
         return $accountMove;
@@ -414,8 +413,8 @@ class SaleManager
         $invoiceSetting = app(InvoiceSettings::class)->invoice_policy;
 
         $quantity = ($productInvoicePolicy ?? $invoiceSetting) === InvoicePolicy::ORDER->value
-            ? $orderLine->qty_to_invoice
-            : $orderLine->product_uom_qty;
+            ? $orderLine->product_uom_qty
+            : $orderLine->qty_to_invoice;
 
         $moveLineData = [
             'state'                  => AccountEnums\MoveState::DRAFT,
@@ -433,7 +432,7 @@ class SaleManager
             'company_currency_id'    => $accountMove->currency_id,
             'partner_id'             => $accountMove->partner_id,
             'product_id'             => $orderLine->product_id,
-            'uom_id'                 => $orderLine->uom_id,
+            'uom_id'                 => $orderLine->product_uom_id,
             'purchase_order_line_id' => $orderLine->id,
             'debit'                  => $orderLine?->price_subtotal,
             'credit'                 => 0.00,
@@ -446,6 +445,8 @@ class SaleManager
         $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
 
         $orderLine->save();
+
+        $orderLine->invoiceLines()->sync($accountMoveLine->id);
 
         $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
     }

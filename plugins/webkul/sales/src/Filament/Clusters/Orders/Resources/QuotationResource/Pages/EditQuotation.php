@@ -18,7 +18,7 @@ class EditQuotation extends EditRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
+        return $this->getResource()::getUrl('edit', ['record' => $this->getRecord()]);
     }
 
     public function getSubNavigationPosition(): SubNavigationPosition
