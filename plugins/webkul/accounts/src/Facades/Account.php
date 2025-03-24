@@ -3,7 +3,11 @@
 namespace Webkul\Account\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Webkul\Account\Models\Move;
 
+/**
+ * @method static computeAccountMove(Move $record)
+ */
 class Account extends Facade
 {
     /**
