@@ -180,6 +180,8 @@ class SaleManager
 
         $line = $this->computeUntaxedAmountToInvoice($line);
 
+        $line = $this->untaxedAmountToInvoiced($line);
+
         $line->save();
 
         return $line;
@@ -268,9 +270,31 @@ class SaleManager
         $priceReduce = $line->price_unit * (1 - ($discount / 100.0));
         $priceSubtotal = $priceReduce * $uomQtyToConsider;
 
-        $amount_to_invoice = $priceSubtotal - $line->untaxed_amount_invoiced;
+        $line->untaxed_amount_to_invoice = $priceSubtotal - $line->untaxed_amount_invoiced;
 
-        $line->untaxed_amount_to_invoice = $amount_to_invoice;
+        return $line;
+    }
+
+    public function untaxedAmountToInvoiced(OrderLine $line): OrderLine
+    {
+        $amountInvoiced = 0.0;
+
+        foreach ($line->invoiceLines as $invoiceLine) {
+            $move = $invoiceLine->move;
+
+            if (
+                $move->state === MoveState::POSTED
+                || $move->payment_state === PaymentState::INVOICING_LEGACY
+            ) {
+                if ($move->move_type === MoveType::OUT_INVOICE) {
+                    $amountInvoiced += $line->price_subtotal;
+                } elseif ($move->move_type === MoveType::OUT_REFUND) {
+                    $amountInvoiced -= $line->price_subtotal;
+                }
+            }
+        }
+
+        $line->untaxed_amount_invoiced = $amountInvoiced;
 
         return $line;
     }
