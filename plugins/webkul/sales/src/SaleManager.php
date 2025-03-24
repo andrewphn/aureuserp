@@ -3,6 +3,7 @@
 namespace Webkul\Sale;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Enums\MoveState;
@@ -14,6 +15,7 @@ use Webkul\Account\Models\Move;
 use Webkul\Invoice\Enums\InvoicePolicy;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Partner\Models\Partner;
+use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
@@ -28,7 +30,8 @@ use Webkul\Support\Services\EmailService;
 class SaleManager
 {
     public function __construct(
-        protected QuotationAndOrderSettings $quotationAndOrderSettings
+        protected QuotationAndOrderSettings $quotationAndOrderSettings,
+        protected InvoiceSettings $invoiceSettings,
     ) {}
 
     public function sendQuotationOrOrderByEmail(Order $record, array $data = []): Order
@@ -92,20 +95,24 @@ class SaleManager
 
     public function createInvoice(Order $record, array $data = [])
     {
-        $advancedPaymentInvoice = AdvancedPaymentInvoice::create([
-            ...$data,
-            'currency_id'          => $record->currency_id,
-            'company_id'           => $record->company_id,
-            'creator_id'           => Auth::id(),
-            'deduct_down_payments' => true,
-            'consolidated_billing' => true,
-        ]);
+        DB::transaction(function () use ($record, $data) {
+            if ($data['advance_payment_method'] == AdvancedPayment::DELIVERED->value) {
+                $this->createAccountMove($record);
+            }
 
-        $advancedPaymentInvoice->orders()->attach($record->id);
+            $advancedPaymentInvoice = AdvancedPaymentInvoice::create([
+                ...$data,
+                'currency_id'          => $record->currency_id,
+                'company_id'           => $record->company_id,
+                'creator_id'           => Auth::id(),
+                'deduct_down_payments' => true,
+                'consolidated_billing' => true,
+            ]);
 
-        $this->createAccountMove($record);
+            $advancedPaymentInvoice->orders()->attach($record->id);
 
-        return $this->computeSaleOrder($record);
+            return $this->computeSaleOrder($record);
+        });
     }
 
     /**
@@ -374,13 +381,12 @@ class SaleManager
         }
     }
 
-    private function createAccountMove(Order $record)
+    private function prepareInvoice(Order $record)
     {
-        $accountMove = Move::create([
+        return [
             'state'                        => AccountEnums\MoveState::DRAFT,
             'move_type'                    => AccountEnums\MoveType::OUT_INVOICE,
             'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
-            'invoice_partner_display_name' => $record->partner->name,
             'invoice_origin'               => $record->name,
             'date'                         => now(),
             'invoice_date_due'             => now(),
@@ -394,29 +400,20 @@ class SaleManager
             'partner_shipping_id'          => $record->partner->addresses->where('type', 'present')->first()?->id,
             'fiscal_position_id'           => $record->fiscal_position_id,
             'creator_id'                   => Auth::id(),
-        ]);
-
-        $record->accountMoves()->attach($accountMove->id);
-
-        foreach ($record->lines as $line) {
-            $this->createAccountMoveLine($accountMove, $line);
-        }
-
-        InvoiceResource::collectTotals($accountMove);
-
-        return $accountMove;
+            'invoice_partner_display_name' => $record->partner->name,
+        ];
     }
 
-    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
+    private function prepareInvoiceLine(Move $accountMove, OrderLine $orderLine)
     {
         $productInvoicePolicy = $orderLine->product?->invoice_policy;
-        $invoiceSetting = app(InvoiceSettings::class)->invoice_policy;
+        $invoiceSetting = $this->invoiceSettings->invoice_policy;
 
         $quantity = ($productInvoicePolicy ?? $invoiceSetting) === InvoicePolicy::ORDER->value
             ? $orderLine->product_uom_qty
             : $orderLine->qty_to_invoice;
 
-        $moveLineData = [
+        return [
             'state'                  => AccountEnums\MoveState::DRAFT,
             'name'                   => $orderLine->name,
             'display_type'           => AccountEnums\DisplayType::PRODUCT,
@@ -439,8 +436,26 @@ class SaleManager
             'balance'                => $orderLine?->price_subtotal,
             'amount_currency'        => $orderLine?->price_subtotal,
         ];
+    }
 
-        $accountMoveLine = $accountMove->lines()->create($moveLineData);
+    private function createAccountMove(Order $record): Move
+    {
+        $accountMove = Move::create($this->prepareInvoice($record));
+
+        $record->accountMoves()->attach($accountMove->id);
+
+        foreach ($record->lines as $line) {
+            $this->createAccountMoveLine($accountMove, $line);
+        }
+
+        InvoiceResource::collectTotals($accountMove);
+
+        return $accountMove;
+    }
+
+    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
+    {
+        $accountMoveLine = $accountMove->lines()->create($this->prepareInvoiceLine($accountMove, $orderLine));
 
         $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
 
