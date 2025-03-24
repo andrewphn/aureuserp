@@ -179,7 +179,7 @@ class SaleManager
 
         $line->state = $line->order->state;
 
-        $line = $this->computerDeliveryMethod($line);
+        $line = $this->computeDeliveryMethod($line);
 
         $line = $this->computeInvoiceStatus($line);
 
@@ -194,7 +194,7 @@ class SaleManager
         return $line;
     }
 
-    public function computerDeliveryMethod(OrderLine $line): OrderLine
+    public function computeDeliveryMethod(OrderLine $line): OrderLine
     {
         $line->qty_delivered_method = 'manual';
 
