@@ -178,6 +178,8 @@ class SaleManager
 
         $line = $this->computeQtyInvoiced($line);
 
+        $line = $this->computeUntaxedAmountToInvoice($line);
+
         $line->save();
 
         return $line;
@@ -194,14 +196,14 @@ class SaleManager
     {
         $qtyInvoiced = 0.000;
 
-        foreach ($line->accountMoveLines as $accountMoveLine) {
-            $move = $accountMoveLine->move;
+        foreach ($line->invoiceLines as $invoiceLine) {
+            $move = $invoiceLine->move;
 
             if (
                 $move->state !== MoveState::CANCEL
                 || $move->payment_state === PaymentState::INVOICING_LEGACY->value
             ) {
-                $convertedQty = $accountMoveLine->uom->computeQuantity($accountMoveLine->quantity, $line->uom);
+                $convertedQty = $invoiceLine->uom->computeQuantity($invoiceLine->quantity, $line->uom);
 
                 if ($move->move_type === MoveType::OUT_INVOICE) {
                     $qtyInvoiced += $convertedQty;
@@ -242,6 +244,33 @@ class SaleManager
         } else {
             $line->invoice_status = InvoiceStatus::NO;
         }
+
+        return $line;
+    }
+
+    public function computeUntaxedAmountToInvoice(OrderLine $line): OrderLine
+    {
+        if ($line->state !== OrderState::SALE) {
+            $line->untaxed_amount_to_invoice = 0;
+
+            return $line;
+        }
+
+        $priceSubtotal = 0;
+
+        if ($line->product->invoice_policy === InvoicePolicy::DELIVERY->value) {
+            $uomQtyToConsider = $line->qty_delivered;
+        } else {
+            $uomQtyToConsider = $line->product_uom_qty;
+        }
+
+        $discount = $line->discount ?? 0.0;
+        $priceReduce = $line->price_unit * (1 - ($discount / 100.0));
+        $priceSubtotal = $priceReduce * $uomQtyToConsider;
+
+        $amount_to_invoice = $priceSubtotal - $line->untaxed_amount_invoiced;
+
+        $line->untaxed_amount_to_invoice = $amount_to_invoice;
 
         return $line;
     }

@@ -123,11 +123,6 @@ class Order extends Model
         return $this->lines->sum('qty_to_invoice');
     }
 
-    public function accountMoves(): BelongsToMany
-    {
-        return $this->belongsToMany(Move::class, 'sales_order_line_invoices', 'order_id', 'move_id');
-    }
-
     public function campaign()
     {
         return $this->belongsTo(UtmCampaign::class, 'campaign_id');
@@ -214,9 +209,9 @@ class Order extends Model
 
         static::creating(function ($order) {
             if ($order->state === 'sale') {
-                $order->name = 'ORD-TMP-'.time();
+                $order->name = 'ORD-TMP-' . time();
             } else {
-                $order->name = 'QT-TMP-'.time();
+                $order->name = 'QT-TMP-' . time();
             }
         });
 
@@ -236,9 +231,9 @@ class Order extends Model
     public function updateName()
     {
         if ($this->state === OrderState::SALE->value) {
-            $this->name = 'ORD-'.$this->id;
+            $this->name = 'ORD-' . $this->id;
         } else {
-            $this->name = 'QT-'.$this->id;
+            $this->name = 'QT-' . $this->id;
         }
     }
 }

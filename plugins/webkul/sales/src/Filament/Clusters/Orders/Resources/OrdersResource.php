@@ -58,7 +58,7 @@ class OrdersResource extends Resource
         return $page->generateNavigationItems([
             Pages\ViewOrders::class,
             Pages\EditOrders::class,
-            Pages\ManageInvoices::class,
+            // Pages\ManageInvoices::class,
         ]);
     }
 
@@ -69,7 +69,7 @@ class OrdersResource extends Resource
             'create'          => Pages\CreateOrders::route('/create'),
             'view'            => Pages\ViewOrders::route('/{record}'),
             'edit'            => Pages\EditOrders::route('/{record}/edit'),
-            'manage-invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
+            // 'manage-invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
         ];
     }
 }
