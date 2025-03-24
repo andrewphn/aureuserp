@@ -196,7 +196,11 @@ class SaleManager
 
     public function computeDeliveryMethod(OrderLine $line): OrderLine
     {
-        $line->qty_delivered_method = 'manual';
+        if ($line->is_expense) {
+            $line->qty_delivered_method = 'analytic';
+        } else {
+            $line->qty_delivered_method = 'manual';
+        }
 
         return $line;
     }
