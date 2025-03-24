@@ -8,6 +8,9 @@ use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
+use Webkul\Inventory\Facades\Inventory as InventoryFacade;
+use Webkul\Inventory\InventoryManager;
+use Illuminate\Foundation\AliasLoader;
 
 class InventoryServiceProvider extends PackageServiceProvider
 {
@@ -105,5 +108,14 @@ class InventoryServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         //
+    }
+
+    public function packageRegistered(): void
+    {
+        $loader = AliasLoader::getInstance();
+
+        $loader->alias('inventory', InventoryFacade::class);
+
+        $this->app->singleton('inventory', InventoryManager::class);
     }
 }
