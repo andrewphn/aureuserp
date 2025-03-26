@@ -5,7 +5,7 @@
     @endphp
 
     <div
-        class="flex gap-4 justify-between items-center p-2 items-center"
+        class="flex items-center justify-between gap-4 p-2"
         style="margin-bottom: -40px"
         wire:listen="filtered-list-updated"
     >
