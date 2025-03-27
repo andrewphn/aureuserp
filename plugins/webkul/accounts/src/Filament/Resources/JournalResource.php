@@ -78,7 +78,8 @@ class JournalResource extends Resource
                                                                     ->preload()
                                                                     ->searchable(),
                                                                 Forms\Components\ColorPicker::make('color')
-                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.color')),
+                                                                    ->label(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.accounting-information.fields.color'))
+                                                                    ->hexColor(),
                                                             ]),
                                                     ]),
                                                 Forms\Components\Fieldset::make(__('accounts::filament/resources/journal.form.tabs.journal-entries.field-set.bank-account-number.title'))

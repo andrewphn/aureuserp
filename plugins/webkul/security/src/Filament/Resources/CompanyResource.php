@@ -249,7 +249,8 @@ class CompanyResource extends Resource
                                             ->directory('company-logos')
                                             ->visibility('private'),
                                         Forms\Components\ColorPicker::make('color')
-                                            ->label(__('security::filament/resources/company.form.sections.branding.fields.color')),
+                                            ->label(__('security::filament/resources/company.form.sections.branding.fields.color'))
+                                            ->hexColor(),
                                     ]),
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.contact-information.title'))
                                     ->schema([

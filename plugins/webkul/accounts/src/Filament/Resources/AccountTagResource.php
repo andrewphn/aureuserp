@@ -46,7 +46,8 @@ class AccountTagResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\ColorPicker::make('color')
-                            ->label(__('accounts::filament/resources/account-tag.form.fields.color')),
+                            ->label(__('accounts::filament/resources/account-tag.form.fields.color'))
+                            ->hexColor(),
                         Forms\Components\Select::make('country_id')
                             ->searchable()
                             ->preload()
