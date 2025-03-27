@@ -333,6 +333,9 @@ class UserResource extends Resource
                                         Infolists\Components\TextEntry::make('name')
                                             ->icon('heroicon-o-user')
                                             ->placeholder('—')
+                                            ->extraAttributes([
+                                                'style' => 'word-break: break-all;',
+                                            ])
                                             ->label(__('security::filament/resources/user.infolist.sections.general-information.entries.name')),
                                         Infolists\Components\TextEntry::make('email')
                                             ->icon('heroicon-o-envelope')
