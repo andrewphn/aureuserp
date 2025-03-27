@@ -185,7 +185,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('security::filament/resources/user.table.columns.name'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(50),
                 Tables\Columns\TextColumn::make('email')
                     ->label(__('security::filament/resources/user.table.columns.email'))
                     ->searchable()
