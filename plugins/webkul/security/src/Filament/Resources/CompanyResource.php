@@ -507,11 +507,8 @@ class CompanyResource extends Resource
                                         ->hiddenLabel()
                                         ->circular()
                                         ->placeholder('—'),
-                                    Infolists\Components\TextEntry::make('color')
-                                        ->icon('heroicon-o-swatch')
+                                    Infolists\Components\ColorEntry::make('color')
                                         ->placeholder('—')
-                                        ->badge()
-                                        ->color(fn ($record) => $record->color ?? 'gray')
                                         ->label(__('security::filament/resources/company.infolist.sections.branding.entries.color')),
                                 ]),
 
