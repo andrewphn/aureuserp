@@ -322,7 +322,7 @@ class BillResource extends Resource
                                 Infolists\Components\RepeatableEntry::make('lines')
                                     ->hiddenLabel()
                                     ->schema([
-                                        Infolists\Components\TextEntry::make('product.name')
+                                        Infolists\Components\TextEntry::make('name')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/bill.infolist.tabs.invoice-lines.repeater.products.entries.product'))
                                             ->icon('heroicon-o-cube'),
@@ -472,6 +472,13 @@ class BillResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
+                                    ->getOptionLabelUsing(function ($record) {
+                                        if ($record->product) {
+                                            return $record->product->name;
+                                        }
+
+                                        return $record->name;
+                                    })
                                     ->dehydrated()
                                     ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
