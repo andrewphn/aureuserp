@@ -84,9 +84,12 @@ class ProductResource extends BaseProductResource
                     ->schema([
                         Forms\Components\CheckboxList::make('routes')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.operation.fields.routes'))
-                            ->relationship('routes', 'name')
-                            ->searchable()
-                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.fields.routes-hint-tooltip')),
+                            ->relationship(
+                                'routes',
+                                'name',
+                                fn ($query) => $query->where('product_selectable', true)
+                            )
+                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.operation.fields.routes-hint-tooltip')),
                     ]),
 
                 Forms\Components\Fieldset::make(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.title'))

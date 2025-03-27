@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Incoterm;
-use Webkul\Account\Models\Move;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
@@ -21,6 +20,8 @@ use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
+use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\OperationType;
 
 class Order extends Model
 {
@@ -74,6 +75,7 @@ class Order extends Model
         'user_id',
         'company_id',
         'creator_id',
+        'operation_type_id',
     ];
 
     /**
@@ -195,7 +197,17 @@ class Order extends Model
 
     public function accountMoves(): BelongsToMany
     {
-        return $this->belongsToMany(Move::class, 'purchases_order_account_moves', 'order_id', 'move_id');
+        return $this->belongsToMany(AccountMove::class, 'purchases_order_account_moves', 'order_id', 'move_id');
+    }
+
+    public function operationType(): BelongsTo
+    {
+        return $this->belongsTo(OperationType::class, 'operation_type_id');
+    }
+
+    public function operations(): BelongsToMany
+    {
+        return $this->belongsToMany(Operation::class, 'purchases_order_operations', 'purchase_order_id', 'inventory_operation_id');
     }
 
     /**

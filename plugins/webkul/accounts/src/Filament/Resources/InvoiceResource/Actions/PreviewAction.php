@@ -41,7 +41,7 @@ class PreviewAction extends Action
         $this
             ->label(__('accounts::filament/resources/invoice/actions/preview.title'))
             ->color('gray')
-            ->visible(fn (Move $record) => $record->state == MoveState::POSTED->value)
+            ->visible(fn (Move $record) => $record->state == MoveState::POSTED)
             ->icon('heroicon-o-viewfinder-circle')
             ->modalHeading(__('accounts::filament/resources/invoice/actions/preview.modal.title'))
             ->modalSubmitAction(false)

@@ -4,6 +4,8 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Currency;
 
 class AccountSeeder extends Seeder
 {
@@ -12,15 +14,23 @@ class AccountSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('accounts_payment_method_lines')->delete();
+
+        DB::table('accounts_journals')->delete();
+
         DB::table('accounts_accounts')->delete();
+
+        $user = User::first();
+
+        $currency = Currency::find(1);
 
         $now = now();
 
         $accounts = [
             [
                 'id'           => 1,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Current Assets',
                 'code'         => '101000',
@@ -33,8 +43,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 2,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Stock Valuation',
                 'code'         => '110100',
@@ -47,8 +57,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 3,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Stock Interim (Received)',
                 'code'         => '110200',
@@ -61,8 +71,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 4,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Stock Interim (Delivered)',
                 'code'         => '110300',
@@ -75,8 +85,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 5,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Cost of Production',
                 'code'         => '110400',
@@ -89,8 +99,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 6,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Work in Progress',
                 'code'         => '110500',
@@ -103,8 +113,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 7,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_receivable',
                 'name'         => 'Account Receivable',
                 'code'         => '121000',
@@ -117,8 +127,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 8,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Products to receive',
                 'code'         => '121100',
@@ -131,8 +141,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 9,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Prepaid Expenses',
                 'code'         => '128000',
@@ -145,8 +155,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 10,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Tax Paid',
                 'code'         => '131000',
@@ -159,8 +169,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 11,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Tax Receivable',
                 'code'         => '132000',
@@ -173,8 +183,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 12,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_prepayments',
                 'name'         => 'Prepayments',
                 'code'         => '141000',
@@ -187,8 +197,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 13,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_fixed',
                 'name'         => 'Fixed Asset',
                 'code'         => '151000',
@@ -201,8 +211,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 14,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_non_current',
                 'name'         => 'Non-current assets',
                 'code'         => '191000',
@@ -215,8 +225,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 15,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Current Liabilities',
                 'code'         => '201000',
@@ -229,8 +239,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 16,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_payable',
                 'name'         => 'Account Payable',
                 'code'         => '211000',
@@ -243,8 +253,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 17,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Bills to receive',
                 'code'         => '211100',
@@ -257,8 +267,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 18,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Deferred Revenue',
                 'code'         => '212000',
@@ -271,8 +281,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 19,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Salary Payable',
                 'code'         => '230000',
@@ -285,8 +295,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 20,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Employee Payroll Taxes',
                 'code'         => '230100',
@@ -299,8 +309,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 21,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Employer Payroll Taxes',
                 'code'         => '230200',
@@ -313,8 +323,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 22,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Tax Received',
                 'code'         => '251000',
@@ -327,8 +337,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 23,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_current',
                 'name'         => 'Tax Payable',
                 'code'         => '252000',
@@ -341,8 +351,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 24,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_non_current',
                 'name'         => 'Non-current Liabilities',
                 'code'         => '291000',
@@ -355,8 +365,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 25,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'equity',
                 'name'         => 'Capital',
                 'code'         => '301000',
@@ -369,8 +379,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 26,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'equity',
                 'name'         => 'Dividends',
                 'code'         => '302000',
@@ -383,8 +393,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 27,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'income',
                 'name'         => 'Product Sales',
                 'code'         => '400000',
@@ -397,8 +407,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 28,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'income',
                 'name'         => 'Foreign Exchange Gain',
                 'code'         => '441000',
@@ -411,8 +421,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 29,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'income',
                 'name'         => 'Cash Difference Gain',
                 'code'         => '442000',
@@ -425,8 +435,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 30,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Cash Discount Loss',
                 'code'         => '443000',
@@ -439,8 +449,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 31,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'income_other',
                 'name'         => 'Other Income',
                 'code'         => '450000',
@@ -453,8 +463,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 32,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense_direct_cost',
                 'name'         => 'Cost of Goods Sold',
                 'code'         => '500000',
@@ -467,8 +477,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 33,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Expenses',
                 'code'         => '600000',
@@ -481,8 +491,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 34,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Purchase of Equipments',
                 'code'         => '611000',
@@ -495,8 +505,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 35,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Rent',
                 'code'         => '612000',
@@ -509,8 +519,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 36,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Bank Fees',
                 'code'         => '620000',
@@ -523,8 +533,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 37,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Salary Expenses',
                 'code'         => '630000',
@@ -537,8 +547,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 38,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Foreign Exchange Loss',
                 'code'         => '641000',
@@ -551,8 +561,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 39,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Cash Difference Loss',
                 'code'         => '642000',
@@ -565,8 +575,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 40,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'income',
                 'name'         => 'Cash Discount Gain',
                 'code'         => '643000',
@@ -579,8 +589,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 41,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'RD Expenses',
                 'code'         => '961000',
@@ -593,8 +603,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 42,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'expense',
                 'name'         => 'Sales Expenses',
                 'code'         => '962000',
@@ -607,8 +617,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 43,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_receivable',
                 'name'         => 'Account Receivable (PoS)',
                 'code'         => '101300',
@@ -621,8 +631,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 44,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'liability_credit_card',
                 'name'         => 'Credit Card',
                 'code'         => '201100',
@@ -635,8 +645,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 45,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_cash',
                 'name'         => 'Bank',
                 'code'         => '101401',
@@ -650,8 +660,8 @@ class AccountSeeder extends Seeder
 
             [
                 'id'           => 46,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_cash',
                 'name'         => 'Cash',
                 'code'         => '101501',
@@ -664,8 +674,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 47,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Bank Suspense Account',
                 'code'         => '101402',
@@ -678,8 +688,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 48,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Liquidity Transfer',
                 'code'         => '101701',
@@ -692,8 +702,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 49,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Outstanding Receipts',
                 'code'         => '101403',
@@ -706,8 +716,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 50,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'asset_current',
                 'name'         => 'Outstanding Payments',
                 'code'         => '101404',
@@ -720,8 +730,8 @@ class AccountSeeder extends Seeder
             ],
             [
                 'id'           => 51,
-                'currency_id'  => null,
-                'creator_id'   => 1,
+                'currency_id'  => $currency?->id,
+                'creator_id'   => $user?->id,
                 'account_type' => 'equity_unaffected',
                 'name'         => 'Undistributed Profits/Losses',
                 'code'         => '999999',

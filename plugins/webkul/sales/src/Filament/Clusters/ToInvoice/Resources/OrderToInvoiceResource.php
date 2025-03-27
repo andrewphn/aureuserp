@@ -4,6 +4,7 @@ namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources;
 
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -20,6 +21,8 @@ class OrderToInvoiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-arrow-down';
 
     protected static ?string $cluster = ToInvoice::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
@@ -40,7 +43,7 @@ class OrderToInvoiceResource extends Resource
     {
         return QuotationResource::table($table)
             ->modifyQueryUsing(function ($query) {
-                $query->where('invoice_status', InvoiceStatus::TO_INVOICE->value);
+                $query->where('invoice_status', InvoiceStatus::TO_INVOICE);
             });
     }
 

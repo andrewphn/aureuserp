@@ -2,17 +2,14 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Actions;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Livewire\Component;
 use Webkul\Account\Models\Partner;
 use Webkul\Purchase\Enums\OrderState;
-use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
 use Webkul\Purchase\Models\Order;
 
 class SendPOEmailAction extends Action
@@ -46,72 +43,43 @@ class SendPOEmailAction extends Action
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.subject'))
                     ->required()
                     ->default("Purchase Order #{$this->getRecord()->name}"),
-                Forms\Components\RichEditor::make('message')
+                Forms\Components\MarkdownEditor::make('message')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.message'))
                     ->required()
-                    ->default("<p>Dear {$this->getRecord()->partner->name} <br><br>Here is in attachment a purchase order <strong>{$this->getRecord()->name}</strong> amounting in <strong>{$this->getRecord()->total_amount}</strong>.
-                            
-                            <br><br>
-                            
-                            The receipt is expected for <strong>{$this->getRecord()->planned_at}</strong>.
-                            
-                            <br><br>
+                    ->default(<<<MD
+Dear **{$this->getRecord()->partner->name}**  
 
-                            Could you please acknowledge the receipt of this order?
-                            
-                            <br><br>
-                            
-                            Best regards,
-                            
-                            <br><br>
-                            --<br>
-                            {$userName}
-                        </p>
-                    "),
+Here is in attachment a purchase order **{$this->getRecord()->name}** amounting to **{$this->getRecord()->total_amount}**.  
+
+The receipt is expected for **{$this->getRecord()->planned_at}**.  
+
+Could you please acknowledge the receipt of this order?  
+
+Best regards,  
+
+--  
+{$userName}  
+MD),
                 Forms\Components\FileUpload::make('attachment')
                     ->hiddenLabel()
                     ->disk('public')
                     ->default(function () {
-                        return $this->generatePdf($this->getRecord());
+                        return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
                     })
                     ->downloadable()
                     ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
-                $pdfPath = $this->generatePdf($record);
+                try {
+                    $record = PurchaseOrder::sendPurchaseOrder($record, $data);
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
 
-                foreach ($data['vendors'] as $vendorId) {
-                    $vendor = Partner::find($vendorId);
-
-                    if ($vendor?->email) {
-                        try {
-                            Mail::to($vendor->email)->send(new VendorPurchaseOrderMail(
-                                $data['subject'],
-                                $data['message'],
-                                $pdfPath
-                            ));
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-
-                            return;
-                        }
-                    }
+                    return;
                 }
-
-                $message = $record->addMessage([
-                    'body' => $data['message'],
-                    'type' => 'comment',
-                ]);
-
-                $record->addAttachments(
-                    [$pdfPath],
-                    ['message_id' => $message->id],
-                );
-
-                Storage::delete($pdfPath);
 
                 $livewire->updateForm();
 
@@ -123,20 +91,5 @@ class SendPOEmailAction extends Action
             })
             ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
             ->visible(fn () => $this->getRecord()->state == OrderState::PURCHASE);
-    }
-
-    private function generatePdf($record)
-    {
-        $pdfPath = 'Purchase Order-'.str_replace('/', '_', $record->name).'.pdf';
-
-        if (! Storage::exists($pdfPath)) {
-            $pdf = PDF::loadView('purchases::filament.admin.clusters.orders.orders.actions.print-purchase-order', [
-                'records'  => [$record],
-            ]);
-
-            Storage::disk('public')->put($pdfPath, $pdf->output());
-        }
-
-        return $pdfPath;
     }
 }

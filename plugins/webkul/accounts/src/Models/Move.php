@@ -4,6 +4,9 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -136,21 +139,24 @@ class Move extends Model
 
     protected $casts = [
         'invoice_date_due' => 'datetime',
+        'state'            => MoveState::class,
+        'payment_state'    => PaymentState::class,
+        'move_type'        => MoveType::class,
     ];
 
     public function campaign()
     {
-        return $this->belongsTo(UtmCampaign::class);
+        return $this->belongsTo(UtmCampaign::class, 'campaign_id');
     }
 
     public function journal()
     {
-        return $this->belongsTo(Journal::class);
+        return $this->belongsTo(Journal::class, 'journal_id');
     }
 
     public function company()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function taxCashBasisOriginMove()
@@ -170,17 +176,17 @@ class Move extends Model
 
     public function partner()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'partner_id');
     }
 
     public function commercialPartner()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'commercial_partner_id');
     }
 
     public function partnerShipping()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'partner_shipping_id');
     }
 
     public function partnerBank()
@@ -190,12 +196,12 @@ class Move extends Model
 
     public function fiscalPosition()
     {
-        return $this->belongsTo(FiscalPosition::class);
+        return $this->belongsTo(FiscalPosition::class, 'fiscal_position_id');
     }
 
     public function currency()
     {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function reversedEntry()
@@ -225,7 +231,7 @@ class Move extends Model
 
     public function source()
     {
-        return $this->belongsTo(UTMSource::class);
+        return $this->belongsTo(UTMSource::class, 'source_id');
     }
 
     public function medium()
@@ -253,12 +259,12 @@ class Move extends Model
 
     public function allLines()
     {
-        return $this->hasMany(MoveLine::class);
+        return $this->hasMany(MoveLine::class, 'move_id');
     }
 
     public function taxLines()
     {
-        return $this->hasMany(MoveLine::class)
+        return $this->hasMany(MoveLine::class, 'move_id')
             ->where('display_type', 'tax');
     }
 
@@ -268,40 +274,50 @@ class Move extends Model
             ->where('display_type', 'payment_term');
     }
 
-    public static function generateNextInvoiceAndCreditNoteNumber(string $type = 'INV'): string
-    {
-        $year = date('Y');
-        $prefix = "{$type}/{$year}/";
-
-        $lastInvoice = self::whereRaw('name LIKE ?', ["{$prefix}%"])
-            ->latest('name')
-            ->first();
-
-        $lastNumber = optional($lastInvoice)->name
-            ? (int) substr($lastInvoice->name, strlen($prefix))
-            : 0;
-
-        return $prefix.str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
-    }
-
+    /**
+     * Bootstrap any application services.
+     */
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            if (empty($model->name)) {
-                $model->name = self::generateNextInvoiceAndCreditNoteNumber();
-            }
+        static::created(function ($model) {
+            $model->updateSequencePrefix();
 
-            $model->sequence_prefix = self::extractPrefixFromName($model->name);
+            $model->updateQuietly([
+                'name' => $model->sequence_prefix.'/'.$model->id,
+            ]);
         });
     }
 
     /**
-     * Extracts the prefix (e.g., "INV or RINV/2025/") from the given invoice and credit Note name.
+     * Update the full name without triggering additional events
      */
-    protected static function extractPrefixFromName(string $name): string
+    public function updateSequencePrefix()
     {
-        return substr($name, 0, strrpos($name, '/') + 1);
+        $suffix = date('Y').'/'.date('m');
+
+        switch ($this->move_type) {
+            case MoveType::OUT_INVOICE:
+                $this->sequence_prefix = 'INV/'.$suffix;
+
+                break;
+            case MoveType::OUT_REFUND:
+                $this->sequence_prefix = 'RINV/'.$suffix;
+
+                break;
+            case MoveType::IN_INVOICE:
+                $this->sequence_prefix = 'BILL/'.$suffix;
+
+                break;
+            case MoveType::IN_REFUND:
+                $this->sequence_prefix = 'RBILL/'.$suffix;
+
+                break;
+            default:
+                $this->sequence_prefix = $suffix;
+
+                break;
+        }
     }
 }

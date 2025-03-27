@@ -5,7 +5,9 @@ namespace Webkul\Purchase\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Mail\Mailables\Envelope;
 
 class VendorPurchaseOrderMail extends Mailable
 {
@@ -26,12 +28,35 @@ class VendorPurchaseOrderMail extends Mailable
         $this->pdfPath = $pdfPath;
     }
 
-    public function build()
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
     {
-        return $this->subject($this->subject)
-            ->html($this->message)
-            ->attach(Storage::disk('public')->path($this->pdfPath), [
-                'mime' => 'application/pdf',
-            ]);
+        return new Envelope(
+            subject: $this->subject,
+        );
+    }
+ 
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            markdown: 'purchases::emails.index',
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [
+            Attachment::fromStorageDisk('public', $this->pdfPath),
+        ];
     }
 }

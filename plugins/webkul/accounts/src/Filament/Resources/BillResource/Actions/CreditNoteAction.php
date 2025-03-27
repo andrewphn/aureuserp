@@ -29,7 +29,7 @@ class CreditNoteAction extends Action
         $this
             ->label(__('Credit Note'))
             ->color('gray')
-            ->visible(fn (Move $record) => $record->state == MoveState::POSTED->value)
+            ->visible(fn (Move $record) => $record->state == MoveState::POSTED)
             ->icon('heroicon-o-receipt-refund')
             ->modalHeading(__('Credit Note'));
 
@@ -80,11 +80,10 @@ class CreditNoteAction extends Action
             'reversed_entry_id'                 => $record->id,
             'invoice_user_id'                   => $record->invoice_user_id,
             'reference'                         => "Reversal of: {$record->name}, {$creditNote->reason}",
-            'state'                             => MoveState::DRAFT->value,
-            'name'                              => Move::generateNextInvoiceAndCreditNoteNumber('RBILL'),
-            'move_type'                         => MoveType::IN_REFUND->value,
+            'state'                             => MoveState::DRAFT,
+            'move_type'                         => MoveType::IN_REFUND,
             'auto_post'                         => 0,
-            'payment_state'                     => PaymentState::NOT_PAID->value,
+            'payment_state'                     => PaymentState::NOT_PAID,
             'invoice_partner_display_name'      => $record->invoice_partner_display_name,
             'date'                              => $creditNote->date,
             'invoice_date'                      => $record->invoice_date,

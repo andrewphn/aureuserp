@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Enums\DelayType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -84,29 +85,12 @@ class InvoiceResource extends Resource
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('payment_state')
-                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
+                                ->icon(fn ($record) => $record->payment_state->getIcon())
+                                ->color(fn ($record) => $record->payment_state->getColor())
+                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID, PaymentState::REVERSED]))
+                                ->label(fn ($record) => $record->payment_state->getLabel())
                                 ->size(ActionSize::ExtraLarge->value),
                         ]),
-                        Forms\Components\Group::make()
-                            ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('accounts::filament/resources/invoice.form.section.general.fields.customer-invoice'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
-                                    ->placeholder('INV/2025/00001')
-                                    ->default(fn () => AccountMove::generateNextInvoiceAndCreditNoteNumber())
-                                    ->unique(
-                                        table: 'accounts_account_moves',
-                                        column: 'name',
-                                        ignoreRecord: true,
-                                    )
-                                    ->columnSpan(1)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
-                            ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Group::make()
@@ -120,7 +104,7 @@ class InvoiceResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED, MoveState::CANCEL])),
                                         Forms\Components\Placeholder::make('partner_address')
                                             ->hiddenLabel()
                                             ->visible(
@@ -154,7 +138,7 @@ class InvoiceResource extends Resource
                                     ->label(__('accounts::filament/resources/invoice.form.section.general.fields.invoice-date'))
                                     ->default(now())
                                     ->native(false)
-                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED, MoveState::CANCEL])),
                                 Forms\Components\DatePicker::make('invoice_date_due')
                                     ->required()
                                     ->default(now())
@@ -205,13 +189,13 @@ class InvoiceResource extends Resource
                                             ->preload()
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.recipient-bank'))
                                             ->createOptionForm(fn ($form) => BankAccountResource::form($form))
-                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED, MoveState::CANCEL])),
                                         Forms\Components\TextInput::make('payment_reference')
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.payment-reference')),
                                         Forms\Components\DatePicker::make('delivery_date')
                                             ->native(false)
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.invoice.fields.delivery-date'))
-                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED, MoveState::CANCEL])),
                                     ]),
                                 Forms\Components\Fieldset::make(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.title'))
                                     ->schema([
@@ -231,7 +215,7 @@ class InvoiceResource extends Resource
                                             ->default(0)
                                             ->inline(false)
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.auto-post'))
-                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                            ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED, MoveState::CANCEL])),
                                         Forms\Components\Toggle::make('checked')
                                             ->inline(false)
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.accounting.fieldset.checked')),
@@ -279,8 +263,7 @@ class InvoiceResource extends Resource
                                 Forms\Components\RichEditor::make('narration')
                                     ->hiddenLabel(),
                             ]),
-                    ])
-                    ->persistTabInQueryString(),
+                    ]),
             ])
             ->columns('full');
     }
@@ -294,6 +277,11 @@ class InvoiceResource extends Resource
                     ->label(__('accounts::filament/resources/invoice.table.columns.number'))
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('state')
+                    ->placeholder('-')
+                    ->label(__('accounts::filament/resources/invoice.table.columns.state'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('invoice_partner_display_name')
                     ->label(__('accounts::filament/resources/invoice.table.columns.customer'))
                     ->placeholder('-')
@@ -344,9 +332,9 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('payment_state')
                     ->label(__('Payment State'))
                     ->placeholder('-')
-                    ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
-                    ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
-                    ->formatStateUsing(fn ($state) => PaymentState::from($state)->getLabel())
+                    ->color(fn (PaymentState $state) => $state->getColor())
+                    ->icon(fn (PaymentState $state) => $state->getIcon())
+                    ->formatStateUsing(fn (PaymentState $state) => $state->getLabel())
                     ->badge()
                     ->searchable()
                     ->sortable()
@@ -484,17 +472,15 @@ class InvoiceResource extends Resource
     {
         return $infolist
             ->schema([
+                Infolists\Components\Section::make()
+                    ->schema([
+                        Infolists\Components\TextEntry::make('payment_state')
+                            ->badge(),
+                    ])
+                    ->compact(),
                 Infolists\Components\Section::make(__('accounts::filament/resources/invoice.infolist.section.general.title'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
-                        Infolists\Components\Actions::make([
-                            Infolists\Components\Actions\Action::make('payment_state')
-                                ->icon(fn ($record) => PaymentState::from($record->payment_state)->getIcon())
-                                ->color(fn ($record) => PaymentState::from($record->payment_state)->getColor())
-                                ->visible(fn ($record) => $record && in_array($record->payment_state, [PaymentState::PAID->value, PaymentState::REVERSED->value]))
-                                ->label(fn ($record) => PaymentState::from($record->payment_state)->getLabel())
-                                ->size(ActionSize::ExtraLarge->value),
-                        ]),
                         Infolists\Components\Grid::make()
                             ->schema([
                                 Infolists\Components\TextEntry::make('name')
@@ -525,10 +511,12 @@ class InvoiceResource extends Resource
                                     ->placeholder('-')
                                     ->label(__('accounts::filament/resources/invoice.infolist.section.general.entries.due-date'))
                                     ->icon('heroicon-o-clock')
+                                    ->hidden(fn ($record) => $record->invoice_payment_term_id !== null)
                                     ->date(),
                                 Infolists\Components\TextEntry::make('invoicePaymentTerm.name')
                                     ->placeholder('-')
                                     ->label(__('accounts::filament/resources/invoice.infolist.section.general.entries.payment-term'))
+                                    ->hidden(fn ($record) => $record->invoice_payment_term_id === null)
                                     ->icon('heroicon-o-calendar-days'),
                             ])->columns(2),
                     ]),
@@ -706,7 +694,15 @@ class InvoiceResource extends Resource
             ->addActionLabel(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.add-product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+            ->itemLabel(function ($state) {
+                if (! empty($state['name'])) {
+                    return $state['name'];
+                }
+
+                $product = Product::find($state['product_id']);
+
+                return $product->name ?? null;
+            })
             ->deleteAction(fn (Forms\Components\Actions\Action $action) => $action->requiresConfirmation())
             ->schema([
                 Forms\Components\Group::make()
@@ -724,7 +720,7 @@ class InvoiceResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductUpdated($set, $get))
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity')
@@ -734,7 +730,7 @@ class InvoiceResource extends Resource
                                     ->numeric()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductQtyUpdated($set, $get)),
                                 Forms\Components\Select::make('uom_id')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.unit'))
@@ -747,7 +743,7 @@ class InvoiceResource extends Resource
                                     ->live()
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterUOMUpdated($set, $get))
                                     ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom),
                                 Forms\Components\Select::make('taxes')
@@ -763,7 +759,7 @@ class InvoiceResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateHydrated(fn (Forms\Get $get, Forms\Set $set) => self::calculateLineTotals($set, $get))
                                     ->afterStateUpdated(fn (Forms\Get $get, Forms\Set $set, $state) => self::calculateLineTotals($set, $get))
                                     ->live(),
@@ -774,7 +770,7 @@ class InvoiceResource extends Resource
                                     ->default(0)
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_unit')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.unit-price'))
@@ -783,13 +779,13 @@ class InvoiceResource extends Resource
                                     ->required()
                                     ->live()
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value]))
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL]))
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get)),
                                 Forms\Components\TextInput::make('price_subtotal')
                                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.sub-total'))
                                     ->default(0)
                                     ->dehydrated()
-                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED->value, MoveState::CANCEL->value])),
+                                    ->disabled(fn ($record) => $record && in_array($record->parent_state, [MoveState::POSTED, MoveState::CANCEL])),
                                 Forms\Components\Hidden::make('product_uom_qty')
                                     ->default(0),
                                 Forms\Components\Hidden::make('price_tax')
@@ -829,12 +825,8 @@ class InvoiceResource extends Resource
             'commercial_partner_id' => $livewire->record->partner_id,
             'display_type'          => 'product',
             'sort'                  => MoveLine::max('sort') + 1,
-            'parent_state'          => $livewire->record->state ?? MoveState::DRAFT->value,
+            'parent_state'          => $livewire->record->state ?? MoveState::DRAFT,
             'move_name'             => $livewire->record->name,
-            'debit'                 => 0.00,
-            'credit'                => floatval($data['price_subtotal']),
-            'balance'               => -floatval($data['price_subtotal']),
-            'amount_currency'       => -floatval($data['price_subtotal']),
         ]);
 
         if ($data['discount'] > 0) {
@@ -1024,6 +1016,14 @@ class InvoiceResource extends Resource
 
         $line->price_total = $subTotal + $taxAmount;
 
+        $line->debit = 0.00;
+
+        $line->credit = round($subTotal, 4);
+
+        $line->balance = -round($subTotal, 4);
+
+        $line->amount_currency = -round($subTotal, 4);
+
         $line->save();
 
         return [
@@ -1034,19 +1034,13 @@ class InvoiceResource extends Resource
 
     public static function updateOrCreatePaymentTermLine($move): void
     {
-        $dateMaturity = $move->invoice_date_due;
-
-        if ($move->invoicePaymentTerm && $move->invoicePaymentTerm->dueTerm?->nb_days) {
-            $dateMaturity = $dateMaturity->addDays($move->invoicePaymentTerm->dueTerm->nb_days);
-        }
-
         $data = [
             'move_id'                  => $move->id,
             'move_name'                => $move->name,
             'display_type'             => 'payment_term',
             'currency_id'              => $move->currency_id,
             'partner_id'               => $move->partner_id,
-            'date_maturity'            => $dateMaturity,
+            'date_maturity'            => static::calculateDateMaturity($move),
             'company_id'               => $move->company_id,
             'company_currency_id'      => $move->company_currency_id,
             'commercial_partner_id'    => $move->partner_id,
@@ -1129,5 +1123,42 @@ class InvoiceResource extends Resource
         }
 
         $existingTaxLines->each->delete();
+    }
+
+    private static function calculateDateMaturity($move)
+    {
+        $dateMaturity = $move->invoice_date_due ?? now();
+
+        if (
+            $move->invoice_payment_term_id
+            && $move->invoicePaymentTerm
+        ) {
+            $dueTerm = $move->invoicePaymentTerm->dueTerm;
+
+            if ($dueTerm) {
+                switch ($dueTerm->delay_type) {
+                    case DelayType::DAYS_AFTER->value:
+                        $dateMaturity = $dateMaturity->addDays($dueTerm->nb_days);
+
+                        break;
+
+                    case DelayType::DAYS_AFTER_END_OF_MONTH->value:
+                        $dateMaturity = $dateMaturity->endOfMonth()->addDays($dueTerm->nb_days);
+                        break;
+
+                    case DelayType::DAYS_AFTER_END_OF_NEXT_MONTH->value:
+                        $dateMaturity = $dateMaturity->addMonth()->endOfMonth()->addDays($dueTerm->days_next_month);
+
+                        break;
+
+                    case DelayType::DAYS_END_OF_MONTH_NO_THE->value:
+                        $dateMaturity = $dateMaturity->endOfMonth();
+
+                        break;
+                }
+            }
+        }
+
+        return $dateMaturity;
     }
 }

@@ -8,6 +8,9 @@ use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
+use Webkul\Inventory\Facades\Inventory as InventoryFacade;
+use Webkul\Inventory\InventoryManager;
+use Illuminate\Foundation\AliasLoader;
 
 class InventoryServiceProvider extends PackageServiceProvider
 {
@@ -50,6 +53,12 @@ class InventoryServiceProvider extends PackageServiceProvider
                 '2025_01_14_133260_create_inventories_moves_table',
                 '2025_01_14_133266_create_inventories_move_destinations_table',
                 '2025_01_15_095753_create_inventories_move_lines_table',
+                '2025_03_13_074205_create_inventories_order_points_table',
+                '2025_03_17_101755_add_inventories_columns_to_purchases_orders_table_from_inventories',
+                '2025_03_17_101814_add_inventories_columns_to_purchases_order_lines_table_from_inventories',
+                '2025_03_17_111610_add_purchases_columns_to_inventories_moves_table_from_inventories',
+                '2025_03_17_115707_create_purchases_order_operations_table_from_inventories',
+                '2025_03_19_100337_add_is_refund_column_in_inventories_moves_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -99,5 +108,14 @@ class InventoryServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         //
+    }
+
+    public function packageRegistered(): void
+    {
+        $loader = AliasLoader::getInstance();
+
+        $loader->alias('inventory', InventoryFacade::class);
+
+        $this->app->singleton('inventory', InventoryManager::class);
     }
 }

@@ -23,11 +23,11 @@ class CancelAction extends Action
             ->label(__('accounts::filament/resources/invoice/actions/cancel-action.title'))
             ->color('gray')
             ->action(function (Move $record, Component $livewire): void {
-                $record->state = MoveState::CANCEL->value;
+                $record->state = MoveState::CANCEL;
                 $record->save();
 
                 $record->allLines->each(function ($moveLine) {
-                    $moveLine->parent_state = MoveState::POSTED->value;
+                    $moveLine->parent_state = MoveState::POSTED;
                     $moveLine->save();
                 });
 
@@ -35,8 +35,8 @@ class CancelAction extends Action
             })
             ->hidden(function (Move $record) {
                 return
-                    $record->state != MoveState::DRAFT->value
-                    || $record->move_type == MoveType::ENTRY->value;
+                    $record->state != MoveState::DRAFT
+                    || $record->move_type == MoveType::ENTRY;
             });
     }
 }

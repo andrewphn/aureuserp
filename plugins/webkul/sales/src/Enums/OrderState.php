@@ -2,9 +2,10 @@
 
 namespace Webkul\Sale\Enums;
 
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum OrderState: string implements HasLabel
+enum OrderState: string implements HasColor, HasLabel
 {
     case DRAFT = 'draft';
 
@@ -32,5 +33,15 @@ enum OrderState: string implements HasLabel
             self::SALE->value    => __('sales::enums/order-state.sale'),
             self::CANCEL->value  => __('sales::enums/order-state.cancel'),
         ];
+    }
+
+    public function getColor(): ?string
+    {
+        return match ($this) {
+            self::DRAFT  => 'gray',
+            self::SENT   => 'primary',
+            self::SALE   => 'success',
+            self::CANCEL => 'danger',
+        };
     }
 }

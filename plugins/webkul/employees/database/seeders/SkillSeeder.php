@@ -4,6 +4,7 @@ namespace Webkul\Employee\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
 
 class SkillSeeder extends Seeder
 {
@@ -14,12 +15,15 @@ class SkillSeeder extends Seeder
     {
         DB::table('employees_skills')->delete();
 
+        $user = User::first();
+
         $skills = [
             [
                 'sort'               => 10,
                 'skill_type_id'      => 1,
                 'name'               => 'French',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -27,6 +31,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Spanish',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -34,6 +39,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'English',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -41,6 +47,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'German',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -48,6 +55,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Filipino',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -55,6 +63,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Arabic',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -62,6 +71,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Bengali',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -69,6 +79,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Mandarin Chinese',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -76,6 +87,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Wu Chinese',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -83,6 +95,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Hindi',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -90,6 +103,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Russian',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -97,6 +111,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Portuguese',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -104,6 +119,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Indonesian',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -111,6 +127,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Urdu',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -118,6 +135,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Japanese',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -125,6 +143,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Punjabi',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -132,6 +151,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Javanese',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -139,6 +159,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Telugu',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -146,6 +167,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Turkish',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -153,6 +175,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Korean',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -160,6 +183,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 1,
                 'name'               => 'Marathi',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
 
@@ -168,6 +192,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Communication',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -175,6 +200,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Teamwork',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -182,6 +208,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Problem-Solving',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -189,6 +216,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Time Management',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -196,6 +224,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Critical Thinking',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -203,6 +232,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Decision-Making',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -210,6 +240,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Organizational',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -217,6 +248,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Stress management',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -224,6 +256,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Adaptability',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -231,6 +264,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Conflict Management',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -238,6 +272,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Leadership',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -245,6 +280,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Creativity',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -252,6 +288,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Resourcefulness',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -259,6 +296,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Persuasion',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -266,6 +304,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 2,
                 'name'               => 'Openness to criticism',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
 
@@ -274,6 +313,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Javascript',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -281,6 +321,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Python',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -288,6 +329,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'C/C++',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -295,6 +337,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Android',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -302,6 +345,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Hadoop',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -309,6 +353,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Spark',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -316,6 +361,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'React',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -323,6 +369,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Django',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -330,6 +377,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'RDMS',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -337,6 +385,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'NoSQL',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -344,6 +393,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Go',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -351,6 +401,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Java',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -358,6 +409,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Kotlin',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -365,6 +417,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'PHP',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -372,6 +425,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'C#',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -379,6 +433,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Swift',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -386,6 +441,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'R',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -393,6 +449,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Ruby',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -400,6 +457,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Matlab',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -407,6 +465,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'TypeScript',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -414,6 +473,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Scala',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -421,6 +481,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'HTML',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -428,6 +489,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'CSS',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -435,6 +497,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Rust',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -442,6 +505,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 3,
                 'name'               => 'Perl',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
 
@@ -450,6 +514,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Web Development',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -457,6 +522,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Database Management',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -464,6 +530,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Cloud computing',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -471,6 +538,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Network administration',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -478,6 +546,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Cybersecurity',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -485,6 +554,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'DevOps',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -492,6 +562,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Machine Learning (AI)',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -499,6 +570,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Data analysis/visualization',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -506,6 +578,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Agile and Scrum methodologies',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -513,6 +586,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Mobile app development',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -520,6 +594,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Project Management',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -527,6 +602,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'System Administration (Linux, Windows)',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -534,6 +610,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Virtualization and Containerization',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -541,6 +618,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'IT support',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -548,6 +626,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'IT infrastructure and architecture',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -555,6 +634,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'IT service management (ITSM)',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -562,6 +642,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'Big data technologies (Hadoop, Spark)',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -569,6 +650,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'IoT and embedded systems',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -576,6 +658,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 4,
                 'name'               => 'IT governance and compliance (GDPR, HIPAA,...)',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
 
@@ -584,6 +667,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 5,
                 'name'               => 'Communication',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -591,6 +675,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 5,
                 'name'               => 'Analytics',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -598,6 +683,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 5,
                 'name'               => 'Digital advertising',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -605,6 +691,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 5,
                 'name'               => 'Public Speaking',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -612,6 +699,7 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 5,
                 'name'               => 'CMS',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
             [
@@ -619,16 +707,9 @@ class SkillSeeder extends Seeder
                 'skill_type_id'      => 5,
                 'name'               => 'Email Marketing',
                 'created_at'         => now(),
+                'creator_id'         => $user?->id,
                 'updated_at'         => now(),
             ],
         ];
-
-        DB::table('employees_skills')->insert(collect($skills)->map(function ($skill) {
-            $skill['creator_id'] = 1;
-
-            return $skill;
-        })->toArray());
-
-        $this->call(SkillLevelSeeder::class);
     }
 }

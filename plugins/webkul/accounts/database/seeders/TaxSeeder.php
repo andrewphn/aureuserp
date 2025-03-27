@@ -5,6 +5,9 @@ namespace Webkul\Account\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Account\Enums\TypeTaxUse;
+use Webkul\Account\Models\TaxGroup;
+use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
 
 class TaxSeeder extends Seeder
 {
@@ -12,14 +15,20 @@ class TaxSeeder extends Seeder
     {
         DB::table('accounts_taxes')->delete();
 
-        $invoicesTaxes = [
+        $user = User::first();
+
+        $company = Company::first();
+
+        $taxGroup = TaxGroup::first();
+
+        $taxes = [
             [
-                'company_id'                       => 1,
+                'company_id'                       => $company?->id,
                 'sort'                             => 1,
-                'tax_group_id'                     => 1,
+                'tax_group_id'                     => $taxGroup?->id,
                 'cash_basis_transition_account_id' => null,
                 'country_id'                       => 233,
-                'creator_id'                       => 1,
+                'creator_id'                       => $user?->id,
                 'type_tax_use'                     => TypeTaxUse::SALE->value,
                 'tax_scope'                        => null,
                 'amount_type'                      => 'percent',
@@ -39,12 +48,12 @@ class TaxSeeder extends Seeder
                 'formula'                          => 'price_unit * 0.10',
             ],
             [
-                'company_id'                       => 1,
+                'company_id'                       => $company?->id,
                 'sort'                             => 1,
-                'tax_group_id'                     => 1,
+                'tax_group_id'                     => $taxGroup?->id,
                 'cash_basis_transition_account_id' => null,
                 'country_id'                       => 233,
-                'creator_id'                       => 1,
+                'creator_id'                       => $user?->id,
                 'type_tax_use'                     => TypeTaxUse::PURCHASE->value,
                 'tax_scope'                        => null,
                 'amount_type'                      => 'percent',
@@ -65,6 +74,6 @@ class TaxSeeder extends Seeder
             ],
         ];
 
-        DB::table('accounts_taxes')->insert($invoicesTaxes);
+        DB::table('accounts_taxes')->insert($taxes);
     }
 }

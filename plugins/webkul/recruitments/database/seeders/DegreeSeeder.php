@@ -4,6 +4,7 @@ namespace Webkul\Recruitment\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
 
 class DegreeSeeder extends Seeder
 {
@@ -14,32 +15,34 @@ class DegreeSeeder extends Seeder
     {
         DB::table('recruitments_degrees')->delete();
 
+        $user = User::first();
+
         $degrees = [
             [
                 'sort'       => 1,
                 'name'       => 'Graduate',
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'sort'       => 2,
                 'name'       => 'Master',
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'sort'       => 3,
                 'name'       => 'Bachelor',
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'sort'       => 4,
                 'name'       => 'Doctoral Degree',
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

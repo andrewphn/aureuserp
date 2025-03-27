@@ -13,6 +13,7 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UOM;
+use Webkul\Purchase\Models\OrderLine;
 
 class Move extends Model
 {
@@ -46,6 +47,7 @@ class Move extends Model
         'is_picked',
         'is_scraped',
         'is_inventory',
+        'is_refund',
         'reservation_date',
         'scheduled_at',
         'product_id',
@@ -64,6 +66,7 @@ class Move extends Model
         'scrap_id',
         'company_id',
         'creator_id',
+        'purchase_order_line_id',
     ];
 
     /**
@@ -77,11 +80,60 @@ class Move extends Model
         'is_picked'        => 'boolean',
         'is_scraped'       => 'boolean',
         'is_inventory'     => 'boolean',
+        'is_refund'        => 'boolean',
         'reservation_date' => 'date',
         'scheduled_at'     => 'datetime',
         'deadline'         => 'datetime',
         'alert_Date'       => 'datetime',
     ];
+
+    /**
+     * Determines if a stock move is a purchase return
+     *
+     * @return bool True if the move is a purchase return, false otherwise
+     */
+    public function isPurchaseReturn()
+    {
+        return $this->destinationLocation->type === Enums\LocationType::SUPPLIER
+            ||  (
+                $this->originReturnedMove
+                && $this->destinationLocation->id === $this->destinationLocation->company->inter_company_location_id
+            );
+    }
+
+    /**
+     * Determines if a stock move is a purchase return
+     *
+     * @return bool True if the move is a purchase return, false otherwise
+     */
+    public function isDropshipped()
+    {
+        return (
+                $this->sourceLocation->type === Enums\LocationType::SUPPLIER
+                || ($this->sourceLocation->type === Enums\LocationType::TRANSIT && ! $this->sourceLocation->company_id)
+            )
+            && (
+                $this->destinationLocation->type === Enums\LocationType::CUSTOMER
+                || ($this->destinationLocation->type === Enums\LocationType::TRANSIT && ! $this->destinationLocation->company_id)
+            );
+    }
+
+    /**
+     * Determines if a stock move is a purchase return
+     *
+     * @return bool True if the move is a purchase return, false otherwise
+     */
+    public function isDropshippedReturned()
+    {
+        return (
+                $this->sourceLocation->type === Enums\LocationType::CUSTOMER
+                || ($this->sourceLocation->type === Enums\LocationType::TRANSIT && ! $this->sourceLocation->company_id)
+            )
+            && (
+                $this->destinationLocation->type === Enums\LocationType::SUPPLIER
+                || ($this->destinationLocation->type === Enums\LocationType::TRANSIT && ! $this->destinationLocation->company_id)
+            );
+    }
 
     public function product(): BelongsTo
     {
@@ -181,6 +233,11 @@ class Move extends Model
     public function shouldBypassReservation(): bool
     {
         return $this->sourceLocation->shouldBypassReservation() || ! $this->product->is_storable;
+    }
+
+    public function purchaseOrderLine(): BelongsTo
+    {
+        return $this->belongsTo(OrderLine::class, 'purchase_order_line_id');
     }
 
     protected static function newFactory(): MoveFactory
