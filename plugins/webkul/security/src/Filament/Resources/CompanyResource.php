@@ -465,6 +465,7 @@ class CompanyResource extends Resource
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.street2')),
                                         Infolists\Components\TextEntry::make('address.city')
+                                            ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.city'))
                                             ->icon('heroicon-o-building-library')
                                             ->placeholder('—'),
                                         Infolists\Components\TextEntry::make('address.zip')
