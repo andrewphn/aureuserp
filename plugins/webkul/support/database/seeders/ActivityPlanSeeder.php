@@ -13,11 +13,11 @@ class ActivityPlanSeeder extends Seeder
      */
     public function run(): void
     {
-        $creator = User::find(1);
+        $user = User::first();
 
         $activityPlans = [
             [
-                'creator_id' => $creator->id ?? null,
+                'creator_id' => $user->id ?? null,
                 'name'       => 'Offboarding',
                 'plugin'     => 'employees',
                 'is_active'  => true,
@@ -25,7 +25,7 @@ class ActivityPlanSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'creator_id' => $creator->id ?? null,
+                'creator_id' => $user->id ?? null,
                 'name'       => 'Onboarding',
                 'plugin'     => 'employees',
                 'is_active'  => true,

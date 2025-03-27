@@ -4,6 +4,7 @@ namespace Webkul\Project\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Webkul\Security\Models\User;
 
 class ProjectStageSeeder extends Seeder
 {
@@ -14,33 +15,38 @@ class ProjectStageSeeder extends Seeder
     {
         DB::table('projects_project_stages')->delete();
 
+        $user = User::first();
+
         DB::table('projects_project_stages')->insert([
             [
                 'name'       => 'To Do',
                 'is_active'  => 1,
                 'sort'       => 1,
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ], [
+            ],
+            [
                 'name'       => 'In Progress',
                 'is_active'  => 1,
                 'sort'       => 2,
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ], [
+            ],
+            [
                 'name'       => 'Done',
                 'is_active'  => 1,
                 'sort'       => 3,
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ], [
+            ],
+            [
                 'name'       => 'Cancelled',
                 'is_active'  => 1,
                 'sort'       => 4,
-                'creator_id' => 1,
+                'creator_id' => $user?->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

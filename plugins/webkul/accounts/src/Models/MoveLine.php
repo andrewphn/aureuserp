@@ -4,6 +4,7 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\MoveState;
 use Webkul\Invoice\Models\Product;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
@@ -67,6 +68,10 @@ class MoveLine extends Model
         'reconciled',
         'is_downpayment',
         'full_reconcile_id',
+    ];
+
+    protected $casts = [
+        'parent_state' => MoveState::class,
     ];
 
     public function move()

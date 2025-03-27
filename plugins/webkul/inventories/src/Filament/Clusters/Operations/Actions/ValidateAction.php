@@ -8,10 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Rule;
+use Webkul\Support\Package;
+use Webkul\Inventory\Facades\Inventory;
 
 class ValidateAction extends Action
 {
@@ -92,10 +95,10 @@ class ValidateAction extends Action
     {
         // (Re)create move lines and update operation state before validation.
         foreach ($record->moves as $move) {
-            OperationResource::updateOrCreateMoveLines($move);
+            Inventory::updateOrCreateMoveLines($move);
         }
 
-        OperationResource::updateOperationState($record);
+        Inventory::computeTransferState($record);
 
         // Validate moves and notify on warnings.
         foreach ($record->moves as $move) {
@@ -109,7 +112,13 @@ class ValidateAction extends Action
             $this->finalizeMove($move);
         }
 
-        OperationResource::updateOperationState($record);
+        Inventory::computeTransferState($record);
+
+        if (Package::isPluginInstalled('purchases')) {
+            foreach ($record->purchaseOrders as $purchaseOrder) {
+                PurchaseOrder::computePurchaseOrder($purchaseOrder);
+            }
+        }
 
         $this->applyPushRules($record);
     }
@@ -331,7 +340,7 @@ class ValidateAction extends Action
 
         $newOperation = $record->replicate()->fill([
             'state'      => Enums\OperationState::DRAFT,
-            'origin'     => $record->name,
+            'origin'     => $record->origin ?? $record->name,
             'user_id'    => Auth::id(),
             'creator_id' => Auth::id(),
         ]);
@@ -349,7 +358,7 @@ class ValidateAction extends Action
                 'operation_id'    => $newOperation->id,
                 'reference'       => $newOperation->name,
                 'state'           => Enums\MoveState::DRAFT,
-                'product_qty'     => OperationResource::calculateProductQuantity($move->uom_id, $remainingQty),
+                'product_qty'     => Inventory::calculateProductQuantity($move->uom_id, $remainingQty),
                 'product_uom_qty' => $remainingQty,
                 'quantity'        => $remainingQty,
             ]);
@@ -360,10 +369,18 @@ class ValidateAction extends Action
         $newOperation->refresh();
 
         foreach ($newOperation->moves as $move) {
-            OperationResource::updateOrCreateMoveLines($move);
+            Inventory::updateOrCreateMoveLines($move);
         }
 
-        OperationResource::updateOperationState($newOperation);
+        Inventory::computeTransferState($newOperation);
+
+        if (Package::isPluginInstalled('purchases')) {
+            $newOperation->purchaseOrders()->attach($record->purchaseOrders->pluck('id'));
+
+            foreach ($record->purchaseOrders as $purchaseOrder) {
+                PurchaseOrder::computePurchaseOrder($purchaseOrder);
+            }
+        }
 
         $url = OperationResource::getUrl('view', ['record' => $record]);
 
@@ -458,10 +475,10 @@ class ValidateAction extends Action
         $newOperation->refresh();
 
         foreach ($newOperation->moves as $move) {
-            OperationResource::updateOrCreateMoveLines($move);
+            Inventory::updateOrCreateMoveLines($move);
         }
 
-        OperationResource::updateOperationState($newOperation);
+        Inventory::computeTransferState($newOperation);
     }
 
     /**
@@ -503,7 +520,7 @@ class ValidateAction extends Action
         $newMove = $move->replicate()->fill([
             'state'                   => Enums\MoveState::DRAFT,
             'reference'               => null,
-            'product_qty'             => OperationResource::calculateProductQuantity($move->uom_id, $move->quantity),
+            'product_qty'             => Inventory::calculateProductQuantity($move->uom_id, $move->quantity),
             'product_uom_qty'         => $move->quantity,
             'origin'                  => $move->origin ?? $move->operation->name ?? '/',
             'operation_id'            => null,

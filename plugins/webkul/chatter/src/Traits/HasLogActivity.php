@@ -2,6 +2,7 @@
 
 namespace Webkul\Chatter\Traits;
 
+use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -69,6 +70,7 @@ trait HasLogActivity
     protected function getLogAttributes(): array
     {
         $normalized = [];
+
         foreach (property_exists($this, 'logAttributes') ? $this->logAttributes : [] as $key => $value) {
             if (is_int($key)) {
                 $normalized[$value] = $value;
@@ -280,15 +282,39 @@ trait HasLogActivity
             return $value ? 'Yes' : 'No';
         }
 
-        if ($value instanceof \UnitEnum) {
-            if (method_exists($value, 'getLabel')) {
-                return $value->getLabel();
-            }
+        if (
+            $value !== null
+            && isset($this->casts[$key])
+        ) {
+            $castType = $this->casts[$key];
 
-            return $value->value;
+            if (class_exists($castType) && is_subclass_of($castType, BackedEnum::class)) {
+                try {
+                    if ($value instanceof BackedEnum) {
+                        if (method_exists($value, 'getLabel')) {
+                            return $value->getLabel();
+                        }
+
+                        return $value->value;
+                    }
+
+                    $enumInstance = $castType::from($value);
+
+                    if (method_exists($enumInstance, 'getLabel')) {
+                        return $enumInstance->getLabel();
+                    }
+
+                    return $enumInstance->value;
+                } catch (\Exception $e) {
+                    return $value;
+                }
+            }
         }
 
-        if (! is_array($value) && json_decode($value, true)) {
+        if (
+            ! is_array($value)
+            && json_decode($value, true)
+        ) {
             $value = json_decode($value, true);
         }
 

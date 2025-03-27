@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Facades\PurchaseOrder;
 
 class PrintRFQAction extends Action
 {
@@ -31,12 +32,8 @@ class PrintRFQAction extends Action
                 $record->update([
                     'state' => OrderState::SENT,
                 ]);
-
-                $record->lines->each(function ($line) {
-                    $line->update([
-                        'state' => OrderState::SENT,
-                    ]);
-                });
+                
+                $record = PurchaseOrder::computePurchaseOrder($record);
 
                 $livewire->updateForm();
 

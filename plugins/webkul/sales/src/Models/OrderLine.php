@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
+use Webkul\Sale\Enums\OrderState;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -60,6 +61,10 @@ class OrderLine extends Model
         'purchase_price',
         'margin',
         'margin_percent',
+    ];
+
+    protected $casts = [
+        'cast' => OrderState::class,
     ];
 
     public function order()

@@ -14,6 +14,7 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
+use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
@@ -100,6 +101,11 @@ class Order extends Model
         'date_order'           => 'Order Date',
         'signed_on'            => 'Signed On',
         'prepayment_percent'   => 'Prepayment Percentage',
+    ];
+
+    protected $casts = [
+        'state'          => OrderState::class,
+        'invoice_status' => InvoiceStatus::class,
     ];
 
     public function company()

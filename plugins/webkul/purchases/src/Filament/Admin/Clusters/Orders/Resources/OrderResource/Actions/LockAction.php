@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
 class LockAction extends Action
@@ -23,15 +24,7 @@ class LockAction extends Action
             ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/lock.label'))
             ->color('gray')
             ->action(function (Order $record, Component $livewire): void {
-                $record->update([
-                    'state' => OrderState::DONE,
-                ]);
-
-                foreach ($record->lines as $move) {
-                    $move->update([
-                        'state' => OrderState::DONE,
-                    ]);
-                }
+                $record = PurchaseOrder::lockPurchaseOrder($record);
 
                 $livewire->updateForm();
 

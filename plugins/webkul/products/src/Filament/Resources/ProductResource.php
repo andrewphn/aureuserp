@@ -414,10 +414,7 @@ class ProductResource extends Resource
                                 ->body(__('products::filament/resources/product.table.bulk-actions.force-delete.notification.body')),
                         ),
                 ]),
-            ])
-            ->modifyQueryUsing(function (Builder $query) {
-                $query->whereNull('parent_id');
-            });
+            ]);
     }
 
     public static function infolist(Infolist $infolist): Infolist

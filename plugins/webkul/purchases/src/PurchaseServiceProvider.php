@@ -8,6 +8,9 @@ use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
+use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
+use Webkul\Purchase\PurchaseOrder;
+use Illuminate\Foundation\AliasLoader;
 
 class PurchaseServiceProvider extends PackageServiceProvider
 {
@@ -30,6 +33,10 @@ class PurchaseServiceProvider extends PackageServiceProvider
                 '2025_02_11_135617_create_purchases_order_line_taxes_table',
                 '2025_02_11_142937_create_purchases_order_account_moves_table',
                 '2025_02_11_143351_alter_accounts_account_move_lines_table',
+                '2025_03_17_101755_add_inventories_columns_to_purchases_orders_table_from_purchases',
+                '2025_03_17_101814_add_inventories_columns_to_purchases_order_lines_table_from_purchases',
+                '2025_03_17_111610_add_purchases_columns_to_inventories_moves_table_from_purchases',
+                '2025_03_17_115707_create_purchases_order_operations_table_from_purchases',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -53,5 +60,16 @@ class PurchaseServiceProvider extends PackageServiceProvider
         Livewire::component('order-summary', Summary::class);
 
         Livewire::component('list-products', \Webkul\Purchase\Livewire\Customer\ListProducts::class);
+
+        \Webkul\Account\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
+    }
+
+    public function packageRegistered(): void
+    {
+        $loader = AliasLoader::getInstance();
+
+        $loader->alias('purchase_order', PurchaseOrderFacade::class);
+
+        $this->app->singleton('purchase_order', PurchaseOrder::class);
     }
 }

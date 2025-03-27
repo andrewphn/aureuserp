@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Employee\Models\EmployeeJobPosition;
 use Webkul\Recruitment\Models\Stage;
+use Webkul\Security\Models\User;
 
 class StageSeeder extends Seeder
 {
@@ -13,11 +14,13 @@ class StageSeeder extends Seeder
     {
         DB::table('recruitments_stages')->delete();
 
+        $user = User::first();
+
         $recruitmentStages = [
             [
                 'sort'           => 0,
                 'is_default'     => 1,
-                'creator_id'     => 1,
+                'creator_id'     => $user?->id,
                 'name'           => 'New',
                 'legend_blocked' => 'Blocked',
                 'legend_done'    => 'Ready for Next Stage',
@@ -31,7 +34,7 @@ class StageSeeder extends Seeder
 
                 'sort'           => 1,
                 'is_default'     => 0,
-                'creator_id'     => 1,
+                'creator_id'     => $user?->id,
                 'name'           => 'First Interview',
                 'legend_blocked' => 'Blocked',
                 'legend_done'    => 'Ready for Next Stage',
@@ -45,7 +48,7 @@ class StageSeeder extends Seeder
 
                 'sort'           => 2,
                 'is_default'     => 0,
-                'creator_id'     => 1,
+                'creator_id'     => $user?->id,
                 'name'           => 'Initial Qualification',
                 'legend_blocked' => 'Blocked',
                 'legend_done'    => 'Ready for Next Stage',
@@ -59,7 +62,7 @@ class StageSeeder extends Seeder
 
                 'sort'           => 3,
                 'is_default'     => 0,
-                'creator_id'     => 1,
+                'creator_id'     => $user?->id,
                 'name'           => 'Second Interview',
                 'legend_blocked' => 'Blocked',
                 'legend_done'    => 'Ready for Next Stage',
@@ -73,7 +76,7 @@ class StageSeeder extends Seeder
 
                 'sort'           => 4,
                 'is_default'     => 0,
-                'creator_id'     => 1,
+                'creator_id'     => $user?->id,
                 'name'           => 'Contract Proposal',
                 'legend_blocked' => 'Blocked',
                 'legend_done'    => 'Ready for Next Stage',
@@ -87,7 +90,7 @@ class StageSeeder extends Seeder
 
                 'sort'           => 5,
                 'is_default'     => 0,
-                'creator_id'     => 1,
+                'creator_id'     => $user?->id,
                 'name'           => 'Contract Signed',
                 'legend_blocked' => 'Blocked',
                 'legend_done'    => 'Ready for Next Stage',

@@ -4,6 +4,8 @@ namespace Webkul\Support;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Filament\Support\Facades\FilamentView;
+use Illuminate\Support\HtmlString;
 
 class SupportPlugin implements Plugin
 {
@@ -31,7 +33,21 @@ class SupportPlugin implements Plugin
 
     public function boot(Panel $panel): void
     {
-        //
+        FilamentView::registerRenderHook(
+            name: 'panels::scripts.before',
+            hook: fn () => new HtmlString(html: "
+            <script>
+                document.addEventListener('livewire:navigated', function() {
+                    setTimeout(() => {
+                        const activeSidebarItem = document.querySelector('nav .fi-sidebar-item-active');
+
+                        const sidebarWrapper = document.querySelector('nav.fi-sidebar-nav');
+    
+                        sidebarWrapper.scrollTo(0, activeSidebarItem.offsetTop - 250);
+                    }, 0);
+                });
+            </script>
+        "));
     }
 
     protected function getPluginBasePath($path = null): string

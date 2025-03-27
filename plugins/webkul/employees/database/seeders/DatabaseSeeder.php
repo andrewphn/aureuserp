@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             EmploymentTypeSeeder::class,
             EmployeeJobPositionSeeder::class,
             SkillTypeSeeder::class,
+            SkillSeeder::class,
+            SkillLevelSeeder::class,
             WorkLocationSeeder::class,
             EmployeeCategorySeeder::class,
             DepartureReasonSeeder::class,

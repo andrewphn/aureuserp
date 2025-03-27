@@ -33,11 +33,11 @@ class CreateCreditNote extends CreateRecord
         $user = Auth::user();
 
         $data['creator_id'] = $user->id;
-        $data['state'] ??= Enums\MoveState::DRAFT->value;
-        $data['move_type'] ??= Enums\MoveType::OUT_REFUND->value;
+        $data['state'] ??= Enums\MoveState::DRAFT;
+        $data['move_type'] ??= Enums\MoveType::OUT_REFUND;
         $data['date'] = now();
         $data['sort'] = Move::max('sort') + 1;
-        $data['payment_state'] = PaymentState::NOT_PAID->value;
+        $data['payment_state'] = PaymentState::NOT_PAID;
 
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);

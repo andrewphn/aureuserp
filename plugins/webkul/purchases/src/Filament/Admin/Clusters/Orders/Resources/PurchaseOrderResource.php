@@ -43,6 +43,7 @@ class PurchaseOrderResource extends OrderResource
             Pages\ViewPurchaseOrder::class,
             Pages\EditPurchaseOrder::class,
             Pages\ManageBills::class,
+            Pages\ManageReceipts::class,
         ]);
     }
 
@@ -55,11 +56,12 @@ class PurchaseOrderResource extends OrderResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPurchaseOrders::route('/'),
-            'create' => Pages\CreatePurchaseOrder::route('/create'),
-            'view'   => Pages\ViewPurchaseOrder::route('/{record}'),
-            'edit'   => Pages\EditPurchaseOrder::route('/{record}/edit'),
-            'bills'  => Pages\ManageBills::route('/{record}/bills'),
+            'index'    => Pages\ListPurchaseOrders::route('/'),
+            'create'   => Pages\CreatePurchaseOrder::route('/create'),
+            'view'     => Pages\ViewPurchaseOrder::route('/{record}'),
+            'edit'     => Pages\EditPurchaseOrder::route('/{record}/edit'),
+            'bills'    => Pages\ManageBills::route('/{record}/bills'),
+            'receipts' => Pages\ManageReceipts::route('/{record}/receipts'),
         ];
     }
 }

@@ -8,6 +8,7 @@ use Livewire\Component;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Facades\PurchaseOrder;
 
 class CancelAction extends Action
 {
@@ -25,11 +26,11 @@ class CancelAction extends Action
             ->color('gray')
             ->requiresConfirmation()
             ->action(function (Order $record, Component $livewire): void {
-                $record->accountMoves->each(function ($move) {
-                    if ($move->state !== MoveState::CANCEL) {
+                $record->lines->each(function ($move) {
+                    if ($move->qty_received > 0) {
                         Notification::make()
-                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.title'))
-                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.body'))
+                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.receipts.title'))
+                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.receipts.body'))
                             ->warning()
                             ->send();
 
@@ -37,15 +38,19 @@ class CancelAction extends Action
                     }
                 });
 
-                $record->update([
-                    'state' => OrderState::CANCELED,
-                ]);
+                $record->accountMoves->each(function ($move) {
+                    if ($move->state !== MoveState::CANCEL) {
+                        Notification::make()
+                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.bills.title'))
+                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/actions/cancel.action.notification.warning.bills.body'))
+                            ->warning()
+                            ->send();
 
-                foreach ($record->lines as $move) {
-                    $move->update([
-                        'state' => OrderState::CANCELED,
-                    ]);
-                }
+                        return;
+                    }
+                });
+
+                $record = PurchaseOrder::cancelPurchaseOrder($record);
 
                 $livewire->updateForm();
 

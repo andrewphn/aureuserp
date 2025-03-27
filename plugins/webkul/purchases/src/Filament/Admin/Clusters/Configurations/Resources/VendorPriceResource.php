@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource\Pages;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageVendors;
 use Webkul\Purchase\Models\ProductSupplier;
 
 class VendorPriceResource extends Resource
@@ -71,9 +72,14 @@ class VendorPriceResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.product'))
-                                    ->relationship('product', 'name')
+                                    ->relationship(
+                                        'product',
+                                        'name',
+                                        fn ($query) => $query->where('is_configurable', null)
+                                    )
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->hiddenOn(ManageVendors::class),
                                 Forms\Components\TextInput::make('min_qty')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.quantity'))
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.quantity-tooltip'))
