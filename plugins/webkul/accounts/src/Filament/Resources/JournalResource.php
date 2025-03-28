@@ -211,10 +211,6 @@ class JournalResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label(__('accounts::filament/resources/journal.table.columns.created-by')),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->sortable()
-                    ->boolean()
-                    ->label(__('accounts::filament/resources/journal.table.columns.status')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
