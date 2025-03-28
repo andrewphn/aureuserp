@@ -185,7 +185,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('security::filament/resources/user.table.columns.name'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(50),
                 Tables\Columns\TextColumn::make('email')
                     ->label(__('security::filament/resources/user.table.columns.email'))
                     ->searchable()
@@ -332,6 +333,9 @@ class UserResource extends Resource
                                         Infolists\Components\TextEntry::make('name')
                                             ->icon('heroicon-o-user')
                                             ->placeholder('—')
+                                            ->extraAttributes([
+                                                'style' => 'word-break: break-all;',
+                                            ])
                                             ->label(__('security::filament/resources/user.infolist.sections.general-information.entries.name')),
                                         Infolists\Components\TextEntry::make('email')
                                             ->icon('heroicon-o-envelope')
