@@ -50,6 +50,7 @@ class BankAccountResource extends Resource
                     })
                     ->required()
                     ->searchable()
+                    ->preload()
                     ->createOptionForm(fn (Form $form) => BankResource::form($form)),
                 Forms\Components\Select::make('partner_id')
                     ->label(__('partners::filament/resources/bank-account.form.account-holder'))
