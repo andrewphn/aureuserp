@@ -529,7 +529,7 @@ class InvoiceResource extends Resource
                                 Infolists\Components\RepeatableEntry::make('lines')
                                     ->hiddenLabel()
                                     ->schema([
-                                        Infolists\Components\TextEntry::make('product.name')
+                                        Infolists\Components\TextEntry::make('name')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.product'))
                                             ->icon('heroicon-o-cube'),
@@ -716,6 +716,13 @@ class InvoiceResource extends Resource
                                         'name',
                                         fn ($query) => $query->where('is_configurable', null),
                                     )
+                                    ->getOptionLabelUsing(function ($record) {
+                                        if ($record->product) {
+                                            return $record->product->name;
+                                        }
+
+                                        return $record->name;
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->live()

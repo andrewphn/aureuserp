@@ -33,6 +33,7 @@ class BankAccountResource extends Resource
                 Forms\Components\TextInput::make('account_number')
                     ->label(__('partners::filament/resources/bank-account.form.account-number'))
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Forms\Components\Toggle::make('can_send_money')
                     ->label(__('partners::filament/resources/bank-account.form.can-send-money'))

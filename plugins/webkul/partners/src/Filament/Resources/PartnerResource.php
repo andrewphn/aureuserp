@@ -144,7 +144,7 @@ class PartnerResource extends Resource
                                                     ->unique('partners_tags'),
                                                 Forms\Components\ColorPicker::make('color')
                                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.color'))
-                                                    ->required(),
+                                                    ->hexColor(),
                                             ])
                                             ->columns(2),
                                     ]),
