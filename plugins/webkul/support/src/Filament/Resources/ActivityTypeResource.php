@@ -132,8 +132,9 @@ class ActivityTypeResource extends Resource
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.suggest'))
                                             ->hidden(fn(Get $get) => $get('chaining_type') === 'trigger' || $get('category') === 'upload_file'),
                                         Forms\Components\Select::make('triggered_next_type_id')
-                                            ->relationship('activityTypes', 'name')
+                                            ->relationship('triggeredNextType', 'name')
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.trigger'))
+                                            ->native(false)
                                             ->hidden(fn(Get $get) => $get('chaining_type') === 'suggest' && $get('category') !== 'upload_file'),
                                     ]),
                                 Forms\Components\Section::make(__('support::filament/resources/activity-type.form.sections.status-and-configuration-information.title'))
@@ -384,7 +385,7 @@ class ActivityTypeResource extends Resource
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.suggest'))
                                             ->listWithLineBreaks(),
-                                        Infolists\Components\TextEntry::make('activityTypes.name')
+                                        Infolists\Components\TextEntry::make('triggeredNextType.name')
                                             ->icon('heroicon-o-forward')
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.trigger')),
