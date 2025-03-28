@@ -117,15 +117,8 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'success' => [
-                        'title' => 'Product deleted',
-                        'body'  => 'The product has been deleted successfully.',
-                    ],
-
-                    'error' => [
-                        'title' => 'Product could not be deleted',
-                        'body'  => 'The product cannot be deleted because it is currently in use.',
-                    ],
+                    'title' => 'Product deleted',
+                    'body'  => 'The product has been deleted successfully.',
                 ],
             ],
 
@@ -137,8 +130,8 @@ return [
                     ],
 
                     'error' => [
-                        'title' => 'Products could not be deleted',
-                        'body'  => 'The products cannot be deleted because they are currently in use.',
+                        'title' => 'Product could not be deleted',
+                        'body'  => 'The product cannot be deleted because it is currently in use.',
                     ],
                 ],
             ],
@@ -180,8 +173,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Products force deleted',
-                    'body'  => 'The products has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Products force deleted',
+                        'body'  => 'The products has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Products could not be deleted',
+                        'body'  => 'The products cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],
