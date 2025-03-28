@@ -58,10 +58,11 @@ class ApplicantCategoryResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.name'))
                     ->required()
+                    ->maxLength(255)
                     ->placeholder(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.name-placeholder')),
                 Forms\Components\ColorPicker::make('color')
-                    ->hexColor()
                     ->label(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.color'))
+                    ->required()
                     ->hexColor(),
             ]);
     }
