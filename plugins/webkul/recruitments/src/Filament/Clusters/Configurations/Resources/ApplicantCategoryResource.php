@@ -60,8 +60,9 @@ class ApplicantCategoryResource extends Resource
                     ->required()
                     ->placeholder(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.name-placeholder')),
                 Forms\Components\ColorPicker::make('color')
+                    ->hexColor()
                     ->label(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.color'))
-                    ->required(),
+                    ->hexColor(),
             ]);
     }
 

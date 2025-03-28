@@ -51,6 +51,7 @@ class AttributeResource extends Resource
                                     ->maxLength(255),
                                 Forms\Components\ColorPicker::make('color')
                                     ->label(__('products::filament/resources/attribute.form.sections.options.fields.color'))
+                                    ->hexColor()
                                     ->visible(fn (Forms\Get $get): bool => $get('../../type') === AttributeType::COLOR->value),
                                 Forms\Components\TextInput::make('extra_price')
                                     ->label(__('products::filament/resources/attribute.form.sections.options.fields.extra-price'))
