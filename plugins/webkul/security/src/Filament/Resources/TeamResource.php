@@ -62,6 +62,7 @@ class TeamResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('security::filament/resources/team.table.columns.name'))
                     ->searchable()
+                    ->limit(50)
                     ->sortable(),
             ])
             ->actions([
