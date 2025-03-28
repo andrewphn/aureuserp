@@ -56,10 +56,11 @@ class ProductCategoryResource extends BaseProductCategoryResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListProductCategories::route('/'),
-            'create' => Pages\CreateProductCategory::route('/create'),
-            'view'   => Pages\ViewProductCategory::route('/{record}'),
-            'edit'   => Pages\EditProductCategory::route('/{record}/edit'),
+            'index'    => Pages\ListProductCategories::route('/'),
+            'create'   => Pages\CreateProductCategory::route('/create'),
+            'view'     => Pages\ViewProductCategory::route('/{record}'),
+            'edit'     => Pages\EditProductCategory::route('/{record}/edit'),
+            'products' => Pages\ManageProducts::route('/{record}/products'),
         ];
     }
 }
