@@ -18,6 +18,8 @@ use Webkul\Partner\Database\Factories\PartnerFactory;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Country;
+use Webkul\Support\Models\State;
 
 class Partner extends Authenticatable implements FilamentUser
 {
@@ -49,6 +51,12 @@ class Partner extends Authenticatable implements FilamentUser
         'color',
         'company_registry',
         'reference',
+        'street1',
+        'street2',
+        'city',
+        'zip',
+        'state_id',
+        'country_id',
         'parent_id',
         'creator_id',
         'user_id',
@@ -87,6 +95,16 @@ class Partner extends Authenticatable implements FilamentUser
         }
 
         return Storage::url($this->avatar);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
     }
 
     public function parent(): BelongsTo
