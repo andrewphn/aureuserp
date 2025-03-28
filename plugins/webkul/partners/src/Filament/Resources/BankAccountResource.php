@@ -45,10 +45,12 @@ class BankAccountResource extends Resource
                         'name',
                         modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                     )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name . ($record->trashed() ? ' (Deleted)' : '');
+                    })
                     ->required()
                     ->searchable()
-                    ->createOptionForm(fn (Form $form) => BankResource::form($form))
-                    ->preload(),
+                    ->createOptionForm(fn (Form $form) => BankResource::form($form)),
                 Forms\Components\Select::make('partner_id')
                     ->label(__('partners::filament/resources/bank-account.form.account-holder'))
                     ->relationship('partner', 'name')

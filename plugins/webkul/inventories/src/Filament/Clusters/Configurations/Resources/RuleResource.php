@@ -174,6 +174,9 @@ class RuleResource extends Resource
                                                 'name',
                                                 modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                                             )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name . ($record->trashed() ? ' (Deleted)' : '');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->required()
