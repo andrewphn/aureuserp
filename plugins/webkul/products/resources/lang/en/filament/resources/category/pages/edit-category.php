@@ -14,4 +14,12 @@ return [
             ],
         ],
     ],
+
+    'save' => [
+        'notification' => [
+            'error' => [
+                'title' => 'Category updated failed',
+            ],
+        ],
+    ],
 ];

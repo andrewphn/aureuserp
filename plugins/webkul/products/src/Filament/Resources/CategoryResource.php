@@ -17,6 +17,8 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
+    protected static ?string $navigationIcon = 'heroicon-o-folder';
+
     protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
@@ -90,6 +92,9 @@ class CategoryResource extends Resource
                 Tables\Grouping\Group::make('parent.full_name')
                     ->label(__('products::filament/resources/category.table.groups.parent'))
                     ->collapsible(),
+                Tables\Grouping\Group::make('creator.name')
+                    ->label(__('products::filament/resources/category.table.groups.creator'))
+                    ->collapsible(),
                 Tables\Grouping\Group::make('created_at')
                     ->label(__('products::filament/resources/category.table.groups.created-at'))
                     ->collapsible(),
@@ -102,6 +107,11 @@ class CategoryResource extends Resource
                 Tables\Filters\SelectFilter::make('parent_id')
                     ->label(__('products::filament/resources/category.table.filters.parent'))
                     ->relationship('parent', 'full_name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('creator_id')
+                    ->label(__('products::filament/resources/category.table.filters.creator'))
+                    ->relationship('creator', 'name')
                     ->searchable()
                     ->preload(),
             ])
