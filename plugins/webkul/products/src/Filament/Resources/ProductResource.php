@@ -338,15 +338,15 @@ class ProductResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('products::filament/resources/product.table.actions.delete.notification.title'))
-                                ->body(__('products::filament/resources/product.table.actions.delete.notification.body')),
+                                ->title(__('products::filament/resources/product.table.actions.delete.notification.success.title'))
+                                ->body(__('products::filament/resources/product.table.actions.delete.notification.success.body')),
                         ),
                     Tables\Actions\ForceDeleteAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('products::filament/resources/product.table.actions.force-delete.notification.title'))
-                                ->body(__('products::filament/resources/product.table.actions.force-delete.notification.body')),
+                                ->title(__('products::filament/resources/product.table.actions.force-delete.notification.success.title'))
+                                ->body(__('products::filament/resources/product.table.actions.force-delete.notification.success.body')),
                         ),
                 ]),
             ])
