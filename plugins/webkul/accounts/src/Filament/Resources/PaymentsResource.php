@@ -95,6 +95,7 @@ class PaymentsResource extends Resource
                                 Forms\Components\TextInput::make('amount')
                                     ->label(__('accounts::filament/resources/payment.form.sections.fields.amount'))
                                     ->default(0)
+                                    ->numeric()
                                     ->required(),
                                 Forms\Components\DatePicker::make('date')
                                     ->label(__('accounts::filament/resources/payment.form.sections.fields.date'))
