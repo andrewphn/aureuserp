@@ -29,12 +29,14 @@ return [
 
         'groups' => [
             'parent'     => 'Parent',
+            'creator' => 'Creator',
             'created-at' => 'Created At',
             'updated-at' => 'Updated At',
         ],
 
         'filters' => [
             'parent' => 'Parent',
+            'creator' => 'Creator',
         ],
 
         'actions' => [

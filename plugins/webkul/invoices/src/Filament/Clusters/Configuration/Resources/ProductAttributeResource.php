@@ -1,13 +1,13 @@
 <?php
 
-namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
+namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource as BaseProductAttributeResource;
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages;
-use Webkul\Sale\Models\Attribute;
+use Webkul\Product\Filament\Resources\AttributeResource;
+use Webkul\Invoice\Filament\Clusters\Configuration;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages;
+use Webkul\Invoice\Models\Attribute;
 
-class ProductAttributeResource extends BaseProductAttributeResource
+class ProductAttributeResource extends AttributeResource
 {
     protected static ?string $model = Attribute::class;
 
@@ -21,12 +21,12 @@ class ProductAttributeResource extends BaseProductAttributeResource
 
     public static function getNavigationGroup(): string
     {
-        return __('sales::filament/clusters/configurations/resources/product-attribute.navigation.group');
+        return __('invoices::filament/clusters/configurations/resources/product-attribute.navigation.group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('sales::filament/clusters/configurations/resources/product-attribute.navigation.title');
+        return __('invoices::filament/clusters/configurations/resources/product-attribute.navigation.title');
     }
 
     public static function getPages(): array
