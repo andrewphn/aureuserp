@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Partner\Models\BankAccount;
+use Illuminate\Database\Eloquent\Builder;
 
 class BankAccountResource extends Resource
 {
@@ -39,7 +40,11 @@ class BankAccountResource extends Resource
                     ->inline(false),
                 Forms\Components\Select::make('bank_id')
                     ->label(__('partners::filament/resources/bank-account.form.bank'))
-                    ->relationship('bank', 'name')
+                    ->relationship(
+                        'bank',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
                     ->required()
                     ->searchable()
                     ->createOptionForm(fn (Form $form) => BankResource::form($form))
