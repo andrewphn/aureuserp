@@ -82,7 +82,7 @@ class PaymentTermResource extends Resource
                                 Forms\Components\TextInput::make('discount_days')
                                     ->required()
                                     ->integer()
-                                    ->minValue(1)
+                                    ->minValue(0)
                                     ->prefix(__('accounts::filament/resources/payment-term.form.sections.fields.discount-days-prefix'))
                                     ->suffix(__('accounts::filament/resources/payment-term.form.sections.fields.discount-days-suffix'))
                                     ->hiddenLabel(),
