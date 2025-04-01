@@ -190,7 +190,7 @@ class PartnerResource extends Resource
                                                         Forms\Components\TextInput::make('code')
                                                             ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
                                                             ->required()
-                                                            ->unique('partners_states'),
+                                                            ->unique('states'),
                                                         Forms\Components\Select::make('country_id')
                                                             ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
                                                             ->relationship('country', 'name')

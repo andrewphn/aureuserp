@@ -170,13 +170,13 @@
                                 <strong>{{ $record->company->name }}</strong><br>
                                 {{ sprintf(
                                     "%s\n%s%s\n%s, %s %s\n%s",
-                                    $record->company->address->name ?? '',
-                                    $record->company->address->street1 ?? '',
-                                    $record->company->address->street2 ? ', ' . $record->company->address->street2 : '',
-                                    $record->company->address->city ?? '',
-                                    $record->company->address->state ? $record->company->address->state->name : '',
-                                    $record->company->address->zip ?? '',
-                                    $record->company->address->country ? $record->company->address->country->name : ''
+                                    $record->company->partner->name ?? '',
+                                    $record->company->partner->street1 ?? '',
+                                    $record->company->partner->street2 ? ', ' . $record->company->partner->street2 : '',
+                                    $record->company->partner->city ?? '',
+                                    $record->company->partner->state ? $record->company->partner->state->name : '',
+                                    $record->company->partner->zip ?? '',
+                                    $record->company->partner->country ? $record->company->partner->country->name : ''
                                 ) }}
                             </div>
                         </td>

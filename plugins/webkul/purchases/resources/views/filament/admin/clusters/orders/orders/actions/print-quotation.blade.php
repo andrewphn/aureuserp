@@ -95,28 +95,28 @@
                 <div class="company-info">
                     <div style="font-size: 28px; color: #1a4587; margin-bottom: 10px;">{{ $record->company->name }}</div>
 
-                    @if ($record->company->address)
+                    @if ($record->company->partner)
                         <div>
-                            {{ $record->company->address->street1 }}
+                            {{ $record->company->partner->street1 }}
 
-                            @if ($record->company->address->street2)
-                                ,{{ $record->company->address->street2 }}
+                            @if ($record->company->partner->street2)
+                                ,{{ $record->company->partner->street2 }}
                             @endif
                         </div>
                         
                         <div>
-                            {{ $record->company->address->city }},
+                            {{ $record->company->partner->city }},
 
-                            @if ($record->company->address->state)
-                                {{ $record->company->address->state->name }},
+                            @if ($record->company->partner->state)
+                                {{ $record->company->partner->state->name }},
                             @endif
                             
-                            {{ $record->company->address->zip }}
+                            {{ $record->company->partner->zip }}
                         </div>
                         
-                        @if ($record->company->address->country)
+                        @if ($record->company->partner->country)
                             <div>
-                                {{ $record->company->address->country->name }}
+                                {{ $record->company->partner->country->name }}
                             </div>
                         @endif
                         
