@@ -191,21 +191,16 @@
                                 @endif
 
                                 @php
-                                    $addressRecord = $record->partner->addresses->where('type', 'present')->first();
-                                    $address = '';
-
-                                    if ($addressRecord) {
-                                        $address = sprintf(
-                                            "%s\n%s%s\n%s, %s %s\n%s",
-                                            $addressRecord->name ?? '',
-                                            $addressRecord->street1 ?? '',
-                                            $addressRecord->street2 ? ', ' . $addressRecord->street2 : '',
-                                            $addressRecord->city ?? '',
-                                            $addressRecord->state ? $addressRecord->state->name : '',
-                                            $addressRecord->zip ?? '',
-                                            $addressRecord->country ? $addressRecord->country->name : ''
-                                        );
-                                    }
+                                    $address = sprintf(
+                                        "%s\n%s%s\n%s, %s %s\n%s",
+                                        $record->partner->name ?? '',
+                                        $record->partner->street1 ?? '',
+                                        $record->partner->street2 ? ', ' . $record->partner->street2 : '',
+                                        $record->partner->city ?? '',
+                                        $record->partner->state ? $record->partner->state->name : '',
+                                        $record->partner->zip ?? '',
+                                        $record->partner->country ? $record->partner->country->name : ''
+                                    );
                                 @endphp
 
                                 @if (!empty($address))

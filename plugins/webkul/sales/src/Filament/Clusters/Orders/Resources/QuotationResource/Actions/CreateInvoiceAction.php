@@ -134,7 +134,7 @@ class CreateInvoiceAction extends Action
             'invoice_payment_term_id'      => $record->payment_term_id,
             'partner_id'                   => $record->partner_id,
             'commercial_partner_id'        => $record->partner_id,
-            'partner_shipping_id'          => $record->partner->addresses->where('type', 'present')->first()?->id,
+            'partner_shipping_id'          => $record->partner->id,
             'fiscal_position_id'           => $record->fiscal_position_id,
             'creator_id'                   => Auth::id(),
         ]);

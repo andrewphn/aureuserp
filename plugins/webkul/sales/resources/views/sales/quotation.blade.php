@@ -199,48 +199,42 @@
             <div class="vendor-info">
                 <div>{{ $record->partner->name }}</div>
 
-                @if ($record->partner->addresses->count())
+                <div>
+                    {{ $record->partner->street1 }}
+
+                    @if ($record->partner->street2)
+                        ,{{ $record->partner->street2 }}
+                    @endif
+                </div>
+
+                <div>
+                    {{ $record->partner->city }},
+
+                    @if ($record->partner->state)
+                        {{ $record->partner->state->name }},
+                    @endif
+
+                    {{ $record->partner->zip }}
+                </div>
+
+                @if ($record->partner->country)
                     <div>
-                        @php
-                            $partnerAddress = $record->partner->addresses->first();
-                        @endphp
-
-                        {{ $partnerAddress->street1 }}
-
-                        @if ($partnerAddress->street2)
-                            ,{{ $partnerAddress->street2 }}
-                        @endif
+                        {{ $record->partner->country->name }}
                     </div>
+                @endif
 
+                @if ($record->partner->email)
                     <div>
-                        {{ $partnerAddress->city }},
-
-                        @if ($partnerAddress->state)
-                            {{ $partnerAddress->state->name }},
-                        @endif
-
-                        {{ $partnerAddress->zip }}
+                        Email:
+                        {{ $record->partner->email }}
                     </div>
+                @endif
 
-                    @if ($partnerAddress->country)
-                        <div>
-                            {{ $partnerAddress->country->name }}
-                        </div>
-                    @endif
-
-                    @if ($partnerAddress->email)
-                        <div>
-                            Email:
-                            {{ $partnerAddress->email }}
-                        </div>
-                    @endif
-
-                    @if ($partnerAddress->phone)
-                        <div>
-                            Phone:
-                            {{ $partnerAddress->phone }}
-                        </div>
-                    @endif
+                @if ($record->partner->phone)
+                    <div>
+                        Phone:
+                        {{ $record->partner->phone }}
+                    </div>
                 @endif
             </div>
 
