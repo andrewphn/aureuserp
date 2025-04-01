@@ -143,11 +143,9 @@ class CompanyResource extends Resource
                                                             ->required(),
                                                         Forms\Components\Toggle::make('state_required')
                                                             ->label(__('security::filament/resources/company.form.sections.address-information.fields.state-required'))
-                                                            ->maxLength(255)
                                                             ->required(),
                                                         Forms\Components\Toggle::make('zip_required')
                                                             ->label(__('security::filament/resources/company.form.sections.address-information.fields.zip-required'))
-                                                            ->maxLength(255)
                                                             ->required(),
                                                     ])
                                                     ->createOptionAction(
