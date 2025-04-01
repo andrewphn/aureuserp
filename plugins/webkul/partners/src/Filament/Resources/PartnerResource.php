@@ -181,24 +181,28 @@ class PartnerResource extends Resource
                                                 titleAttribute: 'name',
                                                 modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                                             )
-                                            ->createOptionForm([
-                                                Forms\Components\TextInput::make('name')
-                                                    ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.name'))
-                                                    ->required(),
-                                                Forms\Components\TextInput::make('code')
-                                                    ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
-                                                    ->required()
-                                                    ->unique('partners_states'),
-                                                Forms\Components\Select::make('country_id')
-                                                    ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
-                                                    ->relationship('country', 'name')
-                                                    ->searchable()
-                                                    ->preload()
-                                                    // ->default(fn (Forms\Get $get) => $get('country_id'))
-                                                    ->default(function (Forms\Get $get) {
-                                                        // dd($get('../country_id'));
-                                                    }),
-                                            ])
+                                            ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
+                                                return $form
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('name')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.name'))
+                                                            ->required(),
+                                                        Forms\Components\TextInput::make('code')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
+                                                            ->required()
+                                                            ->unique('partners_states'),
+                                                        Forms\Components\Select::make('country_id')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                                            ->relationship('country', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->default($get('country_id'))
+                                                            ->afterStateUpdated(function (Forms\Get $get) use ($set) {
+                                                                $set('country_id', $get('country_id'));
+                                                            }),
+                                                    ]);
+                                            })
                                             ->searchable()
                                             ->preload(),
                                     ]),
@@ -509,6 +513,9 @@ class PartnerResource extends Resource
                         ),
                 ]),
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->where('account_type', '!=', AccountType::ADDRESS);
+            })
             ->contentGrid([
                 'sm'  => 1,
                 'md'  => 2,

@@ -139,12 +139,14 @@ class Partner extends Authenticatable implements FilamentUser
 
     public function addresses(): HasMany
     {
-        return $this->hasMany(Address::class);
+        return $this->hasMany(self::class, 'parent_id')
+            ->where('account_type', AccountType::ADDRESS);
     }
 
     public function contacts(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id')
+            ->where('account_type', '!=', AccountType::ADDRESS);
     }
 
     public function bankAccounts(): HasMany
