@@ -153,6 +153,55 @@ class PartnerResource extends Resource
                                             ])
                                             ->columns(2),
                                     ]),
+
+                                Forms\Components\Fieldset::make('Address')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('street1')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street1')),
+                                        Forms\Components\TextInput::make('street2')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street2')),
+                                        Forms\Components\TextInput::make('city')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.city')),
+                                        Forms\Components\TextInput::make('zip')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.zip')),
+                                        Forms\Components\Select::make('country_id')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                            ->relationship(name: 'country', titleAttribute: 'name')
+                                            ->afterStateUpdated(fn (Forms\Set $set) => $set('state_id', null))
+                                            ->searchable()
+                                            ->preload()
+                                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                                $set('state_id', null);
+                                            })
+                                            ->live(),
+                                        Forms\Components\Select::make('state_id')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.state'))
+                                            ->relationship(
+                                                name: 'state',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
+                                            )
+                                            ->createOptionForm([
+                                                Forms\Components\TextInput::make('name')
+                                                    ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.name'))
+                                                    ->required(),
+                                                Forms\Components\TextInput::make('code')
+                                                    ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
+                                                    ->required()
+                                                    ->unique('partners_states'),
+                                                Forms\Components\Select::make('country_id')
+                                                    ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                                    ->relationship('country', 'name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    // ->default(fn (Forms\Get $get) => $get('country_id'))
+                                                    ->default(function (Forms\Get $get) {
+                                                        // dd($get('../country_id'));
+                                                    }),
+                                            ])
+                                            ->searchable()
+                                            ->preload(),
+                                    ]),
                             ])
                             ->columns(2),
                     ]),
