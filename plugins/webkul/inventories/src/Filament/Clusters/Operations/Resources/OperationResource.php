@@ -81,9 +81,9 @@ class OperationResource extends Resource
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
                             ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::INTERNAL)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
-                        Forms\Components\Select::make('partner_address_id')
+                        Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.delivery-address'))
-                            ->relationship('partnerAddress', 'name')
+                            ->relationship('partner', 'name')
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => AddressResource::form($form))

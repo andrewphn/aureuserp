@@ -210,45 +210,45 @@
                 <div class="right-info">
                     <div style="font-weight: bold; margin-bottom: 15px;">Vendor Address</div>
                     
-                    @if($record->partner && $record->partner->addresses->count())
+                    @if($record->partner)
                         <div style="margin-top: 15px;">
                             <div>{{ $record->partner->name }}</div>
                             
                             <div>
-                                {{ $record->partner->addresses->first()->street1 }}
+                                {{ $record->partner->street1 }}
 
-                                @if ($record->partner->addresses->first()->street2)
-                                    ,{{ $record->partner->addresses->first()->street2 }}
+                                @if ($record->partner->street2)
+                                    ,{{ $record->partner->street2 }}
                                 @endif
                             </div>
                             
                             <div>
-                                {{ $record->partner->addresses->first()->city }},
+                                {{ $record->partner->city }},
 
-                                @if ($record->partner->addresses->first()->state)
-                                    {{ $record->partner->addresses->first()->state->name }},
+                                @if ($record->partner->state)
+                                    {{ $record->partner->state->name }},
                                 @endif
                                 
-                                {{ $record->partner->addresses->first()->zip }}
+                                {{ $record->partner->zip }}
                             </div>
                             
-                            @if ($record->partner->addresses->first()->country)
+                            @if ($record->partner->country)
                                 <div>
-                                    {{ $record->partner->addresses->first()->country->name }}
+                                    {{ $record->partner->country->name }}
                                 </div>
                             @endif
                             
-                            @if ($record->partner->addresses->first()->email)
+                            @if ($record->partner->email)
                                 <div>
                                     Email: 
-                                    {{ $record->partner->addresses->first()->email }}
+                                    {{ $record->partner->email }}
                                 </div>
                             @endif
                             
-                            @if ($record->partner->addresses->first()->phone)
+                            @if ($record->partner->phone)
                                 <div>
                                     Phone: 
-                                    {{ $record->partner->addresses->first()->phone }}
+                                    {{ $record->partner->phone }}
                                 </div>
                             @endif
                         </div>

@@ -52,11 +52,6 @@ return new class extends Migration
                 ->constrained('partners_partners')
                 ->restrictOnDelete();
 
-            $table->foreignId('partner_address_id')
-                ->nullable()
-                ->constrained('partners_addresses')
-                ->nullOnDelete();
-
             $table->foreignId('currency_id')
                 ->constrained('currencies')
                 ->restrictOnDelete();
