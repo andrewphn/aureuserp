@@ -47,7 +47,9 @@ class ManageQuotationAndOrder extends SettingsPage
         return $form
             ->schema([
                 Forms\Components\TextInput::make('default_quotation_validity')
-                    ->rules(['required','gt:0','integer'])
+                    ->required()
+                    ->minValue(0)
+                    ->numeric()
                     ->suffix(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.validity-suffix'))
                     ->default(30)
                     ->label(__('sales::filament/clusters/settings/pages/manage-quotation-and-order.form.fields.validity'))
