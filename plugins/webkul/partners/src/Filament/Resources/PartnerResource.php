@@ -45,6 +45,13 @@ class PartnerResource extends Resource
                                             ->columnSpan(2)
                                             ->options(AccountType::class)
                                             ->default(AccountType::INDIVIDUAL->value)
+                                            ->options(function () {
+                                                $options = AccountType::options();
+
+                                                unset($options[AccountType::ADDRESS->value]);
+
+                                                return $options;
+                                            })
                                             ->live(),
                                         Forms\Components\TextInput::make('name')
                                             ->hiddenLabel()

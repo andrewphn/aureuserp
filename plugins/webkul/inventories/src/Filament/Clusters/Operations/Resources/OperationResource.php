@@ -27,7 +27,6 @@ use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
-use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
@@ -86,7 +85,7 @@ class OperationResource extends Resource
                             ->relationship('partner', 'name')
                             ->searchable()
                             ->preload()
-                            ->createOptionForm(fn (Form $form): Form => AddressResource::form($form))
+                            ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
                             ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('operation_type_id')

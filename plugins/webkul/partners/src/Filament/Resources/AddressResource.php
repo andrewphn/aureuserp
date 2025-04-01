@@ -32,7 +32,7 @@ class AddressResource extends Resource
                 ->columnSpan(2),
             Forms\Components\Select::make('parent_id')
                 ->label(__('partners::filament/resources/address.form.partner'))
-                ->relationship('partner', 'name')
+                ->relationship('parent', 'name')
                 ->searchable()
                 ->preload()
                 ->required()

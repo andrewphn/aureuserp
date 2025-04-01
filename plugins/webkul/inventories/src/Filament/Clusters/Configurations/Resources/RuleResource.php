@@ -21,7 +21,7 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RuleResource\Pag
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Rule;
 use Webkul\Inventory\Settings\WarehouseSettings;
-use Webkul\Partner\Filament\Resources\AddressResource;
+use Webkul\Partner\Filament\Resources\PartnerResource;
 
 class RuleResource extends Resource
 {
@@ -157,7 +157,7 @@ class RuleResource extends Resource
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: new HtmlString(__('inventories::filament/clusters/configurations/resources/rule.form.sections.settings.fields.partner-address-hint-tooltip')))
                                     ->searchable()
                                     ->preload()
-                                    ->createOptionForm(fn (Form $form): Form => AddressResource::form($form))
+                                    ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
                                     ->hidden(fn (Forms\Get $get): bool => $get('action') == Enums\RuleAction::PUSH->value),
                                 Forms\Components\TextInput::make('delay')
                                     ->label(__('inventories::filament/clusters/configurations/resources/rule.form.sections.settings.fields.lead-time'))
