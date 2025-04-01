@@ -45,6 +45,13 @@ class PartnerResource extends Resource
                                             ->columnSpan(2)
                                             ->options(AccountType::class)
                                             ->default(AccountType::INDIVIDUAL->value)
+                                            ->options(function () {
+                                                $options = AccountType::options();
+
+                                                unset($options[AccountType::ADDRESS->value]);
+
+                                                return $options;
+                                            })
                                             ->live(),
                                         Forms\Components\TextInput::make('name')
                                             ->hiddenLabel()
@@ -152,6 +159,59 @@ class PartnerResource extends Resource
                                                     ->hexColor(),
                                             ])
                                             ->columns(2),
+                                    ]),
+
+                                Forms\Components\Fieldset::make('Address')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('street1')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street1')),
+                                        Forms\Components\TextInput::make('street2')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street2')),
+                                        Forms\Components\TextInput::make('city')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.city')),
+                                        Forms\Components\TextInput::make('zip')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.zip')),
+                                        Forms\Components\Select::make('country_id')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                            ->relationship(name: 'country', titleAttribute: 'name')
+                                            ->afterStateUpdated(fn (Forms\Set $set) => $set('state_id', null))
+                                            ->searchable()
+                                            ->preload()
+                                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                                $set('state_id', null);
+                                            })
+                                            ->live(),
+                                        Forms\Components\Select::make('state_id')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.state'))
+                                            ->relationship(
+                                                name: 'state',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
+                                            )
+                                            ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
+                                                return $form
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('name')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.name'))
+                                                            ->required(),
+                                                        Forms\Components\TextInput::make('code')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
+                                                            ->required()
+                                                            ->unique('states'),
+                                                        Forms\Components\Select::make('country_id')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                                            ->relationship('country', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->default($get('country_id'))
+                                                            ->afterStateUpdated(function (Forms\Get $get) use ($set) {
+                                                                $set('country_id', $get('country_id'));
+                                                            }),
+                                                    ]);
+                                            })
+                                            ->searchable()
+                                            ->preload(),
                                     ]),
                             ])
                             ->columns(2),
@@ -460,6 +520,9 @@ class PartnerResource extends Resource
                         ),
                 ]),
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->where('account_type', '!=', AccountType::ADDRESS);
+            })
             ->contentGrid([
                 'sm'  => 1,
                 'md'  => 2,

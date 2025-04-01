@@ -438,7 +438,6 @@ class PurchaseOrder
             'move_type'               => InventoryEnums\MoveType::DIRECT,
             'origin'                  => $record->name,
             'partner_id'              => $record->partner_id,
-            'partner_address_id'      => $record->partner_address_id,
             'date'                    => $record->ordered_at,
             'operation_type_id'       => $record->operation_type_id,
             'source_location_id'      => $supplierLocation->id,

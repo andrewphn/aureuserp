@@ -30,7 +30,6 @@ class EmployeeServiceProvider extends PackageServiceProvider
                 '2024_12_11_120605_create_employees_departure_reasons_table',
                 '2024_12_12_063353_create_employees_employees_table',
                 '2024_12_12_063354_create_employees_employee_skills_table',
-                '2024_12_12_064149_create_employees_addresses_table',
                 '2024_12_12_140840_create_employees_employee_categories_table',
                 '2024_12_16_065746_create_employees_employee_resume_line_types_table',
                 '2024_12_16_070029_create_employees_employee_resumes_table',

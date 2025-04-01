@@ -13,7 +13,7 @@ use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Inventory\Database\Factories\WarehouseFactory;
 use Webkul\Inventory\Enums\DeliveryStep;
 use Webkul\Inventory\Enums\ReceptionStep;
-use Webkul\Partner\Models\Address;
+use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
@@ -90,7 +90,7 @@ class Warehouse extends Model implements Sortable
 
     public function partnerAddress(): BelongsTo
     {
-        return $this->belongsTo(Address::class);
+        return $this->belongsTo(Partner::class);
     }
 
     public function creator(): BelongsTo

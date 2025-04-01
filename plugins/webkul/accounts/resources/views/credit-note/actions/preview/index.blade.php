@@ -170,13 +170,13 @@
                                 <strong>{{ $record->company->name }}</strong><br>
                                 {{ sprintf(
                                     "%s\n%s%s\n%s, %s %s\n%s",
-                                    $record->company->address->name ?? '',
-                                    $record->company->address->street1 ?? '',
-                                    $record->company->address->street2 ? ', ' . $record->company->address->street2 : '',
-                                    $record->company->address->city ?? '',
-                                    $record->company->address->state ? $record->company->address->state->name : '',
-                                    $record->company->address->zip ?? '',
-                                    $record->company->address->country ? $record->company->address->country->name : ''
+                                    $record->company->partner->name ?? '',
+                                    $record->company->partner->street1 ?? '',
+                                    $record->company->partner->street2 ? ', ' . $record->company->partner->street2 : '',
+                                    $record->company->partner->city ?? '',
+                                    $record->company->partner->state ? $record->company->partner->state->name : '',
+                                    $record->company->partner->zip ?? '',
+                                    $record->company->partner->country ? $record->company->partner->country->name : ''
                                 ) }}
                             </div>
                         </td>
@@ -191,21 +191,16 @@
                                 @endif
 
                                 @php
-                                    $addressRecord = $record->partner->addresses->where('type', 'present')->first();
-                                    $address = '';
-
-                                    if ($addressRecord) {
-                                        $address = sprintf(
-                                            "%s\n%s%s\n%s, %s %s\n%s",
-                                            $addressRecord->name ?? '',
-                                            $addressRecord->street1 ?? '',
-                                            $addressRecord->street2 ? ', ' . $addressRecord->street2 : '',
-                                            $addressRecord->city ?? '',
-                                            $addressRecord->state ? $addressRecord->state->name : '',
-                                            $addressRecord->zip ?? '',
-                                            $addressRecord->country ? $addressRecord->country->name : ''
-                                        );
-                                    }
+                                    $address = sprintf(
+                                        "%s\n%s%s\n%s, %s %s\n%s",
+                                        $record->partner->name ?? '',
+                                        $record->partner->street1 ?? '',
+                                        $record->partner->street2 ? ', ' . $record->partner->street2 : '',
+                                        $record->partner->city ?? '',
+                                        $record->partner->state ? $record->partner->state->name : '',
+                                        $record->partner->zip ?? '',
+                                        $record->partner->country ? $record->partner->country->name : ''
+                                    );
                                 @endphp
 
                                 @if (!empty($address))

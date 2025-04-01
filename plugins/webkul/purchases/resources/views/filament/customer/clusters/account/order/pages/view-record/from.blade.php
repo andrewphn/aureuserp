@@ -12,33 +12,33 @@
     <p class="mt-2 text-sm leading-6 text-gray-950 dark:text-white">
         {{ $record->company->name }}
 
-        @if ($record->company->address)
-            ({{ $record->company->address->city }})
+        @if ($record->company->partner)
+            ({{ $record->company->partner->city }})
         @endif
     </p>
 
-    @if ($record->company->address)
+    @if ($record->company->partner)
         <p class="mt-2 text-sm leading-6 text-gray-950 dark:text-white">
-            {{ $record->company->address->street1 }}
+            {{ $record->company->partner->street1 }}
 
-            @if ($record->company->address->street2)
-                ,{{ $record->company->address->street2 }}
+            @if ($record->company->partner->street2)
+                ,{{ $record->company->partner->street2 }}
             @endif
         </p>
         
         <p class="text-sm leading-6 text-gray-950 dark:text-white">
-            {{ $record->company->address->city }},
+            {{ $record->company->partner->city }},
 
-            @if ($record->company->address->state)
-                {{ $record->company->address->state->name }},
+            @if ($record->company->partner->state)
+                {{ $record->company->partner->state->name }},
             @endif
             
-            {{ $record->company->address->zip }}
+            {{ $record->company->partner->zip }}
         </p>
         
-        @if ($record->company->address->country)
+        @if ($record->company->partner->country)
             <p class="text-sm leading-6 text-gray-950 dark:text-white">
-                {{ $record->company->address->country->name }}
+                {{ $record->company->partner->country->name }}
             </p>
         @endif
     @endif

@@ -21,6 +21,21 @@ return [
                     'tags'       => 'Tags',
                     'color'      => 'Color',
                 ],
+
+                'address' => [
+                    'title' => 'Address',
+
+                    'fields' => [
+                        'street1'  => 'Street 1',
+                        'street2'  => 'Street 2',
+                        'city'     => 'City',
+                        'zip'      => 'ZIP',
+                        'state'    => 'State',
+                        'country'  => 'Country',
+                        'name'     => 'Name',
+                        'code'     => 'Code',
+                    ],
+                ],
             ],
         ],
 

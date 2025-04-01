@@ -12,12 +12,10 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Employee\Database\Factories\EmployeeFactory;
 use Webkul\Field\Traits\HasCustomFields;
-use Webkul\Partner\Enums\AddressType;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
-use Webkul\Support\Models\CompanyAddress;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
 
@@ -61,6 +59,13 @@ class Employee extends Model
         'distance_home_work_unit',
         'private_phone',
         'private_email',
+        'private_street1',
+        'private_street2',
+        'private_city',
+        'private_zip',
+        'private_state_id',
+        'private_country_id',
+        'private_car_plate',
         'lang',
         'gender',
         'birthday',
@@ -86,7 +91,6 @@ class Employee extends Model
         'time_zone',
         'work_permit',
         'leave_manager_id',
-        'private_car_plate',
         'visa_expire',
         'work_permit_expiration_date',
         'departure_date',
@@ -111,6 +115,16 @@ class Employee extends Model
         'work_permit_scheduled_activity' => 'boolean',
     ];
 
+    public function privateState(): BelongsTo
+    {
+        return $this->belongsTo(State::class, 'private_state_id');
+    }
+
+    public function privateCountry(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'private_country_id');
+    }
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'company_id');
@@ -124,21 +138,6 @@ class Employee extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
-    }
-
-    public function address()
-    {
-        return $this->hasOne(EmployeeAddress::class);
-    }
-
-    public function permanentAddress()
-    {
-        return $this->address()->where('type', AddressType::PERMANENT);
-    }
-
-    public function presentAddress()
-    {
-        return $this->address()->where('type', AddressType::PRESENT);
     }
 
     public function calendar(): BelongsTo
@@ -241,7 +240,7 @@ class Employee extends Model
 
     public function companyAddress()
     {
-        return $this->belongsTo(CompanyAddress::class, 'address_id');
+        return $this->belongsTo(Partner::class, 'address_id');
     }
 
     /**

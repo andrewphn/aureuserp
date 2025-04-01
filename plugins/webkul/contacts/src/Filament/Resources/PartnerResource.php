@@ -16,6 +16,8 @@ class PartnerResource extends BasePartnerResource
 
     protected static ?string $slug = 'contact/contacts';
 
+    protected static bool $shouldRegisterNavigation = true;
+
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string

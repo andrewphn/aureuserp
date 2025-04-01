@@ -6,6 +6,7 @@ return [
         'name'    => 'Name',
         'email'   => 'Email',
         'phone'   => 'Phone',
+        'mobile'  => 'Mobile',
         'type'    => 'Type',
         'address' => 'Address',
         'city'    => 'City',
@@ -13,6 +14,7 @@ return [
         'street2' => 'Street 2',
         'state'   => 'State',
         'zip'     => 'Zip',
+        'code'    => 'Code',
         'country' => 'Country',
     ],
 
@@ -30,6 +32,7 @@ return [
 
         'columns' => [
             'type'    => 'Type',
+            'name'    => 'Contact Name',
             'address' => 'Address',
             'city'    => 'City',
             'street1' => 'Street 1',
