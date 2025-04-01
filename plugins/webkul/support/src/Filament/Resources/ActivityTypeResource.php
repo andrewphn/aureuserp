@@ -322,7 +322,7 @@ class ActivityTypeResource extends Resource
                                             ->placeholder('—')
                                             ->formatStateUsing(fn($state) => ActivityTypeAction::options()[$state])
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.activity-type-details.entries.action')),
-                                        Infolists\Components\TextEntry::make('default_user.name')
+                                        Infolists\Components\TextEntry::make('defaultUser.name')
                                             ->icon('heroicon-o-user')
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.activity-type-details.entries.default-user')),
