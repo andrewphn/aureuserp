@@ -1104,7 +1104,7 @@ class InvoiceResource extends Resource
         $existingTaxLines->each->delete();
     }
 
-    private static function calculateDateMaturity($move)
+    public static function calculateDateMaturity($move)
     {
         $dateMaturity = $move->invoice_date_due ?? now();
 
