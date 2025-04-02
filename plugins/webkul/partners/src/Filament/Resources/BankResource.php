@@ -70,13 +70,17 @@ class BankResource extends Resource
                             ->searchable()
                             ->preload(),
                         Forms\Components\TextInput::make('street1')
-                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.street1')),
+                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.street1'))
+                            ->maxLength(255),
                         Forms\Components\TextInput::make('street2')
-                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.street2')),
+                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.street2'))
+                            ->maxLength(255),
                         Forms\Components\TextInput::make('city')
-                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.city')),
+                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.city'))
+                            ->maxLength(255),
                         Forms\Components\TextInput::make('zip')
-                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.zip')),
+                            ->label(__('partners::filament/resources/bank.form.sections.address.fields.zip'))
+                            ->maxLength(255),
                         Forms\Components\Hidden::make('creator_id')
                             ->default(Auth::user()->id),
                     ])
