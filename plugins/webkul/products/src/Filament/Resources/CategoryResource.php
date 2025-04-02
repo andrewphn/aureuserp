@@ -10,11 +10,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
-use Illuminate\Database\QueryException;
-use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Table;
-use Webkul\Product\Models\Category;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Webkul\Product\Models\Category;
 
 class CategoryResource extends Resource
 {

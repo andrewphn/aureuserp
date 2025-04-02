@@ -5,8 +5,8 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions;
 use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
-use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Facades\Inventory;
+use Webkul\Inventory\Models\Operation;
 
 class CheckAvailabilityAction extends Action
 {

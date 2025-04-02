@@ -2,15 +2,14 @@
 
 namespace Webkul\Inventory;
 
-use Webkul\Inventory\Enums;
-use Illuminate\Support\Facades\Auth;
-use Webkul\Support\Models\UOM;
-use Webkul\Inventory\Models\ProductQuantity;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\ProductQuantity;
+use Webkul\Support\Models\UOM;
 use Webkul\Support\Package;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 
 class InventoryManager
 {

@@ -9,17 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Models\Tax;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Move as InventoryMove;
+use Webkul\Inventory\Models\OrderPoint;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Database\Factories\OrderLineFactory;
+use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Webkul\Inventory\Models\Location;
-use Webkul\Inventory\Models\OrderPoint;
-use Webkul\Inventory\Models\Move as InventoryMove;
-use Webkul\Purchase\Enums;
 
 class OrderLine extends Model
 {
@@ -79,9 +79,9 @@ class OrderLine extends Model
      */
     protected $casts = [
         'qty_received_method' => Enums\QtyReceivedMethod::class,
-        'planned_at'       => 'datetime',
-        'is_downpayment'   => 'boolean',
-        'propagate_cancel' => 'boolean',
+        'planned_at'          => 'datetime',
+        'is_downpayment'      => 'boolean',
+        'propagate_cancel'    => 'boolean',
     ];
 
     public $sortable = [

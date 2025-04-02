@@ -39,7 +39,6 @@ use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
-use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 
 class EmployeeResource extends Resource
@@ -82,7 +81,7 @@ class EmployeeResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            __('employees::filament/resources/employee.global-search.name') => $record?->name ?? '—',
+            __('employees::filament/resources/employee.global-search.name')       => $record?->name ?? '—',
             __('employees::filament/resources/employee.global-search.department') => $record?->department?->name ?? '—',
             __('employees::filament/resources/employee.global-search.work-email') => $record?->work_email ?? '—',
             __('employees::filament/resources/employee.global-search.work-phone') => $record?->work_phone ?? '—',
@@ -137,7 +136,7 @@ class EmployeeResource extends Resource
                                                     $set('work_email', $state);
                                                 }
                                             })
-                                            ->url(fn(?string $state) => $state ? "mailto:{$state}" : '#')
+                                            ->url(fn (?string $state) => $state ? "mailto:{$state}" : '#')
                                     )
                                     ->email(),
                                 Forms\Components\Select::make('department_id')
@@ -145,7 +144,7 @@ class EmployeeResource extends Resource
                                     ->relationship(name: 'department', titleAttribute: 'complete_name')
                                     ->searchable()
                                     ->preload()
-                                    ->createOptionForm(fn(Form $form) => DepartmentResource::form($form)),
+                                    ->createOptionForm(fn (Form $form) => DepartmentResource::form($form)),
                                 Forms\Components\TextInput::make('mobile_phone')
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.work-mobile'))
                                     ->suffixAction(
@@ -155,7 +154,7 @@ class EmployeeResource extends Resource
                                             ->action(function (Set $set, $state) {
                                                 $set('mobile_phone', $state);
                                             })
-                                            ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                            ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                     )
                                     ->tel(),
                                 Forms\Components\Select::make('job_id')
@@ -163,7 +162,7 @@ class EmployeeResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.job-position'))
-                                    ->createOptionForm(fn(Form $form) => JobPositionResource::form($form)),
+                                    ->createOptionForm(fn (Form $form) => JobPositionResource::form($form)),
                                 Forms\Components\TextInput::make('work_phone')
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.work-phone'))
                                     ->suffixAction(
@@ -173,7 +172,7 @@ class EmployeeResource extends Resource
                                             ->action(function (Set $set, $state) {
                                                 $set('work_phone', $state);
                                             })
-                                            ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                            ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                     )
                                     ->tel(),
                                 Forms\Components\Select::make('parent_id')
@@ -188,7 +187,7 @@ class EmployeeResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.employee-tags'))
-                                    ->createOptionForm(fn(Form $form) => EmployeeCategoryResource::form($form)),
+                                    ->createOptionForm(fn (Form $form) => EmployeeCategoryResource::form($form)),
                                 Forms\Components\Select::make('coach_id')
                                     ->searchable()
                                     ->preload()
@@ -223,20 +222,20 @@ class EmployeeResource extends Resource
                                                             ->preload()
                                                             ->label(__('employees::filament/resources/employee.form.tabs.work-information.fields.work-location'))
                                                             ->prefixIcon('heroicon-o-map-pin')
-                                                            ->createOptionForm(fn(Form $form) => WorkLocationResource::form($form))
-                                                            ->editOptionForm(fn(Form $form) => WorkLocationResource::form($form)),
+                                                            ->createOptionForm(fn (Form $form) => WorkLocationResource::form($form))
+                                                            ->editOptionForm(fn (Form $form) => WorkLocationResource::form($form)),
                                                     ])->columns(1),
                                                 Forms\Components\Fieldset::make(__('employees::filament/resources/employee.form.tabs.work-information.fields.approver'))
                                                     ->schema([
                                                         Forms\Components\Select::make('leave_manager_id')
-                                                            ->options(fn() => User::pluck('name', 'id'))
+                                                            ->options(fn () => User::pluck('name', 'id'))
                                                             ->searchable()
                                                             ->preload()
                                                             ->live()
                                                             ->suffixIcon('heroicon-o-clock')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.work-information.fields.time-off')),
                                                         Forms\Components\Select::make('attendance_manager_id')
-                                                            ->options(fn() => User::pluck('name', 'id'))
+                                                            ->options(fn () => User::pluck('name', 'id'))
                                                             ->searchable()
                                                             ->preload()
                                                             ->live()
@@ -246,7 +245,7 @@ class EmployeeResource extends Resource
                                                 Forms\Components\Fieldset::make(__('employees::filament/resources/employee.form.tabs.work-information.fields.schedule'))
                                                     ->schema([
                                                         Forms\Components\Select::make('calendar_id')
-                                                            ->options(fn() => Calendar::pluck('name', 'id'))
+                                                            ->options(fn () => Calendar::pluck('name', 'id'))
                                                             ->searchable()
                                                             ->preload()
                                                             ->live()
@@ -279,7 +278,7 @@ class EmployeeResource extends Resource
                                                                     ->preload()
                                                                     ->prefixIcon('heroicon-o-building-office')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.work-information.fields.company'))
-                                                                    ->createOptionForm(fn(Form $form) => CompanyResource::form($form)),
+                                                                    ->createOptionForm(fn (Form $form) => CompanyResource::form($form)),
                                                                 Forms\Components\ColorPicker::make('color')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.work-information.fields.color'))
                                                                     ->hexColor(),
@@ -313,7 +312,7 @@ class EmployeeResource extends Resource
                                                                 Forms\Components\Select::make('private_country_id')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.country'))
                                                                     ->relationship(name: 'country', titleAttribute: 'name')
-                                                                    ->afterStateUpdated(fn(Set $set) => $set('private_state_id', null))
+                                                                    ->afterStateUpdated(fn (Set $set) => $set('private_state_id', null))
                                                                     ->searchable()
                                                                     ->preload()
                                                                     ->live(),
@@ -357,7 +356,7 @@ class EmployeeResource extends Resource
                                                                             ->action(function (Set $set, $state) {
                                                                                 $set('private_phone', $state);
                                                                             })
-                                                                            ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                                                            ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                                                     )
                                                                     ->tel(),
                                                                 Forms\Components\Select::make('bank_account_id')
@@ -382,7 +381,7 @@ class EmployeeResource extends Resource
                                                                                     })
                                                                                     ->required(),
                                                                                 Forms\Components\Hidden::make('creator_id')
-                                                                                    ->default(fn() => Auth::user()->id),
+                                                                                    ->default(fn () => Auth::user()->id),
                                                                                 Forms\Components\Select::make('bank_id')
                                                                                     ->relationship('bank', 'name')
                                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.bank'))
@@ -390,7 +389,7 @@ class EmployeeResource extends Resource
                                                                                     ->preload()
                                                                                     ->createOptionForm(static::getBankCreateSchema())
                                                                                     ->editOptionForm(static::getBankCreateSchema())
-                                                                                    ->createOptionAction(fn(Action $action) => $action->modalHeading(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-bank')))
+                                                                                    ->createOptionAction(fn (Action $action) => $action->modalHeading(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-bank')))
                                                                                     ->live()
                                                                                     ->required(),
                                                                                 Forms\Components\Toggle::make('is_active')
@@ -405,11 +404,11 @@ class EmployeeResource extends Resource
                                                                             ])->columns(2),
                                                                     ])
                                                                     ->createOptionAction(
-                                                                        fn(Action $action) => $action
+                                                                        fn (Action $action) => $action
                                                                             ->modalHeading(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-bank-account'))
                                                                             ->modalSubmitActionLabel(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-bank-account'))
                                                                     )
-                                                                    ->disabled(fn($livewire) => ! $livewire->record?->user)
+                                                                    ->disabled(fn ($livewire) => ! $livewire->record?->user)
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.bank-account')),
                                                                 Forms\Components\TextInput::make('private_email')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.private-email'))
@@ -422,7 +421,7 @@ class EmployeeResource extends Resource
                                                                                     $set('private_email', $state);
                                                                                 }
                                                                             })
-                                                                            ->url(fn(?string $state) => $state ? "mailto:{$state}" : '#')
+                                                                            ->url(fn (?string $state) => $state ? "mailto:{$state}" : '#')
                                                                     )
                                                                     ->email(),
                                                                 Forms\Components\TextInput::make('private_car_plate')
@@ -456,7 +455,7 @@ class EmployeeResource extends Resource
                                                                                     ->action(function (Set $set, $state) {
                                                                                         $set('emergency_phone', $state);
                                                                                     })
-                                                                                    ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                                                                    ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                                                             )
                                                                             ->tel(),
                                                                     ])->columns(2),
@@ -473,23 +472,23 @@ class EmployeeResource extends Resource
                                                                     ->live(),
                                                                 Forms\Components\TextInput::make('spouse_complete_name')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.spouse-name'))
-                                                                    ->hidden(fn(Get $get) => $get('marital') === MaritalStatus::Single->value)
-                                                                    ->dehydrated(fn(Get $get) => $get('marital') !== MaritalStatus::Single->value)
-                                                                    ->required(fn(Get $get) => $get('marital') !== MaritalStatus::Single->value),
+                                                                    ->hidden(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
+                                                                    ->dehydrated(fn (Get $get) => $get('marital') !== MaritalStatus::Single->value)
+                                                                    ->required(fn (Get $get) => $get('marital') !== MaritalStatus::Single->value),
                                                                 Forms\Components\DatePicker::make('spouse_birthdate')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.spouse-birthday'))
                                                                     ->native(false)
                                                                     ->suffixIcon('heroicon-o-calendar')
-                                                                    ->disabled(fn(Get $get) => $get('marital') === MaritalStatus::Single->value)
-                                                                    ->hidden(fn(Get $get) => $get('marital') === MaritalStatus::Single->value)
-                                                                    ->dehydrated(fn(Get $get) => $get('marital') !== MaritalStatus::Single->value),
+                                                                    ->disabled(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
+                                                                    ->hidden(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
+                                                                    ->dehydrated(fn (Get $get) => $get('marital') !== MaritalStatus::Single->value),
                                                                 Forms\Components\TextInput::make('children')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.number-of-children'))
                                                                     ->numeric()
                                                                     ->minValue(0)
-                                                                    ->disabled(fn(Get $get) => $get('marital') === MaritalStatus::Single->value)
-                                                                    ->hidden(fn(Get $get) => $get('marital') === MaritalStatus::Single->value)
-                                                                    ->dehydrated(fn(Get $get) => $get('marital') !== MaritalStatus::Single->value),
+                                                                    ->disabled(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
+                                                                    ->hidden(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
+                                                                    ->dehydrated(fn (Get $get) => $get('marital') !== MaritalStatus::Single->value),
                                                             ])->columns(2),
                                                         Forms\Components\Fieldset::make(__('employees::filament/resources/employee.form.tabs.private-information.fields.education'))
                                                             ->schema([
@@ -534,12 +533,12 @@ class EmployeeResource extends Resource
                                                                     ->required(),
                                                             ])
                                                             ->createOptionAction(
-                                                                fn(Action $action) => $action
+                                                                fn (Action $action) => $action
                                                                     ->modalHeading(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-country'))
                                                                     ->modalSubmitActionLabel(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-country'))
                                                                     ->modalWidth('lg')
                                                             )
-                                                            ->afterStateUpdated(fn(Set $set) => $set('state_id', null))
+                                                            ->afterStateUpdated(fn (Set $set) => $set('state_id', null))
                                                             ->searchable()
                                                             ->preload()
                                                             ->live(),
@@ -548,7 +547,7 @@ class EmployeeResource extends Resource
                                                             ->relationship(
                                                                 name: 'state',
                                                                 titleAttribute: 'name',
-                                                                modifyQueryUsing: fn(Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
+                                                                modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                                                             )
                                                             ->createOptionForm([
                                                                 Forms\Components\TextInput::make('name')
@@ -561,14 +560,14 @@ class EmployeeResource extends Resource
                                                                     ->maxLength(255),
                                                             ])
                                                             ->createOptionAction(
-                                                                fn(Action $action) => $action
+                                                                fn (Action $action) => $action
                                                                     ->modalHeading(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-state'))
                                                                     ->modalSubmitActionLabel(__('employees::filament/resources/employee.form.tabs.private-information.fields.create-state'))
                                                                     ->modalWidth('lg')
                                                             )
                                                             ->searchable()
                                                             ->preload()
-                                                            ->required(fn(Get $get) => Country::find($get('country_id'))?->state_required),
+                                                            ->required(fn (Get $get) => Country::find($get('country_id'))?->state_required),
                                                         Forms\Components\TextInput::make('identification_id')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.identification-id')),
                                                         Forms\Components\TextInput::make('ssnid')
@@ -647,9 +646,9 @@ class EmployeeResource extends Resource
                                                             ->preload()
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.related-user'))
                                                             ->prefixIcon('heroicon-o-user')
-                                                            ->createOptionForm(fn(Form $form) => UserResource::form($form))
+                                                            ->createOptionForm(fn (Form $form) => UserResource::form($form))
                                                             ->createOptionAction(
-                                                                fn(Action $action, Get $get) => $action
+                                                                fn (Action $action, Get $get) => $action
                                                                     ->fillForm(function (array $arguments) use ($get): array {
                                                                         return [
                                                                             'name'  => $get('name'),
@@ -684,18 +683,18 @@ class EmployeeResource extends Resource
                                                             ->preload()
                                                             ->live()
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.departure-reason'))
-                                                            ->createOptionForm(fn(Form $form) => DepartureReasonResource::form($form)),
+                                                            ->createOptionForm(fn (Form $form) => DepartureReasonResource::form($form)),
                                                         Forms\Components\DatePicker::make('departure_date')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.departure-date'))
                                                             ->native(false)
-                                                            ->hidden(fn(Get $get) => $get('departure_reason_id') === null)
-                                                            ->disabled(fn(Get $get) => $get('departure_reason_id') === null)
-                                                            ->required(fn(Get $get) => $get('departure_reason_id') !== null),
+                                                            ->hidden(fn (Get $get) => $get('departure_reason_id') === null)
+                                                            ->disabled(fn (Get $get) => $get('departure_reason_id') === null)
+                                                            ->required(fn (Get $get) => $get('departure_reason_id') !== null),
                                                         Forms\Components\Textarea::make('departure_description')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.departure-description'))
-                                                            ->hidden(fn(Get $get) => $get('departure_reason_id') === null)
-                                                            ->disabled(fn(Get $get) => $get('departure_reason_id') === null)
-                                                            ->required(fn(Get $get) => $get('departure_reason_id') !== null),
+                                                            ->hidden(fn (Get $get) => $get('departure_reason_id') === null)
+                                                            ->disabled(fn (Get $get) => $get('departure_reason_id') === null)
+                                                            ->required(fn (Get $get) => $get('departure_reason_id') !== null),
                                                     ])->columns(2),
                                                 Forms\Components\Fieldset::make(__('employees::filament/resources/employee.form.tabs.settings.fields.additional-information'))
                                                     ->schema([
@@ -762,7 +761,7 @@ class EmployeeResource extends Resource
                                 ->sortable()
                                 ->label(__('employees::filament/resources/employee.table.columns.job-title')),
                         ])
-                            ->visible(fn($record) => filled($record->job_title)),
+                            ->visible(fn ($record) => filled($record->job_title)),
                         Tables\Columns\Layout\Stack::make([
                             Tables\Columns\TextColumn::make('work_email')
                                 ->icon('heroicon-o-envelope')
@@ -772,7 +771,7 @@ class EmployeeResource extends Resource
                                 ->color('gray')
                                 ->limit(20),
                         ])
-                            ->visible(fn($record) => filled($record->work_email)),
+                            ->visible(fn ($record) => filled($record->work_email)),
                         Tables\Columns\Layout\Stack::make([
                             Tables\Columns\TextColumn::make('work_phone')
                                 ->icon('heroicon-o-phone')
@@ -782,22 +781,22 @@ class EmployeeResource extends Resource
                                 ->limit(30)
                                 ->sortable(),
                         ])
-                            ->visible(fn($record) => filled($record->work_phone)),
+                            ->visible(fn ($record) => filled($record->work_phone)),
                         Tables\Columns\Layout\Stack::make([
                             Tables\Columns\TextColumn::make('categories.name')
                                 ->label(__('employees::filament/resources/employee.table.columns.categories'))
                                 ->badge()
                                 ->state(function (Employee $record): array {
-                                    return $record->categories->map(fn($category) => [
+                                    return $record->categories->map(fn ($category) => [
                                         'label' => $category->name,
                                         'color' => $category->color ?? '#808080',
                                     ])->toArray();
                                 })
-                                ->formatStateUsing(fn($state) => $state['label'])
-                                ->color(fn($state) => Color::hex($state['color']))
+                                ->formatStateUsing(fn ($state) => $state['label'])
+                                ->color(fn ($state) => Color::hex($state['color']))
                                 ->weight(FontWeight::Bold),
                         ])
-                            ->visible(fn($record): bool => (bool) $record->categories()->get()?->count()),
+                            ->visible(fn ($record): bool => (bool) $record->categories()->get()?->count()),
                     ])->space(1),
                 ])->space(4),
             ])
@@ -1300,7 +1299,7 @@ class EmployeeResource extends Resource
                                 Infolists\Components\TextEntry::make('work_email')
                                     ->label(__('employees::filament/resources/employee.infolist.sections.entries.work-email'))
                                     ->placeholder('—')
-                                    ->url(fn(?string $state) => $state ? "mailto:{$state}" : '#')
+                                    ->url(fn (?string $state) => $state ? "mailto:{$state}" : '#')
                                     ->icon('heroicon-o-envelope')
                                     ->iconPosition(IconPosition::Before),
                                 Infolists\Components\TextEntry::make('department.complete_name')
@@ -1309,7 +1308,7 @@ class EmployeeResource extends Resource
                                 Infolists\Components\TextEntry::make('mobile_phone')
                                     ->label(__('employees::filament/resources/employee.infolist.sections.entries.work-mobile'))
                                     ->placeholder('—')
-                                    ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                    ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                     ->icon('heroicon-o-phone')
                                     ->iconPosition(IconPosition::Before),
                                 Infolists\Components\TextEntry::make('job.name')
@@ -1318,7 +1317,7 @@ class EmployeeResource extends Resource
                                 Infolists\Components\TextEntry::make('work_phone')
                                     ->placeholder('—')
                                     ->label(__('employees::filament/resources/employee.infolist.sections.entries.work-phone'))
-                                    ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                    ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                     ->icon('heroicon-o-phone')
                                     ->iconPosition(IconPosition::Before),
                                 Infolists\Components\TextEntry::make('parent.name')
@@ -1329,14 +1328,14 @@ class EmployeeResource extends Resource
                                     ->label(__('employees::filament/resources/employee.infolist.sections.entries.employee-tags'))
                                     ->placeholder('—')
                                     ->state(function (Employee $record): array {
-                                        return $record->categories->map(fn($category) => [
+                                        return $record->categories->map(fn ($category) => [
                                             'label' => $category->name,
                                             'color' => $category->color ?? '#808080',
                                         ])->toArray();
                                     })
                                     ->badge()
-                                    ->formatStateUsing(fn($state) => $state['label'])
-                                    ->color(fn($state) => Color::hex($state['color']))
+                                    ->formatStateUsing(fn ($state) => $state['label'])
+                                    ->color(fn ($state) => Color::hex($state['color']))
                                     ->listWithLineBreaks(),
                                 Infolists\Components\TextEntry::make('coach.name')
                                     ->placeholder('—')
@@ -1434,12 +1433,12 @@ class EmployeeResource extends Resource
                                                     Infolists\Components\TextEntry::make('private_phone')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.private-phone'))
                                                         ->placeholder('—')
-                                                        ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                                        ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                                         ->icon('heroicon-o-phone'),
                                                     Infolists\Components\TextEntry::make('private_email')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.private-email'))
                                                         ->placeholder('—')
-                                                        ->url(fn(?string $state) => $state ? "mailto:{$state}" : '#')
+                                                        ->url(fn (?string $state) => $state ? "mailto:{$state}" : '#')
                                                         ->icon('heroicon-o-envelope'),
                                                     Infolists\Components\TextEntry::make('private_car_plate')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.private-car-plate'))
@@ -1460,7 +1459,7 @@ class EmployeeResource extends Resource
                                                     Infolists\Components\TextEntry::make('emergency_phone')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.contact-phone'))
                                                         ->placeholder('—')
-                                                        ->url(fn(?string $state) => $state ? "tel:{$state}" : '#')
+                                                        ->url(fn (?string $state) => $state ? "tel:{$state}" : '#')
                                                         ->icon('heroicon-o-phone'),
                                                 ]),
                                             Infolists\Components\Fieldset::make(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.work-permit'))
@@ -1485,7 +1484,7 @@ class EmployeeResource extends Resource
                                                         ->icon('heroicon-o-calendar-days')
                                                         ->date('F j, Y')
                                                         ->color(
-                                                            fn($record) => $record->visa_expire && now()->diffInDays($record->visa_expire, false) <= 30
+                                                            fn ($record) => $record->visa_expire && now()->diffInDays($record->visa_expire, false) <= 30
                                                                 ? 'danger'
                                                                 : 'success'
                                                         ),
@@ -1495,7 +1494,7 @@ class EmployeeResource extends Resource
                                                         ->icon('heroicon-o-calendar-days')
                                                         ->date('F j, Y')
                                                         ->color(
-                                                            fn($record) => $record->work_permit_expiration_date && now()->diffInDays($record->work_permit_expiration_date, false) <= 30
+                                                            fn ($record) => $record->work_permit_expiration_date && now()->diffInDays($record->work_permit_expiration_date, false) <= 30
                                                                 ? 'danger'
                                                                 : 'success'
                                                         ),
@@ -1551,7 +1550,7 @@ class EmployeeResource extends Resource
                                                         ->placeholder('—')
                                                         ->icon('heroicon-o-user')
                                                         ->badge()
-                                                        ->color(fn(string $state): string => match ($state) {
+                                                        ->color(fn (string $state): string => match ($state) {
                                                             'male'   => 'info',
                                                             'female' => 'success',
                                                             default  => 'warning',
@@ -1585,16 +1584,16 @@ class EmployeeResource extends Resource
                                                     ->schema([
                                                         Infolists\Components\IconEntry::make('is_active')
                                                             ->label(__('employees::filament/resources/employee.infolist.tabs.settings.entries.active-employee'))
-                                                            ->color(fn($state) => $state ? 'success' : 'danger'),
+                                                            ->color(fn ($state) => $state ? 'success' : 'danger'),
                                                         Infolists\Components\IconEntry::make('is_flexible')
                                                             ->label(__('employees::filament/resources/employee.infolist.tabs.settings.entries.flexible-work-arrangement'))
-                                                            ->color(fn($state) => $state ? 'success' : 'danger'),
+                                                            ->color(fn ($state) => $state ? 'success' : 'danger'),
                                                         Infolists\Components\IconEntry::make('is_fully_flexible')
                                                             ->label(__('employees::filament/resources/employee.infolist.tabs.settings.entries.fully-flexible-schedule'))
-                                                            ->color(fn($state) => $state ? 'success' : 'danger'),
+                                                            ->color(fn ($state) => $state ? 'success' : 'danger'),
                                                         Infolists\Components\IconEntry::make('work_permit_scheduled_activity')
                                                             ->label(__('employees::filament/resources/employee.infolist.tabs.settings.entries.work-permit-scheduled-activity'))
-                                                            ->color(fn($state) => $state ? 'success' : 'danger'),
+                                                            ->color(fn ($state) => $state ? 'success' : 'danger'),
                                                         Infolists\Components\TextEntry::make('user.name')
                                                             ->label(__('employees::filament/resources/employee.infolist.tabs.settings.entries.related-user'))
                                                             ->placeholder('—')
@@ -1681,7 +1680,7 @@ class EmployeeResource extends Resource
                     Forms\Components\Select::make('country_id')
                         ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.bank-country'))
                         ->relationship(name: 'country', titleAttribute: 'name')
-                        ->afterStateUpdated(fn(Set $set) => $set('state_id', null))
+                        ->afterStateUpdated(fn (Set $set) => $set('state_id', null))
                         ->searchable()
                         ->preload()
                         ->live(),
@@ -1690,13 +1689,13 @@ class EmployeeResource extends Resource
                         ->relationship(
                             name: 'state',
                             titleAttribute: 'name',
-                            modifyQueryUsing: fn(Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
+                            modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                         )
                         ->searchable()
                         ->preload()
-                        ->required(fn(Get $get) => Country::find($get('country_id'))?->state_required),
+                        ->required(fn (Get $get) => Country::find($get('country_id'))?->state_required),
                     Forms\Components\Hidden::make('creator_id')
-                        ->default(fn() => Auth::user()->id),
+                        ->default(fn () => Auth::user()->id),
                 ])->columns(2),
         ];
     }

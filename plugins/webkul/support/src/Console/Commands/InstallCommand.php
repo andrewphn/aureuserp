@@ -249,8 +249,8 @@ class InstallCommand extends Command
             }
 
             $fullPath = $this->package->basePath("../database/migrations/{$migration}.php");
-            
-            $path = Str::after($fullPath, base_path() . DIRECTORY_SEPARATOR);
+
+            $path = Str::after($fullPath, base_path().DIRECTORY_SEPARATOR);
 
             $migrationsToRun[] = $path;
         }
@@ -277,8 +277,8 @@ class InstallCommand extends Command
             }
 
             $fullPath = $this->package->basePath("../database/settings/{$setting}.php");
-            
-            $path = Str::after($fullPath, base_path() . DIRECTORY_SEPARATOR);
+
+            $path = Str::after($fullPath, base_path().DIRECTORY_SEPARATOR);
 
             $settingsToRun[] = $path;
         }

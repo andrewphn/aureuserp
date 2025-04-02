@@ -14,10 +14,10 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Partner\Models\Partner;
 
@@ -619,7 +619,6 @@ class PartnerResource extends Resource
                                     ->visible(fn ($record): bool => (bool) $record->tags()->count()),
                             ]),
 
-                        
                         Infolists\Components\Fieldset::make('Address')
                             ->schema([
                                 Infolists\Components\TextEntry::make('street1')

@@ -16,7 +16,6 @@ use Webkul\Account\Enums;
 use Webkul\Account\Enums\TaxIncludeOverride;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
 use Webkul\Account\Models\Tax;
-use Webkul\Account\Models\TaxGroup;
 
 class TaxResource extends Resource
 {

@@ -2,8 +2,8 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages\ManageProducts as BaseManageProducts;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 
 class ManageProducts extends BaseManageProducts
 {

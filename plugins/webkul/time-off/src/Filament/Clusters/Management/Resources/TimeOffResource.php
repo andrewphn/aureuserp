@@ -118,14 +118,14 @@ class TimeOffResource extends Resource
                                             ->native(false)
                                             ->default(now())
                                             ->label(__('time-off::filament/clusters/management/resources/time-off.form.fields.request-date-to'))
-                                            ->hidden(fn(Get $get) => $get('request_unit_half'))
+                                            ->hidden(fn (Get $get) => $get('request_unit_half'))
                                             ->required(),
                                         Forms\Components\Select::make('request_date_from_period')
                                             ->label(__('time-off::filament/clusters/management/resources/time-off.form.fields.period'))
                                             ->options(RequestDateFromPeriod::class)
                                             ->default(RequestDateFromPeriod::MORNING->value)
                                             ->native(false)
-                                            ->visible(fn(Get $get) => $get('request_unit_half'))
+                                            ->visible(fn (Get $get) => $get('request_unit_half'))
                                             ->required(),
                                     ]),
                                 Forms\Components\Toggle::make('request_unit_half')
@@ -198,7 +198,7 @@ class TimeOffResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('time-off::filament/clusters/management/resources/time-off.table.columns.status'))
-                    ->formatStateUsing(fn($state) => State::options()[$state])
+                    ->formatStateUsing(fn ($state) => State::options()[$state])
                     ->sortable()
                     ->badge()
                     ->searchable(),
@@ -233,7 +233,7 @@ class TimeOffResource extends Resource
                 Tables\Actions\Action::make('approve')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->hidden(fn($record) => $record->state === State::VALIDATE_TWO->value)
+                    ->hidden(fn ($record) => $record->state === State::VALIDATE_TWO->value)
                     ->action(function ($record) {
                         if ($record->state === State::VALIDATE_ONE->value) {
                             $record->update(['state' => State::VALIDATE_TWO->value]);
@@ -256,7 +256,7 @@ class TimeOffResource extends Resource
                     }),
                 Tables\Actions\Action::make('refuse')
                     ->icon('heroicon-o-x-circle')
-                    ->hidden(fn($record) => $record->state === State::REFUSE->value)
+                    ->hidden(fn ($record) => $record->state === State::REFUSE->value)
                     ->color('danger')
                     ->action(function ($record) {
                         $record->update(['state' => State::REFUSE->value]);
@@ -306,7 +306,7 @@ class TimeOffResource extends Resource
 
                                 Infolists\Components\TextEntry::make('request_unit_half')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.infolist.entries.half-day'))
-                                    ->formatStateUsing(fn($record) => $record->request_unit_half ? 'Yes' : 'No')
+                                    ->formatStateUsing(fn ($record) => $record->request_unit_half ? 'Yes' : 'No')
                                     ->icon('heroicon-o-clock'),
 
                                 Infolists\Components\TextEntry::make('request_date_from')
@@ -317,12 +317,12 @@ class TimeOffResource extends Resource
                                 Infolists\Components\TextEntry::make('request_date_to')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.infolist.entries.request-date-to'))
                                     ->date()
-                                    ->hidden(fn($record) => $record->request_unit_half)
+                                    ->hidden(fn ($record) => $record->request_unit_half)
                                     ->icon('heroicon-o-calendar'),
 
                                 Infolists\Components\TextEntry::make('request_date_from_period')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.infolist.entries.period'))
-                                    ->visible(fn($record) => $record->request_unit_half)
+                                    ->visible(fn ($record) => $record->request_unit_half)
                                     ->icon('heroicon-o-sun'),
 
                                 Infolists\Components\TextEntry::make('private_name')
@@ -345,7 +345,7 @@ class TimeOffResource extends Resource
 
                                 Infolists\Components\ImageEntry::make('attachment')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.infolist.entries.attachment'))
-                                    ->visible(fn($record) => $record->holidayStatus?->support_document),
+                                    ->visible(fn ($record) => $record->holidayStatus?->support_document),
                             ]),
                     ]),
             ]);

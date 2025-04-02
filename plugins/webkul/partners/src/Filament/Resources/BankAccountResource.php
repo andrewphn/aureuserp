@@ -8,8 +8,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Partner\Models\BankAccount;
 use Illuminate\Database\Eloquent\Builder;
+use Webkul\Partner\Models\BankAccount;
 
 class BankAccountResource extends Resource
 {
@@ -47,7 +47,7 @@ class BankAccountResource extends Resource
                         modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                     )
                     ->getOptionLabelFromRecordUsing(function ($record): string {
-                        return $record->name . ($record->trashed() ? ' (Deleted)' : '');
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
                     })
                     ->required()
                     ->searchable()

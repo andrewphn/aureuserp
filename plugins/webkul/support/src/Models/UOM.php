@@ -46,12 +46,13 @@ class UOM extends Model
     /**
      * Convert the given quantity from the current UoM to a given one
      *
-     * @param float $qty The quantity to convert
-     * @param UOM $toUnit The destination UoM record
-     * @param bool $round Whether to round the result
-     * @param string $roundingMethod The rounding method ('UP', 'DOWN', etc.)
-     * @param bool $raiseIfFailure Whether to throw an exception on conversion failure
+     * @param  float  $qty  The quantity to convert
+     * @param  UOM  $toUnit  The destination UoM record
+     * @param  bool  $round  Whether to round the result
+     * @param  string  $roundingMethod  The rounding method ('UP', 'DOWN', etc.)
+     * @param  bool  $raiseIfFailure  Whether to throw an exception on conversion failure
      * @return float The converted quantity
+     *
      * @throws \Exception If conversion fails and $raiseIfFailure is true
      */
     public function computeQuantity($qty, $toUnit, $round = true, $roundingMethod = 'UP', $raiseIfFailure = true)
@@ -83,8 +84,8 @@ class UOM extends Model
 
         if ($toUnit && $round) {
             $amount = $this->floatRound(
-                $amount, 
-                $toUnit->rounding, 
+                $amount,
+                $toUnit->rounding,
                 $roundingMethod
             );
         }
@@ -95,9 +96,9 @@ class UOM extends Model
     /**
      * Custom float rounding implementation
      *
-     * @param float $value The value to round
-     * @param float $precision The precision to round to
-     * @param string $method The rounding method
+     * @param  float  $value  The value to round
+     * @param  float  $precision  The precision to round to
+     * @param  string  $method  The rounding method
      * @return float The rounded value
      */
     private function floatRound($value, $precision, $method = 'UP')
@@ -105,9 +106,9 @@ class UOM extends Model
         if ($precision == 0) {
             return $value;
         }
-        
+
         $factor = 1.0 / $precision;
-        
+
         switch (strtoupper($method)) {
             case 'CEILING':
             case 'UP':

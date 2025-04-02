@@ -2,7 +2,6 @@
 
 namespace Webkul\Purchase\Filament\Customer\Clusters\Account\Resources;
 
-use Webkul\Website\Filament\Customer\Clusters\Account;
 use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\QuotationResource\Pages;
 use Webkul\Purchase\Models\CustomerPurchaseOrder as PurchaseOrder;
 
@@ -30,7 +29,7 @@ class QuotationResource extends OrderResource
     {
         return [
             'index' => Pages\ListQuotations::route('/'),
-            'view' => Pages\ViewQuotation::route('/{record}'),
+            'view'  => Pages\ViewQuotation::route('/{record}'),
         ];
     }
 }

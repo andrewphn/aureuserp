@@ -5,9 +5,9 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions;
 use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\Operation;
-use Webkul\Inventory\Facades\Inventory;
 
 class ReturnAction extends Action
 {

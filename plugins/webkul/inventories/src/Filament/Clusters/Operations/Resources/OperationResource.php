@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
@@ -31,7 +32,6 @@ use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
 use Webkul\TableViews\Filament\Components\PresetView;
-use Webkul\Inventory\Facades\Inventory;
 
 class OperationResource extends Resource
 {

@@ -68,7 +68,7 @@ class LeaveTypeWidget extends ChartWidget
                 [
                     'label'           => __('time-off::filament/widgets/leave-type-widget.label'),
                     'data'            => array_values($data),
-                    'backgroundColor' => array_map(fn($key) => match ($key) {
+                    'backgroundColor' => array_map(fn ($key) => match ($key) {
                         __('time-off::filament/widgets/leave-type-widget.types.draft')     => '#94a3b8',
                         __('time-off::filament/widgets/leave-type-widget.types.confirmed') => '#3b82f6',
                         __('time-off::filament/widgets/leave-type-widget.types.validated') => '#22c55e',

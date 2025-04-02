@@ -2,27 +2,27 @@
 
 namespace Webkul\Purchase\Livewire\Customer;
 
-use Webkul\Purchase\Models\OrderLine;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Contracts\HasForms;  
 use Filament\Tables\Table;
 use Livewire\Component;
+use Webkul\Purchase\Models\OrderLine;
 
-class ListProducts extends Component implements HasTable, HasForms
+class ListProducts extends Component implements HasForms, HasTable
 {
-    use InteractsWithTable;
     use InteractsWithForms;
-    
+    use InteractsWithTable;
+
     public $record;
-    
+
     public function mount($record)
     {
         $this->record = $record;
     }
-    
+
     public function table(Table $table): Table
     {
         return $table
@@ -34,7 +34,7 @@ class ListProducts extends Component implements HasTable, HasForms
                     ->label('Product'),
                 TextColumn::make('product_qty')
                     ->label('Quantity')
-                    ->formatStateUsing(fn (string $state): string => $state . ' Units'),
+                    ->formatStateUsing(fn (string $state): string => $state.' Units'),
                 TextColumn::make('price_unit')
                     ->label('Unit Price')
                     ->money(fn (OrderLine $record) => $record->currency->code),
@@ -51,7 +51,7 @@ class ListProducts extends Component implements HasTable, HasForms
             ])
             ->paginated(false);
     }
-    
+
     public function render()
     {
         return view('purchases::livewire.customer.account.clusters.order.pages.view-record.products');
