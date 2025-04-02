@@ -55,6 +55,7 @@ class ProductResource extends Resource
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('products::filament/resources/product.form.sections.general.fields.name'))
                                             ->required()
+                                            ->maxLength(255)
                                             ->unique('products_tags'),
                                     ]),
                             ]),

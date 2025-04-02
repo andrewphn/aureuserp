@@ -93,7 +93,8 @@ class PackageTypeResource extends Resource
                             ->numeric()
                             ->default(0.0000),
                         Forms\Components\TextInput::make('barcode')
-                            ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.barcode')),
+                            ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.barcode'))
+                            ->maxLength(255),
                         Forms\Components\Select::make('company_id')
                             ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.company'))
                             ->relationship('company', 'name')

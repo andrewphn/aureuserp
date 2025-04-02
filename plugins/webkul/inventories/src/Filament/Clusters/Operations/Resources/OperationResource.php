@@ -159,6 +159,7 @@ class OperationResource extends Resource
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                                 Forms\Components\TextInput::make('origin')
                                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.source-document'))
+                                    ->maxLength(255)
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.source-document-hint-tooltip'))
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                             ])
@@ -570,6 +571,7 @@ class OperationResource extends Resource
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\TextInput::make('description')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.description'))
+                    ->maxLength(255)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\DateTimePicker::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.scheduled-at'))

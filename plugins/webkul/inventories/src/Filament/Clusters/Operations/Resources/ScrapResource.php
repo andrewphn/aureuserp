@@ -155,6 +155,7 @@ class ScrapResource extends Resource
                                                 Forms\Components\TextInput::make('name')
                                                     ->label(__('inventories::filament/clusters/operations/resources/scrap.form.sections.general.fields.name'))
                                                     ->required()
+                                                    ->maxLength(255)
                                                     ->unique('inventories_tags'),
                                             ]),
                                     ]),
@@ -216,7 +217,8 @@ class ScrapResource extends Resource
                                             ->visible(fn (WarehouseSettings $settings): bool => $settings->enable_locations)
                                             ->disabled(fn ($record): bool => $record?->state == Enums\ScrapState::DONE),
                                         Forms\Components\TextInput::make('origin')
-                                            ->label(__('inventories::filament/clusters/operations/resources/scrap.form.sections.general.fields.source-document')),
+                                            ->label(__('inventories::filament/clusters/operations/resources/scrap.form.sections.general.fields.source-document'))
+                                            ->maxLength(255),
                                         Forms\Components\Select::make('company_id')
                                             ->label(__('inventories::filament/clusters/operations/resources/scrap.form.sections.general.fields.company'))
                                             ->relationship('company', 'name')
