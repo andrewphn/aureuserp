@@ -14,13 +14,13 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
+use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\OperationType;
 use Webkul\Purchase\Database\Factories\OrderFactory;
 use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
-use Webkul\Inventory\Models\Operation;
-use Webkul\Inventory\Models\OperationType;
 
 class Order extends Model
 {
@@ -212,11 +212,11 @@ class Order extends Model
         $user = filament()->auth()->user();
 
         $message->fill(array_merge([
-            'creator_id'    => $user?->id,
-            'date_deadline' => $data['date_deadline'] ?? now(),
-            'company_id'    => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
+            'creator_id'       => $user?->id,
+            'date_deadline'    => $data['date_deadline'] ?? now(),
+            'company_id'       => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
             'messageable_type' => Order::class,
-            'messageable_id' => $this->id,
+            'messageable_id'   => $this->id,
         ], $data));
 
         $message->save();

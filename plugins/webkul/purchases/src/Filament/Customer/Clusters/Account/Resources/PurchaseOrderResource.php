@@ -2,7 +2,6 @@
 
 namespace Webkul\Purchase\Filament\Customer\Clusters\Account\Resources;
 
-use Webkul\Website\Filament\Customer\Clusters\Account;
 use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderResource\Pages;
 use Webkul\Purchase\Models\CustomerPurchaseOrder as PurchaseOrder;
 
@@ -30,7 +29,7 @@ class PurchaseOrderResource extends OrderResource
     {
         return [
             'index' => Pages\ListPurchaseOrders::route('/'),
-            'view' => Pages\ViewPurchaseOrder::route('/{record}'),
+            'view'  => Pages\ViewPurchaseOrder::route('/{record}'),
         ];
     }
 }

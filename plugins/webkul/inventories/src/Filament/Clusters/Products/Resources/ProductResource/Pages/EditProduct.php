@@ -44,7 +44,7 @@ class EditProduct extends BaseEditProduct
                         ->numeric()
                         ->required()
                         ->live()
-                        ->default(fn () => ! $record->is_configurable ? $record->on_hand_quantity: 0),
+                        ->default(fn () => ! $record->is_configurable ? $record->on_hand_quantity : 0),
                 ])
                 ->modalSubmitActionLabel(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-submit-action-label'))
                 ->visible($this->getRecord()->is_storable)

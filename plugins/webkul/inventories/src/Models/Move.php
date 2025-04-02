@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Inventory\Database\Factories\MoveFactory;
 use Webkul\Inventory\Enums;
 use Webkul\Partner\Models\Partner;
+use Webkul\Purchase\Models\OrderLine;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UOM;
-use Webkul\Purchase\Models\OrderLine;
 
 class Move extends Model
 {
@@ -95,7 +95,7 @@ class Move extends Model
     public function isPurchaseReturn()
     {
         return $this->destinationLocation->type === Enums\LocationType::SUPPLIER
-            ||  (
+            || (
                 $this->originReturnedMove
                 && $this->destinationLocation->id === $this->destinationLocation->company->inter_company_location_id
             );
@@ -109,9 +109,9 @@ class Move extends Model
     public function isDropshipped()
     {
         return (
-                $this->sourceLocation->type === Enums\LocationType::SUPPLIER
-                || ($this->sourceLocation->type === Enums\LocationType::TRANSIT && ! $this->sourceLocation->company_id)
-            )
+            $this->sourceLocation->type === Enums\LocationType::SUPPLIER
+            || ($this->sourceLocation->type === Enums\LocationType::TRANSIT && ! $this->sourceLocation->company_id)
+        )
             && (
                 $this->destinationLocation->type === Enums\LocationType::CUSTOMER
                 || ($this->destinationLocation->type === Enums\LocationType::TRANSIT && ! $this->destinationLocation->company_id)
@@ -126,9 +126,9 @@ class Move extends Model
     public function isDropshippedReturned()
     {
         return (
-                $this->sourceLocation->type === Enums\LocationType::CUSTOMER
-                || ($this->sourceLocation->type === Enums\LocationType::TRANSIT && ! $this->sourceLocation->company_id)
-            )
+            $this->sourceLocation->type === Enums\LocationType::CUSTOMER
+            || ($this->sourceLocation->type === Enums\LocationType::TRANSIT && ! $this->sourceLocation->company_id)
+        )
             && (
                 $this->destinationLocation->type === Enums\LocationType::SUPPLIER
                 || ($this->destinationLocation->type === Enums\LocationType::TRANSIT && ! $this->destinationLocation->company_id)

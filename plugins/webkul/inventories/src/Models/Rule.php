@@ -10,8 +10,8 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Inventory\Database\Factories\RuleFactory;
 use Webkul\Inventory\Enums;
-use Webkul\Security\Models\User;
 use Webkul\Partner\Models\Partner;
+use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
 class Rule extends Model implements Sortable

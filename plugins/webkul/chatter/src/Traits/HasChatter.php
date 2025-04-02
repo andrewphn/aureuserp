@@ -77,7 +77,7 @@ trait HasChatter
         }
 
         if (! empty($filters['search'])) {
-            $searchTerm = '%' . $filters['search'] . '%';
+            $searchTerm = '%'.$filters['search'].'%';
             $query->where(function ($query) use ($searchTerm) {
                 $query->where('subject', 'like', $searchTerm)
                     ->orWhere('body', 'like', $searchTerm)
@@ -278,10 +278,10 @@ trait HasChatter
         return $this->attachments()
             ->createMany(
                 collect($files)
-                    ->map(fn($filePath) => [
+                    ->map(fn ($filePath) => [
                         'file_path'          => $filePath,
                         'original_file_name' => basename($filePath),
-                        'mime_type'          => mime_content_type($storagePath = storage_path('app/public/' . $filePath)) ?: 'application/octet-stream',
+                        'mime_type'          => mime_content_type($storagePath = storage_path('app/public/'.$filePath)) ?: 'application/octet-stream',
                         'file_size'          => filesize($storagePath) ?: 0,
                         'creator_id'         => filament()->auth()->user()->id,
                         ...$additionalData,
@@ -306,8 +306,8 @@ trait HasChatter
             return false;
         }
 
-        if (Storage::exists('public/' . $attachment->file_path)) {
-            Storage::delete('public/' . $attachment->file_path);
+        if (Storage::exists('public/'.$attachment->file_path)) {
+            Storage::delete('public/'.$attachment->file_path);
         }
 
         return $attachment->delete();
@@ -319,7 +319,7 @@ trait HasChatter
     public function getAttachmentsByType(string $mimeType): Collection
     {
         return $this->attachments()
-            ->where('mime_type', 'LIKE', $mimeType . '%')
+            ->where('mime_type', 'LIKE', $mimeType.'%')
             ->get();
     }
 
@@ -358,7 +358,7 @@ trait HasChatter
     {
         $attachment = $this->attachments()->find($attachmentId);
 
-        return $attachment && Storage::exists('public/' . $attachment->file_path);
+        return $attachment && Storage::exists('public/'.$attachment->file_path);
     }
 
     /*

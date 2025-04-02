@@ -5,7 +5,6 @@ namespace Webkul\Website\Filament\Customer\Resources;
 use Filament\Resources\Resource;
 use Webkul\Website\Filament\Customer\Resources\PageResource\Pages;
 use Webkul\Website\Models\Page;
-use Illuminate\Database\Eloquent\Model;
 
 class PageResource extends Resource
 {

@@ -5,9 +5,8 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions\Print;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Livewire\Component;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
-use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Facades\Inventory;
+use Webkul\Inventory\Models\Operation;
 
 class ReturnSlipAction extends Action
 {

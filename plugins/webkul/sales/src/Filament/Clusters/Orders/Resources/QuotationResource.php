@@ -24,7 +24,6 @@ use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders;

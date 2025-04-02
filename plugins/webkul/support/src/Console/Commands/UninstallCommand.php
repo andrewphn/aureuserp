@@ -76,8 +76,8 @@ class UninstallCommand extends Command
 
         foreach ($migrations as $migration) {
             $fullPath = $this->package->basePath("../database/migrations/{$migration}.php");
-            
-            $migrationPath = Str::after($fullPath, base_path() . DIRECTORY_SEPARATOR);
+
+            $migrationPath = Str::after($fullPath, base_path().DIRECTORY_SEPARATOR);
 
             if (file_exists($migrationPath)) {
                 require_once $migrationPath;
@@ -96,8 +96,8 @@ class UninstallCommand extends Command
 
         foreach ($this->package->settingFileNames as $setting) {
             $fullPath = $this->package->basePath("../database/settings/{$setting}.php");
-            
-            $migrationPath = Str::after($fullPath, base_path() . DIRECTORY_SEPARATOR);
+
+            $migrationPath = Str::after($fullPath, base_path().DIRECTORY_SEPARATOR);
 
             if (file_exists($migrationPath)) {
                 require_once $migrationPath;

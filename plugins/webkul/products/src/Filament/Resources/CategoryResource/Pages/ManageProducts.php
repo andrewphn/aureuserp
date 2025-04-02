@@ -40,10 +40,11 @@ class ManageProducts extends ManageRelatedRecords
                     ->icon('heroicon-o-plus-circle')
                     ->fillForm(function (array $arguments): array {
                         $uom_id = UOM::first()->id;
+
                         return [
-                            'type' => ProductType::GOODS->value,
-                            'uom_id' => $uom_id,
-                            'uom_po_id' => $uom_id,
+                            'type'        => ProductType::GOODS->value,
+                            'uom_id'      => $uom_id,
+                            'uom_po_id'   => $uom_id,
                             'category_id' => $this->getOwnerRecord()->id,
                         ];
                     })

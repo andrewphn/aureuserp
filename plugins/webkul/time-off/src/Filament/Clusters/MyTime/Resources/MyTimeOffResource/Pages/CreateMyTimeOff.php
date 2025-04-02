@@ -54,7 +54,7 @@ class CreateMyTimeOff extends CreateRecord
             $startDate = Carbon::parse($data['request_date_from']);
             $endDate = $data['request_date_to'] ? Carbon::parse($data['request_date_to']) : $startDate;
 
-            $data['duration_display'] = $startDate->diffInDays($endDate) + 1 . ' day(s)';
+            $data['duration_display'] = $startDate->diffInDays($endDate) + 1 .' day(s)';
 
             $data['number_of_days'] = $startDate->diffInDays($endDate) + 1;
         }

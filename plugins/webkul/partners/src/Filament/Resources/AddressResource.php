@@ -10,10 +10,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Partner\Enums\AddressType;
 use Webkul\Partner\Enums\AccountType;
-use Webkul\Partner\Models\Partner;
+use Webkul\Partner\Enums\AddressType;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ManageAddresses;
+use Webkul\Partner\Models\Partner;
 
 class AddressResource extends Resource
 {

@@ -2,15 +2,14 @@
 
 namespace Webkul\Purchase;
 
+use Illuminate\Foundation\AliasLoader;
 use Livewire\Livewire;
+use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
-use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
-use Webkul\Purchase\PurchaseOrder;
-use Illuminate\Foundation\AliasLoader;
 
 class PurchaseServiceProvider extends PackageServiceProvider
 {

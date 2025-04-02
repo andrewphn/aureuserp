@@ -7,14 +7,14 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
-use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Rule;
+use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Support\Package;
-use Webkul\Inventory\Facades\Inventory;
 
 class ValidateAction extends Action
 {

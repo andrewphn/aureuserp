@@ -2,7 +2,6 @@
 
 namespace Webkul\Chatter\Filament\Actions\Chatter;
 
-use Closure;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -79,7 +78,7 @@ class MessageAction extends Action
                             })
                             ->link()
                             ->size('sm')
-                            ->icon(fn(Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
+                            ->icon(fn (Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
                     ])
                         ->columnSpan('full')
                         ->alignRight(),
@@ -87,7 +86,7 @@ class MessageAction extends Action
                 Forms\Components\TextInput::make('subject')
                     ->placeholder(__('chatter::filament/resources/actions/chatter/message-action.setup.form.fields.subject'))
                     ->live()
-                    ->visible(fn($get) => $get('showSubject')),
+                    ->visible(fn ($get) => $get('showSubject')),
                 Forms\Components\RichEditor::make('body')
                     ->hiddenLabel()
                     ->placeholder(__('chatter::filament/resources/actions/chatter/message-action.setup.form.fields.write-message-here'))

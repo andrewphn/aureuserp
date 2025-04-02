@@ -1,10 +1,10 @@
 <?php
 
 namespace Webkul\Purchase\Observers;
- 
+
 use Webkul\Account\Models\Move;
 use Webkul\Purchase\Models\AccountMove;
- 
+
 class AccountMoveObserver
 {
     /**

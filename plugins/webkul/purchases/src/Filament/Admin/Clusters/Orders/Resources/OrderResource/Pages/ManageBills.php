@@ -5,9 +5,9 @@ namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Livewire\Livewire;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
-use Livewire\Livewire;
 
 class ManageBills extends ManageRelatedRecords
 {

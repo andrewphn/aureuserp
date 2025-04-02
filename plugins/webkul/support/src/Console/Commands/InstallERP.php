@@ -112,13 +112,13 @@ class InstallERP extends Command
                 'Email address',
                 default: 'admin@example.com',
                 required: true,
-                validate: fn($email) => $this->validateAdminEmail($email, $userModel)
+                validate: fn ($email) => $this->validateAdminEmail($email, $userModel)
             ),
             'password' => Hash::make(
                 password(
                     'Password',
                     required: true,
-                    validate: fn($value) => $this->validateAdminPassword($value)
+                    validate: fn ($value) => $this->validateAdminPassword($value)
                 )
             ),
             'resource_permission' => 'global',

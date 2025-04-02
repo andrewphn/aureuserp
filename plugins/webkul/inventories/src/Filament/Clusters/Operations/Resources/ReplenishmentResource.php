@@ -47,7 +47,7 @@ class ReplenishmentResource extends Resource
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                
+
             ])
             ->groups(
                 collect([
@@ -72,13 +72,10 @@ class ReplenishmentResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/replenishment.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
-                        
 
                         return $data;
                     })
-                    ->before(function (array $data) {
-                        
-                    })
+                    ->before(function (array $data) {})
                     ->successNotification(
                         Notification::make()
                             ->success()

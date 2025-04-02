@@ -23,7 +23,6 @@ use Webkul\Account\Filament\Resources\BillResource\Pages;
 use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
-use Webkul\Account\Models\Partner;
 use Webkul\Account\Services\TaxService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;

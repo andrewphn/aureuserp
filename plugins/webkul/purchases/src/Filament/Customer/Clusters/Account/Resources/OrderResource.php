@@ -2,18 +2,18 @@
 
 namespace Webkul\Purchase\Filament\Customer\Clusters\Account\Resources;
 
-use Webkul\Website\Filament\Customer\Clusters\Account;
-use Webkul\Purchase\Models\Order;
-use Illuminate\Support\Facades\Auth;
-use Filament\Resources\Resource;
-use Filament\Infolists;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Notifications\Notification;
+use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Enums\OrderState;
+use Webkul\Purchase\Models\Order;
+use Webkul\Website\Filament\Customer\Clusters\Account;
 
 class OrderResource extends Resource
 {
@@ -45,7 +45,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label(__('purchases::filament/customer/clusters/account/resources/order.table.columns.total-amount'))
                     ->sortable()
-                    ->money(fn(Order $record) => $record->currency->code),
+                    ->money(fn (Order $record) => $record->currency->code),
             ])
             ->filters([
                 //
@@ -70,7 +70,7 @@ class OrderResource extends Resource
                                     ->hiddenLabel()
                                     ->size('text-3xl')
                                     ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                    ->money(fn(Order $record) => $record->currency->code),
+                                    ->money(fn (Order $record) => $record->currency->code),
 
                                 Infolists\Components\Actions::make([
                                     Infolists\Components\Actions\Action::make('accept')
@@ -85,9 +85,9 @@ class OrderResource extends Resource
 
                                             $record->addMessage([
                                                 'body' => __('purchases::filament/customer/clusters/account/resources/order.infolist.settings.actions.accept.message.body'),
-                                                'type'=> 'comment',
+                                                'type' => 'comment',
                                             ]);
-                                            
+
                                             Notification::make()
                                                 ->title(__('purchases::filament/customer/clusters/account/resources/order.infolist.settings.actions.accept.notification.title'))
                                                 ->body(__('purchases::filament/customer/clusters/account/resources/order.infolist.settings.actions.accept.notification.body'))
@@ -106,9 +106,9 @@ class OrderResource extends Resource
 
                                             $record->addMessage([
                                                 'body' => __('purchases::filament/customer/clusters/account/resources/order.infolist.settings.actions.accept.decline.message.body'),
-                                                'type'=> 'comment',
+                                                'type' => 'comment',
                                             ]);
-                                            
+
                                             Notification::make()
                                                 ->title(__('purchases::filament/customer/clusters/account/resources/order.infolist.settings.actions.decline.notification.title'))
                                                 ->body(__('purchases::filament/customer/clusters/account/resources/order.infolist.settings.actions.decline.notification.body'))
@@ -135,7 +135,7 @@ class OrderResource extends Resource
                                                     echo $pdf->output();
                                                 }, 'Quotation-'.str_replace('/', '_', $record->name).'.pdf');
                                             }
-                                            
+
                                             $pdf = PDF::loadView('purchases::filament.admin.clusters.orders.orders.actions.print-purchase-order', [
                                                 'records'  => [$record],
                                             ]);
@@ -183,7 +183,7 @@ class OrderResource extends Resource
                                             ->label(__('purchases::filament/customer/clusters/account/resources/order.infolist.general.entries.from'))
                                             ->view('purchases::filament.customer.clusters.account.order.pages.view-record.from'),
                                         Infolists\Components\TextEntry::make('approved_at')
-                                        ->label(__('purchases::filament/customer/clusters/account/resources/order.infolist.general.entries.confirmation-date'))
+                                            ->label(__('purchases::filament/customer/clusters/account/resources/order.infolist.general.entries.confirmation-date'))
                                             ->visible(fn (Order $record): bool => (bool) $record->approved_at),
                                         Infolists\Components\TextEntry::make('ordered_at')
                                             ->label(__('purchases::filament/customer/clusters/account/resources/order.infolist.general.entries.receipt-date'))
@@ -204,14 +204,14 @@ class OrderResource extends Resource
                                                 return __('purchases::filament/customer/clusters/account/resources/order.infolist.general.entries.products');
                                             }),
 
-                                        Infolists\Components\Livewire::make('list-products', function(Order $record) {
+                                        Infolists\Components\Livewire::make('list-products', function (Order $record) {
                                             return [
                                                 'record' => $record,
                                             ];
                                         }),
 
                                         /**
-                                         * Order totals 
+                                         * Order totals
                                          */
                                         Infolists\Components\Group::make()
                                             ->extraAttributes(['class' => 'flex justify-end'])
@@ -240,7 +240,7 @@ class OrderResource extends Resource
                                             ])
                                             ->visible(fn (Order $record): bool => in_array($record->state, [OrderState::PURCHASE, OrderState::DONE])),
                                     ]),
-                                
+
                                 /**
                                  * Communication history
                                  */
@@ -259,17 +259,17 @@ class OrderResource extends Resource
                                             $record = Order::findOrFail($record->id);
 
                                             return [
-                                                'record' => $record,
+                                                'record'             => $record,
                                                 'showMessageAction'  => true,
                                                 'showActivityAction' => false,
                                                 'showFollowerAction' => false,
                                                 'showLogAction'      => false,
                                                 'showFileAction'     => false,
-                                                'filters' => [
+                                                'filters'            => [
                                                     'type' => [
                                                         'comment',
                                                     ],
-                                                ]
+                                                ],
                                             ];
                                         }),
                                     ]),

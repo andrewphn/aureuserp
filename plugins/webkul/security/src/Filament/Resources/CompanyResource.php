@@ -5,7 +5,6 @@ namespace Webkul\Security\Filament\Resources;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
@@ -24,7 +23,6 @@ use Webkul\Security\Filament\Resources\CompanyResource\RelationManagers;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
-use Webkul\Support\Models\State;
 
 class CompanyResource extends Resource
 {
@@ -104,19 +102,19 @@ class CompanyResource extends Resource
                                             ->relationship('partner')
                                             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
                                                 return array_merge($data, [
-                                                    'name' => $record->name,
-                                                    'email' => $record->email,
-                                                    'phone' => $record->phone,
-                                                    'mobile' => $record->mobile,
+                                                    'name'    => $record->name,
+                                                    'email'   => $record->email,
+                                                    'phone'   => $record->phone,
+                                                    'mobile'  => $record->mobile,
                                                     'website' => $record->website,
                                                 ]);
                                             })
                                             ->mutateRelationshipDataBeforeSaveUsing(function (array $data, $record) {
                                                 return array_merge($data, [
-                                                    'name' => $record->name,
-                                                    'email' => $record->email,
-                                                    'phone' => $record->phone,
-                                                    'mobile' => $record->mobile,
+                                                    'name'    => $record->name,
+                                                    'email'   => $record->email,
+                                                    'phone'   => $record->phone,
+                                                    'mobile'  => $record->mobile,
                                                     'website' => $record->website,
                                                 ]);
                                             })

@@ -45,7 +45,7 @@ class WebsiteServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         FilamentAsset::register([
-            Css::make('website', __DIR__ . '/../resources/dist/website.css'),
+            Css::make('website', __DIR__.'/../resources/dist/website.css'),
         ], 'website');
 
         if (! Package::isPluginInstalled(self::$name)) {
