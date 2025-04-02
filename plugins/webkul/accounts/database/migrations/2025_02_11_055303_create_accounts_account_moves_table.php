@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('invoice_payment_term_id')->nullable()->comment('Payment Term')->constrained('accounts_payment_terms')->nullOnDelete();
             $table->foreignId('partner_id')->nullable()->comment('Partner')->constrained('partners_partners')->nullOnDelete();
             $table->foreignId('commercial_partner_id')->nullable()->comment('Commercial Partner')->constrained('partners_partners')->nullOnDelete();
-            $table->foreignId('partner_shipping_id')->nullable()->comment('Shipping Address')->constrained('partners_addresses')->nullOnDelete();
+            $table->foreignId('partner_shipping_id')->nullable()->comment('Shipping Address')->constrained('partners_partners')->nullOnDelete();
             $table->foreignId('partner_bank_id')->nullable()->comment('Bank Account')->constrained('partners_bank_accounts')->nullOnDelete();
             $table->foreignId('fiscal_position_id')->nullable()->comment('Fiscal Position')->constrained('accounts_fiscal_positions')->nullOnDelete();
             $table->foreignId('currency_id')->nullable()->comment('Currency')->constrained('currencies')->restrictOnDelete();

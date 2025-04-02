@@ -20,6 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('address_id')->nullable()->comment('Company address ID');
             $table->unsignedBigInteger('leave_manager_id')->nullable()->comment('Leave manager ID');
             $table->unsignedBigInteger('bank_account_id')->nullable();
+            $table->unsignedBigInteger('private_state_id')->nullable()->comment('Private State');
+            $table->unsignedBigInteger('private_country_id')->nullable()->comment('Private Country');
             $table->unsignedBigInteger('company_id')->nullable()->comment('Company');
             $table->unsignedBigInteger('user_id')->nullable()->comment('Related user');
             $table->unsignedBigInteger('creator_id')->nullable()->comment('Created by');
@@ -48,6 +50,12 @@ return new class extends Migration
             $table->string('work_email')->nullable()->comment('Work Email');
             $table->string('private_phone')->nullable()->comment('Private Phone');
             $table->string('private_email')->nullable()->comment('Private Email');
+            $table->string('private_street1')->nullable()->comment('Private Street 1');
+            $table->string('private_street2')->nullable()->comment('Private Street 2');
+            $table->string('private_city')->nullable()->comment('Private City');
+            $table->string('private_zip')->nullable()->comment('Private Postcode');
+
+            $table->string('private_car_plate')->nullable()->comment('Private Car Plate');
             $table->string('lang')->nullable()->comment('Language');
             $table->string('gender')->nullable()->comment('Gender');
             $table->string('birthday')->nullable()->comment('Birthday');
@@ -69,7 +77,6 @@ return new class extends Migration
             $table->string('employee_type')->default('employee')->comment('Employee Type');
             $table->string('barcode')->nullable()->comment('Barcode');
             $table->string('pin')->nullable()->comment('Pin');
-            $table->string('private_car_plate')->nullable()->comment('Private Car Plate');
             $table->string('visa_expire')->nullable()->comment('Visa Expire');
             $table->string('work_permit_expiration_date')->nullable()->comment('Work Permit Expiration Date');
             $table->string('departure_date')->nullable()->comment('Departure Date');
@@ -81,6 +88,8 @@ return new class extends Migration
             $table->boolean('is_fully_flexible')->nullable()->comment('Is Fully Flexible');
             $table->boolean('work_permit_scheduled_activity')->nullable()->comment('Work Permit Scheduled Activity');
 
+            $table->foreign('private_state_id')->references('id')->on('states')->onDelete('set null');
+            $table->foreign('private_country_id')->references('id')->on('countries')->onDelete('set null');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('set null');

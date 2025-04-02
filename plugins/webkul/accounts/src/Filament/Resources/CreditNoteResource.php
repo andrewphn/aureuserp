@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Account\Enums\DelayType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
@@ -101,34 +102,6 @@ class CreditNoteResource extends Resource
                                             ->preload()
                                             ->live()
                                             ->disabled(fn ($record) => $record && in_array($record->state, [MoveState::POSTED, MoveState::CANCEL])),
-                                        Forms\Components\Placeholder::make('partner_address')
-                                            ->hiddenLabel()
-                                            ->visible(
-                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
-                                            )
-                                            ->content(function (Get $get) {
-                                                $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
-
-                                                if (
-                                                    ! $partner
-                                                    || $partner->addresses->isEmpty()
-                                                ) {
-                                                    return null;
-                                                }
-
-                                                $address = $partner->addresses->first();
-
-                                                return sprintf(
-                                                    "%s\n%s%s\n%s, %s %s\n%s",
-                                                    $address->name ?? '',
-                                                    $address->street1 ?? '',
-                                                    $address->street2 ? ', '.$address->street2 : '',
-                                                    $address->city ?? '',
-                                                    $address->state ? $address->state->name : '',
-                                                    $address->zip ?? '',
-                                                    $address->country ? $address->country->name : ''
-                                                );
-                                            }),
                                     ]),
                                 Forms\Components\DatePicker::make('invoice_date')
                                     ->label(__('accounts::filament/resources/credit-note.form.section.general.fields.invoice-date'))
@@ -822,19 +795,13 @@ class CreditNoteResource extends Resource
 
     public static function updateOrCreatePaymentTermLine($move): void
     {
-        $dateMaturity = $move->invoice_date_due;
-
-        if ($move->invoicePaymentTerm && $move->invoicePaymentTerm->dueTerm?->nb_days) {
-            $dateMaturity = $dateMaturity->addDays($move->invoicePaymentTerm->dueTerm->nb_days);
-        }
-
         $data = [
             'move_id'                  => $move->id,
             'move_name'                => $move->name,
             'display_type'             => 'payment_term',
             'currency_id'              => $move->currency_id,
             'partner_id'               => $move->partner_id,
-            'date_maturity'            => $dateMaturity,
+            'date_maturity'            => static::calculateDateMaturity($move),
             'company_id'               => $move->company_id,
             'company_currency_id'      => $move->company_currency_id,
             'commercial_partner_id'    => $move->partner_id,
@@ -919,5 +886,42 @@ class CreditNoteResource extends Resource
         }
 
         $existingTaxLines->each->delete();
+    }
+
+    public static function calculateDateMaturity($move)
+    {
+        $dateMaturity = $move->invoice_date_due ?? now();
+
+        if (
+            $move->invoice_payment_term_id
+            && $move->invoicePaymentTerm
+        ) {
+            $dueTerm = $move->invoicePaymentTerm->dueTerm;
+
+            if ($dueTerm) {
+                switch ($dueTerm->delay_type) {
+                    case DelayType::DAYS_AFTER->value:
+                        $dateMaturity = $dateMaturity->addDays($dueTerm->nb_days);
+
+                        break;
+
+                    case DelayType::DAYS_AFTER_END_OF_MONTH->value:
+                        $dateMaturity = $dateMaturity->endOfMonth()->addDays($dueTerm->nb_days);
+                        break;
+
+                    case DelayType::DAYS_AFTER_END_OF_NEXT_MONTH->value:
+                        $dateMaturity = $dateMaturity->addMonth()->endOfMonth()->addDays($dueTerm->days_next_month);
+
+                        break;
+
+                    case DelayType::DAYS_END_OF_MONTH_NO_THE->value:
+                        $dateMaturity = $dateMaturity->endOfMonth();
+
+                        break;
+                }
+            }
+        }
+
+        return $dateMaturity;
     }
 }

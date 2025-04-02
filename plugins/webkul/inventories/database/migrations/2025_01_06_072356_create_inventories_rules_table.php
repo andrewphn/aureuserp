@@ -47,7 +47,7 @@ return new class extends Migration
 
             $table->foreignId('partner_address_id')
                 ->nullable()
-                ->constrained('partners_addresses')
+                ->constrained('partners_partners')
                 ->nullOnDelete();
 
             $table->foreignId('warehouse_id')

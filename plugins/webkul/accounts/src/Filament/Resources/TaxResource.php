@@ -16,6 +16,7 @@ use Webkul\Account\Enums;
 use Webkul\Account\Enums\TaxIncludeOverride;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
 use Webkul\Account\Models\Tax;
+use Webkul\Account\Models\TaxGroup;
 
 class TaxResource extends Resource
 {
@@ -82,6 +83,8 @@ class TaxResource extends Resource
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.invoice-label')),
                                 Forms\Components\Select::make('tax_group_id')
                                     ->relationship('taxGroup', 'name')
+                                    ->required()
+                                    ->createOptionForm(fn (Form $form): Form => TaxGroupResource::form($form))
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.tax-group')),
                                 Forms\Components\Select::make('country_id')
                                     ->relationship('country', 'name')

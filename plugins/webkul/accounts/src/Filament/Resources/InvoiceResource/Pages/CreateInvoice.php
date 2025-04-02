@@ -42,7 +42,7 @@ class CreateInvoice extends CreateRecord
         if ($data['partner_id']) {
             $partner = Partner::find($data['partner_id']);
             $data['commercial_partner_id'] = $partner->id;
-            $data['partner_shipping_id'] = $partner->addresses->where('type', 'present')->first()?->id;
+            $data['partner_shipping_id'] = $partner->id;
             $data['invoice_partner_display_name'] = $partner->name;
         } else {
             $data['invoice_partner_display_name'] = "#Created By: {$user->name}";
@@ -55,6 +55,10 @@ class CreateInvoice extends CreateRecord
     {
         $record = $this->getRecord();
 
-        $this->getResource()::collectTotals($record);
+        $record->invoice_date_due = InvoiceResource::calculateDateMaturity($record)->format('Y-m-d');
+
+        $record->save();
+
+        InvoiceResource::collectTotals($record);
     }
 }
