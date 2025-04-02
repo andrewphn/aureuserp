@@ -122,6 +122,7 @@ class PurchaseAgreementResource extends Resource
                                     }),
                                 Forms\Components\TextInput::make('reference')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.reference'))
+                                    ->maxLength(255)
                                     ->placeholder(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.reference-placeholder')),
                                 Forms\Components\Select::make('company_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.company'))
