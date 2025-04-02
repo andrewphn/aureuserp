@@ -86,7 +86,8 @@ class FieldResource extends Resource
                                     ->hiddenLabel()
                                     ->simple(
                                         Forms\Components\TextInput::make('name')
-                                            ->required(),
+                                            ->required()
+                                            ->maxLength(255),
                                     )
                                     ->addActionLabel(__('fields::filament/resources/field.form.sections.options.fields.add-option')),
                             ]),
@@ -380,6 +381,7 @@ class FieldResource extends Resource
                             Forms\Components\TextInput::make('value')
                                 ->label(__('fields::filament/resources/field.form.sections.form-settings.field-sets.additional-settings.fields.value'))
                                 ->required()
+                                ->maxLength(255)
                                 ->visible(fn (Forms\Get $get): bool => in_array($get('setting'), [
                                     'autocapitalize',
                                     'autocomplete',
@@ -833,6 +835,7 @@ class FieldResource extends Resource
                     Forms\Components\TextInput::make('value')
                         ->label(__('fields::filament/resources/field.form.sections.table-settings.fields.value'))
                         ->required()
+                        ->maxLength(255)
                         ->visible(fn (Forms\Get $get): bool => in_array($get('setting'), [
                             'copyMessage',
                             'dateTimeTooltip',
@@ -1018,6 +1021,7 @@ class FieldResource extends Resource
                     Forms\Components\TextInput::make('value')
                         ->label(__('fields::filament/resources/field.form.sections.infolist-settings.fields.value'))
                         ->required()
+                        ->maxLength(255)
                         ->visible(fn (Forms\Get $get): bool => in_array($get('setting'), [
                             'copyMessage',
                             'dateTimeTooltip',
