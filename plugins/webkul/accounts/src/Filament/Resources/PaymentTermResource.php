@@ -74,10 +74,15 @@ class PaymentTermResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('discount_percentage')
                                     ->required()
+                                    ->numeric()
+                                    ->maxValue(100)
+                                    ->minValue(0)
                                     ->suffix(__('%'))
                                     ->hiddenLabel(),
                                 Forms\Components\TextInput::make('discount_days')
                                     ->required()
+                                    ->integer()
+                                    ->minValue(0)
                                     ->prefix(__('accounts::filament/resources/payment-term.form.sections.fields.discount-days-prefix'))
                                     ->suffix(__('accounts::filament/resources/payment-term.form.sections.fields.discount-days-suffix'))
                                     ->hiddenLabel(),
