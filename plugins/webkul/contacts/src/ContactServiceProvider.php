@@ -3,6 +3,7 @@
 namespace Webkul\Contact;
 
 use Webkul\Support\Console\Commands\InstallCommand;
+use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
@@ -14,7 +15,8 @@ class ContactServiceProvider extends PackageServiceProvider
     {
         $package->name(static::$name)
             ->hasTranslations()
-            ->hasInstallCommand(function (InstallCommand $command) {});
+            ->hasInstallCommand(function (InstallCommand $command) {})
+            ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
     public function packageBooted(): void
