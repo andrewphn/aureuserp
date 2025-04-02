@@ -20,17 +20,17 @@ return [
 
             'applicable-on' => [
                 'title'       => 'Applicable On',
-                'description' => 'Select the places where this route can be selected.',
+                'description' => 'Choose the locations where this route can be applied.',
 
                 'fields' => [
                     'products'                        => 'Products',
-                    'products-hint-tooltip'           => 'When checked, the route will be selectable on the Product.',
+                    'products-hint-tooltip'           => 'If selected, this route will be available for selection on the product.',
                     'product-categories'              => 'Product Categories',
-                    'product-categories-hint-tooltip' => 'When checked, the route will be selectable on the Product Category.',
+                    'product-categories-hint-tooltip' => 'If selected, this route will be available for selection on the product category.',
                     'warehouses'                      => 'Warehouses',
-                    'warehouses-hint-tooltip'         => 'When a warehouse is selected for this route, this route should be seen as the default route when products pass through this warehouse.',
+                    'warehouses-hint-tooltip'         => 'When a warehouse is assigned to this route, it will be considered the default route for products moving through that warehouse.',
                     'packaging'                       => 'Packaging',
-                    'packaging-hint-tooltip'          => 'When checked, the route will be selectable on the Packaging.',
+                    'packaging-hint-tooltip'          => 'If selected, this route will be available for selection on the packaging.',
                 ],
             ],
         ],
@@ -126,13 +126,13 @@ return [
 
                 'entries' => [
                     'products'                        => 'Products',
-                    'products-hint-tooltip'           => 'When checked, the route will be selectable on the Product.',
+                    'products-hint-tooltip'           => 'If selected, this route will be available for selection on the product.',
                     'product-categories'              => 'Product Categories',
-                    'product-categories-hint-tooltip' => 'When checked, the route will be selectable on the Product Category.',
+                    'product-categories-hint-tooltip' => 'If selected, this route will be available for selection on the product category.',
                     'warehouses'                      => 'Warehouses',
-                    'warehouses-hint-tooltip'         => 'When a warehouse is selected for this route, this route should be seen as the default route when products pass through this warehouse.',
+                    'warehouses-hint-tooltip'         => 'When a warehouse is assigned to this route, it will be considered the default route for products moving through that warehouse.',
                     'packaging'                       => 'Packaging',
-                    'packaging-hint-tooltip'          => 'When checked, the route will be selectable on the Packaging.',
+                    'packaging-hint-tooltip'          => 'If selected, this route will be available for selection on the packaging.',
                 ],
             ],
 

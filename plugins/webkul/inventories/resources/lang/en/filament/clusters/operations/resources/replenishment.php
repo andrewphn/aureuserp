@@ -48,7 +48,7 @@ return [
                 'before' => [
                     'notification' => [
                         'title' => 'Replenishment already exists',
-                        'body'  => 'Already has a replenishment for the same configuration. Please update the replenishment instead.',
+                        'body'  => 'A replenishment already exists for this configuration. Please update the existing replenishment instead.',
                     ],
                 ],
             ],

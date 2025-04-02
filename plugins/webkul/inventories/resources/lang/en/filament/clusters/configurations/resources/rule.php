@@ -18,13 +18,13 @@ return [
                     'source-location'             => 'Source Location',
                     'destination-location'        => 'Destination Location',
                     'supply-method'               => 'Supply Method',
-                    'supply-method-hint-tooltip'  => 'Take From Stock: the products will be taken from the available stock of the source location.<br/>Trigger Another Rule: the system will try to find a stock rule to bring the products in the source location. The available stock will be ignored.<br/>Take From Stock, if Unavailable, Trigger Another Rule: the products will be taken from the available stock of the source location.If there is no stock available, the system will try to find a  rule to bring the products in the source location.',
+                    'supply-method-hint-tooltip'  => 'Take From Stock: Products are sourced directly from the available stock in the source location.<br/>Trigger Another Rule: The system ignores available stock and searches for a stock rule to replenish the source location.<br/>Take From Stock, if Unavailable, Trigger Another Rule: Products are first taken from available stock. If none is available, the system applies a stock rule to bring products into the source location.',
                     'automatic-move'              => 'Automatic Move',
-                    'automatic-move-hint-tooltip' => 'The \'Manual Operation\' value will create a stock move after the current one. With \'Automatic No Step Added\', the location is replaced in the original move.',
+                    'automatic-move-hint-tooltip' => 'Manual Operation: Creates a separate stock move after the current one.<br/>Automatic No Step Added: Directly replaces the location in the original move without adding an extra step.',
 
                     'action-information' => [
-                        'pull' => 'When products are needed in <b>:sourceLocation</b>,</br><b>:operation</b> are created from <b>:destinationLocation</b> to fulfill the need.',
-                        'push' => 'When products arrive in <b>:sourceLocation</b>,</br><b>:operation</b> are created to send them to <b>:destinationLocation</b>.',
+                        'pull' => 'When products are required in <b>:sourceLocation</b>, :operation is generated from <b>:destinationLocation</b> to meet the demand.',
+                        'push' => 'When products reach <b>:sourceLocation</b>,</br><b>:operation</b> is generated to transfer them to <b>:destinationLocation</b>.',
                     ],
                 ],
             ],
@@ -36,7 +36,7 @@ return [
                     'partner-address'              => 'Partner Address',
                     'partner-address-hint-tooltip' => 'Address where goods should be delivered. Optional.',
                     'lead-time'                    => 'Lead Time (Days)',
-                    'lead-time-hint-tooltip'       => 'The expected date of the created transfer will be computed based on this lead time.',
+                    'lead-time-hint-tooltip'       => 'The expected transfer date will be calculated using this lead time.',
                 ],
 
                 'fieldsets' => [
@@ -54,10 +54,10 @@ return [
 
                         'fields' => [
                             'propagation-procurement-group'              => 'Propagation of Procurement Group',
-                            'propagation-procurement-group-hint-tooltip' => 'When ticked, if the move created by this rule is cancelled, the next move will be cancelled too.',
+                            'propagation-procurement-group-hint-tooltip' => 'If selected, canceling the move created by this rule will also cancel the subsequent move.',
                             'cancel-next-move'                           => 'Cancel Next Move',
                             'warehouse-to-propagate'                     => 'Warehouse to Propagate',
-                            'warehouse-to-propagate-hint-tooltip'        => 'The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)',
+                            'warehouse-to-propagate-hint-tooltip'        => 'The warehouse assigned to the created move or procurement, which may differ from the warehouse this rule applies to (e.g., for resupply rules from another warehouse).',
                         ],
                     ],
                 ],
@@ -155,8 +155,8 @@ return [
                 'title' => 'Rule Details',
 
                 'description' => [
-                    'pull' => 'When products are needed in <b>:sourceLocation</b>, <b>:operation</b> are created from <b>:destinationLocation</b> to fulfill the need.',
-                    'push' => 'When products arrive in <b>:sourceLocation</b>, <b>:operation</b> are created to send them to <b>:destinationLocation</b>.',
+                    'pull' => 'When products are required in <b>:sourceLocation</b>, <b>:operation</b> is generated from <b>:destinationLocation</b> to meet the demand.',
+                    'push' => 'When products reach in <b>:sourceLocation</b>, <b>:operation</b> is generated to transfer them to <b>:destinationLocation</b>.',
                 ],
 
                 'entries' => [
