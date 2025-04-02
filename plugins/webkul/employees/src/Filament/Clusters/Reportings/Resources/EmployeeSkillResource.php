@@ -9,7 +9,6 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Employee\Filament\Clusters\Reportings;
 use Webkul\Employee\Filament\Clusters\Reportings\Resources\EmployeeSkillResource\Pages;
 use Webkul\Employee\Models\EmployeeSkill;
@@ -33,24 +32,6 @@ class EmployeeSkillResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/reportings/resources/employee-skill.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'employee.name',
-            'skill.name',
-            'skillLevel.name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('employees::filament/clusters/reportings/resources/employee-skill.global-search.employee')    => $record->employee->name ?? '—',
-            __('employees::filament/clusters/reportings/resources/employee-skill.global-search.skill')       => $record->skill?->name ?? '—',
-            __('employees::filament/clusters/reportings/resources/employee-skill.global-search.skill-level') => $record->skillLevel?->name ?? '—',
-        ];
     }
 
     public static function table(Table $table): Table

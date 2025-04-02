@@ -86,7 +86,7 @@ return [
                 'before' => [
                     'notification' => [
                         'title' => 'Quantity already exists',
-                        'body'  => 'Already has a quantity for the same configuration. Please update the quantity instead.',
+                        'body'  => 'A quantity already exists for this configuration. Please update the existing quantity instead.',
                     ],
                 ],
             ],

@@ -21,7 +21,7 @@ use Webkul\Inventory\Filament\Clusters\Configurations;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource\Pages;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\WarehouseSettings;
-use Webkul\Partner\Filament\Resources\AddressResource;
+use Webkul\Partner\Filament\Resources\PartnerResource;
 
 class WarehouseResource extends Resource
 {
@@ -85,7 +85,7 @@ class WarehouseResource extends Resource
                                             ->relationship('partnerAddress', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->createOptionForm(fn (Form $form): Form => AddressResource::form($form)),
+                                            ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form)),
                                     ])
                                     ->columns(2),
                             ]),

@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\CalendarResource\Pages;
@@ -39,23 +38,6 @@ class CalendarResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/calendar.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'timezone', 'two_weeks_calendar', 'flexible_hours', 'full_time_required_hours', 'company.name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('employees::filament/clusters/configurations/resources/calendar.global-search.name')                     => $record->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/calendar.global-search.timezone')                 => $record->timezone ?? '—',
-            __('employees::filament/clusters/configurations/resources/calendar.global-search.two-weeks-calendar')       => $record->two_weeks_calendar ?? '—',
-            __('employees::filament/clusters/configurations/resources/calendar.global-search.flexible-hours')           => $record->flexible_hours ?? '—',
-            __('employees::filament/clusters/configurations/resources/calendar.global-search.full-time-required-hours') => $record->full_time_required_hours ?? '—',
-            __('employees::filament/clusters/configurations/resources/calendar.global-search.company-name')             => $record->company?->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

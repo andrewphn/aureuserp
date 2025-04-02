@@ -24,7 +24,6 @@ use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Facades\Tax;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
-use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders;
@@ -102,34 +101,6 @@ class QuotationResource extends Resource
                                             ->live()
                                             ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL]))
                                             ->columnSpan(1),
-                                        Forms\Components\Placeholder::make('partner_address')
-                                            ->hiddenLabel()
-                                            ->visible(
-                                                fn (Get $get) => Partner::with('addresses')->find($get('partner_id'))?->addresses->isNotEmpty()
-                                            )
-                                            ->content(function (Get $get) {
-                                                $partner = Partner::with('addresses.state', 'addresses.country')->find($get('partner_id'));
-
-                                                if (
-                                                    ! $partner
-                                                    || $partner->addresses->isEmpty()
-                                                ) {
-                                                    return null;
-                                                }
-
-                                                $address = $partner->addresses->first();
-
-                                                return sprintf(
-                                                    "%s\n%s%s\n%s, %s %s\n%s",
-                                                    $address->name ?? '',
-                                                    $address->street1 ?? '',
-                                                    $address->street2 ? ', '.$address->street2 : '',
-                                                    $address->city ?? '',
-                                                    $address->state ? $address->state->name : '',
-                                                    $address->zip ?? '',
-                                                    $address->country ? $address->country->name : ''
-                                                );
-                                            }),
                                     ]),
                                 Forms\Components\DatePicker::make('validity_date')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.expiration'))
@@ -544,8 +515,8 @@ class QuotationResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('sales::filament/clusters/orders/resources/quotation.table.bulk-actions.restore.notification.title'))
-                                ->body(__('sales::filament/clusters/orders/resources/quotation.table.bulk-actions.restore.notification.body'))
+                                ->title(__('sales::filament/clusters/orders/resources/quotation.table.bulk-actions.delete.notification.title'))
+                                ->body(__('sales::filament/clusters/orders/resources/quotation.table.bulk-actions.delete.notification.body'))
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
                         ->successNotification(

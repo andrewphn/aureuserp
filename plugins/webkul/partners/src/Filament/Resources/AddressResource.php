@@ -10,7 +10,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Partner\Enums\AccountType;
 use Webkul\Partner\Enums\AddressType;
+use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ManageAddresses;
 use Webkul\Partner\Models\Partner;
 
 class AddressResource extends Resource
@@ -22,19 +24,20 @@ class AddressResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Radio::make('type')
+            Forms\Components\Radio::make('sub_type')
                 ->hiddenLabel()
                 ->options(AddressType::class)
                 ->default(AddressType::INVOICE->value)
                 ->inline()
                 ->columnSpan(2),
-            Forms\Components\Select::make('partner_id')
+            Forms\Components\Select::make('parent_id')
                 ->label(__('partners::filament/resources/address.form.partner'))
-                ->relationship('partner', 'name')
+                ->relationship('parent', 'name')
                 ->searchable()
                 ->preload()
                 ->required()
                 ->columnSpan(2)
+                ->hiddenOn([ManageAddresses::class])
                 ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form)),
             Forms\Components\TextInput::make('name')
                 ->label(__('partners::filament/resources/address.form.name'))
@@ -45,22 +48,9 @@ class AddressResource extends Resource
             Forms\Components\TextInput::make('phone')
                 ->label(__('partners::filament/resources/address.form.phone'))
                 ->tel(),
-            Forms\Components\Select::make('country_id')
-                ->label(__('partners::filament/resources/address.form.country'))
-                ->relationship(name: 'country', titleAttribute: 'name')
-                ->afterStateUpdated(fn (Forms\Set $set) => $set('state_id', null))
-                ->searchable()
-                ->preload()
-                ->live(),
-            Forms\Components\Select::make('state_id')
-                ->label(__('partners::filament/resources/address.form.state'))
-                ->relationship(
-                    name: 'state',
-                    titleAttribute: 'name',
-                    modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
-                )
-                ->searchable()
-                ->preload(),
+            Forms\Components\TextInput::make('mobile')
+                ->label(__('partners::filament/resources/address.form.mobile'))
+                ->tel(),
             Forms\Components\TextInput::make('street1')
                 ->label(__('partners::filament/resources/address.form.street1')),
             Forms\Components\TextInput::make('street2')
@@ -69,8 +59,47 @@ class AddressResource extends Resource
                 ->label(__('partners::filament/resources/address.form.city')),
             Forms\Components\TextInput::make('zip')
                 ->label(__('partners::filament/resources/address.form.zip')),
-            Forms\Components\Hidden::make('creator_id')
-                ->default(Auth::user()->id),
+            Forms\Components\Select::make('country_id')
+                ->label(__('partners::filament/resources/address.form.country'))
+                ->relationship(name: 'country', titleAttribute: 'name')
+                ->afterStateUpdated(fn (Forms\Set $set) => $set('state_id', null))
+                ->searchable()
+                ->preload()
+                ->live()
+                ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                    $set('state_id', null);
+                }),
+            Forms\Components\Select::make('state_id')
+                ->label(__('partners::filament/resources/address.form.state'))
+                ->relationship(
+                    name: 'state',
+                    titleAttribute: 'name',
+                    modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
+                )
+                ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
+                    return $form
+                        ->schema([
+                            Forms\Components\TextInput::make('name')
+                                ->label(__('partners::filament/resources/address.form.name'))
+                                ->required(),
+                            Forms\Components\TextInput::make('code')
+                                ->label(__('partners::filament/resources/address.form.code'))
+                                ->required()
+                                ->unique('states'),
+                            Forms\Components\Select::make('country_id')
+                                ->label(__('partners::filament/resources/address.form.country'))
+                                ->relationship('country', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->live()
+                                ->default($get('country_id'))
+                                ->afterStateUpdated(function (Forms\Get $get) use ($set) {
+                                    $set('country_id', $get('country_id'));
+                                }),
+                        ]);
+                })
+                ->searchable()
+                ->preload(),
         ])
             ->columns(2);
     }
@@ -79,8 +108,11 @@ class AddressResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('type')
+                Tables\Columns\TextColumn::make('sub_type')
                     ->label(__('partners::filament/resources/address.table.columns.type'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('partners::filament/resources/address.table.columns.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('country.name')
                     ->label(__('partners::filament/resources/address.table.columns.country'))
@@ -106,6 +138,8 @@ class AddressResource extends Resource
                     ->label(__('partners::filament/resources/address.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function (array $data): array {
+                        $data['account_type'] = AccountType::ADDRESS;
+
                         $data['creator_id'] = Auth::id();
 
                         return $data;

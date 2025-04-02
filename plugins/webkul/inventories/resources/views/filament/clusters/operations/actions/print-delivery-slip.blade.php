@@ -100,28 +100,28 @@
                 <div class="left-info">
                     <div style="font-size: 28px; color: #1a4587; margin-bottom: 10px;">{{ $record->company->name }}</div>
 
-                    @if ($record->company->address)
+                    @if ($record->company->partner)
                         <div>
-                            {{ $record->company->address->street1 }}
+                            {{ $record->company->partner->street1 }}
 
-                            @if ($record->company->address->street2)
-                                ,{{ $record->company->address->street2 }}
+                            @if ($record->company->partner->street2)
+                                ,{{ $record->company->partner->street2 }}
                             @endif
                         </div>
                         
                         <div>
-                            {{ $record->company->address->city }},
+                            {{ $record->company->partner->city }},
 
-                            @if ($record->company->address->state)
-                                {{ $record->company->address->state->name }},
+                            @if ($record->company->partner->state)
+                                {{ $record->company->partner->state->name }},
                             @endif
                             
-                            {{ $record->company->address->zip }}
+                            {{ $record->company->partner->zip }}
                         </div>
                         
-                        @if ($record->company->address->country)
+                        @if ($record->company->partner->country)
                             <div>
-                                {{ $record->company->address->country->name }}
+                                {{ $record->company->partner->country->name }}
                             </div>
                         @endif
                         
@@ -147,93 +147,52 @@
             <!-- Header Section -->
             <div class="header">
                 <div class="left-info">
-                    <div style="font-weight: bold; margin-bottom: 15px;">Vendor Address</div>
-                    
-                    @if ($record->destinationLocation->warehouse->partnerAddress)
-                        <div style="margin-top: 15px;">
-                            <div>{{ $record->partner->name }}</div>
-                            
-                            <div>
-                                {{ $record->partner->addresses->first()->street1 }}
-
-                                @if ($record->partner->addresses->first()->street2)
-                                    ,{{ $record->partner->addresses->first()->street2 }}
-                                @endif
-                            </div>
-                            
-                            <div>
-                                {{ $record->partner->addresses->first()->city }},
-
-                                @if ($record->partner->addresses->first()->state)
-                                    {{ $record->partner->addresses->first()->state->name }},
-                                @endif
-                                
-                                {{ $record->partner->addresses->first()->zip }}
-                            </div>
-                            
-                            @if ($record->partner->addresses->first()->country)
-                                <div>
-                                    {{ $record->partner->addresses->first()->country->name }}
-                                </div>
-                            @endif
-                            
-                            @if ($record->partner->addresses->first()->email)
-                                <div>
-                                    Email: 
-                                    {{ $record->partner->addresses->first()->email }}
-                                </div>
-                            @endif
-                            
-                            @if ($record->partner->addresses->first()->phone)
-                                <div>
-                                    Phone: 
-                                    {{ $record->partner->addresses->first()->phone }}
-                                </div>
-                            @endif
-                        </div>
-                    @endif
                 </div>
 
                 <div class="right-info">
-                    <div style="font-weight: bold; margin-bottom: 15px;">Warehouse Address</div>
+                    <div style="font-weight: bold; margin-bottom: 15px;">Delivery Address</div>
                     
-                    @if($record->partner && $record->partner->addresses->count())
+                    @if($record->partner)
                         <div style="margin-top: 15px;">
                             <div>
-                                {{ $record->destinationLocation->warehouse->partnerAddress->street1 }}
+                                {{ $record->partner->name }}
+                            </div>
 
-                                @if ($record->destinationLocation->warehouse->partnerAddress->street2)
-                                    ,{{ $record->destinationLocation->warehouse->partnerAddress->street2 }}
+                            <div>
+                                {{ $record->partner->street1 }}
+
+                                @if ($record->partner->street2)
+                                    ,{{ $record->partner->street2 }}
                                 @endif
                             </div>
                             
                             <div>
-                                {{ $record->destinationLocation->warehouse->partnerAddress->city }},
+                                {{ $record->partner->city }},
 
-                                @if ($record->destinationLocation->warehouse->partnerAddress->state)
-                                    {{ $record->destinationLocation->warehouse->partnerAddress->state->name }},
+                                @if ($record->partner->state)
+                                    {{ $record->partner->state->name }},
                                 @endif
                                 
-                                {{ $record->destinationLocation->warehouse->partnerAddress->zip }}
+                                {{ $record->partner->zip }}
                             </div>
                             
-                            @if ($record->destinationLocation->warehouse->partnerAddress->country)
+                            @if ($record->partner->country)
                                 <div>
-                                    {{ $record->destinationLocation->warehouse->partnerAddress->country->name }}
+                                    {{ $record->partner->country->name }}
                                 </div>
                             @endif
                             
-                            @if ($record->destinationLocation->warehouse->partnerAddress->email)
+                            @if ($record->partner->email)
                                 <div>
                                     Email: 
-                                    {{ $record->destinationLocation->warehouse->partnerAddress->email }}
+                                    {{ $record->partner->email }}
                                 </div>
                             @endif
                             
-                            @if ($record->destinationLocation->warehouse->partnerAddress->phone)
+                            @if ($record->partner->phone)
                                 <div>
                                     Phone: 
-                                    {{ $record->destinationLocation->warehouse->partnerAddress->phone }}
+                                    {{ $record->partner->phone }}
                                 </div>
                             @endif
                         </div>

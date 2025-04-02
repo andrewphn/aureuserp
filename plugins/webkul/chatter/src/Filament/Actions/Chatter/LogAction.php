@@ -27,7 +27,7 @@ class LogAction extends Action
                 $form->fill();
             })
             ->form(
-                fn($form) => $form->schema([
+                fn ($form) => $form->schema([
                     Forms\Components\Group::make([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('add_subject')
@@ -45,7 +45,7 @@ class LogAction extends Action
                                 })
                                 ->link()
                                 ->size('sm')
-                                ->icon(fn(Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
+                                ->icon(fn (Get $get) => ! $get('showSubject') ? 'heroicon-s-plus' : 'heroicon-s-minus'),
                         ])
                             ->columnSpan('full')
                             ->alignRight(),
@@ -53,7 +53,7 @@ class LogAction extends Action
                     Forms\Components\TextInput::make('subject')
                         ->placeholder(__('chatter::filament/resources/actions/chatter/log-action.setup.form.fields.subject'))
                         ->live()
-                        ->visible(fn($get) => $get('showSubject'))
+                        ->visible(fn ($get) => $get('showSubject'))
                         ->columnSpanFull(),
                     Forms\Components\RichEditor::make('body')
                         ->hiddenLabel()

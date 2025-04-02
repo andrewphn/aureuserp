@@ -21,6 +21,21 @@ return [
                     'tags'       => 'Tags',
                     'color'      => 'Color',
                 ],
+
+                'address' => [
+                    'title' => 'Address',
+
+                    'fields' => [
+                        'street1'  => 'Street 1',
+                        'street2'  => 'Street 2',
+                        'city'     => 'City',
+                        'zip'      => 'ZIP',
+                        'state'    => 'State',
+                        'country'  => 'Country',
+                        'name'     => 'Name',
+                        'code'     => 'Code',
+                    ],
+                ],
             ],
         ],
 
@@ -32,7 +47,7 @@ return [
                     'responsible'           => 'Responsible',
                     'responsible-hint-text' => 'This is internal salesperson responsible for this customer',
                     'company-id'            => 'Company ID',
-                    'company-id-hint-text'  => 'The registry number of the company. Use it if it is different from the Tax ID. It must be unique across all partners of a same country',
+                    'company-id-hint-text'  => 'The company\'s registry number, used if different from the Tax ID. It must be unique among all partners within the same country.',
                     'reference'             => 'Reference',
                     'industry'              => 'Industry',
                 ],
@@ -98,8 +113,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Contact force deleted',
-                    'body'  => 'The contact has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Contact force deleted',
+                        'body'  => 'The contact has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Contact could not be deleted',
+                        'body'  => 'The contact cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -121,8 +143,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Contacts force deleted',
-                    'body'  => 'The contacts has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Contacts force deleted',
+                        'body'  => 'The contacts has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Contacts could not be deleted',
+                        'body'  => 'The contacts cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -146,6 +175,21 @@ return [
                     'name'       => 'Name',
                     'short-name' => 'Short Name',
                     'tags'       => 'Tags',
+                ],
+
+                'address' => [
+                    'title' => 'Address',
+
+                    'fields' => [
+                        'street1'  => 'Street 1',
+                        'street2'  => 'Street 2',
+                        'city'     => 'City',
+                        'zip'      => 'ZIP',
+                        'state'    => 'State',
+                        'country'  => 'Country',
+                        'name'     => 'Name',
+                        'code'     => 'Code',
+                    ],
                 ],
             ],
         ],

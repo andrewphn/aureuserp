@@ -2,8 +2,8 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Account\Models\Move as Move;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Webkul\Account\Models\Move as Move;
 
 class AccountMove extends Move
 {

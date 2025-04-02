@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\RoundingMethod;
 use Webkul\Account\Enums\RoundingStrategy;
 use Webkul\Account\Filament\Resources\CashRoundingResource\Pages;
@@ -23,20 +22,6 @@ class CashRoundingResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/cash-rounding.global-search.name') => $record->name ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {

@@ -1,11 +1,6 @@
 <?php
 
 return [
-    'global-search' => [
-        'company-name' => 'Company Name',
-        'payment-term' => 'Payment Term',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [
@@ -40,8 +35,8 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Payment Term deleted',
-                    'body'  => 'The payment term has been deleted successfully.',
+                    'title' => 'Tax Group deleted',
+                    'body'  => 'The Tax Group has been deleted successfully.',
                 ],
             ],
         ],

@@ -6,12 +6,12 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Models\ProductSupplier;
+use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource;
 
 class ManageVendors extends ManageRelatedRecords
@@ -40,14 +40,14 @@ class ManageVendors extends ManageRelatedRecords
 
             array_unshift($secondGroupFirstSectionChildComponents, Forms\Components\Select::make('product_id')
                 ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.product'))
-                    ->relationship(
-                        'product',
-                        'name',
-                        fn (Builder $query) => $query->where('parent_id', $this->getRecord()->id),
-                    )
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                ->relationship(
+                    'product',
+                    'name',
+                    fn (Builder $query) => $query->where('parent_id', $this->getRecord()->id),
+                )
+                ->required()
+                ->searchable()
+                ->preload(),
             );
 
             $secondGroupChildComponents[0]->childComponents($secondGroupFirstSectionChildComponents);

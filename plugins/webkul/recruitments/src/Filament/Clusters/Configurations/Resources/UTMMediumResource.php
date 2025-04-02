@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\UTMMediumResource\Pages;
 use Webkul\Recruitment\Models\UTMMedium;
@@ -38,18 +37,6 @@ class UTMMediumResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/utm-medium.navigation.title');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('recruitments::filament/clusters/configurations/resources/utm-medium.global-search.name') => $record->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -57,11 +44,8 @@ class UTMMediumResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.form.fields.name'))
                     ->required()
+                    ->maxLength(255)
                     ->placeholder(__('recruitments::filament/clusters/configurations/resources/utm-medium.form.fields.name-placeholder')),
-                Forms\Components\Toggle::make('is_active')
-                    ->inline(false)
-                    ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.form.fields.status'))
-                    ->required(),
             ]);
     }
 
@@ -77,10 +61,6 @@ class UTMMediumResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.table.columns.name'))
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.table.columns.status'))
-                    ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.table.columns.created-by'))
@@ -143,10 +123,6 @@ class UTMMediumResource extends Resource
                 Infolists\Components\TextEntry::make('name')
                     ->placeholder('—')
                     ->icon('heroicon-o-briefcase')
-                    ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.infolist.name')),
-                Infolists\Components\IconEntry::make('name')
-                    ->boolean()
-                    ->placeholder('—')
                     ->label(__('recruitments::filament/clusters/configurations/resources/utm-medium.infolist.name')),
             ]);
     }

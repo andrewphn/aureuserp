@@ -49,18 +49,18 @@ class CreateInvoiceAction extends Action
                     ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('amount')
-                            ->visible(fn (Get $get) => $get('advance_payment_method') == AdvancedPayment::PERCENTAGE->value)
+                            ->visible(fn(Get $get) => $get('advance_payment_method') == AdvancedPayment::PERCENTAGE->value)
                             ->rules('required', 'numeric')
                             ->default(0.00)
                             ->suffix('%'),
                         Forms\Components\TextInput::make('amount')
-                            ->visible(fn (Get $get) => $get('advance_payment_method') == AdvancedPayment::FIXED->value)
+                            ->visible(fn(Get $get) => $get('advance_payment_method') == AdvancedPayment::FIXED->value)
                             ->rules('required', 'numeric')
                             ->default(0.00)
-                            ->prefix(fn ($record) => $record->currency->symbol),
+                            ->prefix(fn($record) => $record->currency->symbol),
                     ]),
             ])
-            ->hidden(fn ($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE)
+            ->hidden(fn($record) => $record->invoice_status != InvoiceStatus::TO_INVOICE)
             ->action(function (Order $record, $data) {
                 if ($record->qty_to_invoice == 0) {
                     Notification::make()

@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource\Pages;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource\RelationManagers;
@@ -30,23 +29,6 @@ class ActivityPlanResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/activity-plan.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'department.name', 'company.name', 'plugin', 'createdBy.name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('employees::filament/clusters/configurations/resources/activity-plan.global-search.name')         => $record->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/activity-plan.global-search.department')   => $record->department?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/activity-plan.global-search.manager')      => $record->department?->manager?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/activity-plan.global-search.company')      => $record->company?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/activity-plan.global-search.plugin')       => $record->plugin ?? '—',
-            __('employees::filament/clusters/configurations/resources/activity-plan.global-search.creator-name') => $record->createdBy?->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

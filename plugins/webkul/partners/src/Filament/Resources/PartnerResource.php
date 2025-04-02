@@ -14,6 +14,9 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Partner\Models\Partner;
@@ -21,6 +24,8 @@ use Webkul\Partner\Models\Partner;
 class PartnerResource extends Resource
 {
     protected static ?string $model = Partner::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -40,6 +45,13 @@ class PartnerResource extends Resource
                                             ->columnSpan(2)
                                             ->options(AccountType::class)
                                             ->default(AccountType::INDIVIDUAL->value)
+                                            ->options(function () {
+                                                $options = AccountType::options();
+
+                                                unset($options[AccountType::ADDRESS->value]);
+
+                                                return $options;
+                                            })
                                             ->live(),
                                         Forms\Components\TextInput::make('name')
                                             ->hiddenLabel()
@@ -144,9 +156,62 @@ class PartnerResource extends Resource
                                                     ->unique('partners_tags'),
                                                 Forms\Components\ColorPicker::make('color')
                                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.color'))
-                                                    ->required(),
+                                                    ->hexColor(),
                                             ])
                                             ->columns(2),
+                                    ]),
+
+                                Forms\Components\Fieldset::make('Address')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('street1')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street1')),
+                                        Forms\Components\TextInput::make('street2')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street2')),
+                                        Forms\Components\TextInput::make('city')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.city')),
+                                        Forms\Components\TextInput::make('zip')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.zip')),
+                                        Forms\Components\Select::make('country_id')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                            ->relationship(name: 'country', titleAttribute: 'name')
+                                            ->afterStateUpdated(fn (Forms\Set $set) => $set('state_id', null))
+                                            ->searchable()
+                                            ->preload()
+                                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                                $set('state_id', null);
+                                            })
+                                            ->live(),
+                                        Forms\Components\Select::make('state_id')
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.state'))
+                                            ->relationship(
+                                                name: 'state',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
+                                            )
+                                            ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
+                                                return $form
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('name')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.name'))
+                                                            ->required(),
+                                                        Forms\Components\TextInput::make('code')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
+                                                            ->required()
+                                                            ->unique('states'),
+                                                        Forms\Components\Select::make('country_id')
+                                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
+                                                            ->relationship('country', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->default($get('country_id'))
+                                                            ->afterStateUpdated(function (Forms\Get $get) use ($set) {
+                                                                $set('country_id', $get('country_id'));
+                                                            }),
+                                                    ]);
+                                            })
+                                            ->searchable()
+                                            ->preload(),
                                     ]),
                             ])
                             ->columns(2),
@@ -245,7 +310,7 @@ class PartnerResource extends Resource
                                 ->state(function (Partner $record): array {
                                     return $record->tags()->get()->map(fn ($tag) => [
                                         'label' => $tag->name,
-                                        'color' => $tag->color ?? 'primary',
+                                        'color' => $tag->color ?? '#808080',
                                     ])->toArray();
                                 })
                                 ->badge()
@@ -401,11 +466,22 @@ class PartnerResource extends Resource
                             ->body(__('partners::filament/resources/partner.table.actions.delete.notification.body')),
                     ),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->action(function (Partner $record) {
+                        try {
+                            $record->forceDelete();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('partners::filament/resources/partner.table.actions.force-delete.notification.error.title'))
+                                ->body(__('partners::filament/resources/partner.table.actions.force-delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('partners::filament/resources/partner.table.actions.force-delete.notification.title'))
-                            ->body(__('partners::filament/resources/partner.table.actions.force-delete.notification.body')),
+                            ->title(__('partners::filament/resources/partner.table.actions.force-delete.notification.success.title'))
+                            ->body(__('partners::filament/resources/partner.table.actions.force-delete.notification.success.body')),
                     ),
             ])
             ->bulkActions([
@@ -425,14 +501,28 @@ class PartnerResource extends Resource
                                 ->body(__('partners::filament/resources/partner.table.bulk-actions.delete.notification.body')),
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('partners::filament/resources/partner.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('partners::filament/resources/partner.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('partners::filament/resources/partner.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('partners::filament/resources/partner.table.bulk-actions.force-delete.notification.body')),
+                                ->title(__('partners::filament/resources/partner.table.bulk-actions.force-delete.notification.success.title'))
+                                ->body(__('partners::filament/resources/partner.table.bulk-actions.force-delete.notification.success.body')),
                         ),
                 ]),
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->where('account_type', '!=', AccountType::ADDRESS);
+            })
             ->contentGrid([
                 'sm'  => 1,
                 'md'  => 2,
@@ -519,7 +609,7 @@ class PartnerResource extends Resource
                                     ->state(function (Partner $record): array {
                                         return $record->tags()->get()->map(fn ($tag) => [
                                             'label' => $tag->name,
-                                            'color' => $tag->color ?? 'primary',
+                                            'color' => $tag->color ?? '#808080',
                                         ])->toArray();
                                     })
                                     ->badge()
@@ -527,6 +617,33 @@ class PartnerResource extends Resource
                                     ->color(fn ($state) => Color::hex($state['color']))
                                     ->separator(',')
                                     ->visible(fn ($record): bool => (bool) $record->tags()->count()),
+                            ]),
+
+                        Infolists\Components\Fieldset::make('Address')
+                            ->schema([
+                                Infolists\Components\TextEntry::make('street1')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.street1'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('street2')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.street2'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('city')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.city'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('zip')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.zip'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('country.name')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.country'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('state.name')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.state'))
+                                    ->placeholder('—'),
                             ]),
                     ]),
 

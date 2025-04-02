@@ -5,7 +5,7 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions;
 use Filament\Actions\Action;
 use Livewire\Component;
 use Webkul\Inventory\Enums;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 
 class CheckAvailabilityAction extends Action
@@ -22,11 +22,7 @@ class CheckAvailabilityAction extends Action
         $this
             ->label(__('inventories::filament/clusters/operations/actions/check-availability.label'))
             ->action(function (Operation $record, Component $livewire): void {
-                foreach ($record->moves as $move) {
-                    OperationResource::updateOrCreateMoveLines($move);
-                }
-
-                OperationResource::updateOperationState($record);
+                $record = Inventory::checkTransferAvailability($record);
 
                 $livewire->updateForm();
             })

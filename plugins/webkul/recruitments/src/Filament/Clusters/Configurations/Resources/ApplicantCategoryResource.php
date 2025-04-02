@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ApplicantCategoryResource\Pages;
 use Webkul\Recruitment\Models\ApplicantCategory;
@@ -38,19 +37,6 @@ class ApplicantCategoryResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/applicant-category.navigation.title');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'createdBy.name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('recruitments::filament/clusters/configurations/resources/applicant-category.global-search.name')       => $record->name ?? '—',
-            __('recruitments::filament/clusters/configurations/resources/applicant-category.global-search.created-by') => $record->createdBy?->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -58,10 +44,12 @@ class ApplicantCategoryResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.name'))
                     ->required()
+                    ->maxLength(255)
                     ->placeholder(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.name-placeholder')),
                 Forms\Components\ColorPicker::make('color')
                     ->label(__('recruitments::filament/clusters/configurations/resources/applicant-category.form.fields.color'))
-                    ->required(),
+                    ->required()
+                    ->hexColor(),
             ]);
     }
 

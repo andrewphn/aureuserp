@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\EmploymentTypeResource\Pages;
@@ -36,24 +35,6 @@ class EmploymentTypeResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/employment-type.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'country_id',
-            'creator_id',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('employees::filament/clusters/configurations/resources/employment-type.global-search.name')       => $record->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/employment-type.global-search.country')    => $record->country?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/employment-type.global-search.created-by') => $record->createdBy?->name ?? '—',
-        ];
     }
 
     protected static ?string $cluster = Configurations::class;

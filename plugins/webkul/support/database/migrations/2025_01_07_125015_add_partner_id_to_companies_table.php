@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('companies', function (Blueprint $table) {
             $table->foreignId('partner_id')
-                ->nullable()
                 ->constrained('partners_partners')
                 ->restrictOnDelete();
         });

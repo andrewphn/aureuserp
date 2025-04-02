@@ -4,12 +4,12 @@ namespace Webkul\Product\Filament\Resources\ProductResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
-use Filament\Tables\Table;
 
 class ListProducts extends ListRecords
 {

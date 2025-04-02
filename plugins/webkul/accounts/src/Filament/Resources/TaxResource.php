@@ -11,7 +11,6 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums;
 use Webkul\Account\Enums\TaxIncludeOverride;
 use Webkul\Account\Filament\Resources\TaxResource\Pages;
@@ -26,24 +25,6 @@ class TaxResource extends Resource
     protected static bool $shouldRegisterNavigation = false;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'company.name',
-            'name',
-            'amount_type',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/tax.global-search.company')     => $record->company?->name ?? '—',
-            __('accounts::filament/resources/tax.global-search.name')        => $record->name ?? '—',
-            __('accounts::filament/resources/tax.global-search.amount-type') => $record->amount_type ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {
@@ -82,6 +63,8 @@ class TaxResource extends Resource
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.invoice-label')),
                                 Forms\Components\Select::make('tax_group_id')
                                     ->relationship('taxGroup', 'name')
+                                    ->required()
+                                    ->createOptionForm(fn (Form $form): Form => TaxGroupResource::form($form))
                                     ->label(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.fields.tax-group')),
                                 Forms\Components\Select::make('country_id')
                                     ->relationship('country', 'name')

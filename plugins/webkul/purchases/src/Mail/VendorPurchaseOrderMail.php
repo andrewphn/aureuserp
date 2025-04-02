@@ -4,10 +4,10 @@ namespace Webkul\Purchase\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
 
 class VendorPurchaseOrderMail extends Mailable
 {
@@ -37,7 +37,7 @@ class VendorPurchaseOrderMail extends Mailable
             subject: $this->subject,
         );
     }
- 
+
     /**
      * Get the message content definition.
      */

@@ -2,32 +2,32 @@
 
 namespace Webkul\Purchase;
 
-use Webkul\Purchase\Models\Order;
-use Webkul\Purchase\Models\OrderLine;
-use Webkul\Inventory\Enums as InventoryEnums;
-use Webkul\Inventory\Models\Receipt;
-use Webkul\Purchase\Enums as PurchaseEnums;
-use Webkul\Inventory\Models\OperationType;
-use Illuminate\Support\Facades\Mail;
-use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
-use Illuminate\Support\Facades\Schema;
-use Webkul\Purchase\Settings\OrderSettings;
-use Webkul\Account\Models\Journal as AccountJournal;
-use Webkul\Account\Enums as AccountEnums;
-use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Webkul\Account\Services\TaxService;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Inventory\Models\Move;
-use Webkul\Purchase\Models\AccountMove;
-use Webkul\Inventory\Models\Location;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Webkul\Account\Enums as AccountEnums;
+use Webkul\Account\Models\Journal as AccountJournal;
+use Webkul\Account\Models\Partner;
+use Webkul\Account\Services\TaxService;
+use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Move;
+use Webkul\Inventory\Models\OperationType;
+use Webkul\Inventory\Models\Receipt;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Purchase\Enums as PurchaseEnums;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
+use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
+use Webkul\Purchase\Models\AccountMove;
+use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Models\OrderLine;
+use Webkul\Purchase\Settings\OrderSettings;
 use Webkul\Support\Package;
-use Webkul\Account\Models\Partner;
 
 class PurchaseOrder
 {
@@ -436,7 +436,6 @@ class PurchaseOrder
             'move_type'               => InventoryEnums\MoveType::DIRECT,
             'origin'                  => $record->name,
             'partner_id'              => $record->partner_id,
-            'partner_address_id'      => $record->partner_address_id,
             'date'                    => $record->ordered_at,
             'operation_type_id'       => $record->operation_type_id,
             'source_location_id'      => $supplierLocation->id,
@@ -487,7 +486,7 @@ class PurchaseOrder
             OperationResource::updateOrCreateMoveLines($move);
         }
 
-        OperationResource::updateOperationState($operation);
+        OperationResource::computeTransferState($operation);
 
         $url = PurchaseOrderResource::getUrl('view', ['record' => $record]);
 
@@ -517,7 +516,7 @@ class PurchaseOrder
                 $move->lines()->delete();
             }
 
-            OperationResource::updateOperationState($operation);
+            OperationResource::computeTransferState($operation);
         });
     }
 

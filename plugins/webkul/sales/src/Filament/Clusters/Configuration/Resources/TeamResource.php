@@ -36,26 +36,6 @@ class TeamResource extends Resource
         return __('sales::filament/clusters/configurations/resources/team.navigation.title');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'company.name',
-            'user.name',
-            'name',
-            'invoiced_target',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('sales::filament/clusters/configurations/resources/team.global-search.company-name')    => $record->company?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/team.global-search.user-name')       => $record->user?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/team.global-search.name')            => $record->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/team.global-search.invoiced-target') => $record->invoiced_target ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -90,7 +70,8 @@ class TeamResource extends Resource
                                     ->autocomplete(false)
                                     ->suffix(__('sales::filament/clusters/configurations/resources/team.form.sections.fields.fieldset.team-details.fields.invoiced-target-suffix')),
                                 Forms\Components\ColorPicker::make('color')
-                                    ->label(__('sales::filament/clusters/configurations/resources/team.form.sections.fields.fieldset.team-details.fields.color')),
+                                    ->label(__('sales::filament/clusters/configurations/resources/team.form.sections.fields.fieldset.team-details.fields.color'))
+                                    ->hexColor(),
                                 Forms\Components\Select::make('sales_team_members')
                                     ->relationship('members', 'name')
                                     ->multiple()

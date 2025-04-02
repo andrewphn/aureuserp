@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Filament\Resources\TaxGroupResource\Pages;
 use Webkul\Account\Models\TaxGroup;
 
@@ -21,22 +20,6 @@ class TaxGroupResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'company.name',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/tax-group.global-search.company') => $record->company?->name ?? '—',
-            __('accounts::filament/resources/tax-group.global-search.name')    => $record->name ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {

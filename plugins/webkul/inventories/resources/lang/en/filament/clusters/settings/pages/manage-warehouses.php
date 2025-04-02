@@ -16,7 +16,7 @@ return [
         'notification' => [
             'warning' => [
                 'title' => 'Have multiple warehouses',
-                'body'  => 'You can\'t deactivate the multi-location if you have more than onc warehouse.',
+                'body'  => 'You can\'t deactivate the multi-location if you have more than one warehouse.',
             ],
         ],
     ],

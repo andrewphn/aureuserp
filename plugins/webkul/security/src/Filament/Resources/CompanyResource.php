@@ -5,7 +5,6 @@ namespace Webkul\Security\Filament\Resources;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
@@ -16,7 +15,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Enums\CompanyStatus;
@@ -25,7 +23,6 @@ use Webkul\Security\Filament\Resources\CompanyResource\RelationManagers;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
-use Webkul\Support\Models\State;
 
 class CompanyResource extends Resource
 {
@@ -78,19 +75,23 @@ class CompanyResource extends Resource
                                             ->maxLength(255)
                                             ->live(onBlur: true),
                                         Forms\Components\TextInput::make('registration_number')
-                                            ->label(__('security::filament/resources/company.form.sections.company-information.fields.registration-number')),
+                                            ->label(__('security::filament/resources/company.form.sections.company-information.fields.registration-number'))
+                                            ->maxLength(255),
                                         Forms\Components\TextInput::make('company_id')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.company-id'))
                                             ->required()
                                             ->unique(ignoreRecord: true)
+                                            ->maxLength(255)
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: 'The Company ID is a unique identifier for your company.'),
                                         Forms\Components\TextInput::make('tax_id')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.tax-id'))
                                             ->unique(ignoreRecord: true)
+                                            ->maxLength(255)
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('security::filament/resources/company.form.sections.company-information.fields.tax-id-tooltip')),
                                         Forms\Components\TextInput::make('website')
                                             ->url()
                                             ->prefixIcon('heroicon-o-globe-alt')
+                                            ->maxLength(255)
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.website'))
                                             ->unique(ignoreRecord: true),
                                     ])
@@ -98,83 +99,75 @@ class CompanyResource extends Resource
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.address-information.title'))
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->relationship('address')
+                                            ->relationship('partner')
+                                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
+                                                return array_merge($data, [
+                                                    'name'    => $record->name,
+                                                    'email'   => $record->email,
+                                                    'phone'   => $record->phone,
+                                                    'mobile'  => $record->mobile,
+                                                    'website' => $record->website,
+                                                ]);
+                                            })
+                                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data, $record) {
+                                                return array_merge($data, [
+                                                    'name'    => $record->name,
+                                                    'email'   => $record->email,
+                                                    'phone'   => $record->phone,
+                                                    'mobile'  => $record->mobile,
+                                                    'website' => $record->website,
+                                                ]);
+                                            })
                                             ->schema([
                                                 Forms\Components\TextInput::make('street1')
                                                     ->label(__('security::filament/resources/company.form.sections.address-information.fields.street1'))
-                                                    ->required(),
+                                                    ->maxLength(255),
                                                 Forms\Components\TextInput::make('street2')
                                                     ->label(__('security::filament/resources/company.form.sections.address-information.fields.street2')),
                                                 Forms\Components\TextInput::make('city')
-                                                    ->required(),
+                                                    ->maxLength(255),
                                                 Forms\Components\TextInput::make('zip')
                                                     ->live()
                                                     ->label(__('security::filament/resources/company.form.sections.address-information.fields.zipcode'))
-                                                    ->required(fn (Get $get) => Country::find($get('country_id'))?->zip_required),
+                                                    ->maxLength(255),
                                                 Forms\Components\Select::make('country_id')
                                                     ->label(__('security::filament/resources/company.form.sections.address-information.fields.country'))
                                                     ->relationship(name: 'country', titleAttribute: 'name')
                                                     ->afterStateUpdated(fn (Set $set) => $set('state_id', null))
-                                                    ->createOptionForm([
-                                                        Forms\Components\Select::make('currency_id')
-                                                            ->options(fn () => Currency::pluck('full_name', 'id'))
-                                                            ->searchable()
-                                                            ->preload()
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.currency-name'))
-                                                            ->required(),
-                                                        Forms\Components\TextInput::make('phone_code')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.phone-code'))
-                                                            ->required(),
-                                                        Forms\Components\TextInput::make('code')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.code'))
-                                                            ->required()
-                                                            ->rules('max:2'),
-                                                        Forms\Components\TextInput::make('name')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.country-name'))
-                                                            ->required(),
-                                                        Forms\Components\Toggle::make('state_required')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.state-required'))
-                                                            ->required(),
-                                                        Forms\Components\Toggle::make('zip_required')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.zip-required'))
-                                                            ->required(),
-                                                    ])
-                                                    ->createOptionAction(
-                                                        fn (Action $action) => $action
-                                                            ->modalHeading(__('security::filament/resources/company.form.sections.address-information.fields.create-country'))
-                                                            ->modalSubmitActionLabel(__('security::filament/resources/company.form.sections.address-information.fields.create-country'))
-                                                            ->modalWidth('lg')
-                                                    )
                                                     ->searchable()
                                                     ->preload()
-                                                    ->live()
-                                                    ->required(),
+                                                    ->live(),
                                                 Forms\Components\Select::make('state_id')
                                                     ->label(__('security::filament/resources/company.form.sections.address-information.fields.state'))
-                                                    ->options(
-                                                        fn (Get $get): Collection => State::query()
-                                                            ->where('country_id', $get('country_id'))
-                                                            ->pluck('name', 'id')
+                                                    ->relationship(
+                                                        name: 'state',
+                                                        titleAttribute: 'name',
+                                                        modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                                                     )
-                                                    ->createOptionForm([
-                                                        Forms\Components\TextInput::make('name')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.state-name'))
-                                                            ->required()
-                                                            ->maxLength(255),
-                                                        Forms\Components\TextInput::make('code')
-                                                            ->label(__('security::filament/resources/company.form.sections.address-information.fields.state-code'))
-                                                            ->required()
-                                                            ->maxLength(255),
-                                                    ])
-                                                    ->createOptionAction(
-                                                        fn (Action $action) => $action
-                                                            ->modalHeading('Create State')
-                                                            ->modalSubmitActionLabel('Create State')
-                                                            ->modalWidth('lg')
-                                                    )
+                                                    ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
+                                                        return $form
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('name')
+                                                                    ->label(__('security::filament/resources/company.form.sections.address-information.fields.state-name'))
+                                                                    ->required(),
+                                                                Forms\Components\TextInput::make('code')
+                                                                    ->label(__('security::filament/resources/company.form.sections.address-information.fields.state-code'))
+                                                                    ->required()
+                                                                    ->unique('states'),
+                                                                Forms\Components\Select::make('country_id')
+                                                                    ->label(__('security::filament/resources/company.form.sections.address-information.fields.country'))
+                                                                    ->relationship('country', 'name')
+                                                                    ->searchable()
+                                                                    ->preload()
+                                                                    ->live()
+                                                                    ->default($get('country_id'))
+                                                                    ->afterStateUpdated(function (Forms\Get $get) use ($set) {
+                                                                        $set('country_id', $get('country_id'));
+                                                                    }),
+                                                            ]);
+                                                    })
                                                     ->searchable()
-                                                    ->preload()
-                                                    ->required(fn (Get $get) => Country::find($get('country_id'))?->state_required),
+                                                    ->preload(),
                                             ])
                                             ->columns(2),
                                     ]),
@@ -203,6 +196,7 @@ class CompanyResource extends Resource
                                                             ->unique('currencies', 'full_name', ignoreRecord: true),
                                                         Forms\Components\TextInput::make('symbol')
                                                             ->label(__('security::filament/resources/company.form.sections.additional-information.fields.currency-symbol'))
+                                                            ->maxLength(255)
                                                             ->required(),
                                                         Forms\Components\TextInput::make('iso_numeric')
                                                             ->label(__('security::filament/resources/company.form.sections.additional-information.fields.currency-iso-numeric'))
@@ -249,17 +243,21 @@ class CompanyResource extends Resource
                                             ->directory('company-logos')
                                             ->visibility('private'),
                                         Forms\Components\ColorPicker::make('color')
-                                            ->label(__('security::filament/resources/company.form.sections.branding.fields.color')),
+                                            ->label(__('security::filament/resources/company.form.sections.branding.fields.color'))
+                                            ->hexColor(),
                                     ]),
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.contact-information.title'))
                                     ->schema([
                                         Forms\Components\TextInput::make('phone')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.phone'))
+                                            ->maxLength(255)
                                             ->required(),
                                         Forms\Components\TextInput::make('mobile')
-                                            ->label(__('security::filament/resources/company.form.sections.contact-information.fields.mobile')),
+                                            ->label(__('security::filament/resources/company.form.sections.contact-information.fields.mobile'))
+                                            ->maxLength(255),
                                         Forms\Components\TextInput::make('email')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.email'))
+                                            ->maxLength(255)
                                             ->email(),
                                     ]),
                             ])
@@ -456,25 +454,27 @@ class CompanyResource extends Resource
                                     ->columns(2),
 
                                 Infolists\Components\Section::make(__('security::filament/resources/company.infolist.sections.address-information.title'))
+                                    ->relationship('partner')
                                     ->schema([
-                                        Infolists\Components\TextEntry::make('address.street1')
+                                        Infolists\Components\TextEntry::make('street1')
                                             ->icon('heroicon-o-map-pin')
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.street1')),
-                                        Infolists\Components\TextEntry::make('address.street2')
+                                        Infolists\Components\TextEntry::make('street2')
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.street2')),
-                                        Infolists\Components\TextEntry::make('address.city')
+                                        Infolists\Components\TextEntry::make('city')
+                                            ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.city'))
                                             ->icon('heroicon-o-building-library')
                                             ->placeholder('—'),
-                                        Infolists\Components\TextEntry::make('address.zip')
+                                        Infolists\Components\TextEntry::make('zip')
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.zipcode')),
-                                        Infolists\Components\TextEntry::make('address.country.name')
+                                        Infolists\Components\TextEntry::make('country.name')
                                             ->icon('heroicon-o-globe-alt')
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.country')),
-                                        Infolists\Components\TextEntry::make('address.state.name')
+                                        Infolists\Components\TextEntry::make('state.name')
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.address-information.entries.state')),
                                     ])
@@ -507,11 +507,8 @@ class CompanyResource extends Resource
                                         ->hiddenLabel()
                                         ->circular()
                                         ->placeholder('—'),
-                                    Infolists\Components\TextEntry::make('color')
-                                        ->icon('heroicon-o-swatch')
+                                    Infolists\Components\ColorEntry::make('color')
                                         ->placeholder('—')
-                                        ->badge()
-                                        ->color(fn ($record) => $record->color ?? 'gray')
                                         ->label(__('security::filament/resources/company.infolist.sections.branding.entries.color')),
                                 ]),
 

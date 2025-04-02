@@ -22,12 +22,11 @@ class RespondQuotation extends SimplePage
                 'mail_reception_confirmed' => true,
             ]);
 
-
             $order->addMessage([
                 'causer_type' => $order->partner->getMorphClass(),
-                'causer_id' => $order->partner->id,
-                'body' => 'The RFQ has been acknowledged by vendor.',
-                'type'=> 'comment',
+                'causer_id'   => $order->partner->id,
+                'body'        => 'The RFQ has been acknowledged by vendor.',
+                'type'        => 'comment',
             ]);
         } else {
             $order->update([
@@ -36,9 +35,9 @@ class RespondQuotation extends SimplePage
 
             $order->addMessage([
                 'causer_type' => $order->partner->getMorphClass(),
-                'causer_id' => $order->partner->id,
-                'body' => 'The RFQ has been declined by vendor.',
-                'type'=> 'comment',
+                'causer_id'   => $order->partner->id,
+                'body'        => 'The RFQ has been declined by vendor.',
+                'type'        => 'comment',
             ]);
         }
     }

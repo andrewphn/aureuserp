@@ -1,10 +1,6 @@
 <?php
 
 return [
-    'global-search' => [
-        'name'     => 'Name',
-    ],
-
     'form' => [
         'fields' => [
             'name'               => 'Name',

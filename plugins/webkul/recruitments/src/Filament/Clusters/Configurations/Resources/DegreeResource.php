@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DegreeResource\Pages;
 use Webkul\Recruitment\Models\Degree;
@@ -38,18 +37,6 @@ class DegreeResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/degree.navigation.title');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('recruitments::filament/clusters/configurations/resources/degree.global-search.name') => $record->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -57,6 +44,7 @@ class DegreeResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label(__('recruitments::filament/clusters/configurations/resources/degree.form.fields.name'))
                     ->required()
+                    ->maxLength(255)
                     ->placeholder(__('recruitments::filament/clusters/configurations/resources/degree.form.fields.name-placeholder')),
             ]);
     }

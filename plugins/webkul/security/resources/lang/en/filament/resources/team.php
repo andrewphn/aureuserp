@@ -8,13 +8,6 @@ return [
         'group' => 'Settings',
     ],
 
-    'global-search' => [
-        'status'                         => 'Status',
-        'is-flexible'                    => 'Is Flexible',
-        'is-fully-flexible'              => 'Is Fully Flexible',
-        'work-permit-scheduled-activity' => 'Work Permit Scheduled Activity',
-    ],
-
     'form' => [
         'fields' => [
             'name' => 'Name',
@@ -29,8 +22,8 @@ return [
         'actions' => [
             'edit' => [
                 'notification' => [
-                    'title' => 'Team edited',
-                    'body'  => 'The team has been edited successfully.',
+                    'title' => 'Team updated',
+                    'body'  => 'The team has been updated successfully.',
                 ],
             ],
 

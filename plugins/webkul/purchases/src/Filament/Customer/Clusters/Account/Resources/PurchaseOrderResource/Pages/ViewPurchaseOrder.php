@@ -2,8 +2,8 @@
 
 namespace Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderResource\Pages;
 
-use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderResource;
 use Filament\Resources\Pages\ViewRecord;
+use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderResource;
 
 class ViewPurchaseOrder extends ViewRecord
 {

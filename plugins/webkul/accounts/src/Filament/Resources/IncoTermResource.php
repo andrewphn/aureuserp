@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\IncoTermResource\Pages;
 use Webkul\Account\Models\Incoterm;
@@ -23,22 +22,6 @@ class IncoTermResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'code',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/incoterm.global-search.name') => $record->name ?? '—',
-            __('accounts::filament/resources/incoterm.global-search.code') => $record->code ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -48,6 +31,7 @@ class IncoTermResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('code')
                     ->label(__('accounts::filament/resources/incoterm.form.fields.code'))
+                    ->maxLength(3)
                     ->required(),
                 Forms\Components\TextInput::make('name')
                     ->label(__('accounts::filament/resources/incoterm.form.fields.name'))

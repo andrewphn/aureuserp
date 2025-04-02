@@ -83,6 +83,32 @@
             background: #f8f9fa;
         }
 
+        .items-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .items-table tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        /* Dark Mode Support */
+        :is(.dark .items-table th) {
+            background: #0d2b57;
+            color: #ffffff;
+        }
+
+        :is(.dark .items-table td) {
+            border-bottom: 1px solid #444;
+            color: #ddd;
+        }
+
+        :is(.dark .items-table tr:nth-child(even)) {
+            background: #2d2d2d;
+        }
+
+        :is(.dark .items-table tr:nth-child(odd)) {
+            background: #1e1e1e;
+        }
+
         .summary {
             width: 100%;
             display: inline-block;
@@ -92,7 +118,6 @@
             width: 250px;
             padding-top: 5px;
             padding-bottom: 5px;
-            background-color: #E9EFFC;
             white-space: nowrap;
         }
         .summary table.rtl {
@@ -115,7 +140,6 @@
             clear: both;
             margin-top: 20px;
             padding: 20px;
-            background-color: #E9EFFC;
             border-radius: 8px;
             color: #1a4587;
         }
@@ -341,4 +365,5 @@
         @endif
     </div>
 </body>
+
 </html>

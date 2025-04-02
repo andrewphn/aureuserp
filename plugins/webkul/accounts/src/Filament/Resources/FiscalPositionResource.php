@@ -12,7 +12,6 @@ use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Filament\Resources\FiscalPositionResource\Pages;
 use Webkul\Account\Filament\Resources\FiscalPositionResource\RelationManagers;
 use Webkul\Account\Models\FiscalPosition;
@@ -24,24 +23,6 @@ class FiscalPositionResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-arrow-uturn-left';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'zip_from',
-            'zip_to',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/fiscal-position.global-search.zip-from') => $record->zip_from ?? '—',
-            __('accounts::filament/resources/fiscal-position.global-search.zip-to')   => $record->zip_to ?? '—',
-            __('accounts::filament/resources/fiscal-position.global-search.name')     => $record->name ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {
@@ -122,10 +103,6 @@ class FiscalPositionResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->label(__('accounts::filament/resources/fiscal-position.table.columns.zip-to')),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->searchable()
-                    ->sortable()
-                    ->label(__('accounts::filament/resources/fiscal-position.table.columns.status')),
                 Tables\Columns\IconColumn::make('auto_reply')
                     ->searchable()
                     ->sortable()

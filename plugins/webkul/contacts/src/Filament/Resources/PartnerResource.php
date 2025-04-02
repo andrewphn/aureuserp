@@ -2,25 +2,21 @@
 
 namespace Webkul\Contact\Filament\Resources;
 
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
-use Filament\Resources\Resource;
-use Filament\Tables\Table;
 use Webkul\Contact\Filament\Resources\PartnerResource\Pages;
 use Webkul\Partner\Filament\Resources\PartnerResource as BasePartnerResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
 use Webkul\Partner\Models\Partner;
 
-class PartnerResource extends Resource
+class PartnerResource extends BasePartnerResource
 {
     protected static ?string $model = Partner::class;
 
     protected static ?string $slug = 'contact/contacts';
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
@@ -32,21 +28,6 @@ class PartnerResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('contacts::filament/resources/partner.navigation.group');
-    }
-
-    public static function form(Form $form): Form
-    {
-        return BasePartnerResource::form($form);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return BasePartnerResource::table($table);
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return BasePartnerResource::infolist($infolist);
     }
 
     public static function getRecordSubNavigation(Page $page): array

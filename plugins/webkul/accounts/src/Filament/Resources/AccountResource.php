@@ -11,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\AccountType;
 use Webkul\Account\Filament\Resources\AccountResource\Pages;
 use Webkul\Account\Models\Account;
@@ -23,23 +22,6 @@ class AccountResource extends Resource
     protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'currency.name',
-            'account_type',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/account.global-search.currency') => $record->currency?->name ?? '—',
-            __('accounts::filament/resources/account.global-search.name')     => $record->name ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {

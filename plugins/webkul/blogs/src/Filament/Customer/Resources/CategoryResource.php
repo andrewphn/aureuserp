@@ -3,7 +3,6 @@
 namespace Webkul\Blog\Filament\Customer\Resources;
 
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages;
 use Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Category;

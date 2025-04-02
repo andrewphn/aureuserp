@@ -24,6 +24,7 @@ return [
                     'title-placeholder' => 'Task Title...',
                     'tags'              => 'Tags',
                     'name'              => 'Name',
+                    'color'             => 'Color',
                     'description'       => 'Description',
                     'project'           => 'Project',
                     'status'            => 'Status',
@@ -42,7 +43,7 @@ return [
                 'fields' => [
                     'project'                     => 'Project',
                     'milestone'                   => 'Milestone',
-                    'milestone-hint-text'         => 'Deliver your services automatically when a milestone is reached by linking it to a sales order item.',
+                    'milestone-hint-text'         => 'Automatically deliver your services upon reaching a milestone by linking it to a sales order item.',
                     'name'                        => 'Name',
                     'deadline'                    => 'Deadline',
                     'is-completed'                => 'Is Completed',

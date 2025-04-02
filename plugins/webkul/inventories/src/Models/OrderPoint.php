@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Inventory\Database\Factories\OrderPointFactory;
+use Webkul\Inventory\Enums\OrderPointTrigger;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
-use Webkul\Inventory\Enums\OrderPointTrigger;
 
 class OrderPoint extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     /**
      * Table name.
      *

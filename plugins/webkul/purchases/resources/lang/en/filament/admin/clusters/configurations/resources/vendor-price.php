@@ -13,11 +13,11 @@ return [
                 'fields' => [
                     'vendor'                      => 'Vendor',
                     'vendor-product-name'         => 'Vendor Product Name',
-                    'vendor-product-name-tooltip' => 'This vendor\'s product name will be used when printing a request for quotation. Keep empty to use the internal one.',
+                    'vendor-product-name-tooltip' => 'The vendor\'s product name will appear on the request for quotation. Leave it blank to use the internal product name.',
                     'vendor-product-code'         => 'Vendor Product Code',
-                    'vendor-product-code-tooltip' => 'This vendor\'s product code will be used when printing a request for quotation. Keep empty to use the internal one.',
+                    'vendor-product-code-tooltip' => 'The vendor\'s product code will appear on the request for quotation. Leave it blank to use the internal code.',
                     'delay'                       => 'Delivery Lead Time (Days)',
-                    'delay-tooltip'               => 'Lead time in days between the confirmation of the purchase order and the receipt of the products in your warehouse. Used by the scheduler for automatic computation of the purchase order planning.',
+                    'delay-tooltip'               => 'The lead time (in days) from purchase order confirmation to product receipt in the warehouse. Used by the scheduler for automatic purchase order planning.',
                 ],
             ],
 
@@ -27,9 +27,9 @@ return [
                 'fields' => [
                     'product'            => 'Product',
                     'quantity'           => 'Quantity',
-                    'quantity-tooltip'   => 'The quantity to purchase from this vendor to benefit from the price, expressed in the vendor Product Unit of Measure if not any, in the default unit of measure of the product otherwise.',
+                    'quantity-tooltip'   => 'The minimum quantity required to purchase from this vendor to qualify for the specified price. This is expressed in the vendor\'s Product Unit of Measure or, if not set, the product\'s default unit of measure.',
                     'unit-price'         => 'Unit Price',
-                    'unit-price-tooltip' => 'The price for a single unit of this product from this vendor, in the vendor Product Unit of Measure if not any, in the default unit of measure of the product otherwise.',
+                    'unit-price-tooltip' => 'The price per unit for this product from the vendor, expressed in the vendor’s Product Unit of Measure or, if not set, the product\'s default unit of measure.',
                     'currency'           => 'Currency',
                     'valid-from'         => 'Valid From',
                     'valid-to'           => 'Valid Until',
@@ -107,11 +107,11 @@ return [
                 'entries' => [
                     'vendor'                      => 'Vendor',
                     'vendor-product-name'         => 'Vendor Product Name',
-                    'vendor-product-name-tooltip' => 'This vendor\'s product name will be used when printing a request for quotation. Keep empty to use the internal one.',
+                    'vendor-product-name-tooltip' => 'The vendor\'s product name will appear on the request for quotation. Leave it blank to use the internal product name.',
                     'vendor-product-code'         => 'Vendor Product Code',
-                    'vendor-product-code-tooltip' => 'This vendor\'s product code will be used when printing a request for quotation. Keep empty to use the internal one.',
+                    'vendor-product-code-tooltip' => 'The vendor\'s product code will appear on the request for quotation. Leave it blank to use the internal code.',
                     'delay'                       => 'Delivery Lead Time (Days)',
-                    'delay-tooltip'               => 'Lead time in days between the confirmation of the purchase order and the receipt of the products in your warehouse. Used by the scheduler for automatic computation of the purchase order planning.',
+                    'delay-tooltip'               => 'The lead time (in days) from purchase order confirmation to product receipt in the warehouse. Used by the scheduler for automatic purchase order planning.',
                 ],
             ],
 
@@ -131,9 +131,9 @@ return [
                 'entries' => [
                     'product'            => 'Product',
                     'quantity'           => 'Quantity',
-                    'quantity-tooltip'   => 'The quantity to purchase from this vendor to benefit from the price, expressed in the vendor Product Unit of Measure if not any, in the default unit of measure of the product otherwise.',
+                    'quantity-tooltip'   => 'The minimum quantity required to purchase from this vendor to qualify for the specified price. This is expressed in the vendor\'s Product Unit of Measure or, if not set, the product\'s default unit of measure.',
                     'unit-price'         => 'Unit Price',
-                    'unit-price-tooltip' => 'The price for a single unit of this product from this vendor, in the vendor Product Unit of Measure if not any, in the default unit of measure of the product otherwise.',
+                    'unit-price-tooltip' => 'The price per unit for this product from the vendor, expressed in the vendor’s Product Unit of Measure or, if not set, the product\'s default unit of measure.',
                     'currency'           => 'Currency',
                     'valid-from'         => 'Valid From',
                     'valid-to'           => 'Valid Until',

@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Filament\Resources\TeamResource\Pages;
 use Webkul\Security\Models\Team;
 
@@ -32,18 +31,6 @@ class TeamResource extends Resource
         return __('security::filament/resources/team.navigation.group');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('security::filament/resources/team.global-search.name') => $record->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -62,6 +49,7 @@ class TeamResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('security::filament/resources/team.table.columns.name'))
                     ->searchable()
+                    ->limit(50)
                     ->sortable(),
             ])
             ->actions([
@@ -87,8 +75,8 @@ class TeamResource extends Resource
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('security::filament/resources/team.navigation.table.empty-state-actions.create.notification.title'))
-                            ->body(__('security::filament/resources/team.navigation.table.empty-state-actions.create.notification.body'))
+                            ->title(__('security::filament/resources/team.table.empty-state-actions.create.notification.title'))
+                            ->body(__('security::filament/resources/team.table.empty-state-actions.create.notification.body'))
                     ),
             ]);
     }

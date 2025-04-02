@@ -204,6 +204,9 @@ class JobPositionResource extends Resource
                                             ->relationship('employmentType', 'name')
                                             ->searchable()
                                             ->preload(),
+                                        Forms\Components\Toggle::make('is_active')
+                                            ->label(__('recruitments::filament/clusters/configurations/resources/job-position.form.sections.workforce-planning.fields.status'))
+                                            ->inline(false),
                                     ]),
                             ])
                             ->columnSpan(['lg' => 1]),
@@ -465,10 +468,12 @@ class JobPositionResource extends Resource
                                         Infolists\Components\TextEntry::make('description')
                                             ->label(__('recruitments::filament/clusters/configurations/resources/job-position.infolist.sections.job-description.entries.job-description'))
                                             ->placeholder('—')
+                                            ->html()
                                             ->columnSpanFull(),
                                         Infolists\Components\TextEntry::make('requirements')
                                             ->label(__('recruitments::filament/clusters/configurations/resources/job-position.infolist.sections.job-description.entries.job-requirements'))
                                             ->placeholder('—')
+                                            ->html()
                                             ->columnSpanFull(),
                                     ]),
                             ])->columnSpan(2),
@@ -478,12 +483,13 @@ class JobPositionResource extends Resource
                                     Infolists\Components\TextEntry::make('date_from')
                                         ->label(__('recruitments::filament/clusters/configurations/resources/job-position.infolist.sections.work-planning.entries.date-from'))
                                         ->placeholder('—')
+                                        ->formatStateUsing(fn ($state) => $state ? $state->format('Y-m-d') : null)
                                         ->icon('heroicon-o-calendar'),
                                     Infolists\Components\TextEntry::make('date_to')
                                         ->icon('heroicon-o-calendar')
                                         ->placeholder('—')
-                                        ->label(__('recruitments::filament/clusters/configurations/resources/job-position.infolist.sections.work-planning.entries.date-to'))
-                                        ->numeric(),
+                                        ->formatStateUsing(fn ($state) => $state ? $state->format('Y-m-d') : null)
+                                        ->label(__('recruitments::filament/clusters/configurations/resources/job-position.infolist.sections.work-planning.entries.date-to')),
                                 ]),
                             Infolists\Components\Section::make(__('recruitments::filament/clusters/configurations/resources/job-position.infolist.sections.work-planning.title'))
                                 ->schema([

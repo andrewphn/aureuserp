@@ -5,19 +5,18 @@ namespace Webkul\Inventory\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Inventory\Database\Factories\OperationFactory;
 use Webkul\Inventory\Enums;
-use Webkul\Partner\Models\Address;
 use Webkul\Partner\Models\Partner;
+use Webkul\Purchase\Models\Order;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
-use Webkul\Purchase\Models\Order;
 
 class Operation extends Model
 {
@@ -56,7 +55,6 @@ class Operation extends Model
         'back_order_id',
         'return_id',
         'partner_id',
-        'partner_address_id',
         'company_id',
         'creator_id',
     ];
@@ -99,7 +97,6 @@ class Operation extends Model
         'backOrder.name'                => 'Back Order',
         'return.name'                   => 'Return',
         'partner.name'                  => 'Partner',
-        'partnerAddress.name'           => 'Partner Address',
         'company.name'                  => 'Company',
         'creator.name'                  => 'Creator',
     ];
@@ -142,11 +139,6 @@ class Operation extends Model
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
-    }
-
-    public function partnerAddress(): BelongsTo
-    {
-        return $this->belongsTo(Address::class);
     }
 
     public function company(): BelongsTo

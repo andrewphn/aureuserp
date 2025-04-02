@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
+use Webkul\Security\Settings;
 
 class EditUser extends EditRecord
 {
@@ -33,6 +34,7 @@ class EditUser extends EditRecord
         return [
             Actions\Action::make('changePassword')
                 ->label(__('security::filament/resources/user/pages/edit-user.header-actions.change-password.label'))
+                ->visible(fn (Settings\UserSettings $userSettings) => $userSettings->enable_reset_password)
                 ->action(function (User $record, array $data): void {
                     $record->update([
                         'password' => Hash::make($data['new_password']),

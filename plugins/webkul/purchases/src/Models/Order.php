@@ -14,14 +14,13 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
-use Webkul\Partner\Models\Address;
+use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\OperationType;
 use Webkul\Purchase\Database\Factories\OrderFactory;
 use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
-use Webkul\Inventory\Models\Operation;
-use Webkul\Inventory\Models\OperationType;
 
 class Order extends Model
 {
@@ -67,7 +66,6 @@ class Order extends Model
         'requisition_id',
         'purchases_group_id',
         'partner_id',
-        'partner_address_id',
         'currency_id',
         'fiscal_position_id',
         'payment_term_id',
@@ -117,7 +115,6 @@ class Order extends Model
         'effective_date',
         'requisition.name'    => 'Requisition',
         'partner.name'        => 'Vendor',
-        'partnerAddress.name' => 'Partner Address',
         'currency.name'       => 'Currency',
         'fiscalPosition'      => 'Fiscal Position',
         'paymentTerm.name'    => 'Payment Term',
@@ -148,11 +145,6 @@ class Order extends Model
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
-    }
-
-    public function partnerAddress(): BelongsTo
-    {
-        return $this->belongsTo(Address::class);
     }
 
     public function fiscalPosition(): BelongsTo
@@ -220,11 +212,11 @@ class Order extends Model
         $user = filament()->auth()->user();
 
         $message->fill(array_merge([
-            'creator_id'    => $user?->id,
-            'date_deadline' => $data['date_deadline'] ?? now(),
-            'company_id'    => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
+            'creator_id'       => $user?->id,
+            'date_deadline'    => $data['date_deadline'] ?? now(),
+            'company_id'       => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
             'messageable_type' => Order::class,
-            'messageable_id' => $this->id,
+            'messageable_id'   => $this->id,
         ], $data));
 
         $message->save();

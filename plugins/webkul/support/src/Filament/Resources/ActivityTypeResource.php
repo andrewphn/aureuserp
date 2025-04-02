@@ -11,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\ActivityChainingType;
 use Webkul\Support\Enums\ActivityDecorationType;
@@ -30,19 +29,6 @@ class ActivityTypeResource extends Resource
     protected static ?string $slug = 'settings/activity-types';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'plugin'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('support::filament/resources/activity-type.global-search.name')   => $record->name ?? '—',
-            __('support::filament/resources/activity-type.global-search.plugin') => $record->plugin ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {
@@ -132,8 +118,9 @@ class ActivityTypeResource extends Resource
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.suggest'))
                                             ->hidden(fn (Get $get) => $get('chaining_type') === 'trigger' || $get('category') === 'upload_file'),
                                         Forms\Components\Select::make('triggered_next_type_id')
-                                            ->relationship('activityTypes', 'name')
+                                            ->relationship('triggeredNextType', 'name')
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.trigger'))
+                                            ->native(false)
                                             ->hidden(fn (Get $get) => $get('chaining_type') === 'suggest' && $get('category') !== 'upload_file'),
                                     ]),
                                 Forms\Components\Section::make(__('support::filament/resources/activity-type.form.sections.status-and-configuration-information.title'))
@@ -321,7 +308,7 @@ class ActivityTypeResource extends Resource
                                             ->placeholder('—')
                                             ->formatStateUsing(fn ($state) => ActivityTypeAction::options()[$state])
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.activity-type-details.entries.action')),
-                                        Infolists\Components\TextEntry::make('default_user.name')
+                                        Infolists\Components\TextEntry::make('defaultUser.name')
                                             ->icon('heroicon-o-user')
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.activity-type-details.entries.default-user')),
@@ -384,7 +371,7 @@ class ActivityTypeResource extends Resource
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.suggest'))
                                             ->listWithLineBreaks(),
-                                        Infolists\Components\TextEntry::make('activityTypes.name')
+                                        Infolists\Components\TextEntry::make('triggeredNextType.name')
                                             ->icon('heroicon-o-forward')
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.trigger')),
