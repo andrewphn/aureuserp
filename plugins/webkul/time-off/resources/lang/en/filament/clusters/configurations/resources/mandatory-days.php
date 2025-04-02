@@ -9,12 +9,6 @@ return [
         'title' => 'Mandatory Holidays',
     ],
 
-    'global-search' => [
-        'name'       => 'Name',
-        'start-date' => 'Start Date',
-        'end-date'   => 'End Date',
-    ],
-
     'form' => [
         'fields' => [
             'name'       => 'Name',

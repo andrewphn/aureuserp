@@ -15,11 +15,6 @@ return [
         'updated-at' => 'Updated At',
     ],
 
-    'global-search' => [
-        'name'        => 'Name',
-        'reason-code' => 'Reason Code',
-    ],
-
     'form' => [
         'fields' => [
             'name'  => 'Name',

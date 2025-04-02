@@ -9,12 +9,6 @@ return [
         'title' => 'Time off',
     ],
 
-    'global-search' => [
-        'time-off-type'     => 'Time off Type',
-        'request-date-from' => 'Request Date From',
-        'request-date-to'   => 'Request Date To',
-    ],
-
     'form' => [
         'fields' => [
             'employee-name'     => 'Employee Name',

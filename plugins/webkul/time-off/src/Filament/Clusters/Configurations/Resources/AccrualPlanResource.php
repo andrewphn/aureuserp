@@ -15,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
 use Webkul\TimeOff\Enums\AccruedGainTime;
 use Webkul\TimeOff\Enums\CarryoverDate;
@@ -53,27 +52,6 @@ class AccrualPlanResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('time-off::filament/clusters/configurations/resources/accrual-plan.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'timeOffType.name',
-            'company_id',
-            'transition_mode',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('time-off::filament/clusters/configurations/resources/accrual-plan.global-search.name')            => $record->name ?? '—',
-            __('time-off::filament/clusters/configurations/resources/accrual-plan.global-search.time-off-type')   => $record?->timeOffType?->name ?? '—',
-            __('time-off::filament/clusters/configurations/resources/accrual-plan.global-search.company-name')    => $record?->company?->name ?? '—',
-            __('time-off::filament/clusters/configurations/resources/accrual-plan.global-search.transition_mode') => $record?->transition_mode ?? '—',
-
-        ];
     }
 
     public static function form(Form $form): Form

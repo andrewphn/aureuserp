@@ -1,11 +1,6 @@
 <?php
 
 return [
-    'global-search' => [
-        'name' => 'Name',
-        'code' => 'Code',
-    ],
-
     'form' => [
         'tabs' => [
             'journal-entries' => [

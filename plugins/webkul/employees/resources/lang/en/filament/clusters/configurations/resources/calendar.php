@@ -15,15 +15,6 @@ return [
         'updated-at' => 'Updated At',
     ],
 
-    'global-search' => [
-        'name'                     => 'Name',
-        'timezone'                 => 'Timezone',
-        'two-weeks-calendar'       => 'Two Weeks Calendar',
-        'flexible-hours'           => 'Flexible Hours',
-        'full-time-required-hours' => 'Full Time Required',
-        'company-name'             => 'Company Name',
-    ],
-
     'form' => [
         'sections' => [
             'general' => [

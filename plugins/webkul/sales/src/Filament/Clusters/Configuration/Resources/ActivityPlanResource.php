@@ -36,22 +36,6 @@ class ActivityPlanResource extends Resource
         return __('sales::filament/clusters/configurations/resources/activity-plan.navigation.group');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'department.name', 'company.name', 'plugin', 'createdBy.name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.name')         => $record->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.manager')      => $record->department?->manager?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.company')      => $record->company?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.plugin')       => $record->plugin ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.creator-name') => $record->createdBy?->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form

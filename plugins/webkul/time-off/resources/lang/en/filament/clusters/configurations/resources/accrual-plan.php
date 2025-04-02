@@ -6,12 +6,6 @@ return [
         'title' => 'Accrual Plan',
     ],
 
-    'global-search' => [
-        'name'          => 'Name',
-        'time-off-type' => 'Time Off Type',
-        'created-by'    => 'Created By',
-    ],
-
     'form' => [
         'fields' => [
             'name'                    => 'Title',

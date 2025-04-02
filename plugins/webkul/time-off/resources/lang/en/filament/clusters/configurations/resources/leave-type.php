@@ -6,12 +6,6 @@ return [
         'title' => 'Leave Type',
     ],
 
-    'global-search' => [
-        'name'       => 'Name',
-        'company'    => 'Company',
-        'created-by' => 'Created By',
-    ],
-
     'form' => [
         'sections' => [
             'general' => [

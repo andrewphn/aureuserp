@@ -8,11 +8,6 @@ return [
         'group' => 'Invoices',
     ],
 
-    'global-search' => [
-        'name'  => 'Name',
-        'state' => 'State',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [

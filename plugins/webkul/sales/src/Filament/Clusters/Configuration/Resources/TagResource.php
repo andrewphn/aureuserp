@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource\Pages;
 use Webkul\Sale\Models\Tag;
@@ -36,20 +35,6 @@ class TagResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/tag.navigation.group');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('sales::filament/clusters/configurations/resources/tag.global-search.name') => $record->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

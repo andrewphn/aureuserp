@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Enums\PaymentType;
 use Webkul\Account\Filament\Resources\PaymentsResource\Pages;
@@ -25,22 +24,6 @@ class PaymentsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'state',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/payment.global-search.name')  => $record?->name ?? '—',
-            __('accounts::filament/resources/payment.global-search.state') => $record?->state ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {

@@ -7,12 +7,6 @@ return [
         'title' => 'Skills',
     ],
 
-    'global-search' => [
-        'employee'       => 'Employee',
-        'skill'          => 'Skill',
-        'skill-level'    => 'Level',
-    ],
-
     'form' => [
         'sections' => [
             'skill-details' => [

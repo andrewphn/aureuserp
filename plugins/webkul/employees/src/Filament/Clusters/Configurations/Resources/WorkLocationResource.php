@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums\WorkLocation as WorkLocationEnum;
 use Webkul\Employee\Filament\Clusters\Configurations;
@@ -39,29 +38,6 @@ class WorkLocationResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/work-location.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'company.name',
-            'createdBy.name',
-            'location_type',
-            'location_number',
-            'is_active',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('employees::filament/clusters/configurations/resources/work-location.global-search.name')            => $record->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/work-location.global-search.company')         => $record->company?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/work-location.global-search.created-by')      => $record->createdBy?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/work-location.global-search.location-type')   => $record->location_type ?? '—',
-            __('employees::filament/clusters/configurations/resources/work-location.global-search.location-number') => $record->location_number ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

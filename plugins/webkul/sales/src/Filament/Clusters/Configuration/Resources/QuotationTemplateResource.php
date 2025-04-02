@@ -14,7 +14,6 @@ use Filament\Support\Facades\FilamentView;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
@@ -43,22 +42,6 @@ class QuotationTemplateResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/quotation-template.navigation.group');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'company.name',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('sales::filament/clusters/configurations/resources/quotation-template.global-search.company') => $record->company?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/quotation-template.global-search.name')    => $record->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

@@ -8,13 +8,6 @@ return [
         'group' => 'Settings',
     ],
 
-    'global-search' => [
-        'status'                         => 'Status',
-        'is-flexible'                    => 'Is Flexible',
-        'is-fully-flexible'              => 'Is Fully Flexible',
-        'work-permit-scheduled-activity' => 'Work Permit Scheduled Activity',
-    ],
-
     'form' => [
         'fields' => [
             'name' => 'Name',

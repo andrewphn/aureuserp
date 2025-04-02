@@ -8,14 +8,6 @@ return [
         'group' => 'Employee',
     ],
 
-    'global-search' => [
-        'name'            => 'Name',
-        'company'         => 'Company',
-        'created-by'      => 'Created By',
-        'location-type'   => 'Location Type',
-        'location-number' => 'Location Number',
-    ],
-
     'form' => [
         'name'            => 'Name',
         'company'         => 'Company',

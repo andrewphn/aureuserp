@@ -1,11 +1,6 @@
 <?php
 
 return [
-    'global-search' => [
-        'currency' => 'Currency',
-        'name'     => 'Name',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [

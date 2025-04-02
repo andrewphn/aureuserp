@@ -8,11 +8,6 @@ return [
         'group' => 'Recruitment',
     ],
 
-    'global-search' => [
-        'name'       => 'Job Position',
-        'created-by' => 'Created By',
-    ],
-
     'form' => [
         'sections' => [
             'employment-information' => [

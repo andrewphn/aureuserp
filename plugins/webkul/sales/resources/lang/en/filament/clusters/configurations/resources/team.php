@@ -7,13 +7,6 @@ return [
         'title' => 'Sales Teams',
     ],
 
-    'global-search' => [
-        'company-name'    => 'Company Name',
-        'user-name'       => 'User Name',
-        'name'            => 'Name',
-        'invoiced-target' => 'Invoiced Target',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [

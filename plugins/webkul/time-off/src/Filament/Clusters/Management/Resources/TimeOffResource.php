@@ -12,7 +12,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Webkul\Employee\Models\Employee;
 use Webkul\TimeOff\Enums\RequestDateFromPeriod;
@@ -40,24 +39,6 @@ class TimeOffResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('time-off::filament/clusters/management/resources/time-off.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'holidayStatus.name',
-            'request_date_from',
-            'request_date_to',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('time-off::filament/clusters/management/resources/time-off.global-search.time-off-type')     => $record->holidayStatus?->name ?? '—',
-            __('time-off::filament/clusters/management/resources/time-off.global-search.request-date-from') => $record->request_date_from ?? '—',
-            __('time-off::filament/clusters/management/resources/time-off.global-search.request-date-to')   => $record->request_date_to ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

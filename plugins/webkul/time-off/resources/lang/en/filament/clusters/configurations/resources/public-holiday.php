@@ -9,12 +9,6 @@ return [
         'title' => 'Public Holidays',
     ],
 
-    'global-search' => [
-        'name'      => 'Name',
-        'date-from' => 'Start Date',
-        'date-to'   => 'End Date',
-    ],
-
     'form' => [
         'fields' => [
             'name'             => 'Name',

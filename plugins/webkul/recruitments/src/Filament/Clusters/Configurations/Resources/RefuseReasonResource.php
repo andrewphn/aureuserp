@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\RefuseReasonResource\Pages;
 use Webkul\Recruitment\Models\RefuseReason;
@@ -36,19 +35,6 @@ class RefuseReasonResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('recruitments::filament/clusters/configurations/resources/refuse-reason.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'createdBy.name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('recruitments::filament/clusters/configurations/resources/refuse-reason.global-search.name')       => $record->name ?? '—',
-            __('recruitments::filament/clusters/configurations/resources/refuse-reason.global-search.created-by') => $record->createdBy?->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

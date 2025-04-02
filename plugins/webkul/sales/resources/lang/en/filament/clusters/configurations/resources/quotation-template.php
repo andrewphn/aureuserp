@@ -7,12 +7,7 @@ return [
         'title'  => 'Quotation Template',
         'group'  => 'Sales Orders',
     ],
-
-    'global-search' => [
-        'company' => 'Company',
-        'name'    => 'Name',
-    ],
-
+    
     'form' => [
         'tabs' => [
             'products' => [
