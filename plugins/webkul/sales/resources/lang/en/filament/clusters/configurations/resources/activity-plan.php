@@ -6,15 +6,6 @@ return [
         'group' => 'Activities',
     ],
 
-    'global-search' => [
-        'name'         => 'Department',
-        'department'   => 'Department',
-        'manager'      => 'Manager',
-        'company'      => 'Company',
-        'plugin'       => 'Plugin',
-        'creator-name' => 'Created By',
-    ],
-
     'form' => [
         'sections' => [
             'general' => [
