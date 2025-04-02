@@ -43,7 +43,7 @@ return [
 
                 'fields' => [
                     'visibility'                   => 'Visibility',
-                    'visibility-hint-tooltip'      => 'Grant employees access to your project or tasks by adding them as followers. Employees automatically get access to the tasks they are assigned to.',
+                    'visibility-hint-tooltip'      => 'Allow employees to access your project or tasks by adding them as followers. They will automatically gain access to any tasks assigned to them..',
                     'private-description'          => 'Invited internal users only.',
                     'internal-description'         => 'All internal users can see.',
                     'public-description'           => 'Invited portal users and all internal users.',
@@ -52,7 +52,7 @@ return [
                     'allow-timesheets-helper-text' => 'Log time on tasks and track progress',
                     'task-management'              => 'Task Management',
                     'allow-milestones'             => 'Allow Milestones',
-                    'allow-milestones-helper-text' => 'Track major progress points that must be reached to achieve success',
+                    'allow-milestones-helper-text' => 'Monitor key milestones that are essential for achieving success.',
                 ],
             ],
         ],
