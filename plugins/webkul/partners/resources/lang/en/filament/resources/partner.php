@@ -176,6 +176,21 @@ return [
                     'short-name' => 'Short Name',
                     'tags'       => 'Tags',
                 ],
+
+                'address' => [
+                    'title' => 'Address',
+
+                    'fields' => [
+                        'street1'  => 'Street 1',
+                        'street2'  => 'Street 2',
+                        'city'     => 'City',
+                        'zip'      => 'ZIP',
+                        'state'    => 'State',
+                        'country'  => 'Country',
+                        'name'     => 'Name',
+                        'code'     => 'Code',
+                    ],
+                ],
             ],
         ],
 

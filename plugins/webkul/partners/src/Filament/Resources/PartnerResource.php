@@ -618,6 +618,34 @@ class PartnerResource extends Resource
                                     ->separator(',')
                                     ->visible(fn ($record): bool => (bool) $record->tags()->count()),
                             ]),
+
+                        
+                        Infolists\Components\Fieldset::make('Address')
+                            ->schema([
+                                Infolists\Components\TextEntry::make('street1')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.street1'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('street2')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.street2'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('city')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.city'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('zip')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.zip'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('country.name')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.country'))
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('state.name')
+                                    ->label(__('partners::filament/resources/partner.infolist.sections.general.address.fields.state'))
+                                    ->placeholder('—'),
+                            ]),
                     ]),
 
                 Infolists\Components\Tabs::make('Tabs')
