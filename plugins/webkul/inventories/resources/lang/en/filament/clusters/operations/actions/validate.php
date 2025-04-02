@@ -3,7 +3,7 @@
 return [
     'label'             => 'Validate',
     'modal-heading'     => 'Create Back Order?',
-    'modal-description' => 'Create a back order if you expect to process the remaining products later. Do not create a back order if you will not process the remaining products.',
+    'modal-description' => 'Create a backorder if the remaining products will be processed later. If not, do not generate a backorder.',
 
     'extra-modal-footer-actions' => [
         'no-backorder' => [
@@ -30,7 +30,7 @@ return [
 
             'partial-package' => [
                 'title' => 'Can not move same package content',
-                'body'  => 'You cannot move the same package content more than once in the same transfer or split the same package into two location.',
+                'body'  => 'You cannot move the same package contents more than once within a single transfer or split the package between two locations.',
             ],
         ],
     ],

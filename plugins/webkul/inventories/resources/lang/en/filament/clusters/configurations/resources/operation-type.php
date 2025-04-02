@@ -34,12 +34,12 @@ return [
                     'generate-shipping-labels'           => 'Generate Shipping Labels',
                     'warehouse'                          => 'Warehouse',
                     'show-reception-report'              => 'Show Reception Report at Validation',
-                    'show-reception-report-hint-tooltip' => 'If checked, System will automatically show the reception report (if there are moves to allocate to) when validating.',
+                    'show-reception-report-hint-tooltip' => 'If selected, the system will automatically display the reception report upon validation, provided there are moves to allocate.',
                     'company'                            => 'Company',
                     'return-type'                        => 'Return Type',
                     'create-backorder'                   => 'Create Backorder',
                     'move-type'                          => 'Move Type',
-                    'move-type-hint-tooltip'             => 'Unless previously specified by the source document, this will be the default picking policy for this operation type.',
+                    'move-type-hint-tooltip'             => 'Unless defined by the source document, this will serve as the default picking policy for this operation type.',
                 ],
 
                 'fieldsets' => [
@@ -48,9 +48,9 @@ return [
 
                         'fields' => [
                             'create-new'                => 'Create New',
-                            'create-new-hint-tooltip'   => 'If this is checked only, it will suppose you want to create new Lots/Serial Numbers, so you can provide them in a text field.',
+                            'create-new-hint-tooltip'   => 'If selected, the system will assume you intend to create new Lots/Serial Numbers, allowing you to enter them in a text field.',
                             'use-existing'              => 'Use Existing',
-                            'use-existing-hint-tooltip' => 'If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken.',
+                            'use-existing-hint-tooltip' => 'If selected, you can choose the Lots/Serial Numbers or opt not to assign any. This allows stock to be created without a lot or without restrictions on the lot used.',
                         ],
                     ],
 
@@ -59,9 +59,9 @@ return [
 
                         'fields' => [
                             'source-location'                   => 'Source Location',
-                            'source-location-hint-tooltip'      => 'This is the default source location when this operation is manually created. However, it is possible to change it afterwards or that the routes use another one by default.',
+                            'source-location-hint-tooltip'      => 'This serves as the default source location when manually creating this operation. However, it can be changed later, and routes may assign a different default location.',
                             'destination-location'              => 'Destination Location',
-                            'destination-location-hint-tooltip' => 'This is the default destination location when this operation is manually created. However, it is possible to change it afterwards or that the routes use another one by default.',
+                            'destination-location-hint-tooltip' => 'This is the default destination location for manually created operations. However, it can be modified later, and routes may assign a different default location.',
                         ],
                     ],
 
@@ -70,7 +70,7 @@ return [
 
                         'fields' => [
                             'show-entire-package'              => 'Move Entire Package',
-                            'show-entire-package-hint-tooltip' => 'If checked, you will be able to select entire packages to move',
+                            'show-entire-package-hint-tooltip' => 'If selected, you can move entire packages.',
                         ],
                     ],
                 ],
@@ -85,25 +85,25 @@ return [
 
                         'fields' => [
                             'delivery-slip'              => 'Delivery Slip',
-                            'delivery-slip-hint-tooltip' => 'If this checkbox is ticked, System will automatically print the delivery slip of a picking when it is validated.',
+                            'delivery-slip-hint-tooltip' => 'If selected, the system will automatically print the delivery slip when the picking is validated.',
 
                             'return-slip'              => 'Return Slip',
-                            'return-slip-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the return slip of a picking when it is validated.',
+                            'return-slip-hint-tooltip' => 'If selected, the system will automatically print the return slip when the picking is validated.',
 
                             'product-labels'              => 'Product Labels',
-                            'product-labels-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the product labels of a picking when it is validated.',
+                            'product-labels-hint-tooltip' => 'If selected, the system will automatically print the product labels when the picking is validated.',
 
                             'lots-labels'              => 'Lot/SN Labels',
-                            'lots-labels-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the lot/SN labels of a picking when it is validated.',
+                            'lots-labels-hint-tooltip' => 'If selected, the system will automatically print the lot/serial number labels when the picking is validated.',
 
                             'reception-report'              => 'Reception Report',
-                            'reception-report-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the reception report of a picking when it is validated and has assigned moves.',
+                            'reception-report-hint-tooltip' => 'If selected, the system will automatically print the reception report when the picking is validated and contains assigned moves.',
 
                             'reception-report-labels'              => 'Reception Report Labels',
-                            'reception-report-labels-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the reception report labels of a picking when it is validated.',
+                            'reception-report-labels-hint-tooltip' => 'If selected, the system will automatically print the reception report labels when the picking is validated.',
 
                             'package-content'              => 'Package Content',
-                            'package-content-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the packages and their contents of a picking when it is validated.',
+                            'package-content-hint-tooltip' => 'If selected, the system will automatically print the package details and their contents when the picking is validated.',
                         ],
                     ],
 
@@ -112,7 +112,7 @@ return [
 
                         'fields' => [
                             'package-label'              => 'Package Label',
-                            'package-label-hint-tooltip' => 'If this checkbox is ticked, system will automatically print the package label when \&quot;Put in Pack\&quot; button is used.',
+                            'package-label-hint-tooltip' => 'If selected, the system will automatically print the package label when the "Put in Pack" button is used.',
                         ],
                     ],
                 ],

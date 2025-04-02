@@ -17,10 +17,10 @@ return [
 
                         'fields' => [
                             'track-inventory'              => 'Track Inventory',
-                            'track-inventory-hint-tooltip' => 'A storable product is a product for which you manage stock.',
+                            'track-inventory-hint-tooltip' => 'A storable product is one that requires inventory management..',
                             'track-by'                     => 'Track By',
                             'expiration-date'              => 'Expiration Date',
-                            'expiration-date-hint-tooltip' => 'When this box is ticked, you have the possibility to specify dates to manage product expiration, on the product and on the corresponding lot/serial numbers',
+                            'expiration-date-hint-tooltip' => 'If selected, you can specify expiration dates for the product and its associated lot/serial numbers.',
                         ],
                     ],
 
@@ -29,7 +29,7 @@ return [
 
                         'fields' => [
                             'routes'              => 'Routes',
-                            'routes-hint-tooltip' => 'Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, replenished on order, etc.',
+                            'routes-hint-tooltip' => 'Based on the installed modules, this setting allows you to define the product\'s route, such as purchasing, manufacturing, or replenishing on order.',
                         ],
                     ],
 
@@ -38,11 +38,11 @@ return [
 
                         'fields' => [
                             'responsible'              => 'Responsible',
-                            'responsible-hint-tooltip' => 'Delivery lead time, in days. It\'s the number of days, promised to the customer, between the confirmation of the sales order and the delivery.',
+                            'responsible-hint-tooltip' => 'Delivery lead time (in days) represents the promised duration between sales order confirmation and product delivery.',
                             'weight'                   => 'Weight',
                             'volume'                   => 'Volume',
                             'sale-delay'               => 'Customer Lead Time (Days)',
-                            'sale-delay-hint-tooltip'  => 'Delivery lead time, in days. It\'s the number of days, promised to the customer, between the confirmation of the sales order and the delivery.',
+                            'sale-delay-hint-tooltip'  => 'Delivery lead time (in days) represents the promised duration between sales order confirmation and product delivery.',
                         ],
                     ],
 
@@ -51,13 +51,13 @@ return [
 
                         'fields' => [
                             'expiration-date'               => 'Expiration Date (Days)',
-                            'expiration-date-hint-tooltip'  => 'When this box is ticked, you have the possibility to specify dates to manage product expiration, on the product and on the corresponding lot/serial numbers',
+                            'expiration-date-hint-tooltip'  => 'If selected, you can set expiration dates for the product and its associated lot/serial numbers.',
                             'best-before-date'              => 'Best Before Date (Days)',
-                            'best-before-date-hint-tooltip' => 'Number of days before the Expiration Date after which the goods starts deteriorating, without being dangerous yet. It will be computed on the lot/serial number.',
+                            'best-before-date-hint-tooltip' => 'The number of days before the expiration date when the product begins to deteriorate, though it is still safe to use. This is calculated based on the lot/serial number.',
                             'removal-date'                  => 'Removal Date (Days)',
-                            'removal-date-hint-tooltip'     => 'Number of days before the Expiration Date after which the goods should be removed from the stock. It will be computed on the lot/serial number.',
+                            'removal-date-hint-tooltip'     => 'The number of days before the expiration date when the product should be removed from stock. This is calculated based on the lot/serial number.',
                             'alert-date'                    => 'Alert Date (Days)',
-                            'alert-date-hint-tooltip'       => 'Number of days before the Expiration Date after which an alert should be raised on the lot/serial number. It will be computed on the lot/serial number.',
+                            'alert-date-hint-tooltip'       => 'The number of days before the expiration date when an alert should be triggered for the lot/serial number. This is calculated based on the lot/serial number.',
                         ],
                     ],
                 ],

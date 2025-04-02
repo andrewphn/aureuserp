@@ -5,6 +5,6 @@ return [
 
     'form' => [
         'enable-dropshipping'             => 'Dropshipping',
-        'enable-dropshipping-helper-text' => 'This adds a dropshipping route to apply on products in order to request your vendors to deliver to your customers. A product to dropship will generate a purchase request for quotation once the sales order confirmed. This is a on-demand flow. The requested delivery address will be the customer delivery address and not your warehouse.',
+        'enable-dropshipping-helper-text' => 'This enables a dropshipping route for products, allowing vendors to ship directly to customers. When a product is set to dropship, a purchase request for quotation is generated upon sales order confirmation. This is an on-demand process, with the customer\'s delivery address used instead of the warehouse address.',
     ],
 ];
