@@ -105,8 +105,8 @@ class OperationResource extends Resource
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                 $operationType = OperationType::find($get('operation_type_id'));
 
-                                $set('source_location_id', $operationType->source_location_id);
-                                $set('destination_location_id', $operationType->destination_location_id);
+                                $set('source_location_id', $operationType?->source_location_id);
+                                $set('destination_location_id', $operationType?->destination_location_id);
                             })
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('source_location_id')
