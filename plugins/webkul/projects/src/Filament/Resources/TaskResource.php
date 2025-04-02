@@ -112,6 +112,7 @@ class TaskResource extends Resource
                                                 Forms\Components\TextInput::make('name')
                                                     ->label(__('projects::filament/resources/task.form.sections.general.fields.name'))
                                                     ->required()
+                                                    ->maxLength(255)
                                                     ->unique('projects_tags'),
                                                 Forms\Components\ColorPicker::make('color')
                                                     ->default('#808080')
