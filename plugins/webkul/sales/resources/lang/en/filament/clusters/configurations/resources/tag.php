@@ -8,10 +8,6 @@ return [
         'group' => 'Sales Orders',
     ],
 
-    'global-search' => [
-        'name'    => 'Name',
-    ],
-
     'form' => [
         'fields' => [
             'name'  => 'Name',

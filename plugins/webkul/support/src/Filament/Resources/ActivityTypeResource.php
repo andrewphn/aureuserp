@@ -11,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\ActivityChainingType;
 use Webkul\Support\Enums\ActivityDecorationType;
@@ -30,19 +29,6 @@ class ActivityTypeResource extends Resource
     protected static ?string $slug = 'settings/activity-types';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'plugin'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('support::filament/resources/activity-type.global-search.name')   => $record->name ?? '—',
-            __('support::filament/resources/activity-type.global-search.plugin') => $record->plugin ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {

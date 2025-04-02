@@ -23,22 +23,6 @@ class AccountTagResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'country.name',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/account-tag.navigation.global-search.country') => $record->country?->name ?? '—',
-            __('accounts::filament/resources/account-tag.navigation.global-search.name')    => $record->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form

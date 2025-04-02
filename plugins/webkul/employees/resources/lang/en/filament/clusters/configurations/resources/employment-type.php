@@ -8,12 +8,6 @@ return [
         'group' => 'Recruitment',
     ],
 
-    'global-search' => [
-        'name'       => 'Employment Type',
-        'country'    => 'Country',
-        'created-by' => 'Created By',
-    ],
-
     'form' => [
         'fields' => [
             'name'    => 'Employment Type',

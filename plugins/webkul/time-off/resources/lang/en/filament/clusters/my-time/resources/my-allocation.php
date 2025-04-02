@@ -9,12 +9,6 @@ return [
         'title' => 'My Allocation',
     ],
 
-    'global-search' => [
-        'time-off-type' => 'Time off Type',
-        'date-from'     => 'Request Date From',
-        'date-to'       => 'Request Date To',
-    ],
-
     'form' => [
         'fields' => [
             'name'                => 'Name',

@@ -31,22 +31,6 @@ class PaymentTermResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'company.name',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/payment-term.global-search.company-name') => $record->company?->name ?? '—',
-            __('accounts::filament/resources/payment-term.global-search.payment-term') => $record->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form

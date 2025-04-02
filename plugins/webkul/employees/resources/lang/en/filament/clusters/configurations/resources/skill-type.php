@@ -8,11 +8,6 @@ return [
         'group' => 'Employee',
     ],
 
-    'global-search' => [
-        'name'       => 'Skill Type',
-        'created-by' => 'Created By',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [

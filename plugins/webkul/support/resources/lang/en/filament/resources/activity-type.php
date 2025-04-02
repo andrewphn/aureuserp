@@ -8,11 +8,6 @@ return [
         'group' => 'Employees',
     ],
 
-    'global-search' => [
-        'name'   => 'Activity Type',
-        'plugin' => 'Plugin',
-    ],
-
     'form' => [
         'sections' => [
             'activity-type-details' => [

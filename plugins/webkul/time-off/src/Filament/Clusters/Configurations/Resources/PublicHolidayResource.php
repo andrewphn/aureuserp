@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\TimeOff\Filament\Clusters\Configurations;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResource\Pages;
 use Webkul\TimeOff\Models\CalendarLeave;
@@ -35,24 +34,6 @@ class PublicHolidayResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('time-off::filament/clusters/configurations/resources/public-holiday.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'date_from',
-            'date_to',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('time-off::filament/clusters/configurations/resources/public-holiday.global-search.name')      => $record->name ?? '—',
-            __('time-off::filament/clusters/configurations/resources/public-holiday.global-search.date-from') => $record->date_from ?? '—',
-            __('time-off::filament/clusters/configurations/resources/public-holiday.global-search.date-to')   => $record->date_to ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

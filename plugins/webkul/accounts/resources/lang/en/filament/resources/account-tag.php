@@ -1,11 +1,6 @@
 <?php
 
 return [
-    'global-search' => [
-        'country' => 'Country',
-        'name'    => 'Name',
-    ],
-
     'form' => [
         'fields' => [
             'color'         => 'Color',

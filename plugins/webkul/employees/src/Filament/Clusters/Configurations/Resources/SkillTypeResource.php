@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums;
 use Webkul\Employee\Filament\Clusters\Configurations;
@@ -44,23 +43,6 @@ class SkillTypeResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/skill-type.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'createdBy.name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-
-            __('employees::filament/clusters/configurations/resources/skill-type.global-search.name')       => $record->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/skill-type.global-search.created-by') => $record->createdBy?->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

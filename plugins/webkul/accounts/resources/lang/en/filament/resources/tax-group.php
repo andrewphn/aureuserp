@@ -1,11 +1,6 @@
 <?php
 
 return [
-    'global-search' => [
-        'company-name' => 'Company Name',
-        'payment-term' => 'Payment Term',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [

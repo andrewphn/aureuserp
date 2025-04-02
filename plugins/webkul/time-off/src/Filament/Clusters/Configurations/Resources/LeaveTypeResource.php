@@ -13,7 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\TimeOff\Enums;
 use Webkul\TimeOff\Enums\RequiresAllocation;
 use Webkul\TimeOff\Filament\Clusters\Configurations;
@@ -33,24 +32,6 @@ class LeaveTypeResource extends Resource
     public static function getModelLabel(): string
     {
         return __('time-off::filament/clusters/configurations/resources/leave-type.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'company.name',
-            'createdBy.name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('time-off::filament/clusters/configurations/resources/leave-type.global-search.name')            => $record->name ?? '—',
-            __('time-off::filament/clusters/configurations/resources/leave-type.global-search.company')         => $record->company?->name ?? '—',
-            __('time-off::filament/clusters/configurations/resources/leave-type.global-search.created-by')      => $record->createdBy?->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form

@@ -11,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
@@ -26,22 +25,6 @@ class JournalResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'code',
-            'name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('accounts::filament/resources/journal.global-search.name') => $record->name ?? '—',
-            __('accounts::filament/resources/journal.global-search.code') => $record->code ?? '—',
-        ];
-    }
 
     public static function form(Form $form): Form
     {
