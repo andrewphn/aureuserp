@@ -164,7 +164,6 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('variants_count')
                     ->label(__('products::filament/resources/product.table.columns.variants'))
                     ->placeholder('—')
-                    ->searchable()
                     ->counts('variants')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('reference')
@@ -180,7 +179,6 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('responsible.name')
                     ->label(__('products::filament/resources/product.table.columns.responsible'))
                     ->placeholder('—')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('barcode')
@@ -207,7 +205,6 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('type')
                     ->label(__('products::filament/resources/product.table.columns.type'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')
