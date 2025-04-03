@@ -22,15 +22,19 @@ class ViewScrap extends ViewRecord
                 ->setResource(static::$resource),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\ScrapState::DONE)
-                ->action(function (Scrap $record) {
+                ->action(function (Actions\DeleteAction $action, Scrap $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('inventories::filament/clusters/operations/resources/scrap/pages/view-scrap.header-actions.delete.notification.error.title'))
                             ->body(__('inventories::filament/clusters/operations/resources/scrap/pages/view-scrap.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

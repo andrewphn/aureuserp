@@ -32,15 +32,19 @@ class EditVendorPrice extends EditRecord
         return [
             Actions\ViewAction::make(),
             Actions\DeleteAction::make()
-                ->action(function (ProductSupplier $record) {
+                ->action(function (Actions\DeleteAction $action, ProductSupplier $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price/pages/edit-vendor-price.header-actions.delete.notification.error.title'))
                             ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price/pages/edit-vendor-price.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

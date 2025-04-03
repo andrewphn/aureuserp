@@ -65,15 +65,19 @@ class EditPackage extends EditRecord
                 ->color('gray')
                 ->button(),
             Actions\DeleteAction::make()
-                ->action(function (Package $record) {
+                ->action(function (Actions\DeleteAction $action, Package $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('inventories::filament/clusters/products/resources/package/pages/edit-package.header-actions.delete.notification.error.title'))
                             ->body(__('inventories::filament/clusters/products/resources/package/pages/edit-package.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

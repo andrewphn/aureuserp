@@ -50,15 +50,19 @@ class EditReceipt extends EditRecord
                 ->button(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OperationState::DONE)
-                ->action(function (Receipt $record) {
+                ->action(function (Actions\DeleteAction $action, Receipt $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('inventories::filament/clusters/operations/resources/receipt/pages/edit-receipt.header-actions.delete.notification.error.title'))
                             ->body(__('inventories::filament/clusters/operations/resources/receipt/pages/edit-receipt.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

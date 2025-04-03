@@ -33,15 +33,19 @@ class ViewDelivery extends ViewRecord
                 ->button(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OperationState::DONE)
-                ->action(function (Delivery $record) {
+                ->action(function (Actions\DeleteAction $action, Delivery $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('inventories::filament/clusters/operations/resources/delivery/pages/view-delivery.header-actions.delete.notification.error.title'))
                             ->body(__('inventories::filament/clusters/operations/resources/delivery/pages/view-delivery.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(
