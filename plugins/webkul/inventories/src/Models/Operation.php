@@ -126,12 +126,12 @@ class Operation extends Model
         return $this->belongsTo(Location::class);
     }
 
-    public function backOrder(): BelongsTo
+    public function backOrderOf(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
-    public function return(): BelongsTo
+    public function returnOf(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }

@@ -661,7 +661,7 @@ class OperationResource extends Resource
                         'quantity' => $data['quantity'] ?? null,
                     ]);
 
-                    Inventory::updateOrCreateMoveLines($record);
+                    Inventory::computeTransferMove($record);
 
                     Inventory::computeTransferState($record->operation);
                 }
@@ -919,7 +919,7 @@ class OperationResource extends Resource
                     'quantity' => $totalQty,
                 ]);
 
-                Inventory::updateOrCreateMoveLines($record);
+                Inventory::computeTransferMove($record);
 
                 $set('quantity', $totalQty);
             });
