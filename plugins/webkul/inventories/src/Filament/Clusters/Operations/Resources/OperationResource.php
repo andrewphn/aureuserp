@@ -661,7 +661,7 @@ class OperationResource extends Resource
                         'quantity' => $data['quantity'] ?? null,
                     ]);
 
-                    Inventory::updateOrCreateMoveLines($record);
+                    Inventory::computeTransferMove($record);
 
                     Inventory::computeTransferState($record->operation);
                 }
@@ -770,7 +770,11 @@ class OperationResource extends Resource
                                 $set('result_package_id', $productQuantity?->package_id);
 
                                 if ($productQuantity?->quantity) {
-                                    $set('qty', static::calculateProductUOMQuantity($move->uom_id, $productQuantity->quantity));
+                                    if (! $move->uom_id) {
+                                        $set('qty', $productQuantity->quantity);
+                                    } else {
+                                        $set('qty', (float) ($productQuantity->quantity ?? 0) * $move->uom->factor);
+                                    }
                                 }
                             })
                             ->visible($move->sourceLocation->type == Enums\LocationType::INTERNAL)
@@ -915,7 +919,7 @@ class OperationResource extends Resource
                     'quantity' => $totalQty,
                 ]);
 
-                Inventory::updateOrCreateMoveLines($record);
+                Inventory::computeTransferMove($record);
 
                 $set('quantity', $totalQty);
             });
@@ -1018,19 +1022,10 @@ class OperationResource extends Resource
         return (float) ($uomQuantity ?? 0) / $uom->factor;
     }
 
-    public static function calculateProductUOMQuantity($uomId, $productQuantity)
-    {
-        if (! $uomId) {
-            return $productQuantity;
-        }
-
-        $uom = Uom::find($uomId);
-
-        return (float) ($productQuantity ?? 0) * $uom->factor;
-    }
-
     private static function getBestPackaging($productId, $quantity)
     {
+        $product = Product::find($productId);
+
         $packagings = Packaging::where('product_id', $productId)
             ->orderByDesc('qty')
             ->get();

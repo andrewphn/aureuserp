@@ -33,11 +33,7 @@ class ReturnSlipAction extends Action
                     return;
                 }
 
-                foreach ($record->moves as $move) {
-                    Inventory::updateOrCreateMoveLines($move);
-                }
-
-                Inventory::computeTransferState($record);
+                Inventory::computeTransfer($record);
 
                 $livewire->updateForm();
 

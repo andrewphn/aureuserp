@@ -12,7 +12,7 @@ use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Services\TaxService;
 use Webkul\Inventory\Enums as InventoryEnums;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\OperationType;
@@ -482,11 +482,7 @@ class PurchaseOrder
 
         $operation->refresh();
 
-        foreach ($operation->moves as $move) {
-            OperationResource::updateOrCreateMoveLines($move);
-        }
-
-        OperationResource::computeTransferState($operation);
+        Inventory::computeTransfer($operation);
 
         $url = PurchaseOrderResource::getUrl('view', ['record' => $record]);
 
@@ -516,7 +512,7 @@ class PurchaseOrder
                 $move->lines()->delete();
             }
 
-            OperationResource::computeTransferState($operation);
+            Inventory::computeTransferState($operation);
         });
     }
 
