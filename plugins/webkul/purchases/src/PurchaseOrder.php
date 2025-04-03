@@ -425,7 +425,13 @@ class PurchaseOrder
             return;
         }
 
-        $record->operation_type_id = $this->getInventoryOperationType($record)->id;
+        $operationType = $this->getInventoryOperationType($record);
+
+        if (! $operationType) {
+            return;
+        }
+
+        $record->operation_type_id = $operationType->id;
 
         $record->save();
 
@@ -518,14 +524,14 @@ class PurchaseOrder
 
     protected function getInventoryOperationType(Order $record): ?OperationType
     {
-        $operationType = OperationType::where('type', '=', InventoryEnums\OperationType::INCOMING)
+        $operationType = OperationType::where('type', InventoryEnums\OperationType::INCOMING)
             ->whereHas('warehouse', function ($query) use ($record) {
-                $query->where('company_id', '=', $record->company_id);
+                $query->where('company_id', $record->company_id);
             })
             ->first();
 
         if (! $operationType) {
-            $operationType = OperationType::where('type', '=', InventoryEnums\OperationType::INCOMING)
+            $operationType = OperationType::where('type', InventoryEnums\OperationType::INCOMING)
                 ->whereDoesntHave('warehouse')
                 ->first();
         }
