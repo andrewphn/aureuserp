@@ -251,10 +251,12 @@ class CompanyResource extends Resource
                                         Forms\Components\TextInput::make('phone')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.phone'))
                                             ->maxLength(255)
-                                            ->required(),
+                                            ->required()
+                                            ->tel(),
                                         Forms\Components\TextInput::make('mobile')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.mobile'))
-                                            ->maxLength(255),
+                                            ->maxLength(255)
+                                            ->tel(),
                                         Forms\Components\TextInput::make('email')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.email'))
                                             ->maxLength(255)

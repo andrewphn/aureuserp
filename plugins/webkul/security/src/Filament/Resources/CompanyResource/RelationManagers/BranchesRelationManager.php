@@ -100,7 +100,6 @@ class BranchesRelationManager extends RelationManager
                                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-currency-name'))
                                                             ->required(),
                                                         Forms\Components\TextInput::make('phone_code')
-                                                            ->label('Phone Code')
                                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-phone-code'))
                                                             ->required(),
                                                         Forms\Components\TextInput::make('code')
@@ -222,9 +221,11 @@ class BranchesRelationManager extends RelationManager
                                     ->schema([
                                         Forms\Components\TextInput::make('phone')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.phone-number'))
-                                            ->required(),
+                                            ->required()
+                                            ->tel(),
                                         Forms\Components\TextInput::make('mobile')
-                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.mobile-number')),
+                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.mobile-number'))
+                                            ->tel(),
                                         Forms\Components\TextInput::make('email')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.email-address'))
                                             ->required()

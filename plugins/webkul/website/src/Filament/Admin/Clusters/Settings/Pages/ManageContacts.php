@@ -54,7 +54,8 @@ class ManageContacts extends SettingsPage
                             ->email(),
                         Forms\Components\TextInput::make('phone')
                             ->label(__('website::filament/admin/clusters/settings/pages/manage-contacts.form.sections.contacts.fields.phone'))
-                            ->placeholder('+1234567890'),
+                            ->placeholder('+1234567890')
+                            ->tel(),
                     ])
                     ->columns(2),
                 Forms\Components\Section::make(__('website::filament/admin/clusters/settings/pages/manage-contacts.form.sections.social-links.title'))
