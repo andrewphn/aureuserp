@@ -35,11 +35,6 @@ class InventoryManager
         return $record;
     }
 
-    public function validateTransfer(Operation $record): Operation
-    {
-        return $record;
-    }
-
     public function cancelTransfer(Operation $record): Operation
     {
         foreach ($record->moves as $move) {
@@ -118,13 +113,17 @@ class InventoryManager
         return $newOperation;
     }
 
+    public function validateTransfer(Operation $record): Operation
+    {
+        return $record;
+    }
+
     public function updateOrCreateMoveLines(Move $record)
     {
         $lines = $record->lines()->orderBy('created_at')->get();
 
         if (! is_null($record->quantity)) {
-            // $remainingQty = static::calculateProductQuantity($record->uom_id, $record->quantity);
-            $remainingQty = $record->uom->computeQuantity($record->quantity, $record->product->uom);
+            $remainingQty = $record->uom->computeQuantity($record->quantity, $record->product->uom, true, 'HALF-UP');
         } else {
             $remainingQty = $record->product_qty;
         }
@@ -177,8 +176,7 @@ class InventoryManager
 
                 if ($newQty != $line->uom_qty) {
                     $line->update([
-                        // 'qty'     => static::calculateProductUOMQuantity($record->uom_id, $newQty),
-                        'qty'     => $record->product->uom->computeQuantity($newQty, $record->uom),
+                        'qty'     => $record->product->uom->computeQuantity($newQty, $record->uom, true, 'HALF-UP'),
                         'uom_qty' => $newQty,
                         'state'   => Enums\MoveState::ASSIGNED,
                     ]);
@@ -204,8 +202,7 @@ class InventoryManager
                     }
 
                     $record->lines()->create([
-                        // 'qty'                     => static::calculateProductUOMQuantity($record->uom_id, $newQty),
-                        'qty'                     => $record->product->uom->computeQuantity($newQty, $record->uom),
+                        'qty'                     => $record->product->uom->computeQuantity($newQty, $record->uom, true, 'HALF-UP'),
                         'uom_qty'                 => $newQty,
                         'source_location_id'      => $record->source_location_id,
                         'state'                   => Enums\MoveState::ASSIGNED,
@@ -244,8 +241,7 @@ class InventoryManager
                     $availableQuantity += $newQty;
 
                     $record->lines()->create([
-                        // 'qty'                     => static::calculateProductUOMQuantity($record->uom_id, $newQty),
-                        'qty'                     => $record->product->uom->computeQuantity($newQty, $record->uom),
+                        'qty'                     => $record->product->uom->computeQuantity($newQty, $record->uom, true, 'HALF-UP'),
                         'uom_qty'                 => $newQty,
                         'lot_name'                => $productQuantity->lot?->name,
                         'lot_id'                  => $productQuantity->lot_id,
@@ -284,8 +280,7 @@ class InventoryManager
         } elseif ($availableQuantity < $requestedQty) {
             $record->update([
                 'state'    => Enums\MoveState::PARTIALLY_ASSIGNED,
-                // 'quantity' => static::calculateProductUOMQuantity($record->uom_id, $availableQuantity),
-                'quantity' => $record->product->uom->computeQuantity($availableQuantity, $record->uom),
+                'quantity' => $record->product->uom->computeQuantity($availableQuantity, $record->uom, true, 'HALF-UP'),
             ]);
 
             $record->lines()->update([
@@ -294,8 +289,7 @@ class InventoryManager
         } else {
             $record->update([
                 'state'    => Enums\MoveState::ASSIGNED,
-                // 'quantity' => static::calculateProductUOMQuantity($record->uom_id, $availableQuantity),
-                'quantity' => $record->product->uom->computeQuantity($availableQuantity, $record->uom),
+                'quantity' => $record->product->uom->computeQuantity($availableQuantity, $record->uom, true, 'HALF-UP'),
             ]);
         }
 

@@ -74,7 +74,6 @@ class OrderResource extends Resource
                                     ->relationship(
                                         'partner',
                                         'name',
-                                        fn ($query) => $query->where('sub_type', 'supplier')
                                     )
                                     ->searchable()
                                     ->required()

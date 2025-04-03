@@ -358,7 +358,7 @@ class ValidateAction extends Action
                 'operation_id'    => $newOperation->id,
                 'reference'       => $newOperation->name,
                 'state'           => Enums\MoveState::DRAFT,
-                'product_qty'     => Inventory::calculateProductQuantity($move->uom_id, $remainingQty),
+                'product_qty'     => $move->uom->computeQuantity($remainingQty, $move->product->uom, true, 'HALF-UP'),
                 'product_uom_qty' => $remainingQty,
                 'quantity'        => $remainingQty,
             ]);
@@ -520,7 +520,7 @@ class ValidateAction extends Action
         $newMove = $move->replicate()->fill([
             'state'                   => Enums\MoveState::DRAFT,
             'reference'               => null,
-            'product_qty'             => Inventory::calculateProductQuantity($move->uom_id, $move->quantity),
+            'product_qty'             => $move->uom->computeQuantity($move->quantity, $move->product->uom, true, 'HALF-UP'),
             'product_uom_qty'         => $move->quantity,
             'origin'                  => $move->origin ?? $move->operation->name ?? '/',
             'operation_id'            => null,
