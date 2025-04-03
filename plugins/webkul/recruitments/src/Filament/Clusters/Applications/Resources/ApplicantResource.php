@@ -356,10 +356,14 @@ class ApplicantResource extends Resource
                                         Forms\Components\TextInput::make('salary_expected')
                                             ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.salary.fields.expected-salary'))
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->step(0.01),
                                         Forms\Components\TextInput::make('salary_expected_extra')
                                             ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.salary.fields.salary-proposed-extra'))
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->step(0.01),
                                     ])->columns(2),
                                 Forms\Components\Group::make()
@@ -367,10 +371,14 @@ class ApplicantResource extends Resource
                                         Forms\Components\TextInput::make('salary_proposed')
                                             ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.salary.fields.proposed-salary'))
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->step(0.01),
                                         Forms\Components\TextInput::make('salary_proposed_extra')
                                             ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.salary.fields.salary-expected-extra'))
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->step(0.01),
                                     ])->columns(2),
                             ]),

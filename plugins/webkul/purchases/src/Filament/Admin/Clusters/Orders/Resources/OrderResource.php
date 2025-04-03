@@ -691,6 +691,7 @@ class OrderResource extends Resource
                                     ->required()
                                     ->default(1)
                                     ->numeric()
+                                    ->maxValue(99999999999)
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductQtyUpdated($set, $get);
@@ -701,12 +702,14 @@ class OrderResource extends Resource
                                     ->required()
                                     ->default(0)
                                     ->numeric()
+                                    ->maxValue(99999999999)
                                     ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
                                     ->disabled(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::DONE, Enums\OrderState::CANCELED]) || $record?->qty_received_method == Enums\QtyReceivedMethod::STOCK_MOVE),
                                 Forms\Components\TextInput::make('qty_invoiced')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.billed'))
                                     ->default(0)
                                     ->numeric()
+                                    ->maxValue(99999999999)
                                     ->visible(fn ($record): bool => in_array($record?->order->state, [Enums\OrderState::PURCHASE, Enums\OrderState::DONE]))
                                     ->disabled(),
                                 Forms\Components\Select::make('uom_id')
@@ -728,6 +731,7 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.packaging-qty'))
                                     ->live()
                                     ->numeric()
+                                    ->maxValue(99999999999)
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         static::afterProductPackagingQtyUpdated($set, $get);
                                     })
@@ -751,6 +755,8 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.unit-price'))
                                     ->numeric()
                                     ->default(0)
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->required()
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
@@ -778,6 +784,8 @@ class OrderResource extends Resource
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.discount-percentage'))
                                     ->numeric()
                                     ->default(0)
+                                    ->minValue(0)
+                                    ->maxValue(100)
                                     ->live()
                                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                         self::calculateLineTotals($set, $get);

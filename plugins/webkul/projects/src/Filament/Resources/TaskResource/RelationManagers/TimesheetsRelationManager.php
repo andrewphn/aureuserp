@@ -53,6 +53,7 @@ class TimesheetsRelationManager extends RelationManager
                     ->numeric()
                     ->required()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->helperText(__('projects::filament/resources/task/relation-managers/timesheets.form.time-spent-helper-text')),
             ])
             ->columns(1);

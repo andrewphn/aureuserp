@@ -53,7 +53,8 @@ class ManageCapacityByPackages extends ManageRelatedRecords
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-packages.form.qty'))
                     ->required()
                     ->numeric()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->maxValue(99999999999),
             ])
             ->columns(1);
     }

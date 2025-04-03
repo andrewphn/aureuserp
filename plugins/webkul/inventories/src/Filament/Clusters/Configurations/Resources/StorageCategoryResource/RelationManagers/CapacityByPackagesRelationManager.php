@@ -40,7 +40,8 @@ class CapacityByPackagesRelationManager extends RelationManager
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-packages.form.qty'))
                     ->required()
                     ->numeric()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->maxValue(99999999999),
             ])
             ->columns(1);
     }

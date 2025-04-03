@@ -74,11 +74,13 @@ class ProductResource extends Resource
                                         Forms\Components\TextInput::make('weight')
                                             ->label(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.fields.weight'))
                                             ->numeric()
-                                            ->minValue(0),
+                                            ->minValue(0)
+                                            ->maxValue(99999999999),
                                         Forms\Components\TextInput::make('volume')
                                             ->label(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.fields.volume'))
                                             ->numeric()
-                                            ->minValue(0),
+                                            ->minValue(0)
+                                            ->maxValue(99999999999),
                                     ]),
                             ])
                             ->visible(fn (Forms\Get $get): bool => $get('type') == ProductType::GOODS->value),

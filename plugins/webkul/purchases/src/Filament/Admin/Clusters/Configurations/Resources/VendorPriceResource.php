@@ -66,6 +66,7 @@ class VendorPriceResource extends Resource
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.general.fields.delay-tooltip'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->default(1),
                             ]),
                     ])
@@ -90,6 +91,7 @@ class VendorPriceResource extends Resource
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.quantity-tooltip'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->default(0),
                                 Forms\Components\Group::make()
                                     ->schema([
@@ -98,6 +100,7 @@ class VendorPriceResource extends Resource
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.unit-price-tooltip'))
                                             ->numeric()
                                             ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->default(0),
                                         Forms\Components\Select::make('currency_id')
                                             ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.currency'))
@@ -120,6 +123,7 @@ class VendorPriceResource extends Resource
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.discount'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->default(0),
                                 Forms\Components\Select::make('company_id')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.company'))
@@ -237,10 +241,14 @@ class VendorPriceResource extends Resource
                                 Forms\Components\TextInput::make('price_from')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.price-from'))
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->prefix('From'),
                                 Forms\Components\TextInput::make('price_to')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.price-to'))
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->prefix('To'),
                             ])
                             ->columns(2),
@@ -264,10 +272,14 @@ class VendorPriceResource extends Resource
                                 Forms\Components\TextInput::make('min_qty_from')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.min-qty-from'))
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->prefix('From'),
                                 Forms\Components\TextInput::make('min_qty_to')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.min-qty-to'))
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->prefix('To'),
                             ])
                             ->columns(2),

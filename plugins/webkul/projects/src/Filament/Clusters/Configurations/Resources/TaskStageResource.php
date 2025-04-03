@@ -58,7 +58,6 @@ class TaskStageResource extends Resource
                 Tables\Columns\TextColumn::make('project.name')
                     ->label(__('projects::filament/clusters/configurations/resources/task-stage.table.columns.project'))
                     ->hiddenOn(TaskStagesRelationManager::class)
-                    ->numeric()
                     ->sortable(),
             ])
             ->filters([

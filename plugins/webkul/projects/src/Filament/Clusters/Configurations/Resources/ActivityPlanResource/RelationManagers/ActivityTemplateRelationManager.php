@@ -88,7 +88,8 @@ class ActivityTemplateRelationManager extends RelationManager
                                             ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-count'))
                                             ->numeric()
                                             ->default(0)
-                                            ->minValue(0),
+                                            ->minValue(0)
+                                            ->maxValue(99999999999),
                                         Forms\Components\Select::make('delay_unit')
                                             ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-unit'))
                                             ->searchable()

@@ -107,6 +107,8 @@ class MyAllocationResource extends Resource
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-allocation.form.fields.allocation'))
                                     ->numeric()
                                     ->default(0)
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->required()
                                     ->suffix(__('time-off::filament/clusters/my-time/resources/my-allocation.form.fields.allocation-suffix')),
                                 Forms\Components\RichEditor::make('notes')

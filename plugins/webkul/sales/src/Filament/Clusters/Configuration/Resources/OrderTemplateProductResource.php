@@ -92,23 +92,18 @@ class OrderTemplateProductResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('orderTemplate.name')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.order-template'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.company'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('product.name')
-                    ->numeric()
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.product'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('uom.name')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.product-uom'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.created-by'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('display_type')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.display-type'))
@@ -118,7 +113,6 @@ class OrderTemplateProductResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.quantity'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('sales::filament/clusters/configurations/resources/order-template.table.columns.created-at'))

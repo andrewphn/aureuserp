@@ -55,6 +55,8 @@ class TaxResource extends Resource
                                     ->label(__('accounts::filament/resources/tax.form.sections.fields.amount'))
                                     ->suffix('%')
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->required(),
                             ])->columns(2),
                         Forms\Components\Fieldset::make(__('accounts::filament/resources/tax.form.sections.field-set.advanced-options.title'))
