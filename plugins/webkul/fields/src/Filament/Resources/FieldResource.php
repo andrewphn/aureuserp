@@ -413,6 +413,7 @@ class FieldResource extends Resource
                                 ->required()
                                 ->numeric()
                                 ->minValue(0)
+                                ->maxValue(99999999999)
                                 ->visible(fn (Forms\Get $get): bool => in_array($get('setting'), [
                                     'cols',
                                     'columns',
@@ -930,6 +931,7 @@ class FieldResource extends Resource
                         ->required()
                         ->numeric()
                         ->minValue(0)
+                        ->maxValue(99999999999)
                         ->visible(fn (Forms\Get $get): bool => in_array($get('setting'), [
                             'limit',
                             'words',
@@ -1104,6 +1106,7 @@ class FieldResource extends Resource
                         ->required()
                         ->numeric()
                         ->minValue(0)
+                        ->maxValue(99999999999)
                         ->visible(fn (Forms\Get $get): bool => in_array($get('setting'), [
                             'limit',
                             'words',

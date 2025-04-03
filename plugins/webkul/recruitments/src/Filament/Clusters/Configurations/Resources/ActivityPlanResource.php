@@ -30,15 +30,12 @@ class ActivityPlanResource extends BaseActivityPlanResource
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('department.name')
-                    ->numeric()
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.department'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('department.manager.name')
-                    ->numeric()
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.manager'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('company.name')
-                    ->numeric()
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.company'))
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')

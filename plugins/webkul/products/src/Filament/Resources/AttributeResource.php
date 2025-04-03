@@ -62,7 +62,8 @@ class AttributeResource extends Resource
                                     ->required()
                                     ->numeric()
                                     ->default(0.0000)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->maxValue(99999999999),
                             ])
                             ->columns(3),
                     ]),

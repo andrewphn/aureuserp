@@ -67,31 +67,38 @@ class PackageTypeResource extends Resource
                                     ->required()
                                     ->numeric()
                                     ->default(0.0000)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->maxValue(99999999999),
                                 Forms\Components\TextInput::make('width')
                                     ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.fieldsets.size.fields.width'))
                                     ->required()
                                     ->numeric()
                                     ->default(0.0000)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->maxValue(99999999999),
                                 Forms\Components\TextInput::make('height')
                                     ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.fieldsets.size.fields.height'))
                                     ->required()
                                     ->numeric()
                                     ->default(0.0000)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->maxValue(99999999999),
                             ])
                             ->columns(3),
                         Forms\Components\TextInput::make('base_weight')
                             ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.weight'))
                             ->required()
                             ->numeric()
-                            ->default(0.0000),
+                            ->default(0.0000)
+                            ->minValue(0)
+                            ->maxValue(99999999999),
                         Forms\Components\TextInput::make('max_weight')
                             ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.max-weight'))
                             ->required()
                             ->numeric()
-                            ->default(0.0000),
+                            ->default(0.0000)
+                            ->minValue(0)
+                            ->maxValue(99999999999),
                         Forms\Components\TextInput::make('barcode')
                             ->label(__('inventories::filament/clusters/configurations/resources/package-type.form.sections.general.fields.barcode'))
                             ->maxLength(255),

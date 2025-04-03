@@ -195,6 +195,7 @@ class PurchaseAgreementResource extends Resource
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.quantity'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->disabled(fn ($record): bool => in_array($record?->requisition->state, [Enums\RequisitionState::CLOSED, Enums\RequisitionState::CANCELED])),
@@ -214,6 +215,7 @@ class PurchaseAgreementResource extends Resource
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.unit-price'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->disabled(fn ($record): bool => in_array($record?->requisition->state, [Enums\RequisitionState::CLOSED, Enums\RequisitionState::CANCELED])),

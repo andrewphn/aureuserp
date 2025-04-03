@@ -593,6 +593,7 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.demand'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->live()
@@ -604,6 +605,7 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.quantity'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->visible(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT)
@@ -857,6 +859,7 @@ class OperationResource extends Resource
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.lines.fields.quantity'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->maxValue(fn () => $move->product->tracking == Enums\ProductTracking::SERIAL ? 1 : 999999999)
                             ->required()
                             ->suffix(function () use ($move) {

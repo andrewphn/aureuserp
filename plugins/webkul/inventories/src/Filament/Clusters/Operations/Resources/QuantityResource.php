@@ -121,6 +121,7 @@ class QuantityResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.form.fields.counted-qty'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required(),
                 Forms\Components\DatePicker::make('scheduled_at')

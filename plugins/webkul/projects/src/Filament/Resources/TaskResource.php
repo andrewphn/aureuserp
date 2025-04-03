@@ -207,6 +207,7 @@ class TaskResource extends Resource
                                     ->label(__('projects::filament/resources/task.form.sections.settings.fields.allocated-hours'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->suffixIcon('heroicon-o-clock')
                                     ->helperText(__('projects::filament/resources/task.form.sections.settings.fields.allocated-hours-helper-text'))
                                     ->dehydrateStateUsing(fn ($state) => $state ?: 0)
@@ -305,7 +306,6 @@ class TaskResource extends Resource
                     ->summarize(
                         Sum::make()
                             ->label(__('projects::filament/resources/task.table.columns.allocated-time'))
-                            ->numeric()
                             ->numeric()
                             ->formatStateUsing(function ($state) {
                                 $hours = floor($state);

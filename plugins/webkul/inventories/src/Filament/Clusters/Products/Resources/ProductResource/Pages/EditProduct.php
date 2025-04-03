@@ -42,6 +42,7 @@ class EditProduct extends BaseEditProduct
                     Forms\Components\TextInput::make('quantity')
                         ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.form.fields.on-hand-qty'))
                         ->numeric()
+                        ->maxValue(99999999999)
                         ->required()
                         ->live()
                         ->default(fn () => ! $record->is_configurable ? $record->on_hand_quantity : 0),

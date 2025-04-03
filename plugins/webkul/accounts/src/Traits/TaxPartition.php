@@ -21,6 +21,8 @@ trait TaxPartition
                 Forms\Components\TextInput::make('factor_percent')
                     ->suffix('%')
                     ->numeric()
+                    ->minValue(0)
+                    ->maxValue(100)
                     ->label(__('accounts::traits/tax-partition.form.factor-percent'))
                     ->live()
                     ->afterStateUpdated(fn (Set $set, $state) => $set('factor', (float) $state / 100)),

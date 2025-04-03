@@ -89,7 +89,9 @@ class CalendarAttendance extends RelationManager
                         Forms\Components\TextInput::make('duration_days')
                             ->label(__('employees::filament/clusters/configurations/resources/calendar/relation-managers/working-hours.form.sections.additional-information.fields.durations-days'))
                             ->numeric()
-                            ->default(1),
+                            ->default(1)
+                            ->minValue(0)
+                            ->maxValue(99999999999),
                         Forms\Components\Hidden::make('creator_id')
                             ->default(Auth::user()->id),
                     ]),

@@ -79,6 +79,8 @@ class PaymentsResource extends Resource
                                     ->label(__('accounts::filament/resources/payment.form.sections.fields.amount'))
                                     ->default(0)
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->required(),
                                 Forms\Components\DatePicker::make('date')
                                     ->label(__('accounts::filament/resources/payment.form.sections.fields.date'))

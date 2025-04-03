@@ -186,6 +186,7 @@ class ManageQuantities extends ManageRelatedRecords
                     ->label(__('inventories::filament/clusters/products/resources/product/pages/manage-quantities.form.fields.on-hand-qty'))
                     ->numeric()
                     ->minValue(1)
+                    ->maxValue(99999999999)
                     ->maxValue(fn () => $this->getOwnerRecord()->tracking == Enums\ProductTracking::SERIAL ? 1 : 999999999)
                     ->default(0)
                     ->required(),

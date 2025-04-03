@@ -66,6 +66,7 @@ class VendorPriceResource extends Resource
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.general.fields.delay-tooltip'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->default(1),
                             ]),
                     ])
@@ -90,6 +91,7 @@ class VendorPriceResource extends Resource
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.quantity-tooltip'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->default(0),
                                 Forms\Components\Group::make()
                                     ->schema([
@@ -98,6 +100,7 @@ class VendorPriceResource extends Resource
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.unit-price-tooltip'))
                                             ->numeric()
                                             ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->default(0),
                                         Forms\Components\Select::make('currency_id')
                                             ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.currency'))
@@ -120,6 +123,7 @@ class VendorPriceResource extends Resource
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.discount'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->default(0),
                                 Forms\Components\Select::make('company_id')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.prices.fields.company'))

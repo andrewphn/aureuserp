@@ -71,6 +71,7 @@ class ManageTimesheets extends ManageRelatedRecords
                     ->numeric()
                     ->required()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->helperText(__('projects::filament/resources/task/pages/manage-timesheets.form.time-spent-helper-text')),
             ])
             ->columns(1);

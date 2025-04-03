@@ -100,6 +100,7 @@ class ScrapResource extends Resource
                                             ->required()
                                             ->numeric()
                                             ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->default(0)
                                             ->disabled(fn ($record): bool => $record?->state == Enums\ScrapState::DONE),
                                         Forms\Components\Select::make('uom_id')

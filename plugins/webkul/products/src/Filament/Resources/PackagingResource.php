@@ -45,7 +45,8 @@ class PackagingResource extends Resource
                     ->label(__('products::filament/resources/packaging.form.qty'))
                     ->required()
                     ->numeric()
-                    ->minValue(0.00),
+                    ->minValue(0.00)
+                    ->maxValue(99999999999),
                 Forms\Components\Select::make('company_id')
                     ->label(__('products::filament/resources/packaging.form.company'))
                     ->relationship('company', 'name')
