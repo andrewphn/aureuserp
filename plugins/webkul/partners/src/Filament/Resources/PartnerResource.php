@@ -115,7 +115,8 @@ class PartnerResource extends Resource
                                     ->maxLength(255),
                                 Forms\Components\TextInput::make('mobile')
                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.mobile'))
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->tel(),
                                 Forms\Components\TextInput::make('email')
                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.email'))
                                     ->email()
