@@ -5,11 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResour
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Webkul\Inventory\Enums;
+use Illuminate\Database\QueryException;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
+use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource;
-use Illuminate\Database\QueryException;
 use Webkul\Inventory\Models\InternalTransfer;
 
 class ViewInternal extends ViewRecord

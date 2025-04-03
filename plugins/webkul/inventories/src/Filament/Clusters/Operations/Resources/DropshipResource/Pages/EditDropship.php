@@ -5,11 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResour
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\QueryException;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource;
-use Illuminate\Database\QueryException;
 use Webkul\Inventory\Models\Dropship;
 
 class EditDropship extends EditRecord

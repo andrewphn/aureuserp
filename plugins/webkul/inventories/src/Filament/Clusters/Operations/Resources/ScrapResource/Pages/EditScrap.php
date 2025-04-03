@@ -5,6 +5,7 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource\
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Inventory\Enums;
@@ -12,7 +13,6 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Scrap;
-use Illuminate\Database\QueryException;
 
 class EditScrap extends EditRecord
 {

@@ -16,8 +16,8 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Oper
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Inventory\Enums;
@@ -462,23 +462,23 @@ class ScrapResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                    ->action(function (Collection $records) {
-                        try {
-                            $records->each(fn (Model $record) => $record->delete());
-                        } catch (QueryException $e) {
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
+                        ->successNotification(
                             Notification::make()
-                                ->danger()
-                                ->title(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.error.title'))
-                                ->body(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.error.body'))
-                                ->send();
-                        }
-                    })
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.success.title'))
-                            ->body(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.success.body')),
-                    ),
+                                ->success()
+                                ->title(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/scrap.table.bulk-actions.delete.notification.success.body')),
+                        ),
                 ]),
             ])
             ->checkIfRecordIsSelectableUsing(
