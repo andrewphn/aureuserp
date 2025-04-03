@@ -33,15 +33,19 @@ class ViewDropship extends ViewRecord
                 ->button(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OperationState::DONE)
-                ->action(function (Dropship $record) {
+                ->action(function (Actions\DeleteAction $action, Dropship $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('inventories::filament/clusters/operations/resources/dropship/pages/view-dropship.header-actions.delete.notification.error.title'))
                             ->body(__('inventories::filament/clusters/operations/resources/dropship/pages/view-dropship.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

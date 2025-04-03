@@ -33,15 +33,19 @@ class ViewLot extends ViewRecord
                     }, 'Lot-'.str_replace('/', '_', $record->name).'.pdf');
                 }),
             Actions\DeleteAction::make()
-                ->action(function (Lot $record) {
+                ->action(function (Actions\DeleteAction $action, Lot $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('inventories::filament/clusters/products/resources/lot/pages/view-lot.header-actions.delete.notification.error.title'))
                             ->body(__('inventories::filament/clusters/products/resources/lot/pages/view-lot.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

@@ -63,15 +63,19 @@ class EditOrder extends EditRecord
             OrderActions\CancelAction::make(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OrderState::DONE)
-                ->action(function (Order $record) {
+                ->action(function (Actions\DeleteAction $action, Order $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.error.title'))
                             ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(
