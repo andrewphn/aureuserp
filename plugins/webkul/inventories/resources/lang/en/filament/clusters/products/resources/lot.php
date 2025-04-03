@@ -50,8 +50,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Lot deleted',
-                    'body'  => 'The lot has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Lot deleted',
+                        'body'  => 'The lot has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Lot could not be deleted',
+                        'body'  => 'The lot cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -63,8 +70,15 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Lots deleted',
-                    'body'  => 'The lots has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Lots deleted',
+                        'body'  => 'The lots has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Lots could not be deleted',
+                        'body'  => 'The lots cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

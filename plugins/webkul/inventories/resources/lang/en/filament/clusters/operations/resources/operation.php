@@ -121,52 +121,6 @@ return [
             'company'              => 'Company',
             'creator'              => 'Creator',
         ],
-
-        'actions' => [
-            'restore' => [
-                'notification' => [
-                    'title' => 'Product restored',
-                    'body'  => 'The product has been restored successfully.',
-                ],
-            ],
-
-            'delete' => [
-                'notification' => [
-                    'title' => 'Product deleted',
-                    'body'  => 'The product has been deleted successfully.',
-                ],
-            ],
-
-            'force-delete' => [
-                'notification' => [
-                    'title' => 'Product force deleted',
-                    'body'  => 'The product has been force deleted successfully.',
-                ],
-            ],
-        ],
-
-        'bulk-actions' => [
-            'restore' => [
-                'notification' => [
-                    'title' => 'Products restored',
-                    'body'  => 'The products has been restored successfully.',
-                ],
-            ],
-
-            'delete' => [
-                'notification' => [
-                    'title' => 'Products deleted',
-                    'body'  => 'The products has been deleted successfully.',
-                ],
-            ],
-
-            'force-delete' => [
-                'notification' => [
-                    'title' => 'Products force deleted',
-                    'body'  => 'The products has been force deleted successfully.',
-                ],
-            ],
-        ],
     ],
 
     'infolist' => [

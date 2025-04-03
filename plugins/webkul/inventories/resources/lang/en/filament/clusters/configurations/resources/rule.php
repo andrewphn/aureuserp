@@ -119,8 +119,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Rule force deleted',
-                    'body'  => 'The rule has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Rule force deleted',
+                        'body'  => 'The rule has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Rule could not be deleted',
+                        'body'  => 'The rule cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -142,8 +149,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Rules force deleted',
-                    'body'  => 'The rules has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Rules force deleted',
+                        'body'  => 'The rules has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Rules could not be deleted',
+                        'body'  => 'The rules cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

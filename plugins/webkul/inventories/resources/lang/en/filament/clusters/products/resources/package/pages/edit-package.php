@@ -23,8 +23,15 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Package deleted',
-                'body'  => 'The package has been deleted successfully.',
+                'success' => [
+                    'title' => 'Package deleted',
+                    'body'  => 'The package has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Package could not be deleted',
+                    'body'  => 'The package cannot be deleted because it is currently in use.',
+                ],
             ],
         ],
     ],

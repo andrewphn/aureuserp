@@ -13,8 +13,15 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Delivery deleted',
-                'body'  => 'The delivery has been deleted successfully.',
+                'success' => [
+                    'title' => 'Delivery deleted',
+                    'body'  => 'The delivery has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Delivery could not be deleted',
+                    'body'  => 'The delivery cannot be deleted because it is currently in use.',
+                ],
             ],
         ],
     ],

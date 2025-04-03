@@ -25,8 +25,15 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Order deleted',
-                'body'  => 'The order has been deleted successfully.',
+                'success' => [
+                    'title' => 'Order deleted',
+                    'body'  => 'The order has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Order could not be deleted',
+                    'body'  => 'The order cannot be deleted because it is currently in use.',
+                ],
             ],
         ],
     ],

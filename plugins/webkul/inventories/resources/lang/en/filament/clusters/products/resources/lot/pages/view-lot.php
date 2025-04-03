@@ -8,8 +8,15 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Lot Deleted',
-                'body'  => 'The lot has been deleted successfully.',
+                'success' => [
+                    'title' => 'Lot Deleted',
+                    'body'  => 'The lot has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Lot could not be deleted',
+                    'body'  => 'The lot cannot be deleted because it is currently in use.',
+                ],
             ],
         ],
     ],

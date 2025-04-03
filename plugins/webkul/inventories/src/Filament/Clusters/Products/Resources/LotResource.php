@@ -15,6 +15,9 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource\Pages\EditDelivery;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource\Pages\EditDropship;
@@ -173,11 +176,22 @@ class LotResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
+                        ->action(function (Lot $record) {
+                            try {
+                                $record->delete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/products/resources/lot.table.actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/products/resources/lot.table.actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/products/resources/lot.table.actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/products/resources/lot.table.actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/products/resources/lot.table.actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/products/resources/lot.table.actions.delete.notification.success.body')),
                         ),
                 ]),
             ])
@@ -198,11 +212,22 @@ class LotResource extends Resource
                             }, 'Lot-Barcode.pdf');
                         }),
                     Tables\Actions\DeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/products/resources/lot.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/products/resources/lot.table.bulk-actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/products/resources/lot.table.bulk-actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/products/resources/lot.table.bulk-actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/products/resources/lot.table.bulk-actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/products/resources/lot.table.bulk-actions.delete.notification.success.body')),
                         ),
                 ]),
             ]);
@@ -283,13 +308,6 @@ class LotResource extends Resource
             Pages\EditLot::class,
             Pages\ManageQuantities::class,
         ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

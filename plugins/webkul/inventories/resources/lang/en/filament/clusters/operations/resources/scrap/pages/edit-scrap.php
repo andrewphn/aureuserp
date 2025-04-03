@@ -25,8 +25,15 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Scrap deleted',
-                'body'  => 'The scrap has been deleted successfully.',
+                'success' => [
+                    'title' => 'Scrap deleted',
+                    'body'  => 'The scrap has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Scraps could not be deleted',
+                    'body'  => 'The scraps cannot be deleted because they are currently in use.',
+                ],
             ],
         ],
     ],

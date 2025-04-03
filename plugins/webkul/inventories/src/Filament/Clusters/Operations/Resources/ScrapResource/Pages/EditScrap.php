@@ -5,6 +5,7 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource\
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Inventory\Enums;
@@ -97,11 +98,22 @@ class EditScrap extends EditRecord
                 ->hidden(fn () => $this->getRecord()->state == Enums\ScrapState::DONE),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\ScrapState::DONE)
+                ->action(function (Scrap $record) {
+                    try {
+                        $record->delete();
+                    } catch (QueryException $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('inventories::filament/clusters/operations/resources/scrap/pages/edit-scrap.header-actions.delete.notification.error.title'))
+                            ->body(__('inventories::filament/clusters/operations/resources/scrap/pages/edit-scrap.header-actions.delete.notification.error.body'))
+                            ->send();
+                    }
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('inventories::filament/clusters/operations/resources/scrap/pages/edit-scrap.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/operations/resources/scrap/pages/edit-scrap.header-actions.delete.notification.body')),
+                        ->title(__('inventories::filament/clusters/operations/resources/scrap/pages/edit-scrap.header-actions.delete.notification.success.title'))
+                        ->body(__('inventories::filament/clusters/operations/resources/scrap/pages/edit-scrap.header-actions.delete.notification.success.body')),
                 ),
         ];
     }

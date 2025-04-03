@@ -42,8 +42,15 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Packaging deleted',
-                    'body'  => 'The packaging has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Packaging deleted',
+                        'body'  => 'The packaging has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Packaging could not be deleted',
+                        'body'  => 'The packaging cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -55,8 +62,15 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Packagings deleted',
-                    'body'  => 'The packagings has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Packagings deleted',
+                        'body'  => 'The packagings has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Packagings could not be deleted',
+                        'body'  => 'The packagings cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

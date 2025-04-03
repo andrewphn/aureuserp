@@ -4,8 +4,15 @@ return [
     'header-actions' => [
         'delete' => [
             'notification' => [
-                'title' => 'Scrap Deleted',
-                'body'  => 'The scrap has been deleted successfully.',
+                'success' => [
+                    'title' => 'Scrap Deleted',
+                    'body'  => 'The scrap has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Scraps could not be deleted',
+                    'body'  => 'The scraps cannot be deleted because they are currently in use.',
+                ],
             ],
         ],
     ],
