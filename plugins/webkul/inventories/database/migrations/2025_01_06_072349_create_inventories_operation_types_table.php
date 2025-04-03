@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Webkul\Inventory\Enums;
 
 return new class extends Migration
 {
@@ -17,15 +18,15 @@ return new class extends Migration
             $table->string('type');
             $table->integer('sort')->nullable();
             $table->string('sequence_code');
-            $table->string('reservation_method');
+            $table->string('reservation_method')->default(Enums\ReservationMethod::AT_CONFIRM);
             $table->integer('reservation_days_before')->nullable()->default(0);
             $table->integer('reservation_days_before_priority')->nullable()->default(0);
             $table->string('product_label_format')->nullable();
             $table->string('lot_label_format')->nullable();
             $table->string('package_label_to_print')->nullable();
             $table->string('barcode')->nullable();
-            $table->string('create_backorder');
-            $table->string('move_type')->nullable();
+            $table->string('create_backorder')->default(Enums\CreateBackorder::ASK);
+            $table->string('move_type')->nullable()->default(Enums\MoveType::DIRECT);
             $table->boolean('show_entire_packs')->nullable()->default(0);
             $table->boolean('use_create_lots')->nullable()->default(0);
             $table->boolean('use_existing_lots')->nullable()->default(0);
