@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
+use Illuminate\Database\QueryException;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
@@ -62,11 +63,22 @@ class EditOrder extends EditRecord
             OrderActions\CancelAction::make(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OrderState::DONE)
+                ->action(function (Order $record) {
+                    try {
+                        $record->delete();
+                    } catch (QueryException $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.error.title'))
+                            ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.error.body'))
+                            ->send();
+                    }
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.title'))
-                        ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.body')),
+                        ->title(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.success.title'))
+                        ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.header-actions.delete.notification.success.body')),
                 ),
         ];
     }

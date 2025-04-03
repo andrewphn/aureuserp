@@ -10,8 +10,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Internal Transfer deleted',
-                    'body'  => 'The internal transfer ras been deleted successfully.',
+                    'success' => [
+                        'title' => 'Internal Transfer deleted',
+                        'body'  => 'The internal transfer ras been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Internal Transfer could not be deleted',
+                        'body'  => 'The internal transfer cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -19,8 +26,15 @@ return [
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Internal Transfers deleted',
-                    'body'  => 'The internal transfers has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Internal Transfers deleted',
+                        'body'  => 'The internal transfers has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Internal Transfers could not be deleted',
+                        'body'  => 'The internal transfers cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

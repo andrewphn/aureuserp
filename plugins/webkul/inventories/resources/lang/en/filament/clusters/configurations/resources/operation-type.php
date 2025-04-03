@@ -160,8 +160,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Operation Type force deleted',
-                    'body'  => 'The operation type has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Operation Type force deleted',
+                        'body'  => 'The operation type has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Operation Type could not be deleted',
+                        'body'  => 'The operation type cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -183,8 +190,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Operation Types force deleted',
-                    'body'  => 'The operation types has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Operations Types force deleted',
+                        'body'  => 'The operation types has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Operations Types could not be deleted',
+                        'body'  => 'The operation types cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

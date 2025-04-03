@@ -11,6 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource\Pages;
@@ -69,21 +72,43 @@ class DropshipResource extends Resource
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
                         ->hidden(fn (Dropship $record): bool => $record->state == Enums\OperationState::DONE)
+                        ->action(function (Dropship $record) {
+                            try {
+                                $record->delete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/operations/resources/dropship.table.actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/operations/resources/dropship.table.actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/operations/resources/dropship.table.actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/operations/resources/dropship.table.actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/operations/resources/dropship.table.actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/dropship.table.actions.delete.notification.success.body')),
                         ),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
+                    ->action(function (Collection $records) {
+                        try {
+                            $records->each(fn (Model $record) => $record->delete());
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('inventories::filament/clusters/operations/resources/dropship.table.bulk-actions.delete.notification.error.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/dropship.table.bulk-actions.delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('inventories::filament/clusters/operations/resources/dropship.table.bulk-actions.delete.notification.title'))
-                            ->body(__('inventories::filament/clusters/operations/resources/dropship.table.bulk-actions.delete.notification.body')),
+                            ->title(__('inventories::filament/clusters/operations/resources/dropship.table.bulk-actions.delete.notification.success.title'))
+                            ->body(__('inventories::filament/clusters/operations/resources/dropship.table.bulk-actions.delete.notification.success.body')),
                     ),
             ])
             ->modifyQueryUsing(function (Builder $query) {
@@ -105,12 +130,6 @@ class DropshipResource extends Resource
             Pages\EditDropship::class,
             Pages\ManageMoves::class,
         ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-        ];
     }
 
     public static function getPages(): array

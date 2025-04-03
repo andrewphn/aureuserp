@@ -9,6 +9,8 @@ use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource;
+use Illuminate\Database\QueryException;
+use Webkul\Inventory\Models\Delivery;
 
 class EditDelivery extends EditRecord
 {
@@ -49,11 +51,22 @@ class EditDelivery extends EditRecord
                 ->button(),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OperationState::DONE)
+                ->action(function (Delivery $record) {
+                    try {
+                        $record->delete();
+                    } catch (QueryException $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('inventories::filament/clusters/operations/resources/delivery/pages/edit-delivery.header-actions.delete.notification.error.title'))
+                            ->body(__('inventories::filament/clusters/operations/resources/delivery/pages/edit-delivery.header-actions.delete.notification.error.body'))
+                            ->send();
+                    }
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('inventories::filament/clusters/operations/resources/delivery/pages/edit-delivery.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/operations/resources/delivery/pages/edit-delivery.header-actions.delete.notification.body')),
+                        ->title(__('inventories::filament/clusters/operations/resources/delivery/pages/edit-delivery.header-actions.delete.notification.success.title'))
+                        ->body(__('inventories::filament/clusters/operations/resources/delivery/pages/edit-delivery.header-actions.delete.notification.success.body')),
                 ),
         ];
     }

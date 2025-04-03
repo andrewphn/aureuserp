@@ -11,6 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource\Pages;
@@ -335,20 +338,42 @@ class VendorPriceResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
+                    ->action(function (ProductSupplier $record) {
+                        try {
+                            $record->delete();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.actions.delete.notification.error.title'))
+                                ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.actions.delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.actions.delete.notification.title'))
-                            ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.actions.delete.notification.body')),
+                            ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.actions.delete.notification.success.title'))
+                            ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.actions.delete.notification.success.body')),
                     ),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
+                    ->action(function (Collection $records) {
+                        try {
+                            $records->each(fn (Model $record) => $record->delete());
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.bulk-actions.delete.notification.error.title'))
+                                ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.bulk-actions.delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.bulk-actions.delete.notification.title'))
-                            ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.bulk-actions.delete.notification.body')),
+                            ->title(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.bulk-actions.delete.notification.success.title'))
+                            ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.bulk-actions.delete.notification.success.body')),
                     ),
             ])
             ->emptyStateActions([
@@ -469,13 +494,6 @@ class VendorPriceResource extends Resource
                     ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

@@ -100,8 +100,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Purchase Agreement permanently deleted',
-                    'body'  => 'The purchase agreement has been permanently deleted successfully.',
+                    'success' => [
+                        'title' => 'Purchase Agreement permanently deleted',
+                        'body'  => 'The purchase agreement has been permanently deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Purchase Agreement could not be deleted',
+                        'body'  => 'The The purchase agreement cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -123,8 +130,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Purchase Agreement permanently deleted',
-                    'body'  => 'The purchase agreements has been permanently deleted successfully.',
+                    'success' => [
+                        'title' => 'Purchase Agreements permanently deleted',
+                        'body'  => 'The purchase agreements has been permanently deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Purchase Agreements could not be deleted',
+                        'body'  => 'The purchase agreements cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

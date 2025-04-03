@@ -5,6 +5,7 @@ namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Database\QueryException;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums;
@@ -37,11 +38,22 @@ class ViewOrder extends ViewRecord
                 ->setResource(static::$resource),
             Actions\DeleteAction::make()
                 ->hidden(fn () => $this->getRecord()->state == Enums\OrderState::DONE)
+                ->action(function (Order $record) {
+                    try {
+                        $record->delete();
+                    } catch (QueryException $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('inventories::filament/clusters/orders/resources/order/pages/view-order.header-actions.delete.notification.error.title'))
+                            ->body(__('inventories::filament/clusters/orders/resources/order/pages/view-order.header-actions.delete.notification.error.body'))
+                            ->send();
+                    }
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('inventories::filament/clusters/orders/resources/order/pages/view-order.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/orders/resources/order/pages/view-order.header-actions.delete.notification.body')),
+                        ->title(__('inventories::filament/clusters/orders/resources/order/pages/view-order.header-actions.delete.notification.success.title'))
+                        ->body(__('inventories::filament/clusters/orders/resources/order/pages/view-order.header-actions.delete.notification.success.body')),
                 ),
         ];
     }

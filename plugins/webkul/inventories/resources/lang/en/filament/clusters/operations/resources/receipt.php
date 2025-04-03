@@ -10,8 +10,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Receipt deleted',
-                    'body'  => 'The Receipt ras been deleted successfully.',
+                    'success' => [
+                        'title' => 'Receipt deleted',
+                        'body'  => 'The receipt ras been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Receipt could not be deleted',
+                        'body'  => 'The receipt cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -19,8 +26,15 @@ return [
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Receipts deleted',
-                    'body'  => 'The receipts has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Receipts deleted',
+                        'body'  => 'The receipts has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Receipts could not be deleted',
+                        'body'  => 'The receipts cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

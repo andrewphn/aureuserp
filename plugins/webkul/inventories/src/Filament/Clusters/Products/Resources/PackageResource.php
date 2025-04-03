@@ -14,6 +14,9 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackageTypeResource;
 use Webkul\Inventory\Filament\Clusters\Products;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource\Pages;
@@ -143,11 +146,22 @@ class PackageResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
+                        ->action(function (Package $record) {
+                            try {
+                                $record->delete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/products/resources/package.table.actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/products/resources/package.table.actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/products/resources/package.table.actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/products/resources/package.table.actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/products/resources/package.table.actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/products/resources/package.table.actions.delete.notification.success.body')),
                         ),
                 ]),
             ])
@@ -182,11 +196,22 @@ class PackageResource extends Resource
                             }, 'Package-Barcode.pdf');
                         }),
                     Tables\Actions\DeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/products/resources/package.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/products/resources/package.table.bulk-actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/products/resources/package.table.bulk-actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/products/resources/package.table.bulk-actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/products/resources/package.table.bulk-actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/products/resources/package.table.bulk-actions.delete.notification.success.body')),
                         ),
                 ]),
             ]);

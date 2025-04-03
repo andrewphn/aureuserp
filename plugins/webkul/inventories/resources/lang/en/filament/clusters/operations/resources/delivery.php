@@ -10,8 +10,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Delivery deleted',
-                    'body'  => 'The delivery ras been deleted successfully.',
+                    'success' => [
+                        'title' => 'Delivery deleted',
+                        'body'  => 'The delivery ras been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Delivery could not be deleted',
+                        'body'  => 'The delivery cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -19,8 +26,15 @@ return [
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Deliveries deleted',
-                    'body'  => 'The deliveries has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Deliveries deleted',
+                        'body'  => 'The deliveries has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Deliveries could not be deleted',
+                        'body'  => 'The deliveries cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],
