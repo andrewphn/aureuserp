@@ -241,14 +241,10 @@ class VendorPriceResource extends Resource
                                 Forms\Components\TextInput::make('price_from')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.price-from'))
                                     ->numeric()
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
                                     ->prefix('From'),
                                 Forms\Components\TextInput::make('price_to')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.price-to'))
                                     ->numeric()
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
                                     ->prefix('To'),
                             ])
                             ->columns(2),
@@ -272,14 +268,10 @@ class VendorPriceResource extends Resource
                                 Forms\Components\TextInput::make('min_qty_from')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.min-qty-from'))
                                     ->numeric()
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
                                     ->prefix('From'),
                                 Forms\Components\TextInput::make('min_qty_to')
                                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.filters.min-qty-to'))
                                     ->numeric()
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
                                     ->prefix('To'),
                             ])
                             ->columns(2),
