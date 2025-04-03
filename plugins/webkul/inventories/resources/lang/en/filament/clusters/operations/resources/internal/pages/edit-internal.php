@@ -14,7 +14,7 @@ return [
         'delete' => [
             'notification' => [
                 'success' => [
-                    'title' => 'Delivery deleted',
+                    'title' => 'Internal Transfer deleted',
                     'body'  => 'The internal transfer has been deleted successfully.',
                 ],
 
