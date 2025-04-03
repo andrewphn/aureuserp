@@ -20,6 +20,9 @@ class ReplenishmentResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    //Todo: Remove this when completed
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = Operations::class;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
