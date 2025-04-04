@@ -65,7 +65,7 @@ class VendorPriceResource extends Resource
                                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('purchases::filament/admin/clusters/configurations/resources/vendor-price.form.sections.general.fields.delay-tooltip'))
                                     ->numeric()
                                     ->minValue(0)
-                                    ->maxValue(99999999999)
+                                    ->maxValue(99999999)
                                     ->default(1),
                             ]),
                     ])

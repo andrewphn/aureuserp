@@ -67,7 +67,7 @@ class StorageCategoryResource extends Resource
                             ->numeric()
                             ->default(0.0000)
                             ->minValue(0)
-                            ->maxValue(99999999999),
+                            ->maxValue(99999999),
                         Forms\Components\Select::make('allow_new_products')
                             ->label(__('inventories::filament/clusters/configurations/resources/storage-category.form.sections.general.fields.allow-new-products'))
                             ->options(AllowNewProduct::class)
