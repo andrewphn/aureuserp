@@ -192,7 +192,7 @@ class VendorPriceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->groups([
-                Tables\Grouping\Group::make('vendor.name')
+                Tables\Grouping\Group::make('partner.name')
                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.groups.vendor')),
                 Tables\Grouping\Group::make('product.name')
                     ->label(__('purchases::filament/admin/clusters/configurations/resources/vendor-price.table.groups.product')),
