@@ -11,6 +11,7 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Support\Database\Factories\CompanyFactory;
 
 class Company extends Model
@@ -32,6 +33,12 @@ class Company extends Model
         'email',
         'phone',
         'mobile',
+        'street1',
+        'street2',
+        'city',
+        'zip',
+        'state_id',
+        'country_id',
         'logo',
         'color',
         'is_active',
@@ -41,6 +48,16 @@ class Company extends Model
         'partner_id',
         'website',
     ];
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
+    }
 
     /**
      * Get the creator of the company
@@ -114,5 +131,67 @@ class Company extends Model
     protected static function newFactory(): CompanyFactory
     {
         return CompanyFactory::new();
+    }
+
+        /**
+     * Bootstrap the model and its traits.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($company) {
+            if (!$company->partner_id) {
+                $partner = Partner::create([
+                    'creator_id'       => $company->creator_id ?? Auth::id(),
+                    'sub_type'         => 'company',
+                    'company_registry' => $company->registration_number,
+                    'name'             => $company->name,
+                    'email'            => $company->email,
+                    'website'          => $company->website,
+                    'tax_id'           => $company->tax_id,
+                    'phone'            => $company->phone,
+                    'mobile'           => $company->mobile,
+                    'color'            => $company->color,
+                    'street1'          => $company->street1,
+                    'street2'          => $company->street2,
+                    'city'             => $company->city,
+                    'zip'              => $company->zip,
+                    'state_id'         => $company->state_id,
+                    'country_id'       => $company->country_id,
+                    'parent_id'        => $company->parent_id,
+                    'company_id'       => $company->id,
+                ]);
+                
+                $company->partner_id = $partner->id;
+            }
+        });
+
+        static::saved(function ($company) {
+            Partner::updateOrCreate(
+                [
+                    'id' => $company->partner_id
+                ], [
+                    'creator_id'       => $company->creator_id ?? Auth::id(),
+                    'sub_type'         => 'company',
+                    'company_registry' => $company->registration_number,
+                    'name'             => $company->name,
+                    'email'            => $company->email,
+                    'website'          => $company->website,
+                    'tax_id'           => $company->tax_id,
+                    'phone'            => $company->phone,
+                    'mobile'           => $company->mobile,
+                    'color'            => $company->color,
+                    'street1'          => $company->street1,
+                    'street2'          => $company->street2,
+                    'city'             => $company->city,
+                    'zip'              => $company->zip,
+                    'state_id'         => $company->state_id,
+                    'country_id'       => $company->country_id,
+                    'parent_id'        => $company->parent_id,
+                    'company_id'       => $company->id,
+                ]
+            );
+        });
     }
 }

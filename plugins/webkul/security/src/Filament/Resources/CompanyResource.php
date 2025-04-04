@@ -79,7 +79,6 @@ class CompanyResource extends Resource
                                             ->maxLength(255),
                                         Forms\Components\TextInput::make('company_id')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.company-id'))
-                                            ->required()
                                             ->unique(ignoreRecord: true)
                                             ->maxLength(255)
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: 'The Company ID is a unique identifier for your company.'),
@@ -99,25 +98,6 @@ class CompanyResource extends Resource
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.address-information.title'))
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->relationship('partner')
-                                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
-                                                return array_merge($data, [
-                                                    'name'    => $record->name,
-                                                    'email'   => $record->email,
-                                                    'phone'   => $record->phone,
-                                                    'mobile'  => $record->mobile,
-                                                    'website' => $record->website,
-                                                ]);
-                                            })
-                                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data, $record) {
-                                                return array_merge($data, [
-                                                    'name'    => $record->name,
-                                                    'email'   => $record->email,
-                                                    'phone'   => $record->phone,
-                                                    'mobile'  => $record->mobile,
-                                                    'website' => $record->website,
-                                                ]);
-                                            })
                                             ->schema([
                                                 Forms\Components\TextInput::make('street1')
                                                     ->label(__('security::filament/resources/company.form.sections.address-information.fields.street1'))
@@ -180,7 +160,7 @@ class CompanyResource extends Resource
                                             ->required()
                                             ->live()
                                             ->preload()
-                                            ->options(fn () => Currency::pluck('full_name', 'id'))
+                                            ->default(Currency::first()?->id)
                                             ->createOptionForm([
                                                 Forms\Components\Section::make()
                                                     ->schema([
@@ -251,7 +231,6 @@ class CompanyResource extends Resource
                                         Forms\Components\TextInput::make('phone')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.phone'))
                                             ->maxLength(255)
-                                            ->required()
                                             ->tel(),
                                         Forms\Components\TextInput::make('mobile')
                                             ->label(__('security::filament/resources/company.form.sections.contact-information.fields.mobile'))
@@ -456,7 +435,6 @@ class CompanyResource extends Resource
                                     ->columns(2),
 
                                 Infolists\Components\Section::make(__('security::filament/resources/company.infolist.sections.address-information.title'))
-                                    ->relationship('partner')
                                     ->schema([
                                         Infolists\Components\TextEntry::make('street1')
                                             ->icon('heroicon-o-map-pin')

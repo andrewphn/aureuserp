@@ -44,6 +44,8 @@ class SupportServiceProvider extends PackageServiceProvider
                 '2025_01_09_114324_create_utm_sources_table',
                 '2025_02_07_094256_create_utm_stages_table',
                 '2025_02_07_094325_create_utm_campaigns_table',
+                '2025_04_04_061507_add_address_columns_in_companies_table',
+                '2025_04_04_062023_alter_companies_table',
             ])
             ->runsMigrations()
             ->hasCommands([
