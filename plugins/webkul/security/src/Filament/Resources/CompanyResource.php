@@ -215,13 +215,16 @@ class CompanyResource extends Resource
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.branding.title'))
-                                    ->relationship('partner', 'avatar')
                                     ->schema([
-                                        Forms\Components\FileUpload::make('avatar')
-                                            ->label(__('security::filament/resources/company.form.sections.branding.fields.company-logo'))
-                                            ->image()
-                                            ->directory('company-logos')
-                                            ->visibility('private'),
+                                        Forms\Components\Group::make()
+                                            ->relationship('partner', 'avatar')
+                                            ->schema([
+                                                Forms\Components\FileUpload::make('avatar')
+                                                    ->label(__('security::filament/resources/company.form.sections.branding.fields.company-logo'))
+                                                    ->image()
+                                                    ->directory('company-logos')
+                                                    ->visibility('private'),
+                                            ]),
                                         Forms\Components\ColorPicker::make('color')
                                             ->label(__('security::filament/resources/company.form.sections.branding.fields.color'))
                                             ->hexColor(),
