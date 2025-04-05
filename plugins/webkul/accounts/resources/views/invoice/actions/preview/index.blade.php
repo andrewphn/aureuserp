@@ -177,43 +177,42 @@
             <div class="vendor-info">
                 <div>{{ $record->partner->name }}</div>
 
+                <div>
+                    {{ $record->partner->street1 }}
+
+                    @if ($record->partner->street2)
+                        ,{{ $record->partner->street2 }}
+                    @endif
+                </div>
+
+                <div>
+                    {{ $record->partner->city }},
+
+                    @if ($record->partner->state)
+                        {{ $record->partner->state->name }},
+                    @endif
+
+                    {{ $record->partner->zip }}
+                </div>
+
+                @if ($record->partner->country)
                     <div>
-                        {{ $record->partner->street1 }}
-
-                        @if ($record->partner->street2)
-                            ,{{ $record->partner->street2 }}
-                        @endif
+                        {{ $record->partner->country->name }}
                     </div>
+                @endif
 
+                @if ($record->partner->email)
                     <div>
-                        {{ $record->partner->city }},
-
-                        @if ($record->partner->state)
-                            {{ $record->partner->state->name }},
-                        @endif
-
-                        {{ $record->partner->zip }}
+                        Email:
+                        {{ $record->partner->email }}
                     </div>
+                @endif
 
-                    @if ($record->partner->country)
-                        <div>
-                            {{ $record->partner->country->name }}
-                        </div>
-                    @endif
-
-                    @if ($record->partner->email)
-                        <div>
-                            Email:
-                            {{ $record->partner->email }}
-                        </div>
-                    @endif
-
-                    @if ($record->partner->phone)
-                        <div>
-                            Phone:
-                            {{ $record->partner->phone }}
-                        </div>
-                    @endif
+                @if ($record->partner->phone)
+                    <div>
+                        Phone:
+                        {{ $record->partner->phone }}
+                    </div>
                 @endif
             </div>
 
