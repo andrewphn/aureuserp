@@ -38,6 +38,7 @@ class SaleServiceProvider extends PackageServiceProvider
                 '2025_03_06_133433_create_sales_advance_payment_invoices_table',
                 '2025_03_06_133458_create_sales_advance_payment_invoice_order_sales_table',
                 '2025_03_05_124400_create_sales_order_invoices_table',
+                '2025_04_07_111610_add_sales_columns_to_inventories_moves_table_from_sales',
             ])
             ->runsMigrations()
             ->hasSettings([

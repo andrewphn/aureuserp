@@ -6,18 +6,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums as AccountEnums;
-use Webkul\Account\Enums\MoveState;
-use Webkul\Account\Enums\MoveType;
-use Webkul\Account\Enums\PaymentState;
+use Webkul\Invoice\Enums as InvoiceEnums;
+use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Account\Facades\Tax;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Move;
-use Webkul\Invoice\Enums\InvoicePolicy;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Partner\Models\Partner;
-use Webkul\Sale\Enums\AdvancedPayment;
-use Webkul\Sale\Enums\InvoiceStatus;
-use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
 use Webkul\Sale\Mail\SaleOrderQuotation;
 use Webkul\Sale\Models\AdvancedPaymentInvoice;
@@ -26,6 +22,7 @@ use Webkul\Sale\Models\OrderLine;
 use Webkul\Sale\Settings\InvoiceSettings;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Services\EmailService;
+use Webkul\Support\Package;
 
 class SaleManager
 {
@@ -96,7 +93,7 @@ class SaleManager
     public function createInvoice(Order $record, array $data = [])
     {
         DB::transaction(function () use ($record, $data) {
-            if ($data['advance_payment_method'] == AdvancedPayment::DELIVERED->value) {
+            if ($data['advance_payment_method'] == Enums\AdvancedPayment::DELIVERED->value) {
                 $this->createAccountMove($record);
             }
 
@@ -137,6 +134,10 @@ class SaleManager
             $record->amount_total += $line->price_total;
         }
 
+        $record = $this->computeDeliveryStatus($record);
+
+        $record = $this->computeInvoiceStatus($record);
+
         $record->save();
 
         return $record;
@@ -147,9 +148,15 @@ class SaleManager
      */
     public function computeSaleOrderLine(OrderLine $line): OrderLine
     {
-        $qtyDelivered = $line->qty_delivered ?? 0;
+        $line = $this->computeQtyInvoiced($line);
 
-        $line->qty_to_invoice = $qtyDelivered - $line->qty_invoiced;
+        $line = $this->computeQtyDelivered($line);
+
+        if ($line->qty_delivered_method == Enums\QtyDeliveredMethod::MANUAL) {
+            $line->qty_delivered = $line->qty_delivered ?? 0;
+        }
+
+        $line->qty_to_invoice = $line->qty_delivered - $line->qty_invoiced;
 
         $subTotal = $line->price_unit * $line->product_qty;
 
@@ -183,13 +190,13 @@ class SaleManager
 
         $line = $this->computeDeliveryMethod($line);
 
-        $line = $this->computeInvoiceStatus($line);
+        $line = $this->computeOrderLineInvoiceStatus($line);
 
         $line = $this->computeQtyInvoiced($line);
 
-        $line = $this->computeUntaxedAmountToInvoice($line);
+        $line = $this->computeOrderLineUntaxedAmountToInvoice($line);
 
-        $line = $this->untaxedAmountToInvoiced($line);
+        $line = $this->untaxedOrderLineAmountToInvoiced($line);
 
         $line->save();
 
@@ -211,18 +218,16 @@ class SaleManager
     {
         $qtyInvoiced = 0.000;
 
-        foreach ($line->invoiceLines as $invoiceLine) {
-            $move = $invoiceLine->move;
-
+        foreach ($line->accountMoveLines as $accountMoveLine) {
             if (
-                $move->state !== MoveState::CANCEL
-                || $move->payment_state === PaymentState::INVOICING_LEGACY->value
+                $accountMoveLine->move->state !== AccountEnums\MoveState::CANCEL
+                || $accountMoveLine->move->payment_state === AccountEnums\PaymentState::INVOICING_LEGACY->value
             ) {
-                $convertedQty = $invoiceLine->uom->computeQuantity($invoiceLine->quantity, $line->uom);
+                $convertedQty = $accountMoveLine->uom->computeQuantity($accountMoveLine->quantity, $line->uom);
 
-                if ($move->move_type === MoveType::OUT_INVOICE) {
+                if ($accountMoveLine->move->move_type === AccountEnums\MoveType::OUT_INVOICE) {
                     $qtyInvoiced += $convertedQty;
-                } elseif ($move->move_type === MoveType::OUT_REFUND) {
+                } elseif ($accountMoveLine->move->move_type === AccountEnums\MoveType::OUT_REFUND) {
                     $qtyInvoiced -= $convertedQty;
                 }
             }
@@ -233,10 +238,83 @@ class SaleManager
         return $line;
     }
 
-    public function computeInvoiceStatus(OrderLine $line): OrderLine
+    public function computeQtyDelivered(OrderLine $line): OrderLine
     {
-        if ($line->state !== OrderState::SALE) {
-            $line->invoice_status = InvoiceStatus::NO;
+        $line->qty_delivered = 0.0;
+
+        if ($line->qty_delivered_method == Enums\QtyDeliveredMethod::MANUAL) {
+            $line->qty_delivered = $line->qty_delivered ?? 0.0;
+        }
+
+        if ($line->qty_delivered_method == Enums\QtyDeliveredMethod::STOCK_MOVE) {
+            $qty = 0.0;
+
+            [$outgoingMoves, $incomingMoves] = $line->getOutgoingIncomingMoves();
+            
+            foreach ($outgoingMoves as $move) {
+                if ($move->state != InventoryEnums\MoveState::DONE) {
+                    continue;
+                }
+
+                $qty += $move->uom->computeQuantity($move->quantity, $line->uom, true, 'HALF-UP');
+            }
+            
+            foreach ($incomingMoves as $move) {
+                if ($move->state != InventoryEnums\MoveState::DONE) {
+                    continue;
+                }
+
+                $qty -= $move->uom->computeQuantity($move->quantity, $line->uom, true, 'HALF-UP');
+            }
+            
+            $line->qty_delivered = $qty;
+        }
+
+        return $line;
+    }
+
+    public function computeDeliveryStatus(Order $record): Order
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            $record->delivery_status = Enums\OrderDeliveryStatus::NO;
+
+            return $record;
+        }
+
+        return $record;
+    }
+
+    public function computeInvoiceStatus(Order $order): Order
+    {
+        if ($order->state != Enums\OrderState::SALE) {
+            $order->invoice_status = Enums\InvoiceStatus::NO;
+
+            return $order;
+        }
+        
+        if ($order->lines->contains(function ($line) {
+            return $line->state == Enums\InvoiceStatus::TO_INVOICE;
+        })) {
+            $order->invoice_status = Enums\InvoiceStatus::TO_INVOICE;
+        } elseif ($order->lines->contains(function ($line) {
+            return $line->state == Enums\InvoiceStatus::INVOICED;
+        })) {
+            $order->invoice_status = Enums\InvoiceStatus::INVOICED;
+        } elseif ($order->lines->contains(function ($line) {
+            return in_array($line->state, [Enums\InvoiceStatus::INVOICED, Enums\InvoiceStatus::UP_SELLING]);
+        })) {
+            $order->invoice_status = Enums\InvoiceStatus::UP_SELLING;
+        } else {
+            $order->invoice_status = Enums\InvoiceStatus::NO;
+        }
+
+        return $order;
+    }
+
+    public function computeOrderLineInvoiceStatus(OrderLine $line): OrderLine
+    {
+        if ($line->state !== Enums\OrderState::SALE) {
+            $line->invoice_status = Enums\InvoiceStatus::NO;
 
             return $line;
         }
@@ -245,27 +323,27 @@ class SaleManager
             $line->is_downpayment
             && $line->untaxed_amount_to_invoice == 0
         ) {
-            $line->invoice_status = InvoiceStatus::INVOICED;
+            $line->invoice_status = Enums\InvoiceStatus::INVOICED;
         } elseif ($line->qty_to_invoice != 0) {
-            $line->invoice_status = InvoiceStatus::TO_INVOICE;
+            $line->invoice_status = Enums\InvoiceStatus::TO_INVOICE;
         } elseif (
-            $line->product->invoice_policy === InvoicePolicy::ORDER->value &&
-            $line->product_uom_qty >= 0 &&
-            $line->qty_delivered > $line->product_uom_qty
+            $line->product->invoice_policy === InvoiceEnums\InvoicePolicy::ORDER->value
+            && $line->product_uom_qty >= 0
+            && $line->qty_delivered > $line->product_uom_qty
         ) {
-            $line->invoice_status = InvoiceStatus::UP_SELLING;
+            $line->invoice_status = Enums\InvoiceStatus::UP_SELLING;
         } elseif ($line->qty_invoiced >= $line->product_uom_qty) {
-            $line->invoice_status = InvoiceStatus::INVOICED;
+            $line->invoice_status = Enums\InvoiceStatus::INVOICED;
         } else {
-            $line->invoice_status = InvoiceStatus::NO;
+            $line->invoice_status = Enums\InvoiceStatus::NO;
         }
 
         return $line;
     }
 
-    public function computeUntaxedAmountToInvoice(OrderLine $line): OrderLine
+    public function computeOrderLineUntaxedAmountToInvoice(OrderLine $line): OrderLine
     {
-        if ($line->state !== OrderState::SALE) {
+        if ($line->state !== Enums\OrderState::SALE) {
             $line->untaxed_amount_to_invoice = 0;
 
             return $line;
@@ -273,7 +351,7 @@ class SaleManager
 
         $priceSubtotal = 0;
 
-        if ($line->product->invoice_policy === InvoicePolicy::DELIVERY->value) {
+        if ($line->product->invoice_policy === InvoiceEnums\InvoicePolicy::DELIVERY->value) {
             $uomQtyToConsider = $line->qty_delivered;
         } else {
             $uomQtyToConsider = $line->product_uom_qty;
@@ -288,20 +366,18 @@ class SaleManager
         return $line;
     }
 
-    public function untaxedAmountToInvoiced(OrderLine $line): OrderLine
+    public function untaxedOrderLineAmountToInvoiced(OrderLine $line): OrderLine
     {
         $amountInvoiced = 0.0;
 
-        foreach ($line->invoiceLines as $invoiceLine) {
-            $move = $invoiceLine->move;
-
+        foreach ($line->accountMoveLines as $accountMoveLine) {
             if (
-                $move->state === MoveState::POSTED
-                || $move->payment_state === PaymentState::INVOICING_LEGACY
+                $accountMoveLine->move->state === AccountEnums\MoveState::POSTED
+                || $accountMoveLine->move->payment_state === AccountEnums\PaymentState::INVOICING_LEGACY
             ) {
-                if ($move->move_type === MoveType::OUT_INVOICE) {
+                if ($accountMoveLine->move->move_type === AccountEnums\MoveType::OUT_INVOICE) {
                     $amountInvoiced += $line->price_subtotal;
-                } elseif ($move->move_type === MoveType::OUT_REFUND) {
+                } elseif ($accountMoveLine->move->move_type === AccountEnums\MoveType::OUT_REFUND) {
                     $amountInvoiced -= $line->price_subtotal;
                 }
             }
@@ -319,7 +395,7 @@ class SaleManager
         foreach ($partners as $key => $partner) {
             $payload = [
                 'record_name'    => $record->name,
-                'model_name'     => OrderState::options()[$record->state],
+                'model_name'     => Enums\OrderState::options()[$record->state],
                 'subject'        => $data['subject'],
                 'description'    => $data['description'],
                 'to'             => [
@@ -349,7 +425,7 @@ class SaleManager
             ]);
         }
 
-        $record->state = OrderState::SENT;
+        $record->state = Enums\OrderState::SENT;
         $record->save();
 
         return $record;
@@ -387,9 +463,65 @@ class SaleManager
         }
     }
 
-    private function prepareInvoice(Order $record)
+    public function getOutgoingIncomingMoves(OrderLine $orderLine, bool $strict = true)
     {
+        $outgoingMoveIds = [];
+
+        $incomingMoveIds = [];
+        
+        $moves = $orderLine->inventoryMoves->filter(function($inventoryMove) use($orderLine) {
+            return $inventoryMove->state != InventoryEnums\MoveState::CANCELED
+                && ! $inventoryMove->is_scraped
+                && $orderLine->product_id == $inventoryMove->product_id;
+        });
+
+        $triggeringRuleIds = [];
+
+        if ($moves->isNotEmpty() && ! $strict) {
+            $sortedMoves = $moves->sortBy('id');
+
+            $seenWarehouseIds = [];
+            
+            foreach ($sortedMoves as $move) {
+                if (! in_array($move->warehouse->id, $seenWarehouseIds)) {
+                    $triggeringRuleIds[] = $move->rule_id;
+
+                    $seenWarehouseIds[] = $move->warehouse_id;
+                }
+            }
+        }
+        
+        foreach ($moves as $move) {
+            $isOutgoingStrict = $strict && $move->destinationLocation == InventoryEnums\LocationType::CUSTOMER;
+
+            $isOutgoingNonStrict = ! $strict
+                && in_array($move->rule_id, $triggeringRuleIds)
+                && ($move->finalLocation ?? $move->destinationLocation) == InventoryEnums\LocationType::CUSTOMER;
+                                  
+            if ($isOutgoingStrict || $isOutgoingNonStrict) {
+                if (
+                    ! $move->origin_returned_move_id
+                    || (
+                        $move->origin_returned_move_id
+                        && $move->to_refund
+                    )
+                ) {
+                    $outgoingMoveIds[] = $move->id;
+                }
+            } elseif ($move->sourceLocation == InventoryEnums\LocationType::CUSTOMER && $move->is_refund) {
+                $incomingMoveIds[] = $move->id;
+            }
+        }
+        
         return [
+            $moves->whereIn('id', $outgoingMoveIds),
+            $moves->whereIn('id', $incomingMoveIds),
+        ];
+    }
+
+    private function createAccountMove(Order $record): Move
+    {
+        $accountMove = Move::create([
             'state'                        => AccountEnums\MoveState::DRAFT,
             'move_type'                    => AccountEnums\MoveType::OUT_INVOICE,
             'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
@@ -407,19 +539,29 @@ class SaleManager
             'fiscal_position_id'           => $record->fiscal_position_id,
             'creator_id'                   => Auth::id(),
             'invoice_partner_display_name' => $record->partner->name,
-        ];
+        ]);
+
+        $record->accountMoves()->attach($accountMove->id);
+
+        foreach ($record->lines as $line) {
+            $this->createAccountMoveLine($accountMove, $line);
+        }
+
+        InvoiceResource::collectTotals($accountMove);
+
+        return $accountMove;
     }
 
-    private function prepareInvoiceLine(Move $accountMove, OrderLine $orderLine)
+    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
     {
         $productInvoicePolicy = $orderLine->product?->invoice_policy;
         $invoiceSetting = $this->invoiceSettings->invoice_policy;
 
-        $quantity = ($productInvoicePolicy ?? $invoiceSetting) === InvoicePolicy::ORDER->value
+        $quantity = ($productInvoicePolicy ?? $invoiceSetting) === InvoiceEnums\InvoicePolicy::ORDER->value
             ? $orderLine->product_uom_qty
             : $orderLine->qty_to_invoice;
 
-        return [
+        $accountMoveLine = $accountMove->lines()->create([
             'state'                  => AccountEnums\MoveState::DRAFT,
             'name'                   => $orderLine->name,
             'display_type'           => AccountEnums\DisplayType::PRODUCT,
@@ -436,38 +578,13 @@ class SaleManager
             'partner_id'             => $accountMove->partner_id,
             'product_id'             => $orderLine->product_id,
             'uom_id'                 => $orderLine->product_uom_id,
-            'purchase_order_line_id' => $orderLine->id,
-            'debit'                  => $orderLine?->price_subtotal,
-            'credit'                 => 0.00,
-            'balance'                => $orderLine?->price_subtotal,
-            'amount_currency'        => $orderLine?->price_subtotal,
-        ];
-    }
+            // 'debit'                  => $orderLine?->price_subtotal,
+            // 'credit'                 => 0.00,
+            // 'balance'                => $orderLine?->price_subtotal,
+            // 'amount_currency'        => $orderLine?->price_subtotal,
+        ]);
 
-    private function createAccountMove(Order $record): Move
-    {
-        $accountMove = Move::create($this->prepareInvoice($record));
-
-        $record->accountMoves()->attach($accountMove->id);
-
-        foreach ($record->lines as $line) {
-            $this->createAccountMoveLine($accountMove, $line);
-        }
-
-        InvoiceResource::collectTotals($accountMove);
-
-        return $accountMove;
-    }
-
-    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
-    {
-        $accountMoveLine = $accountMove->lines()->create($this->prepareInvoiceLine($accountMove, $orderLine));
-
-        $orderLine->qty_invoiced += $orderLine->qty_to_invoice;
-
-        $orderLine->save();
-
-        $orderLine->invoiceLines()->sync($accountMoveLine->id);
+        $orderLine->accountMoveLines()->sync($accountMoveLine->id);
 
         $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
     }

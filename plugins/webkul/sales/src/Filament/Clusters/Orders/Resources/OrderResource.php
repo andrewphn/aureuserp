@@ -10,10 +10,10 @@ use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders;
-use Webkul\Sale\Filament\Clusters\Orders\Resources\OrdersResource\Pages;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\Pages;
 use Webkul\Sale\Models\Order;
 
-class OrdersResource extends Resource
+class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
@@ -56,8 +56,8 @@ class OrdersResource extends Resource
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
-            Pages\ViewOrders::class,
-            Pages\EditOrders::class,
+            Pages\ViewOrder::class,
+            Pages\EditOrder::class,
             Pages\ManageInvoices::class,
         ]);
     }
@@ -66,9 +66,9 @@ class OrdersResource extends Resource
     {
         return [
             'index'           => Pages\ListOrders::route('/'),
-            'create'          => Pages\CreateOrders::route('/create'),
-            'view'            => Pages\ViewOrders::route('/{record}'),
-            'edit'            => Pages\EditOrders::route('/{record}/edit'),
+            'create'          => Pages\CreateOrder::route('/create'),
+            'view'            => Pages\ViewOrder::route('/{record}'),
+            'edit'            => Pages\EditOrder::route('/{record}/edit'),
             'manage-invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
         ];
     }

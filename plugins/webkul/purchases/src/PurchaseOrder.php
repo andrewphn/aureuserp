@@ -236,33 +236,6 @@ class PurchaseOrder
         return $line;
     }
 
-    public function computeReceiptStatus(Order $order): Order
-    {
-        if (! Package::isPluginInstalled('inventories')) {
-            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::NO;
-
-            return $order;
-        }
-
-        if ($order->operations->isEmpty() || $order->operations->every(function ($receipt) {
-            return $receipt->state == InventoryEnums\OperationState::CANCELED;
-        })) {
-            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::NO;
-        } elseif ($order->operations->every(function ($receipt) {
-            return in_array($receipt->state, [InventoryEnums\OperationState::DONE, InventoryEnums\OperationState::CANCELED]);
-        })) {
-            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::FULL;
-        } elseif ($order->operations->contains(function ($receipt) {
-            return $receipt->state == InventoryEnums\OperationState::DONE;
-        })) {
-            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::PARTIAL;
-        } else {
-            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::PENDING;
-        }
-
-        return $order;
-    }
-
     public function computeInvoiceStatus(Order $order): Order
     {
         if (! in_array($order->state, [PurchaseEnums\OrderState::PURCHASE, PurchaseEnums\OrderState::DONE])) {
@@ -287,6 +260,33 @@ class PurchaseOrder
             $order->invoice_status = PurchaseEnums\OrderInvoiceStatus::INVOICED;
         } else {
             $order->invoice_status = PurchaseEnums\OrderInvoiceStatus::NO;
+        }
+
+        return $order;
+    }
+
+    public function computeReceiptStatus(Order $order): Order
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::NO;
+
+            return $order;
+        }
+
+        if ($order->operations->isEmpty() || $order->operations->every(function ($receipt) {
+            return $receipt->state == InventoryEnums\OperationState::CANCELED;
+        })) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::NO;
+        } elseif ($order->operations->every(function ($receipt) {
+            return in_array($receipt->state, [InventoryEnums\OperationState::DONE, InventoryEnums\OperationState::CANCELED]);
+        })) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::FULL;
+        } elseif ($order->operations->contains(function ($receipt) {
+            return $receipt->state == InventoryEnums\OperationState::DONE;
+        })) {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::PARTIAL;
+        } else {
+            $order->receipt_status = PurchaseEnums\OrderReceiptStatus::PENDING;
         }
 
         return $order;

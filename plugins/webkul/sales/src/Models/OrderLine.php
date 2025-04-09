@@ -4,13 +4,15 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
-use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Inventory\Models\Move as InventoryMove;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
@@ -65,7 +67,8 @@ class OrderLine extends Model
     ];
 
     protected $casts = [
-        'cast' => OrderState::class,
+        'cast'                 => Enums\OrderState::class,
+        'qty_delivered_method' => Enums\QtyDeliveredMethod::class,
     ];
 
     public function order()
@@ -108,9 +111,14 @@ class OrderLine extends Model
         return $this->belongsToMany(Tax::class, 'sales_order_line_taxes', 'order_line_id', 'tax_id');
     }
 
-    public function invoiceLines()
+    public function accountMoveLines()
     {
         return $this->belongsToMany(MoveLine::class, 'sales_order_line_invoices', 'order_line_id', 'invoice_line_id');
+    }
+
+    public function inventoryMoves(): HasMany
+    {
+        return $this->hasMany(InventoryMove::class, 'sale_order_line_id');
     }
 
     public function productPackaging()
