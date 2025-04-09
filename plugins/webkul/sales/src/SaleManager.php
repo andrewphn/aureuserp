@@ -649,7 +649,7 @@ class SaleManager
             return;
         }
 
-        $rules = [];
+        $rulesToRun = [];
 
         foreach ($record->lines as $line) {
             $rule = $this->getPullRule($line);
@@ -658,17 +658,23 @@ class SaleManager
                 throw new \Exception("No pull rule has been found to replenish \"{$line->name}\".\nVerify the routes configuration on the product.");
             }
 
-            $ruleId = $rule->id;
+            $rulesToRun[$line->id] = $rule;
+        }
+
+        $rules = [];
+
+        foreach ($record->lines as $line) {
+            $rule = $rulesToRun[$line->id];
 
             $pulledMove = $this->runPullRule($rule, $line);
 
-            if (! isset($rules[$ruleId])) {
-                $rules[$ruleId] = [
+            if (! isset($rules[$rule->id])) {
+                $rules[$rule->id] = [
                     'rule'  => $rule,
                     'moves' => [$pulledMove],
                 ];
             } else {
-                $rules[$ruleId]['moves'][] = $pulledMove;
+                $rules[$rule->id]['moves'][] = $pulledMove;
             }
         }
 
