@@ -1017,12 +1017,23 @@ class OperationResource extends Resource
     public static function calculateProductQuantity($uomId, $uomQuantity)
     {
         if (! $uomId) {
-            return $uomQuantity;
+            return self::normalizeZero((float) ($uomQuantity ?? 0));
         }
 
         $uom = Uom::find($uomId);
 
-        return (float) ($uomQuantity ?? 0) / $uom->factor;
+        if (! $uom || ! is_numeric($uom->factor) || $uom->factor == 0) {
+            return 0;
+        }
+
+        $quantity = (float) ($uomQuantity ?? 0) / $uom->factor;
+
+        return self::normalizeZero($quantity);
+    }
+
+    protected static function normalizeZero(float $value): float
+    {
+        return $value == 0 ? 0.0 : $value; // convert -0.0 to 0.0
     }
 
     private static function getBestPackaging($productId, $quantity)
