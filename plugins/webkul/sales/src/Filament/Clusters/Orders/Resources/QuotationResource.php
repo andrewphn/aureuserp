@@ -1404,17 +1404,19 @@ class QuotationResource extends Resource
             Pages\ViewQuotation::class,
             Pages\EditQuotation::class,
             Pages\ManageInvoices::class,
+            Pages\ManageDeliveries::class,
         ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index'           => Pages\ListQuotations::route('/'),
-            'create'          => Pages\CreateQuotation::route('/create'),
-            'view'            => Pages\ViewQuotation::route('/{record}'),
-            'edit'            => Pages\EditQuotation::route('/{record}/edit'),
-            'manage-invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
+            'index'      => Pages\ListQuotations::route('/'),
+            'create'     => Pages\CreateQuotation::route('/create'),
+            'view'       => Pages\ViewQuotation::route('/{record}'),
+            'edit'       => Pages\EditQuotation::route('/{record}/edit'),
+            'invoices'   => Pages\ManageInvoices::route('/{record}/invoices'),
+            'deliveries' => Pages\ManageDeliveries::route('/{record}/deliveries'),
         ];
     }
 }

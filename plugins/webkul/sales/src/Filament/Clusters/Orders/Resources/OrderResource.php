@@ -59,17 +59,19 @@ class OrderResource extends Resource
             Pages\ViewOrder::class,
             Pages\EditOrder::class,
             Pages\ManageInvoices::class,
+            Pages\ManageDeliveries::class,
         ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index'           => Pages\ListOrders::route('/'),
-            'create'          => Pages\CreateOrder::route('/create'),
-            'view'            => Pages\ViewOrder::route('/{record}'),
-            'edit'            => Pages\EditOrder::route('/{record}/edit'),
-            'manage-invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
+            'index'      => Pages\ListOrders::route('/'),
+            'create'     => Pages\CreateOrder::route('/create'),
+            'view'       => Pages\ViewOrder::route('/{record}'),
+            'edit'       => Pages\EditOrder::route('/{record}/edit'),
+            'invoices'   => Pages\ManageInvoices::route('/{record}/invoices'),
+            'deliveries' => Pages\ManageDeliveries::route('/{record}/deliveries'),
         ];
     }
 }
