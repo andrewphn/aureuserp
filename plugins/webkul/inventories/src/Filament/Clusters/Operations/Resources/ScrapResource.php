@@ -82,6 +82,9 @@ class ScrapResource extends Resource
                                                 'name',
                                                 fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
                                             )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->live()
