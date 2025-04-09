@@ -67,8 +67,7 @@ class ManageVariants extends ManageRelatedRecords
                     });
                 })
                 ->badge()
-                ->sortable()
-                ->searchable(),
+                ->sortable(),
             ...$table->getColumns(),
         ]);
 
