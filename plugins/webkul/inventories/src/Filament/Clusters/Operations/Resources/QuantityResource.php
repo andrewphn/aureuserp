@@ -181,6 +181,7 @@ class QuantityResource extends Resource
                 Tables\Columns\TextInputColumn::make('counted_quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.counted'))
                     ->sortable()
+                    ->rules(['numeric', 'min:0'])
                     ->beforeStateUpdated(function ($record, $state) {
                         $record->update([
                             'inventory_quantity_set'  => true,
