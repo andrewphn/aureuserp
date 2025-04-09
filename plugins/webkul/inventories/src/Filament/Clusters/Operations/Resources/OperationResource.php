@@ -441,7 +441,7 @@ class OperationResource extends Resource
                                                     ->placeholder('—')
                                                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations),
 
-                                                Infolists\Components\TextEntry::make('description')
+                                                Infolists\Components\TextEntry::make('description_picking')
                                                     ->label(__('inventories::filament/clusters/operations/resources/operation.infolist.tabs.operations.entries.description'))
                                                     ->icon('heroicon-o-document-text')
                                                     ->placeholder('—'),
