@@ -73,6 +73,7 @@ class TimesheetResource extends Resource
                     ->numeric()
                     ->required()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->helperText(__('timesheets::filament/resources/timesheet.form.time-spent-helper-text')),
             ])
             ->columns(1);

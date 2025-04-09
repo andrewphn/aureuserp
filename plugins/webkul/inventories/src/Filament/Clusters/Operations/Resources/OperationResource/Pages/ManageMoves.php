@@ -11,6 +11,7 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
+use Webkul\Inventory\Models\MoveLine;
 
 class ManageMoves extends ManageRelatedRecords
 {
@@ -68,6 +69,7 @@ class ManageMoves extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\DeleteAction::make()
+                    ->hidden(fn (MoveLine $record): bool => $record->state == Enums\MoveState::DONE)
                     ->successNotification(
                         Notification::make()
                             ->success()

@@ -41,24 +41,31 @@ class AddressResource extends Resource
                 ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form)),
             Forms\Components\TextInput::make('name')
                 ->label(__('partners::filament/resources/address.form.name'))
-                ->required(),
+                ->required()
+                ->maxLength(255),
             Forms\Components\TextInput::make('email')
                 ->label(__('partners::filament/resources/address.form.email'))
-                ->email(),
+                ->email()
+                ->maxLength(255),
             Forms\Components\TextInput::make('phone')
                 ->label(__('partners::filament/resources/address.form.phone'))
-                ->tel(),
+                ->tel()
+                ->maxLength(255),
             Forms\Components\TextInput::make('mobile')
                 ->label(__('partners::filament/resources/address.form.mobile'))
                 ->tel(),
             Forms\Components\TextInput::make('street1')
-                ->label(__('partners::filament/resources/address.form.street1')),
+                ->label(__('partners::filament/resources/address.form.street1'))
+                ->maxLength(255),
             Forms\Components\TextInput::make('street2')
-                ->label(__('partners::filament/resources/address.form.street2')),
+                ->label(__('partners::filament/resources/address.form.street2'))
+                ->maxLength(255),
             Forms\Components\TextInput::make('city')
-                ->label(__('partners::filament/resources/address.form.city')),
+                ->label(__('partners::filament/resources/address.form.city'))
+                ->maxLength(255),
             Forms\Components\TextInput::make('zip')
-                ->label(__('partners::filament/resources/address.form.zip')),
+                ->label(__('partners::filament/resources/address.form.zip'))
+                ->maxLength(255),
             Forms\Components\Select::make('country_id')
                 ->label(__('partners::filament/resources/address.form.country'))
                 ->relationship(name: 'country', titleAttribute: 'name')

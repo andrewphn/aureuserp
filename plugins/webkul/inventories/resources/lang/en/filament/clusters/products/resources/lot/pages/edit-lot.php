@@ -2,8 +2,8 @@
 
 return [
     'notification' => [
-        'title' => 'Package updated',
-        'body'  => 'The package has been updated successfully.',
+        'title' => 'Lot updated',
+        'body'  => 'The lot has been updated successfully.',
     ],
 
     'header-actions' => [
@@ -13,8 +13,15 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Package deleted',
-                'body'  => 'The package has been deleted successfully.',
+                'success' => [
+                    'title' => 'Lot deleted',
+                    'body'  => 'The lot has been deleted successfully.',
+                ],
+
+                'error' => [
+                    'title' => 'Lot could not be deleted',
+                    'body'  => 'The lot cannot be deleted because it is currently in use.',
+                ],
             ],
         ],
     ],

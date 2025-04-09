@@ -81,8 +81,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Warehouse force deleted',
-                    'body'  => 'The warehouse has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Warehouse force deleted',
+                        'body'  => 'The warehouse has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Warehouse could not be deleted',
+                        'body'  => 'The warehouse cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -104,8 +111,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Warehouses force deleted',
-                    'body'  => 'The warehouses has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Warehouses force deleted',
+                        'body'  => 'The warehouses has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Warehouses could not be deleted',
+                        'body'  => 'The warehouses cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

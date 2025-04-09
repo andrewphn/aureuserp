@@ -6,6 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Models\Lot;
 
@@ -40,11 +41,26 @@ class EditLot extends EditRecord
                     }, 'Lot-'.str_replace('/', '_', $record->name).'.pdf');
                 }),
             Actions\DeleteAction::make()
+                ->action(function (Actions\DeleteAction $action, Lot $record) {
+                    try {
+                        $record->delete();
+
+                        $action->success();
+                    } catch (QueryException $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('inventories::filament/clusters/products/resources/lot/pages/edit-lot.header-actions.delete.notification.error.title'))
+                            ->body(__('inventories::filament/clusters/products/resources/lot/pages/edit-lot.header-actions.delete.notification.error.body'))
+                            ->send();
+
+                        $action->failure();
+                    }
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('inventories::filament/clusters/products/resources/lot/pages/edit-lot.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/products/resources/lot/pages/edit-lot.header-actions.delete.notification.body')),
+                        ->title(__('inventories::filament/clusters/products/resources/lot/pages/edit-lot.header-actions.delete.notification.success.title'))
+                        ->body(__('inventories::filament/clusters/products/resources/lot/pages/edit-lot.header-actions.delete.notification.success.body')),
                 ),
         ];
     }

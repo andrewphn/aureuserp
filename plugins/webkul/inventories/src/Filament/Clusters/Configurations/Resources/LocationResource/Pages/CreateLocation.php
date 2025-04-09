@@ -33,7 +33,7 @@ class CreateLocation extends CreateRecord
 
         $data['warehouse_id'] = $parentLocation?->warehouse_id;
 
-        $data['next_inventory_date'] = $data['cyclic_inventory_frequency']
+        $data['next_inventory_date'] = isset($data['cyclic_inventory_frequency']) && $data['cyclic_inventory_frequency']
             ? now()->addDays((int) $data['cyclic_inventory_frequency'])
             : null;
 

@@ -10,8 +10,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Dropship deleted',
-                    'body'  => 'The dropship ras been deleted successfully.',
+                    'success' => [
+                        'title' => 'Dropship deleted',
+                        'body'  => 'The dropship ras been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Dropship could not be deleted',
+                        'body'  => 'The dropship cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -19,8 +26,15 @@ return [
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Dropships deleted',
-                    'body'  => 'The dropships has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Dropships deleted',
+                        'body'  => 'The dropships has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Dropships could not be deleted',
+                        'body'  => 'The dropships cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

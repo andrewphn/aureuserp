@@ -430,11 +430,15 @@ class EmployeeResource extends Resource
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.distance-home-to-work'))
                                                                     ->numeric()
                                                                     ->default(0)
+                                                                    ->minValue(0)
+                                                                    ->maxValue(99999999999)
                                                                     ->suffix('km'),
                                                                 Forms\Components\TextInput::make('km_home_work')
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.km-home-to-work'))
                                                                     ->numeric()
                                                                     ->default(0)
+                                                                    ->minValue(0)
+                                                                    ->maxValue(99999999999)
                                                                     ->suffix('km'),
                                                                 Forms\Components\Select::make('distance_home_work_unit')
                                                                     ->options(DistanceUnit::options())
@@ -486,6 +490,7 @@ class EmployeeResource extends Resource
                                                                     ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.number-of-children'))
                                                                     ->numeric()
                                                                     ->minValue(0)
+                                                                    ->maxValue(99999999999)
                                                                     ->disabled(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
                                                                     ->hidden(fn (Get $get) => $get('marital') === MaritalStatus::Single->value)
                                                                     ->dehydrated(fn (Get $get) => $get('marital') !== MaritalStatus::Single->value),

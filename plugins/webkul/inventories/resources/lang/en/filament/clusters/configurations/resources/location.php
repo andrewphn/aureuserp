@@ -99,8 +99,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Location force deleted',
-                    'body'  => 'The location has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Location force deleted',
+                        'body'  => 'The location has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Location could not be deleted',
+                        'body'  => 'The location cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -126,8 +133,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Locations force deleted',
-                    'body'  => 'The locations has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Locations force deleted',
+                        'body'  => 'The locations has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Locations could not be deleted',
+                        'body'  => 'The locations cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

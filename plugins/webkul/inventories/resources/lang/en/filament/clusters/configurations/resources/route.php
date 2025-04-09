@@ -78,8 +78,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Route force deleted',
-                    'body'  => 'The route has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Route force deleted',
+                        'body'  => 'The route has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Route could not be deleted',
+                        'body'  => 'The route cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -101,8 +108,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Routes force deleted',
-                    'body'  => 'The routes has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Routes force deleted',
+                        'body'  => 'The routes has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Routes could not be deleted',
+                        'body'  => 'The routes cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rules\Unique;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 
@@ -28,17 +29,21 @@ class ManageCapacityByProducts extends ManageRelatedRecords
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('product')
+                Forms\Components\Select::make('product_id')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-products.form.product'))
                     ->relationship(name: 'product', titleAttribute: 'name')
                     ->required()
+                    ->unique(modifyRuleUsing: function (Unique $rule) {
+                        return $rule->where('storage_category_id', $this->getOwnerRecord()->id);
+                    })
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextInput::make('qty')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-products.form.qty'))
                     ->required()
                     ->numeric()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->maxValue(99999999999),
             ])
             ->columns(1);
     }

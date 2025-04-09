@@ -73,8 +73,31 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Scrap deleted',
-                    'body'  => 'The scrap has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Scrap deleted',
+                        'body'  => 'The scrap has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Scrap could not be deleted',
+                        'body'  => 'The scrap cannot be deleted because it is currently in use.',
+                    ],
+                ],
+            ],
+        ],
+
+        'bulk-actions' => [
+            'delete' => [
+                'notification' => [
+                    'success' => [
+                        'title' => 'Scraps deleted',
+                        'body'  => 'The selected scraps have been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Scraps could not be deleted',
+                        'body'  => 'The scraps cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

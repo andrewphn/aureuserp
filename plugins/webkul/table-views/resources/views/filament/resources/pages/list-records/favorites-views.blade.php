@@ -11,7 +11,11 @@
         $tableSavedViews = $this->getSavedTableViews();
     @endphp
 
-    <x-filament::tabs wire:listen="filtered-list-updated" style="margin-bottom: -16px">
+    <x-filament::tabs
+        class="w-full"
+        style="margin-bottom: -24px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;"
+        wire:listen="filtered-list-updated"
+    >
         @foreach ($tabs as $tabKey => $tab)
             @php
                 $tabKey = strval($tabKey);
@@ -56,4 +60,13 @@
             </x-filament::dropdown>
         </div>
     </x-filament::tabs>
+
+    @pushOnce('styles')
+        <style>
+            .fi-ta-ctn {
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+        </style>
+    @endPushOnce
 @endif

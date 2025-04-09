@@ -32,7 +32,8 @@ class SkillLevelRelationManager extends RelationManager
                 Forms\Components\TextInput::make('level')
                     ->label(__('employees::filament/clusters/configurations/resources/skill-type/relation-managers/levels.form.level'))
                     ->numeric()
-                    ->rules(['numeric', 'min:0', 'max:100']),
+                    ->minValue(0)
+                    ->maxValue(100),
                 Forms\Components\Toggle::make('default_level')
                     ->label(__('employees::filament/clusters/configurations/resources/skill-type/relation-managers/levels.form.default-level')),
             ])->columns(2);

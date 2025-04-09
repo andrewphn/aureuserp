@@ -50,6 +50,7 @@ class PostResource extends Resource
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.general.fields.title'))
                                     ->required()
                                     ->live(onBlur: true)
+                                    ->maxLength(255)
                                     ->placeholder(__('blogs::filament/admin/resources/post.form.sections.general.fields.title-placeholder'))
                                     ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;'])
                                     ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
@@ -72,9 +73,11 @@ class PostResource extends Resource
                         Forms\Components\Section::make(__('blogs::filament/admin/resources/post.form.sections.seo.title'))
                             ->schema([
                                 Forms\Components\TextInput::make('meta_title')
-                                    ->label(__('blogs::filament/admin/resources/post.form.sections.seo.fields.meta-title')),
+                                    ->label(__('blogs::filament/admin/resources/post.form.sections.seo.fields.meta-title'))
+                                    ->maxLength(255),
                                 Forms\Components\TextInput::make('meta_keywords')
-                                    ->label(__('blogs::filament/admin/resources/post.form.sections.seo.fields.meta-keywords')),
+                                    ->label(__('blogs::filament/admin/resources/post.form.sections.seo.fields.meta-keywords'))
+                                    ->maxLength(255),
                                 Forms\Components\Textarea::make('meta_description')
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.seo.fields.meta-description')),
                             ]),
@@ -100,6 +103,7 @@ class PostResource extends Resource
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('blogs::filament/admin/resources/post.form.sections.settings.fields.name'))
                                             ->required()
+                                            ->maxLength(255)
                                             ->unique('blogs_tags'),
                                         Forms\Components\ColorPicker::make('color')
                                             ->label(__('blogs::filament/admin/resources/post.form.sections.settings.fields.color'))

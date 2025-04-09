@@ -182,6 +182,7 @@ class JobPositionResource extends Resource
                                             ->label(__('recruitments::filament/clusters/configurations/resources/job-position.form.sections.workforce-planning.fields.recruitment-target'))
                                             ->numeric()
                                             ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->default(0),
                                         Forms\Components\TextInput::make('no_of_employee')
                                             ->disabled()

@@ -47,21 +47,28 @@ return [
             'restore' => [
                 'notification' => [
                     'title' => 'Attribute restored',
-                    'body'  => 'The Attribute has been restored successfully.',
+                    'body'  => 'The attribute has been restored successfully.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
                     'title' => 'Attribute deleted',
-                    'body'  => 'The Attribute has been deleted successfully.',
+                    'body'  => 'The attribute has been deleted successfully.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Attribute force deleted',
-                    'body'  => 'The Attribute has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Attribute force deleted',
+                        'body'  => 'The attribute has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Attribute could not be deleted',
+                        'body'  => 'The attribute cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -70,21 +77,28 @@ return [
             'restore' => [
                 'notification' => [
                     'title' => 'Attributes restored',
-                    'body'  => 'The Attribute has been restored successfully.',
+                    'body'  => 'The attributes has been restored successfully.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
                     'title' => 'Attributes deleted',
-                    'body'  => 'The Attribute has been deleted successfully.',
+                    'body'  => 'The attributes has been deleted successfully.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Attributes force deleted',
-                    'body'  => 'The Attribute has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Attributes force deleted',
+                        'body'  => 'The attributes has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Attributes could not be deleted',
+                        'body'  => 'The attributes cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

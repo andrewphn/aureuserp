@@ -95,11 +95,9 @@ class MilestoneResource extends Resource
                         MilestonesRelationManager::class,
                         ManageMilestones::class,
                     ])
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('creator.name')
                     ->label(__('projects::filament/clusters/configurations/resources/milestone.table.columns.creator'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('projects::filament/clusters/configurations/resources/milestone.table.columns.created-at'))

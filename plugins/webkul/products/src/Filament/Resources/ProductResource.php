@@ -55,6 +55,7 @@ class ProductResource extends Resource
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('products::filament/resources/product.form.sections.general.fields.name'))
                                             ->required()
+                                            ->maxLength(255)
                                             ->unique('products_tags'),
                                     ]),
                             ]),
@@ -73,11 +74,13 @@ class ProductResource extends Resource
                                         Forms\Components\TextInput::make('weight')
                                             ->label(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.fields.weight'))
                                             ->numeric()
-                                            ->minValue(0),
+                                            ->minValue(0)
+                                            ->maxValue(99999999999),
                                         Forms\Components\TextInput::make('volume')
                                             ->label(__('products::filament/resources/product.form.sections.inventory.fieldsets.logistics.fields.volume'))
                                             ->numeric()
-                                            ->minValue(0),
+                                            ->minValue(0)
+                                            ->maxValue(99999999999),
                                     ]),
                             ])
                             ->visible(fn (Forms\Get $get): bool => $get('type') == ProductType::GOODS->value),
@@ -121,11 +124,13 @@ class ProductResource extends Resource
                                     ->label(__('products::filament/resources/product.form.sections.pricing.fields.price'))
                                     ->numeric()
                                     ->required()
-                                    ->default(0.00),
+                                    ->default(0.00)
+                                    ->minValue(0),
                                 Forms\Components\TextInput::make('cost')
                                     ->label(__('products::filament/resources/product.form.sections.pricing.fields.cost'))
                                     ->numeric()
-                                    ->default(0.00),
+                                    ->default(0.00)
+                                    ->minValue(0),
                                 Forms\Components\Hidden::make('uom_id')
                                     ->default(UOM::first()->id),
                                 Forms\Components\Hidden::make('uom_po_id')
@@ -164,7 +169,6 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('variants_count')
                     ->label(__('products::filament/resources/product.table.columns.variants'))
                     ->placeholder('—')
-                    ->searchable()
                     ->counts('variants')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('reference')
@@ -180,7 +184,6 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('responsible.name')
                     ->label(__('products::filament/resources/product.table.columns.responsible'))
                     ->placeholder('—')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('barcode')
@@ -207,7 +210,6 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('type')
                     ->label(__('products::filament/resources/product.table.columns.type'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')

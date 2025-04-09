@@ -10,6 +10,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Settings\OperationSettings;
 
 class CapacityByPackagesRelationManager extends RelationManager
@@ -30,17 +31,21 @@ class CapacityByPackagesRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('packageType')
+                Forms\Components\Select::make('package_type_id')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-packages.form.package-type'))
                     ->relationship(name: 'packageType', titleAttribute: 'name')
                     ->required()
+                    ->unique(modifyRuleUsing: function (Unique $rule) {
+                        return $rule->where('storage_category_id', $this->getOwnerRecord()->id);
+                    })
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextInput::make('qty')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-packages.form.qty'))
                     ->required()
                     ->numeric()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->maxValue(99999999999),
             ])
             ->columns(1);
     }

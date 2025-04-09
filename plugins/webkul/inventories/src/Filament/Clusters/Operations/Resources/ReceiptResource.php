@@ -11,6 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource\Pages;
@@ -59,27 +62,43 @@ class ReceiptResource extends Resource
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
                         ->hidden(fn (Receipt $record): bool => $record->state == Enums\OperationState::DONE)
+                        ->action(function (Receipt $record) {
+                            try {
+                                $record->delete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/operations/resources/receipt.table.actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/operations/resources/receipt.table.actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/operations/resources/receipt.table.actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/operations/resources/receipt.table.actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/operations/resources/receipt.table.actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/receipt.table.actions.delete.notification.success.body')),
                         ),
                 ]),
             ])
             ->bulkActions([
-                Tables\Actions\ActionGroup::make([
-                ])
-                    ->icon('heroicon-o-printer')
-                    ->label('Print')
-                    ->color('gray')
-                    ->button(),
                 Tables\Actions\DeleteBulkAction::make()
+                    ->action(function (Collection $records) {
+                        try {
+                            $records->each(fn (Model $record) => $record->delete());
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('inventories::filament/clusters/operations/resources/receipt.table.bulk-actions.delete.notification.error.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/receipt.table.bulk-actions.delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('inventories::filament/clusters/operations/resources/receipt.table.bulk-actions.delete.notification.title'))
-                            ->body(__('inventories::filament/clusters/operations/resources/receipt.table.bulk-actions.delete.notification.body')),
+                            ->title(__('inventories::filament/clusters/operations/resources/receipt.table.bulk-actions.delete.notification.success.title'))
+                            ->body(__('inventories::filament/clusters/operations/resources/receipt.table.bulk-actions.delete.notification.success.body')),
                     ),
             ])
             ->modifyQueryUsing(function (Builder $query) {
@@ -101,12 +120,6 @@ class ReceiptResource extends Resource
             Pages\EditReceipt::class,
             Pages\ManageMoves::class,
         ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-        ];
     }
 
     public static function getPages(): array

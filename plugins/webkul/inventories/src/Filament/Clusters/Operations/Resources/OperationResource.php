@@ -159,6 +159,7 @@ class OperationResource extends Resource
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                                 Forms\Components\TextInput::make('origin')
                                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.source-document'))
+                                    ->maxLength(255)
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.source-document-hint-tooltip'))
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                             ])
@@ -440,7 +441,7 @@ class OperationResource extends Resource
                                                     ->placeholder('—')
                                                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations),
 
-                                                Infolists\Components\TextEntry::make('description')
+                                                Infolists\Components\TextEntry::make('description_picking')
                                                     ->label(__('inventories::filament/clusters/operations/resources/operation.infolist.tabs.operations.entries.description'))
                                                     ->icon('heroicon-o-document-text')
                                                     ->placeholder('—'),
@@ -568,8 +569,9 @@ class OperationResource extends Resource
                     ->preload()
                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
-                Forms\Components\TextInput::make('description')
+                Forms\Components\TextInput::make('description_picking')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.description'))
+                    ->maxLength(255)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\DateTimePicker::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.scheduled-at'))
@@ -591,6 +593,7 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.demand'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->live()
@@ -602,6 +605,7 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.quantity'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->visible(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT)
@@ -659,7 +663,7 @@ class OperationResource extends Resource
                         'quantity' => $data['quantity'] ?? null,
                     ]);
 
-                    Inventory::updateOrCreateMoveLines($record);
+                    Inventory::computeTransferMove($record);
 
                     Inventory::computeTransferState($record->operation);
                 }
@@ -768,7 +772,11 @@ class OperationResource extends Resource
                                 $set('result_package_id', $productQuantity?->package_id);
 
                                 if ($productQuantity?->quantity) {
-                                    $set('qty', static::calculateProductUOMQuantity($move->uom_id, $productQuantity->quantity));
+                                    if (! $move->uom_id) {
+                                        $set('qty', $productQuantity->quantity);
+                                    } else {
+                                        $set('qty', (float) ($productQuantity->quantity ?? 0) * $move->uom->factor);
+                                    }
                                 }
                             })
                             ->visible($move->sourceLocation->type == Enums\LocationType::INTERNAL)
@@ -851,6 +859,7 @@ class OperationResource extends Resource
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.lines.fields.quantity'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->maxValue(fn () => $move->product->tracking == Enums\ProductTracking::SERIAL ? 1 : 999999999)
                             ->required()
                             ->suffix(function () use ($move) {
@@ -913,7 +922,7 @@ class OperationResource extends Resource
                     'quantity' => $totalQty,
                 ]);
 
-                Inventory::updateOrCreateMoveLines($record);
+                Inventory::computeTransferMove($record);
 
                 $set('quantity', $totalQty);
             });
@@ -1008,27 +1017,29 @@ class OperationResource extends Resource
     public static function calculateProductQuantity($uomId, $uomQuantity)
     {
         if (! $uomId) {
-            return $uomQuantity;
+            return self::normalizeZero((float) ($uomQuantity ?? 0));
         }
 
         $uom = Uom::find($uomId);
 
-        return (float) ($uomQuantity ?? 0) / $uom->factor;
+        if (! $uom || ! is_numeric($uom->factor) || $uom->factor == 0) {
+            return 0;
+        }
+
+        $quantity = (float) ($uomQuantity ?? 0) / $uom->factor;
+
+        return self::normalizeZero($quantity);
     }
 
-    public static function calculateProductUOMQuantity($uomId, $productQuantity)
+    protected static function normalizeZero(float $value): float
     {
-        if (! $uomId) {
-            return $productQuantity;
-        }
-
-        $uom = Uom::find($uomId);
-
-        return (float) ($productQuantity ?? 0) * $uom->factor;
+        return $value == 0 ? 0.0 : $value; // convert -0.0 to 0.0
     }
 
     private static function getBestPackaging($productId, $quantity)
     {
+        $product = Product::find($productId);
+
         $packagings = Packaging::where('product_id', $productId)
             ->orderByDesc('qty')
             ->get();

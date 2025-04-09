@@ -12,6 +12,9 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Models\Packaging;
 
@@ -42,7 +45,8 @@ class PackagingResource extends Resource
                     ->label(__('products::filament/resources/packaging.form.qty'))
                     ->required()
                     ->numeric()
-                    ->minValue(0.00),
+                    ->minValue(0.00)
+                    ->maxValue(99999999),
                 Forms\Components\Select::make('company_id')
                     ->label(__('products::filament/resources/packaging.form.company'))
                     ->relationship('company', 'name')
@@ -114,11 +118,22 @@ class PackagingResource extends Resource
                             ->body(__('products::filament/resources/packaging.table.actions.edit.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
+                    ->action(function (Packaging $record) {
+                        try {
+                            $record->delete();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('products::filament/resources/packaging.table.actions.delete.notification.error.title'))
+                                ->body(__('products::filament/resources/packaging.table.actions.delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('products::filament/resources/packaging.table.actions.delete.notification.title'))
-                            ->body(__('products::filament/resources/packaging.table.actions.delete.notification.body')),
+                            ->title(__('products::filament/resources/packaging.table.actions.delete.notification.success.title'))
+                            ->body(__('products::filament/resources/packaging.table.actions.delete.notification.success.body')),
                     ),
             ])
             ->bulkActions([
@@ -138,11 +153,22 @@ class PackagingResource extends Resource
                             }, 'Packaging-Barcode.pdf');
                         }),
                     Tables\Actions\DeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('products::filament/resources/packaging.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('products::filament/resources/packaging.table.bulk-actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('products::filament/resources/packaging.table.bulk-actions.delete.notification.title'))
-                                ->body(__('products::filament/resources/packaging.table.bulk-actions.delete.notification.body')),
+                                ->title(__('products::filament/resources/packaging.table.bulk-actions.delete.notification.success.title'))
+                                ->body(__('products::filament/resources/packaging.table.bulk-actions.delete.notification.success.body')),
                         ),
                 ]),
             ])

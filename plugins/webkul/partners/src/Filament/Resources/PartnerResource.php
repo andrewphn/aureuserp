@@ -115,7 +115,8 @@ class PartnerResource extends Resource
                                     ->maxLength(255),
                                 Forms\Components\TextInput::make('mobile')
                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.mobile'))
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->tel(),
                                 Forms\Components\TextInput::make('email')
                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.email'))
                                     ->email()
@@ -132,11 +133,13 @@ class PartnerResource extends Resource
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('partners::filament/resources/partner.form.sections.general.fields.name'))
                                             ->required()
+                                            ->maxLength(255)
                                             ->unique('partners_titles'),
                                         Forms\Components\TextInput::make('short_name')
                                             ->label(__('partners::filament/resources/partner.form.sections.general.fields.short-name'))
                                             ->label('Short Name')
                                             ->required()
+                                            ->maxLength(255)
                                             ->unique('partners_titles'),
                                         Forms\Components\Hidden::make('creator_id')
                                             ->default(Auth::user()->id),
@@ -153,6 +156,7 @@ class PartnerResource extends Resource
                                                 Forms\Components\TextInput::make('name')
                                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.name'))
                                                     ->required()
+                                                    ->maxLength(255)
                                                     ->unique('partners_tags'),
                                                 Forms\Components\ColorPicker::make('color')
                                                     ->label(__('partners::filament/resources/partner.form.sections.general.fields.color'))
@@ -164,13 +168,17 @@ class PartnerResource extends Resource
                                 Forms\Components\Fieldset::make('Address')
                                     ->schema([
                                         Forms\Components\TextInput::make('street1')
-                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street1')),
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street1'))
+                                            ->maxLength(255),
                                         Forms\Components\TextInput::make('street2')
-                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street2')),
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.street2'))
+                                            ->maxLength(255),
                                         Forms\Components\TextInput::make('city')
-                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.city')),
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.city'))
+                                            ->maxLength(255),
                                         Forms\Components\TextInput::make('zip')
-                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.zip')),
+                                            ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.zip'))
+                                            ->maxLength(255),
                                         Forms\Components\Select::make('country_id')
                                             ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
                                             ->relationship(name: 'country', titleAttribute: 'name')
@@ -193,11 +201,13 @@ class PartnerResource extends Resource
                                                     ->schema([
                                                         Forms\Components\TextInput::make('name')
                                                             ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.name'))
-                                                            ->required(),
+                                                            ->required()
+                                                            ->maxLength(255),
                                                         Forms\Components\TextInput::make('code')
                                                             ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.code'))
                                                             ->required()
-                                                            ->unique('states'),
+                                                            ->unique('states')
+                                                            ->maxLength(255),
                                                         Forms\Components\Select::make('country_id')
                                                             ->label(__('partners::filament/resources/partner.form.sections.general.address.fields.country'))
                                                             ->relationship('country', 'name')

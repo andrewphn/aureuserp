@@ -18,15 +18,19 @@ class ViewCategory extends ViewRecord
         return [
             Actions\EditAction::make(),
             Actions\DeleteAction::make()
-                ->action(function (Category $record) {
+                ->action(function (Actions\DeleteAction $action, Category $record) {
                     try {
                         $record->delete();
+
+                        $action->success();
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
                             ->title(__('products::filament/resources/category/pages/view-category.header-actions.delete.notification.error.title'))
                             ->body(__('products::filament/resources/category/pages/view-category.header-actions.delete.notification.error.body'))
                             ->send();
+
+                        $action->failure();
                     }
                 })
                 ->successNotification(

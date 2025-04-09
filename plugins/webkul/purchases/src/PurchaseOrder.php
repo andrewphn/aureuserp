@@ -12,7 +12,7 @@ use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Services\TaxService;
 use Webkul\Inventory\Enums as InventoryEnums;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\OperationType;
@@ -425,7 +425,13 @@ class PurchaseOrder
             return;
         }
 
-        $record->operation_type_id = $this->getInventoryOperationType($record)->id;
+        $operationType = $this->getInventoryOperationType($record);
+
+        if (! $operationType) {
+            return;
+        }
+
+        $record->operation_type_id = $operationType->id;
 
         $record->save();
 
@@ -482,11 +488,7 @@ class PurchaseOrder
 
         $operation->refresh();
 
-        foreach ($operation->moves as $move) {
-            OperationResource::updateOrCreateMoveLines($move);
-        }
-
-        OperationResource::computeTransferState($operation);
+        Inventory::computeTransfer($operation);
 
         $url = PurchaseOrderResource::getUrl('view', ['record' => $record]);
 
@@ -516,20 +518,20 @@ class PurchaseOrder
                 $move->lines()->delete();
             }
 
-            OperationResource::computeTransferState($operation);
+            Inventory::computeTransferState($operation);
         });
     }
 
     protected function getInventoryOperationType(Order $record): ?OperationType
     {
-        $operationType = OperationType::where('type', '=', InventoryEnums\OperationType::INCOMING)
+        $operationType = OperationType::where('type', InventoryEnums\OperationType::INCOMING)
             ->whereHas('warehouse', function ($query) use ($record) {
-                $query->where('company_id', '=', $record->company_id);
+                $query->where('company_id', $record->company_id);
             })
             ->first();
 
         if (! $operationType) {
-            $operationType = OperationType::where('type', '=', InventoryEnums\OperationType::INCOMING)
+            $operationType = OperationType::where('type', InventoryEnums\OperationType::INCOMING)
                 ->whereDoesntHave('warehouse')
                 ->first();
         }

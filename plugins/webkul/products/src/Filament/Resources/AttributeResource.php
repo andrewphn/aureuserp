@@ -11,6 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Product\Enums\AttributeType;
 use Webkul\Product\Models\Attribute;
 
@@ -59,7 +62,8 @@ class AttributeResource extends Resource
                                     ->required()
                                     ->numeric()
                                     ->default(0.0000)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->maxValue(99999999999),
                             ])
                             ->columns(3),
                     ]),
@@ -126,11 +130,22 @@ class AttributeResource extends Resource
                             ->body(__('products::filament/resources/attribute.table.actions.delete.notification.body')),
                     ),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->action(function (Attribute $record) {
+                        try {
+                            $record->forceDelete();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('products::filament/resources/attribute.table.actions.force-delete.notification.error.title'))
+                                ->body(__('products::filament/resources/attribute.table.actions.force-delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('products::filament/resources/attribute.table.actions.force-delete.notification.title'))
-                            ->body(__('products::filament/resources/attribute.table.actions.force-delete.notification.body')),
+                            ->title(__('products::filament/resources/attribute.table.actions.force-delete.notification.success.title'))
+                            ->body(__('products::filament/resources/attribute.table.actions.force-delete.notification.success.body')),
                     ),
             ])
             ->bulkActions([
@@ -150,11 +165,22 @@ class AttributeResource extends Resource
                                 ->body(__('products::filament/resources/attribute.table.bulk-actions.delete.notification.body')),
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.body')),
+                                ->title(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.success.title'))
+                                ->body(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.success.body')),
                         ),
                 ]),
             ])

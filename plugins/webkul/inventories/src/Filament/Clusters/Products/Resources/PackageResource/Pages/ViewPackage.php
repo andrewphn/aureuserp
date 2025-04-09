@@ -6,6 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Package;
 
@@ -51,11 +52,26 @@ class ViewPackage extends ViewRecord
                 ->color('gray')
                 ->button(),
             Actions\DeleteAction::make()
+                ->action(function (Actions\DeleteAction $action, Package $record) {
+                    try {
+                        $record->delete();
+
+                        $action->success();
+                    } catch (QueryException $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('inventories::filament/clusters/products/resources/package/pages/view-package.header-actions.delete.notification.error.title'))
+                            ->body(__('inventories::filament/clusters/products/resources/package/pages/view-package.header-actions.delete.notification.error.body'))
+                            ->send();
+
+                        $action->failure();
+                    }
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('inventories::filament/clusters/products/resources/package/pages/view-package.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/products/resources/package/pages/view-package.header-actions.delete.notification.body')),
+                        ->title(__('inventories::filament/clusters/products/resources/package/pages/view-package.header-actions.delete.notification.success.title'))
+                        ->body(__('inventories::filament/clusters/products/resources/package/pages/view-package.header-actions.delete.notification.success.body')),
                 ),
         ];
     }

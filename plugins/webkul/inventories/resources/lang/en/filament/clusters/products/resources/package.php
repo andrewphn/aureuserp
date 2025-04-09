@@ -48,8 +48,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Product deleted',
-                    'body'  => 'The product has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Package deleted',
+                        'body'  => 'The package has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Package could not be deleted',
+                        'body'  => 'The package cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -65,8 +72,15 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Products deleted',
-                    'body'  => 'The products has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Packages deleted',
+                        'body'  => 'The packages has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Packages could not be deleted',
+                        'body'  => 'The packages cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

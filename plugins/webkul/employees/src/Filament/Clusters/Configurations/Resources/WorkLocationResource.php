@@ -91,7 +91,6 @@ class WorkLocationResource extends Resource
                     ->boolean(),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('employees::filament/clusters/configurations/resources/work-location.table.columns.company'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('location_number')
                     ->label(__('employees::filament/clusters/configurations/resources/work-location.table.columns.location-number'))

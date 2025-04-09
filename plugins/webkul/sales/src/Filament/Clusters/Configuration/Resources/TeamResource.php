@@ -66,6 +66,8 @@ class TeamResource extends Resource
                                 Forms\Components\TextInput::make('invoiced_target')
                                     ->numeric()
                                     ->default(0)
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->label(__('sales::filament/clusters/configurations/resources/team.form.sections.fields.fieldset.team-details.fields.invoiced-target'))
                                     ->autocomplete(false)
                                     ->suffix(__('sales::filament/clusters/configurations/resources/team.form.sections.fields.fieldset.team-details.fields.invoiced-target-suffix')),
@@ -97,19 +99,15 @@ class TeamResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('sales::filament/clusters/configurations/resources/team.table.columns.company'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('sales::filament/clusters/configurations/resources/team.table.columns.team-leader'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\ColorColumn::make('color')
                     ->label(__('sales::filament/clusters/configurations/resources/team.table.columns.color'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('createdBy.name')
-                    ->label(__('Created By'))
                     ->label(__('sales::filament/clusters/configurations/resources/team.table.columns.created-by'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('sales::filament/clusters/configurations/resources/team.table.columns.name'))
