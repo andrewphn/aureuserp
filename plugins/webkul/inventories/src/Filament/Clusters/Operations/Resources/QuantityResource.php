@@ -172,12 +172,10 @@ class QuantityResource extends Resource
                     ->visible(fn (OperationSettings $settings) => $settings->enable_packages),
                 Tables\Columns\TextColumn::make('available_quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.available-quantity'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.on-hand'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextInputColumn::make('counted_quantity')
@@ -209,13 +207,11 @@ class QuantityResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.user'))
-                    ->searchable()
                     ->sortable()
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.company'))
-                    ->searchable()
                     ->sortable()
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
