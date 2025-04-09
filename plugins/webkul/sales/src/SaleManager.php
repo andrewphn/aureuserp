@@ -94,6 +94,8 @@ class SaleManager
 
         $record = $this->computeSaleOrder($record);
 
+        $this->cancelInventoryOperation($record);
+
         return $record;
     }
 
