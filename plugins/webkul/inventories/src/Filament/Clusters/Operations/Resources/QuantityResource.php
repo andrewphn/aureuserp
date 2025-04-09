@@ -509,6 +509,10 @@ class QuantityResource extends Resource
                 $query->whereHas('location', function (Builder $query) {
                     $query->whereIn('type', [Enums\LocationType::INTERNAL, Enums\LocationType::TRANSIT]);
                 });
+
+                $query->whereHas('product', function (Builder $query) {
+                    $query->whereNull('deleted_at');
+                });
             });
     }
 
