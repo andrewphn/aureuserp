@@ -48,6 +48,7 @@ class Move extends Model
         'is_scraped',
         'is_inventory',
         'is_refund',
+        'deadline',
         'reservation_date',
         'scheduled_at',
         'product_id',
