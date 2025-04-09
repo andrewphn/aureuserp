@@ -341,7 +341,7 @@ class InvoiceResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('currency.id')
+                Tables\Columns\TextColumn::make('currency.name')
                     ->label(__('accounts::filament/resources/invoice.table.columns.invoice-currency'))
                     ->searchable()
                     ->placeholder('-')
@@ -370,7 +370,6 @@ class InvoiceResource extends Resource
                     ->label(__('accounts::filament/resources/invoice.table.groups.invoice-due-date'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('invoice_origin')
-                    ->date()
                     ->label(__('accounts::filament/resources/invoice.table.groups.invoice-origin'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('invoiceUser.name')
@@ -378,7 +377,6 @@ class InvoiceResource extends Resource
                     ->label(__('accounts::filament/resources/invoice.table.groups.sales-person'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('currency.name')
-                    ->date()
                     ->label(__('accounts::filament/resources/invoice.table.groups.currency'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('created_at')
