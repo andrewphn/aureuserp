@@ -38,6 +38,10 @@ class CreateWarehouse extends CreateRecord
 
         $data['company_id'] = $data['company_id'] ?? Auth::user()->default_company_id;
 
+        $data['reception_steps'] ??= Enums\ReceptionStep::ONE_STEP;
+
+        $data['delivery_steps'] ??= Enums\DeliveryStep::ONE_STEP;
+
         $data = $this->createLocations($data);
 
         $data = $this->createOperationTypes($data);
