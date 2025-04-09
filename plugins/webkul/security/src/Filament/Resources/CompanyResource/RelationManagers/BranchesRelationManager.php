@@ -14,6 +14,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Enums\CompanyStatus;
 use Webkul\Support\Models\Company;
@@ -46,7 +47,6 @@ class BranchesRelationManager extends RelationManager
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.general-information.sections.branch-information.fields.registration-number')),
                                         Forms\Components\TextInput::make('company_id')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.general-information.sections.branch-information.fields.company-id'))
-                                            ->required()
                                             ->unique(ignoreRecord: true)
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('security::filament/resources/company/relation-managers/manage-branch.form.tabs.general-information.sections.branch-information.fields.company-id-tooltip')),
                                         Forms\Components\TextInput::make('tax_id')
@@ -74,84 +74,54 @@ class BranchesRelationManager extends RelationManager
                                 Forms\Components\Section::make(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.title'))
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->relationship('address')
                                             ->schema([
                                                 Forms\Components\TextInput::make('street1')
-                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.street1'))
-                                                    ->required(),
+                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.street1')),
                                                 Forms\Components\TextInput::make('street2')
                                                     ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.street2')),
                                                 Forms\Components\TextInput::make('city')
-                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.city'))
-                                                    ->required(),
+                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.city')),
                                                 Forms\Components\TextInput::make('zip')
                                                     ->live()
-                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.zip-code'))
-                                                    ->required(fn (Get $get) => Country::find($get('country_id'))?->zip_required),
+                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.zip-code')),
                                                 Forms\Components\Select::make('country_id')
                                                     ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country'))
                                                     ->relationship(name: 'country', titleAttribute: 'name')
                                                     ->afterStateUpdated(fn (Set $set) => $set('state_id', null))
-                                                    ->createOptionForm([
-                                                        Forms\Components\Select::make('currency_id')
-                                                            ->options(fn () => Currency::pluck('full_name', 'id'))
-                                                            ->searchable()
-                                                            ->preload()
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-currency-name'))
-                                                            ->required(),
-                                                        Forms\Components\TextInput::make('phone_code')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-phone-code'))
-                                                            ->required(),
-                                                        Forms\Components\TextInput::make('code')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-code'))
-                                                            ->required()
-                                                            ->rules('max:2'),
-                                                        Forms\Components\TextInput::make('name')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-name'))
-                                                            ->required(),
-                                                        Forms\Components\Toggle::make('state_required')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-state-required'))
-                                                            ->required(),
-                                                        Forms\Components\Toggle::make('zip_required')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-zip-required'))
-                                                            ->required(),
-                                                    ])
-                                                    ->createOptionAction(
-                                                        fn (Action $action) => $action
-                                                            ->modalHeading(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-create'))
-                                                            ->modalSubmitActionLabel(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country-create'))
-                                                            ->modalWidth('lg')
-                                                    )
                                                     ->searchable()
                                                     ->preload()
-                                                    ->live()
-                                                    ->required(),
+                                                    ->live(),
                                                 Forms\Components\Select::make('state_id')
                                                     ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state'))
-                                                    ->options(
-                                                        fn (Get $get): Collection => State::query()
-                                                            ->where('country_id', $get('country_id'))
-                                                            ->pluck('name', 'id')
-                                                    )
-                                                    ->createOptionForm([
-                                                        Forms\Components\TextInput::make('name')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state-name'))
-                                                            ->required()
-                                                            ->maxLength(255),
-                                                        Forms\Components\TextInput::make('code')
-                                                            ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state-code'))
-                                                            ->required()
-                                                            ->maxLength(255),
-                                                    ])
-                                                    ->createOptionAction(
-                                                        fn (Action $action) => $action
-                                                            ->modalHeading(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state-create'))
-                                                            ->modalSubmitActionLabel(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state-create'))
-                                                            ->modalWidth('lg')
+                                                    ->relationship(
+                                                        name: 'state',
+                                                        titleAttribute: 'name',
+                                                        modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                                                     )
                                                     ->searchable()
                                                     ->preload()
-                                                    ->required(fn (Get $get) => Country::find($get('country_id'))?->state_required),
+                                                    ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
+                                                        return $form
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('name')
+                                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state-name'))
+                                                                    ->required(),
+                                                                Forms\Components\TextInput::make('code')
+                                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.state-code'))
+                                                                    ->required()
+                                                                    ->unique('states'),
+                                                                Forms\Components\Select::make('country_id')
+                                                                    ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.address-information.fields.country'))
+                                                                    ->relationship('country', 'name')
+                                                                    ->searchable()
+                                                                    ->preload()
+                                                                    ->live()
+                                                                    ->default($get('country_id'))
+                                                                    ->afterStateUpdated(function (Forms\Get $get) use ($set) {
+                                                                        $set('country_id', $get('country_id'));
+                                                                    }),
+                                                            ]);
+                                                    }),
                                             ])
                                             ->columns(2),
                                     ]),
@@ -160,11 +130,12 @@ class BranchesRelationManager extends RelationManager
                                         Forms\Components\Select::make('currency_id')
                                             ->relationship('currency', 'full_name')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.additional-information.fields.default-currency'))
+                                            ->relationship('currency', 'full_name')
                                             ->searchable()
                                             ->required()
                                             ->live()
                                             ->preload()
-                                            ->options(fn () => Currency::pluck('full_name', 'id'))
+                                            ->default(Currency::first()?->id)
                                             ->createOptionForm([
                                                 Forms\Components\Section::make()
                                                     ->schema([
@@ -221,14 +192,12 @@ class BranchesRelationManager extends RelationManager
                                     ->schema([
                                         Forms\Components\TextInput::make('phone')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.phone-number'))
-                                            ->required()
                                             ->tel(),
                                         Forms\Components\TextInput::make('mobile')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.mobile-number'))
                                             ->tel(),
                                         Forms\Components\TextInput::make('email')
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.contact-information.sections.contact-information.fields.email-address'))
-                                            ->required()
                                             ->email(),
                                     ])
                                     ->columns(2),
@@ -254,12 +223,12 @@ class BranchesRelationManager extends RelationManager
                     ->label(__('security::filament/resources/company/relation-managers/manage-branch.table.columns.email'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('address.city')
+                Tables\Columns\TextColumn::make('city')
                     ->label(__('security::filament/resources/company/relation-managers/manage-branch.table.columns.city'))
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('address.country.name')
+                Tables\Columns\TextColumn::make('country.name')
                     ->label(__('security::filament/resources/company/relation-managers/manage-branch.table.columns.country'))
                     ->sortable()
                     ->searchable()
