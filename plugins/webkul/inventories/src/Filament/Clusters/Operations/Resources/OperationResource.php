@@ -569,7 +569,7 @@ class OperationResource extends Resource
                     ->preload()
                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
-                Forms\Components\TextInput::make('description')
+                Forms\Components\TextInput::make('description_picking')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.description'))
                     ->maxLength(255)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
