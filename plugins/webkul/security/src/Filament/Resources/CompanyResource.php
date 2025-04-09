@@ -124,6 +124,8 @@ class CompanyResource extends Resource
                                                         titleAttribute: 'name',
                                                         modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                                                     )
+                                                    ->searchable()
+                                                    ->preload()
                                                     ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
                                                         return $form
                                                             ->schema([
@@ -145,9 +147,7 @@ class CompanyResource extends Resource
                                                                         $set('country_id', $get('country_id'));
                                                                     }),
                                                             ]);
-                                                    })
-                                                    ->searchable()
-                                                    ->preload(),
+                                                    }),
                                             ])
                                             ->columns(2),
                                     ]),
@@ -273,12 +273,12 @@ class CompanyResource extends Resource
                     ->label(__('security::filament/resources/company.table.columns.email'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('address.city')
+                Tables\Columns\TextColumn::make('city')
                     ->label(__('security::filament/resources/company.table.columns.city'))
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('address.country.name')
+                Tables\Columns\TextColumn::make('country.name')
                     ->label(__('security::filament/resources/company.table.columns.country'))
                     ->sortable()
                     ->searchable()
