@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
+use Webkul\Account\Facades\Tax as TaxFacade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -1037,7 +1038,7 @@ class OrderResource extends Resource
 
         $taxIds = $get($prefix.'taxes') ?? [];
 
-        [$subTotal, $taxAmount] = app(TaxService::class)->collectionTaxes($taxIds, $subTotal, $quantity);
+        [$subTotal, $taxAmount] = TaxFacade::collect($taxIds, $subTotal, $quantity);
 
         $set($prefix.'price_subtotal', round($subTotal, 4));
 

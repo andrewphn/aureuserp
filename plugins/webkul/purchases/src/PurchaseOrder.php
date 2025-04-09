@@ -5,12 +5,11 @@ namespace Webkul\Purchase;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Services\TaxService;
+use Webkul\Account\Facades\Tax as TaxFacade;
 use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Location;
@@ -31,10 +30,7 @@ use Webkul\Support\Package;
 
 class PurchaseOrder
 {
-    public function __construct(
-        protected TaxService $taxService,
-        protected OrderSettings $orderSettings
-    ) {}
+    public function __construct(protected OrderSettings $orderSettings) {}
 
     public function sendRFQ(Order $record, array $data): Order
     {
@@ -223,7 +219,7 @@ class PurchaseOrder
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount] = $this->taxService->collectionTaxes($taxIds, $subTotal, $line->product_qty);
+        [$subTotal, $taxAmount] = TaxFacade::collect($taxIds, $subTotal, $line->product_qty);
 
         $line->price_subtotal = round($subTotal, 4);
 
@@ -500,7 +496,7 @@ class PurchaseOrder
 
     protected function cancelInventoryOperations(Order $record): void
     {
-        if (! Schema::hasTable('inventories_operations')) {
+        if (! Package::isPluginInstalled('inventories')) {
             return;
         }
 

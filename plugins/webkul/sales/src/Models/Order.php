@@ -4,7 +4,9 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Journal;
@@ -22,6 +24,8 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
+use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\Warehouse;
 
 class Order extends Model
 {
@@ -66,6 +70,7 @@ class Order extends Model
         'amount_untaxed',
         'amount_tax',
         'amount_total',
+        'warehouse_id',
     ];
 
     protected array $logAttributes = [
@@ -206,6 +211,16 @@ class Order extends Model
     public function quotationTemplate()
     {
         return $this->belongsTo(OrderTemplate::class, 'sale_order_template_id');
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    public function operations(): HasMany
+    {
+        return $this->hasMany(Operation::class, 'sale_order_id');
     }
 
     protected static function boot()

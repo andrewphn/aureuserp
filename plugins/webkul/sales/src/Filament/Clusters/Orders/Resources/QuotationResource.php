@@ -1063,16 +1063,9 @@ class QuotationResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get))
                                     ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
-                                Forms\Components\TextInput::make('purchase_price')
+                                Forms\Components\Hidden::make('purchase_price')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.cost'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get))
-                                    ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
+                                    ->default(0),
                                 Forms\Components\TextInput::make('margin')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.margin'))
                                     ->numeric()
@@ -1081,7 +1074,7 @@ class QuotationResource extends Resource
                                     ->live()
                                     ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get))
-                                    ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
+                                    ->disabled(),
                                 Forms\Components\TextInput::make('margin_percent')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.margin-percentage'))
                                     ->numeric()
@@ -1090,7 +1083,7 @@ class QuotationResource extends Resource
                                     ->live()
                                     ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get))
-                                    ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
+                                    ->disabled(),
                                 Forms\Components\Select::make('taxes')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.taxes'))
                                     ->relationship(

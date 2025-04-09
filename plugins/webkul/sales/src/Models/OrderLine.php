@@ -5,6 +5,7 @@ namespace Webkul\Sale\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
@@ -15,6 +16,8 @@ use Webkul\Support\Models\Company;
 use Webkul\Inventory\Models\Move as InventoryMove;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
+use Webkul\Inventory\Models\Warehouse;
+use Webkul\Inventory\Models\Route;
 
 class OrderLine extends Model
 {
@@ -64,6 +67,7 @@ class OrderLine extends Model
         'purchase_price',
         'margin',
         'margin_percent',
+        'warehouse_id',
     ];
 
     protected $casts = [
@@ -134,5 +138,15 @@ class OrderLine extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    public function route(): BelongsTo
+    {
+        return $this->belongsTo(Route::class, 'route_id');
     }
 }

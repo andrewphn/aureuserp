@@ -10,8 +10,7 @@ use Webkul\Invoice\Enums as InvoiceEnums;
 use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Account\Facades\Tax;
 use Webkul\Account\Models\Journal as AccountJournal;
-use Webkul\Account\Models\Move;
-use Webkul\Inventory\Facades\Inventory;
+use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
@@ -23,6 +22,12 @@ use Webkul\Sale\Settings\InvoiceSettings;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Services\EmailService;
 use Webkul\Support\Package;
+use Webkul\Inventory\Models\Rule;
+use Webkul\Inventory\Models\Operation as InventoryOperation;
+use Webkul\Inventory\Models\Move as InventoryMove;
+use Webkul\Inventory\Models\Warehouse;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Facades\Inventory as InventoryFacade;
 
 class SaleManager
 {
@@ -51,6 +56,8 @@ class SaleManager
 
     public function confirmSaleOrder(Order $record): Order
     {
+        $this->applyPullRules($record);
+
         $record->update([
             'state'          => Enums\OrderState::SALE,
             'invoice_status' => Enums\InvoiceStatus::TO_INVOICE,
@@ -134,6 +141,8 @@ class SaleManager
             $record->amount_total += $line->price_total;
         }
 
+        $record = $this->computeWarehouseId($record);
+
         $record = $this->computeDeliveryStatus($record);
 
         $record = $this->computeInvoiceStatus($record);
@@ -184,11 +193,13 @@ class SaleManager
 
         $line->price_reduce_taxexcl = $line->price_unit - ($line->price_unit * ($line->discount / 100));
 
-        $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2);
+        $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2);//Todo:: This calculation is wrong
 
         $line->state = $line->order->state;
 
-        $line = $this->computeDeliveryMethod($line);
+        $line = $this->computeOrderLineWarehouseId($line);
+
+        $line = $this->computeOrderLineDeliveryMethod($line);
 
         $line = $this->computeOrderLineInvoiceStatus($line);
 
@@ -199,17 +210,6 @@ class SaleManager
         $line = $this->untaxedOrderLineAmountToInvoiced($line);
 
         $line->save();
-
-        return $line;
-    }
-
-    public function computeDeliveryMethod(OrderLine $line): OrderLine
-    {
-        if ($line->is_expense) {
-            $line->qty_delivered_method = 'analytic';
-        } else {
-            $line->qty_delivered_method = 'manual';
-        }
 
         return $line;
     }
@@ -249,7 +249,7 @@ class SaleManager
         if ($line->qty_delivered_method == Enums\QtyDeliveredMethod::STOCK_MOVE) {
             $qty = 0.0;
 
-            [$outgoingMoves, $incomingMoves] = $line->getOutgoingIncomingMoves();
+            [$outgoingMoves, $incomingMoves] = $this->getOutgoingIncomingMoves($line);
             
             foreach ($outgoingMoves as $move) {
                 if ($move->state != InventoryEnums\MoveState::DONE) {
@@ -273,13 +273,42 @@ class SaleManager
         return $line;
     }
 
-    public function computeDeliveryStatus(Order $record): Order
+    public function computeWarehouseId(Order $order): Order
     {
         if (! Package::isPluginInstalled('inventories')) {
-            $record->delivery_status = Enums\OrderDeliveryStatus::NO;
-
-            return $record;
+            return $order;
         }
+
+        $order->warehouse_id = Warehouse::where('company_id', $order->company_id)->first()?->id;
+
+        return $order;
+    }
+
+    public function computeDeliveryStatus(Order $order): Order
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            $order->delivery_status = Enums\OrderDeliveryStatus::NO;
+
+            return $order;
+        }
+
+        if ($order->operations->isEmpty() || $order->operations->every(function ($receipt) {
+            return $receipt->state == InventoryEnums\OperationState::CANCELED;
+        })) {
+            $order->delivery_status = Enums\OrderDeliveryStatus::NO;
+        } elseif ($order->operations->every(function ($receipt) {
+            return in_array($receipt->state, [InventoryEnums\OperationState::DONE, InventoryEnums\OperationState::CANCELED]);
+        })) {
+            $order->delivery_status = Enums\OrderDeliveryStatus::FULL;
+        } elseif ($order->operations->contains(function ($receipt) {
+            return $receipt->state == InventoryEnums\OperationState::DONE;
+        })) {
+            $order->delivery_status = Enums\OrderDeliveryStatus::PARTIAL;
+        } else {
+            $order->delivery_status = Enums\OrderDeliveryStatus::PENDING;
+        }
+
+        return $order;
 
         return $record;
     }
@@ -309,6 +338,28 @@ class SaleManager
         }
 
         return $order;
+    }
+
+    public function computeOrderLineWarehouseId(OrderLine $line): OrderLine
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            return $line;
+        }
+
+        $line->warehouse_id = $line->order->warehouse_id;
+
+        return $line;
+    }
+
+    public function computeOrderLineDeliveryMethod(OrderLine $line): OrderLine
+    {
+        if ($line->is_expense) {
+            $line->qty_delivered_method = 'analytic';
+        } else {
+            $line->qty_delivered_method = 'manual';
+        }
+
+        return $line;
     }
 
     public function computeOrderLineInvoiceStatus(OrderLine $line): OrderLine
@@ -519,9 +570,9 @@ class SaleManager
         ];
     }
 
-    private function createAccountMove(Order $record): Move
+    private function createAccountMove(Order $record): AccountMove
     {
-        $accountMove = Move::create([
+        $accountMove = AccountMove::create([
             'state'                        => AccountEnums\MoveState::DRAFT,
             'move_type'                    => AccountEnums\MoveType::OUT_INVOICE,
             'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
@@ -552,7 +603,7 @@ class SaleManager
         return $accountMove;
     }
 
-    private function createAccountMoveLine(Move $accountMove, OrderLine $orderLine): void
+    private function createAccountMoveLine(AccountMove $accountMove, OrderLine $orderLine): void
     {
         $productInvoicePolicy = $orderLine->product?->invoice_policy;
         $invoiceSetting = $this->invoiceSettings->invoice_policy;
@@ -587,5 +638,207 @@ class SaleManager
         $orderLine->accountMoveLines()->sync($accountMoveLine->id);
 
         $accountMoveLine->taxes()->sync($orderLine->taxes->pluck('id'));
+    }
+
+    /**
+     * Apply push rules for the operation.
+     */
+    public function applyPullRules(Order $record): void
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            return;
+        }
+
+        $rules = [];
+
+        foreach ($record->lines as $line) {
+            $rule = $this->getPullRule($line);
+
+            if (! $rule) {
+                throw new \Exception("No pull rule has been found to replenish \"{$line->name}\".\nVerify the routes configuration on the product.");
+            }
+
+            $ruleId = $rule->id;
+
+            $pulledMove = $this->runPullRule($rule, $line);
+
+            if (! isset($rules[$ruleId])) {
+                $rules[$ruleId] = [
+                    'rule'  => $rule,
+                    'moves' => [$pulledMove],
+                ];
+            } else {
+                $rules[$ruleId]['moves'][] = $pulledMove;
+            }
+        }
+
+        foreach ($rules as $ruleData) {
+            $this->createPullOperation($record, $ruleData['rule'], $ruleData['moves']);
+        }
+    }
+
+    protected function cancelInventoryOperation(Order $record): void
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            return;
+        }
+
+        if (! $record->operation) {
+            return;
+        }
+
+        foreach ($record->operation->moves as $move) {
+            $move->update([
+                'state'    => InventoryEnums\MoveState::CANCELED,
+                'quantity' => 0,
+            ]);
+
+            $move->lines()->delete();
+        }
+
+        InventoryFacade::computeTransferState($record->operation);
+    }
+
+    /**
+     * Create a new operation based on a push rule and assign moves to it.
+     */
+    private function createPullOperation(Order $record, Rule $rule, array $moves): void
+    {
+        $newOperation = InventoryOperation::create([
+            'state'                   => InventoryEnums\OperationState::DRAFT,
+            'origin'                  => $record->name,
+            'operation_type_id'       => $rule->operation_type_id,
+            'source_location_id'      => $rule->source_location_id,
+            'destination_location_id' => $rule->destination_location_id,
+            'scheduled_at'            => now()->addDays($rule->delay),
+            'company_id'              => $rule->company_id,
+            'sale_order_id'           => $record->id,
+            'user_id'                 => Auth::id(),
+            'creator_id'              => Auth::id(),
+        ]);
+
+        foreach ($moves as $move) {
+            $move->update([
+                'operation_id' => $newOperation->id,
+                'reference'    => $newOperation->name,
+                'scheduled_at' => $newOperation->scheduled_at,
+            ]);
+        }
+
+        $newOperation->refresh();
+
+        InventoryFacade::computeTransfer($newOperation);
+    }
+
+    /**
+     * Run a pull rule on a line.
+     */
+    public function runPullRule(Rule $rule, OrderLine $line)
+    {
+        if ($rule->auto !== InventoryEnums\RuleAuto::MANUAL) {
+            return;
+        }
+
+        $newMove = InventoryMove::create([
+            'state'                   => InventoryEnums\MoveState::DRAFT,
+            'reference'               => null,
+            'name'                    => $line->name,
+            'product_id'              => $line->product_id,
+            'product_qty'             => $line->product_qty,
+            'product_uom_qty'         => $line->product_uom_qty,
+            'quantity'                => $line->product_qty,
+            'uom_id'                  => $line->product_uom_id,
+            'origin'                  => $line->origin,
+            'scheduled_at'            => now()->addDays($rule->delay),
+            'source_location_id'      => $rule->source_location_id,
+            'destination_location_id' => $rule->destination_location_id,
+            'final_location_id'       => $rule->destination_location_id,
+            'product_packaging_id'    => $line->product_packaging_id,
+            'rule_id'                 => $rule->id,
+            'company_id'              => $rule->company_id,
+            'operation_type_id'       => $rule->operation_type_id,
+            'propagate_cancel'        => $rule->propagate_cancel,
+            'warehouse_id'            => $rule->warehouse_id,
+            'procure_method'          => InventoryEnums\ProcureMethod::MAKE_TO_ORDER,
+            'sale_order_line_id'      => $line->id,
+        ]);
+
+        $newMove->save();
+
+        if ($newMove->shouldBypassReservation()) {
+            $newMove->update([
+                'procure_method' => InventoryEnums\ProcureMethod::MAKE_TO_STOCK,
+            ]);
+        }
+
+        return $newMove;
+    }
+
+    /**
+     * Traverse up the location tree to find a matching pull rule.
+     */
+    public function getPullRule(OrderLine $line, array $filters = [])
+    {
+        $foundRule = null;
+
+        $location = Location::where('type', InventoryEnums\LocationType::CUSTOMER)->first();
+
+        $filters['action'] = [InventoryEnums\RuleAction::PULL, InventoryEnums\RuleAction::PULL_PUSH];
+
+        while (! $foundRule && $location) {
+            $filters['destination_location_id'] = $location->id;
+
+            $foundRule = $this->searchPullRule(
+                $line->productPackaging,
+                $line->product,
+                $line->warehouse,
+                $filters
+            );
+
+            $location = $location->parent;
+        }
+
+        return $foundRule;
+    }
+
+    /**
+     * Search for a pull rule based on the provided filters.
+     */
+    public function searchPullRule($productPackaging, $product, $warehouse, array $filters)
+    {
+        if ($warehouse) {
+            $filters['warehouse_id'] = $warehouse->id;
+        }
+
+        $routeSources = [
+            [$productPackaging, 'routes'],
+            [$product, 'routes'],
+            [$product?->category, 'routes'],
+            [$warehouse, 'routes'],
+        ];
+
+        foreach ($routeSources as [$source, $relationName]) {
+            if (! $source || ! $source->{$relationName}) {
+                continue;
+            }
+
+            $routeIds = $source->{$relationName}->pluck('id');
+
+            if ($routeIds->isEmpty()) {
+                continue;
+            }
+
+            $foundRule = Rule::whereIn('route_id', $routeIds)
+                ->where($filters)
+                ->orderBy('route_sort', 'asc')
+                ->orderBy('sort', 'asc')
+                ->first();
+
+            if ($foundRule) {
+                return $foundRule;
+            }
+        }
+
+        return null;
     }
 }
