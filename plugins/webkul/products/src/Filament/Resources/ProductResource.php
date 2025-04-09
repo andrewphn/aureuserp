@@ -124,11 +124,13 @@ class ProductResource extends Resource
                                     ->label(__('products::filament/resources/product.form.sections.pricing.fields.price'))
                                     ->numeric()
                                     ->required()
-                                    ->default(0.00),
+                                    ->default(0.00)
+                                    ->minValue(0),
                                 Forms\Components\TextInput::make('cost')
                                     ->label(__('products::filament/resources/product.form.sections.pricing.fields.cost'))
                                     ->numeric()
-                                    ->default(0.00),
+                                    ->default(0.00)
+                                    ->minValue(0),
                                 Forms\Components\Hidden::make('uom_id')
                                     ->default(UOM::first()->id),
                                 Forms\Components\Hidden::make('uom_po_id')
