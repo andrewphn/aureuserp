@@ -927,6 +927,10 @@ class OperationResource extends Resource
             ->mountUsing(function (Forms\ComponentContainer $form, Move $record) {
                 $form->fill([]);
             })
+            ->modalSubmitAction(
+                fn ($action, Move $record) => $action
+                    ->visible(! in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED]))
+            )
             ->action(function (Forms\Set $set, array $data, Move $record): void {
                 $totalQty = $record->lines()->sum('qty');
 
