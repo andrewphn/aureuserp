@@ -113,7 +113,7 @@ class Operation extends Model
 
     public function operationType(): BelongsTo
     {
-        return $this->belongsTo(OperationType::class);
+        return $this->belongsTo(OperationType::class)->withTrashed();
     }
 
     public function sourceLocation(): BelongsTo
