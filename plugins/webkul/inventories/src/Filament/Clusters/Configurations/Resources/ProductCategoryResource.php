@@ -28,6 +28,8 @@ class ProductCategoryResource extends CategoryResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function getNavigationGroup(): string
     {
         return __('inventories::filament/clusters/configurations/resources/product-category.navigation.group');
