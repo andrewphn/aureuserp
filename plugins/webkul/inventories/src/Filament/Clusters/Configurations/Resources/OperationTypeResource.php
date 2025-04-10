@@ -195,7 +195,7 @@ class OperationTypeResource extends Resource
                                     ->schema([
                                         Forms\Components\Select::make('source_location_id')
                                             ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.source-location'))
-                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.lots.fields.source-location-hint-tooltip'))
+                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.source-location-hint-tooltip'))
                                             ->relationship('sourceLocation', 'full_name')
                                             ->searchable()
                                             ->preload()
@@ -220,7 +220,7 @@ class OperationTypeResource extends Resource
                                             ->live(),
                                         Forms\Components\Select::make('destination_location_id')
                                             ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.destination-location'))
-                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.lots.fields.destination-location-hint-tooltip'))
+                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.destination-location-hint-tooltip'))
                                             ->relationship('destinationLocation', 'full_name')
                                             ->searchable()
                                             ->preload()
