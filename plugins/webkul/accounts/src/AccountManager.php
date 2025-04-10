@@ -10,6 +10,7 @@ use Webkul\Account\Facades\Tax as TaxFacade;
 use Webkul\Account\Mail\Invoice\Actions\InvoiceEmail;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
+use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\Tax;
 use Webkul\Support\Services\EmailService;
@@ -126,12 +127,20 @@ class AccountManager
 
         $newTaxEntries = [];
 
+        $record = $this->computePartnerDisplayInfo($record);
+
+        $record = $this->computeInvoiceCurrencyRate($record);
+
+        $record = $this->computeJournalId($record);
+
+        $record = $this->computeInvoiceDateDue($record);
+
         $signMultiplier = $this->getSignMultiplier($record);
 
         foreach ($record->lines as $line) {
-            $line->parent_state = $record->state;
+            $line = $this->computeMoveLine($record, $line);
 
-            [$line, $amountTax] = $this->collectMoveLineTotals($line, $newTaxEntries);
+            [$line, $amountTax] = $this->computeMoveLineTotals($line, $newTaxEntries);
 
             $record->amount_untaxed += floatval($line->price_subtotal);
             $record->amount_tax += floatval($amountTax);
@@ -147,8 +156,6 @@ class AccountManager
             $record->amount_residual_signed += floatval($line->price_total) * $signMultiplier;
         }
 
-        $record = $this->computeInvoiceDateDue($record);
-
         $record->save();
 
         $this->computeTaxLines($record, $newTaxEntries);
@@ -158,10 +165,133 @@ class AccountManager
         return $record;
     }
 
+    public function  computePartnerDisplayInfo(AccountMove $record): AccountMove
+    {
+        $vendorDisplayName = $record->partner?->name;
+
+        if (! $vendorDisplayName) {
+            if ($record->invoice_source_email) {
+                $vendorDisplayName = "@From: {$record->invoice_source_email}";
+            } else {
+                $vendorDisplayName = "#Created by: {$record->createdBy->name}";
+            }
+        }
+    
+        $record->invoice_partner_display_name = $vendorDisplayName;
+
+        return $record;
+    }
+
+    public function  computeInvoiceCurrencyRate(AccountMove $record): AccountMove
+    {
+        $record->invoice_currency_rate = 1; 
+
+        return $record;
+    }
+
+    public function  computeJournalId(AccountMove $record): AccountMove
+    {
+        if (! in_array($record->journal?->type, $record->getValidJournalTypes())) {
+            $record->journal_id = $this->searchDefaultJournal($record)?->id;
+        }
+
+        return $record;
+    }
+
+    public function  searchDefaultJournal(AccountMove $record): ?Journal
+    {
+        $validJournalTypes = $record->getValidJournalTypes();
+
+        return Journal::where('company_id', $record->company_id)
+            ->whereIn('type', $validJournalTypes)
+            ->first();
+    }
+
+    public function  computeCommercialPartnerId(AccountMove $record): AccountMove
+    {
+        $record->commercial_partner_id = $record->partner_id;
+
+        return $record;
+    }
+
+    public function  computePartnerShippingId(AccountMove $record): AccountMove
+    {
+        $record->partner_shipping_id = $record->partner_id;
+
+        return $record;
+    }
+
+    public static function computeInvoiceDateDue(AccountMove $move): AccountMove
+    {
+        $dateMaturity = now();
+
+        if ($move->invoicePaymentTerm) {
+            $dueTerm = $move->invoicePaymentTerm->dueTerm;
+
+            if ($dueTerm) {
+                switch ($dueTerm->delay_type) {
+                    case Enums\DelayType::DAYS_AFTER->value:
+                        $dateMaturity = $dateMaturity->addDays($dueTerm->nb_days);
+
+                        break;
+
+                    case Enums\DelayType::DAYS_AFTER_END_OF_MONTH->value:
+                        $dateMaturity = $dateMaturity->endOfMonth()->addDays($dueTerm->nb_days);
+                        break;
+
+                    case Enums\DelayType::DAYS_AFTER_END_OF_NEXT_MONTH->value:
+                        $dateMaturity = $dateMaturity->addMonth()->endOfMonth()->addDays($dueTerm->days_next_month);
+
+                        break;
+
+                    case Enums\DelayType::DAYS_END_OF_MONTH_NO_THE->value:
+                        $dateMaturity = $dateMaturity->endOfMonth();
+
+                        break;
+                }
+            }
+        }
+
+        $move->invoice_date_due = $dateMaturity;
+
+        return $move;
+    }
+
     /**
      * Collect line totals and tax information
      */
-    public function collectMoveLineTotals(MoveLine $line, array &$newTaxEntries): array
+    public function computeMoveLine(AccountMove $move, MoveLine $line): MoveLine
+    {
+        $line->move_name = $move->name;
+
+        $line->name = $line->product->name;
+
+        $line->parent_state = $move->state;
+
+        $line->date_maturity = $move->invoice_date_due;
+
+        $line->discount_date = $line->discount > 0 ? now() : null;
+
+        $line->uom_id = $line->uom_id ?? $line->product->uom_id;
+
+        $line->partner_id = $move->partner_id;
+
+        $line->journal_id = $move->journal_id;
+
+        $line->currency_id = $move->currency_id;
+
+        //Todo:: check this
+        $line->company_currency_id = $move->currency_id;
+
+        $line->company_id = $move->company_id;
+
+        return $line;
+    }
+
+    /**
+     * Collect line totals and tax information
+     */
+    public function computeMoveLineTotals(MoveLine $line, array &$newTaxEntries): array
     {
         $subTotal = $line->price_unit * $line->quantity;
 
@@ -252,42 +382,6 @@ class AccountManager
         return $line;
     }
 
-    public static function computeInvoiceDateDue(AccountMove $move): AccountMove
-    {
-        $dateMaturity = now();
-
-        if ($move->invoicePaymentTerm) {
-            $dueTerm = $move->invoicePaymentTerm->dueTerm;
-
-            if ($dueTerm) {
-                switch ($dueTerm->delay_type) {
-                    case Enums\DelayType::DAYS_AFTER->value:
-                        $dateMaturity = $dateMaturity->addDays($dueTerm->nb_days);
-
-                        break;
-
-                    case Enums\DelayType::DAYS_AFTER_END_OF_MONTH->value:
-                        $dateMaturity = $dateMaturity->endOfMonth()->addDays($dueTerm->nb_days);
-                        break;
-
-                    case Enums\DelayType::DAYS_AFTER_END_OF_NEXT_MONTH->value:
-                        $dateMaturity = $dateMaturity->addMonth()->endOfMonth()->addDays($dueTerm->days_next_month);
-
-                        break;
-
-                    case Enums\DelayType::DAYS_END_OF_MONTH_NO_THE->value:
-                        $dateMaturity = $dateMaturity->endOfMonth();
-
-                        break;
-                }
-            }
-        }
-
-        $move->invoice_date_due = $dateMaturity;
-
-        return $move;
-    }
-
     /**
      * Update tax lines for the move
      */
@@ -329,6 +423,7 @@ class AccountManager
                 'company_id'            => $move->company_id,
                 'company_currency_id'   => $move->company_currency_id,
                 'commercial_partner_id' => $move->partner_id,
+                'journal_id'               => $move->journal_id,
                 'parent_state'          => $move->state,
                 'date'                  => now(),
                 'creator_id'            => $move->creator_id,
@@ -383,6 +478,7 @@ class AccountManager
             'company_id'               => $move->company_id,
             'company_currency_id'      => $move->company_currency_id,
             'commercial_partner_id'    => $move->partner_id,
+            'journal_id'               => $move->journal_id,
             'parent_state'             => $move->state,
             'date'                     => now(),
             'creator_id'               => $move->creator_id,

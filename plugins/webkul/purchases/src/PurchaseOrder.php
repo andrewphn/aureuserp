@@ -16,8 +16,7 @@ use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Receipt;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
+use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Purchase\Enums as PurchaseEnums;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
@@ -543,25 +542,14 @@ class PurchaseOrder
     public function createAccountMove($record): void
     {
         $accountMove = AccountMove::create([
-            'state'                        => AccountEnums\MoveState::DRAFT,
-            'move_type'                    => $record->qty_to_invoice >= 0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::IN_REFUND,
-            'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
-            'invoice_partner_display_name' => $record->partner->name,
-            'invoice_origin'               => $record->name,
-            'date'                         => now(),
-            'invoice_date_due'             => now(),
-            'invoice_currency_rate'        => 1,
-            'journal_id'                   => AccountJournal::where('type', AccountEnums\JournalType::PURCHASE->value)->first()?->id,
-            'company_id'                   => $record->company_id,
-            'currency_id'                  => $record->currency_id,
-            'invoice_payment_term_id'      => $record->payment_term_id,
-            'partner_id'                   => $record->partner_id,
-            'commercial_partner_id'        => $record->partner_id,
-            'partner_shipping_id'          => $record->partner_shipping_id,
-            // 'partner_bank_id' => $record->partner_bank_id,//TODO: add partner bank id
-            'fiscal_position_id' => $record->fiscal_position_id,
-            // 'preferred_payment_method_line_id' => 1,
-            'creator_id' => Auth::id(),
+            'move_type'               => $record->qty_to_invoice >= 0 ? AccountEnums\MoveType::IN_INVOICE : AccountEnums\MoveType::IN_REFUND,
+            'invoice_origin'          => $record->name,
+            'date'                    => now(),
+            'company_id'              => $record->company_id,
+            'currency_id'             => $record->currency_id,
+            'invoice_payment_term_id' => $record->payment_term_id,
+            'partner_id'              => $record->partner_id,
+            'fiscal_position_id'      => $record->fiscal_position_id,
         ]);
 
         $record->accountMoves()->attach($accountMove->id);
@@ -570,26 +558,19 @@ class PurchaseOrder
             $this->createAccountMoveLine($accountMove, $line);
         }
 
-        if ($record->qty_to_invoice >= 0) {
-            BillResource::collectTotals($accountMove);
-        } else {
-            RefundResource::collectTotals($accountMove);
-        }
+        AccountFacade::computeAccountMove($accountMove);
     }
 
     public function createAccountMoveLine($accountMove, $orderLine): void
     {
         $accountMoveLine = $accountMove->lines()->create([
-            'state'                  => AccountEnums\MoveState::DRAFT,
+            'state'                  => $accountMove->state,
             'name'                   => $orderLine->name,
-            'display_type'           => AccountEnums\DisplayType::PRODUCT,
             'date'                   => $accountMove->date,
-            'creator_id'             => $accountMove?->creator_id,
             'parent_state'           => $accountMove->state,
             'quantity'               => abs($orderLine->qty_to_invoice),
             'price_unit'             => $orderLine->price_unit,
             'discount'               => $orderLine->discount,
-            'journal_id'             => $accountMove->journal_id,
             'company_id'             => $accountMove->company_id,
             'currency_id'            => $accountMove->currency_id,
             'company_currency_id'    => $accountMove->currency_id,

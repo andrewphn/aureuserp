@@ -775,43 +775,13 @@ class InvoiceResource extends Resource
                     ])
                     ->columns(2),
             ])
-            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
-            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record))
+            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record));
     }
 
-    public static function mutateProductRelationship(array $data, $record, $livewire): array
+    public static function mutateProductRelationship(array $data, $record): array
     {
-        $data['product_id'] ??= $record->product_id;
-        $data['quantity'] ??= $record->quantity;
-        $data['uom_id'] ??= $record->uom_id;
-        $data['price_subtotal'] ??= $record->price_subtotal;
-        $data['discount'] ??= $record->discount;
-        $data['discount_date'] ??= $record->discount_date;
-
-        $product = Product::find($data['product_id']);
-
-        $user = Auth::user();
-
-        $data = array_merge($data, [
-            'name'                  => $product->name,
-            'quantity'              => $data['quantity'],
-            'uom_id'                => $data['uom_id'] ?? $product->uom_id,
-            'currency_id'           => ($livewire->data['currency_id'] ?? $record->currency_id) ?? $user->defaultCompany->currency_id,
-            'partner_id'            => $record->partner_id,
-            'creator_id'            => $user->id,
-            'company_id'            => $user->default_company_id,
-            'company_currency_id'   => $user->defaultCompany->currency_id ?? $record->currency_id,
-            'commercial_partner_id' => $livewire->record->partner_id,
-            'display_type'          => 'product',
-            'parent_state'          => $livewire->record->state ?? MoveState::DRAFT,
-            'move_name'             => $livewire->record->name,
-        ]);
-
-        if ($data['discount'] > 0) {
-            $data['discount_date'] = now();
-        } else {
-            $data['discount_date'] = null;
-        }
+        $data['currency_id'] = $record->currency_id;
 
         return $data;
     }

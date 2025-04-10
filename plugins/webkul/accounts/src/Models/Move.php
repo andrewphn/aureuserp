@@ -342,6 +342,19 @@ class Move extends Model implements Sortable
         ] : [Enums\MoveType::IN_INVOICE, Enums\MoveType::IN_REFUND]);
     }
 
+    public function getValidJournalTypes()
+    {
+        if ($this->isSaleDocument(true)) {
+            return [Enums\JournalType::SALE];
+        } elseif ($this->isPurchaseDocument(true)) {
+            return [Enums\JournalType::PURCHASE];
+        } elseif ($this->origin_payment_id || $this->statement_line_id) {
+            return [Enums\JournalType::BANK, Enums\JournalType::CASH, Enums\JournalType::CREDIT_CARD];
+        } else {
+            return [Enums\JournalType::GENERAL];
+        }
+    }
+
     /**
      * Bootstrap any application services.
      */
@@ -351,8 +364,6 @@ class Move extends Model implements Sortable
 
         static::creating(function ($model) {
             $model->creator_id = auth()->id();
-
-            $model->is_storno = false; // in_array($model->move_type, [Enums\MoveType::OUT_REFUND, Enums\MoveType::IN_REFUND]);
         });
 
         static::created(function ($model) {
