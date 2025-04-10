@@ -88,7 +88,11 @@ class OperationResource extends Resource
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('operation_type_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.operation-type'))
-                            ->relationship('operationType', 'name')
+                            ->relationship(
+                                name: 'operationType',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed()
+                            )
                             ->searchable()
                             ->preload()
                             ->required()
@@ -98,7 +102,7 @@ class OperationResource extends Resource
                                     return $record->name;
                                 }
 
-                                return $record->warehouse->name.': '.$record->name;
+                                return $record->warehouse->name.': '.$record->name.($record->trashed() ? ' (Deleted)' : '');
                             })
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                 $operationType = OperationType::find($get('operation_type_id'));
@@ -115,7 +119,7 @@ class OperationResource extends Resource
                                 modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                             )
                             ->getOptionLabelFromRecordUsing(function ($record): string {
-                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
                             })
                             ->searchable()
                             ->preload()
@@ -130,7 +134,7 @@ class OperationResource extends Resource
                                 modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                             )
                             ->getOptionLabelFromRecordUsing(function ($record): string {
-                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
                             })
                             ->searchable()
                             ->preload()
@@ -582,7 +586,7 @@ class OperationResource extends Resource
                         modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                     )
                     ->getOptionLabelFromRecordUsing(function ($record): string {
-                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                        return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
                     })
                     ->searchable()
                     ->preload()
@@ -842,7 +846,7 @@ class OperationResource extends Resource
                                     })
                             )
                             ->getOptionLabelFromRecordUsing(function ($record): string {
-                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
                             })
                             ->searchable()
                             ->preload()
