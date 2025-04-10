@@ -120,7 +120,7 @@ class OperationType extends Model implements Sortable
 
     public function warehouse(): BelongsTo
     {
-        return $this->belongsTo(Warehouse::class);
+        return $this->belongsTo(Warehouse::class)->withTrashed();
     }
 
     public function storageCategoryCapacities(): BelongsToMany
