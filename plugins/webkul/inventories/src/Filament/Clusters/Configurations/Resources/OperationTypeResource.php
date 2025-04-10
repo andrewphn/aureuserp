@@ -8,6 +8,7 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -125,7 +126,14 @@ class OperationTypeResource extends Resource
                                                     ->visible(fn (Forms\Get $get): bool => in_array($get('type'), [Enums\OperationType::OUTGOING->value, Enums\OperationType::INTERNAL->value])),
                                                 Forms\Components\Select::make('warehouse_id')
                                                     ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fields.warehouse'))
-                                                    ->relationship('warehouse', 'name')
+                                                    ->relationship(
+                                                        'warehouse',
+                                                        'name',
+                                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                                    )
+                                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                                    })
                                                     ->searchable()
                                                     ->preload()
                                                     ->live()
