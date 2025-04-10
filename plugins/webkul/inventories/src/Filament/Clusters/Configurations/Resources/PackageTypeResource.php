@@ -28,6 +28,8 @@ class PackageTypeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function getNavigationGroup(): string
     {
         return __('inventories::filament/clusters/configurations/resources/package-type.navigation.group');

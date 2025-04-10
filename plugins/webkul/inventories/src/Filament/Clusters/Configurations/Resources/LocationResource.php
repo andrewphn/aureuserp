@@ -37,6 +37,8 @@ class LocationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {

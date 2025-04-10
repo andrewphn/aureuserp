@@ -40,6 +40,8 @@ class WarehouseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function getNavigationGroup(): string
     {
         return __('inventories::filament/clusters/configurations/resources/warehouse.navigation.group');

@@ -33,6 +33,8 @@ class StorageCategoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
