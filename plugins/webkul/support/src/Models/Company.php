@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Support\Database\Factories\CompanyFactory;
 
 class Company extends Model
@@ -133,7 +133,7 @@ class Company extends Model
         return CompanyFactory::new();
     }
 
-        /**
+    /**
      * Bootstrap the model and its traits.
      */
     protected static function boot()
@@ -141,7 +141,7 @@ class Company extends Model
         parent::boot();
 
         static::creating(function ($company) {
-            if (!$company->partner_id) {
+            if (! $company->partner_id) {
                 $partner = Partner::create([
                     'creator_id'       => $company->creator_id ?? Auth::id(),
                     'sub_type'         => 'company',
@@ -162,7 +162,7 @@ class Company extends Model
                     'parent_id'        => $company->parent_id,
                     'company_id'       => $company->id,
                 ]);
-                
+
                 $company->partner_id = $partner->id;
             }
         });
@@ -170,7 +170,7 @@ class Company extends Model
         static::saved(function ($company) {
             Partner::updateOrCreate(
                 [
-                    'id' => $company->partner_id
+                    'id' => $company->partner_id,
                 ], [
                     'creator_id'       => $company->creator_id ?? Auth::id(),
                     'sub_type'         => 'company',

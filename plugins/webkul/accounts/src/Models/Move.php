@@ -4,9 +4,9 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Webkul\Account\Enums\MoveState;
-use Webkul\Account\Enums\MoveType;
-use Webkul\Account\Enums\PaymentState;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
+use Webkul\Account\Enums;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -19,9 +19,9 @@ use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
 
-class Move extends Model
+class Move extends Model implements Sortable
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SortableTrait;
 
     protected $table = 'accounts_account_moves';
 
@@ -139,9 +139,14 @@ class Move extends Model
 
     protected $casts = [
         'invoice_date_due' => 'datetime',
-        'state'            => MoveState::class,
-        'payment_state'    => PaymentState::class,
-        'move_type'        => MoveType::class,
+        'state'            => Enums\MoveState::class,
+        'payment_state'    => Enums\PaymentState::class,
+        'move_type'        => Enums\MoveType::class,
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function campaign()
@@ -251,6 +256,38 @@ class Move extends Model
             ->sum('discount');
     }
 
+    public function isInbound($includeReceipts = true)
+    {
+        return in_array($this->move_type, $this->getInboundTypes($includeReceipts));
+    }
+
+    public function getInboundTypes($includeReceipts = true): array
+    {
+        $types = [Enums\MoveType::OUT_INVOICE, Enums\MoveType::IN_REFUND];
+
+        if ($includeReceipts) {
+            $types[] = Enums\MoveType::OUT_RECEIPT;
+        }
+
+        return $types;
+    }
+
+    public function isOutbound($includeReceipts = true)
+    {
+        return in_array($this->move_type, $this->getOutboundTypes($includeReceipts));
+    }
+
+    public function getOutboundTypes($includeReceipts = true): array
+    {
+        $types = [Enums\MoveType::IN_INVOICE, Enums\MoveType::OUT_REFUND];
+
+        if ($includeReceipts) {
+            $types[] = Enums\MoveType::IN_RECEIPT;
+        }
+
+        return $types;
+    }
+
     public function lines()
     {
         return $this->hasMany(MoveLine::class, 'move_id')
@@ -281,14 +318,14 @@ class Move extends Model
 
     public function isEntry()
     {
-        return $this->move_type === MoveType::ENTRY;
+        return $this->move_type === Enums\MoveType::ENTRY;
     }
 
     public function getSaleTypes($includeReceipts = false)
     {
         return $includeReceipts
-            ? [MoveType::OUT_INVOICE, MoveType::OUT_REFUND, MoveType::OUT_RECEIPT]
-            : [MoveType::OUT_INVOICE, MoveType::OUT_REFUND];
+            ? [Enums\MoveType::OUT_INVOICE, Enums\MoveType::OUT_REFUND, Enums\MoveType::OUT_RECEIPT]
+            : [Enums\MoveType::OUT_INVOICE, Enums\MoveType::OUT_REFUND];
     }
 
     public function isSaleDocument($includeReceipts = false)
@@ -299,10 +336,10 @@ class Move extends Model
     public function isPurchaseDocument($includeReceipts = false)
     {
         return in_array($this->move_type, $includeReceipts ? [
-            MoveType::IN_INVOICE,
-            MoveType::IN_REFUND,
-            MoveType::IN_RECEIPT,
-        ] : [MoveType::IN_INVOICE, MoveType::IN_REFUND]);
+            Enums\MoveType::IN_INVOICE,
+            Enums\MoveType::IN_REFUND,
+            Enums\MoveType::IN_RECEIPT,
+        ] : [Enums\MoveType::IN_INVOICE, Enums\MoveType::IN_REFUND]);
     }
 
     /**
@@ -311,6 +348,12 @@ class Move extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($model) {
+            $model->creator_id = auth()->id();
+
+            $model->is_storno = false; // in_array($model->move_type, [Enums\MoveType::OUT_REFUND, Enums\MoveType::IN_REFUND]);
+        });
 
         static::created(function ($model) {
             $model->updateSequencePrefix();
@@ -329,19 +372,19 @@ class Move extends Model
         $suffix = date('Y').'/'.date('m');
 
         switch ($this->move_type) {
-            case MoveType::OUT_INVOICE:
+            case Enums\MoveType::OUT_INVOICE:
                 $this->sequence_prefix = 'INV/'.$suffix;
 
                 break;
-            case MoveType::OUT_REFUND:
+            case Enums\MoveType::OUT_REFUND:
                 $this->sequence_prefix = 'RINV/'.$suffix;
 
                 break;
-            case MoveType::IN_INVOICE:
+            case Enums\MoveType::IN_INVOICE:
                 $this->sequence_prefix = 'BILL/'.$suffix;
 
                 break;
-            case MoveType::IN_REFUND:
+            case Enums\MoveType::IN_REFUND:
                 $this->sequence_prefix = 'RBILL/'.$suffix;
 
                 break;

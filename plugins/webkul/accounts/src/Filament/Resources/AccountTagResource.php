@@ -10,7 +10,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Account\Enums\Applicability;
 use Webkul\Account\Filament\Resources\AccountTagResource\Pages;
 use Webkul\Account\Models\Tag;

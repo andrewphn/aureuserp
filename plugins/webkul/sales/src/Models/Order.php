@@ -15,6 +15,8 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
+use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\Warehouse;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
@@ -24,8 +26,6 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
-use Webkul\Inventory\Models\Operation;
-use Webkul\Inventory\Models\Warehouse;
 
 class Order extends Model
 {

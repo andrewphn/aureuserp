@@ -4,13 +4,14 @@ namespace Webkul\Account;
 
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Facades\Tax;
-use Webkul\Account\Models\Move as AccountMove;
-use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
+use Webkul\Account\Facades\Tax as TaxFacade;
 use Webkul\Account\Mail\Invoice\Actions\InvoiceEmail;
+use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Partner;
+use Webkul\Account\Models\Tax;
 use Webkul\Support\Services\EmailService;
 
 class AccountManager
@@ -76,7 +77,7 @@ class AccountManager
 
             foreach ($data['files'] as $file) {
                 $attachments[] = [
-                    'path' => asset('storage/' . $file),
+                    'path' => asset('storage/'.$file),
                     'name' => basename($file),
                 ];
             }
@@ -124,12 +125,13 @@ class AccountManager
         $record->amount_residual_signed = 0;
 
         $newTaxEntries = [];
+
         $signMultiplier = $this->getSignMultiplier($record);
 
         foreach ($record->lines as $line) {
             $line->parent_state = $record->state;
 
-            [$line, $amountTax] = $this->collectLineTotals($line, $newTaxEntries);
+            [$line, $amountTax] = $this->collectMoveLineTotals($line, $newTaxEntries);
 
             $record->amount_untaxed += floatval($line->price_subtotal);
             $record->amount_tax += floatval($amountTax);
@@ -145,31 +147,21 @@ class AccountManager
             $record->amount_residual_signed += floatval($line->price_total) * $signMultiplier;
         }
 
+        $record = $this->computeInvoiceDateDue($record);
+
         $record->save();
 
-        $this->updateTaxLines($record, $newTaxEntries);
+        $this->computeTaxLines($record, $newTaxEntries);
 
-        $this->updateOrCreatePaymentTermLine($record);
+        $this->computePaymentTermLine($record);
 
         return $record;
     }
 
     /**
-     * Get sign multiplier based on document type
-     */
-    private function getSignMultiplier(AccountMove $record): int
-    {
-        if (in_array($record->move_type, ['out_refund', 'in_refund'])) {
-            return -1;
-        }
-
-        return 1;
-    }
-
-    /**
      * Collect line totals and tax information
      */
-    public function collectLineTotals(MoveLine $line, array &$newTaxEntries): array
+    public function collectMoveLineTotals(MoveLine $line, array &$newTaxEntries): array
     {
         $subTotal = $line->price_unit * $line->quantity;
 
@@ -181,29 +173,32 @@ class AccountManager
 
         $taxIds = $line->taxes->pluck('id')->toArray();
 
-        [$subTotal, $taxAmount, $taxesComputed] = Tax::collect($taxIds, $subTotal, $line->quantity);
+        [$subTotal, $taxAmount, $taxesComputed] = TaxFacade::collect($taxIds, $subTotal, $line->quantity);
 
         foreach ($taxesComputed as $taxComputed) {
             $taxId = $taxComputed['tax_id'];
 
             if (! isset($newTaxEntries[$taxId])) {
                 $newTaxEntries[$taxId] = [
-                    'tax_id' => $taxId,
+                    'tax_id'          => $taxId,
                     'tax_base_amount' => 0,
-                    'tax_amount' => 0,
+                    'tax_amount'      => 0,
                 ];
             }
 
             $newTaxEntries[$taxId]['tax_base_amount'] += $subTotal;
+
             $newTaxEntries[$taxId]['tax_amount'] += $taxComputed['tax_amount'];
         }
 
         $line->price_subtotal = round($subTotal, 4);
         $line->price_total = $subTotal + $taxAmount;
 
-        $line = $this->computeBalance($line);
-        $line = $this->computeCreditAndDebit($line);
-        $line = $this->computeAmountCurrency($line);
+        $line = $this->computeMoveLineBalance($line);
+
+        $line = $this->computeMoveLineCreditAndDebit($line);
+
+        $line = $this->computeMoveLineAmountCurrency($line);
 
         $line->save();
 
@@ -214,44 +209,29 @@ class AccountManager
     }
 
     /**
-     * Compute debit and credit based on balance and move type
+     * Compute line balance based on document type
      */
-    private function computeCreditAndDebit(MoveLine $line): MoveLine
+    private function computeMoveLineBalance(MoveLine $line): MoveLine
     {
-        $move = $line->move;
-        $isInverseSign = in_array($move->move_type, ['out_refund', 'in_refund']);
-
-        if (! $move->is_storno) {
-            if (! $isInverseSign) {
-                $line->debit = $line->balance > 0.0 ? $line->balance : 0.0;
-                $line->credit = $line->balance < 0.0 ? -$line->balance : 0.0;
-            } else {
-                $line->debit = $line->balance < 0.0 ? -$line->balance : 0.0;
-                $line->credit = $line->balance > 0.0 ? $line->balance : 0.0;
-            }
-        } else {
-            if (! $isInverseSign) {
-                $line->debit = $line->balance < 0.0 ? $line->balance : 0.0;
-                $line->credit = $line->balance > 0.0 ? -$line->balance : 0.0;
-            } else {
-                $line->debit = $line->balance > 0.0 ? -$line->balance : 0.0;
-                $line->credit = $line->balance < 0.0 ? $line->balance : 0.0;
-            }
-        }
+        $line->balance = $line->move->isInbound()
+            ? -$line->price_subtotal
+            : $line->price_subtotal;
 
         return $line;
     }
 
     /**
-     * Compute line balance based on document type
+     * Compute debit and credit based on balance and move type
      */
-    private function computeBalance(MoveLine $line): MoveLine
+    private function computeMoveLineCreditAndDebit(MoveLine $line): MoveLine
     {
-        $move = $line->move;
-
-        $isInverseSign = in_array($move->move_type, ['out_refund', 'in_refund']);
-
-        $line->balance = $isInverseSign ? $line->price_subtotal : -$line->price_subtotal;
+        if (! $line->move->is_storno) {
+            $line->debit = $line->balance > 0.0 ? $line->balance : 0.0;
+            $line->credit = $line->balance < 0.0 ? -$line->balance : 0.0;
+        } else {
+            $line->debit = $line->balance < 0.0 ? $line->balance : 0.0;
+            $line->credit = $line->balance > 0.0 ? -$line->balance : 0.0;
+        }
 
         return $line;
     }
@@ -259,7 +239,7 @@ class AccountManager
     /**
      * Compute amount in currency
      */
-    private function computeAmountCurrency(MoveLine $line): MoveLine
+    private function computeMoveLineAmountCurrency(MoveLine $line): MoveLine
     {
         if (is_null($line->amount_currency)) {
             $line->amount_currency = round($line->balance * $line->currency_rate, 2);
@@ -272,91 +252,62 @@ class AccountManager
         return $line;
     }
 
-    /**
-     * Prepare payment term line data
-     */
-    private function preparePaymentTermLine(AccountMove $move): array
+    public static function computeInvoiceDateDue(AccountMove $move): AccountMove
     {
-        $dateMaturity = $move->invoice_date_due;
+        $dateMaturity = now();
 
-        if (
-            $move->invoicePaymentTerm
-            && $move->invoicePaymentTerm->dueTerm?->nb_days
-        ) {
-            $dateMaturity = $dateMaturity->addDays($move->invoicePaymentTerm->dueTerm->nb_days);
+        if ($move->invoicePaymentTerm) {
+            $dueTerm = $move->invoicePaymentTerm->dueTerm;
+
+            if ($dueTerm) {
+                switch ($dueTerm->delay_type) {
+                    case Enums\DelayType::DAYS_AFTER->value:
+                        $dateMaturity = $dateMaturity->addDays($dueTerm->nb_days);
+
+                        break;
+
+                    case Enums\DelayType::DAYS_AFTER_END_OF_MONTH->value:
+                        $dateMaturity = $dateMaturity->endOfMonth()->addDays($dueTerm->nb_days);
+                        break;
+
+                    case Enums\DelayType::DAYS_AFTER_END_OF_NEXT_MONTH->value:
+                        $dateMaturity = $dateMaturity->addMonth()->endOfMonth()->addDays($dueTerm->days_next_month);
+
+                        break;
+
+                    case Enums\DelayType::DAYS_END_OF_MONTH_NO_THE->value:
+                        $dateMaturity = $dateMaturity->endOfMonth();
+
+                        break;
+                }
+            }
         }
 
-        $signMultiplier = $this->getSignMultiplier($move);
-        $amount = abs($move->amount_total);
+        $move->invoice_date_due = $dateMaturity;
 
-        if ($signMultiplier < 0) {
-            $debit = 0;
-            $credit = $amount;
-            $balance = -$amount;
-        } else {
-            $debit = $amount;
-            $credit = 0;
-            $balance = $amount;
-        }
-
-        return [
-            'move_id'                  => $move->id,
-            'move_name'                => $move->name,
-            'display_type'             => 'payment_term',
-            'currency_id'              => $move->currency_id,
-            'partner_id'               => $move->partner_id,
-            'date_maturity'            => $dateMaturity,
-            'company_id'               => $move->company_id,
-            'company_currency_id'      => $move->company_currency_id,
-            'commercial_partner_id'    => $move->partner_id,
-            'sort'                     => MoveLine::max('sort') + 1,
-            'parent_state'             => $move->state,
-            'date'                     => now(),
-            'creator_id'               => $move->creator_id,
-            'debit'                    => $debit,
-            'credit'                   => $credit,
-            'balance'                  => $balance,
-            'amount_currency'          => $balance,
-            'amount_residual'          => $amount,
-            'amount_residual_currency' => $amount,
-        ];
-    }
-
-    /**
-     * Update or create the payment term line
-     */
-    private function updateOrCreatePaymentTermLine($move): void
-    {
-        MoveLine::updateOrCreate(
-            [
-                'move_id'      => $move->id,
-                'display_type' => 'payment_term',
-            ],
-            $this->preparePaymentTermLine($move)
-        );
+        return $move;
     }
 
     /**
      * Update tax lines for the move
      */
-    private function updateTaxLines(AccountMove $move, array $newTaxEntries): void
+    private function computeTaxLines(AccountMove $move, array $newTaxEntries): void
     {
         $existingTaxLines = MoveLine::where('move_id', $move->id)
             ->where('display_type', 'tax')
             ->get()
             ->keyBy('tax_line_id');
 
-        $signMultiplier = $this->getSignMultiplier($move);
-
         foreach ($newTaxEntries as $taxId => $taxData) {
-            $tax = \Webkul\Account\Models\Tax::find($taxId);
+            $tax = Tax::find($taxId);
+
             if (! $tax) {
                 continue;
             }
 
             $currentTaxAmount = $taxData['tax_amount'];
 
-            if ($signMultiplier < 0) {
+            if ($move->isOutbound()) {
                 $debit = $currentTaxAmount;
                 $credit = 0;
                 $balance = $currentTaxAmount;
@@ -372,7 +323,7 @@ class AccountManager
                 'name'                  => $tax->name,
                 'move_id'               => $move->id,
                 'move_name'             => $move->name,
-                'display_type'          => 'tax',
+                'display_type'          => Enums\DisplayType::TAX,
                 'currency_id'           => $move->currency_id,
                 'partner_id'            => $move->partner_id,
                 'company_id'            => $move->company_id,
@@ -395,13 +346,53 @@ class AccountManager
 
                 unset($existingTaxLines[$taxId]);
             } else {
-                $taxLineData['sort'] = MoveLine::max('sort') + 1;
-
                 MoveLine::create($taxLineData);
             }
         }
 
         $existingTaxLines->each->delete();
+    }
+
+    /**
+     * Update or create the payment term line
+     */
+    private function computePaymentTermLine($move): void
+    {
+        $amount = abs($move->amount_total);
+
+        if ($move->isOutbound()) {
+            $debit = 0;
+            $credit = $amount;
+            $balance = -$amount;
+        } else {
+            $debit = $amount;
+            $credit = 0;
+            $balance = $amount;
+        }
+
+        MoveLine::updateOrCreate([
+            'move_id'      => $move->id,
+            'display_type' => Enums\DisplayType::PAYMENT_TERM,
+        ], [
+            'move_id'                  => $move->id,
+            'move_name'                => $move->name,
+            'display_type'             => Enums\DisplayType::PAYMENT_TERM,
+            'currency_id'              => $move->currency_id,
+            'partner_id'               => $move->partner_id,
+            'date_maturity'            => $move->invoice_date_due,
+            'company_id'               => $move->company_id,
+            'company_currency_id'      => $move->company_currency_id,
+            'commercial_partner_id'    => $move->partner_id,
+            'parent_state'             => $move->state,
+            'date'                     => now(),
+            'creator_id'               => $move->creator_id,
+            'debit'                    => $debit,
+            'credit'                   => $credit,
+            'balance'                  => $balance,
+            'amount_currency'          => $balance,
+            'amount_residual'          => $balance,
+            'amount_residual_currency' => $balance,
+        ]);
     }
 
     private function preparePayloadForSendByEmail($record, $partner, $data)
@@ -416,5 +407,17 @@ class AccountManager
                 'name'    => $partner?->name,
             ],
         ];
+    }
+
+    /**
+     * Get sign multiplier based on document type
+     */
+    private function getSignMultiplier(AccountMove $record): int
+    {
+        if ($record->isOutbound()) {
+            return -1;
+        }
+
+        return 1;
     }
 }

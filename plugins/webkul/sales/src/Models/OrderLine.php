@@ -3,21 +3,21 @@
 namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Tax;
+use Webkul\Inventory\Models\Move as InventoryMove;
+use Webkul\Inventory\Models\Route;
+use Webkul\Inventory\Models\Warehouse;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Sale\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
-use Webkul\Inventory\Models\Move as InventoryMove;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
-use Webkul\Inventory\Models\Warehouse;
-use Webkul\Inventory\Models\Route;
 
 class OrderLine extends Model
 {

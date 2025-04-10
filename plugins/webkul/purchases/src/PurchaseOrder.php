@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums as AccountEnums;
+use Webkul\Account\Facades\Tax as TaxFacade;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Partner;
-use Webkul\Account\Facades\Tax as TaxFacade;
 use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Location;
@@ -379,7 +379,7 @@ class PurchaseOrder
 
     public function generateRFQPdf($record)
     {
-        $pdfPath = 'Request for Quotation-' . str_replace('/', '_', $record->name) . '.pdf';
+        $pdfPath = 'Request for Quotation-'.str_replace('/', '_', $record->name).'.pdf';
 
         if (! Storage::exists($pdfPath)) {
             $pdf = PDF::loadView('purchases::filament.admin.clusters.orders.orders.actions.print-quotation', [
@@ -394,7 +394,7 @@ class PurchaseOrder
 
     public function generatePurchaseOrderPdf($record)
     {
-        $pdfPath = 'Purchase Order-' . str_replace('/', '_', $record->name) . '.pdf';
+        $pdfPath = 'Purchase Order-'.str_replace('/', '_', $record->name).'.pdf';
 
         if (! Storage::exists($pdfPath)) {
             $pdf = PDF::loadView('purchases::filament.admin.clusters.orders.orders.actions.print-purchase-order', [
@@ -413,7 +413,7 @@ class PurchaseOrder
             return;
         }
 
-        if (! $record->lines->contains(fn($line) => $line->product->type === ProductType::GOODS)) {
+        if (! $record->lines->contains(fn ($line) => $line->product->type === ProductType::GOODS)) {
             return;
         }
 

@@ -10,7 +10,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums;
-use Webkul\Account\Models\TaxPartition as TaxPartitionModel;
 
 trait TaxPartition
 {
@@ -100,8 +99,6 @@ trait TaxPartition
                         $data['company_id'] = $user->default_company_id;
 
                         $data['factor'] = (float) $data['factor_percent'] / 100;
-
-                        $data['sort'] = TaxPartitionModel::max('sort') + 1;
 
                         return $data;
                     }),

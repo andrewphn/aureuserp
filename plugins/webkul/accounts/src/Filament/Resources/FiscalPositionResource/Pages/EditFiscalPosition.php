@@ -8,7 +8,6 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\FiscalPositionResource;
-use Webkul\Account\Models\FiscalPosition;
 
 class EditFiscalPosition extends EditRecord
 {
@@ -51,8 +50,6 @@ class EditFiscalPosition extends EditRecord
         $user = Auth::user();
 
         $data['company_id'] = $user?->default_company_id;
-
-        $data['sort'] = FiscalPosition::max('sort') + 1;
 
         return $data;
     }

@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\FiscalPositionResource;
-use Webkul\Account\Models\FiscalPosition;
 
 class CreateFiscalPosition extends CreateRecord
 {
@@ -32,8 +31,6 @@ class CreateFiscalPosition extends CreateRecord
         $data['company_id'] = $user?->default_company_id;
 
         $data['creator_id'] = $user->id;
-
-        $data['sort'] = FiscalPosition::max('sort') + 1;
 
         return $data;
     }

@@ -6,11 +6,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums as AccountEnums;
-use Webkul\Invoice\Enums as InvoiceEnums;
-use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Account\Facades\Tax;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Inventory\Enums as InventoryEnums;
+use Webkul\Inventory\Facades\Inventory as InventoryFacade;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Move as InventoryMove;
+use Webkul\Inventory\Models\Operation as InventoryOperation;
+use Webkul\Inventory\Models\Rule;
+use Webkul\Inventory\Models\Warehouse;
+use Webkul\Invoice\Enums as InvoiceEnums;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
@@ -20,14 +26,8 @@ use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Sale\Settings\InvoiceSettings;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
-use Webkul\Support\Services\EmailService;
 use Webkul\Support\Package;
-use Webkul\Inventory\Models\Rule;
-use Webkul\Inventory\Models\Operation as InventoryOperation;
-use Webkul\Inventory\Models\Move as InventoryMove;
-use Webkul\Inventory\Models\Warehouse;
-use Webkul\Inventory\Models\Location;
-use Webkul\Inventory\Facades\Inventory as InventoryFacade;
+use Webkul\Support\Services\EmailService;
 
 class SaleManager
 {
@@ -195,7 +195,7 @@ class SaleManager
 
         $line->price_reduce_taxexcl = $line->price_unit - ($line->price_unit * ($line->discount / 100));
 
-        $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2);//Todo:: This calculation is wrong
+        $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2); // Todo:: This calculation is wrong
 
         $line->state = $line->order->state;
 
@@ -252,7 +252,7 @@ class SaleManager
             $qty = 0.0;
 
             [$outgoingMoves, $incomingMoves] = $this->getOutgoingIncomingMoves($line);
-            
+
             foreach ($outgoingMoves as $move) {
                 if ($move->state != InventoryEnums\MoveState::DONE) {
                     continue;
@@ -260,7 +260,7 @@ class SaleManager
 
                 $qty += $move->uom->computeQuantity($move->quantity, $line->uom, true, 'HALF-UP');
             }
-            
+
             foreach ($incomingMoves as $move) {
                 if ($move->state != InventoryEnums\MoveState::DONE) {
                     continue;
@@ -268,7 +268,7 @@ class SaleManager
 
                 $qty -= $move->uom->computeQuantity($move->quantity, $line->uom, true, 'HALF-UP');
             }
-            
+
             $line->qty_delivered = $qty;
         }
 
@@ -322,7 +322,7 @@ class SaleManager
 
             return $order;
         }
-        
+
         if ($order->lines->contains(function ($line) {
             return $line->state == Enums\InvoiceStatus::TO_INVOICE;
         })) {
@@ -521,8 +521,8 @@ class SaleManager
         $outgoingMoveIds = [];
 
         $incomingMoveIds = [];
-        
-        $moves = $orderLine->inventoryMoves->filter(function($inventoryMove) use($orderLine) {
+
+        $moves = $orderLine->inventoryMoves->filter(function ($inventoryMove) use ($orderLine) {
             return $inventoryMove->state != InventoryEnums\MoveState::CANCELED
                 && ! $inventoryMove->is_scraped
                 && $orderLine->product_id == $inventoryMove->product_id;
@@ -534,7 +534,7 @@ class SaleManager
             $sortedMoves = $moves->sortBy('id');
 
             $seenWarehouseIds = [];
-            
+
             foreach ($sortedMoves as $move) {
                 if (! in_array($move->warehouse->id, $seenWarehouseIds)) {
                     $triggeringRuleIds[] = $move->rule_id;
@@ -543,14 +543,14 @@ class SaleManager
                 }
             }
         }
-        
+
         foreach ($moves as $move) {
             $isOutgoingStrict = $strict && $move->destinationLocation == InventoryEnums\LocationType::CUSTOMER;
 
             $isOutgoingNonStrict = ! $strict
                 && in_array($move->rule_id, $triggeringRuleIds)
                 && ($move->finalLocation ?? $move->destinationLocation) == InventoryEnums\LocationType::CUSTOMER;
-                                  
+
             if ($isOutgoingStrict || $isOutgoingNonStrict) {
                 if (
                     ! $move->origin_returned_move_id
@@ -565,7 +565,7 @@ class SaleManager
                 $incomingMoveIds[] = $move->id;
             }
         }
-        
+
         return [
             $moves->whereIn('id', $outgoingMoveIds),
             $moves->whereIn('id', $incomingMoveIds),

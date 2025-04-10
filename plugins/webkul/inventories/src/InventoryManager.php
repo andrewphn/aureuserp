@@ -9,11 +9,10 @@ use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\MoveLine;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
-use Webkul\Support\Models\UOM;
-use Webkul\Support\Package;
 use Webkul\Inventory\Models\Rule;
 use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
 use Webkul\Sale\Facades\SaleOrder as SaleFacade;
+use Webkul\Support\Package;
 
 class InventoryManager
 {

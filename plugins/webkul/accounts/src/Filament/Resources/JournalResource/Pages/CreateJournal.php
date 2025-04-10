@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Filament\Resources\JournalResource;
-use Webkul\Account\Models\Journal;
 
 class CreateJournal extends CreateRecord
 {
@@ -29,8 +28,6 @@ class CreateJournal extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['sort'] = Journal::max('sort') + 1;
-
         $data['creator_id'] = Auth::user()->id;
 
         $data['invoice_reference_type'] = $data['invoice_reference_type'] ?? CommunicationType::INVOICE->value;

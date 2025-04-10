@@ -11,7 +11,6 @@ use Webkul\Account\Filament\Resources\BillResource;
 use Webkul\Account\Filament\Resources\BillResource\Actions\CreditNoteAction;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
-use Webkul\Partner\Models\Partner;
 
 class EditBill extends EditRecord
 {
@@ -58,25 +57,11 @@ class EditBill extends EditRecord
         $data['auto_post'] ??= $record->auto_post;
         $data['invoice_currency_rate'] ??= 1.0;
 
-        if ($data['partner_id']) {
-            $partner = Partner::find($data['partner_id']);
-
-            $data['commercial_partner_id'] = $partner->id;
-            $data['partner_shipping_id'] = $partner->id;
-            $data['invoice_partner_display_name'] = $partner->name;
-        } else {
-            $data['invoice_partner_display_name'] = "#Created By: {$user->name}";
-        }
-
         return $data;
     }
 
     protected function afterSave(): void
     {
-        $record = $this->getRecord();
-
-        $record->invoice_date_due = BillResource::calculateDateMaturity($record)->format('Y-m-d');
-
         Account::computeAccountMove($this->getRecord());
     }
 }

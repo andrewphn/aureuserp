@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
-use Webkul\Account\Models\PaymentTerm;
 
 class CreatePaymentTerm extends CreateRecord
 {
@@ -29,7 +28,6 @@ class CreatePaymentTerm extends CreateRecord
     {
         $user = Auth::user();
 
-        $data['sort'] = PaymentTerm::max('sort') + 1;
         $data['creator_id'] = $user->id;
         $data['company_id'] = $user?->default_company_id;
 
