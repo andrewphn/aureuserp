@@ -97,7 +97,7 @@ return [
             ],
         ],
 
-        'activity-plan' => [
+        'empty-state' => [
             'create' => [
                 'notification' => [
                     'title' => 'Activity Plan created',
