@@ -576,7 +576,14 @@ class OperationResource extends Resource
                     ->disabled(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT),
                 Forms\Components\Select::make('final_location_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.final-location'))
-                    ->relationship('finalLocation', 'full_name')
+                    ->relationship(
+                        'finalLocation',
+                        'full_name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
                     ->searchable()
                     ->preload()
                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations)
@@ -827,12 +834,16 @@ class OperationResource extends Resource
                                 name: 'destinationLocation',
                                 titleAttribute: 'full_name',
                                 modifyQueryUsing: fn (Builder $query) => $query
+                                    ->withTrashed()
                                     ->where('type', '<>', Enums\LocationType::VIEW)
                                     ->where(function ($query) use ($move) {
                                         $query->where('id', $move->destination_location_id)
                                             ->orWhere('parent_id', $move->destination_location_id);
-                                    }),
+                                    })
                             )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
