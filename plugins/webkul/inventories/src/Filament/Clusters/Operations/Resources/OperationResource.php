@@ -111,7 +111,14 @@ class OperationResource extends Resource
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('source_location_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.source-location'))
-                            ->relationship('sourceLocation', 'full_name')
+                            ->relationship(
+                                'sourceLocation',
+                                'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                            )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
@@ -119,7 +126,14 @@ class OperationResource extends Resource
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('destination_location_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.destination-location'))
-                            ->relationship('destinationLocation', 'full_name')
+                            ->relationship(
+                                'destinationLocation',
+                                'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                            )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
