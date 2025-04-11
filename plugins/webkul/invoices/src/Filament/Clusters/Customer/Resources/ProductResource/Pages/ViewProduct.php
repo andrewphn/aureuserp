@@ -3,7 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages\ViewProduct as BaseViewProduct;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ViewProduct as BaseViewProduct;
 
 class ViewProduct extends BaseViewProduct
 {
