@@ -219,13 +219,11 @@ class OperationResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sourceLocation.full_name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.from'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (Settings\WarehouseSettings $settings): bool => $settings->enable_locations),
                 Tables\Columns\TextColumn::make('destinationLocation.full_name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.to'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (Settings\WarehouseSettings $settings): bool => $settings->enable_locations),
@@ -237,7 +235,6 @@ class OperationResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.responsible'))
                     ->placeholder('—')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('scheduled_at')
@@ -264,17 +261,14 @@ class OperationResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('operationType.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.operation-type'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.company'))
                     ->placeholder('—')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.state'))
-                    ->searchable()
                     ->sortable()
                     ->badge(),
             ])
