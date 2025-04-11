@@ -4,6 +4,7 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
 use Filament\Notifications\Notification;
 use Filament\Tables;
+use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource as BaseActivityPlanResource;
@@ -183,7 +184,24 @@ class ActivityPlanResource extends BaseActivityPlanResource
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                    ->icon('heroicon-o-plus-circle'),
+                    ->icon('heroicon-o-plus-circle')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $user = Auth::user();
+
+                        $data['plugin'] = 'recruitments';
+
+                        $data['creator_id'] = $user->id;
+
+                        $data['company_id'] ??= $user->defaultCompany?->id;
+
+                        return $data;
+                    })
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.title'))
+                            ->body(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.body')),
+                    ),
             ])
             ->modifyQueryUsing(function ($query) {
                 $query->where('plugin', 'recruitments');
