@@ -192,7 +192,6 @@ class ActivityTemplateRelationManager extends RelationManager
                     ->mutateFormDataUsing(function (array $data): array {
                         return [
                             ...$data,
-                            'sort'       => ActivityPlanTemplate::max('sort') + 1,
                             'creator_id' => Auth::user()->id,
                         ];
                     })
@@ -212,7 +211,6 @@ class ActivityTemplateRelationManager extends RelationManager
                         ->mutateFormDataUsing(function (array $data): array {
                             return [
                                 ...$data,
-                                'sort'       => ActivityPlanTemplate::max('sort') + 1,
                                 'creator_id' => Auth::user()->id,
                             ];
                         })

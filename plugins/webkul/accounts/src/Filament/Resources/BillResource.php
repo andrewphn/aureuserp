@@ -560,7 +560,6 @@ class BillResource extends Resource
             'company_currency_id'   => $user->defaultCompany->currency_id ?? $record->currency_id,
             'commercial_partner_id' => $livewire->record->partner_id,
             'display_type'          => 'product',
-            'sort'                  => MoveLine::max('sort') + 1,
             'parent_state'          => $livewire->record->state ?? MoveState::DRAFT,
             'move_name'             => $livewire->record->name,
         ]);
@@ -784,7 +783,6 @@ class BillResource extends Resource
             'amount_currency'          => -$move->amount_total,
             'amount_residual'          => -$move->amount_total,
             'amount_residual_currency' => -$move->amount_total,
-            'sort'                     => MoveLine::max('sort') + 1,
             'created_by'               => Auth::id(),
         ];
 
@@ -850,8 +848,6 @@ class BillResource extends Resource
 
                 unset($existingTaxLines[$taxId]);
             } else {
-                $taxData['sort'] = MoveLine::max('sort') + 1;
-
                 MoveLine::create($taxData);
             }
         }

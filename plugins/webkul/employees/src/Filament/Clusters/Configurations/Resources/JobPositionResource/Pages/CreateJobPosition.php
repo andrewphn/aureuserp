@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
-use Webkul\Employee\Models\EmployeeJobPosition;
 
 class CreateJobPosition extends CreateRecord
 {
@@ -28,8 +27,6 @@ class CreateJobPosition extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::user()->id;
-
-        $data['sort'] = EmployeeJobPosition::max('sort') + 1;
 
         return $data;
     }

@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Product\Database\Factories\AttributeFactory;
 use Webkul\Product\Enums\AttributeType;
 use Webkul\Security\Models\User;
 
-class Attribute extends Model
+class Attribute extends Model implements Sortable
 {
     use HasFactory, SoftDeletes, SortableTrait;
 
@@ -45,7 +46,8 @@ class Attribute extends Model
     ];
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function options(): HasMany

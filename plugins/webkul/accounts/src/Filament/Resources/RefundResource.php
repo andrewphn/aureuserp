@@ -538,7 +538,6 @@ class RefundResource extends Resource
             'company_currency_id'   => $user->defaultCompany->currency_id ?? $record->currency_id,
             'commercial_partner_id' => $livewire->record->partner_id,
             'display_type'          => 'product',
-            'sort'                  => MoveLine::max('sort') + 1,
             'parent_state'          => $livewire->record->state ?? MoveState::DRAFT,
             'move_name'             => $livewire->record->name,
         ]);
@@ -757,7 +756,6 @@ class RefundResource extends Resource
             'partner_id'               => $move->partner_id,
             'company_currency_id'      => $move->company_currency_id,
             'company_id'               => $move->company_id,
-            'sort'                     => MoveLine::max('sort') + 1,
             'commercial_partner_id'    => $move->partner_id,
             'date'                     => now(),
             'parent_state'             => $move->state,
@@ -812,7 +810,6 @@ class RefundResource extends Resource
                     'company_id'            => $move->company_id,
                     'company_currency_id'   => $move->company_currency_id,
                     'commercial_partner_id' => $move->partner_id,
-                    'sort'                  => MoveLine::max('sort') + 1,
                     'parent_state'          => $move->state,
                     'date'                  => now(),
                     'creator_id'            => $move->creator_id,
@@ -833,8 +830,6 @@ class RefundResource extends Resource
 
                 unset($existingTaxLines[$taxId]);
             } else {
-                $taxData['sort'] = MoveLine::max('sort') + 1;
-
                 MoveLine::create($taxData);
             }
         }

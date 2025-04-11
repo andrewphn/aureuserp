@@ -3,11 +3,15 @@
 namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\UOM;
 
-class OrderOption extends Model
+class OrderOption extends Model implements Sortable
 {
+    use SortableTrait;
+
     protected $table = 'sales_order_options';
 
     protected $fillable = [
@@ -21,6 +25,11 @@ class OrderOption extends Model
         'quantity',
         'price_unit',
         'discount',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function order()

@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 
-class ProductAttribute extends Model
+class ProductAttribute extends Model implements Sortable
 {
+    use SortableTrait;
+
     /**
      * Table name.
      *
@@ -27,6 +31,11 @@ class ProductAttribute extends Model
         'product_id',
         'attribute_id',
         'creator_id',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function product(): BelongsTo

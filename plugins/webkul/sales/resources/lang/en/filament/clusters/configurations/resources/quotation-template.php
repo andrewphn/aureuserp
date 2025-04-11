@@ -7,7 +7,7 @@ return [
         'title'  => 'Quotation Template',
         'group'  => 'Sales Orders',
     ],
-    
+
     'form' => [
         'tabs' => [
             'products' => [

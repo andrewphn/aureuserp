@@ -8,10 +8,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Models\MoveLine;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
-use Webkul\Inventory\Models\MoveLine;
 
 class ManageMoves extends ManageRelatedRecords
 {

@@ -42,9 +42,6 @@ trait EmployeeResumeRelation
                                     Forms\Components\Hidden::make('creator_id')
                                         ->default(Auth::user()->id)
                                         ->required(),
-                                    Forms\Components\Hidden::make('sort')
-                                        ->default(EmployeeResumeLineType::max('sort') + 1)
-                                        ->required(),
                                 ])->columns(2),
                         ])
                         ->createOptionAction(function (Action $action) {

@@ -4,11 +4,13 @@ namespace Webkul\TimeOff\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 
-class LeaveAccrualLevel extends Model
+class LeaveAccrualLevel extends Model implements Sortable
 {
-    use HasFactory;
+    use HasFactory, SortableTrait;
 
     protected $table = 'time_off_leave_accrual_levels';
 
@@ -39,6 +41,11 @@ class LeaveAccrualLevel extends Model
         'cap_accrued_time',
         'cap_accrued_time_yearly',
         'accrual_validity',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function accrualPlan()

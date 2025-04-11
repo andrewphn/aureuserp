@@ -64,11 +64,6 @@ class PriceRuleItem extends Model
         'type'      => Enums\PriceRuleType::class,
     ];
 
-    public $sortable = [
-        'order_column_name'  => 'sort',
-        'sort_when_creating' => true,
-    ];
-
     public function priceRule(): BelongsTo
     {
         return $this->belongsTo(PriceRule::class);

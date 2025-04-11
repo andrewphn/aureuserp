@@ -28,7 +28,7 @@ class CreateOperationType extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['reservation_method'] = Enums\ReservationMethod::AT_CONFIRM;
-        
+
         $data['creator_id'] = Auth::id();
 
         return $data;

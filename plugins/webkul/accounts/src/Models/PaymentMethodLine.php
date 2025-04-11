@@ -4,11 +4,13 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 
-class PaymentMethodLine extends Model
+class PaymentMethodLine extends Model implements Sortable
 {
-    use HasFactory;
+    use HasFactory, SortableTrait;
 
     protected $table = 'accounts_payment_method_lines';
 
@@ -19,6 +21,11 @@ class PaymentMethodLine extends Model
         'journal_id',
         'name',
         'creator_id',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function createdBy()

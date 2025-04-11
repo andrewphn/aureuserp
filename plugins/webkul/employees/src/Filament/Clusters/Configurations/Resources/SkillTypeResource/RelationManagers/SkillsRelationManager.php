@@ -59,13 +59,7 @@ class SkillsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus-circle')
-                    ->modal('form')
-                    ->mutateFormDataUsing(function (array $data) {
-                        return [
-                            ...$data,
-                            'sort' => Skill::max('sort') + 1,
-                        ];
-                    }),
+                    ->modal('form'),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make()
@@ -75,12 +69,6 @@ class SkillsRelationManager extends RelationManager
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make()
-                        ->mutateFormDataUsing(function (array $data) {
-                            return [
-                                ...$data,
-                                'sort' => Skill::max('sort') + 1,
-                            ];
-                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()

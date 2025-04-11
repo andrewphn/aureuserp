@@ -67,8 +67,6 @@ class CompanyResource extends Resource
                             ->schema([
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.company-information.title'))
                                     ->schema([
-                                        Forms\Components\Hidden::make('sort')
-                                            ->default(Company::max('sort') + 1),
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.name'))
                                             ->required()

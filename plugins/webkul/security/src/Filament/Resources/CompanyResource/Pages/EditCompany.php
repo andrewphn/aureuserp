@@ -43,7 +43,6 @@ class EditCompany extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return [
-            'sort'       => $data['sort'] ?? Company::max('sort') + 1,
             'creator_id' => Auth::user()->id,
             ...$data,
         ];

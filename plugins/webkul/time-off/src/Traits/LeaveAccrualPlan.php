@@ -280,7 +280,6 @@ trait LeaveAccrualPlan
                     ->label(__('time-off::traits/leave-accrual-plan.table.header-actions.created.title'))
                     ->mutateFormDataUsing(function ($data) {
                         $data['creator_id'] = Auth::user()?->id;
-                        $data['sort'] = LeaveAccrualLevel::max('sort') + 1;
 
                         return $data;
                     })

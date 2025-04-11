@@ -101,8 +101,6 @@ trait TaxPartition
 
                         $data['factor'] = (float) $data['factor_percent'] / 100;
 
-                        $data['sort'] = TaxPartitionModel::max('sort') + 1;
-
                         return $data;
                     }),
             ])

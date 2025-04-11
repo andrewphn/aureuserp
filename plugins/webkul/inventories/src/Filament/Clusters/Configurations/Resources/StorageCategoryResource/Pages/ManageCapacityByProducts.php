@@ -8,8 +8,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rules\Unique;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 
 class ManageCapacityByProducts extends ManageRelatedRecords
