@@ -8,9 +8,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rules\Unique;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 
 class CapacityByProductsRelationManager extends RelationManager
 {

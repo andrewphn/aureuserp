@@ -56,11 +56,6 @@ class StageResource extends Resource
                                             Forms\Components\TextInput::make('name')
                                                 ->label(__('recruitments::filament/clusters/configurations/resources/stage.form.sections.general-information.fields.stage-name'))
                                                 ->required(),
-                                            Forms\Components\TextInput::make('sort')
-                                                ->label(__('recruitments::filament/clusters/configurations/resources/stage.form.sections.general-information.fields.sort'))
-                                                ->numeric()
-                                                ->default(Stage::max('sort') + 1)
-                                                ->required(),
                                             Forms\Components\RichEditor::make('requirements')
                                                 ->label(__('recruitments::filament/clusters/configurations/resources/stage.form.sections.general-information.fields.requirements'))
                                                 ->maxLength(255)

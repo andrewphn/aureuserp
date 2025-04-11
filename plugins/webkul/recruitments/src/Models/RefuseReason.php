@@ -12,7 +12,8 @@ class RefuseReason extends Model implements Sortable
     use SortableTrait;
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     protected $table = 'recruitments_refuse_reasons';

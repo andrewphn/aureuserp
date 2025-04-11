@@ -134,8 +134,6 @@ class DepartureReasonResource extends Resource
                             ->body(__('employees::filament/clusters/configurations/resources/departure-reason.table.actions.edit.notification.body')),
                     )
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['sort'] = $data['sort'] ?? DepartureReason::max('sort') + 1;
-
                         $data['reason_code'] = $data['reason_code'] ?? crc32($data['name']) % 100000;
 
                         $data['creator_id'] = $data['creator_id'] ?? Auth::user()->id;

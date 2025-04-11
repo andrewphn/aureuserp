@@ -4,6 +4,8 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Models\Tax;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
@@ -13,8 +15,10 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
-class OrderLine extends Model
+class OrderLine extends Model implements Sortable
 {
+    use SortableTrait;
+
     protected $table = 'sales_order_lines';
 
     protected $fillable = [
@@ -65,6 +69,11 @@ class OrderLine extends Model
 
     protected $casts = [
         'cast' => OrderState::class,
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function order()

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Product\Database\Factories\ProductFactory;
@@ -16,9 +18,9 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UOM;
 
-class Product extends Model
+class Product extends Model implements Sortable
 {
-    use HasChatter, HasFactory, HasLogActivity, SoftDeletes;
+    use HasChatter, HasFactory, HasLogActivity, SoftDeletes, SortableTrait;
 
     /**
      * Table name.
@@ -94,6 +96,11 @@ class Product extends Model
         'category.name' => 'Category',
         'company.name'  => 'Company',
         'creator.name'  => 'Creator',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function parent(): BelongsTo

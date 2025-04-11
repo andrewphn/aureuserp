@@ -29,7 +29,6 @@ class CreatePaymentTerm extends CreateRecord
     {
         $user = Auth::user();
 
-        $data['sort'] = PaymentTerm::max('sort') + 1;
         $data['creator_id'] = $user->id;
         $data['company_id'] = $user?->default_company_id;
 

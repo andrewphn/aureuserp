@@ -52,8 +52,6 @@ class EditFiscalPosition extends EditRecord
 
         $data['company_id'] = $user?->default_company_id;
 
-        $data['sort'] = FiscalPosition::max('sort') + 1;
-
         return $data;
     }
 }

@@ -33,8 +33,6 @@ class CreateLeaveType extends CreateRecord
 
         $data['creator_id'] = $user?->id;
 
-        $data['sort'] = LeaveType::max('sort') + 1;
-
         return $data;
     }
 }

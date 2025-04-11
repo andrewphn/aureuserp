@@ -900,7 +900,6 @@ class QuotationResource extends Resource
 
                                             $data['order_id'] = $livewire->record->id;
                                             $data['creator_id'] = $user->id;
-                                            $data['sort'] = OrderLine::max('sort') + 1;
                                             $data['company_id'] = $user?->default_company_id;
                                             $data['currency_id'] = $livewire->record->currency_id;
                                             $data['product_uom_id'] = $state['uom_id'];
@@ -1440,8 +1439,6 @@ class QuotationResource extends Resource
         $line->price_tax = $taxAmount;
 
         $line->price_total = $subTotal + $taxAmount;
-
-        $line->sort = $line->sort ?? OrderLine::max('sort') + 1;
 
         $line->technical_price_unit = $line->price_unit;
 

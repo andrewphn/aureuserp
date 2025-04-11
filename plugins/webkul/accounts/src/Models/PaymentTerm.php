@@ -5,14 +5,16 @@ namespace Webkul\Account\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Enums\DelayType;
 use Webkul\Account\Enums\DueTermValue;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
-class PaymentTerm extends Model
+class PaymentTerm extends Model implements Sortable
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, SortableTrait;
 
     protected $table = 'accounts_payment_terms';
 
@@ -27,6 +29,11 @@ class PaymentTerm extends Model
         'display_on_invoice',
         'early_discount',
         'discount_percentage',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function company()

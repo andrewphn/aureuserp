@@ -129,7 +129,6 @@ class CreditNoteAction extends Action
             $newMoveLine->reference = $record->reference;
             $newMoveLine->move_name = null;
             $newMoveLine->move_id = $newMove->id;
-            $newMoveLine->sort = $newMove->lines->max('sort') + 1;
             $newMoveLine->debit = $line->credit;
             $newMoveLine->credit = 0.00;
             $newMoveLine->balance = -($line->balance);
@@ -151,7 +150,6 @@ class CreditNoteAction extends Action
             'company_id'               => $newMove->company_id,
             'company_currency_id'      => $newMove->company_currency_id,
             'commercial_partner_id'    => $newMove->partner_id,
-            'sort'                     => $newMove->lines->max('sort') + 1,
             'parent_state'             => $newMove->state,
             'date'                     => now(),
             'creator_id'               => $newMove->creator_id,
@@ -173,7 +171,6 @@ class CreditNoteAction extends Action
             $newMoveLine->reference = $newMove->reference;
             $newMoveLine->move_name = null;
             $newMoveLine->move_id = $newMove->id;
-            $newMoveLine->sort = $newMove->lines->max('sort') + 1;
             $newMoveLine->debit = $line->credit;
             $newMoveLine->credit = 0.00;
             $newMoveLine->balance = -($line->balance);

@@ -4,14 +4,16 @@ namespace Webkul\Sale\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Models\Journal;
 use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
-class OrderTemplate extends Model
+class OrderTemplate extends Model implements Sortable
 {
-    use HasFactory;
+    use HasFactory, SortableTrait;
 
     protected $table = 'sales_order_templates';
 
@@ -27,6 +29,11 @@ class OrderTemplate extends Model
         'require_signature',
         'require_payment',
         'prepayment_percentage',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function company()

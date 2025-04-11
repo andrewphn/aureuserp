@@ -5,7 +5,6 @@ namespace Webkul\Security\Filament\Resources\CompanyResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
@@ -13,14 +12,12 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Enums\CompanyStatus;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
-use Webkul\Support\Models\State;
 
 class BranchesRelationManager extends RelationManager
 {
@@ -288,8 +285,6 @@ class BranchesRelationManager extends RelationManager
                     ->icon('heroicon-o-plus-circle')
                     ->mutateFormDataUsing(function ($livewire, array $data): array {
                         $data['user_id'] = Auth::user()->id;
-
-                        $data['sort'] = Company::max('sort') + 1;
 
                         $data['parent_id'] = $livewire->ownerRecord->id;
 

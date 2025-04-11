@@ -19,8 +19,6 @@ class ListEmploymentTypes extends ListRecords
             Actions\CreateAction::make()->icon('heroicon-o-plus-circle')
                 ->label(__('employees::filament/clusters/configurations/resources/employment-type/pages/list-employment-type.header-actions.create.label'))
                 ->mutateFormDataUsing(function (array $data): array {
-                    $data['sort'] = EmploymentType::max('sort') + 1;
-
                     $data['code'] = $data['code'] ?? $data['name'];
 
                     $data['user_id'] = Auth::user()->id;

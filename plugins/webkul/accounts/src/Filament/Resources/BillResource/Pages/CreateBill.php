@@ -36,7 +36,6 @@ class CreateBill extends CreateRecord
         $data['state'] ??= Enums\MoveState::DRAFT;
         $data['move_type'] ??= Enums\MoveType::IN_INVOICE;
         $data['date'] = now();
-        $data['sort'] = Move::max('sort') + 1;
         $data['payment_state'] = PaymentState::NOT_PAID;
 
         if ($data['partner_id']) {

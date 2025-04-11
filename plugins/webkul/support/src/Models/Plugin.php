@@ -4,9 +4,10 @@ namespace Webkul\Support\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class Plugin extends Model
+class Plugin extends Model implements Sortable
 {
     use SortableTrait;
 

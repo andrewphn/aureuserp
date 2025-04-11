@@ -33,8 +33,6 @@ class CreateFiscalPosition extends CreateRecord
 
         $data['creator_id'] = $user->id;
 
-        $data['sort'] = FiscalPosition::max('sort') + 1;
-
         return $data;
     }
 }

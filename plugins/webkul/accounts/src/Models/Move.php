@@ -4,6 +4,8 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
@@ -19,9 +21,9 @@ use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
 
-class Move extends Model
+class Move extends Model implements Sortable
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SortableTrait;
 
     protected $table = 'accounts_account_moves';
 
@@ -142,6 +144,11 @@ class Move extends Model
         'state'            => MoveState::class,
         'payment_state'    => PaymentState::class,
         'move_type'        => MoveType::class,
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function campaign()

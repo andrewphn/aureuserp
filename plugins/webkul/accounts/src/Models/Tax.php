@@ -43,7 +43,8 @@ class Tax extends Model implements Sortable
     ];
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function company()
