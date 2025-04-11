@@ -201,7 +201,17 @@ class OperationTypeResource extends Resource
                                         Forms\Components\Select::make('source_location_id')
                                             ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.source-location'))
                                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.source-location-hint-tooltip'))
-                                            ->relationship('sourceLocation', 'full_name')
+                                            ->relationship(
+                                                'sourceLocation',
+                                                'full_name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->required()
@@ -226,7 +236,17 @@ class OperationTypeResource extends Resource
                                         Forms\Components\Select::make('destination_location_id')
                                             ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.destination-location'))
                                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.destination-location-hint-tooltip'))
-                                            ->relationship('destinationLocation', 'full_name')
+                                            ->relationship(
+                                                'destinationLocation',
+                                                'full_name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->required()
