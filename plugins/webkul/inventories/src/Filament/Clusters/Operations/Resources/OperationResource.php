@@ -68,7 +68,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
-                            ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::INCOMING)
+                            ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::INCOMING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.contact'))
@@ -76,7 +76,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
-                            ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::INTERNAL)
+                            ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::INTERNAL)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.delivery-address'))
@@ -84,7 +84,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
-                            ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
+                            ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('operation_type_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.operation-type'))
@@ -105,7 +105,7 @@ class OperationResource extends Resource
                                 return $record->warehouse->name.': '.$record->name.($record->trashed() ? ' (Deleted)' : '');
                             })
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                $operationType = OperationType::find($get('operation_type_id'));
+                                $operationType = OperationType::withTrashed()->find($get('operation_type_id'));
 
                                 $set('source_location_id', $operationType?->source_location_id);
                                 $set('destination_location_id', $operationType?->destination_location_id);
@@ -124,7 +124,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
+                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('destination_location_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.destination-location'))
@@ -139,7 +139,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::find($get('operation_type_id'))?->type != Enums\OperationType::OUTGOING)
+                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                     ])
                     ->columns(2),
@@ -165,7 +165,7 @@ class OperationResource extends Resource
                                     ->options(Enums\MoveType::class)
                                     ->default(Enums\MoveType::DIRECT)
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.shipping-policy-hint-tooltip'))
-                                    ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
+                                    ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                                 Forms\Components\DateTimePicker::make('scheduled_at')
                                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.scheduled-at'))
