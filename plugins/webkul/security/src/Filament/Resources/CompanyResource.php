@@ -487,7 +487,6 @@ class CompanyResource extends Resource
                                 ->schema([
                                     Infolists\Components\ImageEntry::make('partner.avatar')
                                         ->label(__('security::filament/resources/company.infolist.sections.branding.entries.company-logo'))
-                                        ->hiddenLabel()
                                         ->circular()
                                         ->placeholder('—'),
                                     Infolists\Components\ColorEntry::make('color')
