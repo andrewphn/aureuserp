@@ -104,6 +104,9 @@ class OperationResource extends Resource
 
                                 return $record->warehouse->name.': '.$record->name.($record->trashed() ? ' (Deleted)' : '');
                             })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
+                            })
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                 $operationType = OperationType::withTrashed()->find($get('operation_type_id'));
 
@@ -121,6 +124,9 @@ class OperationResource extends Resource
                             ->getOptionLabelFromRecordUsing(function ($record): string {
                                 return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
                             })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
@@ -135,6 +141,9 @@ class OperationResource extends Resource
                             )
                             ->getOptionLabelFromRecordUsing(function ($record): string {
                                 return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
                             })
                             ->searchable()
                             ->preload()
@@ -588,6 +597,9 @@ class OperationResource extends Resource
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
                     })
+                    ->disableOptionWhen(function ($label) {
+                        return str_contains($label, ' (Deleted)');
+                    })
                     ->searchable()
                     ->preload()
                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations)
@@ -847,6 +859,9 @@ class OperationResource extends Resource
                             )
                             ->getOptionLabelFromRecordUsing(function ($record): string {
                                 return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
                             })
                             ->searchable()
                             ->preload()

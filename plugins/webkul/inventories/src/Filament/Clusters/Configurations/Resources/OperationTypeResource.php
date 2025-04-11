@@ -136,6 +136,9 @@ class OperationTypeResource extends Resource
                                                     ->getOptionLabelFromRecordUsing(function ($record): string {
                                                         return $record->name.($record->trashed() ? ' (Deleted)' : '');
                                                     })
+                                                    ->disableOptionWhen(function ($label) {
+                                                        return str_contains($label, ' (Deleted)');
+                                                    })
                                                     ->searchable()
                                                     ->preload()
                                                     ->live()
