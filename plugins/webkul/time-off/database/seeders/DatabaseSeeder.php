@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AccrualPlanSeeder::class,
             LeaveTypeSeeder::class,
             LeaveMandatoryDay::class,
+            LeaveTypeSeeder::class,
         ]);
     }
 }
