@@ -109,7 +109,7 @@ trait CandidateSkillRelation
                     )
                     ->mutateFormDataUsing(function ($data, $livewire) {
                         if (empty($data['candidate_id'])) {
-                            $data['candidate_id'] = $livewire?->record?->candidate_id;
+                            $data['candidate_id'] = $this->getOwnerRecord()->id;
                         }
 
                         return $data;
