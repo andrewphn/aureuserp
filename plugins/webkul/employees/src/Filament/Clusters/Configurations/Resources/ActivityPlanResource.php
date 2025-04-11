@@ -9,6 +9,7 @@ use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Clusters\Configurations;
@@ -225,6 +226,17 @@ class ActivityPlanResource extends Resource
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus-circle')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $user = Auth::user();
+
+                        $data['plugin'] = 'employees';
+
+                        $data['creator_id'] = $user->id;
+
+                        $data['company_id'] ??= $user->defaultCompany?->id;
+
+                        return $data;
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
