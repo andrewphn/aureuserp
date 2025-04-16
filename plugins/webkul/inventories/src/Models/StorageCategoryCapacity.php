@@ -41,7 +41,7 @@ class StorageCategoryCapacity extends Model
 
     public function packageType(): BelongsTo
     {
-        return $this->belongsTo(PackageType::class)->withTrashed();
+        return $this->belongsTo(PackageType::class);
     }
 
     public function creator(): BelongsTo
