@@ -49,7 +49,6 @@ class ManageAttributes extends ManageRelatedRecords
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->name.($record->trashed() ? ' (Deleted)' : '');
                     })
-                    // ->disableOptionWhen(fn (string $value): bool => $value === 'published')
                     ->disableOptionWhen(function (string $value) {
                         return $this->getOwnerRecord()->attributes->contains('attribute_id', $value);
                     })
