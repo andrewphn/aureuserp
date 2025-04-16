@@ -875,7 +875,7 @@ class OperationResource extends Resource
                                 modifyQueryUsing: fn (Builder $query, Forms\Get $get, $record) => $query
                                     ->where(function ($query) use ($get, $record) {
                                         $query->where('location_id', $get('destination_location_id'))
-                                            ->orWhere('id', $record?->result_package_id)
+                                            ->orWhere('id', $record?->result_package_id ?? $get('result_package_id'))
                                             ->orWhereNull('location_id');
                                     }),
                             )
