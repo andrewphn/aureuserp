@@ -1023,7 +1023,10 @@ class QuotationResource extends Resource
                                     ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL])),
                                 Forms\Components\TextInput::make('customer_lead')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.lead-time'))
+                                    ->numeric()
                                     ->default(0)
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->required()
                                     ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL])),
                                 Forms\Components\TextInput::make('product_packaging_qty')
