@@ -203,9 +203,6 @@ class ActivityTypeResource extends Resource
                 Tables\Grouping\Group::make('delay_from')
                     ->label(__('support::filament/resources/activity-type.table.groups.delay-source'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('model_type')
-                    ->label(__('support::filament/resources/activity-type.table.groups.associated-model'))
-                    ->collapsible(),
                 Tables\Grouping\Group::make('chaining_type')
                     ->label(__('support::filament/resources/activity-type.table.groups.chaining-type'))
                     ->collapsible(),
