@@ -960,12 +960,18 @@ class QuotationResource extends Resource
                                                     });
                                             }
 
-                                            return $query->where(function ($q) {
+                                            return $query->withTrashed()->where(function ($q) {
                                                 $q->whereNull('parent_id')
                                                     ->orWhereNotNull('parent_id');
                                             });
                                         }
                                     )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(function ($label) {
+                                        return str_contains($label, ' (Deleted)');
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->live()
