@@ -131,8 +131,8 @@ class TaxGroupResource extends Resource
                             } catch (QueryException $e) {
                                 Notification::make()
                                     ->danger()
-                                    ->title(__('accounts::filament/resources/tax-group..table.bulk-actions.delete.notification.error.title'))
-                                    ->body(__('accounts::filament/resources/tax-group..table.bulk-actions.delete.notification.error.body'))
+                                    ->title(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.body'))
                                     ->send();
                             }
                         })

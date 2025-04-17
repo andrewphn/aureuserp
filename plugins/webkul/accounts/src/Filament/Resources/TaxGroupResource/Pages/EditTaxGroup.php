@@ -37,16 +37,16 @@ class EditTaxGroup extends EditRecord
                     } catch (QueryException $e) {
                         Notification::make()
                             ->danger()
-                            ->title(__('accounts::filament/resources/tax/pages/edit-tax-group.header-actions.delete.notification.error.title'))
-                            ->body(__('accounts::filament/resources/tax/pages/edit-tax-group.header-actions.delete.notification.error.body'))
+                            ->title(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.error.title'))
+                            ->body(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.error.body'))
                             ->send();
                     }
                 })
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.title'))
-                        ->body(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.body'))
+                        ->title(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.success.title'))
+                        ->body(__('accounts::filament/resources/tax-group/pages/edit-tax-group.header-actions.delete.notification.success.body'))
                 ),
         ];
     }
