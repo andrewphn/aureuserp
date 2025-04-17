@@ -8,6 +8,7 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
@@ -55,7 +56,14 @@ class PaymentsResource extends Resource
                                     ->relationship(
                                         'partnerBank',
                                         'account_number',
+                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
                                     )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->account_number.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(function ($label) {
+                                        return str_contains($label, ' (Deleted)');
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->required(),
