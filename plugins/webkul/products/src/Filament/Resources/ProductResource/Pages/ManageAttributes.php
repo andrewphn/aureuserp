@@ -54,6 +54,7 @@ class ManageAttributes extends ManageRelatedRecords
                     })
                     ->searchable()
                     ->preload()
+                    ->disabledOn('edit')
                     ->createOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form))
                     ->afterStateUpdated(function ($state, Forms\Set $set) {
                         $set('options', []);
