@@ -178,7 +178,7 @@ class Move extends Model implements Sortable
 
     public function invoicePaymentTerm()
     {
-        return $this->belongsTo(PaymentTerm::class, 'invoice_payment_term_id');
+        return $this->belongsTo(PaymentTerm::class, 'invoice_payment_term_id')->withTrashed();
     }
 
     public function partner()
