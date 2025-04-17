@@ -73,7 +73,7 @@ class ActivityTypeResource extends Resource
                                             ->required()
                                             ->default(0)
                                             ->minValue(0)
-                                            ->maxValue(99999999999),
+                                            ->maxValue(999999999),
                                         Forms\Components\Select::make('delay_unit')
                                             ->label(__('support::filament/resources/activity-type.form.sections.delay-information.fields.delay-unit'))
                                             ->required()
