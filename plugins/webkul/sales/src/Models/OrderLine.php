@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Account\Models\MoveLine;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Account\Models\Tax;
 use Webkul\Inventory\Models\Move as InventoryMove;
 use Webkul\Inventory\Models\Route;
@@ -19,8 +21,10 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
-class OrderLine extends Model
+class OrderLine extends Model implements Sortable
 {
+    use SortableTrait;
+
     protected $table = 'sales_order_lines';
 
     protected $fillable = [
@@ -75,6 +79,11 @@ class OrderLine extends Model
         'qty_delivered_method' => Enums\QtyDeliveredMethod::class,
     ];
 
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
+    ];
+
     public function order()
     {
         return $this->belongsTo(Order::class);
@@ -102,7 +111,7 @@ class OrderLine extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function uom()

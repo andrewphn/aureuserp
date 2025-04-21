@@ -34,15 +34,6 @@ class ListProducts extends BaseListProducts
                 ->modifyQueryUsing(function ($query) {
                     return $query->onlyTrashed();
                 }),
-            'sales' => PresetView::make(__('invoices::filament/clusters/vendors/resources/products/pages/list-product.tabs.sales'))
-                ->icon('heroicon-s-scale')
-                ->favorite()
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('sales_ok', true)),
-            'purchase' => PresetView::make(__('invoices::filament/clusters/vendors/resources/products/pages/list-product.tabs.purchase'))
-                ->icon('heroicon-s-arrow-top-right-on-square')
-                ->favorite()
-                ->default()
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('purchase_ok', true)),
         ];
     }
 }

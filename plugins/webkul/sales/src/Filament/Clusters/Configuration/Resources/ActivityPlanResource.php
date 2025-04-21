@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\Pages;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\RelationManagers;
@@ -222,6 +223,17 @@ class ActivityPlanResource extends Resource
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus-circle')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $user = Auth::user();
+
+                        $data['plugin'] = 'sales';
+
+                        $data['creator_id'] = $user->id;
+
+                        $data['company_id'] ??= $user->defaultCompany?->id;
+
+                        return $data;
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()

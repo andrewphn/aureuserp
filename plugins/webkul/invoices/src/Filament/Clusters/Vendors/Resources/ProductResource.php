@@ -5,11 +5,8 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
-use Filament\Support\Enums\ActionSize;
-use Filament\Tables\Table;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Models\Tax;
 use Webkul\Field\Filament\Traits\HasCustomFields;
@@ -162,37 +159,6 @@ class ProductResource extends BaseProductResource
 
         $components[0]->schema($childComponents);
 
-        $firstGroupChildComponents = $components[0]->getChildComponents();
-
-        $secondChildComponents = $firstGroupChildComponents[0]->getChildComponents();
-
-        $newComponents = [
-            Forms\Components\Toggle::make('sales_ok')
-                ->live()
-                ->default(true)
-                ->label(__('invoices::filament/clusters/vendors/resources/product.form.sections.general.fields.sales')),
-            Forms\Components\Toggle::make('purchase_ok')
-                ->default(true)
-                ->label(__('invoices::filament/clusters/vendors/resources/product.form.sections.general.fields.purchase')),
-        ];
-
-        array_splice($secondChildComponents, 1, 0, $newComponents);
-
-        $favoriteAction = Forms\Components\Actions::make([
-            Forms\Components\Actions\Action::make('is_favorite')
-                ->hiddenLabel()
-                ->outlined(false)
-                ->icon(fn ($record) => $record?->is_favorite >= 1 ? 'heroicon-s-star' : 'heroicon-o-star')
-                ->color('warning')
-                ->iconButton()
-                ->size(ActionSize::Large->value)
-                ->action(fn ($record) => $record?->update(['is_favorite' => ! $record->is_favorite])),
-        ]);
-
-        array_unshift($secondChildComponents, $favoriteAction);
-
-        $firstGroupChildComponents[0]->childComponents($secondChildComponents);
-
         $form->components([
             ...$components,
             Forms\Components\Hidden::make('uom_id')
@@ -204,16 +170,6 @@ class ProductResource extends BaseProductResource
         ]);
 
         return $form;
-    }
-
-    public static function table(Table $table): Table
-    {
-        return BaseProductResource::table($table);
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return BaseProductResource::infolist($infolist);
     }
 
     public static function getRecordSubNavigation(Page $page): array

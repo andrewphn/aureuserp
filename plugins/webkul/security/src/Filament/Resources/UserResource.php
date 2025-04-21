@@ -155,12 +155,10 @@ class UserResource extends Resource
                                                     ->fillForm(function (array $arguments): array {
                                                         return [
                                                             'user_id' => Auth::id(),
-                                                            'sort'    => Company::max('sort') + 1,
                                                         ];
                                                     })
                                                     ->mutateFormDataUsing(function (array $data) {
                                                         $data['user_id'] = Auth::id();
-                                                        $data['sort'] = Company::max('sort') + 1;
 
                                                         return $data;
                                                     });

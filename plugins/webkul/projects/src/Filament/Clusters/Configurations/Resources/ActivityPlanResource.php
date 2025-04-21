@@ -10,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResource\Pages;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResource\RelationManagers;
@@ -140,7 +141,24 @@ class ActivityPlanResource extends Resource
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                    ->icon('heroicon-o-plus-circle'),
+                    ->icon('heroicon-o-plus-circle')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $user = Auth::user();
+
+                        $data['plugin'] = 'projects';
+
+                        $data['creator_id'] = $user->id;
+
+                        $data['company_id'] ??= $user->defaultCompany?->id;
+
+                        return $data;
+                    })
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.title'))
+                            ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.body')),
+                    ),
             ])
             ->modifyQueryUsing(function ($query) {
                 $query->where('plugin', 'projects');

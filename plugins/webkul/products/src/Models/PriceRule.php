@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Product\Database\Factories\PriceRuleFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 
-class PriceRule extends Model
+class PriceRule extends Model implements Sortable
 {
     use HasFactory, SoftDeletes, SortableTrait;
 
@@ -38,7 +39,8 @@ class PriceRule extends Model
     ];
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function currency(): BelongsTo

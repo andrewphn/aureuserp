@@ -34,7 +34,7 @@ class ListActivityPlans extends ListRecords
 
                     $data['creator_id'] = $user->id;
 
-                    $data['company_id'] = $user->defaultCompany?->id;
+                    $data['company_id'] ??= $user->defaultCompany?->id;
 
                     return $data;
                 })

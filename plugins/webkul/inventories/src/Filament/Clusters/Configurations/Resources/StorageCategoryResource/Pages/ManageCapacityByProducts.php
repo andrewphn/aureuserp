@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 
@@ -31,7 +32,17 @@ class ManageCapacityByProducts extends ManageRelatedRecords
             ->schema([
                 Forms\Components\Select::make('product_id')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-products.form.product'))
-                    ->relationship(name: 'product', titleAttribute: 'name')
+                    ->relationship(
+                        'product',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function ($label) {
+                        return str_contains($label, ' (Deleted)');
+                    })
                     ->required()
                     ->unique(modifyRuleUsing: function (Unique $rule) {
                         return $rule->where('storage_category_id', $this->getOwnerRecord()->id);

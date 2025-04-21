@@ -272,7 +272,7 @@ class PageResource extends Resource
                                     ->label(__('website::filament/admin/resources/page.infolist.sections.settings.entries.is-header-visible'))
                                     ->boolean(),
 
-                                Infolists\Components\IconEntry::make('is_header_visible')
+                                Infolists\Components\IconEntry::make('is_footer_visible')
                                     ->label(__('website::filament/admin/resources/page.infolist.sections.settings.entries.is-footer-visible'))
                                     ->boolean(),
                             ]),

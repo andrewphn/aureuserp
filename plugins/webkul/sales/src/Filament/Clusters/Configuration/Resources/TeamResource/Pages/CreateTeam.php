@@ -30,7 +30,6 @@ class CreateTeam extends CreateRecord
         $user = Auth::user();
 
         $data['creator_id'] = $user->id;
-        $data['sort'] = Team::max('sort') + 1;
 
         return $data;
     }

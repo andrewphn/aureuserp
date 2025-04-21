@@ -5,13 +5,15 @@ namespace Webkul\TimeOff\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\TimeOff\Enums\LeaveValidationType;
 
-class LeaveType extends Model
+class LeaveType extends Model implements Sortable
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, SortableTrait;
 
     protected $table = 'time_off_leave_types';
 
@@ -39,6 +41,11 @@ class LeaveType extends Model
 
     protected $casts = [
         'leave_validation_type' => LeaveValidationType::class,
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function company()

@@ -409,7 +409,7 @@ class QuantityResource extends Resource
 
                         return $data;
                     })
-                    ->before(function (array $data) {
+                    ->before(function (Tables\Actions\CreateAction $action, array $data) {
                         $existingQuantity = ProductQuantity::where('location_id', $data['location_id'] ?? Warehouse::first()->lot_stock_location_id)
                             ->where('product_id', $data['product_id'])
                             ->where('package_id', $data['package_id'] ?? null)
@@ -423,7 +423,7 @@ class QuantityResource extends Resource
                                 ->warning()
                                 ->send();
 
-                            $this->halt();
+                            $action->halt();
                         }
                     })
                     ->successNotification(

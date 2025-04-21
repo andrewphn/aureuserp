@@ -5,11 +5,13 @@ namespace Webkul\Support\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 
-class ActivityPlanTemplate extends Model
+class ActivityPlanTemplate extends Model implements Sortable
 {
-    use HasFactory;
+    use HasFactory, SortableTrait;
 
     protected $table = 'activity_plan_templates';
 
@@ -25,6 +27,11 @@ class ActivityPlanTemplate extends Model
         'summary',
         'responsible_type',
         'note',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     /**

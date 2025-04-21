@@ -41,8 +41,6 @@ class OperationResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     public static function form(Form $form): Form
     {
         return $form
@@ -70,7 +68,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
-                            ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::INCOMING)
+                            ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::INCOMING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.contact'))
@@ -78,7 +76,7 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
-                            ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::INTERNAL)
+                            ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::INTERNAL)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.delivery-address'))
@@ -86,11 +84,15 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
-                            ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
+                            ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('operation_type_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.operation-type'))
-                            ->relationship('operationType', 'name')
+                            ->relationship(
+                                name: 'operationType',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed()
+                            )
                             ->searchable()
                             ->preload()
                             ->required()
@@ -100,10 +102,13 @@ class OperationResource extends Resource
                                     return $record->name;
                                 }
 
-                                return $record->warehouse->name.': '.$record->name;
+                                return $record->warehouse->name.': '.$record->name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
                             })
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                                $operationType = OperationType::find($get('operation_type_id'));
+                                $operationType = OperationType::withTrashed()->find($get('operation_type_id'));
 
                                 $set('source_location_id', $operationType?->source_location_id);
                                 $set('destination_location_id', $operationType?->destination_location_id);
@@ -111,19 +116,39 @@ class OperationResource extends Resource
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('source_location_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.source-location'))
-                            ->relationship('sourceLocation', 'full_name')
+                            ->relationship(
+                                'sourceLocation',
+                                'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                            )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
+                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('destination_location_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.destination-location'))
-                            ->relationship('destinationLocation', 'full_name')
+                            ->relationship(
+                                'destinationLocation',
+                                'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                            )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::find($get('operation_type_id'))?->type != Enums\OperationType::OUTGOING)
+                            ->visible(fn (Settings\WarehouseSettings $settings, Forms\Get $get): bool => $settings->enable_locations && OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                     ])
                     ->columns(2),
@@ -149,7 +174,7 @@ class OperationResource extends Resource
                                     ->options(Enums\MoveType::class)
                                     ->default(Enums\MoveType::DIRECT)
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.shipping-policy-hint-tooltip'))
-                                    ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
+                                    ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::INCOMING)
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                                 Forms\Components\DateTimePicker::make('scheduled_at')
                                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.scheduled-at'))
@@ -194,13 +219,11 @@ class OperationResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sourceLocation.full_name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.from'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (Settings\WarehouseSettings $settings): bool => $settings->enable_locations),
                 Tables\Columns\TextColumn::make('destinationLocation.full_name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.to'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (Settings\WarehouseSettings $settings): bool => $settings->enable_locations),
@@ -212,7 +235,6 @@ class OperationResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.responsible'))
                     ->placeholder('—')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('scheduled_at')
@@ -239,17 +261,14 @@ class OperationResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('operationType.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.operation-type'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.company'))
                     ->placeholder('—')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.columns.state'))
-                    ->searchable()
                     ->sortable()
                     ->badge(),
             ])
@@ -564,7 +583,17 @@ class OperationResource extends Resource
                     ->disabled(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT),
                 Forms\Components\Select::make('final_location_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.final-location'))
-                    ->relationship('finalLocation', 'full_name')
+                    ->relationship(
+                        'finalLocation',
+                        'full_name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function ($label) {
+                        return str_contains($label, ' (Deleted)');
+                    })
                     ->searchable()
                     ->preload()
                     ->visible(fn (Settings\WarehouseSettings $settings) => $settings->enable_locations)
@@ -815,12 +844,19 @@ class OperationResource extends Resource
                                 name: 'destinationLocation',
                                 titleAttribute: 'full_name',
                                 modifyQueryUsing: fn (Builder $query) => $query
+                                    ->withTrashed()
                                     ->where('type', '<>', Enums\LocationType::VIEW)
                                     ->where(function ($query) use ($move) {
                                         $query->where('id', $move->destination_location_id)
                                             ->orWhere('parent_id', $move->destination_location_id);
-                                    }),
+                                    })
                             )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(function ($label) {
+                                return str_contains($label, ' (Deleted)');
+                            })
                             ->searchable()
                             ->preload()
                             ->required()
@@ -839,7 +875,7 @@ class OperationResource extends Resource
                                 modifyQueryUsing: fn (Builder $query, Forms\Get $get, $record) => $query
                                     ->where(function ($query) use ($get, $record) {
                                         $query->where('location_id', $get('destination_location_id'))
-                                            ->orWhere('id', $record?->package_id)
+                                            ->orWhere('id', $record?->result_package_id ?? $get('result_package_id'))
                                             ->orWhereNull('location_id');
                                     }),
                             )
@@ -915,6 +951,10 @@ class OperationResource extends Resource
             ->mountUsing(function (Forms\ComponentContainer $form, Move $record) {
                 $form->fill([]);
             })
+            ->modalSubmitAction(
+                fn ($action, Move $record) => $action
+                    ->visible(! in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED]))
+            )
             ->action(function (Forms\Set $set, array $data, Move $record): void {
                 $totalQty = $record->lines()->sum('qty');
 

@@ -25,8 +25,6 @@ class ListDepartureReasons extends ListRecords
                         ->body(__('employees::filament/clusters/configurations/resources/departure-reason/pages/list-departure.header-actions.create.notification.body')),
                 )
                 ->mutateFormDataUsing(function (array $data): array {
-                    $data['sort'] = DepartureReason::max('sort') + 1;
-
                     $data['reason_code'] = crc32($data['name']) % 100000;
 
                     return $data;

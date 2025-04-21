@@ -46,9 +46,6 @@ class OrderTemplateProductResource extends Resource
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('sort')
-                            ->label(__('sales::filament/clusters/configurations/resources/order-template.form.fields.sort'))
-                            ->numeric(),
                         Forms\Components\Select::make('orderTemplate.name')
                             ->searchable()
                             ->preload()

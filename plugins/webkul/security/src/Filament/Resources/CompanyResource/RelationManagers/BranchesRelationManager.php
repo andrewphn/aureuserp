@@ -286,8 +286,6 @@ class BranchesRelationManager extends RelationManager
                     ->mutateFormDataUsing(function ($livewire, array $data): array {
                         $data['user_id'] = Auth::user()->id;
 
-                        $data['sort'] = Company::max('sort') + 1;
-
                         $data['parent_id'] = $livewire->ownerRecord->id;
 
                         return $data;

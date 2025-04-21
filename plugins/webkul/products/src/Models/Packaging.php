@@ -5,12 +5,13 @@ namespace Webkul\Product\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Product\Database\Factories\PackagingFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
-class Packaging extends Model
+class Packaging extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
 
@@ -37,12 +38,13 @@ class Packaging extends Model
     ];
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function company(): BelongsTo

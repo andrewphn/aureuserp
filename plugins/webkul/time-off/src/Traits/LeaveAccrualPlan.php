@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Support\Enums\Week;
 use Webkul\TimeOff\Enums;
@@ -249,7 +250,10 @@ trait LeaveAccrualPlan
                         Forms\Components\Toggle::make('cap_accrued_time')
                             ->label(__('time-off::traits/leave-accrual-plan.table.filters.cap-accrued-time')),
                     ])
-                    ->query(fn ($query, $data) => $query->where('cap_accrued_time', $data['cap_accrued_time']))
+                    ->query(fn (Builder $query, array $data) => $query->when(
+                        $data['cap_accrued_time'] ?? null,
+                        fn (Builder $query, $value): Builder => $query->where('cap_accrued_time', '>=', $value),
+                    ))
                     ->label(__('time-off::traits/leave-accrual-plan.table.filters.cap-accrued-time')),
                 SelectFilter::make('action_with_unused_accruals')
                     ->options(\Webkul\TimeOff\Enums\CarryOverUnusedAccruals::class)
@@ -280,7 +284,6 @@ trait LeaveAccrualPlan
                     ->label(__('time-off::traits/leave-accrual-plan.table.header-actions.created.title'))
                     ->mutateFormDataUsing(function ($data) {
                         $data['creator_id'] = Auth::user()?->id;
-                        $data['sort'] = LeaveAccrualLevel::max('sort') + 1;
 
                         return $data;
                     })

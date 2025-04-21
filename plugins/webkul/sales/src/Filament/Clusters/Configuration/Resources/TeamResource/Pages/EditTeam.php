@@ -41,11 +41,4 @@ class EditTeam extends EditRecord
                 ),
         ];
     }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        $data['sort'] = Team::max('sort') + 1;
-
-        return $data;
-    }
 }

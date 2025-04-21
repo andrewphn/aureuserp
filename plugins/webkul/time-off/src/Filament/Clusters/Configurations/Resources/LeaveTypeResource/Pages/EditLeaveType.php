@@ -48,8 +48,6 @@ class EditLeaveType extends EditRecord
 
         $data['creator_id'] = $user?->id;
 
-        $data['sort'] = LeaveType::max('sort') + 1;
-
         return $data;
     }
 }

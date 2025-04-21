@@ -38,6 +38,8 @@ class RuleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -179,6 +181,9 @@ class RuleResource extends Resource
                                             )
                                             ->getOptionLabelFromRecordUsing(function ($record): string {
                                                 return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
                                             })
                                             ->searchable()
                                             ->preload()

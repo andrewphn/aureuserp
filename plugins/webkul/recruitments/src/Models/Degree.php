@@ -16,7 +16,8 @@ class Degree extends Model implements Sortable
     protected $fillable = ['name', 'sort', 'creator_id'];
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function createdBy()

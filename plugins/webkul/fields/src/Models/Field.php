@@ -4,10 +4,12 @@ namespace Webkul\Field\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 
-class Field extends Model
+class Field extends Model implements Sortable
 {
-    use SoftDeletes;
+    use SoftDeletes, SortableTrait;
 
     /**
      * Table name.
@@ -48,5 +50,10 @@ class Field extends Model
         'infolist_settings',
         'sort',
         'customizable_type',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 }

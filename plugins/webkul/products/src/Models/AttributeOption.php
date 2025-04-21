@@ -5,11 +5,12 @@ namespace Webkul\Product\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Product\Database\Factories\AttributeOptionFactory;
 use Webkul\Security\Models\User;
 
-class AttributeOption extends Model
+class AttributeOption extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
 
@@ -35,7 +36,8 @@ class AttributeOption extends Model
     ];
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function attribute(): BelongsTo

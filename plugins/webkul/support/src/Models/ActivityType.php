@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 
-class ActivityType extends Model
+class ActivityType extends Model implements Sortable
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, SortableTrait;
 
     protected $table = 'activity_types';
 
@@ -40,6 +42,11 @@ class ActivityType extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'keep_done' => 'boolean',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function activityPlan(): BelongsTo

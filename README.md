@@ -179,8 +179,8 @@ AureusERP is designed to be highly customizable, allowing you to:
 
 ### License
 
-Aureus CRM is a truly opensource CRM framework which will always be free under the MIT License.
+Aureus ERP is a truly opensource ERP framework which will always be free under the MIT License.
 
 ### Security Vulnerabilities
 
-Please don't disclose security vulnerabilities publicly. If you find any security vulnerability in Aureus CRM then please email us: support@webkul.com.
+Please don't disclose security vulnerabilities publicly. If you find any security vulnerability in Aureus ERP then please email us: support@webkul.com.

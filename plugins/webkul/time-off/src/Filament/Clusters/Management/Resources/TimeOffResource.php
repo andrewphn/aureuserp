@@ -202,53 +202,55 @@ class TimeOffResource extends Resource
                     ->collapsible(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('time-off::filament/clusters/management/resources/time-off.table.actions.delete.notification.title'))
-                            ->body(__('time-off::filament/clusters/management/resources/time-off.table.actions.delete.notification.body'))
-                    ),
-                Tables\Actions\Action::make('approve')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->hidden(fn ($record) => $record->state === State::VALIDATE_TWO->value)
-                    ->action(function ($record) {
-                        if ($record->state === State::VALIDATE_ONE->value) {
-                            $record->update(['state' => State::VALIDATE_TWO->value]);
-                        } else {
-                            $record->update(['state' => State::VALIDATE_TWO->value]);
-                        }
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('approve')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->hidden(fn ($record) => $record->state === State::VALIDATE_TWO->value)
+                        ->action(function ($record) {
+                            if ($record->state === State::VALIDATE_ONE->value) {
+                                $record->update(['state' => State::VALIDATE_TWO->value]);
+                            } else {
+                                $record->update(['state' => State::VALIDATE_TWO->value]);
+                            }
 
-                        Notification::make()
-                            ->success()
-                            ->title(__('time-off::filament/clusters/management/resources/time-off.table.actions.approve.notification.title'))
-                            ->body(__('time-off::filament/clusters/management/resources/time-off.table.actions.approve.notification.body'))
-                            ->send();
-                    })
-                    ->label(function ($record) {
-                        if ($record->state === State::VALIDATE_ONE->value) {
-                            return __('time-off::filament/clusters/management/resources/time-off.table.actions.approve.title.validate');
-                        } else {
-                            return __('time-off::filament/clusters/management/resources/time-off.table.actions.approve.title.approve');
-                        }
-                    }),
-                Tables\Actions\Action::make('refuse')
-                    ->icon('heroicon-o-x-circle')
-                    ->hidden(fn ($record) => $record->state === State::REFUSE->value)
-                    ->color('danger')
-                    ->action(function ($record) {
-                        $record->update(['state' => State::REFUSE->value]);
+                            Notification::make()
+                                ->success()
+                                ->title(__('time-off::filament/clusters/management/resources/time-off.table.actions.approve.notification.title'))
+                                ->body(__('time-off::filament/clusters/management/resources/time-off.table.actions.approve.notification.body'))
+                                ->send();
+                        })
+                        ->label(function ($record) {
+                            if ($record->state === State::VALIDATE_ONE->value) {
+                                return __('time-off::filament/clusters/management/resources/time-off.table.actions.approve.title.validate');
+                            } else {
+                                return __('time-off::filament/clusters/management/resources/time-off.table.actions.approve.title.approve');
+                            }
+                        }),
+                    Tables\Actions\Action::make('refuse')
+                        ->icon('heroicon-o-x-circle')
+                        ->hidden(fn ($record) => $record->state === State::REFUSE->value)
+                        ->color('danger')
+                        ->action(function ($record) {
+                            $record->update(['state' => State::REFUSE->value]);
 
-                        Notification::make()
-                            ->success()
-                            ->title(__('time-off::filament/clusters/management/resources/time-off.table.actions.refused.notification.title'))
-                            ->body(__('time-off::filament/clusters/management/resources/time-off.table.actions.refused.notification.body'))
-                            ->send();
-                    })
-                    ->label(__('time-off::filament/clusters/management/resources/time-off.table.actions.refused.title')),
+                            Notification::make()
+                                ->success()
+                                ->title(__('time-off::filament/clusters/management/resources/time-off.table.actions.refused.notification.title'))
+                                ->body(__('time-off::filament/clusters/management/resources/time-off.table.actions.refused.notification.body'))
+                                ->send();
+                        })
+                        ->label(__('time-off::filament/clusters/management/resources/time-off.table.actions.refused.title')),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title(__('time-off::filament/clusters/management/resources/time-off.table.actions.delete.notification.title'))
+                                ->body(__('time-off::filament/clusters/management/resources/time-off.table.actions.delete.notification.body'))
+                        ),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

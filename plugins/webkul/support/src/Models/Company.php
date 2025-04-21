@@ -8,15 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Database\Factories\CompanyFactory;
 
-class Company extends Model
+class Company extends Model implements Sortable
 {
-    use HasChatter, HasCustomFields, HasFactory, SoftDeletes;
+    use HasChatter, HasCustomFields, HasFactory, SoftDeletes, SortableTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +49,11 @@ class Company extends Model
         'currency_id',
         'partner_id',
         'website',
+    ];
+
+    public $sortable = [
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function country(): BelongsTo

@@ -41,11 +41,24 @@ class ManageAttributes extends ManageRelatedRecords
                 Forms\Components\Select::make('attribute_id')
                     ->label(__('products::filament/resources/product/pages/manage-attributes.form.attribute'))
                     ->required()
-                    ->relationship('attribute', 'name')
+                    ->relationship(
+                        'attribute',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function (string $value) {
+                        return $this->getOwnerRecord()->attributes->contains('attribute_id', $value);
+                    })
                     ->searchable()
                     ->preload()
-                    ->editOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form))
-                    ->createOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form)),
+                    ->disabledOn('edit')
+                    ->createOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form))
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        $set('options', []);
+                    }),
                 Forms\Components\Select::make('options')
                     ->label(__('products::filament/resources/product/pages/manage-attributes.form.values'))
                     ->required()

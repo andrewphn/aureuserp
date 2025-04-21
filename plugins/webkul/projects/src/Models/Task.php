@@ -108,7 +108,8 @@ class Task extends Model implements Sortable
     public string $recordTitleAttribute = 'title';
 
     public $sortable = [
-        'order_column_name' => 'sort',
+        'order_column_name'  => 'sort',
+        'sort_when_creating' => true,
     ];
 
     public function parent(): BelongsTo

@@ -20,8 +20,6 @@ class JobPosition extends BaseJobPosition
      */
     public function __construct(array $attributes = [])
     {
-        parent::__construct($attributes);
-
         $this->mergeFillable([
             'address_id',
             'manager_id',
@@ -36,6 +34,8 @@ class JobPosition extends BaseJobPosition
             'date_from' => 'datetime',
             'date_to'   => 'datetime',
         ]);
+
+        parent::__construct($attributes);
     }
 
     public function address(): BelongsTo

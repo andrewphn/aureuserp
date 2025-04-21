@@ -40,6 +40,8 @@ class WarehouseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $isGloballySearchable = false;
+
     public static function getNavigationGroup(): string
     {
         return __('inventories::filament/clusters/configurations/resources/warehouse.navigation.group');
@@ -72,7 +74,7 @@ class WarehouseResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder(__('inventories::filament/clusters/configurations/resources/warehouse.form.sections.general.fields.code-placeholder'))
-                                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/warehouse.form.sections.settings.fields.code-hint-tooltip'))
+                                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/warehouse.form.sections.general.fields.code-hint-tooltip'))
                                     ->unique(ignoreRecord: true),
 
                                 Forms\Components\Group::make()

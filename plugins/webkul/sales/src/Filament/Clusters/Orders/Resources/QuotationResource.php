@@ -243,51 +243,43 @@ class QuotationResource extends Resource
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
                     ->badge()
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
                     ->placeholder('-')
                     ->badge()
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.creation-date'))
                     ->placeholder('-')
-                    ->searchable()
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_untaxed')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.untaxed-amount'))
                     ->placeholder('-')
-                    ->searchable()
                     ->summarize(Sum::make()->label('Total'))
                     ->money(fn ($record) => $record->currency->code)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_tax')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.amount-tax'))
                     ->placeholder('-')
-                    ->searchable()
                     ->summarize(Sum::make()->label('Taxes'))
                     ->money(fn ($record) => $record->currency->code)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_total')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.amount-total'))
                     ->placeholder('-')
-                    ->searchable()
                     ->summarize(Sum::make()->label('Total Amount'))
                     ->money(fn ($record) => $record->currency->code)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('commitment_date')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.commitment-date'))
                     ->placeholder('-')
-                    ->searchable()
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('expected_date')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.expected-date'))
                     ->placeholder('-')
-                    ->searchable()
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('partner.name')
@@ -298,12 +290,10 @@ class QuotationResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.sales-person'))
                     ->placeholder('-')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('team.name')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.sales-team'))
                     ->placeholder('-')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('client_order_ref')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.customer-reference'))
@@ -902,7 +892,6 @@ class QuotationResource extends Resource
 
                                             $data['order_id'] = $livewire->record->id;
                                             $data['creator_id'] = $user->id;
-                                            $data['sort'] = OrderLine::max('sort') + 1;
                                             $data['company_id'] = $user?->default_company_id;
                                             $data['currency_id'] = $livewire->record->currency_id;
                                             $data['product_uom_id'] = $state['product_uom_id'];
@@ -973,12 +962,18 @@ class QuotationResource extends Resource
                                                     });
                                             }
 
-                                            return $query->where(function ($q) {
+                                            return $query->withTrashed()->where(function ($q) {
                                                 $q->whereNull('parent_id')
                                                     ->orWhereNotNull('parent_id');
                                             });
                                         }
                                     )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(function ($label) {
+                                        return str_contains($label, ' (Deleted)');
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -1030,13 +1025,17 @@ class QuotationResource extends Resource
                                     ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
                                 Forms\Components\TextInput::make('customer_lead')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.lead-time'))
+                                    ->numeric()
                                     ->default(0)
+                                    ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->required()
                                     ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
                                 Forms\Components\TextInput::make('product_packaging_qty')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.packaging-qty'))
                                     ->live()
                                     ->numeric()
+                                    ->minValue(0)
                                     ->maxValue(99999999999)
                                     ->default(0)
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => static::afterProductPackagingQtyUpdated($set, $get))
@@ -1390,7 +1389,11 @@ class QuotationResource extends Resource
 
         $totalMargin = $marginPerUnit * $quantity;
 
-        $marginPercentage = ($marginPerUnit / $discountedPrice) * 100;
+        if ($marginPerUnit != 0) {
+            $marginPercentage = ($totalMargin / $marginPerUnit) * 100;
+        } else {
+            $marginPercentage = 0;
+        }
 
         return [
             $totalMargin,

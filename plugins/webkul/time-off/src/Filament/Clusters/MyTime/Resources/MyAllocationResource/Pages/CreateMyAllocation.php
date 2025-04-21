@@ -6,6 +6,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
+use Webkul\Employee\Models\Employee;
 
 class CreateMyAllocation extends CreateRecord
 {
@@ -20,17 +21,27 @@ class CreateMyAllocation extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.title'))
-            ->body(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.body'));
+            ->title(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.success.title'))
+            ->body(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.success.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $user = Auth::user();
+        $employee = Employee::where('user_id', Auth::id())->first();
 
-        if ($user?->employee) {
-            $data['employee_id'] = $user->employee->id;
+        if (! $employee) {
+            Notification::make()
+                ->warning()
+                ->title(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.warning.title'))
+                ->body(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.warning.body'))
+                ->send();
+
+            $this->halt();
+
+            return $data;
         }
+
+        $data['employee_id'] = $employee->id;
 
         return $data;
     }

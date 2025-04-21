@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
@@ -36,6 +37,8 @@ class OperationTypeResource extends Resource
     protected static ?string $cluster = Configurations::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static bool $isGloballySearchable = false;
 
     public static function getNavigationGroup(): string
     {
@@ -125,7 +128,17 @@ class OperationTypeResource extends Resource
                                                     ->visible(fn (Forms\Get $get): bool => in_array($get('type'), [Enums\OperationType::OUTGOING->value, Enums\OperationType::INTERNAL->value])),
                                                 Forms\Components\Select::make('warehouse_id')
                                                     ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fields.warehouse'))
-                                                    ->relationship('warehouse', 'name')
+                                                    ->relationship(
+                                                        'warehouse',
+                                                        'name',
+                                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                                    )
+                                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                                    })
+                                                    ->disableOptionWhen(function ($label) {
+                                                        return str_contains($label, ' (Deleted)');
+                                                    })
                                                     ->searchable()
                                                     ->preload()
                                                     ->live()
@@ -187,8 +200,18 @@ class OperationTypeResource extends Resource
                                     ->schema([
                                         Forms\Components\Select::make('source_location_id')
                                             ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.source-location'))
-                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.lots.fields.source-location-hint-tooltip'))
-                                            ->relationship('sourceLocation', 'full_name')
+                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.source-location-hint-tooltip'))
+                                            ->relationship(
+                                                'sourceLocation',
+                                                'full_name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->required()
@@ -212,8 +235,18 @@ class OperationTypeResource extends Resource
                                             ->live(),
                                         Forms\Components\Select::make('destination_location_id')
                                             ->label(__('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.destination-location'))
-                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.lots.fields.destination-location-hint-tooltip'))
-                                            ->relationship('destinationLocation', 'full_name')
+                                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/configurations/resources/operation-type.form.tabs.general.fieldsets.locations.fields.destination-location-hint-tooltip'))
+                                            ->relationship(
+                                                'destinationLocation',
+                                                'full_name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->full_name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->required()

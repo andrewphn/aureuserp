@@ -2,23 +2,22 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Pages\SubNavigationPosition;
-use Filament\Tables\Table;
-use Webkul\Field\Filament\Traits\HasCustomFields;
+use Filament\Resources\Pages\Page;
 use Webkul\Invoice\Filament\Clusters\Customer;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource as BaseProductResource;
 use Webkul\Invoice\Models\Product;
+use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 
 class ProductResource extends BaseProductResource
 {
-    use HasCustomFields;
-
     protected static ?string $model = Product::class;
 
     protected static ?string $cluster = Customer::class;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static ?int $navigationSort = 5;
 
@@ -27,26 +26,19 @@ class ProductResource extends BaseProductResource
         return __('invoices::filament/clusters/customers/resources/products.title');
     }
 
-    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
-
     public static function getNavigationLabel(): string
     {
         return __('invoices::filament/clusters/customers/resources/products.navigation.title');
     }
 
-    public static function form(Form $form): Form
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return BaseProductResource::form($form);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return BaseProductResource::table($table);
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return BaseProductResource::infolist($infolist);
+        return $page->generateNavigationItems([
+            Pages\ViewProduct::class,
+            Pages\EditProduct::class,
+            Pages\ManageAttributes::class,
+            Pages\ManageVariants::class,
+        ]);
     }
 
     public static function getPages(): array

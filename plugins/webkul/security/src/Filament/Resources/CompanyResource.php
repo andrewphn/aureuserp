@@ -67,8 +67,6 @@ class CompanyResource extends Resource
                             ->schema([
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.company-information.title'))
                                     ->schema([
-                                        Forms\Components\Hidden::make('sort')
-                                            ->default(Company::max('sort') + 1),
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.name'))
                                             ->required()
@@ -487,7 +485,6 @@ class CompanyResource extends Resource
                                 ->schema([
                                     Infolists\Components\ImageEntry::make('partner.avatar')
                                         ->label(__('security::filament/resources/company.infolist.sections.branding.entries.company-logo'))
-                                        ->hiddenLabel()
                                         ->circular()
                                         ->placeholder('—'),
                                     Infolists\Components\ColorEntry::make('color')

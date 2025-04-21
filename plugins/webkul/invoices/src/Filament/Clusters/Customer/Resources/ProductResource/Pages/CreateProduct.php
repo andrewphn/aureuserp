@@ -3,7 +3,7 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages;
 
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages\CreateProduct as BaseCreateProduct;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\CreateProduct as BaseCreateProduct;
 
 class CreateProduct extends BaseCreateProduct
 {

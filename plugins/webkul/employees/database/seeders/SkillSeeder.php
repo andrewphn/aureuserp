@@ -711,5 +711,7 @@ class SkillSeeder extends Seeder
                 'updated_at'         => now(),
             ],
         ];
+
+        DB::table('employees_skills')->insert($skills);
     }
 }
