@@ -227,21 +227,12 @@ class Order extends Model
     {
         parent::boot();
 
-        static::creating(function ($order) {
-            if ($order->state === 'sale') {
-                $order->name = 'ORD-TMP-'.time();
-            } else {
-                $order->name = 'QT-TMP-'.time();
-            }
+        static::saving(function ($order) {
+            $order->updateName();
         });
 
         static::created(function ($order) {
-            $order->updateName();
-            $order->saveQuietly();
-        });
-
-        static::updating(function ($order) {
-            $order->updateName();
+            $order->update(['name' => $order->name]);
         });
     }
 
@@ -250,10 +241,6 @@ class Order extends Model
      */
     public function updateName()
     {
-        if ($this->state === OrderState::SALE->value) {
-            $this->name = 'ORD-'.$this->id;
-        } else {
-            $this->name = 'QT-'.$this->id;
-        }
+        $this->name = 'SO/'.$this->id;
     }
 }

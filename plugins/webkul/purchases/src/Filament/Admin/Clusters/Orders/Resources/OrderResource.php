@@ -30,6 +30,7 @@ use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
+use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Support\Package;
 
@@ -168,6 +169,7 @@ class OrderResource extends Resource
                                 static::getProductRepeater(),
                                 Forms\Components\Livewire::make(Summary::class, function (Forms\Get $get) {
                                     return [
+                                        'currency' => Currency::find($get('currency_id')),
                                         'products' => $get('products'),
                                     ];
                                 })

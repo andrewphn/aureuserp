@@ -1390,7 +1390,7 @@ class QuotationResource extends Resource
         $totalMargin = $marginPerUnit * $quantity;
 
         if ($marginPerUnit != 0) {
-            $marginPercentage = ($totalMargin / $marginPerUnit) * 100;
+            $marginPercentage = ($marginPerUnit / $discountedPrice) * 100;
         } else {
             $marginPercentage = 0;
         }

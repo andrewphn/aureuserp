@@ -133,6 +133,10 @@ class AccountManager
 
         $record = $this->computeJournalId($record);
 
+        $record = $this->computePartnerShippingId($record);
+
+        $record = $this->computeCommercialPartnerId($record);
+
         $record = $this->computeInvoiceDateDue($record);
 
         $signMultiplier = $this->getSignMultiplier($record);

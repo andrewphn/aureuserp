@@ -9,7 +9,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
-use Webkul\Sale\Facades\SaleOrder;
+use Webkul\Sale\Facades\SaleOrder as SalesFacade;
 use Webkul\Sale\Models\Order;
 
 class CreateInvoiceAction extends Action
@@ -72,7 +72,7 @@ class CreateInvoiceAction extends Action
                     return;
                 }
 
-                SaleOrder::createInvoice($record, $data);
+                SalesFacade::createInvoice($record, $data);
 
                 Notification::make()
                     ->title(__('sales::filament/clusters/orders/resources/quotation/actions/create-invoice.notification.invoice-created.title'))

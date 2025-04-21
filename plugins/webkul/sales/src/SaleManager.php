@@ -9,6 +9,7 @@ use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Facades\Tax;
 use Webkul\Account\Models\Journal as AccountJournal;
 use Webkul\Account\Models\Move as AccountMove;
+use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Facades\Inventory as InventoryFacade;
 use Webkul\Inventory\Models\Location;
@@ -242,8 +243,6 @@ class SaleManager
 
     public function computeQtyDelivered(OrderLine $line): OrderLine
     {
-        $line->qty_delivered = 0.0;
-
         if ($line->qty_delivered_method == Enums\QtyDeliveredMethod::MANUAL) {
             $line->qty_delivered = $line->qty_delivered ?? 0.0;
         }
@@ -324,15 +323,15 @@ class SaleManager
         }
 
         if ($order->lines->contains(function ($line) {
-            return $line->state == Enums\InvoiceStatus::TO_INVOICE;
+            return $line->invoice_status == Enums\InvoiceStatus::TO_INVOICE;
         })) {
             $order->invoice_status = Enums\InvoiceStatus::TO_INVOICE;
         } elseif ($order->lines->contains(function ($line) {
-            return $line->state == Enums\InvoiceStatus::INVOICED;
+            return $line->invoice_status == Enums\InvoiceStatus::INVOICED;
         })) {
             $order->invoice_status = Enums\InvoiceStatus::INVOICED;
         } elseif ($order->lines->contains(function ($line) {
-            return in_array($line->state, [Enums\InvoiceStatus::INVOICED, Enums\InvoiceStatus::UP_SELLING]);
+            return in_array($line->invoice_status, [Enums\InvoiceStatus::INVOICED, Enums\InvoiceStatus::UP_SELLING]);
         })) {
             $order->invoice_status = Enums\InvoiceStatus::UP_SELLING;
         } else {
@@ -575,23 +574,14 @@ class SaleManager
     private function createAccountMove(Order $record): AccountMove
     {
         $accountMove = AccountMove::create([
-            'state'                        => AccountEnums\MoveState::DRAFT,
-            'move_type'                    => AccountEnums\MoveType::OUT_INVOICE,
-            'payment_state'                => AccountEnums\PaymentState::NOT_PAID,
-            'invoice_origin'               => $record->name,
-            'date'                         => now(),
-            'invoice_date_due'             => now(),
-            'invoice_currency_rate'        => 1,
-            'journal_id'                   => AccountJournal::where('type', AccountEnums\JournalType::SALE->value)->first()?->id,
-            'company_id'                   => $record->company_id,
-            'currency_id'                  => $record->currency_id,
-            'invoice_payment_term_id'      => $record->payment_term_id,
-            'partner_id'                   => $record->partner_id,
-            'commercial_partner_id'        => $record->partner_id,
-            'partner_shipping_id'          => $record->partner->addresses->where('type', 'present')->first()?->id,
-            'fiscal_position_id'           => $record->fiscal_position_id,
-            'creator_id'                   => Auth::id(),
-            'invoice_partner_display_name' => $record->partner->name,
+            'move_type'               => AccountEnums\MoveType::OUT_INVOICE,
+            'invoice_origin'          => $record->name,
+            'date'                    => now(),
+            'company_id'              => $record->company_id,
+            'currency_id'             => $record->currency_id,
+            'invoice_payment_term_id' => $record->payment_term_id,
+            'partner_id'              => $record->partner_id,
+            'fiscal_position_id'      => $record->fiscal_position_id,
         ]);
 
         $record->accountMoves()->attach($accountMove->id);
@@ -600,7 +590,7 @@ class SaleManager
             $this->createAccountMoveLine($accountMove, $line);
         }
 
-        InvoiceResource::collectTotals($accountMove);
+        $accountMove = AccountFacade::computeAccountMove($accountMove);
 
         return $accountMove;
     }
@@ -615,26 +605,16 @@ class SaleManager
             : $orderLine->qty_to_invoice;
 
         $accountMoveLine = $accountMove->lines()->create([
-            'state'                  => AccountEnums\MoveState::DRAFT,
-            'name'                   => $orderLine->name,
-            'display_type'           => AccountEnums\DisplayType::PRODUCT,
-            'date'                   => $accountMove->date,
-            'creator_id'             => $accountMove?->creator_id,
-            'parent_state'           => $accountMove->state,
-            'quantity'               => $quantity,
-            'price_unit'             => $orderLine->price_unit,
-            'discount'               => $orderLine->discount,
-            'journal_id'             => $accountMove->journal_id,
-            'company_id'             => $accountMove->company_id,
-            'currency_id'            => $accountMove->currency_id,
-            'company_currency_id'    => $accountMove->currency_id,
-            'partner_id'             => $accountMove->partner_id,
-            'product_id'             => $orderLine->product_id,
-            'uom_id'                 => $orderLine->product_uom_id,
-            // 'debit'                  => $orderLine?->price_subtotal,
-            // 'credit'                 => 0.00,
-            // 'balance'                => $orderLine?->price_subtotal,
-            // 'amount_currency'        => $orderLine?->price_subtotal,
+            'name'         => $orderLine->name,
+            'date'         => $accountMove->date,
+            'creator_id'   => $accountMove?->creator_id,
+            'parent_state' => $accountMove->state,
+            'quantity'     => $quantity,
+            'price_unit'   => $orderLine->price_unit,
+            'discount'     => $orderLine->discount,
+            'currency_id'  => $accountMove->currency_id,
+            'product_id'   => $orderLine->product_id,
+            'uom_id'       => $orderLine->product_uom_id,
         ]);
 
         $orderLine->accountMoveLines()->sync($accountMoveLine->id);
