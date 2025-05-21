@@ -50,6 +50,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Dashboard'),
                 NavigationGroup::make()
                     ->label('Settings'),
+            ])->userMenuItems([
+                'version' => \Filament\Navigation\MenuItem::make()
+                    ->label('Version: '.app()->version()),
+                // ...
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
