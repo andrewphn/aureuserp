@@ -31,10 +31,9 @@ class Installer
                     'Accept' => 'application/json',
                 ],
                 'json'    => [
-                    'domain'       => config('app.url'),
-                    'email'        => $user?->email,
-                    'name'         => $user?->name,
-                    'country_code' => config('app.default_country') ?? 'IN',
+                    'domain' => config('app.url'),
+                    'email' => $user?->email,
+                    'name' => $user?->name,
                 ],
             ]);
         } catch (\Exception $e) {
