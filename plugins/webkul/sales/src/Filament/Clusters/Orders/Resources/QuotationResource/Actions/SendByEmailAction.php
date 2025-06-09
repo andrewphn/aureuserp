@@ -62,6 +62,7 @@ class SendByEmailAction extends Action
                             ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.form.fields.attachment'))
                             ->downloadable()
                             ->openable()
+                            ->disabled()  
                             ->disk('public')
                             ->hiddenLabel(),
                     ]);

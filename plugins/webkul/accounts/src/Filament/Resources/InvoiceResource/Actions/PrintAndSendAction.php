@@ -69,7 +69,7 @@ class PrintAndSendAction extends Action
                         ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.files'))
                         ->downloadable()
                         ->openable()
-                        ->multiple()
+                        ->disabled()  
                         ->disk('public')
                         ->hiddenLabel(),
                 ]);
