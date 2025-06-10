@@ -60,9 +60,12 @@ class SendByEmailAction extends Action
                             ->hiddenLabel(),
                         Forms\Components\FileUpload::make('file')
                             ->label(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.form.fields.attachment'))
+                            ->acceptedFileTypes([
+                                'image/*',
+                                'application/pdf',
+                            ])   
                             ->downloadable()
                             ->openable()
-                            ->disabled()  
                             ->disk('public')
                             ->hiddenLabel(),
                     ]);

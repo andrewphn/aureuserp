@@ -78,8 +78,11 @@ MD),
                 ->default(function () {
                     return PurchaseOrder::generateRFQPdf($this->getRecord());
                 })
+                ->acceptedFileTypes([
+                    'image/*',
+                    'application/pdf',
+                ])   
                 ->downloadable()
-                ->disabled()
                 ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
