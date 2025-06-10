@@ -60,14 +60,15 @@ Best regards,
 --  
 {$userName}  
 MD),
-                Forms\Components\FileUpload::make('attachment')
-                    ->hiddenLabel()
-                    ->disk('public')
-                    ->default(function () {
-                        return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
-                    })
-                    ->downloadable()
-                    ->openable(),
+            Forms\Components\FileUpload::make('attachment')
+                ->hiddenLabel()
+                ->disk('public')
+                ->default(function () {
+                    return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
+                })
+                ->downloadable()
+                ->disabled()
+                ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
                 try {
