@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://aureuserp.com"><img src="https://aureuserp.com/wp-content/uploads/2025/03/logo.png" alt="Total Downloads"></a>
+<a href="https://aureuserp.com"><img src="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-dark.png" alt="Total Downloads"></a>
 </p>
 
 <p align="center">
