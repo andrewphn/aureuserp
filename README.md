@@ -1,10 +1,9 @@
 <p align="center">
-<a href="https://aureuserp.com"><img src="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-dark.png" alt="Total Downloads"></a>
   <a href="https://aureuserp.com">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-light.png">
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-dark.png">
-      <img src="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-dark.png" alt="UnoPim logo">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-light.png">
+      <img src="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-light.png" alt="UnoPim logo">
     </picture>
   </a>  
 </p>
