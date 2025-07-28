@@ -115,6 +115,7 @@ class ProductResource extends Resource
                                     ->relationship('company', 'name')
                                     ->searchable()
                                     ->preload()
+                                    ->formatStateUsing(fn (Model $record): string => $record->company?->name ?? '')
                                     ->default(Auth::user()->default_company_id),
                             ]),
 
