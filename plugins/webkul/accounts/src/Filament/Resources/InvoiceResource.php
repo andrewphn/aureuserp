@@ -97,6 +97,7 @@ class InvoiceResource extends Resource
                                             ->relationship(
                                                 'partner',
                                                 'name',
+                                                fn ($query) => $query->where('sub_type', 'customer')->orderBy('id'),
                                             )
                                             ->searchable()
                                             ->preload()
