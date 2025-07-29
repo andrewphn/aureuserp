@@ -8,14 +8,12 @@ use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
-use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Route;
 use Webkul\TimeOff\Enums\AccruedGainTime;
 use Webkul\TimeOff\Enums\CarryoverDate;
 use Webkul\TimeOff\Enums\CarryoverDay;
@@ -34,15 +32,6 @@ class AccrualPlanResource extends Resource
     protected static ?string $cluster = Configurations::class;
 
     protected static ?int $navigationSort = 2;
-
-    public static function getSubNavigationPosition(): SubNavigationPosition
-    {
-        if (str_contains(Route::currentRouteName(), 'index')) {
-            return SubNavigationPosition::Start;
-        }
-
-        return SubNavigationPosition::Top;
-    }
 
     public static function getModelLabel(): string
     {
@@ -120,8 +109,7 @@ class AccrualPlanResource extends Resource
                     ->searchable()
                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.table.columns.name')),
                 Tables\Columns\TextColumn::make('leaveAccrualLevels')
-                    ->searchable()
-                    ->formatStateUsing(fn ($record) => $record->leaveAccrualLevels?->count() ?? 0)
+                    ->formatStateUsing(fn ($record) => $record?->leaveAccrualLevels?->count() ?? 0)
                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.table.columns.levels')),
             ])
             ->actions([
