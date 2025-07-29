@@ -121,7 +121,7 @@ class AccrualPlanResource extends Resource
                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.table.columns.name')),
                 Tables\Columns\TextColumn::make('leaveAccrualLevels')
                     ->searchable()
-                    ->formatStateUsing(fn ($record) => $record->leaveAccrualLevels?->count())
+                    ->formatStateUsing(fn ($record) => $record->leaveAccrualLevels?->count() ?? 0)
                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.table.columns.levels')),
             ])
             ->actions([
@@ -166,23 +166,19 @@ class AccrualPlanResource extends Resource
                                         Infolists\Components\TextEntry::make('accrued_gain_time')
                                             ->icon('heroicon-o-clock')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => AccruedGainTime::options()[$state])
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.accrued-gain-time')),
                                         Infolists\Components\TextEntry::make('carryover_date')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => CarryoverDate::options()[$state])
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.carry-over-time')),
                                         Infolists\Components\TextEntry::make('carryover_day')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => CarryoverDay::options()[$state])
                                             ->label(__('Carryover Day'))
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.carry-over-day')),
                                         Infolists\Components\TextEntry::make('carryover_month')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => CarryoverMonth::options()[$state])
                                             ->label(__('Carryover Month'))
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.carry-over-month')),
                                     ]),
