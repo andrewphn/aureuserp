@@ -16,6 +16,7 @@ use Spatie\Permission\Models\Role;
 use Webkul\Security\Enums\PermissionType;
 use Webkul\Security\Filament\Resources\UserResource\Pages;
 use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
 
 class UserResource extends Resource
 {
@@ -162,6 +163,19 @@ class UserResource extends Resource
 
                                                         return $data;
                                                     });
+                                            })
+                                            ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                                if (empty($state)) {
+                                                    $component->state(null);
+
+                                                    return;
+                                                }
+
+                                                $company = Company::find($state);
+
+                                                if (! $company) {
+                                                    $component->state(null);
+                                                }
                                             })
                                             ->preload(),
                                     ]),

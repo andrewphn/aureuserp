@@ -30,6 +30,7 @@ use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
+use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Support\Package;
@@ -131,6 +132,7 @@ class OrderResource extends Resource
                                     ->required()
                                     ->searchable()
                                     ->preload()
+                                    ->live()
                                     ->default(Auth::user()->defaultCompany?->currency_id)
                                     ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                             ]),
@@ -173,6 +175,7 @@ class OrderResource extends Resource
                                         'products' => $get('products'),
                                     ];
                                 })
+                                    ->visible(fn (Forms\Get $get) => $get('currency_id') && $get('products'))
                                     ->live()
                                     ->reactive(),
                             ]),
@@ -195,7 +198,20 @@ class OrderResource extends Resource
                                             ->preload()
                                             ->required()
                                             ->default(Auth::user()->default_company_id)
-                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT]))
+                                            ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                                if (empty($state)) {
+                                                    $component->state(null);
+
+                                                    return;
+                                                }
+
+                                                $company = Company::find($state);
+
+                                                if (! $company) {
+                                                    $component->state(null);
+                                                }
+                                            }),
                                         Forms\Components\TextInput::make('reference')
                                             ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.additional.fields.source-document'))
                                             ->maxLength(255),
