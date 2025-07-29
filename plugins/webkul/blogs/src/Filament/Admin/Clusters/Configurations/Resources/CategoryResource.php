@@ -90,6 +90,7 @@ class CategoryResource extends Resource
                             ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.restore.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
+                    ->hidden(fn ($record) => $record->posts->isNotEmpty())
                     ->successNotification(
                         Notification::make()
                             ->success()
@@ -128,7 +129,8 @@ class CategoryResource extends Resource
                                 ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.bulk-actions.force-delete.notification.body')),
                         ),
                 ]),
-            ]);
+            ])
+            ->checkIfRecordIsSelectableUsing(fn ($record) => $record->posts->isEmpty());
     }
 
     public static function getPages(): array
