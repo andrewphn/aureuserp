@@ -27,6 +27,8 @@ class ProductResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
+
     public static function form(Form $form): Form
     {
         return $form
