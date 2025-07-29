@@ -146,6 +146,7 @@ class InvoiceResource extends Resource
                                         'products' => $get('products'),
                                     ];
                                 })
+                                    ->visible(fn (Forms\Get $get) => $get('currency_id') && $get('products'))
                                     ->live()
                                     ->reactive(),
                             ]),
