@@ -23,6 +23,7 @@ use Webkul\Product\Models\Product;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages;
+use Webkul\Purchase\Models\Partner;
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
@@ -83,7 +84,20 @@ class PurchaseAgreementResource extends Resource
                                     ->searchable()
                                     ->required()
                                     ->preload()
-                                    ->disabled(fn ($record): bool => $record && $record?->state != Enums\RequisitionState::DRAFT),
+                                    ->disabled(fn ($record): bool => $record && $record?->state != Enums\RequisitionState::DRAFT)
+                                    ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                        if (empty($state)) {
+                                            $component->state(null);
+
+                                            return;
+                                        }
+
+                                        $partner = Partner::find($state);
+
+                                        if (! $partner) {
+                                            $component->state(null);
+                                        }
+                                    }),
                                 Forms\Components\Select::make('user_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.buyer'))
                                     ->relationship('user', 'name')
