@@ -64,9 +64,9 @@ class ActivityPlanResource extends Resource
                                     return;
                                 }
 
-                                $parent = Company::find($state);
+                                $company = Company::find($state);
 
-                                if (! $parent) {
+                                if (! $company) {
                                     $component->state(null);
                                 }
                             }),
