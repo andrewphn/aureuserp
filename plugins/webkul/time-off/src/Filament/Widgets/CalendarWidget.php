@@ -125,11 +125,19 @@ class CalendarWidget extends FullCalendarWidget
         $totalDays = $this->calculateTotalDays($startDate, $endDate);
         $weekendDays = $totalDays - $businessDays;
 
+        if ($weekendDays > 0) {
+            $duration = trans_choice('time-off::filament/widgets/calendar-widget.modal-actions.edit.duration-display-with-weekend', $businessDays, [
+                'count'   => $businessDays,
+                'weekend' => $weekendDays,
+            ]);
+        } else {
+            $duration = trans_choice('time-off::filament/widgets/calendar-widget.modal-actions.edit.duration-display', $businessDays, [
+                'count' => $businessDays,
+            ]);
+        }
+
         return [
-            'duration_display' => __('time-off::filament/widgets/calendar-widget.modal-actions.edit.duration-display', [
-                'business' => $businessDays,
-                'weekend'  => $weekendDays,
-            ]),
+            'duration_display' => $duration,
             'number_of_days'   => $businessDays,
             'business_days'    => $businessDays,
             'total_days'       => $totalDays,

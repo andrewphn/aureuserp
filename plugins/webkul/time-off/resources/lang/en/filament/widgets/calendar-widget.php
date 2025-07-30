@@ -3,8 +3,9 @@
 return [
     'modal-actions' => [
         'edit' => [
-            'title'            => 'Edit',
-            'duration-display' => ':business working day|:business working days|:business working day (+ :weekend weekend day)|:business working days (+ :weekend weekend days)',
+            'title'                         => 'Edit',
+            'duration-display'              => ':count working day|:count working days',
+            'duration-display-with-weekend' => ':count working day (+ :weekend weekend day)|:count working days (+ :weekend weekend days)',
 
             'notification' => [
                 'title' => 'Time Off Updated',
