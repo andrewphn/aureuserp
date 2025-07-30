@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use Webkul\Project\Filament\Clusters\Configurations;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TaskStageResource\Pages;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\TaskStagesRelationManager;
+use Webkul\Project\Models\Project;
 use Webkul\Project\Models\TaskStage;
 
 class TaskStageResource extends Resource
@@ -42,7 +43,20 @@ class TaskStageResource extends Resource
                     ->hiddenOn(TaskStagesRelationManager::class)
                     ->required()
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                        if (empty($state)) {
+                            $component->state(null);
+
+                            return;
+                        }
+
+                        $project = Project::find($state);
+
+                        if (! $project) {
+                            $component->state(null);
+                        }
+                    }),
             ])
             ->columns(1);
     }
