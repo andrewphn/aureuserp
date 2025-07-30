@@ -34,6 +34,7 @@ use Webkul\Employee\Filament\Clusters\Configurations\Resources\WorkLocationResou
 use Webkul\Employee\Filament\Resources\EmployeeResource\Pages;
 use Webkul\Employee\Filament\Resources\EmployeeResource\RelationManagers;
 use Webkul\Employee\Models\Calendar;
+use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\Employee;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Filament\Resources\CompanyResource;
@@ -144,7 +145,20 @@ class EmployeeResource extends Resource
                                     ->relationship(name: 'department', titleAttribute: 'complete_name')
                                     ->searchable()
                                     ->preload()
-                                    ->createOptionForm(fn (Form $form) => DepartmentResource::form($form)),
+                                    ->createOptionForm(fn (Form $form) => DepartmentResource::form($form))
+                                    ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                        if (empty($state)) {
+                                            $component->state(null);
+
+                                            return;
+                                        }
+
+                                        $department = Department::find($state);
+
+                                        if (! $department) {
+                                            $component->state(null);
+                                        }
+                                    }),
                                 Forms\Components\TextInput::make('mobile_phone')
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.work-mobile'))
                                     ->suffixAction(
