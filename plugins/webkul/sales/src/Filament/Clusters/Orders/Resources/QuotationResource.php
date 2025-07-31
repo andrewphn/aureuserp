@@ -95,13 +95,19 @@ class QuotationResource extends Resource
                                     ->schema([
                                         Forms\Components\Select::make('partner_id')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.customer'))
-                                            ->relationship('partner', 'name')
+                                            ->relationship(
+                                                'partner',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed()
+                                            )
                                             ->searchable()
                                             ->preload()
                                             ->required()
                                             ->live()
                                             ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [Enums\OrderState::CANCEL]))
-                                            ->columnSpan(1),
+                                            ->columnSpan(1)
+                                            ->getOptionLabelFromRecordUsing(fn ($record): string => $record->name.($record->trashed() ? ' (Deleted)' : ''))
+                                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)')),
                                     ]),
                                 Forms\Components\DatePicker::make('validity_date')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.expiration'))
