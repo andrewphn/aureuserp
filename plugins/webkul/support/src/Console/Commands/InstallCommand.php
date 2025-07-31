@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Webkul\Support\Models\Plugin;
 use Webkul\Support\Package;
 
@@ -166,6 +168,8 @@ class InstallCommand extends Command
         if ($this->endWith) {
             ($this->endWith)($this);
         }
+
+        $this->regenerateAdminPanelPermissions();
 
         $this->info("🎉 Package <comment>{$this->package->shortName()}</comment> has been installed!");
     }
@@ -425,5 +429,16 @@ class InstallCommand extends Command
         ));
 
         return $this;
+    }
+
+    protected function regenerateAdminPanelPermissions(): void
+    {
+        $this->info('⚙️ Refreshing access controls for the admin panel...');
+
+        exec('php '.base_path('artisan').' shield:generate --all --option=permissions --panel=admin');
+
+        $role = Role::first();
+
+        $role?->syncPermissions(Permission::all());
     }
 }
