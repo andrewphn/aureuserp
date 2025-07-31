@@ -439,6 +439,8 @@ class InstallCommand extends Command
 
         $role = Role::first();
 
-        $role?->syncPermissions(Permission::all());
+        $permissions = Permission::query()->pluck('id')->all();
+
+        $role?->permissions()->sync($permissions);
     }
 }
