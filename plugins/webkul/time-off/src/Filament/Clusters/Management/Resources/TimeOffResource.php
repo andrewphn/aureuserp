@@ -54,7 +54,7 @@ class TimeOffResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                    ->afterStateUpdated(function (Set $set, $state) {
                                         if ($state) {
                                             $employee = Employee::find($state);
 
@@ -118,7 +118,7 @@ class TimeOffResource extends Resource
                                     ->live()
                                     ->inlineLabel()
                                     ->reactive()
-                                    ->content(function ($state, Get $get): string {
+                                    ->content(function (Get $get): string {
                                         if ($get('request_unit_half')) {
                                             return __('time-off::filament/clusters/management/resources/time-off.form.fields.day', ['day' => '0.5']);
                                         }
@@ -164,11 +164,11 @@ class TimeOffResource extends Resource
                     ->label(__('time-off::filament/clusters/management/resources/time-off.table.columns.description'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date_from')
+                Tables\Columns\TextColumn::make('request_date_from')
                     ->label(__('time-off::filament/clusters/management/resources/time-off.table.columns.date-from'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date_to')
+                Tables\Columns\TextColumn::make('request_date_to')
                     ->label(__('time-off::filament/clusters/management/resources/time-off.table.columns.date-to'))
                     ->sortable()
                     ->searchable(),
@@ -265,16 +265,6 @@ class TimeOffResource extends Resource
             ]);
     }
 
-    public static function getPages(): array
-    {
-        return [
-            'index'  => Pages\ListTimeOffs::route('/'),
-            'create' => Pages\CreateTimeOff::route('/create'),
-            'edit'   => Pages\EditTimeOff::route('/{record}/edit'),
-            'view'   => Pages\ViewTimeOff::route('/{record}'),
-        ];
-    }
-
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -332,5 +322,15 @@ class TimeOffResource extends Resource
                             ]),
                     ]),
             ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => Pages\ListTimeOff::route('/'),
+            'create' => Pages\CreateTimeOff::route('/create'),
+            'edit'   => Pages\EditTimeOff::route('/{record}/edit'),
+            'view'   => Pages\ViewTimeOff::route('/{record}'),
+        ];
     }
 }

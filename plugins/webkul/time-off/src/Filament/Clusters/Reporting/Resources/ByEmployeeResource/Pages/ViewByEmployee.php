@@ -2,10 +2,10 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource\Pages;
 
-use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource\Pages\ListTimeOff;
+use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource\Pages\ViewTimeOff as BaseViewTimeOff;
 use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource;
 
-class ListByEmployees extends ListTimeOff
+class ViewByEmployee extends BaseViewTimeOff
 {
     protected static string $resource = ByEmployeeResource::class;
 }
