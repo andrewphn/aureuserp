@@ -29,6 +29,7 @@ use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
 use Webkul\Partner\Filament\Resources\PartnerResource;
+use Webkul\Partner\Models\Partner;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Support\Models\UOM;
 use Webkul\TableViews\Filament\Components\PresetView;
@@ -69,7 +70,20 @@ class OperationResource extends Resource
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
                             ->visible(fn (Forms\Get $get): bool => OperationType::withTrashed()->find($get('operation_type_id'))?->type == Enums\OperationType::INCOMING)
-                            ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
+                            ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED]))
+                            ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                if (empty($state)) {
+                                    $component->state(null);
+
+                                    return;
+                                }
+
+                                $partner = Partner::find($state);
+
+                                if (! $partner) {
+                                    $component->state(null);
+                                }
+                            }),
                         Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.contact'))
                             ->relationship('partner', 'name')
