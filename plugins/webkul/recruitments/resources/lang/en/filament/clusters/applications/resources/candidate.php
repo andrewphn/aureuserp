@@ -95,6 +95,15 @@ return [
                 ],
             ],
         ],
+
+        'bulk-actions' => [
+            'delete' => [
+                'notification' => [
+                    'title' => 'Candidate deleted',
+                    'body'  => 'The candidate has been deleted successfully.',
+                ],
+            ],
+        ],
     ],
 
     'infolist' => [
