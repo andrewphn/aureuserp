@@ -25,7 +25,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Recruitment\Enums\ApplicationStatus;
@@ -48,31 +47,11 @@ class ApplicantResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    public static function getSubNavigationPosition(): SubNavigationPosition
-    {
-        $currentRoute = Route::currentRouteName();
-
-        if ($currentRoute === 'livewire.update') {
-            $previousUrl = url()->previous();
-
-            return str_contains($previousUrl, '/index') || str_contains($previousUrl, '?tableGrouping') || str_contains($previousUrl, '?tableFilters')
-                ? SubNavigationPosition::Start
-                : SubNavigationPosition::Top;
-        }
-
-        return str_contains($currentRoute, '.index')
-            ? SubNavigationPosition::Start
-            : SubNavigationPosition::Top;
-    }
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
         return __('recruitments::filament/clusters/applications/resources/applicant.title');
-    }
-
-    public static function getNavigationGroup(): string
-    {
-        return __('recruitments::filament/clusters/applications/resources/applicant.navigation.group');
     }
 
     public static function getNavigationLabel(): string

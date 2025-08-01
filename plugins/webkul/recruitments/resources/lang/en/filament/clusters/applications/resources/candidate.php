@@ -4,7 +4,6 @@ return [
     'title' => 'Candidate',
 
     'navigation' => [
-        'group' => 'Applications',
         'title' => 'Candidates',
     ],
 
