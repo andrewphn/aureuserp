@@ -17,6 +17,7 @@ class InvoiceServiceProvider extends PackageServiceProvider
             ->hasTranslations()
             ->hasMigrations([
                 '2025_02_04_082243_alter_products_products_table',
+                '2025_08_01_082922_alter_accounts_payment_terms_table',
             ])
             ->runsMigrations()
             ->hasSettings([
