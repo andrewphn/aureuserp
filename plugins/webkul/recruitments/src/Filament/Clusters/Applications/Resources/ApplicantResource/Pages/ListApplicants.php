@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Recruitment\Enums\RecruitmentState;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\ApplicantResource;
@@ -78,8 +79,10 @@ class ListApplicants extends ListRecords
 
             'archived' => PresetView::make(__('recruitments::filament/clusters/applications/resources/applicant/pages/list-applicant.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
+                ->favorite()
                 ->modifyQueryUsing(function (Builder $query) {
                     return $query
+                        ->withoutGlobalScope(SoftDeletingScope::class)
                         ->where(function (Builder $subQuery) {
                             $subQuery
                                 ->whereNotNull('deleted_at')
