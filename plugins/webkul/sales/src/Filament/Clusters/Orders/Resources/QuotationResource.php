@@ -639,6 +639,7 @@ class QuotationResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.discount-percentage'))
                                             ->icon('heroicon-o-tag')
+                                            ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_discount)
                                             ->suffix('%'),
                                         Infolists\Components\TextEntry::make('price_subtotal')
                                             ->placeholder('-')
@@ -683,6 +684,7 @@ class QuotationResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.product-optional.entries.discount-percentage'))
                                             ->icon('heroicon-o-tag')
+                                            ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_discount)
                                             ->suffix('%'),
                                         Infolists\Components\TextEntry::make('price_unit')
                                             ->placeholder('-')
@@ -865,6 +867,7 @@ class QuotationResource extends Resource
                                     ->minValue(0)
                                     ->maxValue(100)
                                     ->live()
+                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_discount)
                                     ->dehydrated(),
                                 Forms\Components\Actions::make([
                                     Forms\Components\Actions\Action::make('add_order_line')
@@ -1104,6 +1107,7 @@ class QuotationResource extends Resource
                                     ->minValue(0)
                                     ->maxValue(100)
                                     ->live()
+                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_discount)
                                     ->afterStateUpdated(fn (Forms\Set $set, Forms\Get $get) => self::calculateLineTotals($set, $get))
                                     ->disabled(fn ($record): bool => $record && $record->order?->locked || in_array($record?->order?->state, [Enums\OrderState::CANCEL])),
                                 Forms\Components\TextInput::make('price_subtotal')
