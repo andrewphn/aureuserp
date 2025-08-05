@@ -125,7 +125,7 @@ class PurchaseAgreementResource extends Resource
                                             ->native(false)
                                             ->suffixIcon('heroicon-o-calendar')
                                             ->native(false)
-                                            ->minDate(fn (Forms\Get $get) => $get('date_from') ?: now()->toDateString())
+                                            ->minDate(fn (Forms\Get $get) => $get('starts_at') ?: now()->toDateString())
                                             ->live()
                                             ->rules([
                                                 'date',
