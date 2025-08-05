@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -112,7 +113,15 @@ class ProductResource extends Resource
                                     ->createOptionForm(fn (Forms\Form $form): Form => CategoryResource::form($form)),
                                 Forms\Components\Select::make('company_id')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.company'))
-                                    ->relationship('company', 'name')
+                                    ->relationship(
+                                        'company',
+                                        'name',
+                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
                                     ->formatStateUsing(fn (Model $record): string => $record->company?->name ?? '')
