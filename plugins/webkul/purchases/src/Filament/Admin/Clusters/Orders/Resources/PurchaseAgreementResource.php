@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
@@ -23,7 +24,6 @@ use Webkul\Product\Models\Product;
 use Webkul\Purchase\Enums;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages;
-use Webkul\Purchase\Models\Partner;
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
@@ -79,25 +79,16 @@ class PurchaseAgreementResource extends Resource
                                     ->relationship(
                                         'partner',
                                         'name',
-                                        fn ($query) => $query->where('sub_type', 'supplier')
+                                        fn (Builder $query) => $query->withTrashed()->where('sub_type', 'supplier')
                                     )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->required()
                                     ->preload()
-                                    ->disabled(fn ($record): bool => $record && $record?->state != Enums\RequisitionState::DRAFT)
-                                    ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
-                                        if (empty($state)) {
-                                            $component->state(null);
-
-                                            return;
-                                        }
-
-                                        $partner = Partner::find($state);
-
-                                        if (! $partner) {
-                                            $component->state(null);
-                                        }
-                                    }),
+                                    ->disabled(fn ($record): bool => $record && $record?->state != Enums\RequisitionState::DRAFT),
                                 Forms\Components\Select::make('user_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.buyer'))
                                     ->relationship('user', 'name')
