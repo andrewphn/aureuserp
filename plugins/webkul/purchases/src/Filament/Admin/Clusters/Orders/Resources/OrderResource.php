@@ -30,7 +30,6 @@ use Webkul\Purchase\Models\Order;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Settings;
 use Webkul\Purchase\Settings\OrderSettings;
-use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Support\Package;
@@ -132,7 +131,6 @@ class OrderResource extends Resource
                                     ->required()
                                     ->searchable()
                                     ->preload()
-                                    ->live()
                                     ->default(Auth::user()->defaultCompany?->currency_id)
                                     ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                             ]),
@@ -175,7 +173,6 @@ class OrderResource extends Resource
                                         'products' => $get('products'),
                                     ];
                                 })
-                                    ->visible(fn (Forms\Get $get) => $get('currency_id') && $get('products'))
                                     ->live()
                                     ->reactive(),
                             ]),
@@ -193,25 +190,20 @@ class OrderResource extends Resource
                                             ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT, Enums\OrderState::PURCHASE])),
                                         Forms\Components\Select::make('company_id')
                                             ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.additional.fields.company'))
-                                            ->relationship('company', 'name')
+                                            ->relationship(
+                                                'company',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                             ->searchable()
                                             ->preload()
                                             ->required()
                                             ->default(Auth::user()->default_company_id)
-                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT]))
-                                            ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
-                                                if (empty($state)) {
-                                                    $component->state(null);
-
-                                                    return;
-                                                }
-
-                                                $company = Company::find($state);
-
-                                                if (! $company) {
-                                                    $component->state(null);
-                                                }
-                                            }),
+                                            ->disabled(fn ($record): bool => $record && ! in_array($record?->state, [Enums\OrderState::DRAFT, Enums\OrderState::SENT])),
                                         Forms\Components\TextInput::make('reference')
                                             ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.additional.fields.source-document'))
                                             ->maxLength(255),

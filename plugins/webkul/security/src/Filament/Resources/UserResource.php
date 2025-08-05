@@ -10,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
@@ -147,7 +148,15 @@ class UserResource extends Resource
                                             ->searchable(),
                                         Forms\Components\Select::make('default_company_id')
                                             ->label(__('security::filament/resources/user.form.sections.multi-company.default-company'))
-                                            ->relationship('defaultCompany', 'name')
+                                            ->relationship(
+                                                'defaultCompany',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                             ->required()
                                             ->searchable()
                                             ->createOptionForm(fn (Form $form) => CompanyResource::form($form))
