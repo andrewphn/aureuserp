@@ -7,6 +7,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Recruitment\Enums\RecruitmentState;
