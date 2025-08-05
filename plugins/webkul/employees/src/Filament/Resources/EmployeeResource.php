@@ -142,23 +142,18 @@ class EmployeeResource extends Resource
                                     ->email(),
                                 Forms\Components\Select::make('department_id')
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.department'))
-                                    ->relationship(name: 'department', titleAttribute: 'complete_name')
+                                    ->relationship(
+                                        name: 'department',
+                                        titleAttribute: 'complete_name',
+                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
-                                    ->createOptionForm(fn (Form $form) => DepartmentResource::form($form))
-                                    ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
-                                        if (empty($state)) {
-                                            $component->state(null);
-
-                                            return;
-                                        }
-
-                                        $department = Department::find($state);
-
-                                        if (! $department) {
-                                            $component->state(null);
-                                        }
-                                    }),
+                                    ->createOptionForm(fn (Form $form) => DepartmentResource::form($form)),
                                 Forms\Components\TextInput::make('mobile_phone')
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.work-mobile'))
                                     ->suffixAction(
