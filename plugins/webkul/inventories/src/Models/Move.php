@@ -140,8 +140,7 @@ class Move extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class)
-            ->withTrashed();
+        return $this->belongsTo(Product::class);
     }
 
     public function uom(): BelongsTo

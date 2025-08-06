@@ -562,7 +562,14 @@ class OperationResource extends Resource
     {
         return Forms\Components\Repeater::make('moves')
             ->hiddenLabel()
-            ->relationship()
+            ->relationship(
+                modifyQueryUsing: fn (Builder $query) => $query->with([
+                    'product' => fn ($q) => $q->withTrashed(),
+                    'finalLocation',
+                    'uom',
+                    'productPackaging',
+                ])
+            )
             ->schema([
                 Forms\Components\Select::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.product'))
