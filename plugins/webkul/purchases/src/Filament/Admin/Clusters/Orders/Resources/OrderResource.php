@@ -297,12 +297,12 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('untaxed_amount')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.table.columns.untaxed-amount'))
                     ->sortable()
-                    ->money(fn (Order $record) => $record->currency->code)
+                    ->money(fn (Order $record) => $record->currency?->name)
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.table.columns.total-amount'))
                     ->sortable()
-                    ->money(fn (Order $record) => $record->currency->code)
+                    ->money(fn (Order $record) => $record->currency?->name)
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.table.columns.billing-status'))
@@ -587,13 +587,13 @@ class OrderResource extends Resource
                                 Infolists\Components\Group::make([
                                     Infolists\Components\TextEntry::make('untaxed_amount')
                                         ->label(__('purchases::filament/admin/clusters/orders/resources/order.table.columns.untaxed-amount'))
-                                        ->money(fn (Order $record) => $record->currency->code),
+                                        ->money(fn (Order $record) => $record->currency?->name),
                                     Infolists\Components\TextEntry::make('tax_amount')
                                         ->label('Tax Amount')
-                                        ->money(fn (Order $record) => $record->currency->code),
+                                        ->money(fn (Order $record) => $record->currency?->name),
                                     Infolists\Components\TextEntry::make('total_amount')
                                         ->label(__('purchases::filament/admin/clusters/orders/resources/order.table.columns.total-amount'))
-                                        ->money(fn (Order $record) => $record->currency->code),
+                                        ->money(fn (Order $record) => $record->currency?->name),
                                     Infolists\Components\TextEntry::make('invoice_status')
                                         ->label(__('purchases::filament/admin/clusters/orders/resources/order.table.columns.billing-status'))
                                         ->badge(),
