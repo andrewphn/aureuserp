@@ -135,7 +135,10 @@ class WebsitePlugin implements Plugin
                 ->url('/'),
         ]);
 
-        $pages = Page::where('is_footer_visible', true)->get();
+        $pages = Page::where([
+            'is_footer_visible' => true,
+            'is_published'      => true,
+        ])->get();
 
         $pages->each(function ($page) use ($navigationItems) {
             $navigationItems->push(
