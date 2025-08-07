@@ -30,7 +30,6 @@ class EditDepartment extends EditRecord
         return [
             ChatterActions\ChatterAction::make()
                 ->setResource(static::$resource),
-            Actions\ViewAction::make(),
             Actions\DeleteAction::make()
                 ->successNotification(
                     Notification::make()
