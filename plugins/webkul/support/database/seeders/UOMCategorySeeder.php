@@ -53,8 +53,6 @@ class UOMCategorySeeder extends Seeder
             }
         } catch (Throwable $e) {
             report($e);
-
-            $this->command?->error('UOMCategorySeeder failed: '.$e->getMessage());
         }
     }
 }

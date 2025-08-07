@@ -2,6 +2,7 @@
 
 namespace Webkul\Support\Database\Seeders;
 
+use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -24,7 +25,7 @@ class CompanySeeder extends Seeder
                 || ! Schema::hasTable('companies')
                 || ! Schema::hasTable('partners_partners')
             ) {
-                throw new \Exception('Required tables are missing.');
+                throw new Exception('Required tables are missing.');
             }
 
             DB::table('partners_partners')->delete();
@@ -32,10 +33,6 @@ class CompanySeeder extends Seeder
             DB::table('users')->delete();
 
             $user = User::first();
-
-            if (! $user) {
-                throw new \Exception('No user found to assign as creator.');
-            }
 
             $partnerId = DB::table('partners_partners')->insertGetId([
                 'sub_type'         => 'company',
@@ -46,7 +43,7 @@ class CompanySeeder extends Seeder
                 'tax_id'           => 'DUM123456',
                 'phone'            => '1234567890',
                 'mobile'           => '1234567890',
-                'creator_id'       => $user->id,
+                'creator_id'       => $user?->id,
                 'color'            => '#AAAAAA',
                 'created_at'       => now(),
                 'updated_at'       => now(),
@@ -55,7 +52,7 @@ class CompanySeeder extends Seeder
             $currency = Currency::find(1);
 
             if (! $currency) {
-                throw new \Exception('Currency with ID 1 not found.');
+                throw new Exception('Currency with ID 1 not found.');
             }
 
             DB::table('companies')->insert([
@@ -64,7 +61,7 @@ class CompanySeeder extends Seeder
                 'tax_id'              => 'DUM123456',
                 'registration_number' => 'DUMREG789',
                 'company_id'          => 'DUMCOMP001',
-                'creator_id'          => $user->id,
+                'creator_id'          => $user?->id,
                 'email'               => 'dummy@dummycorp.local',
                 'phone'               => '1234567890',
                 'mobile'              => '1234567890',
@@ -81,10 +78,6 @@ class CompanySeeder extends Seeder
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
-
-            report($e);
-
-            $this->command?->error('CompanySeeder failed: '.$e->getMessage());
         }
     }
 }

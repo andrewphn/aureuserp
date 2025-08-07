@@ -2,11 +2,11 @@
 
 namespace Webkul\Support\Database\Seeders;
 
-use Throwable;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\UOMType;
 
@@ -296,8 +296,6 @@ class UOMSeeder extends Seeder
             ]);
         } catch (Throwable $e) {
             report($e);
-
-            $this->command?->error('UOMSeeder failed: '.$e->getMessage());
         }
     }
 }
