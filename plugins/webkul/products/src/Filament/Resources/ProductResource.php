@@ -124,7 +124,6 @@ class ProductResource extends Resource
                                     ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
-                                    ->formatStateUsing(fn (Model $record): string => $record->company?->name ?? '')
                                     ->default(Auth::user()->default_company_id),
                             ]),
 
