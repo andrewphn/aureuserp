@@ -938,7 +938,6 @@ class QuotationResource extends Resource
             ->defaultItems(0)
             ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deletable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::CANCEL]) && $record->state !== Enums\OrderState::SALE)
-            ->deletable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::CANCEL]))
             ->addable(fn ($record): bool => ! in_array($record?->state, [Enums\OrderState::CANCEL]))
             ->schema([
                 Forms\Components\Group::make()
