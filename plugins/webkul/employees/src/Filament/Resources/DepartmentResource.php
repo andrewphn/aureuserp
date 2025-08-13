@@ -12,6 +12,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages;
@@ -73,10 +74,25 @@ class DepartmentResource extends Resource
                                             ->live(onBlur: true),
                                         Forms\Components\Select::make('parent_id')
                                             ->label(__('employees::filament/resources/department.form.sections.general.fields.parent-department'))
-                                            ->relationship('parent', 'complete_name')
+                                            ->relationship(
+                                                name: 'parent',
+                                                titleAttribute: 'complete_name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(
+                                                fn (Model $record): string => $record->complete_name.($record->trashed() ? ' (Deleted)' : ''),
+                                            )
+                                            ->disableOptionWhen(
+                                                fn (string $label): bool => str_contains($label, ' (Deleted)'),
+                                            )
                                             ->searchable()
+                                            ->afterStateHydrated(function (Model $record, Forms\Set $set) {
+                                                if (! $record->parent) {
+                                                    $set('parent_id', null);
+                                                }
+                                            })
                                             ->preload()
-                                            ->live(onBlur: true),
+                                            ->live(),
                                         Forms\Components\Select::make('manager_id')
                                             ->label(__('employees::filament/resources/department.form.sections.general.fields.manager'))
                                             ->relationship('manager', 'name')
@@ -280,6 +296,7 @@ class DepartmentResource extends Resource
                                             ->placeholder('—')
                                             ->label(__('employees::filament/resources/department.infolist.sections.general.entries.color')),
                                         Infolists\Components\Fieldset::make(__('employees::filament/resources/department.infolist.sections.general.entries.hierarchy-title'))
+                                            ->hidden(fn (Department $record): bool => $record->parent === null)
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('hierarchy')
                                                     ->label('')
@@ -304,6 +321,7 @@ class DepartmentResource extends Resource
     protected static function findRootDepartment(Department $department): Department
     {
         $current = $department;
+
         while ($current->parent_id) {
             $current = $current->parent;
         }
