@@ -81,6 +81,12 @@ class CalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'] ?? null;
 
                     $record->update($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/calendar-widget.modal-actions.edit.notification.title'))
+                        ->body(__('time-off::filament/widgets/calendar-widget.modal-actions.edit.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Forms\Form $form, array $arguments, $livewire) {
@@ -174,6 +180,12 @@ class CalendarWidget extends FullCalendarWidget
                     $data['date_to'] = isset($data['request_date_to']) ? $data['request_date_to'] : null;
 
                     Leave::create($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/calendar-widget.header-actions.create.notification.title'))
+                        ->body(__('time-off::filament/widgets/calendar-widget.header-actions.create.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Forms\Form $form, array $arguments) {
@@ -289,7 +301,7 @@ class CalendarWidget extends FullCalendarWidget
                 return [
                     'id'              => $leave->id,
                     'title'           => __('time-off::filament/widgets/calendar-widget.events.title', [
-                        'name'   => $leave->user->name,
+                        'name'   => $leave->user?->name,
                         'status' => $leave->holidayStatus->name,
                         'days'   => $leave->number_of_days,
                     ]),

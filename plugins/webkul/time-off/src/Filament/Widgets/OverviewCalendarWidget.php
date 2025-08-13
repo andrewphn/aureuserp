@@ -80,6 +80,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'] ?? null;
 
                     $record->update($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/overview-calendar-widget.modal-actions.edit.notification.title'))
+                        ->body(__('time-off::filament/widgets/overview-calendar-widget.modal-actions.edit.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Forms\Form $form, array $arguments, $livewire) {
@@ -172,6 +178,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'];
 
                     Leave::create($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.notification.title'))
+                        ->body(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Forms\Form $form, array $arguments) {
