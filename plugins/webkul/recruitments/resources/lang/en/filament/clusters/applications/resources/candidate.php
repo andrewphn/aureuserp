@@ -82,7 +82,7 @@ return [
             'delete' => [
                 'notification' => [
                     'title' => 'Candidate Deleted',
-                    'body'  => 'The candidate was successfully deleted.',
+                    'body'  => 'The candidates has been deleted successfully.',
                 ],
             ],
 
@@ -90,7 +90,7 @@ return [
                 'create' => [
                     'notification' => [
                         'title' => 'Candidate Created',
-                        'body'  => 'The candidate was successfully created.',
+                        'body'  => 'The candidates has been created successfully.',
                     ],
                 ],
             ],
@@ -99,8 +99,8 @@ return [
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Candidate deleted',
-                    'body'  => 'The candidate has been deleted successfully.',
+                    'title' => 'Candidates Deleted',
+                    'body'  => 'The candidates has been deleted successfully.',
                 ],
             ],
         ],
