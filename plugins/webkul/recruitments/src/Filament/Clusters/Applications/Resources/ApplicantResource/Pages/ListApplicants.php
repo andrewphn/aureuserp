@@ -158,6 +158,27 @@ class ListApplicants extends ListRecords
 
                     return $data;
                 })
+                ->using(function (array $data): \Illuminate\Database\Eloquent\Model {
+                    $model = static::$resource::getModel();
+
+                    $existingApplicant = $model::where('candidate_id', $data['candidate_id'])
+                        ->where('company_id', $data['company_id'])
+                        ->first();
+
+                    if ($existingApplicant) {
+                        $existingApplicant->update([
+                            'is_active'        => true,
+                            'deleted_at'       => null,
+                            'refuse_reason_id' => null,
+                            'date_closed'      => null,
+                            'recruiter_id'     => $data['creator_id'],
+                        ]);
+
+                        return $existingApplicant;
+                    }
+
+                    return $model::create($data);
+                })
                 ->createAnother(false)
                 ->after(function ($record) {
                     return redirect(

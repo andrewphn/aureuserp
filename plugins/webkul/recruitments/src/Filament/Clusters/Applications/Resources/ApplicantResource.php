@@ -23,7 +23,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
@@ -645,6 +644,8 @@ class ApplicantResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\RestoreAction::make()
+                        ->visible(fn (Applicant $record) => $record->trashed()),
                     Tables\Actions\DeleteAction::make()
                         ->successNotification(
                             Notification::make()
@@ -680,7 +681,8 @@ class ApplicantResource extends Resource
                 ]),
             ])
             ->modifyQueryUsing(function (Builder $query) {
-                $query->where('state', '!=', RecruitmentStateEnum::BLOCKED->value)
+                $query
+                    ->where('state', '!=', RecruitmentStateEnum::BLOCKED->value)
                     ->orWhereNull('state');
             });
     }
@@ -887,13 +889,5 @@ class ApplicantResource extends Resource
             'edit'   => Pages\EditApplicant::route('/{record}/edit'),
             'skills' => Pages\ManageSkill::route('/{record}/skills'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }
