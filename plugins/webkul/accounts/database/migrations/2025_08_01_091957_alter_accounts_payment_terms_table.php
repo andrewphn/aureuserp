@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('accounts_payment_terms', function (Blueprint $table) {
-            $table->text('note')->change();
+            $table->text('note')->nullable()->comment('Note')->change();
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('accounts_payment_terms', function (Blueprint $table) {
-            $table->string('note')->change();
+            $table->string('note')->nullable()->comment('Note')->change();
         });
     }
 };
