@@ -435,7 +435,17 @@ class InstallCommand extends Command
     {
         $this->info('⚙️ Refreshing access controls for the admin panel...');
 
-        exec('php '.base_path('artisan').' shield:generate --all --option=permissions --panel=admin');
+        $php = escapeshellarg(PHP_BINARY);
+
+        $artisan = escapeshellarg(base_path('artisan'));
+
+        $cmd = "$php $artisan shield:generate --all --option=permissions --panel=admin";
+
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            $this->error('Failed to generate admin panel permissions. Command output: '.implode(PHP_EOL, $output));
+        }
 
         $role = Role::first();
 
