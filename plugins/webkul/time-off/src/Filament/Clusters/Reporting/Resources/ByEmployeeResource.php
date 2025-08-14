@@ -2,6 +2,12 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\Reporting\Resources;
 
+<<<<<<< Updated upstream
+=======
+use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+>>>>>>> Stashed changes
 use Filament\Tables\Table;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource as BaseByEmployeeResource;
 use Webkul\TimeOff\Filament\Clusters\Reporting;
@@ -27,6 +33,11 @@ class ByEmployeeResource extends BaseByEmployeeResource
     {
         return parent::table($table)
             ->defaultGroup('employee.name');
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return TimeOffResource::infolist($infolist);
     }
 
     public static function getPages(): array
