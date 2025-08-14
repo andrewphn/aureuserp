@@ -83,7 +83,7 @@ class RouteResource extends Resource
                                 fn (Model $record): string => $record->name.($record->trashed() ? ' (Deleted)' : ''),
                             )
                             ->disableOptionWhen(
-                                fn (Model $label): bool => str_contains($label, ' (Deleted)'),
+                                fn (string $label): bool => str_contains($label, ' (Deleted)'),
                             )
                             ->live()
                             ->searchable()
