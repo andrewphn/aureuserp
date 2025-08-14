@@ -183,7 +183,7 @@ class TimeOffResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('state')
                     ->label(__('time-off::filament/clusters/management/resources/time-off.table.columns.status'))
-                    ->formatStateUsing(fn ($state) => State::options()[$state])
+                    ->formatStateUsing(fn (State $state) => $state->getLabel())
                     ->sortable()
                     ->badge()
                     ->searchable(),
@@ -347,11 +347,7 @@ class TimeOffResource extends Resource
     public static function getPages(): array
     {
         return [
-<<<<<<< Updated upstream
             'index'  => Pages\ListTimeOff::route('/'),
-=======
-            'index'  => Pages\ListTimeOffs::route('/'),
->>>>>>> Stashed changes
             'create' => Pages\CreateTimeOff::route('/create'),
             'edit'   => Pages\EditTimeOff::route('/{record}/edit'),
             'view'   => Pages\ViewTimeOff::route('/{record}'),

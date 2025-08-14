@@ -81,8 +81,8 @@ return [
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Time Offs deleted',
-                    'body'  => 'The time offs has been deleted successfully.',
+                    'title' => 'Time Off deleted',
+                    'body'  => 'The time off has been deleted successfully.',
                 ],
             ],
         ],
