@@ -86,11 +86,6 @@ class DepartmentResource extends Resource
                                                 fn (string $label): bool => str_contains($label, ' (Deleted)'),
                                             )
                                             ->searchable()
-                                            ->afterStateHydrated(function (Model $record, Forms\Set $set) {
-                                                if (! $record->parent) {
-                                                    $set('parent_id', null);
-                                                }
-                                            })
                                             ->preload()
                                             ->live(),
                                         Forms\Components\Select::make('manager_id')
