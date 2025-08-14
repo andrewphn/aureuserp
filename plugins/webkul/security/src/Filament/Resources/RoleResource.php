@@ -107,7 +107,8 @@ class RoleResource extends Resource implements HasShieldPermissions
                     ->dateTime(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(fn (Model $record) => $record->name == config('filament-shield.panel_user.name')),
                 Tables\Actions\DeleteAction::make()
                     ->hidden(fn (Model $record) => $record->name == config('filament-shield.panel_user.name')),
             ])

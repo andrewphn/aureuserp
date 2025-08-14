@@ -12,6 +12,15 @@ use Webkul\Security\Filament\Resources\RoleResource;
 
 class EditRole extends EditRecord
 {
+    public function mount($record): void
+    {
+        parent::mount($record);
+
+        if ($this->record->name == config('filament-shield.panel_user.name')) {
+            abort(403, 'The admin role cannot be edited.');
+        }
+    }
+
     protected static string $resource = RoleResource::class;
 
     public Collection $permissions;
