@@ -34,7 +34,10 @@ class EditRole extends EditRecord
             ->flatten()
             ->unique();
 
-        return Arr::only($data, ['name', 'guard_name']);
+        return [
+            'name'       => $data['name'],
+            'guard_name' => Utils::getFilamentAuthGuard(),
+        ];
     }
 
     protected function afterSave(): void
