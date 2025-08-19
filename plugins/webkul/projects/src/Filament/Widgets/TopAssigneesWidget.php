@@ -56,7 +56,7 @@ class TopAssigneesWidget extends BaseWidget
             ')
             ->whereBetween('analytic_records.created_at', [$startDate, $endDate])
             ->groupBy('user_id')
-            ->orderByDesc('total_hours')
+            ->orderByRaw('SUM(unit_amount) DESC')
             ->limit(10);
     }
 
