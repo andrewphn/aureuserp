@@ -55,7 +55,7 @@ class RoleResource extends Resource implements HasShieldPermissions
 
                                 Forms\Components\TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))
-                                    ->default('web')
+                                    ->default(Utils::getFilamentAuthGuard())
                                     ->dehydrated()
                                     ->readOnly()
                                     ->maxLength(255),

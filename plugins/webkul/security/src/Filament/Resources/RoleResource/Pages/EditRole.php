@@ -44,7 +44,7 @@ class EditRole extends EditRecord
         $this->permissions->each(function ($permission) use ($permissionModels) {
             $permissionModels->push(Utils::getPermissionModel()::firstOrCreate([
                 'name'       => $permission,
-                'guard_name' => 'web',
+                'guard_name' => Utils::getFilamentAuthGuard(),
             ]));
         });
 
