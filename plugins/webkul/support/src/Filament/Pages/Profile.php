@@ -180,6 +180,7 @@ class Profile extends Page implements HasForms
             $user->save();
 
             $this->fillProfileForm();
+
             $this->dispatch('profile-updated');
 
             Notification::make()
@@ -188,6 +189,8 @@ class Profile extends Page implements HasForms
                 ->success()
                 ->duration(3000)
                 ->send();
+
+            $this->js('setTimeout(() => window.location.reload(), 2000)');
         } catch (Exception $e) {
             Notification::make()
                 ->title(__('support::filament/pages/profile.notification.error.title'))
@@ -222,6 +225,8 @@ class Profile extends Page implements HasForms
                 ->success()
                 ->duration(3000)
                 ->send();
+
+            $this->js('setTimeout(() => window.location.reload(), 2000)');
         } catch (Exception $e) {
             Notification::make()
                 ->title(__('support::filament/pages/profile.password.notification.error.title'))
@@ -290,7 +295,7 @@ class Profile extends Page implements HasForms
             Action::make('updateProfile')
                 ->label(__('support::filament/pages/profile.actions.save'))
                 ->color('primary')
-                ->action('updateProfile'),
+                ->action('updateProfile')
         ];
     }
 

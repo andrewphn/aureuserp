@@ -54,7 +54,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Settings'),
             ])
             ->userMenuItems([
-                'profile' => MenuItem::make()->url(fn (): string => Profile::getUrl()),
+                'profile' => MenuItem::make()
+                    ->label(fn () => filament()->auth()->user()?->name)
+                    ->url(fn (): string => Profile::getUrl()),
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
