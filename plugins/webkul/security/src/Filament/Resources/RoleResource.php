@@ -120,13 +120,6 @@ class RoleResource extends Resource implements HasShieldPermissions
             ->defaultSort('created_at', 'asc');
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
