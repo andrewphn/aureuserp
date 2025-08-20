@@ -649,14 +649,11 @@ class EmployeeResource extends Resource
                                                             ->relationship(
                                                                 name: 'user',
                                                                 titleAttribute: 'name',
-                                                                modifyQueryUsing: function ($query, $livewire) {
-                                                                    $selectedId = old('user_id') ?? data_get($livewire->form->getRawState(), 'user_id') ?? $livewire->record?->user_id;
-
-                                                                    return $query->where(function ($query) use ($selectedId) {
+                                                                modifyQueryUsing: function ($query, $state) {
+                                                                    return $query->where(function ($query) use ($state) {
                                                                         $query->whereDoesntHave('employee');
-
-                                                                        if ($selectedId) {
-                                                                            $query->orWhere('id', $selectedId);
+                                                                        if ($state) {
+                                                                            $query->orWhere('id', $state);
                                                                         }
                                                                     });
                                                                 }
