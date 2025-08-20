@@ -646,7 +646,22 @@ class EmployeeResource extends Resource
                                                         Forms\Components\Toggle::make('work_permit_scheduled_activity')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.work-permit-scheduled-activity')),
                                                         Forms\Components\Select::make('user_id')
-                                                            ->relationship(name: 'user', titleAttribute: 'name')
+                                                            ->relationship(
+                                                                name: 'user',
+                                                                titleAttribute: 'name',
+                                                                modifyQueryUsing: function ($query, $livewire) {
+                                                                    $selectedId = old('user_id') ?? data_get($livewire->form->getRawState(), 'user_id') ?? $livewire->record?->user_id;
+
+                                                                    return $query->where(function ($query) use ($selectedId) {
+                                                                        $query->whereDoesntHave('employee');
+
+                                                                        if ($selectedId) {
+                                                                            $query->orWhere('id', $selectedId);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            )
+                                                            ->unique(ignoreRecord: true)
                                                             ->searchable()
                                                             ->preload()
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.related-user'))
