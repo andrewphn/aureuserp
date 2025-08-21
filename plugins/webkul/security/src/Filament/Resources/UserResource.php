@@ -12,9 +12,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
 use Webkul\Security\Enums\PermissionType;
 use Webkul\Security\Filament\Resources\UserResource\Pages;
+use Webkul\Security\Models\Role;
 use Webkul\Security\Models\User;
 
 class UserResource extends Resource
@@ -255,67 +255,177 @@ class UserResource extends Resource
                         ->hidden(fn ($record) => $record->trashed()),
                     Tables\Actions\EditAction::make()
                         ->hidden(fn ($record) => $record->trashed())
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('security::filament/resources/user.table.actions.edit.notification.title'))
-                                ->body(__('security::filament/resources/user.table.actions.edit.notification.body')),
-                        ),
+                        ->successNotification(self::getSuccessNotification(
+                            'security::filament/resources/user.table.actions.edit.notification.title',
+                            'security::filament/resources/user.table.actions.edit.notification.body'
+                        )),
                     Tables\Actions\DeleteAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('security::filament/resources/user.table.actions.delete.notification.title'))
-                                ->body(__('security::filament/resources/user.table.actions.delete.notification.body')),
-                        ),
+                        ->visible(fn ($record) => self::canDeleteUser($record))
+                        ->before(fn ($record) => self::validateUserDeletion($record))
+                        ->successNotification(self::getSuccessNotification(
+                            'security::filament/resources/user.table.actions.delete.notification.title',
+                            'security::filament/resources/user.table.actions.delete.notification.body'
+                        )),
                     Tables\Actions\RestoreAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('security::filament/resources/user.table.actions.restore.notification.title'))
-                                ->body(__('security::filament/resources/user.table.actions.restore.notification.body')),
-                        ),
+                        ->successNotification(self::getSuccessNotification(
+                            'security::filament/resources/user.table.actions.restore.notification.title',
+                            'security::filament/resources/user.table.actions.restore.notification.body'
+                        )),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('security::filament/resources/user.table.bulk-actions.delete.notification.title'))
-                                ->body(__('security::filament/resources/user.table.bulk-actions.delete.notification.body')),
-                        ),
+                        ->deselectRecordsAfterCompletion()
+                        ->action(fn ($records) => self::bulkDeleteUsers($records))
+                        ->successNotification(self::getSuccessNotification(
+                            'security::filament/resources/user.table.bulk-actions.delete.notification.title',
+                            'security::filament/resources/user.table.bulk-actions.delete.notification.body'
+                        )),
+
                     Tables\Actions\ForceDeleteBulkAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('security::filament/resources/user.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('security::filament/resources/user.table.bulk-actions.force-delete.notification.body')),
-                        ),
+                        ->deselectRecordsAfterCompletion()
+                        ->action(fn ($records) => self::forceDeleteNonProtectedUsers($records))
+                        ->successNotification(self::getSuccessNotification(
+                            'security::filament/resources/user.table.bulk-actions.force-delete.notification.title',
+                            'security::filament/resources/user.table.bulk-actions.force-delete.notification.body'
+                        )),
+
                     Tables\Actions\RestoreBulkAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('security::filament/resources/user.table.bulk-actions.restore.notification.title'))
-                                ->body(__('security::filament/resources/user.table.bulk-actions.restore.notification.body')),
-                        ),
+                        ->successNotification(self::getSuccessNotification(
+                            'security::filament/resources/user.table.bulk-actions.restore.notification.title',
+                            'security::filament/resources/user.table.bulk-actions.restore.notification.body'
+                        )),
                 ]),
             ])
+            ->checkIfRecordIsSelectableUsing(fn (User $record) => ! $record->is_default)
             ->defaultSort('created_at', 'desc')
-            ->modifyQueryUsing(function ($query) {
-                $query->with('roles', 'teams', 'defaultCompany', 'allowedCompanies');
-            })
+            ->modifyQueryUsing(fn ($query) => $query->with('roles', 'teams', 'defaultCompany', 'allowedCompanies'))
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus-circle')
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('security::filament/resources/user.table.empty-state-actions.create.notification.title'))
-                            ->body(__('security::filament/resources/user.table.empty-state-actions.create.notification.body')),
-                    ),
+                    ->successNotification(self::getSuccessNotification(
+                        'security::filament/resources/user.table.empty-state-actions.create.notification.title',
+                        'security::filament/resources/user.table.empty-state-actions.create.notification.body'
+                    )),
             ]);
+    }
+
+    public static function hasDefaultRole($record): bool
+    {
+        return $record->roles->contains('is_default', true);
+    }
+
+    public static function isProtectedUser($record): bool
+    {
+        return $record->is_default || self::hasDefaultRole($record);
+    }
+
+    public static function canDeleteUser($record): bool
+    {
+        if ($record->is_default) {
+            return false;
+        }
+
+        if (self::hasDefaultRole($record)) {
+            return false;
+        }
+
+        $defaultRoleUsersCount = self::getDefaultRoleUsersCount();
+
+        if (self::hasDefaultRole($record) && $defaultRoleUsersCount <= 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static function validateUserDeletion($record): bool
+    {
+        if ($record->is_default) {
+            self::sendErrorNotification(
+                'security::filament/resources/user.table.actions.delete.notification.title',
+                'security::filament/resources/user.table.actions.delete.notification.default-user-protected'
+            );
+
+            return false;
+        }
+
+        if (self::hasDefaultRole($record)) {
+            $defaultRoleUsersCount = self::getDefaultRoleUsersCount();
+
+            if ($defaultRoleUsersCount <= 1) {
+                self::sendErrorNotification(
+                    'security::filament/resources/user.table.actions.delete.notification.title',
+                    'security::filament/resources/user.table.actions.delete.notification.default-role-required'
+                );
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static function bulkDeleteUsers($records): void
+    {
+        $defaultRoleUsersCount = self::getDefaultRoleUsersCount();
+
+        $defaultUsers = $records->filter(fn ($record) => $record->is_default);
+
+        if ($defaultUsers->count() > 0) {
+            self::sendErrorNotification(
+                'security::filament/resources/user.table.bulk-actions.delete.notification.title',
+                'security::filament/resources/user.table.bulk-actions.delete.notification.default-users-protected'
+            );
+
+            return;
+        }
+
+        $defaultRoleUsersToDelete = $records->filter(fn ($record) => self::hasDefaultRole($record));
+        $remainingDefaultRoleUsers = $defaultRoleUsersCount - $defaultRoleUsersToDelete->count();
+
+        if ($remainingDefaultRoleUsers < 1) {
+            self::sendErrorNotification(
+                'security::filament/resources/user.table.bulk-actions.delete.notification.title',
+                'security::filament/resources/user.table.bulk-actions.delete.notification.default-role-required'
+            );
+
+            return;
+        }
+
+        $records
+            ->filter(fn ($record) => ! self::isProtectedUser($record))
+            ->each(fn ($record) => $record->delete());
+    }
+
+    private static function forceDeleteNonProtectedUsers($records): void
+    {
+        $records
+            ->filter(fn ($record) => ! self::isProtectedUser($record))
+            ->each(fn ($record) => $record->forceDelete());
+    }
+
+    private static function getDefaultRoleUsersCount(): int
+    {
+        return User::whereHas('roles', fn ($q) => $q->where('is_default', true))->count();
+    }
+
+    private static function sendErrorNotification(string $titleKey, string $bodyKey): void
+    {
+        Notification::make()
+            ->danger()
+            ->title(__($titleKey))
+            ->body(__($bodyKey))
+            ->send();
+    }
+
+    private static function getSuccessNotification(string $titleKey, string $bodyKey): Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title(__($titleKey))
+            ->body(__($bodyKey));
     }
 
     public static function infolist(Infolist $infolist): Infolist
@@ -409,13 +519,6 @@ class UserResource extends Resource
                         ])->columnSpan(1),
                     ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

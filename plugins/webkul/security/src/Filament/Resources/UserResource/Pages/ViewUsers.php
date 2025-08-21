@@ -16,6 +16,7 @@ class ViewUsers extends ViewRecord
         return [
             Actions\EditAction::make(),
             Actions\DeleteAction::make()
+                ->visible(fn ($record) => self::getResource()::canDeleteUser($record))
                 ->successNotification(
                     Notification::make()
                         ->success()

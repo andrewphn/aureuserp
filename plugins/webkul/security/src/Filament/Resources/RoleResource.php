@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Webkul\Security\Filament\Resources\RoleResource\Pages;
+use Webkul\Security\Models\Role;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
@@ -117,6 +118,7 @@ class RoleResource extends Resource implements HasShieldPermissions
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ])
+            ->checkIfRecordIsSelectableUsing(fn (Role $record) => ! $record->is_default)
             ->defaultSort('created_at', 'asc');
     }
 
