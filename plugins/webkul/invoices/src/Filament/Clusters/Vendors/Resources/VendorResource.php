@@ -2,46 +2,41 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Tabs\Tab;
-use Webkul\Invoice\Enums\InvoiceSendingMethod;
-use Webkul\Invoice\Enums\InvoiceFormat;
-use Filament\Schemas\Components\Utilities\Get;
-use Webkul\Invoice\Enums\PartyIdentificationScheme;
-use Filament\Forms\Components\TextInput;
-use Webkul\Invoice\Enums\AutoPostBills;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\RichEditor;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\RelationManagers\BankAccountsRelationManager;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ViewVendor;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\EditVendor;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ManageContacts;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ManageAddresses;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ManageBankAccounts;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\CreateVendor;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Webkul\Invoice\Enums;
+use Webkul\Invoice\Enums\AutoPostBills;
+use Webkul\Invoice\Enums\InvoiceFormat;
+use Webkul\Invoice\Enums\InvoiceSendingMethod;
+use Webkul\Invoice\Enums\PartyIdentificationScheme;
 use Webkul\Invoice\Filament\Clusters\Vendors;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\RelationManagers;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\CreateVendor;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\EditVendor;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ManageAddresses;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ManageBankAccounts;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ManageContacts;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ViewVendor;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\RelationManagers\BankAccountsRelationManager;
 use Webkul\Invoice\Models\Partner;
 use Webkul\Partner\Filament\Resources\PartnerResource as BaseVendorResource;
 
 class VendorResource extends BaseVendorResource
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $model = Partner::class;
 

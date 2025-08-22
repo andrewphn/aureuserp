@@ -2,9 +2,8 @@
 
 namespace Webkul\Security\Filament\Resources\RoleResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use BezhanSalleh\FilamentShield\Support\Utils;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;

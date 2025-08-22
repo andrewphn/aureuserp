@@ -2,9 +2,9 @@
 
 namespace Webkul\Support\Filament\Clusters;
 
-use Filament\Panel;
 use Filament\Clusters\Cluster;
 use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Widgets\Widget;
 
 class Dashboard extends Cluster
@@ -13,7 +13,7 @@ class Dashboard extends Cluster
 
     protected static string $routePath = '/';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-squares-2x2';
 
     protected static ?int $navigationSort = 0;
 

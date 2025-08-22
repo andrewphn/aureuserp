@@ -2,56 +2,53 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Forms\Components\RichEditor;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\QueryBuilder;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\ListQuotationTemplates;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\CreateQuotationTemplate;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\ViewQuotationTemplate;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\EditQuotationTemplate;
-use Filament\Forms\Components\Repeater;
 use Filament\Actions\Action;
-use Filament\Schemas\Components\Grid;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Forms;
-use Filament\Infolists;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentView;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\OrderDisplayType;
 use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\CreateQuotationTemplate;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\EditQuotationTemplate;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\ListQuotationTemplates;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\ViewQuotationTemplate;
 use Webkul\Sale\Models\OrderTemplate;
 
 class QuotationTemplateResource extends Resource
 {
     protected static ?string $model = OrderTemplate::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document';
 
     protected static ?string $cluster = Configuration::class;
 

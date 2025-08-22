@@ -2,9 +2,8 @@
 
 namespace Webkul\Support\Filament\Resources\ActivityTypeResource\Pages;
 
-use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Support\Filament\Resources\ActivityTypeResource;

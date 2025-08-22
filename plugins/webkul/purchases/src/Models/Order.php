@@ -2,10 +2,6 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Purchase\Enums\OrderState;
-use Webkul\Purchase\Enums\OrderInvoiceStatus;
-use Webkul\Purchase\Enums\OrderReceiptStatus;
-use Webkul\Chatter\Models\Message;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,13 +11,16 @@ use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Incoterm;
 use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\PaymentTerm;
+use Webkul\Chatter\Models\Message;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Purchase\Database\Factories\OrderFactory;
-use Webkul\Purchase\Enums;
+use Webkul\Purchase\Enums\OrderInvoiceStatus;
+use Webkul\Purchase\Enums\OrderReceiptStatus;
+use Webkul\Purchase\Enums\OrderState;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;

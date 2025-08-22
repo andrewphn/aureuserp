@@ -3,9 +3,8 @@
 namespace Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource;
 use Webkul\TimeOff\Models\LeaveType;
 

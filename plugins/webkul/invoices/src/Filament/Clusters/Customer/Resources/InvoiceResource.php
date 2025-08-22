@@ -3,14 +3,13 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ViewInvoice;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\EditInvoice;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ListInvoices;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\CreateInvoice;
 use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\InvoiceResource as BaseInvoiceResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\CreateInvoice;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\EditInvoice;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ListInvoices;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ViewInvoice;
 use Webkul\Invoice\Models\Invoice;
 
 class InvoiceResource extends BaseInvoiceResource

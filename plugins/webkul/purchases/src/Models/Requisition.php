@@ -2,8 +2,6 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Purchase\Enums\RequisitionState;
-use Webkul\Purchase\Enums\RequisitionType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +12,8 @@ use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
 use Webkul\Purchase\Database\Factories\RequisitionFactory;
-use Webkul\Purchase\Enums;
+use Webkul\Purchase\Enums\RequisitionState;
+use Webkul\Purchase\Enums\RequisitionType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;

@@ -2,39 +2,32 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Actions;
 use Filament\Actions\Action;
-use Filament\Support\Enums\Size;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Livewire;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\RichEditor;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid;
-use Filament\Support\Enums\TextSize;
-use Filament\Infolists\Components\RepeatableEntry;
-use Webkul\Invoice\Settings\ProductSettings;
-use Filament\Infolists\Components\IconEntry;
-use Webkul\Account\Filament\Resources\BillResource\Pages\ListBills;
-use Webkul\Account\Filament\Resources\BillResource\Pages\CreateBill;
-use Webkul\Account\Filament\Resources\BillResource\Pages\EditBill;
-use Webkul\Account\Filament\Resources\BillResource\Pages\ViewBill;
-use Filament\Forms\Components\Repeater;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms;
-use Filament\Infolists;
-use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\Size;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -43,13 +36,16 @@ use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\TypeTaxUse;
 use Webkul\Account\Facades\Tax;
-use Webkul\Account\Filament\Resources\BillResource\Pages;
+use Webkul\Account\Filament\Resources\BillResource\Pages\CreateBill;
+use Webkul\Account\Filament\Resources\BillResource\Pages\EditBill;
+use Webkul\Account\Filament\Resources\BillResource\Pages\ListBills;
+use Webkul\Account\Filament\Resources\BillResource\Pages\ViewBill;
 use Webkul\Account\Livewire\InvoiceSummary;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 use Webkul\Invoice\Models\Product;
-use Webkul\Invoice\Settings;
+use Webkul\Invoice\Settings\ProductSettings;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
@@ -57,7 +53,7 @@ class BillResource extends Resource
 {
     protected static ?string $model = AccountMove::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
 

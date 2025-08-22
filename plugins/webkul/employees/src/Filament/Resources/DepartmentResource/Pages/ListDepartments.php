@@ -3,7 +3,6 @@
 namespace Webkul\Employee\Filament\Resources\DepartmentResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Employee\Filament\Resources\DepartmentResource;

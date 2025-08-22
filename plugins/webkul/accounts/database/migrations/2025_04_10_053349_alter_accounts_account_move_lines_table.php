@@ -1,11 +1,10 @@
 <?php
 
-use Webkul\Account\Enums\DisplayType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Webkul\Account\Enums;
+use Webkul\Account\Enums\DisplayType;
 
 return new class extends Migration
 {

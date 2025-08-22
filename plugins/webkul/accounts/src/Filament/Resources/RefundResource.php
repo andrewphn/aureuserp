@@ -2,11 +2,10 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Webkul\Account\Filament\Resources\RefundResource\Pages\ListRefunds;
 use Webkul\Account\Filament\Resources\RefundResource\Pages\CreateRefund;
 use Webkul\Account\Filament\Resources\RefundResource\Pages\EditRefund;
+use Webkul\Account\Filament\Resources\RefundResource\Pages\ListRefunds;
 use Webkul\Account\Filament\Resources\RefundResource\Pages\ViewRefund;
-use Webkul\Account\Filament\Resources\RefundResource\Pages;
 use Webkul\Account\Models\Move as AccountMove;
 
 class RefundResource extends BillResource
@@ -15,7 +14,7 @@ class RefundResource extends BillResource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
 
     public static function getPages(): array
     {

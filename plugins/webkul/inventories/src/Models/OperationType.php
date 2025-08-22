@@ -2,9 +2,6 @@
 
 namespace Webkul\Inventory\Models;
 
-use Webkul\Inventory\Enums\ReservationMethod;
-use Webkul\Inventory\Enums\CreateBackorder;
-use Webkul\Inventory\Enums\MoveType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +11,9 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Inventory\Database\Factories\OperationTypeFactory;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\CreateBackorder;
+use Webkul\Inventory\Enums\MoveType;
+use Webkul\Inventory\Enums\ReservationMethod;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 

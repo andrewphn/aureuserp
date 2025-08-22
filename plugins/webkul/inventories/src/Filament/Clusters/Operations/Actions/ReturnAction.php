@@ -2,10 +2,9 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Actions;
 
-use Webkul\Inventory\Enums\OperationState;
 use Filament\Actions\Action;
 use Livewire\Component;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\Operation;

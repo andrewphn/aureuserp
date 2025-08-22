@@ -2,61 +2,56 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\Configurations\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Radio;
-use Webkul\TimeOff\Enums\LeaveValidationType;
-use Filament\Schemas\Components\Utilities\Get;
-use Webkul\TimeOff\Enums\EmployeeRequest;
-use Webkul\TimeOff\Enums\AllocationValidationType;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Select;
-use Webkul\TimeOff\Enums\RequestUnit;
-use Filament\Forms\Components\Toggle;
-use Webkul\TimeOff\Enums\TimeType;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Tables\Filters\QueryBuilder;
-use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Schemas\Components\Grid;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Support\Enums\TextSize;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\IconEntry;
-use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\ListLeaveTypes;
-use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\CreateLeaveType;
-use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\ViewLeaveType;
-use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\EditLeaveType;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\TextSize;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
-use Webkul\TimeOff\Enums;
+use Webkul\TimeOff\Enums\AllocationValidationType;
+use Webkul\TimeOff\Enums\EmployeeRequest;
+use Webkul\TimeOff\Enums\LeaveValidationType;
+use Webkul\TimeOff\Enums\RequestUnit;
 use Webkul\TimeOff\Enums\RequiresAllocation;
+use Webkul\TimeOff\Enums\TimeType;
 use Webkul\TimeOff\Filament\Clusters\Configurations;
-use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages;
+use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\CreateLeaveType;
+use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\EditLeaveType;
+use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\ListLeaveTypes;
+use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\ViewLeaveType;
 use Webkul\TimeOff\Models\LeaveType;
 
 class LeaveTypeResource extends Resource
 {
     protected static ?string $model = LeaveType::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $cluster = Configurations::class;
 

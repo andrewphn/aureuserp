@@ -3,7 +3,6 @@
 namespace Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource\Pages;
 
 use Filament\Actions\EditAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
 

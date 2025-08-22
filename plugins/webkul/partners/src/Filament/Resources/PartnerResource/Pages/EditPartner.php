@@ -2,9 +2,8 @@
 
 namespace Webkul\Partner\Filament\Resources\PartnerResource\Pages;
 
-use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;

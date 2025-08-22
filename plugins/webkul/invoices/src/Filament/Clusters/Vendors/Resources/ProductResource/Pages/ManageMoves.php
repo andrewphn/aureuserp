@@ -2,15 +2,13 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Tables\Columns\TextColumn;
-use Webkul\Inventory\Enums\ProductTracking;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
@@ -22,9 +20,9 @@ class ManageMoves extends ManageRelatedRecords
 
     protected static string $relationship = 'moveLines';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrows-right-left';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrows-right-left';
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

@@ -3,19 +3,16 @@
 namespace Webkul\Security\Filament\Resources\UserResource\Pages;
 
 use Filament\Actions\Action;
-use Webkul\Security\Settings\UserSettings;
-use Filament\Forms\Components\TextInput;
-use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
-use Filament\Forms;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
-use Webkul\Security\Settings;
+use Webkul\Security\Settings\UserSettings;
 
 class EditUser extends EditRecord
 {

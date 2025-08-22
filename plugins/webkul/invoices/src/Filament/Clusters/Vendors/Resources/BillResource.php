@@ -3,21 +3,20 @@
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\ViewBill;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\EditBill;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\ListBills;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\CreateBill;
 use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\BillResource as BaseBillResource;
 use Webkul\Invoice\Filament\Clusters\Vendors;
-use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\CreateBill;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\EditBill;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\ListBills;
+use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\ViewBill;
 use Webkul\Invoice\Models\Bill;
 
 class BillResource extends BaseBillResource
 {
     protected static ?string $model = Bill::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
 
     protected static bool $shouldRegisterNavigation = true;
 

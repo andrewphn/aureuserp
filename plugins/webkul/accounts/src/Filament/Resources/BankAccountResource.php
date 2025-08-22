@@ -3,9 +3,8 @@
 namespace Webkul\Account\Filament\Resources;
 
 use Filament\Schemas\Schema;
-use Webkul\Account\Filament\Resources\BankAccountResource\Pages\ListBankAccounts;
 use Filament\Tables\Table;
-use Webkul\Account\Filament\Resources\BankAccountResource\Pages;
+use Webkul\Account\Filament\Resources\BankAccountResource\Pages\ListBankAccounts;
 use Webkul\Partner\Filament\Resources\BankAccountResource as BaseBankAccountResource;
 
 class BankAccountResource extends BaseBankAccountResource

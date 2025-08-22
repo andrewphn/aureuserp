@@ -2,13 +2,12 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources;
 
-use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\ListProductAttributes;
-use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\CreateProductAttribute;
-use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\ViewProductAttribute;
-use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\EditProductAttribute;
 use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations;
-use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages;
+use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\CreateProductAttribute;
+use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\EditProductAttribute;
+use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\ListProductAttributes;
+use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource\Pages\ViewProductAttribute;
 use Webkul\Purchase\Models\Attribute;
 use Webkul\Purchase\Settings\ProductSettings;
 
@@ -16,7 +15,7 @@ class ProductAttributeResource extends AttributeResource
 {
     protected static ?string $model = Attribute::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-swatch';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-swatch';
 
     protected static bool $shouldRegisterNavigation = true;
 

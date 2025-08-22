@@ -3,19 +3,17 @@
 namespace Webkul\Website\Filament\Admin\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ViewPartner;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\EditPartner;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ManageContacts;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ManageAddresses;
-use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\ContactsRelationManager;
-use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\AddressesRelationManager;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ListPartners;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\CreatePartner;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Webkul\Partner\Filament\Resources\PartnerResource as BasePartnerResource;
-use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
-use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages;
+use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\AddressesRelationManager;
+use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\ContactsRelationManager;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\CreatePartner;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\EditPartner;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ListPartners;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ManageAddresses;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ManageContacts;
+use Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages\ViewPartner;
 use Webkul\Website\Models\Partner;
 
 class PartnerResource extends BasePartnerResource
@@ -24,7 +22,7 @@ class PartnerResource extends BasePartnerResource
 
     protected static ?string $slug = 'website/contacts';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     protected static bool $shouldRegisterNavigation = true;
 

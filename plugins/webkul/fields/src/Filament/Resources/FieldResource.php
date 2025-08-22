@@ -2,48 +2,45 @@
 
 namespace Webkul\Field\Filament\Resources;
 
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Get;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Webkul\Field\Filament\Resources\FieldResource\Pages\ListFields;
-use Webkul\Field\Filament\Resources\FieldResource\Pages\CreateField;
-use Webkul\Field\Filament\Resources\FieldResource\Pages\EditField;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Support\Enums\TextSize;
-use Filament\Facades\Filament;
-use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
-use Filament\Tables;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Schema;
 use Webkul\Field\FieldsColumnManager;
-use Webkul\Field\Filament\Resources\FieldResource\Pages;
+use Webkul\Field\Filament\Resources\FieldResource\Pages\CreateField;
+use Webkul\Field\Filament\Resources\FieldResource\Pages\EditField;
+use Webkul\Field\Filament\Resources\FieldResource\Pages\ListFields;
 use Webkul\Field\Models\Field;
 
 class FieldResource extends Resource
 {
     protected static ?string $model = Field::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-puzzle-piece';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-puzzle-piece';
 
     protected static ?int $navigationSort = 5;
 

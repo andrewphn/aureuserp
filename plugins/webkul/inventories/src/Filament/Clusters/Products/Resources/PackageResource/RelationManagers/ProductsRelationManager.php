@@ -2,9 +2,8 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource\RelationManagers;
 
-use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ProductsRelationManager extends RelationManager

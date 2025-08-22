@@ -2,14 +2,13 @@
 
 namespace Webkul\Field\Filament\Infolists\Components;
 
-use Filament\Schemas\Components\Component;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\Entry;
-use Filament\Support\Enums\TextSize;
-use Filament\Infolists;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Component;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Illuminate\Support\Collection;
 use Webkul\Field\Models\Field;
 

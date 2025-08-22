@@ -10,7 +10,7 @@ class EditRefund extends BaseEditRefund
 {
     protected static string $resource = RefundResource::class;
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

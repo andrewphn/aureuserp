@@ -4,15 +4,12 @@ namespace Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Filament\Forms\Components\TextInput;
-use Webkul\Inventory\Enums\ProductTracking;
-use Webkul\Inventory\Enums\LocationType;
-use Filament\Actions;
-use Filament\Forms;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Product;

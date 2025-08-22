@@ -2,20 +2,19 @@
 
 namespace Webkul\Project\Filament\Pages;
 
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\View\LegacyComponents\Widget;
+use Webkul\Partner\Models\Partner;
 use Webkul\Project\Filament\Widgets\StatsOverviewWidget;
 use Webkul\Project\Filament\Widgets\TaskByStageChart;
 use Webkul\Project\Filament\Widgets\TaskByStateChart;
 use Webkul\Project\Filament\Widgets\TopAssigneesWidget;
 use Webkul\Project\Filament\Widgets\TopProjectsWidget;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Pages\Dashboard as BaseDashboard;
-use Filament\View\LegacyComponents\Widget;
-use Webkul\Partner\Models\Partner;
-use Webkul\Project\Filament\Widgets;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Tag;
 use Webkul\Security\Models\User;
@@ -27,7 +26,7 @@ class Dashboard extends BaseDashboard
 
     protected static string $routePath = 'project';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-folder';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-folder';
 
     protected static ?string $cluster = DashboardCluster::class;
 

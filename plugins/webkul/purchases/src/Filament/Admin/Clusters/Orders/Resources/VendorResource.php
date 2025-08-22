@@ -3,23 +3,21 @@
 namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ViewVendor;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\EditVendor;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManageContacts;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManageAddresses;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManageBills;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManagePurchases;
-use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\ContactsRelationManager;
-use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\AddressesRelationManager;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ListVendors;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\CreateVendor;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource as BaseVendorResource;
-use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers;
+use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\AddressesRelationManager;
+use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\ContactsRelationManager;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders;
-use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\CreateVendor;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\EditVendor;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ListVendors;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManageAddresses;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManageBills;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManageContacts;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ManagePurchases;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ViewVendor;
 use Webkul\Purchase\Models\Partner;
 
 class VendorResource extends BaseVendorResource
@@ -28,7 +26,7 @@ class VendorResource extends BaseVendorResource
 
     protected static ?string $model = Partner::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     protected static bool $shouldRegisterNavigation = true;
 

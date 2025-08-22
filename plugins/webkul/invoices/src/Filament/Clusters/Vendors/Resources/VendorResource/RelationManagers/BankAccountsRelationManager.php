@@ -2,10 +2,9 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\RelationManagers;
 
-use Filament\Schemas\Schema;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Webkul\Partner\Filament\Resources\BankAccountResource;
 

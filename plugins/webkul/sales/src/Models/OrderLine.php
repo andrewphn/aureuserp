@@ -2,8 +2,6 @@
 
 namespace Webkul\Sale\Models;
 
-use Webkul\Sale\Enums\OrderState;
-use Webkul\Sale\Enums\QtyDeliveredMethod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -17,7 +15,8 @@ use Webkul\Inventory\Models\Route;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
-use Webkul\Sale\Enums;
+use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Enums\QtyDeliveredMethod;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;

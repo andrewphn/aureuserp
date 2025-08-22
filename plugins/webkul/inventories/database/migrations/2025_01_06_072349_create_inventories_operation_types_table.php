@@ -1,12 +1,11 @@
 <?php
 
-use Webkul\Inventory\Enums\ReservationMethod;
-use Webkul\Inventory\Enums\CreateBackorder;
-use Webkul\Inventory\Enums\MoveType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\CreateBackorder;
+use Webkul\Inventory\Enums\MoveType;
+use Webkul\Inventory\Enums\ReservationMethod;
 
 return new class extends Migration
 {

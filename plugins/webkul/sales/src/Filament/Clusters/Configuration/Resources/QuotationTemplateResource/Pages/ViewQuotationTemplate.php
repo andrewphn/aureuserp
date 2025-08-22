@@ -2,11 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 
@@ -14,7 +13,7 @@ class ViewQuotationTemplate extends ViewRecord
 {
     protected static string $resource = QuotationTemplateResource::class;
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

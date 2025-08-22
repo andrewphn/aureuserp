@@ -2,7 +2,6 @@
 
 namespace Webkul\Purchase\Models;
 
-use Webkul\Purchase\Enums\QtyReceivedMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +16,7 @@ use Webkul\Inventory\Models\OrderPoint;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Database\Factories\OrderLineFactory;
-use Webkul\Purchase\Enums;
+use Webkul\Purchase\Enums\QtyReceivedMethod;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;

@@ -3,13 +3,11 @@
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource\Pages;
 
 use Filament\Actions\DeleteAction;
-use Webkul\Inventory\Enums\LocationType;
-use Webkul\Inventory\Enums\ReceptionStep;
-use Webkul\Inventory\Enums\DeliveryStep;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\DeliveryStep;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\ReceptionStep;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\OperationType;

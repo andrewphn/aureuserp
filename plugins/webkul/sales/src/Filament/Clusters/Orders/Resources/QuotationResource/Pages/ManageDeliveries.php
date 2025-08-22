@@ -2,10 +2,9 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages;
 
-use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Livewire\Livewire;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
@@ -18,7 +17,7 @@ class ManageDeliveries extends ManageRelatedRecords
 
     protected static string $relationship = 'operations';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
     /**
      * @param  array<string, mixed>  $parameters

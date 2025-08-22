@@ -3,10 +3,9 @@
 namespace Webkul\Partner\Filament\Resources\TagResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\TagResource;
 use Webkul\Partner\Models\Tag;

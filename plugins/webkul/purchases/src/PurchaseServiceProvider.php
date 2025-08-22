@@ -2,10 +2,10 @@
 
 namespace Webkul\Purchase;
 
-use Webkul\Purchase\Livewire\Customer\ListProducts;
 use Illuminate\Foundation\AliasLoader;
 use Livewire\Livewire;
 use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
+use Webkul\Purchase\Livewire\Customer\ListProducts;
 use Webkul\Purchase\Livewire\Summary;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;

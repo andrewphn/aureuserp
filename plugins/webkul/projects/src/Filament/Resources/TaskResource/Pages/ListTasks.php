@@ -2,15 +2,14 @@
 
 namespace Webkul\Project\Filament\Resources\TaskResource\Pages;
 
-use Webkul\Project\Filament\Widgets\StatsOverviewWidget;
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Enums\TaskState;
 use Webkul\Project\Filament\Resources\TaskResource;
+use Webkul\Project\Filament\Widgets\StatsOverviewWidget;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 

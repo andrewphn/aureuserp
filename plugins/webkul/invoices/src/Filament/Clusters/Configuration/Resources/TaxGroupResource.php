@@ -2,13 +2,12 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\ListTaxGroups;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\CreateTaxGroup;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\ViewTaxGroup;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\EditTaxGroup;
 use Webkul\Account\Filament\Resources\TaxGroupResource as BaseTaxGroupResource;
 use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\CreateTaxGroup;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\EditTaxGroup;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\ListTaxGroups;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource\Pages\ViewTaxGroup;
 use Webkul\Invoice\Models\TaxGroup;
 
 class TaxGroupResource extends BaseTaxGroupResource

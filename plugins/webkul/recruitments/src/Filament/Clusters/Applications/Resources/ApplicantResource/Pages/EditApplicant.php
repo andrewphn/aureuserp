@@ -2,19 +2,17 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Applications\Resources\ApplicantResource\Pages;
 
-use Filament\Forms\Components\ToggleButtons;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Forms\Components\TextInput;
-use Filament\Actions;
-use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Employee\Filament\Resources\EmployeeResource;

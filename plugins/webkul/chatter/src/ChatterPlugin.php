@@ -2,9 +2,9 @@
 
 namespace Webkul\Chatter;
 
-use ReflectionClass;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use ReflectionClass;
 
 class ChatterPlugin implements Plugin
 {

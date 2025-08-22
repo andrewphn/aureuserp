@@ -2,13 +2,12 @@
 
 namespace Webkul\Inventory\Database\Seeders;
 
-use Webkul\Inventory\Enums\OperationType;
-use Webkul\Inventory\Enums\ReservationMethod;
-use Webkul\Inventory\Enums\CreateBackorder;
-use Webkul\Inventory\Enums\MoveType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\CreateBackorder;
+use Webkul\Inventory\Enums\MoveType;
+use Webkul\Inventory\Enums\OperationType;
+use Webkul\Inventory\Enums\ReservationMethod;
 use Webkul\Security\Models\User;
 
 class OperationTypeSeeder extends Seeder

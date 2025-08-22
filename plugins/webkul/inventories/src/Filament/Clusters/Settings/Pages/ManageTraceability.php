@@ -2,15 +2,14 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Support\HtmlString;
-use Filament\Schemas\Components\Utilities\Get;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\HtmlString;
 use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Models\Product;
@@ -21,11 +20,11 @@ class ManageTraceability extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-magnifying-glass-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-magnifying-glass-circle';
 
     protected static ?string $slug = 'inventory/manage-traceability';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Inventory';
+    protected static string|\UnitEnum|null $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 4;
 

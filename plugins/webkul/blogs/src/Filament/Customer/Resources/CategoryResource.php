@@ -2,10 +2,9 @@
 
 namespace Webkul\Blog\Filament\Customer\Resources;
 
+use Filament\Resources\Resource;
 use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages\ListCategories;
 use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages\ViewCategory;
-use Filament\Resources\Resource;
-use Webkul\Blog\Filament\Customer\Resources\CategoryResource\Pages;
 use Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Category;
 

@@ -3,10 +3,9 @@
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource;
 use Webkul\Inventory\Models\OperationType;

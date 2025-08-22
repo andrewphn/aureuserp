@@ -2,10 +2,9 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages;
 
-use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource;
@@ -16,7 +15,7 @@ class ManageBills extends ManageRelatedRecords
 
     protected static string $relationship = 'accountMoves';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-check';
 
     public static function getNavigationLabel(): string
     {

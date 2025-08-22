@@ -2,50 +2,46 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Components\Section;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Schemas\Components\Grid;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ColorEntry;
-use Webkul\Account\Filament\Resources\JournalResource\Pages\ListJournals;
-use Webkul\Account\Filament\Resources\JournalResource\Pages\CreateJournal;
-use Webkul\Account\Filament\Resources\JournalResource\Pages\ViewJournal;
-use Webkul\Account\Filament\Resources\JournalResource\Pages\EditJournal;
-use Filament\Forms;
-use Filament\Infolists;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Enums\JournalType;
-use Webkul\Account\Filament\Resources\JournalResource\Pages;
+use Webkul\Account\Filament\Resources\JournalResource\Pages\CreateJournal;
+use Webkul\Account\Filament\Resources\JournalResource\Pages\EditJournal;
+use Webkul\Account\Filament\Resources\JournalResource\Pages\ListJournals;
+use Webkul\Account\Filament\Resources\JournalResource\Pages\ViewJournal;
 use Webkul\Account\Models\Journal;
 
 class JournalResource extends Resource
 {
     protected static ?string $model = Journal::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-book-open';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
     protected static bool $shouldRegisterNavigation = false;
 

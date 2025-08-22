@@ -3,7 +3,6 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;

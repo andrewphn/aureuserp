@@ -2,12 +2,12 @@
 
 namespace Webkul\Recruitment\Filament\Clusters;
 
-use Filament\Panel;
 use Filament\Clusters\Cluster;
+use Filament\Panel;
 
 class Applications extends Cluster
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?int $navigationSort = 2;
 

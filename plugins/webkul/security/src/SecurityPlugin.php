@@ -2,9 +2,9 @@
 
 namespace Webkul\Security;
 
-use ReflectionClass;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use ReflectionClass;
 use Webkul\Security\Settings\UserSettings;
 
 class SecurityPlugin implements Plugin

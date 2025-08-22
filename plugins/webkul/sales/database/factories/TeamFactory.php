@@ -2,8 +2,8 @@
 
 namespace Webkul\Sale\Database\Factories;
 
-use Webkul\Sale\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Webkul\Sale\Models\Team;
 
 /**
  * @extends Factory<Team>

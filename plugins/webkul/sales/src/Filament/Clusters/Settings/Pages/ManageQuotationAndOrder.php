@@ -2,12 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Schema;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
@@ -15,11 +14,11 @@ class ManageQuotationAndOrder extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     protected static ?string $slug = 'sale/manage-quotation-and-order';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Sales';
+    protected static string|\UnitEnum|null $navigationGroup = 'Sales';
 
     protected static ?int $navigationSort = 2;
 

@@ -2,35 +2,31 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
-use Webkul\Account\Filament\Resources\AccountResource\Pages\ListAccounts;
-use Webkul\Account\Filament\Resources\AccountResource\Pages\CreateAccount;
-use Webkul\Account\Filament\Resources\AccountResource\Pages\ViewAccount;
-use Webkul\Account\Filament\Resources\AccountResource\Pages\EditAccount;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Account\Enums\AccountType;
-use Webkul\Account\Filament\Resources\AccountResource\Pages;
+use Webkul\Account\Filament\Resources\AccountResource\Pages\CreateAccount;
+use Webkul\Account\Filament\Resources\AccountResource\Pages\EditAccount;
+use Webkul\Account\Filament\Resources\AccountResource\Pages\ListAccounts;
+use Webkul\Account\Filament\Resources\AccountResource\Pages\ViewAccount;
 use Webkul\Account\Models\Account;
 
 class AccountResource extends Resource
@@ -39,7 +35,7 @@ class AccountResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
 
     public static function form(Schema $schema): Schema
     {

@@ -2,8 +2,8 @@
 
 namespace Webkul\Website\Filament\Customer\Pages;
 
-use Filament\Panel;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Website\Models\Page as PageModel;
 

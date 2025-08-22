@@ -10,7 +10,7 @@ class EditInvoice extends BaseEditInvoice
 {
     protected static string $resource = InvoiceResource::class;
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

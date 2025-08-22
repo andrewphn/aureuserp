@@ -2,12 +2,11 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource;
@@ -19,7 +18,7 @@ class ManageRules extends ManageRelatedRecords
 
     protected static string $relationship = 'rules';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     public static function getNavigationLabel(): string
     {

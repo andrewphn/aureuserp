@@ -2,15 +2,14 @@
 
 namespace Webkul\Account\Models;
 
-use Webkul\Account\Enums\MoveState;
-use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Enums\MoveType;
-use Webkul\Account\Enums\JournalType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
-use Webkul\Account\Enums;
+use Webkul\Account\Enums\JournalType;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;

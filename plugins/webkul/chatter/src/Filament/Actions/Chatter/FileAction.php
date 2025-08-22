@@ -2,13 +2,12 @@
 
 namespace Webkul\Chatter\Filament\Actions\Chatter;
 
-use Filament\Forms\Components\FileUpload;
 use Exception;
-use Filament\Support\Enums\Width;
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
 
 class FileAction extends Action

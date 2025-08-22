@@ -2,22 +2,22 @@
 
 namespace Webkul\Website\Filament\Customer\Auth;
 
-use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
-use Filament\Auth\Events\Registered;
-use Filament\Auth\Notifications\VerifyEmail;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Component;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Auth\Events\Registered;
+use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
+use Filament\Auth\Notifications\VerifyEmail;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Schema;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\MustVerifyEmail;

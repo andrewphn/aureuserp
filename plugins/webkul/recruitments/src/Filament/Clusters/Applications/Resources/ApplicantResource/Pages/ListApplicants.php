@@ -2,20 +2,18 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Applications\Resources\ApplicantResource\Pages;
 
-use Webkul\Recruitment\Filament\Widgets\JobPositionStatsWidget;
 use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Group;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Schema;
-use Filament\Actions;
-use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Recruitment\Enums\RecruitmentState;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\ApplicantResource;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResource;
+use Webkul\Recruitment\Filament\Widgets\JobPositionStatsWidget;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 

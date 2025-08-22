@@ -3,14 +3,13 @@
 namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
 use Filament\Panel;
-use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\ListDepartments;
-use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\CreateDepartment;
-use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\EditDepartment;
-use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\ViewDepartment;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Resources\DepartmentResource as BaseDepartmentResource;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
-use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages;
+use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\CreateDepartment;
+use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\EditDepartment;
+use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\ListDepartments;
+use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\ViewDepartment;
 use Webkul\Recruitment\Models\Department;
 
 class DepartmentResource extends BaseDepartmentResource

@@ -3,15 +3,14 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ViewProduct;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\EditProduct;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ManageAttributes;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ManageVariants;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ListProducts;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\CreateProduct;
 use Filament\Resources\Pages\Page;
 use Webkul\Invoice\Filament\Clusters\Customer;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\CreateProduct;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\EditProduct;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ListProducts;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ManageAttributes;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ManageVariants;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\ViewProduct;
 use Webkul\Invoice\Models\Product;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 

@@ -3,7 +3,6 @@
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;

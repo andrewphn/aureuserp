@@ -2,7 +2,6 @@
 
 namespace Webkul\Purchase;
 
-use Webkul\Purchase\Enums\QtyReceivedMethod;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +18,7 @@ use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Receipt;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Purchase\Enums as PurchaseEnums;
+use Webkul\Purchase\Enums\QtyReceivedMethod;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
 use Webkul\Purchase\Mail\VendorPurchaseOrderMail;
 use Webkul\Purchase\Models\AccountMove;

@@ -3,14 +3,13 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\ViewCreditNote;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\EditCreditNotes;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\ListCreditNotes;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\CreateCreditNotes;
 use Filament\Resources\Pages\Page;
 use Webkul\Account\Filament\Resources\CreditNoteResource as BaseCreditNoteResource;
 use Webkul\Invoice\Filament\Clusters\Customer;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\CreateCreditNotes;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\EditCreditNotes;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\ListCreditNotes;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\ViewCreditNote;
 use Webkul\Invoice\Models\CreditNote;
 
 class CreditNotesResource extends BaseCreditNoteResource

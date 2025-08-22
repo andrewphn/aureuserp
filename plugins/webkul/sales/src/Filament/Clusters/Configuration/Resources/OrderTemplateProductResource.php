@@ -2,31 +2,27 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\ListOrderTemplateProducts;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\CreateOrderTemplateProduct;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\ViewOrderTemplateProduct;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\EditOrderTemplateProduct;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Forms;
-use Filament\Infolists;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\CreateOrderTemplateProduct;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\EditOrderTemplateProduct;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\ListOrderTemplateProducts;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\OrderTemplateProductResource\Pages\ViewOrderTemplateProduct;
 use Webkul\Sale\Models\OrderTemplateProduct;
 
 class OrderTemplateProductResource extends Resource
@@ -35,7 +31,7 @@ class OrderTemplateProductResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
 
     public static function getModelLabel(): string
     {

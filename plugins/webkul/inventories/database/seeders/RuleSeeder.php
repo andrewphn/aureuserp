@@ -2,13 +2,12 @@
 
 namespace Webkul\Inventory\Database\Seeders;
 
-use Webkul\Inventory\Enums\GroupPropagation;
-use Webkul\Inventory\Enums\RuleAction;
-use Webkul\Inventory\Enums\ProcureMethod;
-use Webkul\Inventory\Enums\RuleAuto;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\GroupPropagation;
+use Webkul\Inventory\Enums\ProcureMethod;
+use Webkul\Inventory\Enums\RuleAction;
+use Webkul\Inventory\Enums\RuleAuto;
 use Webkul\Security\Models\User;
 
 class RuleSeeder extends Seeder

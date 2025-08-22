@@ -2,12 +2,12 @@
 
 namespace Webkul\Chatter\Filament\Actions;
 
-use InvalidArgumentException;
-use Filament\Support\Enums\Width;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class ChatterAction extends Action
 {

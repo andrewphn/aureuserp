@@ -2,19 +2,17 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Actions\Print;
 
-use Filament\Schemas\Components\Wizard;
-use Filament\Schemas\Components\Wizard\Step;
-use Filament\Forms\Components\Radio;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
-use Webkul\Inventory\Settings\TraceabilitySettings;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
-use Filament\Forms;
-use Webkul\Inventory\Settings;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Webkul\Inventory\Settings\TraceabilitySettings;
 
 class LabelsAction extends Action
 {

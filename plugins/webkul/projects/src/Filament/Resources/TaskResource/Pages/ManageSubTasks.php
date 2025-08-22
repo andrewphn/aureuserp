@@ -2,19 +2,18 @@
 
 namespace Webkul\Project\Filament\Resources\TaskResource\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Actions\CreateAction;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Enums\TaskState;
@@ -28,7 +27,7 @@ class ManageSubTasks extends ManageRelatedRecords
 
     protected static string $relationship = 'subTasks';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function getNavigationLabel(): string
     {

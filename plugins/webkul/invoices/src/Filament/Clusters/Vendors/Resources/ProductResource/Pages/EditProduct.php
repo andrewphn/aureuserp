@@ -10,7 +10,7 @@ class EditProduct extends BaseEditProduct
 {
     protected static string $resource = ProductResource::class;
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

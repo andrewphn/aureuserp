@@ -3,13 +3,11 @@
 namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource\Pages;
 
 use Filament\Actions\DeleteAction;
-use Webkul\Inventory\Enums\ScrapState;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Database\QueryException;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\ScrapState;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource;
 use Webkul\Inventory\Models\Scrap;
 

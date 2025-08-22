@@ -2,13 +2,12 @@
 
 namespace Webkul\Inventory\Models;
 
-use Webkul\Inventory\Enums\ProductTracking;
-use Webkul\Inventory\Enums\LocationType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Field\Traits\HasCustomFields;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Product\Models\Product as BaseProduct;
 use Webkul\Security\Models\User;
 

@@ -2,8 +2,8 @@
 
 namespace Webkul\Partner\Database\Factories;
 
-use Webkul\Partner\Models\BankAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Title;
 use Webkul\Security\Models\User;
 

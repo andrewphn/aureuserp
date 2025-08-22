@@ -2,20 +2,20 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource\Pages;
 
-use Webkul\Inventory\Enums\ReceptionStep;
-use Webkul\Inventory\Enums\DeliveryStep;
-use Webkul\Inventory\Enums\LocationType;
-use Webkul\Inventory\Enums\ReservationMethod;
-use Webkul\Inventory\Enums\CreateBackorder;
-use Webkul\Inventory\Enums\MoveType;
-use Webkul\Inventory\Enums\GroupPropagation;
-use Webkul\Inventory\Enums\RuleAction;
-use Webkul\Inventory\Enums\ProcureMethod;
-use Webkul\Inventory\Enums\RuleAuto;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\CreateBackorder;
+use Webkul\Inventory\Enums\DeliveryStep;
+use Webkul\Inventory\Enums\GroupPropagation;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\MoveType;
+use Webkul\Inventory\Enums\ProcureMethod;
+use Webkul\Inventory\Enums\ReceptionStep;
+use Webkul\Inventory\Enums\ReservationMethod;
+use Webkul\Inventory\Enums\RuleAction;
+use Webkul\Inventory\Enums\RuleAuto;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\OperationType;

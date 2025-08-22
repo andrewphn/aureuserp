@@ -2,14 +2,13 @@
 
 namespace Webkul\Product\Models;
 
-use Webkul\Product\Enums\PriceRuleApplyTo;
-use Webkul\Product\Enums\PriceRuleBase;
-use Webkul\Product\Enums\PriceRuleType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Product\Database\Factories\PriceRuleItemFactory;
-use Webkul\Product\Enums;
+use Webkul\Product\Enums\PriceRuleApplyTo;
+use Webkul\Product\Enums\PriceRuleBase;
+use Webkul\Product\Enums\PriceRuleType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;

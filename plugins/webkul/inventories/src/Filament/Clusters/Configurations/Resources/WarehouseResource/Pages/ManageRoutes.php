@@ -2,11 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource\Pages;
 
-use Filament\Schemas\Schema;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource;
@@ -18,7 +17,7 @@ class ManageRoutes extends ManageRelatedRecords
 
     protected static string $relationship = 'routes';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path';
 
     public static function getNavigationLabel(): string
     {

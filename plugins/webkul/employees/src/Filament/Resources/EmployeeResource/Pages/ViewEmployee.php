@@ -3,7 +3,6 @@
 namespace Webkul\Employee\Filament\Resources\EmployeeResource\Pages;
 
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;

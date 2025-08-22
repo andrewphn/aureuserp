@@ -2,16 +2,15 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Components\Utilities\Get;
-use Illuminate\Support\HtmlString;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\HtmlString;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 use Webkul\Inventory\Models\OperationType;
@@ -23,11 +22,11 @@ class ManageWarehouses extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-storefront';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static ?string $slug = 'inventory/manage-warehouses';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Inventory';
+    protected static string|\UnitEnum|null $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 3;
 

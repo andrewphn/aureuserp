@@ -3,10 +3,9 @@
 namespace Webkul\Product\Filament\Resources\AttributeResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Product\Models\Attribute;

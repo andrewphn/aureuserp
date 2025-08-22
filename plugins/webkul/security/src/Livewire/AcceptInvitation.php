@@ -2,13 +2,13 @@
 
 namespace Webkul\Security\Livewire;
 
-use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\SimplePage;
+use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 use Webkul\Project\Filament\Pages\Dashboard;
 use Webkul\Security\Models\Invitation;

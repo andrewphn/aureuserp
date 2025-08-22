@@ -2,9 +2,9 @@
 
 namespace Webkul\Product;
 
-use ReflectionClass;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use ReflectionClass;
 use Webkul\Support\Package;
 
 class ProductPlugin implements Plugin

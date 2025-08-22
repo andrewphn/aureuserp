@@ -2,48 +2,45 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\MyTime\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Radio;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\RichEditor;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\ListMyAllocations;
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\CreateMyAllocation;
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\EditMyAllocation;
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\ViewMyAllocation;
-use Filament\Forms;
-use Filament\Infolists;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\TimeOff\Enums\AllocationType;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Filament\Clusters\MyTime;
-use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\CreateMyAllocation;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\EditMyAllocation;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\ListMyAllocations;
+use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource\Pages\ViewMyAllocation;
 use Webkul\TimeOff\Models\LeaveAllocation;
 
 class MyAllocationResource extends Resource
 {
     protected static ?string $model = LeaveAllocation::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar';
 
     protected static ?string $cluster = MyTime::class;
 

@@ -2,10 +2,9 @@
 
 namespace Webkul\Account\Filament\Resources\InvoiceResource\Pages;
 
-use Webkul\Account\Enums\MoveType;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Webkul\Account\Enums;
+use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Facades\Account;
 use Webkul\Account\Filament\Resources\InvoiceResource;
 

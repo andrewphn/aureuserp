@@ -2,49 +2,46 @@
 
 namespace Webkul\Blog\Filament\Admin\Resources;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Support\Enums\TextSize;
-use Filament\Support\Enums\FontWeight;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\IconEntry;
-use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\ViewPost;
-use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\EditPost;
-use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\ListPosts;
-use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\CreatePost;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
-use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages;
+use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\CreatePost;
+use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\EditPost;
+use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\ListPosts;
+use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Post;
 
 class PostResource extends Resource
@@ -53,7 +50,7 @@ class PostResource extends Resource
 
     protected static ?string $slug = 'website/posts';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-newspaper';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-newspaper';
 
     protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

@@ -2,8 +2,8 @@
 
 namespace Webkul\Chatter\Traits;
 
-use Exception;
 use BackedEnum;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

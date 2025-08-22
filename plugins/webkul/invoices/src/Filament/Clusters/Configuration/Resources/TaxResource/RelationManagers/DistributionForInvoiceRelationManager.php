@@ -2,9 +2,8 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\RelationManagers;
 
-use Webkul\Account\Enums\DocumentType;
 use Filament\Resources\RelationManagers\RelationManager;
-use Webkul\Account\Enums;
+use Webkul\Account\Enums\DocumentType;
 use Webkul\Account\Traits\TaxPartition;
 
 class DistributionForInvoiceRelationManager extends RelationManager

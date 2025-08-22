@@ -2,14 +2,13 @@
 
 namespace Webkul\Project\Filament\Widgets;
 
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Webkul\Project\Models\Timesheet;
 

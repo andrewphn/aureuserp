@@ -2,58 +2,55 @@
 
 namespace Webkul\Support\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\RichEditor;
-use Guava\FilamentIconPicker\Forms\IconPicker;
-use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Schemas\Components\Grid;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
-use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ListActivityTypes;
-use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\CreateActivityType;
-use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ViewActivityType;
-use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\EditActivityType;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Guava\FilamentIconPicker\Forms\IconPicker;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\ActivityChainingType;
 use Webkul\Support\Enums\ActivityDecorationType;
 use Webkul\Support\Enums\ActivityDelayFrom;
 use Webkul\Support\Enums\ActivityDelayUnit;
 use Webkul\Support\Enums\ActivityTypeAction;
-use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages;
+use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\CreateActivityType;
+use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\EditActivityType;
+use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ListActivityTypes;
+use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ViewActivityType;
 use Webkul\Support\Models\ActivityType;
 
 class ActivityTypeResource extends Resource
 {
     protected static ?string $model = ActivityType::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $slug = 'settings/activity-types';
 

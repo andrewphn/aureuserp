@@ -2,51 +2,46 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\CreateAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Support\Enums\TextSize;
-use Filament\Schemas\Components\Grid;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\ViewRoute;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\EditRoute;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\ManageRules;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\RelationManagers\RulesRelationManager;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\ListRoutes;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\CreateRoute;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
+use Filament\Support\Enums\TextSize;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages;
-use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\RelationManagers;
+use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\CreateRoute;
+use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\EditRoute;
+use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\ListRoutes;
+use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\ManageRules;
+use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\Pages\ViewRoute;
+use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource\RelationManagers\RulesRelationManager;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource\Pages\ManageRoutes;
 use Webkul\Inventory\Models\Route;
 use Webkul\Inventory\Settings\ProductSettings;
@@ -56,7 +51,7 @@ class RouteResource extends Resource
 {
     protected static ?string $model = Route::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path';
 
     protected static ?int $navigationSort = 3;
 

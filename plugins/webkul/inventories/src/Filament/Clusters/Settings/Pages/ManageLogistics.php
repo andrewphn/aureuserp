@@ -2,11 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
+use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Schema;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Settings\LogisticSettings;
@@ -16,11 +15,11 @@ class ManageLogistics extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
     protected static ?string $slug = 'inventory/manage-logistics';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Inventory';
+    protected static string|\UnitEnum|null $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 5;
 

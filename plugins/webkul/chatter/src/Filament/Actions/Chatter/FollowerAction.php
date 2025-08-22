@@ -2,17 +2,16 @@
 
 namespace Webkul\Chatter\Filament\Actions\Chatter;
 
-use Filament\Support\Enums\Width;
-use Filament\Schemas\Schema;
+use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\RichEditor;
-use Filament\Schemas\Components\Utilities\Get;
-use Throwable;
-use Filament\Actions\Action;
-use Filament\Forms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
+use Throwable;
 use Webkul\Chatter\Mail\FollowerMail;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Services\EmailService;

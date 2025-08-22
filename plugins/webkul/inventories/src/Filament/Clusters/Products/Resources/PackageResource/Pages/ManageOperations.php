@@ -3,15 +3,13 @@
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource\Pages;
 
 use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Webkul\Inventory\Enums\OperationState;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Operation;
@@ -25,7 +23,7 @@ class ManageOperations extends ManageRelatedRecords
 
     protected static string $relationship = 'operations';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrows-right-left';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrows-right-left';
 
     public static function getNavigationLabel(): string
     {

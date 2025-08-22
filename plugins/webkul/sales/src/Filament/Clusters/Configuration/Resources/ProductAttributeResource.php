@@ -2,13 +2,12 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ListProductAttributes;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\CreateProductAttribute;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ViewProductAttribute;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\EditProductAttribute;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource as BaseProductAttributeResource;
 use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\CreateProductAttribute;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\EditProductAttribute;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ListProductAttributes;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ViewProductAttribute;
 use Webkul\Sale\Models\Attribute;
 
 class ProductAttributeResource extends BaseProductAttributeResource

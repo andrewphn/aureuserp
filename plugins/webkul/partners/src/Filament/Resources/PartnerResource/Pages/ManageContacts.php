@@ -2,11 +2,10 @@
 
 namespace Webkul\Partner\Filament\Resources\PartnerResource\Pages;
 
-use Filament\Schemas\Schema;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\PartnerResource;
@@ -17,7 +16,7 @@ class ManageContacts extends ManageRelatedRecords
 
     protected static string $relationship = 'contacts';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     public static function getNavigationLabel(): string
     {

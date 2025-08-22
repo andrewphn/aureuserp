@@ -3,7 +3,6 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors as BaseListPartners;

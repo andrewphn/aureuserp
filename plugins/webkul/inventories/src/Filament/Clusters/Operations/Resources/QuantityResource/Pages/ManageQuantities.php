@@ -2,11 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\QuantityResource\Pages;
 
-use Webkul\Inventory\Enums\LocationType;
 use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\QuantityResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;

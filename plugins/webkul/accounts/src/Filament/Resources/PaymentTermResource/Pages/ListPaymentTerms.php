@@ -3,9 +3,8 @@
 namespace Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
 use Webkul\Account\Models\PaymentTerm;
 

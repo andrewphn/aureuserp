@@ -3,7 +3,6 @@
 namespace Webkul\Website\Filament\Admin\Resources\PageResource\Pages;
 
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Website\Filament\Admin\Resources\PageResource;

@@ -2,12 +2,11 @@
 
 namespace Webkul\Project\Filament\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Support\HtmlString;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
+use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TaskStageResource;
 use Webkul\Project\Settings\TaskSettings;
 use Webkul\Support\Filament\Clusters\Settings;
@@ -16,9 +15,9 @@ class ManageTasks extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Project';
+    protected static string|\UnitEnum|null $navigationGroup = 'Project';
 
     protected static string $settings = TaskSettings::class;
 

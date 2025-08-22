@@ -2,10 +2,6 @@
 
 namespace Webkul\Inventory\Models;
 
-use Webkul\Inventory\Enums\RuleAction;
-use Webkul\Inventory\Enums\GroupPropagation;
-use Webkul\Inventory\Enums\RuleAuto;
-use Webkul\Inventory\Enums\ProcureMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Inventory\Database\Factories\RuleFactory;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\GroupPropagation;
+use Webkul\Inventory\Enums\ProcureMethod;
+use Webkul\Inventory\Enums\RuleAction;
+use Webkul\Inventory\Enums\RuleAuto;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;

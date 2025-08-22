@@ -2,11 +2,6 @@
 
 namespace Webkul\Sale;
 
-use Webkul\Sale\Enums\OrderState;
-use Webkul\Sale\Enums\InvoiceStatus;
-use Webkul\Sale\Enums\AdvancedPayment;
-use Webkul\Sale\Enums\QtyDeliveredMethod;
-use Webkul\Sale\Enums\OrderDeliveryStatus;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +19,11 @@ use Webkul\Inventory\Models\Rule;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Invoice\Enums as InvoiceEnums;
 use Webkul\Partner\Models\Partner;
+use Webkul\Sale\Enums\AdvancedPayment;
+use Webkul\Sale\Enums\InvoiceStatus;
+use Webkul\Sale\Enums\OrderDeliveryStatus;
+use Webkul\Sale\Enums\OrderState;
+use Webkul\Sale\Enums\QtyDeliveredMethod;
 use Webkul\Sale\Mail\SaleOrderCancelQuotation;
 use Webkul\Sale\Mail\SaleOrderQuotation;
 use Webkul\Sale\Models\AdvancedPaymentInvoice;

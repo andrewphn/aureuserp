@@ -33,8 +33,8 @@ class Installer
                 ],
                 'json'    => [
                     'domain' => config('app.url'),
-                    'email' => $user?->email,
-                    'name' => $user?->name,
+                    'email'  => $user?->email,
+                    'name'   => $user?->name,
                 ],
             ]);
         } catch (Exception $e) {

@@ -2,38 +2,34 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Components\Utilities\Get;
-use Webkul\Inventory\Enums\ProductTracking;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ViewProduct;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\EditProduct;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageAttributes;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageVariants;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageQuantities;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageMoves;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ListProducts;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\CreateProduct;
-use Webkul\Inventory\Enums\MoveState;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\MoveState;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products;
-use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\CreateProduct;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\EditProduct;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ListProducts;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageAttributes;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageMoves;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageQuantities;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ManageVariants;
+use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages\ViewProduct;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Settings\TraceabilitySettings;
@@ -46,7 +42,7 @@ class ProductResource extends BaseProductResource
 
     protected static ?string $model = Product::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
     protected static bool $shouldRegisterNavigation = true;
 

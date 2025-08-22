@@ -2,15 +2,14 @@
 
 namespace Webkul\Inventory\Models;
 
-use Webkul\Inventory\Enums\MoveState;
-use Webkul\Inventory\Enums\LocationType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Inventory\Database\Factories\MoveFactory;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\MoveState;
 use Webkul\Partner\Models\Partner;
 use Webkul\Purchase\Models\OrderLine as PurchaseOrderLine;
 use Webkul\Sale\Models\OrderLine as SaleOrderLine;

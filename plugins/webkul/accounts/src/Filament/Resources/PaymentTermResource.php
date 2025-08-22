@@ -2,53 +2,49 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\RichEditor;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ViewPaymentTerm;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\EditPaymentTerm;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ManagePaymentDueTerm;
-use Webkul\Account\Filament\Resources\PaymentTermResource\RelationManagers\PaymentDueTermRelationManager;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ListPaymentTerms;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\CreatePaymentTerm;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use Webkul\Account\Enums\EarlyPayDiscount;
-use Webkul\Account\Filament\Resources\PaymentTermResource\Pages;
-use Webkul\Account\Filament\Resources\PaymentTermResource\RelationManagers;
+use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\CreatePaymentTerm;
+use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\EditPaymentTerm;
+use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ListPaymentTerms;
+use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ManagePaymentDueTerm;
+use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ViewPaymentTerm;
+use Webkul\Account\Filament\Resources\PaymentTermResource\RelationManagers\PaymentDueTermRelationManager;
 use Webkul\Account\Models\PaymentTerm;
 
 class PaymentTermResource extends Resource
 {
     protected static ?string $model = PaymentTerm::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 

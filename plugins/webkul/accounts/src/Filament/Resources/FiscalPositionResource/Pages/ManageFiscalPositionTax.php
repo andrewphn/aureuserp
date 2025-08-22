@@ -15,9 +15,9 @@ class ManageFiscalPositionTax extends ManageRelatedRecords
 
     protected static string $relationship = 'fiscalPositionTaxes';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document';
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

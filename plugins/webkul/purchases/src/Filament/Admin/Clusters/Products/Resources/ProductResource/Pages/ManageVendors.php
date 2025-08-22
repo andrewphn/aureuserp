@@ -2,13 +2,11 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
 use Filament\Actions\CreateAction;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +20,7 @@ class ManageVendors extends ManageRelatedRecords
 
     protected static string $relationship = 'supplierInformation';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     public static function getNavigationLabel(): string
     {

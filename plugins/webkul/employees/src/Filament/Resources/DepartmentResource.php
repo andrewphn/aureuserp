@@ -2,49 +2,46 @@
 
 namespace Webkul\Employee\Filament\Resources;
 
-use Filament\Schemas\Schema;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\ColorEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
+use Filament\Panel;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Tables\Columns\Layout\Stack;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\QueryBuilder;
-use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ColorEntry;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Panel;
-use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ListDepartments;
-use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\CreateDepartment;
-use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ViewDepartment;
-use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\EditDepartment;
-use Filament\Forms;
-use Filament\Infolists;
-use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Employee\Filament\Resources\DepartmentResource\Pages;
+use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\CreateDepartment;
+use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\EditDepartment;
+use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ListDepartments;
+use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ViewDepartment;
 use Webkul\Employee\Models\Department;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Support\Models\Company;
@@ -55,7 +52,7 @@ class DepartmentResource extends Resource
 
     protected static ?string $model = Department::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-office-2';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
     public static function getNavigationLabel(): string
     {

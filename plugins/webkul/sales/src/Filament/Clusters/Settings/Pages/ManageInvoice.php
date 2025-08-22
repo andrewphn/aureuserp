@@ -2,11 +2,10 @@
 
 namespace Webkul\Sale\Filament\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Radio;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
+use Filament\Forms\Components\Radio;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Schema;
 use Webkul\Invoice\Enums\InvoicePolicy;
 use Webkul\Sale\Settings\InvoiceSettings;
 use Webkul\Support\Filament\Clusters\Settings;
@@ -15,11 +14,11 @@ class ManageInvoice extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $slug = 'sale/manage-invoicing';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Sales';
+    protected static string|\UnitEnum|null $navigationGroup = 'Sales';
 
     protected static ?int $navigationSort = 2;
 

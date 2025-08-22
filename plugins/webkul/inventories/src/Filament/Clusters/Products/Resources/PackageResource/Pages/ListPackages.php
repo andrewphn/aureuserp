@@ -3,7 +3,6 @@
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Inventory\Enums\LocationType;

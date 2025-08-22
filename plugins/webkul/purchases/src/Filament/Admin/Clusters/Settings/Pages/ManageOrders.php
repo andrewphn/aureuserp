@@ -2,14 +2,13 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Settings\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Get;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Forms;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Webkul\Purchase\Settings\OrderSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
@@ -17,11 +16,11 @@ class ManageOrders extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     protected static ?string $slug = 'purchase/manage-orders';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Purchase';
+    protected static string|\UnitEnum|null $navigationGroup = 'Purchase';
 
     protected static ?int $navigationSort = 1;
 

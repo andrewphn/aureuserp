@@ -2,11 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource\Pages;
 
-use Filament\Actions\ActionGroup;
-use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\QueryException;

@@ -2,14 +2,13 @@
 
 namespace Webkul\Field\Filament\Tables\Columns;
 
-use Filament\Tables\Columns\Column;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Support\Enums\TextSize;
 use Filament\Support\Components\Component;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
+use Filament\Support\Enums\TextSize;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\Column;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Collection;
 use Webkul\Field\Models\Field;
 

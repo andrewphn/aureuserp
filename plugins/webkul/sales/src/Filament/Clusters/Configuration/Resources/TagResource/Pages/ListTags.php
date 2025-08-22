@@ -3,7 +3,6 @@
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource;

@@ -2,39 +2,36 @@
 
 namespace Webkul\Security\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Tabs;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Webkul\Security\Filament\Resources\RoleResource\Pages\ListRoles;
-use Webkul\Security\Filament\Resources\RoleResource\Pages\CreateRole;
-use Webkul\Security\Filament\Resources\RoleResource\Pages\ViewRole;
-use Webkul\Security\Filament\Resources\RoleResource\Pages\EditRole;
-use Filament\Panel;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Forms\Components\Placeholder;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Forms\Components\CheckboxList;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
 use BezhanSalleh\FilamentShield\Support\Utils;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
+use Filament\Panel;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Webkul\Security\Filament\Resources\RoleResource\Pages;
+use Webkul\Security\Filament\Resources\RoleResource\Pages\CreateRole;
+use Webkul\Security\Filament\Resources\RoleResource\Pages\EditRole;
+use Webkul\Security\Filament\Resources\RoleResource\Pages\ListRoles;
+use Webkul\Security\Filament\Resources\RoleResource\Pages\ViewRole;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {

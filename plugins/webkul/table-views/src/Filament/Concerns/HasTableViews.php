@@ -2,11 +2,11 @@
 
 namespace Webkul\TableViews\Filament\Concerns;
 
-use Filament\Support\Enums\Width;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Support\Concerns\EvaluatesClosures;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
 use Webkul\TableViews\Filament\Actions\CreateViewAction;

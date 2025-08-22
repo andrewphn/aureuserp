@@ -2,11 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource\Pages;
 
-use Webkul\Inventory\Enums\ReservationMethod;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\ReservationMethod;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource;
 
 class CreateOperationType extends CreateRecord

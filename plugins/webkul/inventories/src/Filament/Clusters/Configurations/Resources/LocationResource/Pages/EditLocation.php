@@ -2,10 +2,9 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource\Pages;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;

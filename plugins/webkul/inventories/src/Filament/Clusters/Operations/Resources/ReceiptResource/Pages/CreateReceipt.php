@@ -2,12 +2,12 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource\Pages;
 
-use Webkul\Inventory\Enums\OperationState;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
 use Webkul\Inventory\Models\OperationType;
 

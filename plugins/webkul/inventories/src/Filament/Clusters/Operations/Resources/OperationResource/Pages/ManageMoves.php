@@ -2,16 +2,14 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource\Pages;
 
-use Filament\Tables\Columns\TextColumn;
-use Webkul\Inventory\Enums\ProductTracking;
-use Webkul\Inventory\Enums\LocationType;
 use Filament\Actions\DeleteAction;
-use Webkul\Inventory\Enums\MoveState;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\MoveState;
+use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\MoveLine;
 use Webkul\Inventory\Settings\OperationSettings;
@@ -24,7 +22,7 @@ class ManageMoves extends ManageRelatedRecords
 
     protected static string $relationship = 'moveLines';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrows-right-left';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrows-right-left';
 
     public static function getNavigationLabel(): string
     {

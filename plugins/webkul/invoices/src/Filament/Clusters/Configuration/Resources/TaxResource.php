@@ -2,15 +2,14 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ListTaxes;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\CreateTax;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ViewTax;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\EditTax;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ManageDistributionForInvoice;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ManageDistributionForRefund;
 use Webkul\Account\Filament\Resources\TaxResource as BaseTaxResource;
 use Webkul\Invoice\Filament\Clusters\Configuration;
-use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\CreateTax;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\EditTax;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ListTaxes;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ManageDistributionForInvoice;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ManageDistributionForRefund;
+use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\Pages\ViewTax;
 use Webkul\Invoice\Models\Tax;
 
 class TaxResource extends BaseTaxResource

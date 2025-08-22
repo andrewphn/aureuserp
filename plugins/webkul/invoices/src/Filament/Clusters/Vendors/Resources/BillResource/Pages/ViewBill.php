@@ -10,7 +10,7 @@ class ViewBill extends BaseViewBill
 {
     protected static string $resource = BillResource::class;
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

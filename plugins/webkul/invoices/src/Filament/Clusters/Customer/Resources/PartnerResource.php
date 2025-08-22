@@ -3,17 +3,16 @@
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ViewPartner;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\EditPartner;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ManageContacts;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ManageAddresses;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ManageBankAccounts;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ListPartners;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\CreatePartner;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Customer;
-use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\CreatePartner;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\EditPartner;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ListPartners;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ManageAddresses;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ManageBankAccounts;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ManageContacts;
+use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource\Pages\ViewPartner;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource as BasePartnerResource;
 use Webkul\Invoice\Models\Partner;
 use Webkul\Partner\Filament\Resources\PartnerResource as BaseVendorResource;
@@ -26,7 +25,7 @@ class PartnerResource extends BasePartnerResource
 
     protected static ?int $navigationSort = 6;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $cluster = Customer::class;
 

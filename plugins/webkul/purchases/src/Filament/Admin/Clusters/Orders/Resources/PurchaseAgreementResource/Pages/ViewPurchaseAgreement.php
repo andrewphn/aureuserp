@@ -3,12 +3,10 @@
 namespace Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages;
 
 use Filament\Actions\DeleteAction;
-use Webkul\Purchase\Enums\RequisitionState;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
-use Webkul\Purchase\Enums;
+use Webkul\Purchase\Enums\RequisitionState;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource;
 
 class ViewPurchaseAgreement extends ViewRecord

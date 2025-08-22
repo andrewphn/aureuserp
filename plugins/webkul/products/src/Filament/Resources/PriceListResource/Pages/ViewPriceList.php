@@ -3,7 +3,6 @@
 namespace Webkul\Product\Filament\Resources\PriceListResource\Pages;
 
 use Filament\Actions\EditAction;
-use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Product\Filament\Resources\PriceListResource;
 

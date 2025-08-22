@@ -2,39 +2,35 @@
 
 namespace Webkul\Account\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Grouping\Group;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Infolists\Components\TextEntry;
-use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\ListTaxGroups;
-use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\CreateTaxGroup;
-use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\ViewTaxGroup;
-use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\EditTaxGroup;
-use Filament\Forms;
-use Filament\Infolists;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
-use Webkul\Account\Filament\Resources\TaxGroupResource\Pages;
+use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\CreateTaxGroup;
+use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\EditTaxGroup;
+use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\ListTaxGroups;
+use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\ViewTaxGroup;
 use Webkul\Account\Models\TaxGroup;
 
 class TaxGroupResource extends Resource
 {
     protected static ?string $model = TaxGroup::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-group';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-group';
 
     protected static bool $shouldRegisterNavigation = false;
 

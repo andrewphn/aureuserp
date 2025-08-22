@@ -2,9 +2,9 @@
 
 namespace Webkul\Recruitment;
 
-use ReflectionClass;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use ReflectionClass;
 use Webkul\Support\Package;
 
 class RecruitmentPlugin implements Plugin

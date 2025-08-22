@@ -2,11 +2,10 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Actions;
 
-use Webkul\Inventory\Enums\OperationState;
-use Webkul\Inventory\Enums\MoveState;
 use Filament\Actions\Action;
 use Livewire\Component;
-use Webkul\Inventory\Enums;
+use Webkul\Inventory\Enums\MoveState;
+use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 

@@ -2,8 +2,8 @@
 
 namespace Webkul\TableViews\Filament\Components;
 
-use Filament\Schemas\Components\Tabs\Tab;
 use Closure;
+use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\TableViews\Models\TableViewFavorite;
 
 class PresetView extends Tab

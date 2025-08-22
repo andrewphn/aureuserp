@@ -11,7 +11,7 @@ class CreateCustomer extends BaseCreateCustomer
 {
     protected static string $resource = CustomerResource::class;
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

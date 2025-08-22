@@ -2,16 +2,16 @@
 
 namespace Webkul\Inventory;
 
-use Webkul\Inventory\Enums\MoveState;
-use Webkul\Inventory\Enums\OperationState;
-use Webkul\Inventory\Enums\LocationType;
-use Webkul\Inventory\Enums\ProductTracking;
-use Webkul\Inventory\Enums\CreateBackorder;
-use Webkul\Inventory\Enums\RuleAuto;
-use Webkul\Inventory\Enums\ProcureMethod;
-use Webkul\Inventory\Enums\RuleAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Inventory\Enums\CreateBackorder;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Enums\MoveState;
+use Webkul\Inventory\Enums\OperationState;
+use Webkul\Inventory\Enums\ProcureMethod;
+use Webkul\Inventory\Enums\ProductTracking;
+use Webkul\Inventory\Enums\RuleAction;
+use Webkul\Inventory\Enums\RuleAuto;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\MoveLine;

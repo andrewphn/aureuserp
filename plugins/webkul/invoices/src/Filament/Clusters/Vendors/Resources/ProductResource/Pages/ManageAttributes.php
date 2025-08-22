@@ -12,9 +12,9 @@ class ManageAttributes extends BaseManageAttributes
 
     protected static string $relationship = 'attributes';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-swatch';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-swatch';
 
-    function getSubNavigationPosition(): SubNavigationPosition
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

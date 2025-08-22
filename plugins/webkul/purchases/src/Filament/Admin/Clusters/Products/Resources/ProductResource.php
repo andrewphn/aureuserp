@@ -3,19 +3,18 @@
 namespace Webkul\Purchase\Filament\Admin\Clusters\Products\Resources;
 
 use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ViewProduct;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\EditProduct;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageAttributes;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageVariants;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageVendors;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ListProducts;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\CreateProduct;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Schema;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Products;
-use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\CreateProduct;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\EditProduct;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ListProducts;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageAttributes;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageVariants;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageVendors;
+use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ViewProduct;
 use Webkul\Purchase\Models\Product;
 
 class ProductResource extends BaseProductResource
@@ -24,7 +23,7 @@ class ProductResource extends BaseProductResource
 
     protected static ?string $model = Product::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
     protected static bool $shouldRegisterNavigation = true;
 
