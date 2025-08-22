@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "dev:styles": "./node_modules/.bin/tailwindcss -i resources/css/index.css -o resources/dist/website.css --watch",
-    "build:styles": "./node_modules/.bin/tailwindcss -i resources/css/index.css -o resources/dist/website.css --minify && npm run purge",
-    "purge": "./node_modules/.bin/filament-purge -i resources/dist/website.css -o resources/dist/website.css -v 3.x",
+    "dev:styles": "tailwindcss -i resources/css/index.css -o resources/dist/website.css --watch",
+    "build:styles": "tailwindcss -i resources/css/index.css -o resources/dist/website.css --minify && npm run purge",
+    "purge": "filament-purge -i resources/dist/website.css -o resources/dist/website.css -v 3.x",
     "dev": "npm-run-all --parallel dev:*",
     "build": "npm-run-all build:*"
   },
