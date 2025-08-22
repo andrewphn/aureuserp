@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo-light.svg'))
             ->darkModeBrandLogo(asset('images/logo-dark.svg'))
             ->brandLogoHeight('2rem')
-            // ->passwordReset()
+            ->passwordReset()
             ->emailVerification()
             ->profile()
             ->colors([
