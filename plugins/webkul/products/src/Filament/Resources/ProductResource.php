@@ -406,7 +406,7 @@ class ProductResource extends Resource
                     BulkAction::make('print')
                         ->label(__('products::filament/resources/product.table.bulk-actions.print.label'))
                         ->icon('heroicon-o-printer')
-                        ->form([
+                        ->schema([
                             TextInput::make('quantity')
                                 ->label(__('products::filament/resources/product.table.bulk-actions.print.form.fields.quantity'))
                                 ->required()

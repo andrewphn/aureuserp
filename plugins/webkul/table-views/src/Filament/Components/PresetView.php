@@ -25,7 +25,7 @@ class PresetView extends Tab
     protected static mixed $cachedFavoriteTableViews;
 
     /**
-     * @return array<string|int, \Filament\Schemas\Components\Tabs\Tab>
+     * @return array<string|int, Tab>
      */
     public function getFavoriteTableViews(): mixed
     {
