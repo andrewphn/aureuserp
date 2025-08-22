@@ -2,7 +2,7 @@
 
 return [
     Webkul\Account\AccountPlugin::class,
-    // Webkul\Blog\BlogPlugin::class,
+    Webkul\Blog\BlogPlugin::class,
     Webkul\Chatter\ChatterPlugin::class,
     Webkul\Contact\ContactPlugin::class,
     Webkul\Employee\EmployeePlugin::class,

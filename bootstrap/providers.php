@@ -6,7 +6,7 @@ return [
     App\Providers\Filament\CustomerPanelProvider::class,
     Webkul\Account\AccountServiceProvider::class,
     Webkul\Analytic\AnalyticServiceProvider::class,
-    // Webkul\Blog\BlogServiceProvider::class,
+    Webkul\Blog\BlogServiceProvider::class,
     Webkul\Chatter\ChatterServiceProvider::class,
     Webkul\Contact\ContactServiceProvider::class,
     Webkul\Employee\EmployeeServiceProvider::class,
