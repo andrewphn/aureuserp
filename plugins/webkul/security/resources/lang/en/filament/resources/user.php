@@ -87,9 +87,8 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title'          => 'User deleted',
-                    'body'           => 'The user has been deleted successfully.',
-                    'admin-required' => 'At least one admin user must exist.',
+                    'title' => 'User deleted',
+                    'body'  => 'The user has been deleted successfully.',
                 ],
             ],
 
@@ -111,9 +110,8 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title'          => 'Users deleted',
-                    'body'           => 'The users has been deleted successfully.',
-                    'admin-required' => 'At least one admin user must exist.',
+                    'title' => 'Users deleted',
+                    'body'  => 'The users has been deleted successfully.',
                 ],
             ],
 
