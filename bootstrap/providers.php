@@ -22,8 +22,8 @@ return [
     Webkul\Sale\SaleServiceProvider::class,
     Webkul\Security\SecurityServiceProvider::class,
     Webkul\Support\SupportServiceProvider::class,
-    // Webkul\TableViews\TableViewsServiceProvider::class,
-    // Webkul\TimeOff\TimeOffServiceProvider::class,
-    // Webkul\Timesheet\TimesheetServiceProvider::class,
-    // Webkul\Website\WebsiteServiceProvider::class,
+    Webkul\TableViews\TableViewsServiceProvider::class,
+    Webkul\TimeOff\TimeOffServiceProvider::class,
+    Webkul\Timesheet\TimesheetServiceProvider::class,
+    Webkul\Website\WebsiteServiceProvider::class,
 ];
