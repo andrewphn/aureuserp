@@ -83,7 +83,6 @@ class ProjectStageResource extends Resource
                             ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.restore.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
-                    ->hidden(fn ($record) => $record->projects->isNotEmpty())
                     ->successNotification(
                         Notification::make()
                             ->success()
@@ -91,6 +90,7 @@ class ProjectStageResource extends Resource
                             ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.delete.notification.body')),
                     ),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->hidden(fn ($record) => $record->projects->isNotEmpty())
                     ->successNotification(
                         Notification::make()
                             ->success()
