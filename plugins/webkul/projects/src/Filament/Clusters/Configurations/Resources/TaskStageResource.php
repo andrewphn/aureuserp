@@ -11,9 +11,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\Builder;
 use Webkul\Project\Filament\Clusters\Configurations;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TaskStageResource\Pages;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\TaskStagesRelationManager;
+use Webkul\Project\Models\Project;
 use Webkul\Project\Models\TaskStage;
 
 class TaskStageResource extends Resource
@@ -41,7 +43,15 @@ class TaskStageResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('project_id')
                     ->label(__('projects::filament/clusters/configurations/resources/task-stage.form.project'))
-                    ->relationship('project', 'name')
+                    ->relationship(
+                        'project',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                     ->hiddenOn(TaskStagesRelationManager::class)
                     ->required()
                     ->searchable()
