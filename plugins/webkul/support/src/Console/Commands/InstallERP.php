@@ -88,7 +88,11 @@ class InstallERP extends Command
 
         $adminRole = Role::firstOrCreate(['name' => $this->getAdminRoleName()]);
 
-        Artisan::call('shield:generate', ['--all' => true, '--option' => 'permissions'], $this->getOutput());
+        Artisan::call('shield:generate', [
+            '--all'    => true,
+            '--option' => 'permissions',
+            '--panel'  => 'admin',
+        ], $this->getOutput());
 
         $permissions = Permission::all();
         $adminRole->syncPermissions($permissions);
