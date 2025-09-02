@@ -279,8 +279,8 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.source-document')),
                 Tables\Grouping\Group::make('operationType.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.operation-type')),
-                Tables\Grouping\Group::make('schedule_at')
-                    ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.schedule-at'))
+                Tables\Grouping\Group::make('scheduled_at')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.scheduled-at'))
                     ->date(),
                 Tables\Grouping\Group::make('created_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.created-at'))
