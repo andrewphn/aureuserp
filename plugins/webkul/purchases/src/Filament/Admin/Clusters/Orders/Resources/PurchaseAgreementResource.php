@@ -112,11 +112,25 @@ class PurchaseAgreementResource extends Resource
                                         Forms\Components\DatePicker::make('starts_at')
                                             ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.valid-from'))
                                             ->native(false)
-                                            ->suffixIcon('heroicon-o-calendar'),
+                                            ->suffixIcon('heroicon-o-calendar')
+                                            ->minDate(now()->toDateString())
+                                            ->live()
+                                            ->afterStateUpdated(fn (Forms\Set $set) => $set('ends_at', null))
+                                            ->rules([
+                                                'date',
+                                                'after_or_equal:today',
+                                            ]),
                                         Forms\Components\DatePicker::make('ends_at')
                                             ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.valid-to'))
                                             ->native(false)
-                                            ->suffixIcon('heroicon-o-calendar'),
+                                            ->suffixIcon('heroicon-o-calendar')
+                                            ->native(false)
+                                            ->minDate(fn (Forms\Get $get) => $get('starts_at') ?: now()->toDateString())
+                                            ->live()
+                                            ->rules([
+                                                'date',
+                                                'after_or_equal:date_from',
+                                            ]),
                                     ])
                                     ->columns(2)
                                     ->hidden(function (Forms\Get $get): bool {
@@ -132,7 +146,7 @@ class PurchaseAgreementResource extends Resource
                                     ->searchable()
                                     ->required()
                                     ->preload()
-                                    ->default(auth()->user()->default_company_id)
+                                    ->default(filament()->auth()?->user()?->default_company_id)
                                     ->disabled(fn ($record): bool => $record && $record?->state != Enums\RequisitionState::DRAFT),
                             ]),
                     ])
