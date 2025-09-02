@@ -64,7 +64,15 @@ class OperationResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.receive-from'))
-                            ->relationship('partner', 'name')
+                            ->relationship(
+                                name: 'partner',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed()
+                            )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
