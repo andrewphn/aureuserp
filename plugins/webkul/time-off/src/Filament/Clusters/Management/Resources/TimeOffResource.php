@@ -137,11 +137,11 @@ class TimeOffResource extends Resource
                                     ->deletable()
                                     ->previewable()
                                     ->openable()
-                                        ->acceptedFileTypes([
-                                            'image/*',
-                                            'application/pdf',
-                                        ])                                     
-                                        ->visible(function (Get $get) {
+                                    ->acceptedFileTypes([
+                                        'image/*',
+                                        'application/pdf',
+                                    ])
+                                    ->visible(function (Get $get) {
                                         $leaveType = LeaveType::find($get('holiday_status_id'));
 
                                         if ($leaveType) {
