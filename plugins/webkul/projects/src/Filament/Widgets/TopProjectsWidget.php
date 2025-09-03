@@ -62,7 +62,7 @@ class TopProjectsWidget extends BaseWidget
             ')
             ->whereBetween('analytic_records.created_at', [$startDate, $endDate])
             ->groupBy('analytic_records.project_id', 'projects_projects.name')
-            ->orderByDesc('total_hours')
+            ->orderByRaw('SUM(analytic_records.unit_amount) DESC')
             ->limit(10);
     }
 
