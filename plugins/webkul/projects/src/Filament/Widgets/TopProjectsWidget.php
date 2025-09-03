@@ -4,16 +4,18 @@ namespace Webkul\Project\Filament\Widgets;
 
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Webkul\Project\Models\Timesheet;
 
 class TopProjectsWidget extends BaseWidget
 {
     use HasWidgetShield, InteractsWithPageFilters;
+
+    protected static bool $isLazy = false;
 
     protected static ?string $pollingInterval = '15s';
 
@@ -22,7 +24,7 @@ class TopProjectsWidget extends BaseWidget
         return __('projects::filament/widgets/top-projects.heading.title');
     }
 
-    protected function getTableQuery(): Builder
+    public function table(Table $table): Table
     {
         $query = Timesheet::query();
 
@@ -52,7 +54,7 @@ class TopProjectsWidget extends BaseWidget
             Carbon::parse($this->filters['endDate']) :
             now();
 
-        return $query
+        $query = $query
             ->join('projects_projects', 'projects_projects.id', '=', 'analytic_records.project_id')
             ->selectRaw('
                 analytic_records.project_id,
@@ -64,25 +66,20 @@ class TopProjectsWidget extends BaseWidget
             ->groupBy('analytic_records.project_id', 'projects_projects.name')
             ->orderByRaw('SUM(analytic_records.unit_amount) DESC')
             ->limit(10);
-    }
 
-    protected function getTableColumns(): array
-    {
-        return [
-            Tables\Columns\TextColumn::make('project_name')
-                ->label(__('projects::filament/widgets/top-projects.table-columns.project-name'))
-                ->sortable(),
-            Tables\Columns\TextColumn::make('total_hours')
-                ->label(__('projects::filament/widgets/top-projects.table-columns.hours-spent'))
-                ->sortable(),
-            Tables\Columns\TextColumn::make('total_tasks')
-                ->label(__('projects::filament/widgets/top-projects.table-columns.tasks'))
-                ->sortable(),
-        ];
-    }
-
-    public function getTableRecordKey($record): string
-    {
-        return (string) $record->project_id;
+        return $table
+            ->query($query)
+            ->defaultPaginationPageOption(5)
+            ->columns([
+                Tables\Columns\TextColumn::make('project_name')
+                    ->label(__('projects::filament/widgets/top-projects.table-columns.project-name'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total_hours')
+                    ->label(__('projects::filament/widgets/top-projects.table-columns.hours-spent'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total_tasks')
+                    ->label(__('projects::filament/widgets/top-projects.table-columns.tasks'))
+                    ->sortable(),
+            ]);
     }
 }
