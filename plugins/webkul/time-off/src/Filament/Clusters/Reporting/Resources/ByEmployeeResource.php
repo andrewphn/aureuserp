@@ -3,15 +3,13 @@
 namespace Webkul\TimeOff\Filament\Clusters\Reporting\Resources;
 
 use Filament\Tables\Table;
-use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource;
+use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource as BaseByEmployeeResource;
 use Webkul\TimeOff\Filament\Clusters\Reporting;
 use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource\Pages;
-use Webkul\TimeOff\Models\Leave;
 
-class ByEmployeeResource extends TimeOffResource
+
+class ByEmployeeResource extends BaseByEmployeeResource
 {
-    protected static ?string $model = Leave::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $cluster = Reporting::class;
@@ -38,6 +36,7 @@ class ByEmployeeResource extends TimeOffResource
             'index'  => Pages\ListByEmployees::route('/'),
             'create' => Pages\CreateByEmployee::route('/create'),
             'edit'   => Pages\EditByEmployee::route('/{record}/edit'),
+            'view'   => Pages\ViewByEmployee::route('/{record}'),
         ];
     }
 }
