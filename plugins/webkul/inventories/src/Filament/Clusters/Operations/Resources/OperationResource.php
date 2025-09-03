@@ -938,6 +938,7 @@ class OperationResource extends Resource
                         $data['creator_id'] = Auth::id();
                         $data['product_id'] = $move->product_id;
                         $data['company_id'] = $move->company_id;
+                        $data['destination_location_id'] = $data['destination_location_id'] ?? $move->destination_location_id;
 
                         return $data;
                     })
