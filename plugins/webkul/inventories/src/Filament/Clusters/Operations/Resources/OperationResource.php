@@ -853,7 +853,6 @@ class OperationResource extends Resource
                                 titleAttribute: 'full_name',
                                 modifyQueryUsing: fn (Builder $query) => $query
                                     ->withTrashed()
-                                    ->where('type', '<>', Enums\LocationType::VIEW)
                                     ->where(function ($query) use ($move) {
                                         $query->where('id', $move->destination_location_id)
                                             ->orWhere('parent_id', $move->destination_location_id);
@@ -869,11 +868,11 @@ class OperationResource extends Resource
                             ->preload()
                             ->required()
                             ->live()
-                            ->default($move->destination_location_id)
+                            // ->default($move->destination_location_id)
                             ->afterStateUpdated(function (Forms\Set $set) {
                                 $set('result_package_id', null);
                             })
-                            ->visible($move->destinationLocation->type == Enums\LocationType::INTERNAL)
+                            // ->visible($move->destinationLocation->type == Enums\LocationType::INTERNAL)
                             ->disabled(fn (): bool => in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                         Forms\Components\Select::make('result_package_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.lines.fields.package'))
