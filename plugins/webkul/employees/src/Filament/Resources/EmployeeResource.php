@@ -22,7 +22,9 @@ use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums\DistanceUnit;
 use Webkul\Employee\Enums\Gender;
@@ -1270,6 +1272,17 @@ class EmployeeResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -1277,11 +1290,22 @@ class EmployeeResource extends Resource
                                 ->body(__('employees::filament/resources/employee.table.bulk-actions.delete.notification.body'))
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.body'))
+                                ->title(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.success.title'))
+                                ->body(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.success.body'))
                         ),
                 ]),
             ]);
