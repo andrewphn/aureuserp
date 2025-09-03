@@ -661,7 +661,19 @@ class EmployeeResource extends Resource
                                                         Forms\Components\Toggle::make('work_permit_scheduled_activity')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.work-permit-scheduled-activity')),
                                                         Forms\Components\Select::make('user_id')
-                                                            ->relationship(name: 'user', titleAttribute: 'name')
+                                                            ->relationship(
+                                                                name: 'user',
+                                                                titleAttribute: 'name',
+                                                                modifyQueryUsing: function ($query, $state) {
+                                                                    return $query->where(function ($query) use ($state) {
+                                                                        $query->whereDoesntHave('employee');
+                                                                        if ($state) {
+                                                                            $query->orWhere('id', $state);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            )
+                                                            ->unique(ignoreRecord: true)
                                                             ->searchable()
                                                             ->preload()
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.related-user'))
