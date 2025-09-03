@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Currency;
 
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
@@ -87,7 +88,11 @@ class InstallERP extends Command
 
         $adminRole = Role::firstOrCreate(['name' => $this->getAdminRoleName()]);
 
-        Artisan::call('shield:generate', ['--all' => true, '--option' => 'permissions'], $this->getOutput());
+        Artisan::call('shield:generate', [
+            '--all'    => true,
+            '--option' => 'permissions',
+            '--panel'  => 'admin',
+        ], $this->getOutput());
 
         $permissions = Permission::all();
         $adminRole->syncPermissions($permissions);
@@ -141,6 +146,8 @@ class InstallERP extends Command
 
         $this->backfillMissingCreatorIds($adminUser);
 
+        $this->syncDefaultSettings($adminUser);
+
         $this->info("✅ Admin user '{$adminUser->name}' created and assigned the '{$this->getAdminRoleName()}' role successfully.");
     }
 
@@ -176,6 +183,9 @@ class InstallERP extends Command
         return strlen($password) >= 8 ? null : 'The password must be at least 8 characters long.';
     }
 
+    /**
+     * Ask the user to star the GitHub repository.
+     */
     protected function askToStarGithubRepository(): void
     {
         if (! $this->confirm('Would you like to star our repo on GitHub?')) {
@@ -197,6 +207,9 @@ class InstallERP extends Command
         }
     }
 
+    /**
+     * Storage link command to create a symbolic link from "public/storage" to "storage/app/public".
+     */
     private function storageLink()
     {
         if (file_exists(public_path('storage'))) {
@@ -225,5 +238,43 @@ class InstallERP extends Command
         collect($mappings)
             ->filter(fn ($column) => ! is_null($column))
             ->each(fn ($column, $table) => DB::table($table)->whereNull($column)->update([$column => $user->id]));
+    }
+
+    /**
+     * Resolve default settings for the user.
+     */
+    private function syncDefaultSettings($user)
+    {
+        $settings = [
+            [
+                'group'   => 'general',
+                'name'    => 'default_company_id',
+                'payload' => $user->default_company_id,
+            ],
+            [
+                'group'   => 'general',
+                'name'    => 'default_role_id',
+                'payload' => Role::first()?->id,
+            ],
+            [
+                'group'   => 'currency',
+                'name'    => 'default_currency_id',
+                'payload' => Currency::first()?->id,
+            ],
+        ];
+
+        foreach ($settings as $setting) {
+            if (! isset($setting['payload'])) {
+                continue;
+            }
+
+            DB::table('settings')->updateOrInsert(
+                ['group' => $setting['group'], 'name' => $setting['name']],
+                [
+                    'payload'    => json_encode($setting['payload']),
+                    'updated_at' => now(),
+                ]
+            );
+        }
     }
 }

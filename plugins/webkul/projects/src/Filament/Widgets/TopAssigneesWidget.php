@@ -17,7 +17,7 @@ class TopAssigneesWidget extends BaseWidget
 
     public function getHeading(): string|Htmlable|null
     {
-        return __('projects::filament/widgets/top-assignees.heading');
+        return __('projects::filament/widgets/top-assignees.heading.title');
     }
 
     protected static ?string $pollingInterval = '15s';
