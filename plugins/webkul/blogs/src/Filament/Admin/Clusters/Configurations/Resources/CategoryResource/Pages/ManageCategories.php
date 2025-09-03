@@ -41,9 +41,7 @@ class ManageCategories extends ManageRecords
                 ->badge(Category::count()),
             'archived' => Tab::make(__('blogs::filament/admin/clusters/configurations/resources/category/pages/manage-categories.tabs.archived'))
                 ->badge(Category::onlyTrashed()->count())
-                ->modifyQueryUsing(function ($query) {
-                    return $query->onlyTrashed();
-                }),
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }
