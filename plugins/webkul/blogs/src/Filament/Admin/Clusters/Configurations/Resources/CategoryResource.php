@@ -8,6 +8,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
 use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource\Pages;
 use Webkul\Blog\Models\Category;
@@ -90,7 +93,6 @@ class CategoryResource extends Resource
                             ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.restore.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
-                    ->hidden(fn ($record) => $record->posts->isNotEmpty())
                     ->successNotification(
                         Notification::make()
                             ->success()
@@ -98,12 +100,22 @@ class CategoryResource extends Resource
                             ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.delete.notification.body')),
                     ),
                 Tables\Actions\ForceDeleteAction::make()
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.title'))
-                            ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.body')),
-                    ),
+                    ->action(function (Category $record) {
+                        try {
+                            $record->forceDelete();
+                            Notification::make()
+                                ->success()
+                                ->title(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.success.title'))
+                                ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.success.body'))
+                                ->send();
+                        } catch (QueryException) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.error.title'))
+                                ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.error.body'))
+                                ->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -122,15 +134,24 @@ class CategoryResource extends Resource
                                 ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.bulk-actions.delete.notification.body')),
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('blogs::filament/admin/clusters/configurations/resources/category.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.bulk-actions.force-delete.notification.body')),
-                        ),
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                                Notification::make()
+                                    ->success()
+                                    ->title(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.success.title'))
+                                    ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.success.body'))
+                                    ->send();
+                            } catch (QueryException) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('blogs::filament/admin/clusters/configurations/resources/category.table.actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        }),
                 ]),
-            ])
-            ->checkIfRecordIsSelectableUsing(fn ($record) => $record->posts->isEmpty());
+            ]);
     }
 
     public static function getPages(): array
