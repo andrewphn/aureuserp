@@ -787,6 +787,7 @@ class QuotationResource extends Resource
                             ->schema([
                                 Infolists\Components\TextEntry::make('note')
                                     ->html()
+                                    ->placeholder('-')
                                     ->hiddenLabel(),
                             ]),
                     ]),
