@@ -19,7 +19,7 @@ class TopProjectsWidget extends BaseWidget
 
     public function getHeading(): string|Htmlable|null
     {
-        return __('projects::filament/widgets/top-projects.heading');
+        return __('projects::filament/widgets/top-projects.heading.title');
     }
 
     protected function getTableQuery(): Builder
@@ -55,9 +55,9 @@ class TopProjectsWidget extends BaseWidget
         return $query
             ->join('projects_projects', 'projects_projects.id', '=', 'analytic_records.project_id')
             ->selectRaw('
-                analytic_records.project_id, 
-                projects_projects.name as project_name, 
-                SUM(analytic_records.unit_amount) as total_hours, 
+                analytic_records.project_id,
+                projects_projects.name as project_name,
+                SUM(analytic_records.unit_amount) as total_hours,
                 COUNT(DISTINCT analytic_records.task_id) as total_tasks
             ')
             ->whereBetween('analytic_records.created_at', [$startDate, $endDate])
