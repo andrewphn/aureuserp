@@ -306,6 +306,7 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn (User $record) => self::canDeleteUser($record))
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -343,6 +344,7 @@ class UserResource extends Resource
             ->modifyQueryUsing(function ($query) {
                 $query->with('roles', 'teams', 'defaultCompany', 'allowedCompanies');
             })
+            ->checkIfRecordIsSelectableUsing(fn (User $record) => self::canDeleteUser($record))
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus-circle')
@@ -448,11 +450,9 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
+    public static function canDeleteUser(User $record): bool
     {
-        return [
-            //
-        ];
+        return ! $record->is_default;
     }
 
     public static function getPages(): array

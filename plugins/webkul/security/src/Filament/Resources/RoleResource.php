@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Webkul\Security\Filament\Resources\RoleResource\Pages;
+use Webkul\Security\Models\Role;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
@@ -108,16 +109,15 @@ class RoleResource extends Resource implements HasShieldPermissions
                     ->dateTime(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(fn (Model $record) => $record->name == config('filament-shield.panel_user.name')),
                 Tables\Actions\DeleteAction::make()
                     ->hidden(fn (Model $record) => $record->name == config('filament-shield.panel_user.name')),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ])
-            ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => ! ($record->name == config('filament-shield.panel_user.name'))
-            )
+            ->checkIfRecordIsSelectableUsing(fn (Role $record) => ! $record->is_default)
             ->defaultSort('created_at', 'asc');
     }
 
