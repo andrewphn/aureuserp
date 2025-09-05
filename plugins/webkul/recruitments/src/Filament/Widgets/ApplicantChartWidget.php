@@ -11,17 +11,17 @@ use Webkul\Recruitment\Models\Applicant;
 class ApplicantChartWidget extends ChartWidget
 {
     use HasWidgetShield;
-    
-    public function getHeading(): string|Htmlable|null
-    {
-        return __('recruitments::filament/widgets/applicant.overview.label');
-    }
 
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $maxHeight = '400px';
+
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('recruitments::filament/widgets/applicant.heading.title');
+    }
 
     protected function getData(): array
     {

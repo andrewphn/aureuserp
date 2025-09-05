@@ -16,6 +16,11 @@ class MyTimeOffWidget extends BaseWidget
 {
     use HasWidgetShield;
     
+    protected function getHeading(): ?string
+    {
+        return __('time-off::filament/widgets/my-time-off-widget.heading.title');
+    }
+
     protected function getStats(): array
     {
         $employeeId = Auth::user()?->employee?->id;

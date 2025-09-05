@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Infolists;
 use Filament\Notifications\Notification;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Saade\FilamentFullCalendar\Actions;
@@ -22,6 +23,11 @@ class OverviewCalendarWidget extends FullCalendarWidget
     use HasWidgetShield;
     
     public Model|string|null $model = Leave::class;
+
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('time-off::filament/widgets/overview-calendar-widget.heading.title');
+    }
 
     public function config(): array
     {
@@ -83,6 +89,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'] ?? null;
 
                     $record->update($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/overview-calendar-widget.modal-actions.edit.notification.title'))
+                        ->body(__('time-off::filament/widgets/overview-calendar-widget.modal-actions.edit.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Forms\Form $form, array $arguments, $livewire) {
@@ -175,6 +187,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'];
 
                     Leave::create($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.notification.title'))
+                        ->body(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Forms\Form $form, array $arguments) {
