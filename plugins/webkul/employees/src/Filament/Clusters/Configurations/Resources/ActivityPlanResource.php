@@ -2,6 +2,7 @@
 
 namespace Webkul\Employee\Filament\Clusters\Configurations\Resources;
 
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -21,7 +22,7 @@ use Webkul\Employee\Filament\Resources\DepartmentResource;
 use Webkul\Employee\Models\ActivityPlan;
 use Webkul\Security\Filament\Resources\CompanyResource;
 
-class ActivityPlanResource extends Resource
+class ActivityPlanResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = ActivityPlan::class;
 
@@ -32,6 +33,24 @@ class ActivityPlanResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/activity-plan.navigation.title');
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view::employee',
+            'view_any::employee',
+            'create::employee',
+            'update::employee',
+            'restore::employee',
+            'restore_any::employee',
+            'replicate::employee',
+            'reorder::employee',
+            'delete::employee',
+            'delete_any::employee',
+            'force_delete::employee',
+            'force_delete_any::employee',
+        ];
     }
 
     public static function form(Form $form): Form

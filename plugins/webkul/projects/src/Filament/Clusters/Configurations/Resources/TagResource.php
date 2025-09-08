@@ -2,6 +2,7 @@
 
 namespace Webkul\Project\Filament\Clusters\Configurations\Resources;
 
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -12,7 +13,7 @@ use Webkul\Project\Filament\Clusters\Configurations;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TagResource\Pages;
 use Webkul\Project\Models\Tag;
 
-class TagResource extends Resource
+class TagResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Tag::class;
 
@@ -25,6 +26,24 @@ class TagResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('projects::filament/clusters/configurations/resources/tag.navigation.title');
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view::project',
+            'view_any::project',
+            'create::project',
+            'update::project',
+            'restore::project',
+            'restore_any::project',
+            'replicate::project',
+            'reorder::project',
+            'delete::project',
+            'delete_any::project',
+            'force_delete::project',
+            'force_delete_any::project',
+        ];
     }
 
     public static function form(Form $form): Form

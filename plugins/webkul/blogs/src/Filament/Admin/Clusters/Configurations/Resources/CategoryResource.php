@@ -2,6 +2,7 @@
 
 namespace Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources;
 
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -16,7 +17,7 @@ use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResourc
 use Webkul\Blog\Models\Category;
 use Webkul\Website\Filament\Admin\Clusters\Configurations;
 
-class CategoryResource extends Resource
+class CategoryResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Category::class;
 
@@ -34,6 +35,24 @@ class CategoryResource extends Resource
     public static function getNavigationGroup(): string
     {
         return __('blogs::filament/admin/clusters/configurations/resources/category.navigation.group');
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view::blog',
+            'view_any::blog',
+            'create::blog',
+            'update::blog',
+            'restore::blog',
+            'restore_any::blog',
+            'replicate::blog',
+            'reorder::blog',
+            'delete::blog',
+            'delete_any::blog',
+            'force_delete::blog',
+            'force_delete_any::blog',
+        ];
     }
 
     public static function form(Form $form): Form
