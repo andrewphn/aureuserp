@@ -212,7 +212,13 @@ class QuotationResource extends Resource
                                     ->schema([
                                         Forms\Components\Select::make('company_id')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.additional-information.fields.company'))
-                                            ->relationship('company', 'name')
+                                            ->relationship('company', 'name', modifyQueryUsing: fn (Builder $query) => $query->withTrashed())
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->live()
