@@ -79,7 +79,7 @@ class FieldResource extends Resource
                                     ->helperText(__('fields::filament/resources/field.form.sections.general.fields.code-helper-text'))
                                     ->unique(ignoreRecord: true)
                                     ->notIn(function (Get $get) {
-                                        if ($get('id')) {
+                                        if ($get('id') || ! $get('customizable_type')) {
                                             return [];
                                         }
 

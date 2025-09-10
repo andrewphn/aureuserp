@@ -276,7 +276,7 @@ class CompanyResource extends Resource
                     ])
                     ->columns(3),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -438,6 +438,7 @@ class CompanyResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Grid::make(['default' => 3])
                     ->schema([
