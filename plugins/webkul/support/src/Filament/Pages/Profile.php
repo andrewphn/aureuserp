@@ -59,7 +59,7 @@ class Profile extends Page implements HasForms
                         FileUpload::make('avatar')
                             ->label(__('support::filament/pages/profile.fields.avatar'))
                             ->avatar()
-                            ->directory('avatars')
+                            ->directory('users/avatars')
                             ->visibility('public')
                             ->disk('public')
                             ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])

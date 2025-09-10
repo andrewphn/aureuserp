@@ -149,9 +149,9 @@ class InstallERP extends Command
             $adminUser->assignRole($adminRoleName);
         }
 
-        // $this->backfillMissingCreatorIds($adminUser);
+        $this->backfillMissingCreatorIds($adminUser);
 
-        // $this->syncDefaultSettings($adminUser);
+        $this->syncDefaultSettings($adminUser);
 
         $this->info("✅ Admin user '{$adminUser->name}' created and assigned the '{$this->getAdminRoleName()}' role successfully.");
     }

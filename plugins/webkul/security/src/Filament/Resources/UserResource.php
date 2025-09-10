@@ -147,7 +147,7 @@ class UserResource extends Resource
                                             ->image()
                                             ->imageEditor()
                                             ->directory('users/avatars')
-                                            ->visibility('private'),
+                                            ->visibility('public'),
                                     ])
                                     ->columns(1),
                                 Section::make(__('security::filament/resources/user.form.sections.lang-and-status.title'))
