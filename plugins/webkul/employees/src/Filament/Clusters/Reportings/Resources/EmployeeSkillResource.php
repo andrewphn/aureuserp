@@ -77,12 +77,12 @@ class EmployeeSkillResource extends Resource
                     ->color('secondary')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('creator.name')
+                TextColumn::make('createdBy.name')
                     ->label(__('employees::filament/clusters/reportings/resources/employee-skill.table.columns.created-by'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('user.name')
+                TextColumn::make('employee.user.name')
                     ->label(__('employees::filament/clusters/reportings/resources/employee-skill.table.columns.user'))
                     ->searchable()
                     ->sortable()
@@ -139,7 +139,7 @@ class EmployeeSkillResource extends Resource
                                     ->multiple()
                                     ->preload(),
                             ),
-                        RelationshipConstraint::make('creator')
+                        RelationshipConstraint::make('createdBy')
                             ->label(__('employees::filament/clusters/reportings/resources/employee-skill.table.filters.created-by'))
                             ->icon('heroicon-o-user')
                             ->multiple()
@@ -150,7 +150,7 @@ class EmployeeSkillResource extends Resource
                                     ->multiple()
                                     ->preload(),
                             ),
-                        RelationshipConstraint::make('user')
+                        RelationshipConstraint::make('employee.user')
                             ->label(__('employees::filament/clusters/reportings/resources/employee-skill.table.filters.user'))
                             ->icon('heroicon-o-user')
                             ->multiple()
@@ -199,11 +199,11 @@ class EmployeeSkillResource extends Resource
                     ->columns(2),
                 Section::make(__('employees::filament/clusters/reportings/resources/employee-skill.infolist.sections.additional-information.title'))
                     ->schema([
-                        TextEntry::make('creator.name')
+                        TextEntry::make('createdBy.name')
                             ->icon('heroicon-o-user')
                             ->placeholder('—')
                             ->label(__('employees::filament/clusters/reportings/resources/employee-skill.infolist.sections.additional-information.entries.created-by')),
-                        TextEntry::make('user.name')
+                        TextEntry::make('employee.user.name')
                             ->placeholder('—')
                             ->icon('heroicon-o-user')
                             ->label(__('employees::filament/clusters/reportings/resources/employee-skill.infolist.sections.additional-information.entries.updated-by')),

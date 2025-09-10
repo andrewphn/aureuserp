@@ -35,6 +35,8 @@ class ManageBankAccounts extends ManageRelatedRecords
                     ->label(__('New Bank Account'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateDataUsing(function (array $data): array {
+                        $data['creator_id'] = filament()->auth()->user()->id;
+
                         return $data;
                     }),
             ]);

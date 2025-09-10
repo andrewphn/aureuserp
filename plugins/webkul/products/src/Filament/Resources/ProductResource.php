@@ -47,6 +47,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -97,6 +98,7 @@ class ProductResource extends Resource
                         Section::make(__('products::filament/resources/product.form.sections.images.title'))
                             ->schema([
                                 FileUpload::make('images')
+                                    ->image()
                                     ->multiple()
                                     ->storeFileNamesIn('products'),
                             ]),
@@ -146,7 +148,15 @@ class ProductResource extends Resource
                                     ->createOptionForm(fn (Schema $schema): Schema => CategoryResource::form($schema)),
                                 Select::make('company_id')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.company'))
-                                    ->relationship('company', 'name')
+                                    ->relationship(
+                                        'company',
+                                        'name',
+                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
                                     ->default(Auth::user()->default_company_id),
@@ -195,7 +205,7 @@ class ProductResource extends Resource
                     ->circular()
                     ->stacked()
                     ->limit(3)
-                    ->limitedRemainingText(isSeparate: true),
+                    ->limitedRemainingText(),
                 TextColumn::make('name')
                     ->label(__('products::filament/resources/product.table.columns.name'))
                     ->searchable()

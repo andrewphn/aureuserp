@@ -2,14 +2,16 @@
 
 namespace Webkul\Support;
 
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
 use Webkul\Security\Livewire\AcceptInvitation;
+use Webkul\Security\Models\Role;
 use Webkul\Security\Policies\RolePolicy;
 use Webkul\Support\Console\Commands\InstallERP;
 
@@ -74,6 +76,10 @@ class SupportServiceProvider extends PackageServiceProvider
             'uses' => 'Webkul\Support\Http\Controllers\ImageCacheController@getImage',
             'as'   => 'image_cache',
         ])->where(['filename' => '[ \w\\.\\/\\-\\@\(\)\=]+']);
+
+        FilamentAsset::register([
+            Css::make('support', __DIR__.'/../resources/dist/support.css'),
+        ], 'support');
     }
 
     public function packageRegistered(): void

@@ -9,10 +9,10 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -32,7 +32,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Size;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
@@ -40,11 +39,10 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
+use Filament\Tables\Grouping\Group as TableGroup;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Recruitment\Enums\ApplicationStatus;
@@ -71,31 +69,11 @@ class ApplicantResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    public static function getSubNavigationPosition(): SubNavigationPosition
-    {
-        $currentRoute = Route::currentRouteName();
-
-        if ($currentRoute === 'livewire.update') {
-            $previousUrl = url()->previous();
-
-            return str_contains($previousUrl, '/index') || str_contains($previousUrl, '?tableGrouping') || str_contains($previousUrl, '?tableFilters')
-                ? SubNavigationPosition::Start
-                : SubNavigationPosition::Top;
-        }
-
-        return str_contains($currentRoute, '.index')
-            ? SubNavigationPosition::Start
-            : SubNavigationPosition::Top;
-    }
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
         return __('recruitments::filament/clusters/applications/resources/applicant.title');
-    }
-
-    public static function getNavigationGroup(): string
-    {
-        return __('recruitments::filament/clusters/applications/resources/applicant.navigation.group');
     }
 
     public static function getNavigationLabel(): string
@@ -208,11 +186,11 @@ class ApplicantResource extends Resource
                                                     }
                                                 }),
                                         ]),
-                                        Placeholder::make('application_status')
+                                        TextEntry::make('application_status')
                                             ->live()
                                             ->hiddenLabel()
                                             ->hidden(fn ($record) => $record->application_status->value === ApplicationStatus::ONGOING->value)
-                                            ->content(function ($record) {
+                                            ->state(function ($record) {
                                                 $html = '<span style="display: inline-flex; align-items: center; background-color: '.$record->application_status->getColor().'; color: white; padding: 4px 8px; border-radius: 12px; font-size: 18px; font-weight: 500;">';
 
                                                 $html .= view('filament::components.icon', [
@@ -565,28 +543,28 @@ class ApplicantResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->groups([
-                Tables\Grouping\Group::make('stage.name')
+                TableGroup::make('stage.name')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.stage'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('job.name')
+                TableGroup::make('job.name')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.job-position'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('candidate.name')
+                TableGroup::make('candidate.name')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.candidate-name'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('recruiter.name')
+                TableGroup::make('recruiter.name')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.responsible'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('created_at')
+                TableGroup::make('created_at')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.creation-date'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('date_closed')
+                TableGroup::make('date_closed')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.hired-date'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('lastStage.name')
+                TableGroup::make('lastStage.name')
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.last-stage'))
                     ->collapsible(),
-                Tables\Grouping\Group::make('refuseReason.name')
+                TableGroup::make('refuseReason.name')
                     ->label(__('Refuse Reason'))
                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.table.groups.refuse-reason'))
                     ->collapsible(),
@@ -682,13 +660,15 @@ class ApplicantResource extends Resource
                     ]),
             ])
             ->defaultGroup('stage.name')
-            ->columnToggleFormColumns(3)
+            ->columnManagerColumns(3)
             ->filtersFormColumns(2)
             ->filtersLayout(FiltersLayout::Dropdown)
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
+                    RestoreAction::make()
+                        ->visible(fn (Applicant $record) => $record->trashed()),
                     DeleteAction::make()
                         ->successNotification(
                             Notification::make()
@@ -724,7 +704,8 @@ class ApplicantResource extends Resource
                 ]),
             ])
             ->modifyQueryUsing(function (Builder $query) {
-                $query->where('state', '!=', RecruitmentStateEnum::BLOCKED->value)
+                $query
+                    ->where('state', '!=', RecruitmentStateEnum::BLOCKED->value)
                     ->orWhereNull('state');
             });
     }
@@ -931,13 +912,5 @@ class ApplicantResource extends Resource
             'edit'   => EditApplicant::route('/{record}/edit'),
             'skills' => ManageSkill::route('/{record}/skills'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }

@@ -13,9 +13,7 @@ return [
         'cluster'                    => null,
     ],
 
-    'auth_provider_model' => [
-        'fqcn' => 'Webkul\\Security\\Models\\User',
-    ],
+    'auth_provider_model' => 'Webkul\\Security\\Models\\User',
 
     'super_admin' => [
         'enabled'         => false,
@@ -26,7 +24,7 @@ return [
 
     'panel_user' => [
         'enabled' => true,
-        'name'    => 'admin',
+        'name'    => 'Admin',
     ],
 
     'permission_prefixes' => [

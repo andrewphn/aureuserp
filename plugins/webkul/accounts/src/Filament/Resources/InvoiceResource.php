@@ -59,6 +59,7 @@ use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Invoice\Models\Product;
 use Webkul\Invoice\Settings\ProductSettings;
+use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
@@ -128,6 +129,7 @@ class InvoiceResource extends Resource
                                             ->relationship(
                                                 'partner',
                                                 'name',
+                                                fn ($query) => $query->where('sub_type', 'customer')->orderBy('id'),
                                             )
                                             ->searchable()
                                             ->preload()
@@ -177,6 +179,7 @@ class InvoiceResource extends Resource
                                         'products' => $get('products'),
                                     ];
                                 })
+                                    ->visible(fn (Get $get) => $get('currency_id') && $get('products'))
                                     ->live()
                                     ->reactive(),
                             ]),
@@ -237,7 +240,17 @@ class InvoiceResource extends Resource
                                             ->relationship('company', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->default(Auth::user()->default_company_id),
+                                            ->reactive()
+                                            ->afterStateUpdated(fn (callable $set, $state) => $set('currency_id', Company::find($state)?->currency_id))
+                                            ->default(Auth::user()->default_company_id)
+                                            ->live()
+                                            ->afterStateUpdated(function (Get $get, Set $set) {
+                                                $company = Company::find($get('company_id'));
+
+                                                if ($company?->currency_id) {
+                                                    $set('currency_id', $company->currency_id);
+                                                }
+                                            }),
                                         Select::make('currency_id')
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.additional-information.fields.currency'))
                                             ->relationship('currency', 'name')
@@ -312,7 +325,7 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn ($record) => $record->currency->code)
+                    ->money(fn ($record) => $record->currency?->name)
                     ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('amount_tax_signed')
@@ -320,7 +333,7 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn ($record) => $record->currency->code)
+                    ->money(fn ($record) => $record->currency?->name)
                     ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('amount_total_in_currency_signed')
@@ -329,7 +342,7 @@ class InvoiceResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->summarize(Sum::make()->label(__('accounts::filament/resources/invoice.table.total')))
-                    ->money(fn ($record) => $record->currency->code)
+                    ->money(fn ($record) => $record->currency?->name)
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('amount_residual_signed')
                     ->label(__('accounts::filament/resources/invoice.table.columns.amount-due'))
@@ -337,7 +350,7 @@ class InvoiceResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->summarize(Sum::make()->label('Total'))
-                    ->money(fn ($record) => $record->currency->code)
+                    ->money(fn ($record) => $record->currency?->name)
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('payment_state')
                     ->label(__('Payment State'))
@@ -553,8 +566,8 @@ class InvoiceResource extends Resource
                                         TextEntry::make('price_unit')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.unit-price'))
-                                            ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn ($record) => $record->currency->code),
+                                            ->icon('heroicon-o-banknotes')
+                                            ->money(fn ($record) => $record->currency?->name),
                                         TextEntry::make('discount')
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.discount-percentage'))
@@ -576,7 +589,7 @@ class InvoiceResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('accounts::filament/resources/invoice.infolist.tabs.invoice-lines.repeater.products.entries.sub-total'))
                                             ->icon('heroicon-o-calculator')
-                                            ->money(fn ($record) => $record->currency->code),
+                                            ->money(fn ($record) => $record->currency?->name),
                                     ])->columns(5),
                                 Livewire::make(InvoiceSummary::class, function ($record) {
                                     return [
@@ -648,6 +661,21 @@ class InvoiceResource extends Resource
                                                     ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.accounting.fieldset.checked'))
                                                     ->icon('heroicon-o-check-circle')
                                                     ->boolean(),
+                                            ])->columns(2),
+                                    ]),
+                                Section::make(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.additional-information.title'))
+                                    ->icon('heroicon-o-document')
+                                    ->schema([
+                                        Grid::make()
+                                            ->schema([
+                                                TextEntry::make('company.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.additional-information.entries.company'))
+                                                    ->icon('heroicon-o-building-office'),
+                                                TextEntry::make('currency.name')
+                                                    ->placeholder('-')
+                                                    ->label(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.additional-information.entries.currency'))
+                                                    ->icon('heroicon-o-banknotes'),
                                             ])->columns(2),
                                     ]),
                                 Section::make(__('accounts::filament/resources/invoice.infolist.tabs.other-information.fieldset.marketing.title'))

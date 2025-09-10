@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Table;
 use Livewire\Livewire;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Support\Package;
 
@@ -19,9 +20,6 @@ class ManageDeliveries extends ManageRelatedRecords
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
     public static function canAccess(array $parameters = []): bool
     {
         $canAccess = parent::canAccess($parameters);
@@ -46,13 +44,13 @@ class ManageDeliveries extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return OperationResource::table($table)
-            ->recordActions([
+            ->actions([
                 ViewAction::make()
-                    ->url(fn ($record) => OperationResource::getUrl('view', ['record' => $record]))
+                    ->url(fn ($record) => DeliveryResource::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
 
                 EditAction::make()
-                    ->url(fn ($record) => OperationResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn ($record) => DeliveryResource::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
             ])
             ->toolbarActions([]);

@@ -17,6 +17,9 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Project\Filament\Clusters\Configurations;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ProjectStageResource\Pages\ManageProjectStages;
 use Webkul\Project\Models\ProjectStage;
@@ -99,12 +102,23 @@ class ProjectStageResource extends Resource
                             ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.delete.notification.body')),
                     ),
                 ForceDeleteAction::make()
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.body')),
-                    ),
+                    ->action(function (ProjectStage $record) {
+                        try {
+                            $record->forceDelete();
+
+                            Notification::make()
+                                ->success()
+                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.title'))
+                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.body'))
+                                ->send();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.title'))
+                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.body'))
+                                ->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -123,12 +137,23 @@ class ProjectStageResource extends Resource
                                 ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.force-delete.notification.body')),
-                        ),
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+
+                                Notification::make()
+                                    ->success()
+                                    ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.title'))
+                                    ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.body'))
+                                    ->send();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        }),
                 ]),
             ]);
     }

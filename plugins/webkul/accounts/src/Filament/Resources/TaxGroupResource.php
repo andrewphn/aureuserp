@@ -135,10 +135,14 @@ class TaxGroupResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records, DeleteBulkAction $action) {
                             try {
                                 $records->each(fn (Model $record) => $record->delete());
+
+                                $action->success();
                             } catch (QueryException $e) {
+                                $action->failure();
+
                                 Notification::make()
                                     ->danger()
                                     ->title(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.title'))
@@ -148,6 +152,7 @@ class TaxGroupResource extends Resource
                         })
                         ->successNotification(
                             Notification::make()
+                                ->success()
                                 ->title(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.success.title'))
                                 ->body(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.success.body'))
                         ),

@@ -14,7 +14,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
-use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
@@ -27,7 +26,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Route;
 use Webkul\TimeOff\Enums\AccruedGainTime;
 use Webkul\TimeOff\Enums\CarryoverDate;
 use Webkul\TimeOff\Enums\CarryoverDay;
@@ -50,15 +48,6 @@ class AccrualPlanResource extends Resource
     protected static ?string $cluster = Configurations::class;
 
     protected static ?int $navigationSort = 2;
-
-    public static function getSubNavigationPosition(): SubNavigationPosition
-    {
-        if (str_contains(Route::currentRouteName(), 'index')) {
-            return SubNavigationPosition::Start;
-        }
-
-        return SubNavigationPosition::Top;
-    }
 
     public static function getModelLabel(): string
     {
@@ -136,8 +125,7 @@ class AccrualPlanResource extends Resource
                     ->searchable()
                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.table.columns.name')),
                 TextColumn::make('leaveAccrualLevels')
-                    ->searchable()
-                    ->formatStateUsing(fn ($record) => $record->leaveAccrualLevels?->count())
+                    ->formatStateUsing(fn ($record) => $record?->leaveAccrualLevels?->count() ?? 0)
                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.table.columns.levels')),
             ])
             ->recordActions([
@@ -182,23 +170,19 @@ class AccrualPlanResource extends Resource
                                         TextEntry::make('accrued_gain_time')
                                             ->icon('heroicon-o-clock')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => AccruedGainTime::options()[$state])
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.accrued-gain-time')),
                                         TextEntry::make('carryover_date')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => CarryoverDate::options()[$state])
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.carry-over-time')),
                                         TextEntry::make('carryover_day')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => CarryoverDay::options()[$state])
                                             ->label(__('Carryover Day'))
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.carry-over-day')),
                                         TextEntry::make('carryover_month')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => CarryoverMonth::options()[$state])
                                             ->label(__('Carryover Month'))
                                             ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.infolist.entries.carry-over-month')),
                                     ]),

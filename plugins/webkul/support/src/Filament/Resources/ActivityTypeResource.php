@@ -33,7 +33,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Guava\FilamentIconPicker\Forms\IconPicker;
+use Guava\IconPicker\Forms\Components\IconPicker;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\ActivityChainingType;
 use Webkul\Support\Enums\ActivityDecorationType;
@@ -55,6 +55,8 @@ class ActivityTypeResource extends Resource
     protected static ?string $slug = 'settings/activity-types';
 
     protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?string $pluginName = 'support';
 
     public static function form(Schema $schema): Schema
     {
@@ -122,9 +124,7 @@ class ActivityTypeResource extends Resource
                                         IconPicker::make('icon')
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.icon'))
                                             ->sets(['heroicons', 'fontawesome-solid'])
-                                            ->columns(4)
-                                            ->preload()
-                                            ->optionsLimit(50),
+                                            ->columns(4),
                                         Select::make('decoration_type')
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.decoration-type'))
                                             ->options(ActivityDecorationType::options())
@@ -310,6 +310,7 @@ class ActivityTypeResource extends Resource
                         ),
                 ]),
             ])
+            ->modifyQueryUsing(fn ($query) => $query->where('plugin', static::$pluginName))
             ->reorderable('sort');
     }
 

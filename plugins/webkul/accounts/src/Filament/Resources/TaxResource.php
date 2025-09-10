@@ -287,6 +287,7 @@ class TaxResource extends Resource
                                             ->suffix('%')
                                             ->placeholder('—'),
                                         IconEntry::make('is_active')
+                                            ->boolean()
                                             ->label(__('accounts::filament/resources/tax.infolist.sections.entries.status')),
                                     ])->columns(2),
                                 Section::make()
@@ -315,11 +316,14 @@ class TaxResource extends Resource
                                     TextEntry::make('country.name')
                                         ->label(__('accounts::filament/resources/tax.infolist.sections.field-set.advanced-options.entries.country'))
                                         ->placeholder('—'),
-                                    IconEntry::make('price_include_override')
+                                    TextEntry::make('price_include_override')
+                                        ->formatStateUsing(fn ($state) => TaxIncludeOverride::options()[$state] ?? $state)
                                         ->label(__('accounts::filament/resources/tax.infolist.sections.field-set.advanced-options.entries.include-in-price')),
                                     IconEntry::make('include_base_amount')
+                                        ->boolean()
                                         ->label(__('accounts::filament/resources/tax.infolist.sections.field-set.advanced-options.entries.include-base-amount')),
                                     IconEntry::make('is_base_affected')
+                                        ->boolean()
                                         ->label(__('accounts::filament/resources/tax.infolist.sections.field-set.advanced-options.entries.is-base-affected')),
                                 ]),
                         ])->columnSpan(1),

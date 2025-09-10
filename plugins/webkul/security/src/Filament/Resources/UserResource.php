@@ -30,7 +30,10 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Webkul\Security\Enums\PermissionType;
@@ -39,6 +42,7 @@ use Webkul\Security\Filament\Resources\UserResource\Pages\EditUser;
 use Webkul\Security\Filament\Resources\UserResource\Pages\ListUsers;
 use Webkul\Security\Filament\Resources\UserResource\Pages\ViewUsers;
 use Webkul\Security\Models\User;
+use Webkul\Support\Models\Company;
 
 class UserResource extends Resource
 {
@@ -169,7 +173,15 @@ class UserResource extends Resource
                                             ->searchable(),
                                         Select::make('default_company_id')
                                             ->label(__('security::filament/resources/user.form.sections.multi-company.default-company'))
-                                            ->relationship('defaultCompany', 'name')
+                                            ->relationship(
+                                                'defaultCompany',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                             ->required()
                                             ->searchable()
                                             ->createOptionForm(fn (Schema $schema) => CompanyResource::form($schema))
@@ -186,6 +198,19 @@ class UserResource extends Resource
                                                         return $data;
                                                     });
                                             })
+                                            ->afterStateHydrated(function (Select $component, $state) {
+                                                if (empty($state)) {
+                                                    $component->state(null);
+
+                                                    return;
+                                                }
+
+                                                $company = Company::find($state);
+
+                                                if (! $company) {
+                                                    $component->state(null);
+                                                }
+                                            })
                                             ->preload(),
                                     ]),
                             ])
@@ -201,7 +226,8 @@ class UserResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('partner.avatar')
-                    ->size(50)
+                    ->defaultImageUrl(fn ($record) => $record->avatar_url)
+                    ->imageSize(50)
                     ->label(__('security::filament/resources/user.table.columns.avatar')),
                 TextColumn::make('name')
                     ->label(__('security::filament/resources/user.table.columns.name'))
@@ -285,6 +311,7 @@ class UserResource extends Resource
                                 ->body(__('security::filament/resources/user.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
+                        ->hidden(fn ($record) => $record->trashed() || $record->hasRole('admin'))
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -303,6 +330,7 @@ class UserResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->visible(fn (?User $record) => $record && self::canDeleteUser($record))
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -310,6 +338,17 @@ class UserResource extends Resource
                                 ->body(__('security::filament/resources/user.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('security::filament/resources/user.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('security::filament/resources/user.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -329,6 +368,7 @@ class UserResource extends Resource
             ->modifyQueryUsing(function ($query) {
                 $query->with('roles', 'teams', 'defaultCompany', 'allowedCompanies');
             })
+            ->checkIfRecordIsSelectableUsing(fn (User $record) => self::canDeleteUser($record))
             ->emptyStateActions([
                 CreateAction::make()
                     ->icon('heroicon-o-plus-circle')
@@ -435,11 +475,9 @@ class UserResource extends Resource
                 ->columns(1);
     }
 
-    public static function getRelations(): array
+    public static function canDeleteUser(User $record): bool
     {
-        return [
-            //
-        ];
+        return ! $record->is_default;
     }
 
     public static function getPages(): array

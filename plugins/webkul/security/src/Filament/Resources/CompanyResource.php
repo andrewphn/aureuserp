@@ -48,6 +48,7 @@ use Webkul\Security\Filament\Resources\CompanyResource\Pages\EditCompany;
 use Webkul\Security\Filament\Resources\CompanyResource\Pages\ListCompanies;
 use Webkul\Security\Filament\Resources\CompanyResource\Pages\ViewCompany;
 use Webkul\Security\Filament\Resources\CompanyResource\RelationManagers\BranchesRelationManager;
+use Webkul\Security\Settings\UserSettings;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
@@ -284,7 +285,7 @@ class CompanyResource extends Resource
             ->columns([
                 ImageColumn::make('partner.avatar')
                     ->circular()
-                    ->size(50)
+                    ->imageSize(50)
                     ->label(__('security::filament/resources/company.table.columns.logo')),
                 TextColumn::make('name')
                     ->label(__('security::filament/resources/company.table.columns.company-name'))
@@ -328,7 +329,7 @@ class CompanyResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->columnToggleFormColumns(2)
+            ->columnManagerColumns(2)
             ->groups([
                 Tables\Grouping\Group::make('name')
                     ->label(__('security::filament/resources/company.table.groups.company-name'))
@@ -383,6 +384,7 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
+                        ->hidden(fn (Model $record, UserSettings $userSettings): bool => $record->id === $userSettings->default_company_id)
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -427,7 +429,10 @@ class CompanyResource extends Resource
                     ->where('creator_id', Auth::user()->id)
                     ->whereNull('parent_id');
             })
-            ->reorderable('sequence');
+            ->checkIfRecordIsSelectableUsing(
+                fn (Model $record, UserSettings $userSettings): bool => ! ($record->id === $userSettings->default_company_id)
+            )
+            ->reorderable('sort');
     }
 
     public static function infolist(Schema $schema): Schema

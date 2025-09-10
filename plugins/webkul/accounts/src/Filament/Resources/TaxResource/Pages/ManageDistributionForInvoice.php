@@ -23,7 +23,7 @@ class ManageDistributionForInvoice extends ManageRelatedRecords
         return DocumentType::INVOICE->value;
     }
 
-    public function getSubNavigationPosition(): SubNavigationPosition
+    public static function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

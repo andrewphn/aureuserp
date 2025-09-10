@@ -5,6 +5,7 @@ namespace Webkul\Recruitment\Filament\Clusters\Applications\Resources;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
@@ -28,24 +29,21 @@ class JobByPositionResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function form(Schema $schema): Schema
-    {
-        return JobPositionResource::form($schema);
-    }
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
         return __('recruitments::filament/clusters/applications/resources/job-by-application.title');
     }
 
-    public static function getNavigationGroup(): string
-    {
-        return __('recruitments::filament/clusters/applications/resources/job-by-application.navigation.group');
-    }
-
     public static function getNavigationLabel(): string
     {
         return __('recruitments::filament/clusters/applications/resources/job-by-application.navigation.title');
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return JobPositionResource::form($schema);
     }
 
     public static function table(Table $table): Table

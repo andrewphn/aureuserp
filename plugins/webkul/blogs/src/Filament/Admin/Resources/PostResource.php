@@ -117,8 +117,18 @@ class PostResource extends Resource
                             ->schema([
                                 Select::make('category_id')
                                     ->label(__('blogs::filament/admin/resources/post.form.sections.settings.fields.category'))
-                                    ->relationship('category', 'name')
+                                    ->relationship(
+                                        name: 'category',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn ($query) => $query->withTrashed(),
+                                    )
                                     ->searchable()
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(function ($label) {
+                                        return str_contains($label, ' (Deleted)');
+                                    })
                                     ->preload()
                                     ->required(),
                                 Select::make('tags')

@@ -24,6 +24,7 @@ return [
     Webkul\Support\SupportServiceProvider::class,
     Webkul\TableViews\TableViewsServiceProvider::class,
     Webkul\TimeOff\TimeOffServiceProvider::class,
+    Webkul\FullCalendar\FullCalendarServiceProvider::class,
     Webkul\Timesheet\TimesheetServiceProvider::class,
     Webkul\Website\WebsiteServiceProvider::class,
 ];

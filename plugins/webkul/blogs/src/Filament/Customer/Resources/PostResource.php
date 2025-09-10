@@ -10,7 +10,7 @@ use Webkul\Blog\Models\Post;
 
 class PostResource extends Resource
 {
-    public static string $parentResource = CategoryResource::class;
+    public static ?string $parentResource = CategoryResource::class;
 
     protected static ?string $model = Post::class;
 

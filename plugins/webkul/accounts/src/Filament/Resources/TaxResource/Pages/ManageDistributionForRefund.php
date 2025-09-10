@@ -23,7 +23,7 @@ class ManageDistributionForRefund extends ManageRelatedRecords
         return DocumentType::REFUND->value;
     }
 
-    public function getSubNavigationPosition(): SubNavigationPosition
+    public static function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }

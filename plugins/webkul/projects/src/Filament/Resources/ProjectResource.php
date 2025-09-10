@@ -74,7 +74,7 @@ class ProjectResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-folder';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -158,8 +158,10 @@ class ProjectResource extends Resource
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.allocated-hours'))
                                     ->suffixIcon('heroicon-o-clock')
                                     ->minValue(0)
+                                    ->numeric()
                                     ->helperText(__('projects::filament/resources/project.form.sections.additional.fields.allocated-hours-helper-text'))
-                                    ->visible(fn (TimeSettings $timeSettings) => $timeSettings->enable_timesheets),
+                                    ->visible(fn (TimeSettings $timeSettings) => $timeSettings->enable_timesheets)
+                                    ->rules(['nullable', 'numeric', 'min:0']),
                                 Select::make('tags')
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
                                     ->relationship(name: 'tags', titleAttribute: 'name')

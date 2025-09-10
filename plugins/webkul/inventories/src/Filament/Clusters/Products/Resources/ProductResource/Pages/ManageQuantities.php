@@ -42,9 +42,6 @@ class ManageQuantities extends ManageRelatedRecords
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-scale';
 
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
     public static function canAccess(array $parameters = []): bool
     {
         $canAccess = parent::canAccess($parameters);
@@ -174,19 +171,30 @@ class ManageQuantities extends ManageRelatedRecords
                     ->relationship(
                         name: 'package',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query, Get $get) => $query
-                            ->where('location_id', $get('location_id'))
-                            ->orWhereNull('location_id'),
+                        modifyQueryUsing: fn (Builder $query, Get $get) => $query->where(function ($query) use ($get) {
+                            $locationId = $get('location_id');
+
+                            if ($locationId) {
+                                $query->where('location_id', $locationId);
+                            } else {
+                                $query->whereNull('location_id');
+                            }
+                        }),
                     )
+                    ->getOptionLabelUsing(fn ($record) => $record?->name)
                     ->searchable()
+                    ->reactive()
                     ->preload()
                     ->createOptionForm(fn (Schema $schema): Schema => PackageResource::form($schema))
-                    ->createOptionAction(function (Action $action) {
-                        $action->mutateDataUsing(function (array $data) {
-                            $data['company_id'] = $this->getOwnerRecord()->company_id;
+                    ->createOptionAction(function (Action $action, Set $set) {
+                        $action
+                            ->mutateDataUsing(function (array $data) {
+                                $data['company_id'] = $this->getOwnerRecord()->company_id;
+                                $data['creator_id'] = filament()->auth()->user()->id;
 
-                            return $data;
-                        });
+                                return $data;
+                            })
+                            ->after(fn () => $set('package_id', null));
                     })
                     ->visible(fn (OperationSettings $settings) => $settings->enable_packages),
                 TextInput::make('quantity')

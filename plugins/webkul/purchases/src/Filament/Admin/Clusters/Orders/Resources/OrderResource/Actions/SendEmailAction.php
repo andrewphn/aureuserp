@@ -63,27 +63,31 @@ class SendEmailAction extends Action
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-email.form.fields.message'))
                     ->required()
                     ->default(<<<MD
-Dear {$this->getRecord()->partner->name}  
+Dear {$this->getRecord()->partner->name}
 
-Here is in attachment a request for quotation **{$this->getRecord()->name}**.  
+Here is in attachment a request for quotation **{$this->getRecord()->name}**.
 
-If you have any questions, please do not hesitate to contact us.  
+If you have any questions, please do not hesitate to contact us.
 
-[Accept]({$acceptRespondUrl}) | [Decline]({$declineRespondUrl})  
+[Accept]({$acceptRespondUrl}) | [Decline]({$declineRespondUrl})
 
-Best regards,  
+Best regards,
 
---  
-{$userName}  
+--
+{$userName}
 MD),
-                FileUpload::make('attachment')
-                    ->hiddenLabel()
-                    ->disk('public')
-                    ->default(function () {
-                        return PurchaseOrder::generateRFQPdf($this->getRecord());
-                    })
-                    ->downloadable()
-                    ->openable(),
+            FileUpload::make('attachment')
+                ->hiddenLabel()
+                ->disk('public')
+                ->default(function () {
+                    return PurchaseOrder::generateRFQPdf($this->getRecord());
+                })
+                ->acceptedFileTypes([
+                    'image/*',
+                    'application/pdf',
+                ])
+                ->downloadable()
+                ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
                 try {

@@ -54,7 +54,9 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums\DistanceUnit;
 use Webkul\Employee\Enums\Gender;
@@ -72,6 +74,7 @@ use Webkul\Employee\Filament\Resources\EmployeeResource\Pages\ViewEmployee;
 use Webkul\Employee\Filament\Resources\EmployeeResource\RelationManagers\ResumeRelationManager;
 use Webkul\Employee\Filament\Resources\EmployeeResource\RelationManagers\SkillsRelationManager;
 use Webkul\Employee\Models\Calendar;
+use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\Employee;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Filament\Resources\CompanyResource;
@@ -87,7 +90,7 @@ class EmployeeResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?int $navigationSort = 1;
 
@@ -179,7 +182,15 @@ class EmployeeResource extends Resource
                                     ->email(),
                                 Select::make('department_id')
                                     ->label(__('employees::filament/resources/employee.form.sections.fields.department'))
-                                    ->relationship(name: 'department', titleAttribute: 'complete_name')
+                                    ->relationship(
+                                        name: 'department',
+                                        titleAttribute: 'complete_name',
+                                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
                                     ->createOptionForm(fn (Schema $schema) => DepartmentResource::form($schema)),
@@ -654,6 +665,10 @@ class EmployeeResource extends Resource
                                                             ->label(__('employees::filament/resources/employee.form.tabs.private-information.fields.work-permit'))
                                                             ->panelAspectRatio('4:1')
                                                             ->panelLayout('integrated')
+                                                            ->acceptedFileTypes([
+                                                                'image/*',
+                                                                'application/pdf',
+                                                            ])
                                                             ->directory('employees/work-permit')
                                                             ->visibility('private'),
                                                     ])->columns(1),
@@ -684,7 +699,16 @@ class EmployeeResource extends Resource
                                                         Toggle::make('work_permit_scheduled_activity')
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.work-permit-scheduled-activity')),
                                                         Select::make('user_id')
-                                                            ->relationship(name: 'user', titleAttribute: 'name')
+                                                            ->relationship(name: 'user', titleAttribute: 'name', modifyQueryUsing: fn ($query) => $query->withTrashed())
+                                                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                                                return $record->trashed()
+                                                                    ? $record->name.' (Deleted)'
+                                                                    : $record->name;
+                                                            })
+                                                            ->disableOptionWhen(function ($value) {
+                                                                $user = User::withTrashed()->find($value);
+                                                                return $user && $user->trashed();
+                                                            })
                                                             ->searchable()
                                                             ->preload()
                                                             ->label(__('employees::filament/resources/employee.form.tabs.settings.fields.related-user'))
@@ -789,7 +813,7 @@ class EmployeeResource extends Resource
             ->columns([
                 Stack::make([
                     ImageColumn::make('partner.avatar')
-                        ->height(150)
+                        ->imageHeight(150)
                         ->width(200),
                     Stack::make([
                         TextColumn::make('name')
@@ -1295,6 +1319,17 @@ class EmployeeResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->delete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.title'))
+                                    ->body(__('accounts::filament/resources/tax-group.table.bulk-actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -1302,11 +1337,22 @@ class EmployeeResource extends Resource
                                 ->body(__('employees::filament/resources/employee.table.bulk-actions.delete.notification.body'))
                         ),
                     ForceDeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.body'))
+                                ->title(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.success.title'))
+                                ->body(__('employees::filament/resources/employee.table.bulk-actions.force-delete.notification.success.body'))
                         ),
                 ]),
             ]);
@@ -1333,7 +1379,7 @@ class EmployeeResource extends Resource
                                 Group::make([
                                     ImageEntry::make('partner.avatar')
                                         ->hiddenLabel()
-                                        ->height(140)
+                                        ->imageHeight(140)
                                         ->circular(),
                                 ])->columnSpan(1),
                             ]),
@@ -1528,8 +1574,8 @@ class EmployeeResource extends Resource
                                                         ->date('F j, Y')
                                                         ->color(
                                                             fn ($record) => $record->visa_expire && now()->diffInDays($record->visa_expire, false) <= 30
-                                                                ? 'danger'
-                                                                : 'success'
+                                                            ? 'danger'
+                                                            : 'success'
                                                         ),
                                                     TextEntry::make('work_permit_expiration_date')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.work-permit-expiration-date'))
@@ -1538,14 +1584,14 @@ class EmployeeResource extends Resource
                                                         ->date('F j, Y')
                                                         ->color(
                                                             fn ($record) => $record->work_permit_expiration_date && now()->diffInDays($record->work_permit_expiration_date, false) <= 30
-                                                                ? 'danger'
-                                                                : 'success'
+                                                            ? 'danger'
+                                                            : 'success'
                                                         ),
                                                     ImageEntry::make('work_permit')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.work-permit-document'))
                                                         ->columnSpanFull()
                                                         ->placeholder('—')
-                                                        ->height(200),
+                                                        ->imageHeight(200),
                                                 ]),
                                         ])->columnSpan(2),
                                         Group::make([

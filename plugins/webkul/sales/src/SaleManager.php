@@ -15,6 +15,7 @@ use Webkul\Inventory\Facades\Inventory as InventoryFacade;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Move as InventoryMove;
 use Webkul\Inventory\Models\Operation as InventoryOperation;
+use Webkul\Inventory\Models\Product as InventoryProduct;
 use Webkul\Inventory\Models\Rule;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Invoice\Enums as InvoiceEnums;
@@ -156,6 +157,8 @@ class SaleManager
 
         $record->save();
 
+        $record->refresh();
+
         return $record;
     }
 
@@ -203,8 +206,6 @@ class SaleManager
         $line->price_reduce_taxinc = round($line->price_reduce_taxexcl + ($line->price_reduce_taxexcl * ($line->taxes->sum('amount') / 100)), 2); // Todo:: This calculation is wrong
 
         $line->state = $line->order->state;
-
-        $line = $this->computeOrderLineWarehouseId($line);
 
         $line = $this->computeOrderLineDeliveryMethod($line);
 
@@ -286,6 +287,11 @@ class SaleManager
 
         $order->warehouse_id = Warehouse::where('company_id', $order->company_id)->first()?->id;
 
+        optional($order->lines)->each(function ($line) use ($order) {
+            $line->warehouse_id = $order->warehouse_id;
+            $line->save();
+        });
+
         return $order;
     }
 
@@ -314,8 +320,6 @@ class SaleManager
         }
 
         return $order;
-
-        return $record;
     }
 
     public function computeInvoiceStatus(Order $order): Order
@@ -343,17 +347,6 @@ class SaleManager
         }
 
         return $order;
-    }
-
-    public function computeOrderLineWarehouseId(OrderLine $line): OrderLine
-    {
-        if (! Package::isPluginInstalled('inventories')) {
-            return $line;
-        }
-
-        $line->warehouse_id = $line->order->warehouse_id;
-
-        return $line;
     }
 
     public function computeOrderLineDeliveryMethod(OrderLine $line): OrderLine
@@ -782,7 +775,7 @@ class SaleManager
 
             $foundRule = $this->searchPullRule(
                 $line->productPackaging,
-                $line->product,
+                InventoryProduct::find($line->product_id),
                 $line->warehouse,
                 $filters
             );

@@ -7,7 +7,7 @@ use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Support\Enums\Width;
-use Guava\FilamentIconPicker\Forms\IconPicker;
+use Guava\IconPicker\Forms\Components\IconPicker;
 use Webkul\TableViews\Models\TableView;
 use Webkul\TableViews\Models\TableViewFavorite;
 
@@ -28,7 +28,7 @@ class EditViewAction extends Action
             ->model(TableView::class)
             ->fillForm(function (array $arguments): array {
                 $tableViewFavorite = TableViewFavorite::query()
-                    ->where('user_id', auth()->id())
+                    ->where('user_id', filament()->auth()->id())
                     ->where('view_type', 'saved')
                     ->where('view_key', $arguments['view_model']['id'])
                     ->where('filterable_type', $arguments['view_model']['filterable_type'])
@@ -73,7 +73,7 @@ class EditViewAction extends Action
                             'view_type'       => 'saved',
                             'view_key'        => $arguments['view_model']['id'],
                             'filterable_type' => $record->filterable_type,
-                            'user_id'         => auth()->id(),
+                            'user_id'         => filament()->auth()->id(),
                         ], [
                             'is_favorite' => $data['is_favorite'],
                         ]

@@ -51,27 +51,31 @@ class SendPOEmailAction extends Action
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.message'))
                     ->required()
                     ->default(<<<MD
-Dear **{$this->getRecord()->partner->name}**  
+Dear **{$this->getRecord()->partner->name}**
 
-Here is in attachment a purchase order **{$this->getRecord()->name}** amounting to **{$this->getRecord()->total_amount}**.  
+Here is in attachment a purchase order **{$this->getRecord()->name}** amounting to **{$this->getRecord()->total_amount}**.
 
-The receipt is expected for **{$this->getRecord()->planned_at}**.  
+The receipt is expected for **{$this->getRecord()->planned_at}**.
 
-Could you please acknowledge the receipt of this order?  
+Could you please acknowledge the receipt of this order?
 
-Best regards,  
+Best regards,
 
---  
-{$userName}  
+--
+{$userName}
 MD),
-                FileUpload::make('attachment')
-                    ->hiddenLabel()
-                    ->disk('public')
-                    ->default(function () {
-                        return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
-                    })
-                    ->downloadable()
-                    ->openable(),
+            FileUpload::make('attachment')
+                ->hiddenLabel()
+                ->disk('public')
+                ->default(function () {
+                    return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
+                })
+                ->acceptedFileTypes([
+                    'image/*',
+                    'application/pdf',
+                ])
+                ->downloadable()
+                ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
                 try {

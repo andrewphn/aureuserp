@@ -5,7 +5,6 @@ namespace Webkul\TimeOff\Filament\Widgets;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -14,13 +13,14 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Saade\FilamentFullCalendar\Actions\CreateAction;
-use Saade\FilamentFullCalendar\Actions\DeleteAction;
-use Saade\FilamentFullCalendar\Actions\EditAction;
-use Saade\FilamentFullCalendar\Actions\ViewAction;
-use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
+use Webkul\FullCalendar\Filament\Actions\CreateAction;
+use Webkul\FullCalendar\Filament\Actions\DeleteAction;
+use Webkul\FullCalendar\Filament\Actions\EditAction;
+use Webkul\FullCalendar\Filament\Actions\ViewAction;
+use Webkul\FullCalendar\Filament\Widgets\FullCalendarWidget;
 use Webkul\TimeOff\Enums\RequestDateFromPeriod;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Models\Leave;
@@ -28,6 +28,11 @@ use Webkul\TimeOff\Models\Leave;
 class OverviewCalendarWidget extends FullCalendarWidget
 {
     public Model|string|null $model = Leave::class;
+
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('time-off::filament/widgets/overview-calendar-widget.heading.title');
+    }
 
     public function config(): array
     {
@@ -89,6 +94,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'] ?? null;
 
                     $record->update($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/overview-calendar-widget.modal-actions.edit.notification.title'))
+                        ->body(__('time-off::filament/widgets/overview-calendar-widget.modal-actions.edit.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Schema $schema, array $arguments, $livewire) {
@@ -114,7 +125,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
             ->modalIcon('heroicon-o-lifebuoy')
             ->label(__('time-off::filament/widgets/overview-calendar-widget.view-action.title'))
             ->modalDescription(__('time-off::filament/widgets/overview-calendar-widget.view-action.description'))
-            ->infolist($this->infolist());
+            ->schema($this->infolist());
     }
 
     protected function headerActions(): array
@@ -181,6 +192,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
                     $data['date_to'] = $data['request_date_to'];
 
                     Leave::create($data);
+
+                    Notification::make()
+                        ->success()
+                        ->title(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.notification.title'))
+                        ->body(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.notification.body'))
+                        ->send();
                 })
                 ->mountUsing(
                     function (Schema $schema, array $arguments) {
@@ -231,12 +248,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
             Toggle::make('request_unit_half')
                 ->live()
                 ->label(__('time-off::filament/widgets/overview-calendar-widget.form.fields.half-day')),
-            Placeholder::make('requested_days')
+            TextEntry::make('requested_days')
                 ->label(__('time-off::filament/widgets/overview-calendar-widget.form.fields.requested-days'))
                 ->live()
                 ->inlineLabel()
                 ->reactive()
-                ->content(function ($state, Get $get): string {
+                ->state(function ($state, Get $get): string {
                     if ($get('request_unit_half')) {
                         return '0.5 day';
                     }

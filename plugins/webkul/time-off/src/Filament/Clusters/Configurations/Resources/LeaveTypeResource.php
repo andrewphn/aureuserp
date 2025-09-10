@@ -119,6 +119,7 @@ class LeaveTypeResource extends Resource
                                     ->hiddenLabel()
                                     ->schema([
                                         ColorPicker::make('color')
+                                            ->required()
                                             ->label(__('time-off::filament/clusters/configurations/resources/leave-type.form.sections.display-option.fields.color'))
                                             ->hexColor(),
                                     ]),

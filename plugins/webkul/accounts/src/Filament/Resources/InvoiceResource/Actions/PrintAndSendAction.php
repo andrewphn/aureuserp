@@ -70,9 +70,13 @@ class PrintAndSendAction extends Action
                         ->hiddenLabel(),
                     FileUpload::make('files')
                         ->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.form.files'))
+                        ->acceptedFileTypes([
+                            'image/*',
+                            'application/pdf',
+                        ])                    
                         ->downloadable()
                         ->openable()
-                        ->multiple()
+                        ->multiple()  
                         ->disk('public')
                         ->hiddenLabel(),
                 ]);

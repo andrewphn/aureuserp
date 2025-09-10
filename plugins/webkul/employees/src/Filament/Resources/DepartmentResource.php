@@ -19,7 +19,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Panel;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Group;
@@ -36,12 +38,14 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\CreateDepartment;
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\EditDepartment;
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ListDepartments;
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ViewDepartment;
+use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ManageEmployee;
 use Webkul\Employee\Models\Department;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Support\Models\Company;
@@ -53,6 +57,8 @@ class DepartmentResource extends Resource
     protected static ?string $model = Department::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
     {
@@ -100,10 +106,20 @@ class DepartmentResource extends Resource
                                             ->live(onBlur: true),
                                         Select::make('parent_id')
                                             ->label(__('employees::filament/resources/department.form.sections.general.fields.parent-department'))
-                                            ->relationship('parent', 'complete_name')
+                                            ->relationship(
+                                                name: 'parent',
+                                                titleAttribute: 'complete_name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(
+                                                fn (Model $record): string => $record->complete_name.($record->trashed() ? ' (Deleted)' : ''),
+                                            )
+                                            ->disableOptionWhen(
+                                                fn (string $label): bool => str_contains($label, ' (Deleted)'),
+                                            )
                                             ->searchable()
                                             ->preload()
-                                            ->live(onBlur: true),
+                                            ->live(),
                                         Select::make('manager_id')
                                             ->label(__('employees::filament/resources/department.form.sections.general.fields.manager'))
                                             ->relationship('manager', 'name')
@@ -307,6 +323,7 @@ class DepartmentResource extends Resource
                                             ->placeholder('—')
                                             ->label(__('employees::filament/resources/department.infolist.sections.general.entries.color')),
                                         Fieldset::make(__('employees::filament/resources/department.infolist.sections.general.entries.hierarchy-title'))
+                                            ->hidden(fn (Department $record): bool => $record->parent === null)
                                             ->schema([
                                                 TextEntry::make('hierarchy')
                                                     ->label('')
@@ -331,6 +348,7 @@ class DepartmentResource extends Resource
     protected static function findRootDepartment(Department $department): Department
     {
         $current = $department;
+
         while ($current->parent_id) {
             $current = $current->parent;
         }
@@ -419,6 +437,15 @@ class DepartmentResource extends Resource
     public static function getSlug(?Panel $panel = null): string
     {
         return 'employees/departments';
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewDepartment::class,
+            EditDepartment::class,
+            ManageEmployee::class,
+        ]);
     }
 
     public static function getPages(): array

@@ -34,6 +34,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
@@ -93,7 +94,15 @@ class OperationResource extends Resource
                     ->schema([
                         Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.receive-from'))
-                            ->relationship('partner', 'name')
+                            ->relationship(
+                                name: 'partner',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed()
+                            )
+                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                            })
+                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                             ->searchable()
                             ->preload()
                             ->createOptionForm(fn (Schema $schema): Schema => PartnerResource::form($schema))
@@ -308,8 +317,8 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.source-document')),
                 Group::make('operationType.name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.operation-type')),
-                Group::make('schedule_at')
-                    ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.schedule-at'))
+                Group::make('scheduled_at')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.scheduled-at'))
                     ->date(),
                 Group::make('created_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.table.groups.created-at'))
@@ -573,10 +582,7 @@ class OperationResource extends Resource
             ->columns(1);
     }
 
-    /**
-     * @param  array<mixed>  $parameters
-     */
-    public static function getUrl(string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null): string
+    public static function getUrl(?string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
     {
         return match ($parameters['record']?->operationType->type) {
             Enums\OperationType::INCOMING => ReceiptResource::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
@@ -590,21 +596,54 @@ class OperationResource extends Resource
     {
         return Repeater::make('moves')
             ->hiddenLabel()
-            ->relationship()
+            ->relationship(
+                modifyQueryUsing: fn (Builder $query) => $query->with([
+                    'product' => fn ($q) => $q->withTrashed(),
+                    'finalLocation',
+                    'uom',
+                    'productPackaging',
+                ])
+            )
             ->schema([
                 Select::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.product'))
-                    ->relationship('product', 'name')
                     ->relationship(
-                        'product',
-                        'name',
-                        fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
+                        name: 'product',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) => $query
+                            ->withTrashed()
+                            ->where('type', ProductType::GOODS)
+                            ->whereNull('is_configurable'),
                     )
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function ($value, $state, $component, $label) {
+                        if (str_contains($label, ' (Deleted)')) {
+                            return true;
+                        }
+
+                        $repeater = $component->getParentRepeater();
+
+                        if (! $repeater) {
+                            return false;
+                        }
+
+                        return collect($repeater->getState())
+                            ->pluck(
+                                (string) str($component->getStatePath())
+                                    ->after("{$repeater->getStatePath()}.")
+                                    ->after('.'),
+                            )
+                            ->flatten()
+                            ->diff(Arr::wrap($state))
+                            ->filter(fn (mixed $siblingItemState): bool => filled($siblingItemState))
+                            ->contains($value);
+                    })
                     ->distinct()
-                    ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                     ->live()
                     ->afterStateUpdated(function (Set $set, Get $get) {
                         static::afterProductUpdated($set, $get);
@@ -874,7 +913,6 @@ class OperationResource extends Resource
                                 titleAttribute: 'full_name',
                                 modifyQueryUsing: fn (Builder $query) => $query
                                     ->withTrashed()
-                                    ->where('type', '<>', LocationType::VIEW)
                                     ->where(function ($query) use ($move) {
                                         $query->where('id', $move->destination_location_id)
                                             ->orWhere('parent_id', $move->destination_location_id);
@@ -890,12 +928,10 @@ class OperationResource extends Resource
                             ->preload()
                             ->required()
                             ->live()
-                            ->default($move->destination_location_id)
                             ->afterStateUpdated(function (Set $set) {
                                 $set('result_package_id', null);
                             })
-                            ->visible($move->destinationLocation->type == LocationType::INTERNAL)
-                            ->disabled(fn (): bool => in_array($move->state, [MoveState::DONE, MoveState::CANCELED])),
+                            ->disabled(fn (): bool => in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                         Select::make('result_package_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.lines.fields.package'))
                             ->relationship(
@@ -959,6 +995,7 @@ class OperationResource extends Resource
                         $data['creator_id'] = Auth::id();
                         $data['product_id'] = $move->product_id;
                         $data['company_id'] = $move->company_id;
+                        $data['destination_location_id'] = $data['destination_location_id'] ?? $move->destination_location_id;
 
                         return $data;
                     })
@@ -1109,7 +1146,7 @@ class OperationResource extends Resource
     {
         $product = Product::find($productId);
 
-        $packagings = Packaging::where('product_id', $productId)
+        $packagings = Packaging::where('product_id', $product?->id)
             ->orderByDesc('qty')
             ->get();
 

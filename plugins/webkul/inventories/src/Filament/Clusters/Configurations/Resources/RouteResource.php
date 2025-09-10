@@ -31,6 +31,7 @@ use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
@@ -95,7 +96,18 @@ class RouteResource extends Resource
                             ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;']),
                         Select::make('company_id')
                             ->label(__('inventories::filament/clusters/configurations/resources/route.form.sections.general.fields.company'))
-                            ->relationship(name: 'company', titleAttribute: 'name')
+                            ->relationship(
+                                name: 'company',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                            )
+                            ->getOptionLabelFromRecordUsing(
+                                fn (Model $record): string => $record->name.($record->trashed() ? ' (Deleted)' : ''),
+                            )
+                            ->disableOptionWhen(
+                                fn (string $label): bool => str_contains($label, ' (Deleted)'),
+                            )
+                            ->live()
                             ->searchable()
                             ->preload()
                             ->default(Auth::user()->default_company_id),
