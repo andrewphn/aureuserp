@@ -40,6 +40,10 @@ class SaleManager
     {
         $record = $this->sendByEmail($record, $data);
 
+        $record->update([
+            'state' => Enums\OrderState::SENT,
+        ]);
+        
         $record = $this->computeSaleOrder($record);
 
         return $record;
@@ -438,7 +442,7 @@ class SaleManager
         foreach ($partners as $key => $partner) {
             $payload = [
                 'record_name'    => $record->name,
-                'model_name'     => Enums\OrderState::options()[$record->state],
+                'model_name' => $record->state->getLabel(),
                 'subject'        => $data['subject'],
                 'description'    => $data['description'],
                 'to'             => [
@@ -453,7 +457,7 @@ class SaleManager
                 payload: $payload,
                 attachments: [
                     [
-                        'path' => asset(Storage::url($data['file'])),
+                        'path' => $data['file'],
                         'name' => basename($data['file']),
                     ],
                 ]
