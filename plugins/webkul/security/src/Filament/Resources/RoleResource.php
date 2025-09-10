@@ -142,11 +142,7 @@ class RoleResource extends RolesRoleResource
                 ->label(__('filament-shield::filament-shield.resources'))
                 ->visible(fn (): bool => Utils::isResourceTabEnabled())
                 ->badge(static::getResourceTabBadgeCount())
-                ->schema([
-                    Grid::make()
-                        ->schema(static::getResourceEntitiesSchema())
-                        ->columns(static::shield()->getGridColumns()),
-                ]);
+                ->schema(static::getPluginResourceEntitiesSchema());
     }
 
     public static function getPluginResources(): ?array
@@ -154,6 +150,67 @@ class RoleResource extends RolesRoleResource
         return collect(static::getResources())
             ->groupBy(function ($value, $key) {
                 return explode('\\', $key)[1] ?? 'Unknown';
+            })
+            ->toArray();
+    }
+
+    public static function getResources(): ?array
+    {
+        return FilamentShield::discoverResources()
+            ->reject(function ($resource) {
+                if ($resource == 'BezhanSalleh\FilamentShield\Resources\RoleResource') {
+                    return true;
+                }
+
+                if (Utils::getConfig()->resources->exclude) {
+                    return in_array(
+                        Str::of($resource)->afterLast('\\'),
+                        Utils::getConfig()->resources->exclude
+                    );
+                }
+            })
+            ->mapWithKeys(function (string $resource) {
+                return [
+                    $resource => [
+                        'model'        => str($resource::getModel())->afterLast('\\')->toString(),
+                        'modelFqcn'    => str($resource::getModel())->toString(),
+                        'resourceFqcn' => $resource,
+                    ],
+                ];
+            })
+            ->sortKeys()
+            ->toArray();
+    }
+
+    public static function getPluginResourceEntitiesSchema(): ?array
+    {
+        return collect(static::getPluginResources())
+            ->sortKeys()
+            ->map(function ($plugin, $key) {
+                return Section::make($key)
+                    ->collapsible()
+                    ->schema([
+                        Grid::make()
+                            ->schema(function () use ($plugin) {
+                                return collect($plugin)
+                                    ->map(function ($entity) {
+                                        $fieldsetLabel = strval(
+                                            static::shield()->hasLocalizedPermissionLabels()
+                                                ? FilamentShield::getLocalizedResourceLabel($entity['resourceFqcn'])
+                                                : $entity['model']
+                                        );
+
+                                        return Fieldset::make($fieldsetLabel)
+                                            ->schema([
+                                                static::getCheckBoxListComponentForResource($entity)
+                                                    ->hiddenLabel(),
+                                            ])
+                                            ->columnSpan(static::shield()->getSectionColumnSpan());
+                                    })
+                                    ->toArray();
+                            })
+                            ->columns(static::shield()->getGridColumns()),
+                    ]);
             })
             ->toArray();
     }
