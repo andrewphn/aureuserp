@@ -14,7 +14,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Enums\CompanyStatus;
@@ -333,7 +332,6 @@ class CompanyResource extends Resource
                     ->collapsible(),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\SelectFilter::make('is_active')
                     ->label(__('security::filament/resources/company.table.filters.status'))
                     ->options(CompanyStatus::options()),
@@ -535,13 +533,5 @@ class CompanyResource extends Resource
             'view'   => Pages\ViewCompany::route('/{record}'),
             'edit'   => Pages\EditCompany::route('/{record}/edit'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }
