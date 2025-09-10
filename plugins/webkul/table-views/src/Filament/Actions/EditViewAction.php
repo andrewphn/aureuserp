@@ -50,9 +50,7 @@ class EditViewAction extends Action
                 IconPicker::make('icon')
                     ->label(__('table-views::filament/actions/edit-view.form.icon'))
                     ->sets(['heroicons'])
-                    ->columns(4)
-                    ->preload()
-                    ->optionsLimit(50),
+                    ->columns(4),
                 Toggle::make('is_favorite')
                     ->label(__('table-views::filament/actions/edit-view.form.add-to-favorites'))
                     ->helperText(__('table-views::filament/actions/edit-view.form.add-to-favorites-help')),
