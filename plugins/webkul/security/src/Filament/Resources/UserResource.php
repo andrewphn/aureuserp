@@ -311,7 +311,7 @@ class UserResource extends Resource
                                 ->body(__('security::filament/resources/user.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
-                        ->hidden(fn ($record) => $record->trashed() || $record->hasRole('admin'))
+                        ->hidden(fn ($record) => $record->trashed() || ! self::canDeleteUser($record))
                         ->successNotification(
                             Notification::make()
                                 ->success()
