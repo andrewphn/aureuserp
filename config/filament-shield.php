@@ -100,7 +100,7 @@ return [
 
     'permissions' => [
         'separator' => '_',
-        'case' => 'snake',
+        'case' => 'lower_snake',
         'generate' => true,
     ],
 
@@ -120,15 +120,15 @@ return [
         'merge' => false,
         'generate' => false,
         'methods' => [
-            'viewAny', 'view', 'create', 'update', 'delete', 'restore',
-            'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',
+            'view_any', 'view', 'create', 'update', 'delete', 'restore',
+            'force_delete', 'force_delete_any', 'restore_any', 'replicate', 'reorder',
         ],
         'single_parameter_methods' => [
-            'viewAny',
+            'view_any',
             'create',
-            'deleteAny',
-            'forceDeleteAny',
-            'restoreAny',
+            'delete_any',
+            'force_delete_any',
+            'restore_any',
             'reorder',
         ],
     ],
@@ -163,16 +163,11 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage' => [
-            \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class => [
-                'viewAny',
-                'view',
-                'create',
-                'update',
-                'delete',
-            ],
+            // Only configure your custom resources here if needed
+            // Don't include any RoleResource configuration to avoid conflicts
         ],
         'exclude' => [
-            //
+            \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class,
         ],
     ],
 

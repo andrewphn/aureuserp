@@ -158,7 +158,7 @@ class RoleResource extends RolesRoleResource
     {
         return FilamentShield::discoverResources()
             ->reject(function ($resource) {
-                if ($resource == 'BezhanSalleh\FilamentShield\Resources\RoleResource') {
+                if ($resource == 'BezhanSalleh\FilamentShield\Resources\Roles\RoleResource') {
                     return true;
                 }
 
