@@ -2,13 +2,13 @@
     <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         @foreach ($records as $record)
             <div class="max-w-md overflow-hidden bg-white shadow-md rounded-xl md:max-w-2xl">
-                <a href="{{ $record->category ? self::getResource()::getUrl('posts.view', ['parent' => $record->category->slug, 'record' => $record->slug]) : self::getResource()::getUrl('index')}}">
+                <a href="{{ $record->category ? self::getResource()::getUrl('posts.view', ['category' => $record->category->slug, 'record' => $record->slug]) : self::getResource()::getUrl('index')}}">
                     <div class="md:shrink-0">
                         @if ($record->image_url)
                             <img class="object-cover w-full h-48 md:h-full md:w-48" src="{{$record->image_url}}" alt="Blog post featured image" style="aspect-ratio: 2 / 1" />
                         @else
                             <div class="object-cover w-full h-48 rounded-md bg-primary-500 md:h-full md:w-48" style="aspect-ratio: 2 / 1"></div>
-                        @endif
+                        @endifgit
                     </div>
 
                     <div class="p-6">
