@@ -588,6 +588,7 @@ class OperationResource extends Resource
             Enums\OperationType::INCOMING => ReceiptResource::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
             Enums\OperationType::INTERNAL => InternalResource::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
             Enums\OperationType::OUTGOING => DeliveryResource::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
+            Enums\OperationType::DROPSHIP => DropshipResource::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
             default                       => parent::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
         };
     }

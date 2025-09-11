@@ -2,6 +2,7 @@
 
 namespace Webkul\TimeOff\Filament\Clusters\Configurations\Resources;
 
+use Carbon\Carbon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -28,7 +29,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\TimeOff\Enums\AccruedGainTime;
 use Webkul\TimeOff\Enums\CarryoverDate;
-use Webkul\TimeOff\Enums\CarryoverDay;
 use Webkul\TimeOff\Enums\CarryoverMonth;
 use Webkul\TimeOff\Filament\Clusters\Configurations;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\AccrualPlanResource\Pages\CreateAccrualPlan;
@@ -98,13 +98,28 @@ class AccrualPlanResource extends Resource
                                     ->schema([
                                         Select::make('carryover_day')
                                             ->hiddenLabel()
-                                            ->options(CarryoverDay::class)
+                                            ->options(function (Get $get) {
+                                                $monthValue = $get('carryover_month') ?? CarryoverMonth::JAN->value;
+
+                                                $monthEnum = CarryoverMonth::from($monthValue);
+
+                                                $monthNumber = $monthEnum->toNumber();
+                                                $year = now()->year;
+
+                                                $daysInMonth = Carbon::createFromDate($year, $monthNumber, 1)->daysInMonth;
+
+                                                return collect(range(1, $daysInMonth))
+                                                    ->mapWithKeys(fn ($day) => [$day => $day])
+                                                    ->toArray();
+                                            })
+
                                             ->maxWidth(Width::ExtraSmall)
-                                            ->default(CarryoverDay::DAY_1->value)
+                                            ->default(1)
                                             ->required(),
                                         Select::make('carryover_month')
                                             ->hiddenLabel()
                                             ->options(CarryoverMonth::class)
+                                            ->reactive()
                                             ->default(CarryoverMonth::JAN->value)
                                             ->required(),
                                     ])->columns(2),

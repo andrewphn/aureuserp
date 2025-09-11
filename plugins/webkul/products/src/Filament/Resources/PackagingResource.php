@@ -52,7 +52,10 @@ class PackagingResource extends Resource
                     ->relationship(
                         'product',
                         'name',
-                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                        modifyQueryUsing: fn (Builder $query) => $query
+                            ->withTrashed()
+                            ->where('type', 'goods')
+                            ->orderBy('id'),
                     )
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->name.($record->trashed() ? ' (Deleted)' : '');

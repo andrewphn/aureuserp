@@ -237,7 +237,13 @@ class InvoiceResource extends Resource
                                     ->schema([
                                         Select::make('company_id')
                                             ->label(__('accounts::filament/resources/invoice.form.tabs.other-information.fieldset.additional-information.fields.company'))
-                                            ->relationship('company', 'name')
+                                            ->relationship('company', 'name', modifyQueryUsing: fn (Builder $query) => $query->withTrashed())
+                                            ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                            })
+                                            ->disableOptionWhen(function ($label) {
+                                                return str_contains($label, ' (Deleted)');
+                                            })
                                             ->searchable()
                                             ->preload()
                                             ->reactive()
