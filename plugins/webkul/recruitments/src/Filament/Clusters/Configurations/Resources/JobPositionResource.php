@@ -66,24 +66,6 @@ class JobPositionResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/job-position.navigation.group');
     }
 
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::recruitment',
-            'view_any::recruitment',
-            'create::recruitment',
-            'update::recruitment',
-            'restore::recruitment',
-            'restore_any::recruitment',
-            'replicate::recruitment',
-            'reorder::recruitment',
-            'delete::recruitment',
-            'delete_any::recruitment',
-            'force_delete::recruitment',
-            'force_delete_any::recruitment',
-        ];
-    }
-
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [

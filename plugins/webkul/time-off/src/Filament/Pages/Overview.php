@@ -2,14 +2,11 @@
 
 namespace Webkul\TimeOff\Filament\Pages;
 
-use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Webkul\TimeOff\Filament\Widgets\OverviewCalendarWidget;
 
 class Overview extends BaseDashboard
 {
-    use HasPageShield;
-
     protected static string $routePath = 'time-off';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar';

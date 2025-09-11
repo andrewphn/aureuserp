@@ -2,7 +2,6 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Tables\Table;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityTypeResource\Pages\CreateActivityType;
@@ -12,7 +11,7 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityTypeRe
 use Webkul\Recruitment\Models\ActivityType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
-class ActivityTypeResource extends BaseActivityTypeResource implements HasShieldPermissions
+class ActivityTypeResource extends BaseActivityTypeResource
 {
     protected static ?string $model = ActivityType::class;
 
@@ -25,24 +24,6 @@ class ActivityTypeResource extends BaseActivityTypeResource implements HasShield
     public static function getNavigationGroup(): string
     {
         return __('recruitments::filament/clusters/configurations/resources/activity-type.navigation.group');
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::recruitment',
-            'view_any::recruitment',
-            'create::recruitment',
-            'update::recruitment',
-            'restore::recruitment',
-            'restore_any::recruitment',
-            'replicate::recruitment',
-            'reorder::recruitment',
-            'delete::recruitment',
-            'delete_any::recruitment',
-            'force_delete::recruitment',
-            'force_delete_any::recruitment',
-        ];
     }
 
     public static function table(Table $table): Table

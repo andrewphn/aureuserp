@@ -39,8 +39,7 @@ class InvoicePlugin implements Plugin
                             ->url(fn () => Products::getUrl())
                             ->icon('heroicon-o-wrench')
                             ->group('Invoices')
-                            ->sort(4)
-                            ->visible(fn () => Products::canAccess()),
+                            ->sort(4),
                     ]);
             });
     }

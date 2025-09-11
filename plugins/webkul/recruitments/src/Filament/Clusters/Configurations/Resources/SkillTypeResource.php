@@ -2,7 +2,6 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource as BaseSkillTypeResource;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\SkillTypeResource\Pages\EditSkillType;
@@ -10,7 +9,7 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\SkillTypeResou
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\SkillTypeResource\Pages\ViewSkillType;
 use Webkul\Recruitment\Models\SkillType;
 
-class SkillTypeResource extends BaseSkillTypeResource implements HasShieldPermissions
+class SkillTypeResource extends BaseSkillTypeResource
 {
     protected static ?string $model = SkillType::class;
 
@@ -19,24 +18,6 @@ class SkillTypeResource extends BaseSkillTypeResource implements HasShieldPermis
     public static function getNavigationGroup(): string
     {
         return __('recruitments::filament/clusters/configurations/resources/skill-type.navigation.group');
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::recruitment',
-            'view_any::recruitment',
-            'create::recruitment',
-            'update::recruitment',
-            'restore::recruitment',
-            'restore_any::recruitment',
-            'replicate::recruitment',
-            'reorder::recruitment',
-            'delete::recruitment',
-            'delete_any::recruitment',
-            'force_delete::recruitment',
-            'force_delete_any::recruitment',
-        ];
     }
 
     public static function getPages(): array
