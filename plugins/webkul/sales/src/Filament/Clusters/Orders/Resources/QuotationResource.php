@@ -291,7 +291,7 @@ class QuotationResource extends Resource
                             ]),
                     ]),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -848,7 +848,8 @@ class QuotationResource extends Resource
                                     ->hiddenLabel(),
                             ]),
                     ]),
-            ]);
+            ])
+                ->columns(1);
     }
 
     public static function getOptionalProductRepeater(Get $parentGet, Set $parentSet): Repeater
@@ -996,7 +997,7 @@ class QuotationResource extends Resource
                                 ])->hidden(fn($record) => ! $record ?? false),
                             ]),
                     ])
-                    ->columns(2),
+                    ->columns(1),
             ]);
     }
 
@@ -1202,7 +1203,7 @@ class QuotationResource extends Resource
                                     ->default(0),
                             ]),
                     ])
-                    ->columns(2),
+                    ->columns(1),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
             ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
