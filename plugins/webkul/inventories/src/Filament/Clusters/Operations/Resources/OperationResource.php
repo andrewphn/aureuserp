@@ -646,10 +646,8 @@ class OperationResource extends Resource
                     })
                     ->distinct()
                     ->live()
-                    ->afterStateUpdated(function (Set $set, Get $get) {
-                        static::afterProductUpdated($set, $get);
-                    })
-                    ->disabled(fn (Move $move): bool => $move->id && $move->state !== MoveState::DRAFT),
+                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductUpdated($set, $get))
+                    ->disabled(fn (?Move $record): bool => $record?->id && $record?->state !== MoveState::DRAFT),
                 Select::make('final_location_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.final-location'))
                     ->relationship(
@@ -695,10 +693,8 @@ class OperationResource extends Resource
                     ->default(0)
                     ->required()
                     ->live()
-                    ->afterStateUpdated(function (Set $set, Get $get) {
-                        static::afterProductUOMQtyUpdated($set, $get);
-                    })
-                    ->disabled(fn (Move $move): bool => $move->id && $move->state !== MoveState::DRAFT),
+                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductUOMQtyUpdated($set, $get))
+                    ->disabled(fn (?Move $record): bool => $record?->id && $record?->state !== MoveState::DRAFT),
                 TextInput::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.quantity'))
                     ->numeric()
@@ -706,7 +702,7 @@ class OperationResource extends Resource
                     ->maxValue(99999999999)
                     ->default(0)
                     ->required()
-                    ->visible(fn (Move $move): bool => $move->id && $move->state !== MoveState::DRAFT)
+                    ->visible(fn (?Move $record): bool => $record?->id && $record?->state !== MoveState::DRAFT)
                     ->disabled(fn ($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED]))
                     ->suffixAction(fn ($record) => static::getMoveLinesAction($record)),
                 Select::make('uom_id')
