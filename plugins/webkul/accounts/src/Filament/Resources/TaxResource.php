@@ -113,7 +113,8 @@ class TaxResource extends Resource
                         RichEditor::make('invoice_legal_notes')
                             ->label(__('accounts::filament/resources/tax.form.sections.field-set.fields.legal-notes')),
                     ]),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -328,7 +329,7 @@ class TaxResource extends Resource
                                 ]),
                         ])->columnSpan(1),
                     ]),
-            ]);
+            ])->columns(1);
     }
 
     public static function getPages(): array

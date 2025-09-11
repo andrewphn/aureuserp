@@ -35,13 +35,12 @@ class PaymentTermResource extends BasePaymentTermResource
         return __('invoices::filament/clusters/configurations/resources/payment-term.navigation.group');
     }
 
-
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
-            Pages\ViewPaymentTerm::class,
-            Pages\EditPaymentTerm::class,
-            Pages\ManagePaymentDueTerm::class,
+            ViewPaymentTerm::class,
+            EditPaymentTerm::class,
+            ManagePaymentDueTerm::class,
         ]);
     }
 

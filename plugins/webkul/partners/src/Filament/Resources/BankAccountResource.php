@@ -75,7 +75,11 @@ class BankAccountResource extends Resource
                 Select::make('partner_id')
                     ->label(__('partners::filament/resources/bank-account.form.account-holder'))
                     ->relationship('partner', 'name')
-                    ->default(fn ($livewire) => $livewire->getRecord()->id)
+                    ->default(function ($livewire) {
+                        if (method_exists($livewire, 'getRecord')) {
+                            return $livewire->getRecord()?->partner_id;
+                        }
+                    })
                     ->required()
                     ->searchable()
                     ->preload(),

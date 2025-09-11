@@ -251,7 +251,7 @@ class BillResource extends Resource
                     ])
                     ->persistTabInQueryString(),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -443,7 +443,8 @@ class BillResource extends Resource
                             ]),
                     ])
                     ->persistTabInQueryString(),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function getPages(): array
@@ -480,7 +481,7 @@ class BillResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->getOptionLabelUsing(function ($record) {
+                                    ->getOptionLabelFromRecordUsing(function (Model $record) {
                                         if ($record->product) {
                                             return $record->product->name;
                                         }
@@ -566,7 +567,7 @@ class BillResource extends Resource
                                     ->default(0),
                             ]),
                     ])
-                    ->columns(2),
+                    ->columns(1),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record))
             ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record));

@@ -58,7 +58,7 @@ class TaxGroupResource extends Resource
                             ->label(__('accounts::filament/resources/tax-group.form.sections.fields.preceding-subtotal'))
                             ->maxLength(255),
                     ])->columns(2),
-            ]);
+            ])->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -183,7 +183,8 @@ class TaxGroupResource extends Resource
                             ->placeholder('-')
                             ->label(__('accounts::filament/resources/tax-group.infolist.sections.entries.preceding-subtotal')),
                     ])->columns(2),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function getPages(): array

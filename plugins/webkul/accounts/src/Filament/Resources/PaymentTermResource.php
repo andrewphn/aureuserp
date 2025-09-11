@@ -101,7 +101,7 @@ class PaymentTermResource extends Resource
                         RichEditor::make('note')
                             ->label(__('accounts::filament/resources/payment-term.form.sections.fields.note')),
                     ]),
-            ]);
+            ])->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -240,7 +240,7 @@ class PaymentTermResource extends Resource
                                     ->placeholder('—'),
                             ]),
                     ]),
-            ]);
+            ])->columns(1);
     }
 
     public static function getRecordSubNavigation(Page $page): array
