@@ -2,7 +2,6 @@
 
 namespace Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Webkul\Product\Filament\Resources\CategoryResource;
@@ -10,7 +9,7 @@ use Webkul\Purchase\Filament\Admin\Clusters\Configurations;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductCategoryResource\Pages;
 use Webkul\Purchase\Models\Category;
 
-class ProductCategoryResource extends CategoryResource implements HasShieldPermissions
+class ProductCategoryResource extends CategoryResource
 {
     protected static ?string $model = Category::class;
 
@@ -32,24 +31,6 @@ class ProductCategoryResource extends CategoryResource implements HasShieldPermi
     public static function getNavigationLabel(): string
     {
         return __('purchases::filament/admin/clusters/configurations/resources/product-category.navigation.title');
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::purchase',
-            'view_any::purchase',
-            'create::purchase',
-            'update::purchase',
-            'restore::purchase',
-            'restore_any::purchase',
-            'replicate::purchase',
-            'reorder::purchase',
-            'delete::purchase',
-            'delete_any::purchase',
-            'force_delete::purchase',
-            'force_delete_any::purchase',
-        ];
     }
 
     public static function getSubNavigationPosition(): SubNavigationPosition
