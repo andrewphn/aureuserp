@@ -294,7 +294,7 @@ class InvoiceResource extends Resource
                             ]),
                     ]),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -848,7 +848,7 @@ class InvoiceResource extends Resource
                                     ->default(0),
                             ]),
                     ])
-                    ->columns(2),
+                    ->columns(1),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record))
             ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record));

@@ -40,7 +40,7 @@ class ListTasks extends ListRecords
             'open_tasks' => PresetView::make(__('projects::filament/resources/task/pages/list-tasks.tabs.open-tasks'))
                 ->icon('heroicon-s-bolt')
                 ->favorite()
-                ->default()
+                ->setAsDefault()
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotIn('state', [
                     TaskState::CANCELLED,
                     TaskState::DONE,

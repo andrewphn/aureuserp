@@ -28,7 +28,7 @@ class CustomerResource extends BaseCustomerResource
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {

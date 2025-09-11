@@ -2,6 +2,7 @@
 
 namespace Webkul\Product\Filament\Resources;
 
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -61,6 +62,8 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function form(Schema $schema): Schema
     {

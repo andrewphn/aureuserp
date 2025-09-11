@@ -30,7 +30,7 @@ class PurchaseOrderResource extends OrderResource
 
     protected static ?string $cluster = Orders::class;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
     {

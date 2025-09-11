@@ -22,7 +22,7 @@ class CreditNotesResource extends BaseCreditNoteResource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {

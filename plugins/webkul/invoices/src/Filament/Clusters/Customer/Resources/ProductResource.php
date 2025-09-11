@@ -20,7 +20,7 @@ class ProductResource extends BaseProductResource
 
     protected static ?string $cluster = Customer::class;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static bool $shouldRegisterNavigation = true;
 

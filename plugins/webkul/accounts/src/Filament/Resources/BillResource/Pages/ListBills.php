@@ -30,7 +30,7 @@ class ListBills extends BaseListBills
         return [
             'bill' => PresetView::make(__('accounts::filament/resources/bill/pages/list-bill.tabs.bills'))
                 ->favorite()
-                ->default()
+                ->setAsDefault()
                 ->icon('heroicon-s-receipt-percent')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('move_type', MoveType::IN_INVOICE)),
             ...Arr::except(parent::getPresetTableViews(), 'invoice'),

@@ -23,7 +23,7 @@ class QuotationResource extends OrderResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?int $navigationSort = 1;
 

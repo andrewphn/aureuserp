@@ -21,7 +21,7 @@ class PaymentsResource extends BasePaymentsResource
 
     protected static ?string $cluster = Customer::class;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {

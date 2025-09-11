@@ -22,7 +22,7 @@ class InvoiceResource extends BaseInvoiceResource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {

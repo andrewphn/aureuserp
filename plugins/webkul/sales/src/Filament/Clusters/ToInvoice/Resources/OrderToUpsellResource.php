@@ -20,7 +20,7 @@ class OrderToUpsellResource extends Resource
 
     protected static ?string $cluster = ToInvoice::class;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
