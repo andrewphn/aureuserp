@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
@@ -28,6 +29,7 @@ class SendByEmailAction extends Action
         parent::setUp();
 
         $this
+            ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
             ->beforeFormFilled(function (Order $record, Action $action) {
                 $pdf = Pdf::loadView('sales::sales.quotation', compact('record'))
                     ->setPaper('A4', 'portrait')
@@ -66,7 +68,7 @@ class SendByEmailAction extends Action
                             ->acceptedFileTypes([
                                 'image/*',
                                 'application/pdf',
-                            ])   
+                            ])
                             ->downloadable()
                             ->openable()
                             ->disk('public')
@@ -76,11 +78,11 @@ class SendByEmailAction extends Action
             )
             ->modalIcon('heroicon-s-envelope')
             ->modalHeading(__('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.modal.heading'))
-            ->hidden(fn (Order $record) => $record->state != OrderState::SALE)
-            ->action(function (Order $record, array $data) {
+            ->hidden(fn (Order $record) => $record->state == OrderState::SALE)
+            ->action(function (Order $record, array $data,Component $livewire) {
                 SaleOrder::sendQuotationOrOrderByEmail($record, $data);
 
-                $this->refreshFormData(['state']);
+                $livewire->refreshFormData(['state']);
 
                 Notification::make()
                     ->success()

@@ -1,12 +1,12 @@
 <?php
 
-namespace Webkul\Recruitment\Policies;
+namespace Webkul\Invoice\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Webkul\Recruitment\Models\Department;
+use Webkul\Invoice\Models\Attribute;
 use Webkul\Security\Models\User;
 
-class DepartmentPolicy
+class AttributePolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class DepartmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any::recruitment::department');
+        return $user->can('view_any_product::attribute');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Department $department): bool
+    public function view(User $user, Attribute $attribute): bool
     {
-        return $user->can('view::recruitment::department');
+        return $user->can('view_product::attribute');
     }
 
     /**
@@ -31,23 +31,23 @@ class DepartmentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create::recruitment::department');
+        return $user->can('create_product::attribute');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Department $department): bool
+    public function update(User $user, Attribute $attribute): bool
     {
-        return $user->can('update::recruitment::department');
+        return $user->can('update_product::attribute');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Department $department): bool
+    public function delete(User $user, Attribute $attribute): bool
     {
-        return $user->can('delete::recruitment::department');
+        return $user->can('delete_product::attribute');
     }
 
     /**
@@ -55,15 +55,15 @@ class DepartmentPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any::recruitment::department');
+        return $user->can('delete_any_product::attribute');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Department $department): bool
+    public function forceDelete(User $user, Attribute $attribute): bool
     {
-        return $user->can('force_delete::recruitment::department');
+        return $user->can('force_delete_product::attribute');
     }
 
     /**
@@ -71,15 +71,15 @@ class DepartmentPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any::recruitment::department');
+        return $user->can('force_delete_any_product::attribute');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Department $department): bool
+    public function restore(User $user, Attribute $attribute): bool
     {
-        return $user->can('restore::recruitment::department');
+        return $user->can('restore_product::attribute');
     }
 
     /**
@@ -87,15 +87,15 @@ class DepartmentPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any::recruitment::department');
+        return $user->can('restore_any_product::attribute');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Department $department): bool
+    public function replicate(User $user, Attribute $attribute): bool
     {
-        return $user->can('replicate::recruitment::department');
+        return $user->can('replicate_product::attribute');
     }
 
     /**
@@ -103,6 +103,6 @@ class DepartmentPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder::recruitment::department');
+        return $user->can('reorder_product::attribute');
     }
 }

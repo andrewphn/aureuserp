@@ -2,13 +2,13 @@
 
 namespace Webkul\TimeOff\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
@@ -31,6 +31,8 @@ use Webkul\TimeOff\Models\Leave;
 
 class CalendarWidget extends FullCalendarWidget
 {
+    use HasWidgetShield;
+
     public Model|string|null $model = Leave::class;
 
     public function getHeading(): string|Htmlable|null
@@ -328,15 +330,15 @@ class CalendarWidget extends FullCalendarWidget
                             DatePicker::make('request_date_from')
                                 ->native(false)
                                 ->label(__('time-off::filament/widgets/calendar-widget.form.fields.request-date-from'))
-                                ->default(now())
                                 ->required()
                                 ->live()
                                 ->prefixIcon('heroicon-o-calendar')
                                 ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                    if (
-                                        $state
-                                        && ! $get('request_unit_half')
-                                    ) {
+                                    if (blank($state)) {
+                                        $set('request_date_to', null);
+                                    }
+
+                                    if ($state && ! $get('request_unit_half')) {
                                         $this->updateDurationCalculation($set, $get);
                                     }
                                 }),
@@ -344,16 +346,14 @@ class CalendarWidget extends FullCalendarWidget
                             DatePicker::make('request_date_to')
                                 ->native(false)
                                 ->label('To Date')
-                                ->default(now())
                                 ->hidden(fn (Get $get) => $get('request_unit_half'))
                                 ->required(fn (Get $get) => ! $get('request_unit_half'))
                                 ->live()
                                 ->prefixIcon('heroicon-o-calendar')
+                                ->disabled(fn (Get $get) => blank($get('request_date_from')))
+                                ->minDate(fn (Get $get) => $get('request_date_from'))
                                 ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                    if (
-                                        $state
-                                        && $get('request_date_from')
-                                    ) {
+                                    if ($state && $get('request_date_from')) {
                                         $this->updateDurationCalculation($set, $get);
                                     }
                                 }),
@@ -587,34 +587,34 @@ class CalendarWidget extends FullCalendarWidget
             ->all();
     }
 
-    private function getEventPriority(string $state): string
+    private function getEventPriority(State $state): string
     {
         return match ($state) {
-            State::REFUSE->value       => 'low',
-            State::VALIDATE_ONE->value => 'medium',
-            State::CONFIRM->value      => 'high',
-            State::VALIDATE_TWO->value => 'highest',
+            State::REFUSE              => 'low',
+            State::VALIDATE_ONE        => 'medium',
+            State::CONFIRM             => 'high',
+            State::VALIDATE_TWO        => 'highest',
             default                    => 'normal'
         };
     }
 
-    private function getStateLabel(string $state): string
+    private function getStateLabel(State $state): string
     {
         return match ($state) {
-            State::VALIDATE_ONE->value => State::VALIDATE_ONE->getLabel(),
-            State::VALIDATE_TWO->value => State::VALIDATE_TWO->getLabel(),
-            State::CONFIRM->value      => State::CONFIRM->getLabel(),
-            State::REFUSE->value       => State::REFUSE->getLabel(),
+            State::VALIDATE_ONE => State::VALIDATE_ONE->getLabel(),
+            State::VALIDATE_TWO => State::VALIDATE_TWO->getLabel(),
+            State::CONFIRM      => State::CONFIRM->getLabel(),
+            State::REFUSE       => State::REFUSE->getLabel(),
         };
     }
 
-    private function getStateIcon(string $state): string
+    private function getStateIcon(State $state): string
     {
         return match ($state) {
-            State::VALIDATE_ONE->value => 'heroicon-o-magnifying-glass',
-            State::VALIDATE_TWO->value => 'heroicon-o-check-circle',
-            State::CONFIRM->value      => 'heroicon-o-clock',
-            State::REFUSE->value       => 'heroicon-o-x-circle',
+            State::VALIDATE_ONE        => 'heroicon-o-magnifying-glass',
+            State::VALIDATE_TWO        => 'heroicon-o-check-circle',
+            State::CONFIRM             => 'heroicon-o-clock',
+            State::REFUSE              => 'heroicon-o-x-circle',
             default                    => 'heroicon-o-document',
         };
     }

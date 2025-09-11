@@ -516,8 +516,7 @@ class ProductResource extends Resource
                         Section::make(__('products::filament/resources/product.infolist.sections.images.title'))
                             ->schema([
                                 ImageEntry::make('images')
-                                    ->hiddenLabel()
-                                    ->circular(),
+                                    ->hiddenLabel(),
                             ])
                             ->visible(fn ($record): bool => ! empty($record->images)),
 
