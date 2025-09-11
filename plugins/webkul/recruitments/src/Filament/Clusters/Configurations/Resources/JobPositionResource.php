@@ -241,7 +241,7 @@ class JobPositionResource extends Resource
                     ])
                     ->columns(3),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -549,7 +549,7 @@ class JobPositionResource extends Resource
                                         ->label(__('Expected Skills')),
                                 ]),
                         ])->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 

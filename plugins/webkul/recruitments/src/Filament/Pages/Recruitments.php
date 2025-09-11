@@ -89,7 +89,7 @@ class Recruitments extends BaseDashboard
                             ->default(now())
                             ->native(false),
                     ])
-                    ->columns(3),
+                    ->columns(3)->columnSpanFull(),
             ]);
     }
 

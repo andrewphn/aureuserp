@@ -31,6 +31,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Oper
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums\Colors;
 use Webkul\Employee\Filament\Clusters\Configurations;
@@ -115,13 +116,13 @@ class SkillTypeResource extends Resource
                 TextColumn::make('color')
                     ->label(__('employees::filament/clusters/configurations/resources/skill-type.table.columns.color'))
                     ->toggleable(isToggledHiddenByDefault: false)
-                    ->formatStateUsing(fn (SkillType $skillType) => '<span class="flex h-5 w-5 rounded-full" style="background: rgb(var(--'.$skillType->color.'-500))"></span>')
+                    ->formatStateUsing(fn (Model $skillType) => '<span class="flex h-5 w-5 rounded-full" style="background: rgb(var(--'.$skillType?->color.'-500))"></span>')
                     ->html()
                     ->sortable(),
                 TextColumn::make('skills.name')
                     ->label(__('employees::filament/clusters/configurations/resources/skill-type.table.columns.skills'))
                     ->badge()
-                    ->color(fn (SkillType $skillType) => $skillType->color)
+                    ->color(fn (Model $skillType) => $skillType?->color)
                     ->searchable(),
                 TextColumn::make('skillLevels.name')
                     ->label(__('employees::filament/clusters/configurations/resources/skill-type.table.columns.levels'))

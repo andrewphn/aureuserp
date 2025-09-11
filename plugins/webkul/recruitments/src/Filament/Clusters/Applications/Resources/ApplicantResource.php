@@ -128,7 +128,7 @@ class ApplicantResource extends Resource
                                     });
                                 }
                             }),
-                    ])->columns(2),
+                    ])->columns(2)->columnSpanFull(),
                 Grid::make()
                     ->schema([
                         Section::make(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.general-information.title'))
@@ -319,13 +319,13 @@ class ApplicantResource extends Resource
                                             ->preload(),
                                     ])
                                     ->columns(2),
-                            ]),
+                            ])->columnSpanFull(),
                         Section::make()
                             ->schema([
                                 RichEditor::make('applicant_notes')
                                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.general-information.fields.notes'))
                                     ->columnSpan(2),
-                            ]),
+                            ])->columnSpanFull(),
                     ])
                     ->columnSpan(['lg' => 2]),
                 Grid::make()
@@ -341,7 +341,7 @@ class ApplicantResource extends Resource
                                 DatePicker::make('availability_date')
                                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.education-and-availability.fields.availability-date'))
                                     ->native(false),
-                            ]),
+                            ])->columnSpanFull(),
                         Section::make(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.department.title'))
                             ->schema([
                                 Select::make('department_id')
@@ -349,7 +349,7 @@ class ApplicantResource extends Resource
                                     ->hiddenLabel()
                                     ->searchable()
                                     ->preload(),
-                            ]),
+                            ])->columnSpanFull(),
                         Section::make(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.salary.title'))
                             ->schema([
                                 Group::make()
@@ -382,7 +382,7 @@ class ApplicantResource extends Resource
                                             ->maxValue(99999999999)
                                             ->step(0.01),
                                     ])->columns(2),
-                            ]),
+                            ])->columnSpanFull(),
                         Section::make(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.source-and-medium.title'))
                             ->schema([
                                 Select::make('source_id')
@@ -391,7 +391,7 @@ class ApplicantResource extends Resource
                                 Select::make('medium_id')
                                     ->relationship('medium', 'name')
                                     ->label(__('recruitments::filament/clusters/applications/resources/applicant.form.sections.source-and-medium.fields.medium')),
-                            ]),
+                            ])->columnSpanFull(),
                     ])
                     ->columnSpan(['lg' => 1]),
             ])
@@ -881,7 +881,7 @@ class ApplicantResource extends Resource
                                             ->label(__('recruitments::filament/clusters/applications/resources/applicant.infolist.sections.source-and-medium.entries.medium')),
                                     ]),
                             ])->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 

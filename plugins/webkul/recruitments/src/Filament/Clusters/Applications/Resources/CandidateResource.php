@@ -405,7 +405,7 @@ class CandidateResource extends Resource
                                     ]),
                             ])
                             ->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
