@@ -2,6 +2,7 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
@@ -24,7 +25,7 @@ use Webkul\Recruitment\Models\JobPosition;
 use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Security\Filament\Resources\UserResource;
 
-class JobPositionResource extends Resource
+class JobPositionResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = JobPosition::class;
 
@@ -37,6 +38,24 @@ class JobPositionResource extends Resource
     public static function getNavigationGroup(): string
     {
         return __('recruitments::filament/clusters/configurations/resources/job-position.navigation.group');
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view::recruitment',
+            'view_any::recruitment',
+            'create::recruitment',
+            'update::recruitment',
+            'restore::recruitment',
+            'restore_any::recruitment',
+            'replicate::recruitment',
+            'reorder::recruitment',
+            'delete::recruitment',
+            'delete_any::recruitment',
+            'force_delete::recruitment',
+            'force_delete_any::recruitment',
+        ];
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
