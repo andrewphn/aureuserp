@@ -2,9 +2,9 @@
 
 namespace Webkul\Sale;
 
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Facades\Tax;
@@ -40,10 +40,6 @@ class SaleManager
     {
         $record = $this->sendByEmail($record, $data);
 
-        $record->update([
-            'state' => Enums\OrderState::SENT,
-        ]);
-        
         $record = $this->computeSaleOrder($record);
 
         return $record;
@@ -440,9 +436,18 @@ class SaleManager
         $partners = Partner::whereIn('id', $data['partners'])->get();
 
         foreach ($partners as $key => $partner) {
+            if (empty($partner?->email)) {
+                Notification::make()
+                    ->title('Email not sent')
+                    ->body("Partner '{$partner->name}' does not have an email address.")
+                    ->danger()
+                    ->send();
+
+                return $record;
+            }
             $payload = [
                 'record_name'    => $record->name,
-                'model_name' => $record->state->getLabel(),
+                'model_name'     => $record->state->getLabel(),
                 'subject'        => $data['subject'],
                 'description'    => $data['description'],
                 'to'             => [
