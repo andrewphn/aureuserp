@@ -246,7 +246,7 @@ class EmployeeResource extends Resource
                             ->columns(2),
 
                     ])
-                    ->columns(1),
+                    ->columns(1)->columnSpanFull(),
                 Tabs::make()
                     ->tabs([
                         Tab::make(__('employees::filament/resources/employee.form.tabs.work-information.title'))
@@ -1430,7 +1430,7 @@ class EmployeeResource extends Resource
                                     ->placeholder('—')
                                     ->label(__('employees::filament/resources/employee.infolist.sections.entries.coach')),
                             ]),
-                    ]),
+                    ])->columnSpanFull(),
 
                 Tabs::make()
                     ->tabs([
