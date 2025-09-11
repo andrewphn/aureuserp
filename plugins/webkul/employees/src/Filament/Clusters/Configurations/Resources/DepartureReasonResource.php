@@ -58,7 +58,7 @@ class DepartureReasonResource extends Resource
                     ->required(),
                 Hidden::make('creator_id')
                     ->default(Auth::user()->id),
-            ])->columns('full');
+            ])->columns(1);
     }
 
     public static function infolist(Schema $schema): Schema

@@ -86,7 +86,7 @@ trait EmployeeResumeRelation
                         ->reactive(),
                     Textarea::make('description')
                         ->label(__('employees::filament/resources/employee/relation-manager/resume.form.sections.fields.description')),
-                ])->columns(2),
+                ])->columns(2)->columnSpanFull(),
             ]);
     }
 

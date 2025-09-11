@@ -95,7 +95,7 @@ class SkillTypeResource extends Resource
                     Toggle::make('is_active')
                         ->label(__('employees::filament/clusters/configurations/resources/skill-type.form.sections.fields.status'))
                         ->default(true),
-                ])->columns(2),
+                ])->columns(2)->columnSpanFull(),
             ]);
     }
 
@@ -303,7 +303,7 @@ class SkillTypeResource extends Resource
                         IconEntry::make('is_active')
                             ->boolean()
                             ->label(__('employees::filament/clusters/configurations/resources/skill-type.infolist.sections.entries.status')),
-                    ])->columns(3),
+                    ])->columns(3)->columnSpanFull(),
             ]);
     }
 
