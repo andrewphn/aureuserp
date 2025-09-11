@@ -2,12 +2,13 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityTypeResource\Pages;
 use Webkul\Sale\Models\ActivityType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
-class ActivityTypeResource extends BaseActivityTypeResource
+class ActivityTypeResource extends BaseActivityTypeResource implements HasShieldPermissions
 {
     protected static ?string $model = ActivityType::class;
 
@@ -23,6 +24,24 @@ class ActivityTypeResource extends BaseActivityTypeResource
     public static function getNavigationGroup(): ?string
     {
         return __('Activities');
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view::sale',
+            'view_any::sale',
+            'create::sale',
+            'update::sale',
+            'restore::sale',
+            'restore_any::sale',
+            'replicate::sale',
+            'reorder::sale',
+            'delete::sale',
+            'delete_any::sale',
+            'force_delete::sale',
+            'force_delete_any::sale',
+        ];
     }
 
     public static function getPages(): array

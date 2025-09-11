@@ -2,6 +2,7 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
@@ -12,7 +13,7 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityPlanResource\Pages;
 use Webkul\Recruitment\Models\ActivityPlan;
 
-class ActivityPlanResource extends BaseActivityPlanResource
+class ActivityPlanResource extends BaseActivityPlanResource implements HasShieldPermissions
 {
     protected static ?string $model = ActivityPlan::class;
 
@@ -21,6 +22,24 @@ class ActivityPlanResource extends BaseActivityPlanResource
     public static function getNavigationGroup(): string
     {
         return __('recruitments::filament/clusters/configurations/resources/activity-plan.navigation.group');
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view::recruitment',
+            'view_any::recruitment',
+            'create::recruitment',
+            'update::recruitment',
+            'restore::recruitment',
+            'restore_any::recruitment',
+            'replicate::recruitment',
+            'reorder::recruitment',
+            'delete::recruitment',
+            'delete_any::recruitment',
+            'force_delete::recruitment',
+            'force_delete_any::recruitment',
+        ];
     }
 
     public static function table(Table $table): Table
