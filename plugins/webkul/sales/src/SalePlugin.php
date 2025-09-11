@@ -38,8 +38,7 @@ class SalePlugin implements Plugin
                             ->url(fn () => ManageProducts::getUrl())
                             ->icon('heroicon-o-wrench')
                             ->group('Sales')
-                            ->sort(4)
-                            ->visible(fn () => ManageProducts::canAccess()),
+                            ->sort(4),
                     ]);
             });
     }

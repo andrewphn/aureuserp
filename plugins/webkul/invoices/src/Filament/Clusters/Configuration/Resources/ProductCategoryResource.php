@@ -2,7 +2,6 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Webkul\Invoice\Filament\Clusters\Configuration;
@@ -10,7 +9,7 @@ use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryReso
 use Webkul\Invoice\Models\Category;
 use Webkul\Product\Filament\Resources\CategoryResource as BaseProductCategoryResource;
 
-class ProductCategoryResource extends BaseProductCategoryResource implements HasShieldPermissions
+class ProductCategoryResource extends BaseProductCategoryResource
 {
     protected static ?string $model = Category::class;
 
@@ -26,24 +25,6 @@ class ProductCategoryResource extends BaseProductCategoryResource implements Has
     public static function getNavigationLabel(): string
     {
         return __('invoices::filament/clusters/configurations/resources/product-category.navigation.title');
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::invoice',
-            'view_any::invoice',
-            'create::invoice',
-            'update::invoice',
-            'restore::invoice',
-            'restore_any::invoice',
-            'replicate::invoice',
-            'reorder::invoice',
-            'delete::invoice',
-            'delete_any::invoice',
-            'force_delete::invoice',
-            'force_delete_any::invoice',
-        ];
     }
 
     public static function getSubNavigationPosition(): SubNavigationPosition

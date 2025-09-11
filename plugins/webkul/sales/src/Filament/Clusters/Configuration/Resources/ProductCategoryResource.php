@@ -2,14 +2,13 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Resources\Pages\Page;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource as BaseProductCategoryResource;
 use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductCategoryResource\Pages;
 use Webkul\Sale\Models\Category;
 
-class ProductCategoryResource extends BaseProductCategoryResource implements HasShieldPermissions
+class ProductCategoryResource extends BaseProductCategoryResource
 {
     protected static ?string $model = Category::class;
 
@@ -18,24 +17,6 @@ class ProductCategoryResource extends BaseProductCategoryResource implements Has
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/product-category.navigation.group');
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::sale',
-            'view_any::sale',
-            'create::sale',
-            'update::sale',
-            'restore::sale',
-            'restore_any::sale',
-            'replicate::sale',
-            'reorder::sale',
-            'delete::sale',
-            'delete_any::sale',
-            'force_delete::sale',
-            'force_delete_any::sale',
-        ];
     }
 
     public static function getRecordSubNavigation(Page $page): array

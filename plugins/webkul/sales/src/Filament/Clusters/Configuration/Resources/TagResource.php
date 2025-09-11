@@ -2,7 +2,6 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -15,7 +14,7 @@ use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource\Pages;
 use Webkul\Sale\Models\Tag;
 
-class TagResource extends Resource implements HasShieldPermissions
+class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
@@ -36,24 +35,6 @@ class TagResource extends Resource implements HasShieldPermissions
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/tag.navigation.group');
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view::sale',
-            'view_any::sale',
-            'create::sale',
-            'update::sale',
-            'restore::sale',
-            'restore_any::sale',
-            'replicate::sale',
-            'reorder::sale',
-            'delete::sale',
-            'delete_any::sale',
-            'force_delete::sale',
-            'force_delete_any::sale',
-        ];
     }
 
     public static function form(Form $form): Form
