@@ -36,7 +36,7 @@ class PrintAndSendAction extends Action
                     || $record->state == MoveState::POSTED;
             });
 
-        $this->beforeFormFilled(function ($record, Action $action) {
+        $this->beforeFormFilled(function (Move $record, Action $action) {
             $description = "
                     <p>Dear {$record->partner->name},</p>
                     <p>Your invoice <strong>{$record->name}</strong> from <strong>{$record->company->name}</strong> for <strong>{$record->currency->symbol} {$record->amount_total}</strong> is now available. Kindly arrange payment at your earliest convenience.</p>
@@ -73,10 +73,10 @@ class PrintAndSendAction extends Action
                         ->acceptedFileTypes([
                             'image/*',
                             'application/pdf',
-                        ])                    
+                        ])
                         ->downloadable()
                         ->openable()
-                        ->multiple()  
+                        ->multiple()
                         ->disk('public')
                         ->hiddenLabel(),
                 ]);
@@ -86,9 +86,7 @@ class PrintAndSendAction extends Action
         $this->modalSubmitActionLabel(__('accounts::filament/resources/invoice/actions/print-and-send.modal.action.submit.title'));
         $this->modalIcon('heroicon-m-paper-airplane');
         $this->icon('heroicon-o-envelope');
-        $this->action(function (Move $record, array $data) {
-            Account::printAndSend($record, $data);
-        });
+        $this->action(fn (Move $record, array $data) => Account::printAndSend($record, $data));
         $this->modalSubmitAction(function ($action) {
             $action->label(__('accounts::filament/resources/invoice/actions/print-and-send.modal.action.submit.title'));
             $action->icon('heroicon-m-paper-airplane');

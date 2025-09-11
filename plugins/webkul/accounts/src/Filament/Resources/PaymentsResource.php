@@ -118,7 +118,7 @@ class PaymentsResource extends Resource
                             ])->columns(2),
                     ]),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -333,6 +333,7 @@ class PaymentsResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make()
                     ->schema([

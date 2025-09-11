@@ -97,7 +97,6 @@ class PartnerResource extends Resource
                                             ->relationship(
                                                 name: 'parent',
                                                 titleAttribute: 'name',
-                                                // modifyQueryUsing: fn (Builder $query) => $query->where('account_type', AccountType::COMPANY->value),
                                             )
                                             ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL->value)
                                             ->searchable()
@@ -118,7 +117,7 @@ class PartnerResource extends Resource
                                                         return $data;
                                                     });
                                             })
-                                            ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                            ->afterStateHydrated(function (Select $component, $state) {
                                                 if (empty($state)) {
                                                     $component->state(null);
 
@@ -267,10 +266,11 @@ class PartnerResource extends Resource
                                             })
                                             ->searchable()
                                             ->preload(),
-                                    ]),
+                                    ])
+                                    ->columnSpanFull(),
                             ])
                             ->columns(2),
-                    ]),
+                    ])->columnSpanFull(),
 
                 Tabs::make('tabs')
                     ->tabs([
@@ -734,6 +734,6 @@ class PartnerResource extends Resource
                     ])
                     ->columnSpan(2),
             ])
-            ->columns(2);
+            ->columns(1);
     }
 }
