@@ -164,7 +164,7 @@ class ActivityTypeResource extends Resource
                     ])
                     ->columns(3),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -410,7 +410,8 @@ class ActivityTypeResource extends Resource
                                     ]),
                             ])->columnSpan(1),
                     ]),
-            ]);
+            ])
+                ->columns(1);
     }
 
     public static function getPages(): array

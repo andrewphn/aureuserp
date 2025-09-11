@@ -80,7 +80,8 @@ class ActivityPlanResource extends Resource
                             ->default(true)
                             ->inline(false),
                     ])->columns(2),
-            ]);
+            ])
+                ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -295,7 +296,8 @@ class ActivityPlanResource extends Resource
                             ->boolean(),
                     ])
                     ->columns(2),
-            ]);
+            ])
+                ->columns(1);
     }
 
     public static function getRelations(): array

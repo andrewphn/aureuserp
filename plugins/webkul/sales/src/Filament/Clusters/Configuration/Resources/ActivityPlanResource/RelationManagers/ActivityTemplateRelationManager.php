@@ -124,7 +124,7 @@ class ActivityTemplateRelationManager extends RelationManager
                     ])
                     ->columns(3),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public function table(Table $table): Table
@@ -201,7 +201,6 @@ class ActivityTemplateRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->modalWidth(Width::FitContent)
                     ->mutateDataUsing(function (array $data): array {
                         return [
                             ...$data,
@@ -310,6 +309,7 @@ class ActivityTemplateRelationManager extends RelationManager
                                 ]),
                         ])->columnSpan(1),
                     ]),
-            ]);
+            ])
+                ->columns(1);
     }
 }
