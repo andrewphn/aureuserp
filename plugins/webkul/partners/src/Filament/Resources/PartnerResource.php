@@ -90,7 +90,7 @@ class PartnerResource extends Resource
                                             ->required()
                                             ->maxLength(255)
                                             ->columnSpan(2)
-                                            ->placeholder(fn (Get $get): string => $get('account_type') === AccountType::INDIVIDUAL->value ? 'Jhon Doe' : 'ACME Corp')
+                                            ->placeholder(fn (Get $get): string => $get('account_type') === AccountType::INDIVIDUAL ? 'Jhon Doe' : 'ACME Corp')
                                             ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;']),
                                         Select::make('parent_id')
                                             ->label(__('partners::filament/resources/partner.form.sections.general.fields.company'))
@@ -98,7 +98,7 @@ class PartnerResource extends Resource
                                                 name: 'parent',
                                                 titleAttribute: 'name',
                                             )
-                                            ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL->value)
+                                            ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL)
                                             ->searchable()
                                             ->preload()
                                             ->columnSpan(2)
@@ -316,8 +316,9 @@ class PartnerResource extends Resource
             ->columns([
                 Stack::make([
                     ImageColumn::make('avatar')
-                        ->height(150)
-                        ->width(200),
+                        ->height(200)
+                        ->width(250)
+                        ->alignCenter(),
                     Stack::make([
                         TextColumn::make('name')
                             ->weight(FontWeight::Bold)
