@@ -221,7 +221,7 @@ trait LeaveAccrualPlan
                                     ]),
                             ])
                             ->columns(2),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
@@ -364,7 +364,6 @@ trait LeaveAccrualPlan
                             ->formatStateUsing(fn ($state) => Frequency::options()[$state] ?? $state)
                             ->icon('heroicon-o-calendar'),
                         Group::make()
-                            ->label(__('time-off::traits/leave-accrual-plan.infolist.entries.accrual-frequency'))
                             ->schema([
                                 TextEntry::make('week_day')
                                     ->label(__('time-off::traits/leave-accrual-plan.infolist.entries.accrual-day'))
@@ -414,7 +413,6 @@ trait LeaveAccrualPlan
                                     ->icon('heroicon-o-adjustments-vertical'),
                             ]),
                         Group::make()
-                            ->label(__('time-off::traits/leave-accrual-plan.infolist.entries.advanced-accrual-settings'))
                             ->schema([
                                 TextEntry::make('action_with_unused_accruals')
                                     ->label(__('time-off::traits/leave-accrual-plan.infolist.entries.action-with-unused-accruals'))

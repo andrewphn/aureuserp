@@ -41,7 +41,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
         ];
     }
 
-    protected function modalActions(): array
+    public function modalActions(): array
     {
         return [
             EditAction::make()
@@ -213,8 +213,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
             Select::make('holiday_status_id')
                 ->label(__('time-off::filament/widgets/overview-calendar-widget.form.fields.time-off-type'))
                 ->relationship('holidayStatus', 'name')
-                ->searchable()
-                ->preload()
+                ->native(false)
                 ->required(),
             Fieldset::make()
                 ->label(function (Get $get) {
@@ -248,20 +247,30 @@ class OverviewCalendarWidget extends FullCalendarWidget
             Toggle::make('request_unit_half')
                 ->live()
                 ->label(__('time-off::filament/widgets/overview-calendar-widget.form.fields.half-day')),
-            TextEntry::make('requested_days')
-                ->label(__('time-off::filament/widgets/overview-calendar-widget.form.fields.requested-days'))
+            TextEntry::make('duration_info')
+                ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.requested-days'))
                 ->live()
-                ->inlineLabel()
-                ->reactive()
-                ->state(function ($state, Get $get): string {
+                ->state(function (Get $get): string {
                     if ($get('request_unit_half')) {
-                        return '0.5 day';
+                        return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.day', ['day' => '0.5']);
                     }
 
-                    $startDate = Carbon::parse($get('request_date_from'));
-                    $endDate = $get('request_date_to') ? Carbon::parse($get('request_date_to')) : $startDate;
+                    $startDate = $get('request_date_from');
+                    $endDate = $get('request_date_to');
 
-                    return $startDate->diffInDays($endDate).' day(s)';
+                    if (! $startDate) {
+                        return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => 0]);
+                    }
+
+                    try {
+                        $startDate = Carbon::parse($startDate);
+                        $endDate = $endDate ? Carbon::parse($endDate) : $startDate;
+                        $days = $startDate->diffInDays($endDate) + 1;
+
+                        return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => $days]);
+                    } catch (\Exception $e) {
+                        return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => 0]);
+                    }
                 }),
             Textarea::make('private_name')
                 ->label(__('time-off::filament/widgets/overview-calendar-widget.form.fields.description')),
@@ -293,7 +302,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
             TextEntry::make('state')
                 ->placeholder(__('time-off::filament/widgets/overview-calendar-widget.infolist.entries.status'))
                 ->badge()
-                ->formatStateUsing(fn ($state) => State::options()[$state])
+                ->formatStateUsing(fn ($state) => State::options()[$state->value])
                 ->icon('heroicon-o-check-circle'),
         ];
     }

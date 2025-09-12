@@ -89,7 +89,7 @@ class MyAllocationResource extends Resource
                             ->disabled()
                             ->reactive()
                             ->live(),
-                    ])->columns(2),
+                    ])->columns(2)->columnSpanFull(),
                 Section::make()
                     ->schema([
                         Group::make()
@@ -135,7 +135,7 @@ class MyAllocationResource extends Resource
                                 RichEditor::make('notes')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-allocation.form.fields.reason')),
                             ]),
-                    ])->columns(2),
+                    ])->columns(2)->columnSpanFull(),
             ]);
     }
 
@@ -300,7 +300,7 @@ class MyAllocationResource extends Resource
                                         ->label(__('time-off::filament/clusters/my-time/resources/my-allocation.infolist.sections.allocation-status.entries.state')),
                                 ]),
                         ])->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
