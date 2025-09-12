@@ -845,7 +845,7 @@ class OrderResource extends Resource
                                     ->default(0),
                                 Hidden::make('price_total')
                                     ->default(0),
-                            ]),
+                            ])->columnSpanFull(),
                     ])
                     ->columns(2),
             ])

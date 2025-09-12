@@ -27,14 +27,12 @@ class SendPOEmailAction extends Action
     {
         parent::setUp();
 
-        $userName = Auth::user()->name;
-
         $this
-            ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.label'))
-            ->schema([
+            ->label(fn (Order $record) => __('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.label'))
+            ->schema(fn (Order $record) => [
                 Select::make('vendors')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.to'))
-                    ->options(Partner::get()->mapWithKeys(fn ($partner) => [
+                    ->options(fn () => Partner::get()->mapWithKeys(fn ($partner) => [
                         $partner->id => $partner->email
                             ? "{$partner->name} <{$partner->email}>"
                             : $partner->name,
@@ -42,20 +40,25 @@ class SendPOEmailAction extends Action
                     ->multiple()
                     ->searchable()
                     ->preload()
-                    ->default(fn () => [$this->getRecord()->partner_id]),
+                    ->default([$record->partner_id]),
+
                 TextInput::make('subject')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.subject'))
                     ->required()
-                    ->default("Purchase Order #{$this->getRecord()->name}"),
+                    ->default("Purchase Order #{$record->name}"),
+
                 MarkdownEditor::make('message')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order/actions/send-po-email.form.fields.message'))
                     ->required()
-                    ->default(<<<MD
-Dear **{$this->getRecord()->partner->name}**
+                    ->default(function () use ($record) {
+                        $userName = Auth::user()->name;
 
-Here is in attachment a purchase order **{$this->getRecord()->name}** amounting to **{$this->getRecord()->total_amount}**.
+                        return <<<MD
+Dear **{$record->partner->name}**
 
-The receipt is expected for **{$this->getRecord()->planned_at}**.
+Here is in attachment a purchase order **{$record->name}** amounting to **{$record->total_amount}**.
+
+The receipt is expected for **{$record->planned_at}**.
 
 Could you please acknowledge the receipt of this order?
 
@@ -63,19 +66,19 @@ Best regards,
 
 --
 {$userName}
-MD),
-            FileUpload::make('attachment')
-                ->hiddenLabel()
-                ->disk('public')
-                ->default(function () {
-                    return PurchaseOrder::generatePurchaseOrderPdf($this->getRecord());
-                })
-                ->acceptedFileTypes([
-                    'image/*',
-                    'application/pdf',
-                ])
-                ->downloadable()
-                ->openable(),
+MD;
+                    }),
+
+                FileUpload::make('attachment')
+                    ->hiddenLabel()
+                    ->disk('public')
+                    ->default(fn () => PurchaseOrder::generatePurchaseOrderPdf($record))
+                    ->acceptedFileTypes([
+                        'image/*',
+                        'application/pdf',
+                    ])
+                    ->downloadable()
+                    ->openable(),
             ])
             ->action(function (array $data, Order $record, Component $livewire) {
                 try {
@@ -97,7 +100,11 @@ MD),
                     ->success()
                     ->send();
             })
-            ->color(fn (): string => $this->getRecord()->state === OrderState::DRAFT ? 'primary' : 'gray')
-            ->visible(fn () => $this->getRecord()->state == OrderState::PURCHASE);
+            ->color(fn (Order $record): string =>
+                $record->state === OrderState::DRAFT ? 'primary' : 'gray'
+            )
+            ->visible(fn (Order $record) =>
+                $record->state == OrderState::PURCHASE
+            );
     }
 }
