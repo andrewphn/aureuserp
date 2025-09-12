@@ -112,7 +112,7 @@ class InstallERP extends Command
 
         $defaultCompany = Company::first();
 
-        $userModel = app(config('filament-shield.auth_provider_model.fqcn'));
+        $userModel = app(Utils::getAuthProviderFQCN());
 
         $adminData = [
             'name'  => text(

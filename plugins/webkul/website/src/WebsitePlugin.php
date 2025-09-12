@@ -3,11 +3,12 @@
 namespace Webkul\Website;
 
 use Filament\Contracts\Plugin;
-use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Collection;
+use ReflectionClass;
+use Filament\Actions\Action;
 use Webkul\Support\Package;
 use Webkul\Website\Filament\Customer\Auth\Login;
 use Webkul\Website\Filament\Customer\Auth\PasswordReset\RequestPasswordReset;
@@ -47,7 +48,7 @@ class WebsitePlugin implements Plugin
                     ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Clusters'), for: 'Webkul\\Website\\Filament\\Customer\\Clusters')
                     ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Widgets'), for: 'Webkul\\Website\\Filament\\Customer\\Widgets')
                     ->userMenuItems([
-                        'my_account' => MenuItem::make()->label('My Account')
+                        'my_account' => Action::make('my_account')->label('My Account')
                             ->url(fn (): string => Account::getUrl())
                             ->sort(2)
                             ->visible(fn (): bool => (bool) count(Account::getClusteredComponents())),
@@ -84,7 +85,7 @@ class WebsitePlugin implements Plugin
 
     protected function getPluginBasePath($path = null): string
     {
-        $reflector = new \ReflectionClass(get_class($this));
+        $reflector = new ReflectionClass(get_class($this));
 
         return dirname($reflector->getFileName()).($path ?? '');
     }
@@ -213,7 +214,6 @@ class WebsitePlugin implements Plugin
             );
         }
 
-        // LinkedIn
         if ($contactSettings->linkedin) {
             $socialLinks->push(
                 NavigationItem::make('LinkedIn')
