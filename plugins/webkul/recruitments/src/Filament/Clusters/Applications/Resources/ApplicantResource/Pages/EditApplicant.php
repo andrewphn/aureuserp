@@ -91,6 +91,7 @@ class EditApplicant extends EditRecord
                 })
                 ->action(function (Applicant $record, $data) {
                     $record->update($data);
+                    $record->refresh();
 
                     Notification::make()
                         ->success()
