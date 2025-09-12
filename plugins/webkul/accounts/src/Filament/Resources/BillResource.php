@@ -223,7 +223,7 @@ class BillResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                                            ->afterStateUpdated(function (Set $set, Get $get) {
                                                 $company = $get('company_id') ? \Webkul\Support\Models\Company::find($get('company_id')) : null;
 
                                                 if ($company) {
