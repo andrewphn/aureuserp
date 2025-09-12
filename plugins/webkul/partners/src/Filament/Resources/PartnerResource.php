@@ -140,7 +140,7 @@ class PartnerResource extends Resource
                                             ->imageEditor()
                                             ->avatar()
                                             ->directory('partners/avatar')
-                                            ->visibility('private'),
+                                            ->visibility('public'),
                                     ]),
                             ])->columns(2),
                         Group::make()
