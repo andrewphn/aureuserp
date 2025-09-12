@@ -2,6 +2,7 @@
 
 namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Panel;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Resources\DepartmentResource as BaseDepartmentResource;
@@ -17,6 +18,8 @@ class DepartmentResource extends BaseDepartmentResource
     protected static ?string $model = Department::class;
 
     protected static ?string $cluster = Configurations::class;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 
     public static function getNavigationGroup(): string
     {
