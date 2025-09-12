@@ -26,9 +26,9 @@ class CategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'      => ListCategories::route('/'),
-            'view'       => ViewCategory::route('/{record}'),
-            'posts.view' => ViewPost::route('/{parent}/{record}'),
+            'index' => ListCategories::route('/'),
+            'view' => ViewCategory::route('/{record}'),
+            'posts.by-category' => ViewPost::route('/{category}/{record}'),
         ];
     }
 }
