@@ -136,7 +136,7 @@ class OverviewCalendarWidget extends FullCalendarWidget
                 ->modalIcon('heroicon-o-lifebuoy')
                 ->label(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.title'))
                 ->modalDescription(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.description'))
-                ->action(function ($data) {
+                ->action(function ($data, CreateAction $action) {
                     $user = Auth::user();
                     $employee = $user->employee;
 
@@ -148,6 +148,8 @@ class OverviewCalendarWidget extends FullCalendarWidget
                             ->title(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.employee-not-found.notification.title'))
                             ->body(__('time-off::filament/widgets/overview-calendar-widget.header-actions.create.employee-not-found.notification.body'))
                             ->send();
+
+                        $action->cancel();
 
                         return;
                     }
