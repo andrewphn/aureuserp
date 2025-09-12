@@ -44,24 +44,23 @@
         width: 0;
     }
 
-    /* Custom colors */
     .progress-primary {
-        background-color: #2563eb; /* Tailwind blue-600 */
+        background-color: #2563eb;
     }
     .progress-success {
-        background-color: #16a34a; /* Tailwind green-600 */
+        background-color: #16a34a;
     }
     .progress-danger {
-        background-color: #dc2626; /* Tailwind red-600 */
+        background-color: #dc2626;
     }
     .progress-warning {
-        background-color: #ca8a04; /* Tailwind yellow-600 */
+        background-color: #ca8a04;
     }
     .progress-info {
-        background-color: #0284c7; /* Tailwind sky-600 */
+        background-color: #0284c7;
     }
     .progress-gray {
-        background-color: #4b5563; /* Tailwind gray-600 */
+        background-color: #4b5563; 
     }
 
     .progress-text {
