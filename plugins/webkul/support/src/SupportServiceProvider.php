@@ -88,7 +88,7 @@ class SupportServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $version = 'v1.0.0';
+        $version = '1.0.0';
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::USER_MENU_PROFILE_BEFORE,
