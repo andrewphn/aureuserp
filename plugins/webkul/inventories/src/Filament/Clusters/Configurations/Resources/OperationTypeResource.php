@@ -425,7 +425,7 @@ class OperationTypeResource extends Resource
                                 ->body(__('inventories::filament/clusters/configurations/resources/operation-type.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records, ForceDeleteBulkAction $action) {
                             try {
                                 $records->each(fn (Model $record) => $record->forceDelete());
                             } catch (QueryException $e) {
@@ -434,6 +434,8 @@ class OperationTypeResource extends Resource
                                     ->title(__('inventories::filament/clusters/configurations/resources/operation-type.table.bulk-actions.force-delete.notification.error.title'))
                                     ->body(__('inventories::filament/clusters/configurations/resources/operation-type.table.bulk-actions.force-delete.notification.error.body'))
                                     ->send();
+
+                                $action->cancel();
                             }
                         })
                         ->successNotification(
