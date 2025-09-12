@@ -301,6 +301,8 @@ class CalendarWidget extends FullCalendarWidget
                         ->title(__('time-off::filament/widgets/calendar-widget.header-actions.create.notification.title'))
                         ->body(__('time-off::filament/widgets/calendar-widget.header-actions.create.notification.body'))
                         ->send();
+
+                    $action->cancel();
                 })
                 ->mountUsing(fn (Schema $schema, array $arguments) => $schema->fill($arguments)),
         ];
