@@ -148,7 +148,7 @@ class JobPositionResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->live()
-                                            ->createOptionForm(fn (Schema $schema) => CompanyResource::form($schema))
+                                            ->createOptionForm(fn (Schema $schema) => UserResource::form($schema))
                                             ->createOptionAction(function (Action $action) {
                                                 return $action
                                                     ->modalIcon('heroicon-o-building-office')
