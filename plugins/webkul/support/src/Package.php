@@ -10,6 +10,8 @@ use Webkul\Support\Models\Plugin;
 
 class Package extends BasePackage
 {
+    public static $plugins = [];
+
     public ?Plugin $plugin = null;
 
     public bool $isCore = false;
@@ -157,12 +159,27 @@ class Package extends BasePackage
 
     public static function getPackagePlugin(string $name): ?Plugin
     {
-        return Plugin::where('name', $name)->first();
+        if (count(static::$plugins) == 0) {
+            static::$plugins = Plugin::all()->keyBy('name');
+        }
+
+        if (isset(static::$plugins[$name])) {
+            return static::$plugins[$name];
+        }
+
+        return static::$plugins[$name] ??= Plugin::where('name', $name)->first();
     }
 
     public static function isPluginInstalled(string $name): bool
     {
-        return Schema::hasTable('plugins')
-            && (bool) static::getPackagePlugin($name)?->is_installed;
+        if (count(static::$plugins) == 0) {
+            static::$plugins = Plugin::all()->keyBy('name');
+        }
+
+        if (isset(static::$plugins[$name]) && static::$plugins[$name]->is_installed) {
+            return true;
+        }
+
+        return false;
     }
 }
