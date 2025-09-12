@@ -8,7 +8,7 @@
                             <img class="object-cover w-full h-48 md:h-full md:w-48" src="{{$record->image_url}}" alt="Blog post featured image" style="aspect-ratio: 2 / 1" />
                         @else
                             <div class="object-cover w-full h-48 rounded-md bg-primary-500 md:h-full md:w-48" style="aspect-ratio: 2 / 1"></div>
-                        @endifgit
+                        @endif
                     </div>
 
                     <div class="p-6">
