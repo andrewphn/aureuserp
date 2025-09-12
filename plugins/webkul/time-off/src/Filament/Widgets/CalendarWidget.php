@@ -250,7 +250,7 @@ class CalendarWidget extends FullCalendarWidget
                 ->label(__('time-off::filament/widgets/calendar-widget.header-actions.create.title'))
                 ->modalDescription(__('time-off::filament/widgets/calendar-widget.header-actions.create.description'))
                 ->color('success')
-                ->action(function ($data) {
+                ->action(function ($data, CreateAction $action) {
                     $user = Auth::user();
                     $employee = $user->employee;
 
@@ -263,6 +263,8 @@ class CalendarWidget extends FullCalendarWidget
                             ->body(__('time-off::filament/widgets/calendar-widget.header-actions.create.employee-not-found.notification.body'))
                             ->icon('heroicon-o-exclamation-triangle')
                             ->send();
+
+                        $action->cancel();
 
                         return;
                     }
