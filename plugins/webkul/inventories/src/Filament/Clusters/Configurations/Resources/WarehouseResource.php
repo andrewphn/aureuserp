@@ -232,7 +232,7 @@ class WarehouseResource extends Resource
                             ->body(__('inventories::filament/clusters/configurations/resources/warehouse.table.actions.delete.notification.body')),
                     ),
                 ForceDeleteAction::make()
-                    ->action(function (Warehouse $record) {
+                    ->action(function (Warehouse $record, $action) {
                         try {
                             $record->forceDelete();
                         } catch (QueryException $e) {
@@ -267,7 +267,7 @@ class WarehouseResource extends Resource
                                 ->body(__('inventories::filament/clusters/configurations/resources/warehouse.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records, ForceDeleteBulkAction $action) {
                             try {
                                 $records->each(fn (Model $record) => $record->forceDelete());
                             } catch (QueryException $e) {
@@ -276,6 +276,8 @@ class WarehouseResource extends Resource
                                     ->title(__('inventories::filament/clusters/configurations/resources/warehouse.table.bulk-actions.force-delete.notification.error.title'))
                                     ->body(__('inventories::filament/clusters/configurations/resources/warehouse.table.bulk-actions.force-delete.notification.error.body'))
                                     ->send();
+
+                                $action->cancel();
                             }
                         })
                         ->successNotification(
