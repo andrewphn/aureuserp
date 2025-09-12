@@ -34,14 +34,13 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\TimeOff\Enums\AllocationValidationType;
 use Webkul\TimeOff\Enums\EmployeeRequest;
 use Webkul\TimeOff\Enums\LeaveValidationType;
 use Webkul\TimeOff\Enums\RequestUnit;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\QueryException;
-use Webkul\TimeOff\Enums;
 use Webkul\TimeOff\Enums\RequiresAllocation;
 use Webkul\TimeOff\Enums\TimeType;
 use Webkul\TimeOff\Filament\Clusters\Configurations;
@@ -428,7 +427,7 @@ class LeaveTypeResource extends Resource
                                         ->numeric(),
                                 ]),
                         ])->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
