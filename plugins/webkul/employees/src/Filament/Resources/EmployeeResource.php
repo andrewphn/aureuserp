@@ -74,7 +74,6 @@ use Webkul\Employee\Filament\Resources\EmployeeResource\Pages\ViewEmployee;
 use Webkul\Employee\Filament\Resources\EmployeeResource\RelationManagers\ResumeRelationManager;
 use Webkul\Employee\Filament\Resources\EmployeeResource\RelationManagers\SkillsRelationManager;
 use Webkul\Employee\Models\Calendar;
-use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\Employee;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Filament\Resources\CompanyResource;
@@ -701,13 +700,24 @@ class EmployeeResource extends Resource
                                                         Select::make('user_id')
                                                             ->relationship(name: 'user', titleAttribute: 'name', modifyQueryUsing: fn ($query) => $query->withTrashed())
                                                             ->getOptionLabelFromRecordUsing(function ($record) {
-                                                                return $record->trashed()
-                                                                    ? $record->name.' (Deleted)'
-                                                                    : $record->name;
+                                                                if ($record->trashed()) {
+                                                                    return $record->name.' ( Deleted )';
+                                                                }
+
+                                                                if ($record->employee) {
+                                                                    return $record->name.' ( Assigned )';
+                                                                }
+
+                                                                return $record->name;
                                                             })
                                                             ->disableOptionWhen(function ($value) {
                                                                 $user = User::withTrashed()->find($value);
-                                                                return $user && $user->trashed();
+
+                                                                if (! $user) {
+                                                                    return false;
+                                                                }
+
+                                                                return $user->trashed() || $user->employee()->exists();
                                                             })
                                                             ->searchable()
                                                             ->preload()
@@ -1574,8 +1584,8 @@ class EmployeeResource extends Resource
                                                         ->date('F j, Y')
                                                         ->color(
                                                             fn ($record) => $record->visa_expire && now()->diffInDays($record->visa_expire, false) <= 30
-                                                            ? 'danger'
-                                                            : 'success'
+                                                                ? 'danger'
+                                                                : 'success'
                                                         ),
                                                     TextEntry::make('work_permit_expiration_date')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.work-permit-expiration-date'))
@@ -1584,8 +1594,8 @@ class EmployeeResource extends Resource
                                                         ->date('F j, Y')
                                                         ->color(
                                                             fn ($record) => $record->work_permit_expiration_date && now()->diffInDays($record->work_permit_expiration_date, false) <= 30
-                                                            ? 'danger'
-                                                            : 'success'
+                                                                ? 'danger'
+                                                                : 'success'
                                                         ),
                                                     ImageEntry::make('work_permit')
                                                         ->label(__('employees::filament/resources/employee.infolist.tabs.private-information.entries.work-permit-document'))

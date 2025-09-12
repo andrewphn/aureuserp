@@ -1,31 +1,45 @@
 @php
+    use Filament\Infolists\Components\IconEntry\IconEntrySize;
+
+    $stateValue = $getState();
+
+    if ($stateValue instanceof Closure) {
+        $stateValue = $stateValue();
+    }
+
     $total = 100;
-    $progress = ($getState() / $total) * 100;
+    $progress = ($stateValue / $total) * 100;
     $displayProgress = $progress == 100 ? number_format($progress, 0) : number_format($progress, 2);
 
-    // Just keep the semantic color (not full Tailwind class)
-    $color = $getColor($state) ?? 'primary';
+    $color = $getColor($state) ?? 'gray';
 @endphp
 
-<div class="progress-container">
-    <div class="progress-bar progress-{{ $color }}" style="width: {{ $displayProgress }}%"></div>
-
-    <div class="progress-text">
-        @if (
-            $column instanceof \Webkul\Support\Filament\Tables\Columns\ProgressBarEntry
-            && $column->getCanShow()
-        )
-            <small
-                @class([
-                    'text-gray-700' => $displayProgress != 100,
-                    'text-white' => $displayProgress == 100
+<x-dynamic-component :component="$getEntryWrapperView()" :entry="$entry">
+    <div
+        {{
+            $attributes
+                ->merge($getExtraAttributes(), escape: false)
+                ->class([
+                    'fi-in-progress-bar flex flex-wrap gap-1.5',
                 ])
-            >
-                {{ $displayProgress }}%
-            </small>
-        @endif
+        }}
+    >
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ $displayProgress }}%; background-color: rgb(var(--{{ $color }}-500));"></div>
+
+            <div class="progress-text">
+                <small
+                    @class([
+                        'text-gray-700' => $displayProgress != 100,
+                        'text-white' => $displayProgress == 100
+                    ])
+                >
+                    {{ $displayProgress }}%
+                </small>
+            </div>
+        </div>
     </div>
-</div>
+</x-dynamic-component>
 
 <style>
     .progress-container {
@@ -41,28 +55,7 @@
         height: 100%;
         border-radius: 0.375rem;
         transition: width 0.3s, background-color 0.3s;
-        width: 0;
     }
-
-    .progress-primary {
-        background-color: #2563eb;
-    }
-    .progress-success {
-        background-color: #16a34a;
-    }
-    .progress-danger {
-        background-color: #dc2626;
-    }
-    .progress-warning {
-        background-color: #ca8a04;
-    }
-    .progress-info {
-        background-color: #0284c7;
-    }
-    .progress-gray {
-        background-color: #4b5563; 
-    }
-
     .progress-text {
         text-align: center;
         font-size: 0.875rem;
