@@ -124,12 +124,14 @@ class Package extends BasePackage
     {
         Plugin::where('name', $this->name)->delete();
 
+        unset(static::$plugins[$this->name]);
+
         $this->plugin = null;
     }
 
     public function updateOrCreate(): Plugin
     {
-        return $this->plugin = Plugin::updateOrCreate([
+        $this->plugin = Plugin::updateOrCreate([
             'name' => $this->name,
         ], [
             'author'         => $this->author ?? null,
@@ -141,6 +143,10 @@ class Package extends BasePackage
             'is_active'      => true,
             'is_installed'   => true,
         ]);
+
+        static::$plugins[$this->name] = $this->plugin;
+
+        return $this->plugin;
     }
 
     public function getPlugin(): ?Plugin
