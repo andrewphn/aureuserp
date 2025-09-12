@@ -30,6 +30,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\StageResource\Pages\CreateStage;
@@ -261,11 +262,23 @@ class StageResource extends Resource
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
+                    ->action(function (Stage $record, DeleteAction $action) {
+                        try {
+                            $record->delete();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('recruitments::filament/clusters/configurations/resources/stage.table.actions.delete.notification.error.title'))
+                                ->body(__('recruitments::filament/clusters/configurations/resources/stage.table.actions.delete.notification.error.body'))
+                                ->send();
+                            $action->cancel();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('recruitments::filament/clusters/configurations/resources/stage.table.actions.delete.notification.title'))
-                            ->body(__('recruitments::filament/clusters/configurations/resources/stage.table.actions.delete.notification.body'))
+                            ->title(__('recruitments::filament/clusters/configurations/resources/stage.table.actions.delete.notification.success.title'))
+                            ->body(__('recruitments::filament/clusters/configurations/resources/stage.table.actions.delete.notification.success.body'))
                     ),
             ])
             ->toolbarActions([
