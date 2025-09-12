@@ -2,6 +2,8 @@
 
 namespace Webkul\Support;
 
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use Illuminate\Support\Str;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
@@ -80,6 +82,8 @@ class SupportServiceProvider extends PackageServiceProvider
         FilamentAsset::register([
             Css::make('support', __DIR__.'/../resources/dist/support.css'),
         ], 'support');
+
+        $this->managePermissions();
     }
 
     public function packageRegistered(): void
@@ -106,5 +110,41 @@ class SupportServiceProvider extends PackageServiceProvider
                 'version' => $version,
             ]),
         );
+    }
+
+    public function managePermissions()
+    {
+        FilamentShield::buildPermissionKeyUsing(function (string $entity, string $affix, string $subject) {
+            $affix = Str::snake($affix);
+
+            if (
+                $entity == 'BezhanSalleh\FilamentShield\Resources\Roles\RoleResource'
+                || $entity == 'App\Filament\Resources\RoleResource'
+            ) {
+                return $affix . '_role';
+            }
+
+            if (class_exists($entity) && method_exists($entity, 'getModel')) {
+                $resourceIdentifier = Str::of($entity)
+                    ->afterLast('Resources\\')
+                    ->beforeLast('Resource')
+                    ->replace('\\', '')
+                    ->snake()
+                    ->replace('_', '::')
+                    ->toString();
+
+                return $affix . '_' . $resourceIdentifier;
+            }
+
+            if (Str::contains($entity, 'Pages\\')) {
+                return 'page_' . Str::snake(class_basename($entity));
+            }
+
+            if (Str::contains($entity, 'Widgets\\') || Str::endsWith($entity, 'Widget')) {
+                return 'widget_' . Str::snake(class_basename($entity));
+            }
+
+            return $affix . '_' . Str::snake($subject);
+        });
     }
 }
