@@ -137,7 +137,7 @@ class QuotationTemplateResource extends Resource
                     ])
                     ->columns(3),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public static function table(Table $table): Table

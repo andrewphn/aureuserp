@@ -227,7 +227,7 @@ class BranchesRelationManager extends RelationManager
                             ->columnSpanFull(),
                     ]),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public function table(Table $table): Table

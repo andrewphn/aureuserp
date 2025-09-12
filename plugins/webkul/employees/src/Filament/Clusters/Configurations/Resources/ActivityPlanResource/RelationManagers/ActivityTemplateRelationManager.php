@@ -124,7 +124,7 @@ class ActivityTemplateRelationManager extends RelationManager
                     ])
                     ->columns(3),
             ])
-            ->columns('full');
+            ->columns(1);
     }
 
     public function table(Table $table): Table
