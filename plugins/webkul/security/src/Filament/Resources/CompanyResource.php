@@ -39,7 +39,6 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Enums\CompanyStatus;
@@ -49,6 +48,9 @@ use Webkul\Security\Filament\Resources\CompanyResource\Pages\ListCompanies;
 use Webkul\Security\Filament\Resources\CompanyResource\Pages\ViewCompany;
 use Webkul\Security\Filament\Resources\CompanyResource\RelationManagers\BranchesRelationManager;
 use Webkul\Security\Settings\UserSettings;
+use Webkul\Security\Filament\Resources\CompanyResource\Pages;
+use Webkul\Security\Filament\Resources\CompanyResource\RelationManagers;
+use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
@@ -361,8 +363,7 @@ class CompanyResource extends Resource
                     ->collapsible(),
             ])
             ->filters([
-                TrashedFilter::make(),
-                SelectFilter::make('is_active')
+                Tables\Filters\SelectFilter::make('is_active')
                     ->label(__('security::filament/resources/company.table.filters.status'))
                     ->options(CompanyStatus::options()),
                 SelectFilter::make('country')
@@ -384,7 +385,7 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
-                        ->hidden(fn (Model $record, UserSettings $userSettings): bool => $record->id === $userSettings->default_company_id)
+                        ->hidden(fn ($record) => User::where('default_company_id', $record->id)->exists())
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -430,7 +431,7 @@ class CompanyResource extends Resource
                     ->whereNull('parent_id');
             })
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record, UserSettings $userSettings): bool => ! ($record->id === $userSettings->default_company_id)
+                fn (Model $record): bool => ! User::where('default_company_id', $record->id)->exists()
             )
             ->reorderable('sort');
     }
@@ -564,13 +565,5 @@ class CompanyResource extends Resource
             'view'   => ViewCompany::route('/{record}'),
             'edit'   => EditCompany::route('/{record}/edit'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }
