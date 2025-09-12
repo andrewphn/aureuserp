@@ -101,7 +101,7 @@ class PublicHolidayResource extends Resource
                         ->label(__('time-off::filament/clusters/configurations/resources/public-holiday.form.fields.calendar'))
                         ->preload()
                         ->relationship('calendar', 'name'),
-                ]),
+                ])->columnSpanFull(),
             ]);
     }
 

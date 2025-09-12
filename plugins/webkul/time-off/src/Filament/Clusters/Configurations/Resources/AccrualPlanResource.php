@@ -128,7 +128,7 @@ class AccrualPlanResource extends Resource
                                     ->label(__('Status'))
                                     ->label(__('time-off::filament/clusters/configurations/resources/accrual-plan.form.fields.status')),
                             ]),
-                    ])->columns(2),
+                    ])->columns(2)->columnSpanFull(),
             ]);
     }
 
@@ -203,7 +203,7 @@ class AccrualPlanResource extends Resource
                                     ]),
                             ])
                             ->columnSpan(2),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 

@@ -25,6 +25,11 @@ class ManageCategories extends ManageRecords
 
                     return $data;
                 })
+                ->after(function ($record) {
+                    return redirect(
+                        static::$resource::getUrl('index', ['record' => $record]),
+                    );
+                })
                 ->successNotification(
                     Notification::make()
                         ->success()

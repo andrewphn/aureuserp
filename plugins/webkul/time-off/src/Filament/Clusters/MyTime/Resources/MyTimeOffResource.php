@@ -10,7 +10,6 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -108,20 +107,30 @@ class MyTimeOffResource extends Resource
                                 Toggle::make('request_unit_half')
                                     ->live()
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.half-day')),
-                                Placeholder::make('requested_days')
+                                TextEntry::make('duration_info')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.requested-days'))
                                     ->live()
-                                    ->inlineLabel()
-                                    ->reactive()
-                                    ->content(function ($state, Get $get): string {
+                                    ->state(function (Get $get): string {
                                         if ($get('request_unit_half')) {
                                             return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.day', ['day' => '0.5']);
                                         }
 
-                                        $startDate = Carbon::parse($get('request_date_from'));
-                                        $endDate = $get('request_date_to') ? Carbon::parse($get('request_date_to')) : $startDate;
+                                        $startDate = $get('request_date_from');
+                                        $endDate = $get('request_date_to');
 
-                                        return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => $startDate->diffInDays($endDate) + 1]);
+                                        if (! $startDate) {
+                                            return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => 0]);
+                                        }
+
+                                        try {
+                                            $startDate = Carbon::parse($startDate);
+                                            $endDate = $endDate ? Carbon::parse($endDate) : $startDate;
+                                            $days = $startDate->diffInDays($endDate) + 1;
+
+                                            return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => $days]);
+                                        } catch (\Exception $e) {
+                                            return __('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.days', ['days' => 0]);
+                                        }
                                     }),
                                 Textarea::make('private_name')
                                     ->label(__('time-off::filament/clusters/my-time/resources/my-time-off.form.fields.description'))
@@ -143,9 +152,8 @@ class MyTimeOffResource extends Resource
                                     })
                                     ->live(),
                             ]),
-                    ]),
-            ])
-                ->columns(1);
+                    ])->columnSpanFull(),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -324,7 +332,7 @@ class MyTimeOffResource extends Resource
                                     ->label(__('time-off::filament/clusters/management/resources/time-off.infolist.entries.attachment'))
                                     ->visible(fn ($record) => $record->holidayStatus?->support_document),
                             ]),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 }
