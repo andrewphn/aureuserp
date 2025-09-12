@@ -80,7 +80,7 @@ class AccountManager
 
             foreach ($data['files'] as $file) {
                 $attachments[] = [
-                    'path' => asset('storage/'.$file),
+                    'path' => $file,
                     'name' => basename($file),
                 ];
             }
