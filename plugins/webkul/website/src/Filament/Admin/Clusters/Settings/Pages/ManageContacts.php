@@ -2,11 +2,13 @@
 
 namespace Webkul\Website\Filament\Admin\Clusters\Settings\Pages;
 
+use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use UnitEnum;
 use Webkul\Support\Filament\Clusters\Settings;
 use Webkul\Website\Settings\ContactSettings;
 
@@ -14,11 +16,11 @@ class ManageContacts extends SettingsPage
 {
     use HasPageShield;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
     protected static ?string $slug = 'website/manage-contacts';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Website';
+    protected static string|UnitEnum|null $navigationGroup = 'Website';
 
     protected static ?int $navigationSort = 5;
 
@@ -58,7 +60,7 @@ class ManageContacts extends SettingsPage
                             ->placeholder('+1234567890')
                             ->tel(),
                     ])
-                    ->columns(2),
+                    ->columns(2)->columnSpanFull(),
                 Section::make(__('website::filament/admin/clusters/settings/pages/manage-contacts.form.sections.social-links.title'))
                     ->schema([
                         TextInput::make('twitter')
@@ -102,7 +104,7 @@ class ManageContacts extends SettingsPage
                             ->placeholder('username')
                             ->prefix('https://slack.com/'),
                     ])
-                    ->columns(2),
+                    ->columns(2)->columnSpanFull(),
             ]);
     }
 }
