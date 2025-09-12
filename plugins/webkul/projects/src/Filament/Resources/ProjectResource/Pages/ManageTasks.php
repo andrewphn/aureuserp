@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Project\Filament\Resources\Projects\Pages;
+namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -16,8 +16,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Enums\TaskState;
-use Webkul\Project\Filament\Resources\Projects\ProjectResource;
-use Webkul\Project\Filament\Resources\Tasks\TaskResource;
+use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Filament\Resources\TaskResource;
 use Webkul\Project\Models\Task;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
