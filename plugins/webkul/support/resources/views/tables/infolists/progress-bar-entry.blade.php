@@ -11,7 +11,18 @@
     $progress = ($stateValue / $total) * 100;
     $displayProgress = $progress == 100 ? number_format($progress, 0) : number_format($progress, 2);
 
-    $color = $getColor($state) ?? 'gray';
+    // Map logical color names to RGB
+    $colorMap = [
+        'success' => '34,197,94',
+        'warning' => '234,179,8',
+        'danger'  => '239,68,68',
+        'info'    => '59,130,246',
+        'primary' => '59,130,246',
+        'secondary' => '107,114,128',
+        'gray' => '107,114,128',
+    ];
+
+    $selectedColor = $colorMap[$getColor($state) ?? 'gray'] ?? $colorMap['gray'];
 @endphp
 
 <x-dynamic-component :component="$getEntryWrapperView()" :entry="$entry">
@@ -25,13 +36,15 @@
         }}
     >
         <div class="progress-container">
-            <div class="progress-bar" style="width: {{ $displayProgress }}%; background-color: rgb(var(--{{ $color }}-500));"></div>
+            <div class="progress-bar"
+                 style="width: {{ $displayProgress }}%; background-color: rgb({{ $selectedColor }});">
+            </div>
 
             <div class="progress-text">
                 <small
                     @class([
                         'text-gray-700' => $displayProgress != 100,
-                        'text-white' => $displayProgress == 100
+                        'text-white' => $displayProgress == 100,
                     ])
                 >
                     {{ $displayProgress }}%
@@ -44,7 +57,7 @@
 <style>
     .progress-container {
         width: 100%;
-        background-color: #e5e7eb;
+        background-color: #e5e7eb; /* gray-200 */
         border-radius: 0.375rem;
         height: 1.5rem;
         overflow: hidden;
