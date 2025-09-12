@@ -86,7 +86,7 @@
             min-height: 38px;
         }
         .dark .stage-button {
-        border: 1px solid var(--gray-700);
+            border: 1px solid var(--gray-700);
         }
         .stage-button:after {
             content: "";
@@ -98,8 +98,8 @@
             z-index: 1;
             transform: translateY(-50%) rotate(45deg);
             background-color: #ffffff;
-            border-right: 1px solid var(--gray-950);
-            border-top: 1px solid var(--gray-950);
+            border-right: 1px solid var(--gray-300);
+            border-top: 1px solid var(--gray-300);
             transition-duration: 75ms;
         }
         .dark .stage-button:after {
