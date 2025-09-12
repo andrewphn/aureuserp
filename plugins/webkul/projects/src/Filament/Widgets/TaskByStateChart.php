@@ -2,6 +2,7 @@
 
 namespace Webkul\Project\Filament\Widgets;
 
+use Exception;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
@@ -55,20 +56,10 @@ class TaskByStateChart extends ChartWidget
                 $query->whereIn('parent_id', $this->pageFilters['selectedPartners']);
             }
 
-            $startDate = ! is_null($this->pageFilters['startDate'] ?? null) ?
-                Carbon::parse($this->pageFilters['startDate']) :
-                null;
-
-            $endDate = ! is_null($this->pageFilters['endDate'] ?? null) ?
-                Carbon::parse($this->pageFilters['endDate']) :
-                now();
+            $this->applyDateFilters($query);
 
             $datasets['labels'][] = TaskState::options()[$state->value];
-
-            $datasets['datasets'][] = $query
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->where('state', $state->value)
-                ->count();
+            $datasets['datasets'][] = $query->where('state', $state->value)->count();
         }
 
         $colors = TaskState::colors();
@@ -91,6 +82,33 @@ class TaskByStateChart extends ChartWidget
             ],
             'labels' => $datasets['labels'],
         ];
+    }
+
+    private function applyDateFilters($query): void
+    {
+        $startDate = $this->pageFilters['startDate'] ?? null;
+        $endDate = $this->pageFilters['endDate'] ?? null;
+
+        if (! empty($startDate)) {
+            try {
+                $startDateCarbon = Carbon::parse($startDate)->startOfDay();
+                $query->where('created_at', '>=', $startDateCarbon);
+            } catch (Exception) {}
+        }
+
+        if (! empty($endDate)) {
+            try {
+                $endDateCarbon = Carbon::parse($endDate)->endOfDay();
+                $query->where('created_at', '<=', $endDateCarbon);
+            } catch (Exception) {}
+        }
+
+        if (empty($startDate) && empty($endDate)) {
+            $query->whereBetween('created_at', [
+                now()->subMonth()->startOfDay(),
+                now()->endOfDay()
+            ]);
+        }
     }
 
     protected function getType(): string
