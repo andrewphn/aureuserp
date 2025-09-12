@@ -122,7 +122,7 @@ class PackageTypeResource extends Resource
                             ->relationship('company', 'name')
                             ->searchable()
                             ->preload(),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 

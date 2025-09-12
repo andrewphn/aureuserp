@@ -104,7 +104,7 @@ class PackageResource extends Resource
                                     ->preload(),
                             ])
                             ->columns(2),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 

@@ -96,7 +96,7 @@ class StorageCategoryResource extends Resource
                             ->preload()
                             ->default(Auth::user()->default_company_id),
                     ])
-                    ->columns(2),
+                    ->columns(2)->columnSpanFull(),
             ]);
     }
 

@@ -143,7 +143,7 @@ class RuleResource extends Resource
 
                                         Group::make()
                                             ->schema([
-                                                Placeholder::make('')
+                                                Placeholder::make('placeholder')
                                                     ->hiddenLabel()
                                                     ->content(new HtmlString('When products are needed in Destination Location, </br>Operation Type are created from Source Location to fulfill the need.'))
                                                     ->content(function (Get $get): HtmlString {
@@ -160,11 +160,15 @@ class RuleResource extends Resource
                                                             'operation'           => $operation?->name ?? __('inventories::filament/clusters/configurations/resources/rule.form.sections.general.fields.operation-type'),
                                                             'destinationLocation' => $operation?->destinationLocation?->full_name ?? __('inventories::filament/clusters/configurations/resources/rule.form.sections.general.fields.destination-location'),
                                                         ]);
+                                                        $action = ($get('action') instanceof RuleAction)
+                                                            ? $get('action')
+                                                            : RuleAction::tryFrom($get('action') ?? RuleAction::PULL->value);
 
-                                                        return match ($get('action') ?? RuleAction::PULL->value) {
-                                                            RuleAction::PULL->value      => new HtmlString($pullMessage),
-                                                            RuleAction::PUSH->value      => new HtmlString($pushMessage),
-                                                            RuleAction::PULL_PUSH->value => new HtmlString($pullMessage.'</br></br>'.$pushMessage),
+                                                        return match ($action) {
+                                                            RuleAction::PULL      => new HtmlString($pullMessage),
+                                                            RuleAction::PUSH      => new HtmlString($pushMessage),
+                                                            RuleAction::PULL_PUSH => new HtmlString($pullMessage.'</br></br>'.$pushMessage),
+                                                            default               => new HtmlString('Unsupported action.'),
                                                         };
                                                     }),
                                             ]),
