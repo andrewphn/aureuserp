@@ -34,6 +34,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Guava\IconPicker\Forms\Components\IconPicker;
+use Illuminate\Database\QueryException;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\ActivityChainingType;
 use Webkul\Support\Enums\ActivityDecorationType;
@@ -82,7 +83,7 @@ class ActivityTypeResource extends Resource
                                             ->preload(),
                                         Select::make('default_user_id')
                                             ->label(__('support::filament/resources/activity-type.form.sections.activity-type-details.fields.default-user'))
-                                            ->options(fn () => User::query()->pluck('name', 'id'))
+                                            ->options(fn() => User::query()->pluck('name', 'id'))
                                             ->searchable()
                                             ->preload(),
                                         Textarea::make('summary')
@@ -136,19 +137,19 @@ class ActivityTypeResource extends Resource
                                             ->live()
                                             ->required()
                                             ->native(false)
-                                            ->hidden(fn (Get $get) => $get('category') === 'upload_file'),
+                                            ->hidden(fn(Get $get) => $get('category') === 'upload_file'),
                                         Select::make('activity_type_suggestions')
                                             ->multiple()
                                             ->relationship('suggestedActivityTypes', 'name')
                                             ->searchable()
                                             ->preload()
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.suggest'))
-                                            ->hidden(fn (Get $get) => $get('chaining_type') === 'trigger' || $get('category') === 'upload_file'),
+                                            ->hidden(fn(Get $get) => $get('chaining_type') === 'trigger' || $get('category') === 'upload_file'),
                                         Select::make('triggered_next_type_id')
                                             ->relationship('triggeredNextType', 'name')
                                             ->label(__('support::filament/resources/activity-type.form.sections.advanced-information.fields.trigger'))
                                             ->native(false)
-                                            ->hidden(fn (Get $get) => $get('chaining_type') === 'suggest' && $get('category') !== 'upload_file'),
+                                            ->hidden(fn(Get $get) => $get('chaining_type') === 'suggest' && $get('category') !== 'upload_file'),
                                     ]),
                                 Section::make(__('support::filament/resources/activity-type.form.sections.status-and-configuration-information.title'))
                                     ->schema([
@@ -186,14 +187,14 @@ class ActivityTypeResource extends Resource
                     }),
                 TextColumn::make('delay_from')
                     ->label(__('support::filament/resources/activity-type.table.columns.type'))
-                    ->formatStateUsing(fn ($state) => ActivityDelayFrom::options()[$state])
+                    ->formatStateUsing(fn($state) => ActivityDelayFrom::options()[$state])
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('category')
                     ->badge()
                     ->label(__('support::filament/resources/activity-type.table.columns.action'))
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => ActivityTypeAction::options()[$state])
+                    ->formatStateUsing(fn($state) => ActivityTypeAction::options()[$state])
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->label(__('support::filament/resources/activity-type.table.columns.status'))
@@ -256,7 +257,7 @@ class ActivityTypeResource extends Resource
                     ->label(__('support::filament/resources/activity-type.table.filters.status')),
                 Filter::make('has_delay')
                     ->label(__('support::filament/resources/activity-type.table.filters.has-delay'))
-                    ->query(fn ($query) => $query->whereNotNull('delay_count')),
+                    ->query(fn($query) => $query->whereNotNull('delay_count')),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -277,12 +278,23 @@ class ActivityTypeResource extends Resource
                                 ->body(__('support::filament/resources/activity-type.table.actions.delete.notification.body')),
                         ),
                     ForceDeleteAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('support::filament/resources/activity-type.table.actions.force-delete.notification.title'))
-                                ->body(__('support::filament/resources/activity-type.table.actions.force-delete.notification.body')),
-                        ),
+                        ->action(function (ActivityType $record) {
+                            try {
+                                $record->forceDelete();
+
+                                Notification::make()
+                                    ->success()
+                                    ->title(__('support::filament/resources/activity-type.table.actions.force-delete.notification.success.title'))
+                                    ->body(__('support::filament/resources/activity-type.table.actions.force-delete.notification.success.body'))
+                                    ->send();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('support::filament/resources/activity-type.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('support::filament/resources/activity-type.table.actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        }),
                 ]),
             ])
             ->toolbarActions([
@@ -310,7 +322,7 @@ class ActivityTypeResource extends Resource
                         ),
                 ]),
             ])
-            ->modifyQueryUsing(fn ($query) => $query->where('plugin', static::$pluginName))
+            ->modifyQueryUsing(fn($query) => $query->where('plugin', static::$pluginName))
             ->reorderable('sort');
     }
 
@@ -331,7 +343,7 @@ class ActivityTypeResource extends Resource
                                         TextEntry::make('category')
                                             ->icon('heroicon-o-tag')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => ActivityTypeAction::options()[$state])
+                                            ->formatStateUsing(fn($state) => ActivityTypeAction::options()[$state])
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.activity-type-details.entries.action')),
                                         TextEntry::make('defaultUser.name')
                                             ->icon('heroicon-o-user')
@@ -364,12 +376,12 @@ class ActivityTypeResource extends Resource
                                         TextEntry::make('delay_unit')
                                             ->icon('heroicon-o-calendar')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => ActivityDelayUnit::options()[$state])
+                                            ->formatStateUsing(fn($state) => ActivityDelayUnit::options()[$state])
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.delay-information.entries.delay-unit')),
                                         TextEntry::make('delay_from')
                                             ->icon('heroicon-o-arrow-right')
                                             ->placeholder('—')
-                                            ->formatStateUsing(fn ($state) => ActivityDelayFrom::options()[$state])
+                                            ->formatStateUsing(fn($state) => ActivityDelayFrom::options()[$state])
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.delay-information.entries.delay-form')),
                                     ])->columns(2),
                             ])->columnSpan(2),
@@ -378,17 +390,17 @@ class ActivityTypeResource extends Resource
                                 Section::make(__('support::filament/resources/activity-type.infolist.sections.advanced-information.title'))
                                     ->schema([
                                         TextEntry::make('icon')
-                                            ->icon(fn ($record) => $record->icon)
+                                            ->icon(fn($record) => $record->icon)
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.icon')),
                                         TextEntry::make('decoration_type')
                                             ->icon('heroicon-o-paint-brush')
-                                            ->formatStateUsing(fn ($state) => ActivityDecorationType::options()[$state])
+                                            ->formatStateUsing(fn($state) => ActivityDecorationType::options()[$state])
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.decoration-type')),
                                         TextEntry::make('chaining_type')
                                             ->icon('heroicon-o-link')
-                                            ->formatStateUsing(fn ($state) => ActivityChainingType::options()[$state])
+                                            ->formatStateUsing(fn($state) => ActivityChainingType::options()[$state])
                                             ->placeholder('—')
                                             ->label(__('support::filament/resources/activity-type.infolist.sections.advanced-information.entries.chaining-type')),
                                         TextEntry::make('suggestedActivityTypes.name')
@@ -411,7 +423,7 @@ class ActivityTypeResource extends Resource
                             ])->columnSpan(1),
                     ]),
             ])
-                ->columns(1);
+            ->columns(1);
     }
 
     public static function getPages(): array
