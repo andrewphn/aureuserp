@@ -128,8 +128,8 @@ class TaxGroupResource extends Resource
                     })
                     ->successNotification(
                         Notification::make()
-                            ->title(__('accounts::filament/resources/tax-group.table.actions.delete.notification.title'))
-                            ->body(__('accounts::filament/resources/tax-group.table.actions.delete.notification.body'))
+                            ->title(__('accounts::filament/resources/tax-group.table.actions.delete.notification.success.title'))
+                            ->body(__('accounts::filament/resources/tax-group.table.actions.delete.notification.success.body'))
                     ),
             ])
             ->toolbarActions([
