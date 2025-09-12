@@ -43,6 +43,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
@@ -451,12 +452,22 @@ class ProjectResource extends Resource
                                 ->body(__('projects::filament/resources/project.table.actions.delete.notification.body')),
                         ),
                     ForceDeleteAction::make()
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('projects::filament/resources/project.table.actions.force-delete.notification.title'))
-                                ->body(__('projects::filament/resources/project.table.actions.force-delete.notification.body')),
-                        ),
+                        ->action(function (Model $record) {
+                            try {
+                                $record->forceDelete();
+                                Notification::make()
+                                    ->success()
+                                    ->title(__('projects::filament/resources/project.table.actions.force-delete.notification.success.title'))
+                                    ->body(__('projects::filament/resources/project.table.actions.force-delete.notification.success.body'))
+                                    ->send();
+                            } catch (QueryException $th) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('projects::filament/resources/project.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('projects::filament/resources/project.table.actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        }),
                 ])
                     ->link()
                     ->hiddenLabel(),
