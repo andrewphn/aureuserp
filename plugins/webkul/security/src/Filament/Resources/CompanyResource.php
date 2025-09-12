@@ -252,7 +252,7 @@ class CompanyResource extends Resource
                                                     ->label(__('security::filament/resources/company.form.sections.branding.fields.company-logo'))
                                                     ->image()
                                                     ->directory('company-logos')
-                                                    ->visibility('private'),
+                                                    ->visibility('public'),
                                             ]),
                                         ColorPicker::make('color')
                                             ->label(__('security::filament/resources/company.form.sections.branding.fields.color'))

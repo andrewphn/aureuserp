@@ -87,7 +87,7 @@ class BranchesRelationManager extends RelationManager
                                             ->label(__('security::filament/resources/company/relation-managers/manage-branch.form.tabs.general-information.sections.branding.fields.branch-logo'))
                                             ->image()
                                             ->directory('company-logos')
-                                            ->visibility('private'),
+                                            ->visibility('public'),
                                     ]),
                             ])
                             ->columnSpanFull(),
