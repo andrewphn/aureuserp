@@ -163,7 +163,7 @@ class ProductResource extends BaseProductResource
                     ])
                     ->visible(fn (Get $get): bool => (bool) $get('use_expiration_date')),
             ])
-            ->visible(fn (Get $get): bool => $get('type')->value == ProductType::GOODS->value);
+            ->visible(fn (Get $get): bool => $get('type') == ProductType::GOODS);
 
         $firstGroupChildComponents[] = Section::make(__('inventories::filament/clusters/products/resources/product.form.sections.additional.title'))
             ->visible(! empty($customFormFields = static::getCustomFormFields()))
