@@ -316,8 +316,9 @@ class PartnerResource extends Resource
             ->columns([
                 Stack::make([
                     ImageColumn::make('avatar')
-                        ->height(150)
-                        ->width(200),
+                        ->height(200)
+                        ->width(250)
+                        ->alignCenter(),
                     Stack::make([
                         TextColumn::make('name')
                             ->weight(FontWeight::Bold)
