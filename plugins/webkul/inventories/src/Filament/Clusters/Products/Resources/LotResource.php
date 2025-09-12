@@ -122,7 +122,7 @@ class LotResource extends Resource
                                     ->columnSpan(2),
                             ])
                             ->columns(2),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
