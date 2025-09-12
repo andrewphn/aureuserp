@@ -144,7 +144,8 @@ class MyTimeOffResource extends Resource
                                     ->live(),
                             ]),
                     ]),
-            ]);
+            ])
+                ->columns(1);
     }
 
     public static function table(Table $table): Table
