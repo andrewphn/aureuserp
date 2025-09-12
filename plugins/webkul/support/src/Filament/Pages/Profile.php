@@ -70,7 +70,7 @@ class Profile extends Page implements HasForms
                                 '1:1',
                             ])
                             ->columnSpanFull()
-                            ->helperText(__('support::filament/pages/profile.fields.avatar').': '.__('support::filament/pages/profile.information_description'))
+                            ->helperText(__('support::filament/pages/profile.fields.avatar') . ': ' . __('support::filament/pages/profile.information_description'))
                             ->deletable(true)
                             ->downloadable(false),
 
@@ -138,7 +138,7 @@ class Profile extends Page implements HasForms
                             ->live(debounce: 500)
                             ->confirmed()
                             ->helperText(__('support::filament/pages/profile.password.helper'))
-                            ->dehydrateStateUsing(fn ($state): ?string => $state ? Hash::make($state) : null),
+                            ->dehydrateStateUsing(fn($state): ?string => $state ? Hash::make($state) : null),
 
                         TextInput::make('password_confirmation')
                             ->label(__('support::filament/pages/profile.password.confirm'))
@@ -215,6 +215,8 @@ class Profile extends Page implements HasForms
             $user->password = $data['password'];
             $user->save();
 
+            Filament::auth()->login($user, true);
+
             $this->editPasswordForm->fill([
                 'current_password'      => '',
                 'password'              => '',
@@ -229,8 +231,6 @@ class Profile extends Page implements HasForms
                 ->success()
                 ->duration(3000)
                 ->send();
-
-            $this->js('setTimeout(() => window.location.reload(), 2000)');
         } catch (Exception $e) {
             Notification::make()
                 ->title(__('support::filament/pages/profile.password.notification.error.title'))

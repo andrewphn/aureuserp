@@ -157,7 +157,7 @@ class AllocationResource extends Resource
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('allocation_type')
-                    ->formatStateUsing(fn($state) => AllocationType::options()[$state])
+                    ->formatStateUsing(fn($state) => $state->getLabel())
                     ->label(__('time-off::filament/clusters/management/resources/allocation.table.columns.allocation-type'))
                     ->sortable()
                     ->searchable(),
@@ -270,7 +270,7 @@ class AllocationResource extends Resource
                                         TextEntry::make('allocation_type')
                                             ->placeholder('—')
                                             ->icon('heroicon-o-queue-list')
-                                            ->formatStateUsing(fn($state) => AllocationType::options()[$state])
+                                            ->formatStateUsing(fn($state) => $state->getLabel())
                                             ->label(__('time-off::filament/clusters/management/resources/allocation.infolist.sections.allocation-details.entries.allocation-type')),
                                     ])->columns(2),
                                 Section::make(__('time-off::filament/clusters/management/resources/allocation.infolist.sections.validity-period.title'))
