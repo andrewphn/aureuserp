@@ -48,7 +48,7 @@ class WebsitePlugin implements Plugin
                     ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Clusters'), for: 'Webkul\\Website\\Filament\\Customer\\Clusters')
                     ->discoverClusters(in: $this->getPluginBasePath('/Filament/Customer/Widgets'), for: 'Webkul\\Website\\Filament\\Customer\\Widgets')
                     ->userMenuItems([
-                        'my_account' => Action::make()->label('My Account')
+                        'my_account' => Action::make('my_account')->label('My Account')
                             ->url(fn (): string => Account::getUrl())
                             ->sort(2)
                             ->visible(fn (): bool => (bool) count(Account::getClusteredComponents())),
