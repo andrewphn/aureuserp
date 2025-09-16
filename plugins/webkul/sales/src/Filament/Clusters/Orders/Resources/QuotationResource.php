@@ -1024,42 +1024,51 @@ class QuotationResource extends Resource
                     ->toggleable()
                     ->width('200px'),
                 TableColumn::make('Quantity')
-                ->toggleable()
+                    ->toggleable()
                     ->width('50px'),
                 TableColumn::make('Quantity Delivered')
-                ->toggleable()
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('Quantity Invoiced')
-                ->toggleable()
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('Unit of Measure')
-                ->toggleable()
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom),
                 TableColumn::make('Customer Lead')
+                    ->toggleable()
                     ->width('50px'),
                 TableColumn::make('Packaging Qty')
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('Packaging')
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('Unit Price')
+                    ->toggleable()
                     ->width('100px'),
                 TableColumn::make('Margin')
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('Margin %')
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('Taxes')
+                    ->toggleable()
                     ->width('100px'),
                 TableColumn::make('Discount %')
+                    ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),
                 TableColumn::make('Sub Total')
+                    ->toggleable()
                     ->width('100px'),
             ])
             ->schema([

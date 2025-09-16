@@ -97,8 +97,10 @@
                                             {{ $columnManagerTriggerAction }}
                                         </x-slot>
 
-                                        <x-filament-tables::column-manager
+                                        <x-support::column-manager
                                             :apply-action="$columnManagerApplyAction"
+                                            :table-columns="$getMappedColumnsForColumnManager()"
+                                            :get-custom-action="$getCustomAction"
                                             :columns="$columnManagerColumns"
                                             :has-reorderable-columns="$hasReorderableColumns"
                                             :has-toggleable-columns="$hasToggleableColumns"

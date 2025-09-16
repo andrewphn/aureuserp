@@ -12,10 +12,32 @@ use Filament\Support\Icons\Heroicon;
 class Repeater extends BaseRepeater
 {
     use HasColumnManager;
-    
+
     public function getDefaultView(): string
     {
         return 'support::filament.forms.components.repeater.table';
+    }
+
+    public function getMappedColumnsForColumnManager(): array
+    {
+        $columns = $this->evaluate($this->tableColumns);
+
+        if (! is_array($columns)) {
+            $columns = [];
+        }
+
+        return array_map(
+            fn (TableColumn $column): array => [
+                'type'  => 'column',
+                'name' => $column->getLabel(),
+                'label' => $column->getLabel(),
+                'isHidden' => $column->isHidden() || ($column->isToggledHiddenByDefault() && $column->isToggledHiddenByDefault()),
+                'isToggled' => $column->isToggleable(),
+                'isToggleable' => $column->isToggleable(),
+                'isToggledHiddenByDefault' => $column->isToggleable() ? $column->isToggledHiddenByDefault() : null,
+            ],
+            $columns,
+        );
     }
     
     public function getTableColumns(): array
@@ -28,7 +50,7 @@ class Repeater extends BaseRepeater
 
         $visibleColumns = array_filter(
             $columns,
-            fn (TableColumn $column): bool => ! $column->isHidden() && !($column->isToggledHiddenByDefault() && $column->isToggledHiddenByDefault())
+            fn (TableColumn $column): bool => ! $column->isHidden() && ! ($column->isToggledHiddenByDefault() && $column->isToggledHiddenByDefault())
         );
 
         return array_values($visibleColumns);
@@ -45,6 +67,11 @@ class Repeater extends BaseRepeater
         }
 
         return false;
+
+    public function applyTableColumnManager(?array $state = null): void
+    {
+        dd('TableColumn');
+    }
     }
 
     public function getColumnManagerApplyAction(): Action
@@ -86,5 +113,10 @@ class Repeater extends BaseRepeater
         }
 
         return $action;
+    }
+
+    public function applyTableColumnManager(?array $state = null): void
+    {
+        dd('repeater');
     }
 }

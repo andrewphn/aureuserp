@@ -2,7 +2,7 @@
     @forelse($record->followers as $follower)
         <div
             wire:key="non-follower-{{ $follower->partner->id }}"
-            class="group flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/60"
+            class="flex items-center justify-between p-2 transition-colors rounded-lg group hover:bg-gray-50 dark:hover:bg-gray-800/60"
         >
             <div class="flex items-center gap-3">
                 <x-filament-panels::avatar.user
@@ -26,7 +26,7 @@
         <div class="flex flex-col items-center justify-center p-4 text-center text-gray-500 dark:text-gray-400">
             <x-filament::icon
                 icon="heroicon-o-user-group"
-                class="mb-3 h-8 w-8 text-gray-400 dark:text-gray-500"
+                class="w-8 h-8 mb-3 text-gray-400 dark:text-gray-500"
             />
             <p class="text-sm">
                 {{ __('No followers have been added yet.') }}
