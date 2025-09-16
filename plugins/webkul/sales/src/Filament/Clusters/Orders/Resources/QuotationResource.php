@@ -1019,7 +1019,7 @@ class QuotationResource extends Resource
             ->addable(fn($record): bool => ! in_array($record?->state, [OrderState::CANCEL]))
             ->table(fn($record) => [
                 TableColumn::make('Product')
-                    ->width('250px'),
+                    ->width('200px'),
                 TableColumn::make('Quantity')
                     ->width('100px'),
                 TableColumn::make('Quantity Delivered')
@@ -1037,7 +1037,7 @@ class QuotationResource extends Resource
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('Packaging')
-                    ->width('100px')
+                    ->width('200px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('Unit Price')
                     ->width('100px'),
@@ -1048,7 +1048,7 @@ class QuotationResource extends Resource
                     ->width('100px')
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('Taxes')
-                    ->width('100px'),
+                    ->width('200px'),
                 TableColumn::make('Discount %')
                     ->width('100px')
                     ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),
