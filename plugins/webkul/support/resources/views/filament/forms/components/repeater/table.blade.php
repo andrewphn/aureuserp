@@ -29,6 +29,10 @@
     $statePath = $getStatePath();
 
     $tableColumns = $getTableColumns();
+
+    $hasColumnManagerDropdown = $hasColumnManager();
+    $columnManagerApplyAction = $getColumnManagerApplyAction();
+    $columnManagerTriggerAction = $getColumnManagerTriggerAction();
 @endphp
 
 <x-dynamic-component :component="$fieldWrapperView" :field="$field">
@@ -73,7 +77,37 @@
                         @if (count($extraItemActions) || $isCloneable || $isDeletable)
                             <th
                                 class="fi-fo-table-repeater-empty-header-cell"
-                            ></th>
+                            >
+                                @if ($hasColumnManagerDropdown)
+                                    @php
+                                        $columnManagerMaxHeight = $getColumnManagerMaxHeight();
+                                        $columnManagerWidth = $getColumnManagerWidth();
+                                        $columnManagerColumns = $getColumnManagerColumns();
+                                    @endphp
+
+                                    <x-filament::dropdown
+                                        :max-height="$columnManagerMaxHeight"
+                                        placement="bottom-end"
+                                        shift
+                                        :width="$columnManagerWidth"
+                                        :wire:key="$this->getId() . '.table.column-manager'"
+                                        class="fi-ta-col-manager-dropdown"
+                                    >
+                                        <x-slot name="trigger">
+                                            {{ $columnManagerTriggerAction }}
+                                        </x-slot>
+
+                                        <x-filament-tables::column-manager
+                                            :apply-action="$columnManagerApplyAction"
+                                            :columns="$columnManagerColumns"
+                                            :has-reorderable-columns="$hasReorderableColumns"
+                                            :has-toggleable-columns="$hasToggleableColumns"
+                                            heading-tag="h2"
+                                            :reorder-animation-duration="$getReorderAnimationDuration()"
+                                        />
+                                    </x-filament::dropdown>
+                                @endif
+                            </th>
                         @endif
                     </tr>
                 </thead>
@@ -114,7 +148,7 @@
                                 <td>
                                     @if ($reorderActionIsVisible || $moveUpActionIsVisible || $moveDownActionIsVisible)
                                         <div
-                                            class="fi-fo-table-repeater-actions"
+                               fi-fo-table-repeater-actionsble-repeater-actions"
                                         >
                                             @if ($reorderActionIsVisible)
                                                 <div x-on:click.stop>
@@ -180,7 +214,7 @@
                                                 {{ $schemaComponent }}
                                             </td>
                                         @else
-                                            <td class="fi-hidden"></td>
+                                   fi-hidden<td class="fi-hidden"></td>
                                         @endif
                                     @endif
                                 @endif
@@ -190,7 +224,7 @@
                                 <td>
                                     @if ($visibleExtraItemActions || $cloneActionIsVisible || $deleteActionIsVisible)
                                         <div
-                                            class="fi-fo-table-repeater-actions"
+                               fi-fo-table-repeater-actionsble-repeater-actions"
                                         >
                                             @foreach ($visibleExtraItemActions as $extraItemAction)
                                                 <div x-on:click.stop>

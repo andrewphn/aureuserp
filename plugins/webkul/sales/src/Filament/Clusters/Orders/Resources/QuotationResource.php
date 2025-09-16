@@ -302,11 +302,13 @@ class QuotationResource extends Resource
                 TextColumn::make('name')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.number'))
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('state')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
                     ->badge()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
@@ -1019,25 +1021,30 @@ class QuotationResource extends Resource
             ->addable(fn($record): bool => ! in_array($record?->state, [OrderState::CANCEL]))
             ->table(fn($record) => [
                 TableColumn::make('Product')
+                    ->toggleable()
                     ->width('200px'),
                 TableColumn::make('Quantity')
-                    ->width('100px'),
+                ->toggleable()
+                    ->width('50px'),
                 TableColumn::make('Quantity Delivered')
+                ->toggleable()
                     ->width('100px')
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('Quantity Invoiced')
+                ->toggleable()
                     ->width('100px')
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('Unit of Measure')
+                ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom),
                 TableColumn::make('Customer Lead')
-                    ->width('100px'),
+                    ->width('50px'),
                 TableColumn::make('Packaging Qty')
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('Packaging')
-                    ->width('200px')
+                    ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('Unit Price')
                     ->width('100px'),
@@ -1048,7 +1055,7 @@ class QuotationResource extends Resource
                     ->width('100px')
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('Taxes')
-                    ->width('200px'),
+                    ->width('100px'),
                 TableColumn::make('Discount %')
                     ->width('100px')
                     ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),
