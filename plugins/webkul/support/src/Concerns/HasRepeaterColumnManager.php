@@ -35,6 +35,7 @@ trait HasRepeaterColumnManager
 
             if (method_exists($component, 'getChildComponents')) {
                 $found = $this->findRepeaterInComponents($component->getChildComponents(), $repeaterKey);
+
                 if ($found) {
                     return $found;
                 }
@@ -53,6 +54,7 @@ trait HasRepeaterColumnManager
 
             if (method_exists($component, 'getChildComponents')) {
                 $found = $this->findRepeaterInComponents($component->getChildComponents(), $repeaterKey);
+
                 if ($found) {
                     return $found;
                 }

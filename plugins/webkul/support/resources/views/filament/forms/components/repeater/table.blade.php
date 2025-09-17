@@ -64,7 +64,10 @@
                                 ])
                             >
                                 @if (! $column->isHeaderLabelHidden())
-                                    {{ $column->getLabel() }}@if ($column->isMarkedAsRequired())<sup class="fi-fo-table-repeater-header-required-mark">*</sup>
+                                    {{ $column->getLabel() }}
+
+                                    @if ($column->isMarkedAsRequired())
+                                        <sup class="fi-fo-table-repeater-header-required-mark">*</sup>
                                     @endif
                                 @else
                                     <span class="fi-sr-only">
@@ -74,10 +77,12 @@
                             </th>
                         @endforeach
 
-                        @if (count($extraItemActions) || $isCloneable || $isDeletable)
-                            <th
-                                class="fi-fo-table-repeater-empty-header-cell"
-                            >
+                        @if (
+                            count($extraItemActions) 
+                            || $isCloneable 
+                            || $isDeletable
+                        )
+                            <th class="text-center align-middle fi-fo-table-repeater-empty-header-cell">
                                 @if ($hasColumnManagerDropdown)
                                     @php
                                         $columnManagerMaxHeight = $getColumnManagerMaxHeight();
@@ -91,7 +96,7 @@
                                         shift
                                         :width="$columnManagerWidth"
                                         :wire:key="$this->getId() . '.table.column-manager.' . $statePath"
-                                        class="fi-ta-col-manager-dropdown"
+                                        class="inline-block fi-ta-col-manager-dropdown"
                                     >
                                         <x-slot name="trigger">
                                             {{ $columnManagerTriggerAction }}
@@ -101,7 +106,7 @@
                                             :apply-action="$columnManagerApplyAction"
                                             :table-columns="$getMappedColumnsForColumnManager()"
                                             :columns="$columnManagerColumns"
-                                            :has-reorderable-columns="$hasReorderableColumns"
+                                            :has-reorderable-columns="false"
                                             :has-toggleable-columns="$hasToggleableColumns"
                                             heading-tag="h2"
                                             :reorder-animation-duration="$getReorderAnimationDuration()"
@@ -146,9 +151,16 @@
                             wire:key="{{ $item->getLivewireKey() }}.item"
                             x-sortable-item="{{ $itemKey }}"
                         >
-                            @if ((count($items) > 1) && ($isReorderableWithButtons || $isReorderableWithDragAndDrop))
+                            @if (
+                                (count($items) > 1) 
+                                && ($isReorderableWithButtons || $isReorderableWithDragAndDrop)
+                            )
                                 <td>
-                                    @if ($reorderActionIsVisible || $moveUpActionIsVisible || $moveDownActionIsVisible)
+                                    @if (
+                                        $reorderActionIsVisible 
+                                        || $moveUpActionIsVisible 
+                                        || $moveDownActionIsVisible
+                                    )
                                         <div class="fi-fo-table-repeater-actionable-repeater-actions">
                                             @if ($reorderActionIsVisible)
                                                 <div x-on:click.stop>
@@ -156,7 +168,10 @@
                                                 </div>
                                             @endif
 
-                                            @if ($moveUpActionIsVisible || $moveDownActionIsVisible)
+                                            @if (
+                                                $moveUpActionIsVisible 
+                                                || $moveDownActionIsVisible
+                                            )
                                                 <div x-on:click.stop>
                                                     {{ $moveUpAction }}
                                                 </div>
@@ -174,6 +189,10 @@
                                 $counter = 0
                             @endphp
 
+                            @php
+                                $visibleColumns = collect($tableColumns)->mapWithKeys(fn ($col) => [$col->getName() => $col]);
+                            @endphp
+
                             @foreach ($item->getComponents() as $schemaComponent)
                                 @php
                                     throw_unless(
@@ -182,42 +201,26 @@
                                     );
                                 @endphp
 
-                                @if (count($tableColumns) > $counter)
+                                @if ($visibleColumns->has($schemaComponent->getName()))
                                     @if ($schemaComponent instanceof \Filament\Forms\Components\Hidden)
                                         {{ $schemaComponent }}
                                     @else
-                                        @php
-                                            $counter++
-                                        @endphp
+                                        <td
+                                            @if (! (($schemaComponent instanceof Action) || ($schemaComponent instanceof ActionGroup)))
+                                                @php
+                                                    $schemaComponentStatePath = $schemaComponent->getStatePath();
+                                                @endphp
 
-                                        @if ($schemaComponent->isVisible())
-                                            <td
-                                                @if (! (($schemaComponent instanceof Action) || ($schemaComponent instanceof ActionGroup)))
-                                                    @php
-                                                        $schemaComponentStatePath = $schemaComponent->getStatePath();
-                                                    @endphp
-
-                                                    x-data="filamentSchemaComponent({
-                                                        path: @js($schemaComponentStatePath),
-                                                        containerPath: @js($itemStatePath),
-                                                        isLive: @js($schemaComponent->isLive()),
-                                                        $wire,
-                                                    })"
-                                                    @if ($afterStateUpdatedJs = $schemaComponent->getAfterStateUpdatedJs())
-                                                        x-init="{{ implode(';', array_map(
-                                                            fn (string $js): string => '$wire.watch(' . Js::from($schemaComponentStatePath) . ', ($state, $old) => ($state !== undefined) && eval(' . Js::from($js) . '))',
-                                                            $afterStateUpdatedJs,
-                                                        )) }}"
-                                                    @endif
-                                                @endif
-                                            >
-                                                {{ $schemaComponent->getLabel() }}
-
-                                                {{ $schemaComponent }}
-                                            </td>
-                                        @else
-                                            <td class="fi-hidden"></td>
-                                        @endif
+                                                x-data="filamentSchemaComponent({
+                                                    path: @js($schemaComponentStatePath),
+                                                    containerPath: @js($itemStatePath),
+                                                    isLive: @js($schemaComponent->isLive()),
+                                                    $wire,
+                                                })"
+                                            @endif
+                                        >
+                                            {{ $schemaComponent }}
+                                        </td>
                                     @endif
                                 @endif
                             @endforeach

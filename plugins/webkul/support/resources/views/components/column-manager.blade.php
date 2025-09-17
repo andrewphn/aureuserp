@@ -15,7 +15,7 @@
     use Illuminate\View\ComponentAttributeBag;
 @endphp
 
-<div class="fi-ta-col-manager">
+<div class="p-4 fi-ta-col-manager">
     <div
         x-data="(() => {
             return {

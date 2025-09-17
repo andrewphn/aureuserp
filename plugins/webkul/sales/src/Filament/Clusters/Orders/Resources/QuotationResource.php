@@ -1025,7 +1025,7 @@ class QuotationResource extends Resource
                     ->toggleable()
                     ->width('200px'),
                 TableColumn::make('product_qty')
-                    ->label('Quantity Label')
+                    ->label('Quantity')
                     ->toggleable()
                     ->width('50px'),
                 TableColumn::make('qty_delivered')

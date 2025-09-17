@@ -15,11 +15,13 @@ class Repeater extends BaseRepeater
 
     protected string | null $columnManagerSessionKey = null;
 
-    public string $view = 'support::filament.forms.components.repeater.table';
-
     public function getDefaultView(): string
     {
-        return static::$view;
+        if ($this->isTable()) {
+            return 'support::filament.forms.components.repeater.table';
+        }
+
+        return parent::getDefaultView();
     }
 
     public function getColumnManagerSessionKey(): string
@@ -40,9 +42,10 @@ class Repeater extends BaseRepeater
         return array_map(
             function (TableColumn $column) use ($savedState): array {
                 $columnName = $column->getName();
+
                 $isToggled = isset($savedState[$columnName]) 
                     ? $savedState[$columnName]['isToggled'] 
-                    : !$column->isToggledHiddenByDefault();
+                    : ! $column->isToggledHiddenByDefault();
 
                 return [
                     'type' => 'column',
