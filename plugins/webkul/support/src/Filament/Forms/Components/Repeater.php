@@ -7,7 +7,7 @@ use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Tables\Table\Concerns\HasColumnManager;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
-use Webkul\Support\Filament\Forms\Components\Actions\Action;
+use Filament\Actions\Action;
 
 class Repeater extends BaseRepeater
 {
@@ -15,7 +15,7 @@ class Repeater extends BaseRepeater
 
     protected string | null $columnManagerSessionKey = null;
 
-    public static string $view = 'support::filament.forms.components.repeater.table';
+    public string $view = 'support::filament.forms.components.repeater.table';
 
     public function getDefaultView(): string
     {
@@ -106,7 +106,6 @@ class Repeater extends BaseRepeater
         $action = Action::make('applyTableColumnManager')
             ->label(__('filament-tables::table.column_manager.actions.apply.label'))
             ->button()
-            ->repeater($this)
             ->visible($this->hasDeferredColumnManager())
             ->alpineClickHandler('applyTableColumnManager')
             ->authorize(true);
@@ -127,7 +126,6 @@ class Repeater extends BaseRepeater
             ->iconButton()
             ->icon(Heroicon::ViewColumns)
             ->color('gray')
-            ->repeater($this)
             ->livewireClickHandlerEnabled(false)
             ->authorize(true);
 
