@@ -57,7 +57,7 @@ class Repeater extends BaseRepeater
             $columns,
         );
     }
-    
+
     public function getTableColumns(): array
     {
         $columns = $this->evaluate($this->tableColumns);
@@ -76,7 +76,7 @@ class Repeater extends BaseRepeater
                 }
 
                 $columnName = $column->getName();
-                
+
                 if (isset($savedState[$columnName])) {
                     return $savedState[$columnName]['isToggled'];
                 }
@@ -88,25 +88,10 @@ class Repeater extends BaseRepeater
         return array_values($visibleColumns);
     }
 
-    public function getItems(): array
-    {
-        $items = parent::getItems();
-        $columns = $this->getTableColumns();
-
-        return array_map(function ($item) use ($columns) {
-            $mappedItem = [];
-            foreach ($columns as $column) {
-                $name = $column->getName();
-                $mappedItem[$name] = $item[$name] ?? null;
-            }
-            return $mappedItem;
-        }, $items);
-    }
-
     public function hasToggleableColumns(): bool
     {
         $columns = $this->evaluate($this->tableColumns) ?? [];
-        
+
         foreach ($columns as $column) {
             if ($column->isToggleable()) {
                 return true;
@@ -164,7 +149,7 @@ class Repeater extends BaseRepeater
         }
 
         $columnState = [];
-        
+
         foreach ($columns as $column) {
             if (isset($column['name']) && isset($column['isToggled'])) {
                 $columnState[$column['name']] = [
