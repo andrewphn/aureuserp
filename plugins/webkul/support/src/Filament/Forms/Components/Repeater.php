@@ -15,9 +15,11 @@ class Repeater extends BaseRepeater
 
     protected string | null $columnManagerSessionKey = null;
 
+    public static string $view = 'support::filament.forms.components.repeater.table';
+
     public function getDefaultView(): string
     {
-        return 'support::filament.forms.components.repeater.table';
+        return static::$view;
     }
 
     public function getColumnManagerSessionKey(): string
