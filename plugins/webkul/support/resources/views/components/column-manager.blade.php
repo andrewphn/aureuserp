@@ -7,6 +7,7 @@
     'headingTag' => 'h3',
     'reorderAnimationDuration' => 300,
     'applyTableColumnManager',
+    'repeaterKey' => null,
 ])
 
 @php
@@ -22,6 +23,7 @@
                 isLoading: false,
                 columns: @js($tableColumns),
                 isLive: {{ $applyAction->isVisible() ? 'false' : 'true' }},
+                repeaterKey: @js($repeaterKey),
 
                 init() {
                     if (!this.columns || this.columns.length === 0) {
@@ -142,10 +144,10 @@
                 async applyTableColumnManager() {
                     this.isLoading = true;
                     try {
-                        console.log(this.$wire);
-                        await this.$wire.applyTableColumnManager(this.columns);
+                        await this.$wire.call('applyRepeaterColumnManager', this.repeaterKey, this.columns);
                     } catch (error) {
                         this.error = error;
+                        console.error('Column manager error:', error);
                     } finally {
                         this.isLoading = false;
                     }
@@ -166,9 +168,9 @@
                             new ComponentAttributeBag([
                                 'color' => 'danger',
                                 'tag' => 'button',
-                                'wire:click' => 'resetTableColumnManager',
+                                'wire:click' => 'resetRepeaterColumnManager(\'' . $repeaterKey . '\')',
                                 'wire:loading.remove.delay.' . config('filament.livewire_loading_delay', 'default') => '',
-                                'wire:target' => 'resetTableColumnManager',
+                                'wire:target' => 'resetRepeaterColumnManager',
                             ])
                         )
                     "

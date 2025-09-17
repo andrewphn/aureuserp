@@ -5,17 +5,24 @@ namespace Webkul\Support\Filament\Forms\Components;
 use Filament\Forms\Components\Repeater as BaseRepeater;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Tables\Table\Concerns\HasColumnManager;
-use Filament\Actions\Action;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
+use Webkul\Support\Filament\Forms\Components\Actions\Action;
 
 class Repeater extends BaseRepeater
 {
     use HasColumnManager;
 
+    protected string | null $columnManagerSessionKey = null;
+
     public function getDefaultView(): string
     {
         return 'support::filament.forms.components.repeater.table';
+    }
+
+    public function getColumnManagerSessionKey(): string
+    {
+        return $this->columnManagerSessionKey ??= 'repeater_' . $this->getStatePath() . '_column_manager';
     }
 
     public function getMappedColumnsForColumnManager(): array
@@ -26,16 +33,25 @@ class Repeater extends BaseRepeater
             $columns = [];
         }
 
+        $savedState = session($this->getColumnManagerSessionKey(), []);
+
         return array_map(
-            fn (TableColumn $column): array => [
-                'type'  => 'column',
-                'name' => $column->getLabel(),
-                'label' => $column->getLabel(),
-                'isHidden' => $column->isHidden() || ($column->isToggledHiddenByDefault() && $column->isToggledHiddenByDefault()),
-                'isToggled' => $column->isToggleable(),
-                'isToggleable' => $column->isToggleable(),
-                'isToggledHiddenByDefault' => $column->isToggleable() ? $column->isToggledHiddenByDefault() : null,
-            ],
+            function (TableColumn $column) use ($savedState): array {
+                $columnName = $column->getName();
+                $isToggled = isset($savedState[$columnName]) 
+                    ? $savedState[$columnName]['isToggled'] 
+                    : !$column->isToggledHiddenByDefault();
+
+                return [
+                    'type' => 'column',
+                    'name' => $columnName,
+                    'label' => $column->getLabel(),
+                    'isHidden' => $column->isHidden(),
+                    'isToggled' => $isToggled,
+                    'isToggleable' => $column->isToggleable(),
+                    'isToggledHiddenByDefault' => $column->isToggledHiddenByDefault(),
+                ];
+            },
             $columns,
         );
     }
@@ -48,9 +64,23 @@ class Repeater extends BaseRepeater
             $columns = [];
         }
 
+        $savedState = session($this->getColumnManagerSessionKey(), []);
+
         $visibleColumns = array_filter(
             $columns,
-            fn (TableColumn $column): bool => ! $column->isHidden() && ! ($column->isToggledHiddenByDefault() && $column->isToggledHiddenByDefault())
+            function (TableColumn $column) use ($savedState): bool {
+                if ($column->isHidden()) {
+                    return false;
+                }
+
+                $columnName = $column->getName();
+                
+                if (isset($savedState[$columnName])) {
+                    return $savedState[$columnName]['isToggled'];
+                }
+
+                return ! $column->isToggledHiddenByDefault();
+            }
         );
 
         return array_values($visibleColumns);
@@ -58,20 +88,15 @@ class Repeater extends BaseRepeater
 
     public function hasToggleableColumns(): bool
     {
-        foreach ($this->getTableColumns() as $column) {
-            if (! $column->isToggleable()) {
-                continue;
+        $columns = $this->evaluate($this->tableColumns) ?? [];
+        
+        foreach ($columns as $column) {
+            if ($column->isToggleable()) {
+                return true;
             }
-
-            return true;
         }
 
         return false;
-
-    public function applyTableColumnManager(?array $state = null): void
-    {
-        dd('TableColumn');
-    }
     }
 
     public function getColumnManagerApplyAction(): Action
@@ -79,6 +104,7 @@ class Repeater extends BaseRepeater
         $action = Action::make('applyTableColumnManager')
             ->label(__('filament-tables::table.column_manager.actions.apply.label'))
             ->button()
+            ->repeater($this)
             ->visible($this->hasDeferredColumnManager())
             ->alpineClickHandler('applyTableColumnManager')
             ->authorize(true);
@@ -92,13 +118,14 @@ class Repeater extends BaseRepeater
         return $action;
     }
 
-     public function getColumnManagerTriggerAction(): Action
+    public function getColumnManagerTriggerAction(): Action
     {
         $action = Action::make('openColumnManager')
             ->label(__('filament-tables::table.actions.column_manager.label'))
             ->iconButton()
             ->icon(Heroicon::ViewColumns)
             ->color('gray')
+            ->repeater($this)
             ->livewireClickHandlerEnabled(false)
             ->authorize(true);
 
@@ -115,8 +142,33 @@ class Repeater extends BaseRepeater
         return $action;
     }
 
-    public function applyTableColumnManager(?array $state = null): void
+    public function applyTableColumnManager(?array $columns = null): void
     {
-        dd('repeater');
+        if (! $columns) {
+            return;
+        }
+
+        $columnState = [];
+        
+        foreach ($columns as $column) {
+            if (isset($column['name']) && isset($column['isToggled'])) {
+                $columnState[$column['name']] = [
+                    'isToggled' => $column['isToggled'],
+                    'isToggleable' => $column['isToggleable'] ?? true,
+                ];
+            }
+        }
+
+        session([$this->getColumnManagerSessionKey() => $columnState]);
+    }
+
+    public function resetTableColumnManager(): void
+    {
+        session()->forget($this->getColumnManagerSessionKey());
+    }
+
+    public function hasDeferredColumnManager(): bool
+    {
+        return false;
     }
 }

@@ -90,7 +90,7 @@
                                         placement="bottom-end"
                                         shift
                                         :width="$columnManagerWidth"
-                                        :wire:key="$this->getId() . '.table.column-manager'"
+                                        :wire:key="$this->getId() . '.table.column-manager.' . $statePath"
                                         class="fi-ta-col-manager-dropdown"
                                     >
                                         <x-slot name="trigger">
@@ -100,12 +100,12 @@
                                         <x-support::column-manager
                                             :apply-action="$columnManagerApplyAction"
                                             :table-columns="$getMappedColumnsForColumnManager()"
-                                            :get-custom-action="$getCustomAction"
                                             :columns="$columnManagerColumns"
                                             :has-reorderable-columns="$hasReorderableColumns"
                                             :has-toggleable-columns="$hasToggleableColumns"
                                             heading-tag="h2"
                                             :reorder-animation-duration="$getReorderAnimationDuration()"
+                                            :repeater-key="$statePath"
                                         />
                                     </x-filament::dropdown>
                                 @endif
