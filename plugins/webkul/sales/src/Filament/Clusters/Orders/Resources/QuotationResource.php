@@ -15,7 +15,6 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -70,6 +69,8 @@ use Webkul\Sale\Settings\PriceSettings;
 use Webkul\Sale\Settings\ProductSettings;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Sale\Settings;
+use Webkul\Support\Filament\Forms\Components\Repeater;
+use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
@@ -136,7 +137,7 @@ class QuotationResource extends Resource
                                             ->relationship(
                                                 'partner',
                                                 'name',
-                                                modifyQueryUsing: fn (Builder $query) => $query
+                                                modifyQueryUsing: fn(Builder $query) => $query
                                                     ->withTrashed()
                                                     ->where('sub_type', 'customer')
                                                     ->orderBy('id')
@@ -145,7 +146,7 @@ class QuotationResource extends Resource
                                             ->preload()
                                             ->required()
                                             ->live()
-                                            ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL]))
+                                            ->disabled(fn($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL]))
                                             ->columnSpan(1)
                                             ->getOptionLabelFromRecordUsing(fn($record): string => $record->name . ($record->trashed() ? ' (Deleted)' : ''))
                                             ->disableOptionWhen(fn($label) => str_contains($label, ' (Deleted)')),
@@ -153,10 +154,10 @@ class QuotationResource extends Resource
                                 DatePicker::make('validity_date')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.expiration'))
                                     ->native(false)
-                                    ->default(fn (QuotationAndOrderSettings $settings) => now()->addDays($settings->default_quotation_validity))
+                                    ->default(fn(QuotationAndOrderSettings $settings) => now()->addDays($settings->default_quotation_validity))
                                     ->required()
-                                    ->hidden(fn ($record) => $record)
-                                    ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL])),
+                                    ->hidden(fn($record) => $record)
+                                    ->disabled(fn($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL])),
                                 DatePicker::make('date_order')
                                     ->label(function ($record) {
                                         return $record?->state == OrderState::SALE
@@ -166,7 +167,7 @@ class QuotationResource extends Resource
                                     ->default(now())
                                     ->native(false)
                                     ->required()
-                                    ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL])),
+                                    ->disabled(fn($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL])),
                                 Select::make('payment_term_id')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.payment-term'))
                                     ->relationship('paymentTerm', 'name')
@@ -194,7 +195,7 @@ class QuotationResource extends Resource
                                     ->reactive(),
                             ]),
                         Tab::make(__('Optional Products'))
-                            ->hidden(fn ($record) => in_array($record?->state, [OrderState::CANCEL]))
+                            ->hidden(fn($record) => in_array($record?->state, [OrderState::CANCEL]))
                             ->icon('heroicon-o-arrow-path-rounded-square')
                             ->schema(function (Set $set, Get $get) {
                                 return [
@@ -223,7 +224,7 @@ class QuotationResource extends Resource
                                 Fieldset::make(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.shipping.title'))
                                     ->schema([
                                         DatePicker::make('commitment_date')
-                                            ->disabled(fn ($record) => in_array($record?->state, [OrderState::CANCEL]))
+                                            ->disabled(fn($record) => in_array($record?->state, [OrderState::CANCEL]))
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.shipping.fields.commitment-date'))
                                             ->native(false),
                                     ]),
@@ -252,9 +253,9 @@ class QuotationResource extends Resource
                                     ->schema([
                                         Select::make('company_id')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.other-information.fieldset.additional-information.fields.company'))
-                                            ->relationship('company', 'name', modifyQueryUsing: fn (Builder $query) => $query->withTrashed())
+                                            ->relationship('company', 'name', modifyQueryUsing: fn(Builder $query) => $query->withTrashed())
                                             ->getOptionLabelFromRecordUsing(function ($record): string {
-                                                return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                                return $record->name . ($record->trashed() ? ' (Deleted)' : '');
                                             })
                                             ->disableOptionWhen(function ($label) {
                                                 return str_contains($label, ' (Deleted)');
@@ -301,11 +302,13 @@ class QuotationResource extends Resource
                 TextColumn::make('name')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.number'))
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('state')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.status'))
                     ->placeholder('-')
                     ->badge()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('invoice_status')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.table.columns.invoice-status'))
@@ -540,7 +543,7 @@ class QuotationResource extends Resource
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make()
-                        ->hidden(fn (Model $record) => $record->state == OrderState::SALE)
+                        ->hidden(fn(Model $record) => $record->state == OrderState::SALE)
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -589,7 +592,7 @@ class QuotationResource extends Resource
                 ]),
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => static::can('delete', $record) && $record->state !== OrderState::SALE,
+                fn(Model $record): bool => static::can('delete', $record) && $record->state !== OrderState::SALE,
             );
     }
 
@@ -647,7 +650,7 @@ class QuotationResource extends Resource
                                             ->icon('heroicon-o-hashtag'),
                                         TextEntry::make('uom.name')
                                             ->placeholder('-')
-                                            ->visible(fn (ProductSettings $settings) => $settings->enable_uom)
+                                            ->visible(fn(ProductSettings $settings) => $settings->enable_uom)
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.uom'))
                                             ->icon('heroicon-o-scale'),
                                         TextEntry::make('customer_lead')
@@ -656,35 +659,35 @@ class QuotationResource extends Resource
                                             ->icon('heroicon-o-clock'),
                                         TextEntry::make('product_packaging_qty')
                                             ->placeholder('-')
-                                            ->visible(fn (ProductSettings $settings) => $settings->enable_packagings)
+                                            ->visible(fn(ProductSettings $settings) => $settings->enable_packagings)
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.packaging-qty'))
                                             ->icon('heroicon-o-arrow-path-rounded-square'),
                                         TextEntry::make('product_packaging_id')
                                             ->placeholder('-')
-                                            ->visible(fn (ProductSettings $settings) => $settings->enable_packagings)
+                                            ->visible(fn(ProductSettings $settings) => $settings->enable_packagings)
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.packaging'))
                                             ->icon('heroicon-o-archive-box'),
                                         TextEntry::make('price_unit')
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.unit-price'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->money(fn ($record) => $record->currency->code),
+                                            ->money(fn($record) => $record->currency->code),
                                         TextEntry::make('purchase_price')
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.cost'))
                                             ->icon('heroicon-o-banknotes')
-                                            ->money(fn ($record) => $record->currency->code),
+                                            ->money(fn($record) => $record->currency->code),
                                         TextEntry::make('margin')
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.margin'))
                                             ->icon('heroicon-o-currency-dollar')
-                                            ->visible(fn (PriceSettings $settings) => $settings->enable_margin)
-                                            ->money(fn ($record) => $record->currency->code),
+                                            ->visible(fn(PriceSettings $settings) => $settings->enable_margin)
+                                            ->money(fn($record) => $record->currency->code),
                                         TextEntry::make('margin_percent')
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.margin-percentage'))
                                             ->icon('heroicon-o-chart-bar')
-                                            ->visible(fn (PriceSettings $settings) => $settings->enable_margin)
+                                            ->visible(fn(PriceSettings $settings) => $settings->enable_margin)
                                             ->suffix('%'),
                                         TextEntry::make('taxes.name')
                                             ->badge()
@@ -736,7 +739,7 @@ class QuotationResource extends Resource
                                             ->icon('heroicon-o-cube'),
                                         TextEntry::make('uom.name')
                                             ->placeholder('-')
-                                            ->visible(fn (ProductSettings $settings) => $settings->enable_uom)
+                                            ->visible(fn(ProductSettings $settings) => $settings->enable_uom)
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.product-optional.entries.uom'))
                                             ->icon('heroicon-o-scale'),
                                         TextEntry::make('quantity')
@@ -849,7 +852,7 @@ class QuotationResource extends Resource
                             ]),
                     ]),
             ])
-                ->columns(1);
+            ->columns(1);
     }
 
     public static function getOptionalProductRepeater(Get $parentGet, Set $parentSet): Repeater
@@ -872,7 +875,7 @@ class QuotationResource extends Resource
 
                 return $product->name ?? null;
             })
-            ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
+            ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
             ->schema([
                 Group::make()
                     ->schema([
@@ -923,7 +926,7 @@ class QuotationResource extends Resource
                                     ->default(UOM::first()?->id)
                                     ->selectablePlaceholder(false)
                                     ->dehydrated()
-                                    ->visible(fn (ProductSettings $settings) => $settings->enable_uom),
+                                    ->visible(fn(ProductSettings $settings) => $settings->enable_uom),
                                 TextInput::make('price_unit')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.fields.unit-price'))
                                     ->numeric()
@@ -1012,198 +1015,258 @@ class QuotationResource extends Resource
             ->addActionLabel(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.add-product'))
             ->collapsible()
             ->defaultItems(0)
-            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-            ->deletable(fn ($record): bool => ! in_array($record?->state, [OrderState::CANCEL]) && $record?->state !== OrderState::SALE)
-            ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
-            ->addable(fn ($record): bool => ! in_array($record?->state, [OrderState::CANCEL]))
+            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+            ->deletable(fn($record): bool => ! in_array($record?->state, [OrderState::CANCEL]) && $record?->state !== OrderState::SALE)
+            ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
+            ->addable(fn($record): bool => ! in_array($record?->state, [OrderState::CANCEL]))
+            ->columnManagerColumns(2)
+            ->table(fn($record) => [
+                TableColumn::make('product_id')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.product'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('product_qty')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.quantity'))
+                    ->width(150)
+                    ->toggleable(),
+                TableColumn::make('qty_delivered')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-delivered'))
+                    ->width(100)
+                    ->toggleable()
+                    ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
+                TableColumn::make('qty_invoiced')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-invoiced'))
+                    ->width(100)
+                    ->toggleable()
+                    ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
+                TableColumn::make('product_uom_id')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.uom'))
+                    ->width(100)
+                    ->toggleable()
+                    ->visible(fn() => resolve(ProductSettings::class)->enable_uom),
+                TableColumn::make('customer_lead')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.lead-time'))
+                    ->width(150)
+                    ->toggleable(),
+                TableColumn::make('product_packaging_qty')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->width(100)
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.packaging-qty'))
+                    ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
+                TableColumn::make('product_packaging_id')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->width(200)
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.packaging'))
+                    ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
+                TableColumn::make('price_unit')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.unit-price'))
+                    ->width(100)
+                    ->toggleable(),
+                TableColumn::make('margin')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin'))
+                    ->width(100)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
+                TableColumn::make('margin_percent')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin-percent'))
+                    ->width(100)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
+                TableColumn::make('taxes')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.taxes'))
+                    ->width(250)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TableColumn::make('discount')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.discount'))
+                    ->width(250)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),
+                TableColumn::make('price_subtotal')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.amount'))
+                    ->width(100)
+                    ->toggleable(),
+            ])
             ->schema([
-                Group::make()
-                    ->schema([
-                        Grid::make(4)
-                            ->schema([
-                                Select::make('product_id')
-                                    ->label(fn (ProductSettings $settings) => $settings->enable_variants ? __('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.product-variants') : __('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.product-simple'))
-                                    ->relationship(
-                                        name: 'product',
-                                        titleAttribute: 'name',
-                                        modifyQueryUsing: function ($query, Settings\ProductSettings $settings) {
-                                            if (! $settings?->enable_variants) {
-                                                return $query->whereNull('parent_id')
-                                                    ->where(function ($q) {
-                                                        $q->where('is_configurable', true)
-                                                            ->orWhere(function ($subq) {
-                                                                $subq->whereNull('is_configurable')
-                                                                    ->orWhere('is_configurable', false);
-                                                            });
-                                                    });
-                                            }
-
-                                            return $query->withTrashed()->where(function ($q) {
-                                                $q->whereNull('parent_id')
-                                                    ->orWhereNotNull('parent_id');
+                Select::make('product_id')
+                    ->label(fn(ProductSettings $settings) => $settings->enable_variants ? __('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.product-variants') : __('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.product-simple'))
+                    ->relationship(
+                        name: 'product',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: function ($query, Settings\ProductSettings $settings) {
+                            if (! $settings?->enable_variants) {
+                                return $query->whereNull('parent_id')
+                                    ->where(function ($q) {
+                                        $q->where('is_configurable', true)
+                                            ->orWhere(function ($subq) {
+                                                $subq->whereNull('is_configurable')
+                                                    ->orWhere('is_configurable', false);
                                             });
-                                        }
-                                    )
-                                    ->getOptionLabelFromRecordUsing(function ($record): string {
-                                        return $record->name . ($record->trashed() ? ' (Deleted)' : '');
-                                    })
-                                    ->disableOptionWhen(function ($label, $record) {
-                                        $isDeleted = str_contains($label, ' (Deleted)');
+                                    });
+                            }
 
-                                        $isOrderLocked =
-                                            $record && (
-                                                $record->order?->locked
-                                                || in_array($record?->order?->state, [OrderState::CANCEL])
-                                            );
+                            return $query->withTrashed()->where(function ($q) {
+                                $q->whereNull('parent_id')
+                                    ->orWhereNotNull('parent_id');
+                            });
+                        }
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name . ($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function ($label, $record) {
+                        $isDeleted = str_contains($label, ' (Deleted)');
 
-                                        return $isDeleted || $isOrderLocked;
-                                    })
-                                    ->searchable()
-                                    ->preload()
-                                    ->live()
-                                    ->dehydrated(true)
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductUpdated($set, $get))
-                                    ->required()
-                                    ->selectablePlaceholder(false),
-                                TextInput::make('product_qty')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.quantity'))
-                                    ->required()
-                                    ->default(1)
-                                    ->numeric()
-                                    ->maxValue(99999999999)
-                                    ->live()
-                                    ->afterStateHydrated(fn (Set $set, Get $get) => static::afterProductQtyUpdated($set, $get))
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductQtyUpdated($set, $get))
-                                    ->readOnly(fn ($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                TextInput::make('qty_delivered')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.qty-delivered'))
-                                    ->required()
-                                    ->default(1)
-                                    ->numeric()
-                                    ->maxValue(99999999999)
-                                    ->live()
-                                    ->readOnly(fn ($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL])))
-                                    ->visible(fn ($record): bool => in_array($record?->order->state, [OrderState::SALE])),
-                                TextInput::make('qty_invoiced')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.qty-invoiced'))
-                                    ->required()
-                                    ->default(1)
-                                    ->numeric()
-                                    ->maxValue(99999999999)
-                                    ->live()
-                                    ->readOnly()
-                                    ->visible(fn ($record): bool => in_array($record?->order->state, [OrderState::SALE])),
-                                Select::make('product_uom_id')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.uom'))
-                                    ->relationship(
-                                        'uom',
-                                        'name',
-                                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
-                                    )
-                                    ->required()
-                                    ->live()
-                                    ->default(UOM::first()?->id)
-                                    ->selectablePlaceholder(false)
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterUOMUpdated($set, $get))
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
-                                    ->disableOptionWhen(fn ($value, $record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                TextInput::make('customer_lead')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.lead-time'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
-                                    ->required()
-                                    ->readOnly(fn ($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                TextInput::make('product_packaging_qty')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.packaging-qty'))
-                                    ->live()
-                                    ->numeric()
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
-                                    ->default(0)
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductPackagingQtyUpdated($set, $get))
-                                    ->visible(fn (ProductSettings $settings) => $settings->enable_packagings),
-                                Select::make('product_packaging_id')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.packaging'))
-                                    ->relationship(
-                                        'productPackaging',
-                                        'name',
-                                    )
-                                    ->searchable()
-                                    ->preload()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductPackagingUpdated($set, $get))
-                                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
-                                    ->disableOptionWhen(fn ($value, $record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                TextInput::make('price_unit')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.unit-price'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->minValue(0)
-                                    ->maxValue(99999999999)
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateLineTotals($set, $get))
-                                    ->readOnly(fn ($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                Hidden::make('purchase_price')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.cost'))
-                                    ->default(0),
-                                TextInput::make('margin')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.margin'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->maxValue(99999999999)
-                                    ->live()
-                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateLineTotals($set, $get))
-                                    ->readOnly(),
-                                TextInput::make('margin_percent')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.margin-percentage'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->maxValue(100)
-                                    ->live()
-                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_margin)
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateLineTotals($set, $get))
-                                    ->readOnly(),
-                                Select::make('taxes')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.taxes'))
-                                    ->relationship(
-                                        'taxes',
-                                        'name',
-                                        fn(Builder $query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
-                                    )
-                                    ->searchable()
-                                    ->multiple()
-                                    ->preload()
-                                    ->afterStateHydrated(fn (Get $get, Set $set) => self::calculateLineTotals($set, $get))
-                                    ->afterStateUpdated(fn (Get $get, Set $set) => self::calculateLineTotals($set, $get))
-                                    ->live()
-                                    ->disableOptionWhen(fn ($value, $record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                TextInput::make('discount')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.discount-percentage'))
-                                    ->numeric()
-                                    ->default(0)
-                                    ->minValue(0)
-                                    ->maxValue(100)
-                                    ->live()
-                                    ->visible(fn (Settings\PriceSettings $settings) => $settings->enable_discount)
-                                    ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateLineTotals($set, $get))
-                                    ->readOnly(fn ($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
-                                TextInput::make('price_subtotal')
-                                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.amount'))
-                                    ->default(0)
-                                    ->readOnly(),
-                                Hidden::make('product_uom_qty')
-                                    ->default(0),
-                                Hidden::make('price_tax')
-                                    ->default(0),
-                                Hidden::make('price_total')
-                                    ->default(0),
-                            ]),
-                    ])
-                    ->columns(1),
+                        $isOrderLocked =
+                            $record && (
+                                $record->order?->locked
+                                || in_array($record?->order?->state, [OrderState::CANCEL])
+                            );
+
+                        return $isDeleted || $isOrderLocked;
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->dehydrated(true)
+                    ->afterStateUpdated(fn(Set $set, Get $get) => static::afterProductUpdated($set, $get))
+                    ->required()
+                    ->selectablePlaceholder(false),
+                TextInput::make('product_qty')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.quantity'))
+                    ->required()
+                    ->default(1)
+                    ->numeric()
+                    ->maxValue(99999999999)
+                    ->live()
+                    ->afterStateHydrated(fn(Set $set, Get $get) => static::afterProductQtyUpdated($set, $get))
+                    ->afterStateUpdated(fn(Set $set, Get $get) => static::afterProductQtyUpdated($set, $get))
+                    ->readOnly(fn($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('qty_delivered')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.qty-delivered'))
+                    ->required()
+                    ->default(1)
+                    ->numeric()
+                    ->maxValue(99999999999)
+                    ->live()
+                    ->readOnly(fn($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL])))
+                    ->visible(fn($record): bool => in_array($record?->order->state, [OrderState::SALE])),
+                TextInput::make('qty_invoiced')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.qty-invoiced'))
+                    ->required()
+                    ->default(1)
+                    ->numeric()
+                    ->maxValue(99999999999)
+                    ->live()
+                    ->readOnly()
+                    ->visible(fn($record): bool => in_array($record?->order->state, [OrderState::SALE])),
+                Select::make('product_uom_id')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.uom'))
+                    ->relationship(
+                        'uom',
+                        'name',
+                        fn($query) => $query->where('category_id', 1)->orderBy('id'),
+                    )
+                    ->required()
+                    ->live()
+                    ->default(UOM::first()?->id)
+                    ->selectablePlaceholder(false)
+                    ->afterStateUpdated(fn(Set $set, Get $get) => static::afterUOMUpdated($set, $get))
+                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_uom)
+                    ->disableOptionWhen(fn($value, $record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('customer_lead')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.lead-time'))
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->maxValue(99999999999)
+                    ->required()
+                    ->readOnly(fn($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('product_packaging_qty')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.packaging-qty'))
+                    ->live()
+                    ->numeric()
+                    ->minValue(0)
+                    ->maxValue(99999999999)
+                    ->default(0)
+                    ->afterStateUpdated(fn(Set $set, Get $get) => static::afterProductPackagingQtyUpdated($set, $get))
+                    ->visible(fn(ProductSettings $settings) => $settings->enable_packagings),
+                Select::make('product_packaging_id')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.packaging'))
+                    ->relationship(
+                        'productPackaging',
+                        'name',
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn(Set $set, Get $get) => static::afterProductPackagingUpdated($set, $get))
+                    ->visible(fn(Settings\ProductSettings $settings) => $settings->enable_packagings)
+                    ->disableOptionWhen(fn($value, $record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('price_unit')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.unit-price'))
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->maxValue(99999999999)
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateLineTotals($set, $get))
+                    ->readOnly(fn($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('margin')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.margin'))
+                    ->numeric()
+                    ->default(0)
+                    ->maxValue(99999999999)
+                    ->live()
+                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
+                    ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateLineTotals($set, $get))
+                    ->readOnly(),
+                TextInput::make('margin_percent')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.margin-percentage'))
+                    ->numeric()
+                    ->default(0)
+                    ->maxValue(100)
+                    ->live()
+                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_margin)
+                    ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateLineTotals($set, $get))
+                    ->readOnly(),
+                Select::make('taxes')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.taxes'))
+                    ->relationship(
+                        'taxes',
+                        'name',
+                        fn(Builder $query) => $query->where('type_tax_use', TypeTaxUse::SALE->value),
+                    )
+                    ->searchable()
+                    ->multiple()
+                    ->preload()
+                    ->afterStateHydrated(fn(Get $get, Set $set) => self::calculateLineTotals($set, $get))
+                    ->afterStateUpdated(fn(Get $get, Set $set) => self::calculateLineTotals($set, $get))
+                    ->live()
+                    ->disableOptionWhen(fn($value, $record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('discount')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.discount-percentage'))
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->maxValue(100)
+                    ->live()
+                    ->visible(fn(Settings\PriceSettings $settings) => $settings->enable_discount)
+                    ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateLineTotals($set, $get))
+                    ->readOnly(fn($record): bool => $record && ($record->order?->locked || in_array($record?->order?->state, [OrderState::CANCEL]))),
+                TextInput::make('price_subtotal')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.amount'))
+                    ->default(0)
+                    ->readOnly(),
+                Hidden::make('product_uom_qty')
+                    ->default(0),
+                Hidden::make('price_tax')
+                    ->default(0),
+                Hidden::make('price_total')
+                    ->default(0),
+                Hidden::make('purchase_price')
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.cost'))
+                    ->default(0),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
             ->mutateRelationshipDataBeforeSaveUsing(fn(array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));

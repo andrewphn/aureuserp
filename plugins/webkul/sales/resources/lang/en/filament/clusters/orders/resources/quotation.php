@@ -29,6 +29,26 @@ return [
                     'products' => [
                         'title'       => 'Products',
                         'add-product' => 'Add Product',
+                        'columns'     => [
+                            'product'             => 'Product',
+                            'product-variants'    => 'Product Variants',
+                            'product-simple'      => 'Product Simple',
+                            'quantity'            => 'Quantity',
+                            'uom'                 => 'Unit Of Measure',
+                            'lead-time'           => 'Lead Time',
+                            'qty-delivered'       => 'Quantity Delivered',
+                            'qty-invoiced'        => 'Quantity Invoiced',
+                            'packaging-qty'       => 'Packaging Quantity',
+                            'packaging'           => 'Packaging',
+                            'unit-price'          => 'Unit Price',
+                            'cost'                => 'Cost',
+                            'margin'              => 'Margin',
+                            'taxes'               => 'Taxes',
+                            'amount'              => 'Amount',
+                            'margin-percentage'   => 'Margin (%)',
+                            'discount-percentage' => 'Discount (%)',
+                        ],
+
                         'fields'      => [
                             'product'             => 'Product',
                             'product-variants'    => 'Product Variants',
