@@ -1020,44 +1020,44 @@ class QuotationResource extends Resource
             ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
             ->addable(fn($record): bool => ! in_array($record?->state, [OrderState::CANCEL]))
             ->table(fn($record) => [
-                TableColumn::make('product')
+                TableColumn::make('product_id')
                     ->label('Product')
                     ->toggleable()
                     ->width('200px'),
-                TableColumn::make('quantity')
+                TableColumn::make('product_qty')
                     ->label('Quantity Label')
                     ->toggleable()
                     ->width('50px'),
-                TableColumn::make('quantity_delivered')
+                TableColumn::make('qty_delivered')
                     ->label('Quantity Delivered')
                     ->toggleable()
                     ->width('100px')
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
-                TableColumn::make('quantity_invoiced')
+                TableColumn::make('qty_invoiced')
                     ->label('Quantity Invoiced')
                     ->toggleable()
                     ->width('100px')
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
-                TableColumn::make('unit_of_measure')
+                TableColumn::make('product_uom_id')
                     ->label('Unit of Measure')
                     ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom),
-                TableColumn::make('customer_lead_time')
+                TableColumn::make('customer_lead')
                     ->label('Customer Lead Time')
                     ->toggleable()
                     ->width('50px'),
-                TableColumn::make('packaging_qty')
+                TableColumn::make('product_packaging_qty')
                     ->toggleable()
                     ->label('Packaging Qty')
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
-                TableColumn::make('packaging')
+                TableColumn::make('product_packaging_id')
                     ->toggleable()
                     ->label('Packaging')
                     ->width('100px')
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
-                TableColumn::make('unit_price')
+                TableColumn::make('price_unit')
                     ->label('Unit Price')
                     ->toggleable()
                     ->width('100px'),
@@ -1066,7 +1066,7 @@ class QuotationResource extends Resource
                     ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
-                TableColumn::make('margin_percentage')
+                TableColumn::make('margin_percent')
                     ->label('Margin %')
                     ->toggleable()
                     ->width('100px')
@@ -1075,12 +1075,12 @@ class QuotationResource extends Resource
                     ->label('Taxes')
                     ->toggleable()
                     ->width('100px'),
-                TableColumn::make('discount_percentage')
+                TableColumn::make('discount')
                     ->label('Discount %')
                     ->toggleable()
                     ->width('100px')
                     ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),
-                TableColumn::make('sub_total')
+                TableColumn::make('price_subtotal')
                     ->label('Sub Total')
                     ->toggleable()
                     ->width('100px'),

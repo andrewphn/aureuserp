@@ -149,9 +149,7 @@
                             @if ((count($items) > 1) && ($isReorderableWithButtons || $isReorderableWithDragAndDrop))
                                 <td>
                                     @if ($reorderActionIsVisible || $moveUpActionIsVisible || $moveDownActionIsVisible)
-                                        <div
-                               fi-fo-table-repeater-actionsble-repeater-actions"
-                                        >
+                                        <div class="fi-fo-table-repeater-actionable-repeater-actions">
                                             @if ($reorderActionIsVisible)
                                                 <div x-on:click.stop>
                                                     {{ $reorderAction->extraAttributes(['x-sortable-handle' => true], merge: true) }}
@@ -213,10 +211,12 @@
                                                     @endif
                                                 @endif
                                             >
+                                                {{ $schemaComponent->getLabel() }}
+
                                                 {{ $schemaComponent }}
                                             </td>
                                         @else
-                                   fi-hidden<td class="fi-hidden"></td>
+                                            <td class="fi-hidden"></td>
                                         @endif
                                     @endif
                                 @endif
@@ -225,9 +225,7 @@
                             @if (count($extraItemActions) || $isCloneable || $isDeletable)
                                 <td>
                                     @if ($visibleExtraItemActions || $cloneActionIsVisible || $deleteActionIsVisible)
-                                        <div
-                               fi-fo-table-repeater-actionsble-repeater-actions"
-                                        >
+                                        <div class="fi-fo-table-repeater-actionable-repeater-actions">
                                             @foreach ($visibleExtraItemActions as $extraItemAction)
                                                 <div x-on:click.stop>
                                                     {{ $extraItemAction(['item' => $itemKey]) }}
