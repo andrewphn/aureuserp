@@ -35,7 +35,10 @@
     $columnManagerTriggerAction = $getColumnManagerTriggerAction();
 @endphp
 
-<x-dynamic-component :component="$fieldWrapperView" :field="$field">
+<x-dynamic-component
+    :component="$fieldWrapperView"
+    :field="$field"
+>
     <div
         {{ 
             $attributes
