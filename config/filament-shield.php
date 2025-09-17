@@ -120,8 +120,17 @@ return [
         'merge' => false,
         'generate' => false,
         'methods' => [
-            'view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any',
-            'force_delete', 'force_delete_any', 'restore_any', 'replicate', 'reorder',
+            'view_any',
+            'view',
+            'create',
+            'update',
+            'delete',
+            'restore',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'restore_any',
+            'reorder',
         ],
         'single_parameter_methods' => [
             'view_any',
@@ -165,6 +174,32 @@ return [
         'manage' => [
             // Only configure your custom resources here if needed
             // Don't include any RoleResource configuration to avoid conflicts
+            \Webkul\Partner\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+
+            \Webkul\Account\Filament\Resources\PaymentTermResource::class => [],
+            \Webkul\Account\Filament\Resources\PaymentsResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\InvoiceResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\CreditNoteResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\BillResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\RefundResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+
+            \Webkul\Security\Filament\Resources\TeamResource::class => ['view_any', 'view', 'create', 'update', 'delete',],
+            \Webkul\Security\Filament\Resources\UserResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Field\Filament\Resources\FieldResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+
         ],
         'exclude' => [
             \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class,
