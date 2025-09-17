@@ -14,13 +14,13 @@ return [
     */
 
     'shield_resource' => [
-        'slug' => 'shield/roles',
+        'slug'            => 'shield/roles',
         'show_model_path' => true,
-        'cluster' => null,
-        'tabs' => [
-            'pages' => true,
-            'widgets' => true,
-            'resources' => true,
+        'cluster'         => null,
+        'tabs'            => [
+            'pages'              => true,
+            'widgets'            => true,
+            'resources'          => true,
             'custom_permissions' => false,
         ],
     ],
@@ -63,10 +63,10 @@ return [
     */
 
     'super_admin' => [
-        'enabled' => false,
-        'name' => 'super_admin',
+        'enabled'         => false,
+        'name'            => 'super_admin',
         'define_via_gate' => false,
-        'intercept_gate' => 'before',
+        'intercept_gate'  => 'before',
     ],
 
     /*
@@ -82,7 +82,7 @@ return [
 
     'panel_user' => [
         'enabled' => true,
-        'name' => 'Admin',
+        'name'    => 'Admin',
     ],
 
     /*
@@ -100,8 +100,8 @@ return [
 
     'permissions' => [
         'separator' => '_',
-        'case' => 'lower_snake',
-        'generate' => true,
+        'case'      => 'lower_snake',
+        'generate'  => true,
     ],
 
     /*
@@ -116,10 +116,10 @@ return [
     */
 
     'policies' => [
-        'path' => app_path('Policies'),
-        'merge' => false,
+        'path'     => app_path('Policies'),
+        'merge'    => false,
         'generate' => false,
-        'methods' => [
+        'methods'  => [
             'view_any',
             'view',
             'create',
@@ -155,7 +155,7 @@ return [
 
     'localization' => [
         'enabled' => false,
-        'key' => 'filament-shield::filament-shield',
+        'key'     => 'filament-shield::filament-shield',
     ],
 
     /*
@@ -171,34 +171,41 @@ return [
 
     'resources' => [
         'subject' => 'model',
-        'manage' => [
+        'manage'  => [
             // Only configure your custom resources here if needed
             // Don't include any RoleResource configuration to avoid conflicts
-            \Webkul\Partner\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Partner\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
 
             \Webkul\Account\Filament\Resources\PaymentTermResource::class => [],
-            \Webkul\Account\Filament\Resources\PaymentsResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Account\Filament\Resources\InvoiceResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Account\Filament\Resources\CreditNoteResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Account\Filament\Resources\BillResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Account\Filament\Resources\RefundResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Account\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Account\Filament\Resources\PaymentsResource::class    => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\InvoiceResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\CreditNoteResource::class  => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\BillResource::class        => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\RefundResource::class      => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Account\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Account\Filament\Resources\IncoTermResource::class    => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Account\Filament\Resources\PaymentTermResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
 
-            \Webkul\Security\Filament\Resources\TeamResource::class => ['view_any', 'view', 'create', 'update', 'delete',],
-            \Webkul\Security\Filament\Resources\UserResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
-            \Webkul\Field\Filament\Resources\FieldResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Product\Filament\Resources\CategoryResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
 
-            \Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
-            \Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Security\Filament\Resources\TeamResource::class => ['view_any', 'view', 'create', 'update', 'delete'],
+            \Webkul\Security\Filament\Resources\UserResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Field\Filament\Resources\FieldResource::class   => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource::class    => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
             \Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
 
             \Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
-            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
-            
-            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any',],
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource::class   => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource::class   => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource::class        => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
 
         ],
         'exclude' => [
@@ -219,7 +226,7 @@ return [
 
     'pages' => [
         'subject' => 'class',
-        'prefix' => 'view',
+        'prefix'  => 'view',
         'exclude' => [
             \Filament\Pages\Dashboard::class,
         ],
@@ -238,7 +245,7 @@ return [
 
     'widgets' => [
         'subject' => 'class',
-        'prefix' => 'view',
+        'prefix'  => 'view',
         'exclude' => [
             \Filament\Widgets\AccountWidget::class,
             \Filament\Widgets\FilamentInfoWidget::class,
@@ -271,8 +278,8 @@ return [
 
     'discovery' => [
         'discover_all_resources' => false,
-        'discover_all_widgets' => false,
-        'discover_all_pages' => false,
+        'discover_all_widgets'   => false,
+        'discover_all_pages'     => false,
     ],
 
     /*
