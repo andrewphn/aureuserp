@@ -243,6 +243,13 @@ return [
 
             \Webkul\Timesheet\Filament\Resources\TimesheetResource::class => ['view_any', 'create', 'update', 'delete', 'delete_any'],
 
+            \Webkul\Website\Filament\Admin\Resources\PageResource::class    => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Website\Filament\Admin\Resources\PartnerResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+
+            \Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource::class => ['view_any', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\TagResource::class      => ['view_any', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Blog\Filament\Admin\Resources\PostResource::class                             => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+
         ],
         'exclude' => [
             \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class,
