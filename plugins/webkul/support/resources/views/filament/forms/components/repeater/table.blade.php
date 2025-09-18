@@ -85,7 +85,7 @@
                             || $isCloneable 
                             || $isDeletable
                         )
-                            <th class="text-center align-middle fi-fo-table-repeater-empty-header-cell">
+                            <th class="text-center !w-[50px] align-middle fi-fo-table-repeater-empty-header-cell">
                                 @if ($hasColumnManagerDropdown)
                                     @php
                                         $columnManagerMaxHeight = $getColumnManagerMaxHeight();
@@ -231,7 +231,7 @@
                             @if (count($extraItemActions) || $isCloneable || $isDeletable)
                                 <td>
                                     @if ($visibleExtraItemActions || $cloneActionIsVisible || $deleteActionIsVisible)
-                                        <div class="fi-fo-table-repeater-actions">
+                                        <div class="flex flex-col gap-2">
                                             @foreach ($visibleExtraItemActions as $extraItemAction)
                                                 <div x-on:click.stop>
                                                     {{ $extraItemAction(['item' => $itemKey]) }}
