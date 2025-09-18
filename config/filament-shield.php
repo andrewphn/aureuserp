@@ -185,8 +185,11 @@ return [
             \Webkul\Account\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
             \Webkul\Account\Filament\Resources\IncoTermResource::class    => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
             \Webkul\Account\Filament\Resources\PaymentTermResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Account\Filament\Resources\TaxGroupResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any',],
+            \Webkul\Account\Filament\Resources\TaxResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any','reorder'],
 
-            \Webkul\Product\Filament\Resources\CategoryResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Product\Filament\Resources\CategoryResource::class  => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Product\Filament\Resources\AttributeResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
 
             \Webkul\Security\Filament\Resources\TeamResource::class => ['view_any', 'view', 'create', 'update', 'delete'],
             \Webkul\Security\Filament\Resources\UserResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
@@ -202,10 +205,13 @@ return [
             \Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource::class   => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
             \Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource::class   => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
 
-            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
-            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource::class        => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
-            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource::class     => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
-            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource::class      => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource::class         => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\PaymentTermResource::class      => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource::class  => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxGroupResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any','reorder'],
 
         ],
         'exclude' => [
