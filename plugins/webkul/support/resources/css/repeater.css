@@ -94,7 +94,7 @@
                 & > tr {
                     & > th {
                         &:last-child {
-                            @apply @xl:sticky @xl:right-0 @xl:z-10 @xl:bg-gray-50 @xl:dark:bg-white/5;
+                            @apply @xl:sticky @xl:right-0 @xl:z-10 @xl:bg-white @xl:dark:bg-gray-900;
                             box-shadow: -2px 0 8px -2px rgba(0, 0, 0, 0.1);
                         }
 
@@ -118,16 +118,14 @@
                             @apply @xl:table-cell;
                         }
 
-                        /* Make actions column sticky */
                         &:last-child {
                             @apply @xl:sticky @xl:right-0 @xl:z-10 @xl:bg-white @xl:dark:bg-gray-900;
                             box-shadow: -2px 0 8px -2px rgba(0, 0, 0, 0.1);
                         }
 
-                        /* Ensure data columns take full available width */
                         &:not(:last-child):not(
-                                .fi-fo-table-repeater-empty-header-cell
-                            ) {
+                            .fi-fo-table-repeater-empty-header-cell
+                        ) {
                             @apply @xl:min-w-[150px] @xl:max-w-none;
                         }
 
@@ -165,13 +163,11 @@
 
                 & > tr {
                     & > th {
-                        /* Make actions column sticky */
                         &:last-child {
                             @apply lg:sticky lg:right-0 lg:z-10 lg:bg-gray-50 lg:dark:bg-white/5;
                             box-shadow: -2px 0 8px -2px rgba(0, 0, 0, 0.1);
                         }
 
-                        /* Ensure other columns have minimum width */
                         &:not(:last-child) {
                             @apply lg:min-w-[150px];
                         }
@@ -192,16 +188,14 @@
                             @apply lg:table-cell;
                         }
 
-                        /* Make actions column sticky */
                         &:last-child {
                             @apply lg:sticky lg:right-0 lg:z-10 lg:bg-white lg:dark:bg-gray-900;
                             box-shadow: -2px 0 8px -2px rgba(0, 0, 0, 0.1);
                         }
 
-                        /* Ensure data columns take full available width */
                         &:not(:last-child):not(
-                                .fi-fo-table-repeater-empty-header-cell
-                            ) {
+                            .fi-fo-table-repeater-empty-header-cell
+                        ) {
                             @apply lg:min-w-[150px] lg:max-w-none;
                         }
 
