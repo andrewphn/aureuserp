@@ -73,4 +73,46 @@ class TableColumn extends Component
     {
         return (bool) $this->evaluate($this->isMarkedAsRequired);
     }
+
+
+    /**
+     * @return array<mixed>
+     */
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    {
+        return match ($parameterName) {
+            'context', 'operation' => [$this->getContainer()->getOperation()],
+            'get' => [$this->makeGetUtility()],
+            'livewire' => [$this->getLivewire()],
+            'model' => [$this->getModel()],
+            'rawState' => [$this->getRawState()],
+            'record' => [$this->getRecord()],
+            'set' => [$this->makeSetUtility()],
+            'state' => [$this->getState()],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected function resolveDefaultClosureDependencyForEvaluationByType(string $parameterType): array
+    {
+        $record = $this->getRecord();
+
+        if ((! $record) || is_array($record)) {
+            return match ($parameterType) {
+                Get::class => [$this->makeGetUtility()],
+                Set::class => [$this->makeSetUtility()],
+                default => parent::resolveDefaultClosureDependencyForEvaluationByType($parameterType),
+            };
+        }
+
+        return match ($parameterType) {
+            Get::class => [$this->makeGetUtility()],
+            Model::class, $record::class => [$record],
+            Set::class => [$this->makeSetUtility()],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByType($parameterType),
+        };
+    }
 }

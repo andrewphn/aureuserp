@@ -5,7 +5,6 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -60,6 +59,8 @@ use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Support\Filament\Forms\Components\Repeater;
+use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Models\UOM;
 use Webkul\TableViews\Filament\Components\PresetView;
 
@@ -605,6 +606,52 @@ class OperationResource extends Resource
                     'productPackaging',
                 ])
             )
+            ->table(fn($record) => [
+                TableColumn::make('product_id')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.product'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('final_location_id')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.final-location'))
+                    ->width(250)
+                    ->visible(fn() => resolve(WarehouseSettings::class)->enable_locations)
+                    ->toggleable(),
+                TableColumn::make('description_picking')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.description'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('scheduled_at')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.scheduled-at'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('deadline')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.deadline'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('product_packaging_id')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.packaging'))
+                    ->width(250)
+                    ->visible(fn() => resolve(ProductSettings::class)->enable_packagings)
+                    ->toggleable(),
+                TableColumn::make('product_uom_qty')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.demand'))
+                    ->width(100)
+                    ->toggleable(),
+                TableColumn::make('quantity')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.quantity'))
+                    ->width(250)
+                    ->visible(fn () => $record?->moves->contains(fn ($move) => $move->id && $move->state !== MoveState::DRAFT))
+                    ->toggleable(),
+                TableColumn::make('uom_id')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.unit'))
+                    ->width(250)
+                    ->visible(fn() => resolve(ProductSettings::class)->enable_uom)
+                    ->toggleable(),
+                TableColumn::make('is_picked')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.picked'))
+                    ->width(80)
+                    ->toggleable(),
+            ])
             ->schema([
                 Select::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.product'))
