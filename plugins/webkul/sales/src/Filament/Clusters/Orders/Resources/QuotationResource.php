@@ -1077,7 +1077,7 @@ class QuotationResource extends Resource
                     ->width(250)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('discount')
-                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.discount'))
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.discount-percentage'))
                     ->width(250)
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),

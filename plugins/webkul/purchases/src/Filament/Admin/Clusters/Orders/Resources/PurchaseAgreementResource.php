@@ -14,7 +14,6 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -60,6 +59,8 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementRe
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Purchase\Settings\OrderSettings;
 use Webkul\Purchase\Settings\ProductSettings;
+use Webkul\Support\Filament\Forms\Components\Repeater;
+use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 
 class PurchaseAgreementResource extends Resource
 {
@@ -112,28 +113,28 @@ class PurchaseAgreementResource extends Resource
                                     ->relationship(
                                         'partner',
                                         'name',
-                                        fn (Builder $query) => $query->withTrashed()->where('sub_type', 'supplier')
+                                        fn(Builder $query) => $query->withTrashed()->where('sub_type', 'supplier')
                                     )
                                     ->getOptionLabelFromRecordUsing(function ($record): string {
-                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                        return $record->name . ($record->trashed() ? ' (Deleted)' : '');
                                     })
-                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
+                                    ->disableOptionWhen(fn($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->required()
                                     ->preload()
-                                    ->disabled(fn ($record): bool => $record && $record?->state != RequisitionState::DRAFT),
+                                    ->disabled(fn($record): bool => $record && $record?->state != RequisitionState::DRAFT),
                                 Select::make('user_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.buyer'))
                                     ->relationship('user', 'name')
                                     ->searchable()
                                     ->preload()
-                                    ->disabled(fn ($record): bool => $record && $record?->state != RequisitionState::DRAFT),
+                                    ->disabled(fn($record): bool => $record && $record?->state != RequisitionState::DRAFT),
                                 Select::make('type')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.agreement-type'))
                                     ->options(RequisitionType::class)
                                     ->required()
                                     ->default(RequisitionType::BLANKET_ORDER)
-                                    ->disabled(fn ($record): bool => $record && $record?->state != RequisitionState::DRAFT)
+                                    ->disabled(fn($record): bool => $record && $record?->state != RequisitionState::DRAFT)
                                     ->live(),
                                 Select::make('currency_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.currency'))
@@ -153,7 +154,7 @@ class PurchaseAgreementResource extends Resource
                                             ->suffixIcon('heroicon-o-calendar')
                                             ->minDate(now()->toDateString())
                                             ->live()
-                                            ->afterStateUpdated(fn (Set $set) => $set('ends_at', null))
+                                            ->afterStateUpdated(fn(Set $set) => $set('ends_at', null))
                                             ->rules([
                                                 'date',
                                                 'after_or_equal:today',
@@ -163,7 +164,7 @@ class PurchaseAgreementResource extends Resource
                                             ->native(false)
                                             ->suffixIcon('heroicon-o-calendar')
                                             ->native(false)
-                                            ->minDate(fn (Get $get) => $get('starts_at') ?: now()->toDateString())
+                                            ->minDate(fn(Get $get) => $get('starts_at') ?: now()->toDateString())
                                             ->live()
                                             ->rules([
                                                 'date',
@@ -180,9 +181,9 @@ class PurchaseAgreementResource extends Resource
                                     ->placeholder(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.reference-placeholder')),
                                 Select::make('company_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.company'))
-                                    ->relationship('company', 'name', modifyQueryUsing: fn (Builder $query) => $query->withTrashed())
+                                    ->relationship('company', 'name', modifyQueryUsing: fn(Builder $query) => $query->withTrashed())
                                     ->getOptionLabelFromRecordUsing(function ($record): string {
-                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                        return $record->name . ($record->trashed() ? ' (Deleted)' : '');
                                     })
                                     ->disableOptionWhen(function ($label) {
                                         return str_contains($label, ' (Deleted)');
@@ -191,7 +192,7 @@ class PurchaseAgreementResource extends Resource
                                     ->required()
                                     ->preload()
                                     ->default(filament()->auth()?->user()?->default_company_id)
-                                    ->disabled(fn ($record): bool => $record && $record?->state != RequisitionState::DRAFT),
+                                    ->disabled(fn($record): bool => $record && $record?->state != RequisitionState::DRAFT),
                             ]),
                     ])
                     ->columns(2),
@@ -228,6 +229,25 @@ class PurchaseAgreementResource extends Resource
         return Repeater::make('lines')
             ->hiddenLabel()
             ->relationship()
+            ->table([
+                TableColumn::make('product_id')
+                    ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.product'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('qty')
+                    ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.quantity'))
+                    ->width(250)
+                    ->toggleable(),
+                TableColumn::make('uom_id')
+                    ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.unit'))
+                    ->width(250)
+                    ->visible(fn() => resolve(ProductSettings::class)->enable_uom)
+                    ->toggleable(),
+                TableColumn::make('price_unit')
+                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.unit-price'))
+                    ->width(250)
+                    ->toggleable(),
+            ])
             ->schema([
                 Select::make('product_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.product'))
@@ -235,7 +255,7 @@ class PurchaseAgreementResource extends Resource
                     ->relationship(
                         'product',
                         'name',
-                        fn ($query) => $query->where('type', ProductType::GOODS),
+                        fn($query) => $query->where('type', ProductType::GOODS),
                     )
                     ->required()
                     ->searchable()
@@ -248,7 +268,7 @@ class PurchaseAgreementResource extends Resource
                             $set('uom_id', $product->uom_id);
                         }
                     })
-                    ->disabled(fn ($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
+                    ->disabled(fn($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
                 TextInput::make('qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.quantity'))
                     ->numeric()
@@ -256,19 +276,19 @@ class PurchaseAgreementResource extends Resource
                     ->maxValue(99999999999)
                     ->default(0)
                     ->required()
-                    ->disabled(fn ($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
+                    ->disabled(fn($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
                 Select::make('uom_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.unit'))
                     ->relationship(
                         'uom',
                         'name',
-                        fn ($query) => $query->where('category_id', 1),
+                        fn($query) => $query->where('category_id', 1),
                     )
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->visible(fn (ProductSettings $settings) => $settings->enable_uom)
-                    ->disabled(fn ($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
+                    ->visible(fn(ProductSettings $settings) => $settings->enable_uom)
+                    ->disabled(fn($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
                 TextInput::make('price_unit')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.fields.unit-price'))
                     ->numeric()
@@ -276,7 +296,7 @@ class PurchaseAgreementResource extends Resource
                     ->maxValue(99999999999)
                     ->default(0)
                     ->required()
-                    ->disabled(fn ($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
+                    ->disabled(fn($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
             ])
             ->columns($columns);
     }
@@ -401,16 +421,16 @@ class PurchaseAgreementResource extends Resource
                     ]))->filter()->values()->all()),
             ], layout: FiltersLayout::Modal)
             ->filtersTriggerAction(
-                fn (Action $action) => $action
+                fn(Action $action) => $action
                     ->slideOver(),
             )
             ->filtersFormColumns(2)
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()
-                        ->hidden(fn ($record) => $record->trashed()),
+                        ->hidden(fn($record) => $record->trashed()),
                     EditAction::make()
-                        ->hidden(fn ($record) => $record->trashed()),
+                        ->hidden(fn($record) => $record->trashed()),
                     RestoreAction::make()
                         ->successNotification(
                             Notification::make()
@@ -419,7 +439,7 @@ class PurchaseAgreementResource extends Resource
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.restore.notification.body')),
                         ),
                     DeleteAction::make()
-                        ->hidden(fn (Model $record) => $record->state == RequisitionState::CLOSED)
+                        ->hidden(fn(Model $record) => $record->state == RequisitionState::CLOSED)
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -465,7 +485,7 @@ class PurchaseAgreementResource extends Resource
                     ForceDeleteBulkAction::make()
                         ->action(function (Collection $records) {
                             try {
-                                $records->each(fn (Model $record) => $record->forceDelete());
+                                $records->each(fn(Model $record) => $record->forceDelete());
                             } catch (QueryException $e) {
                                 Notification::make()
                                     ->danger()
@@ -483,7 +503,7 @@ class PurchaseAgreementResource extends Resource
                 ]),
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => static::can('delete', $record) && $record->state !== RequisitionState::CLOSED,
+                fn(Model $record): bool => static::can('delete', $record) && $record->state !== RequisitionState::CLOSED,
             );
     }
 
@@ -535,7 +555,7 @@ class PurchaseAgreementResource extends Resource
                                                 ->icon('heroicon-o-calendar')
                                                 ->date(),
                                         ])
-                                        ->visible(fn ($record) => $record->type === RequisitionType::BLANKET_ORDER),
+                                        ->visible(fn($record) => $record->type === RequisitionType::BLANKET_ORDER),
 
                                     TextEntry::make('reference')
                                         ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.infolist.sections.general.entries.reference'))
@@ -563,11 +583,11 @@ class PurchaseAgreementResource extends Resource
 
                                         TextEntry::make('uom.name')
                                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.entries.unit'))
-                                            ->visible(fn (ProductSettings $settings) => $settings->enable_uom),
+                                            ->visible(fn(ProductSettings $settings) => $settings->enable_uom),
 
                                         TextEntry::make('price_unit')
                                             ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.infolist.tabs.products.entries.unit-price'))
-                                            ->money(fn ($record) => $record->requisition->currency->code ?? 'USD'),
+                                            ->money(fn($record) => $record->requisition->currency->code ?? 'USD'),
                                     ])
                                     ->columns([
                                         'sm' => 2,
