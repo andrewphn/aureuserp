@@ -635,16 +635,16 @@ class OperationResource extends Resource
                     ->toggleable(),
                 TableColumn::make('product_uom_qty')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.demand'))
-                    ->width(100)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.quantity'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn () => $record?->moves->contains(fn ($move) => $move->id && $move->state !== MoveState::DRAFT))
                     ->toggleable(),
                 TableColumn::make('uom_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.unit'))
-                    ->width(250)
+                    ->width(200)
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom)
                     ->toggleable(),
                 TableColumn::make('is_picked')
