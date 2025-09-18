@@ -164,7 +164,7 @@
                                         || $moveUpActionIsVisible 
                                         || $moveDownActionIsVisible
                                     )
-                                        <div class="fi-fo-table-repeater-actionable-repeater-actions">
+                                        <div class="fi-fo-table-repeater-actions">
                                             @if ($reorderActionIsVisible)
                                                 <div x-on:click.stop>
                                                     {{ $reorderAction->extraAttributes(['x-sortable-handle' => true], merge: true) }}
@@ -231,7 +231,7 @@
                             @if (count($extraItemActions) || $isCloneable || $isDeletable)
                                 <td>
                                     @if ($visibleExtraItemActions || $cloneActionIsVisible || $deleteActionIsVisible)
-                                        <div class="fi-fo-table-repeater-actionable-repeater-actions">
+                                        <div class="fi-fo-table-repeater-actions">
                                             @foreach ($visibleExtraItemActions as $extraItemAction)
                                                 <div x-on:click.stop>
                                                     {{ $extraItemAction(['item' => $itemKey]) }}
@@ -258,7 +258,9 @@
                 </tbody>
             </table>
         @endif
+    </div>
 
+    <div class="flex items-center justify-center">
         @if ($isAddable && $addAction->isVisible())
             <div
                 @class([
