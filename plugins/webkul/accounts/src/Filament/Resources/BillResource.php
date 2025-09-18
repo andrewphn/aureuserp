@@ -478,7 +478,7 @@ class BillResource extends Resource
                     ->toggleable(),
                 TableColumn::make('quantity')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.quantity'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('uom_id')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.unit'))
@@ -491,15 +491,15 @@ class BillResource extends Resource
                     ->toggleable(),
                 TableColumn::make('discount')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.discount-percentage'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('price_unit')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.unit-price'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('price_subtotal')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.sub-total'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
             ])
             ->schema([
