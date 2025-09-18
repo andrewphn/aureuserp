@@ -263,6 +263,14 @@ return [
             \Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource::class             => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
             \Webkul\Employee\Filament\Clusters\Configurations\Resources\EmploymentTypeResource::class        => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any', 'reorder'],
 
+            \Webkul\Contact\Filament\Resources\PartnerResource::class        => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+
+            \Webkul\Contact\Filament\Clusters\Configurations\Resources\TagResource::class                => ['view_any', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Contact\Filament\Clusters\Configurations\Resources\TitleResource::class              => ['view_any', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Contact\Filament\Clusters\Configurations\Resources\IndustryResource::class           => ['view_any', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Contact\Filament\Clusters\Configurations\Resources\BankAccountResource::class        => ['view_any', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Contact\Filament\Clusters\Configurations\Resources\BankResource::class               => ['view_any', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+
         ],
         'exclude' => [
             \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class,
