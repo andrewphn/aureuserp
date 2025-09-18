@@ -237,6 +237,12 @@ return [
             \Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttributeResource::class       => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
             \Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\PackagingResource::class              => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
 
+            \Webkul\Project\Filament\Clusters\Configurations\Resources\MilestoneResource::class    => ['view_any', 'view', 'create', 'update', 'delete', 'delete_any'],
+            \Webkul\Project\Filament\Clusters\Configurations\Resources\TagResource::class          => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+            \Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
+
+            \Webkul\Timesheet\Filament\Resources\TimesheetResource::class => ['view_any', 'create', 'update', 'delete', 'delete_any'],
+
         ],
         'exclude' => [
             \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class,
