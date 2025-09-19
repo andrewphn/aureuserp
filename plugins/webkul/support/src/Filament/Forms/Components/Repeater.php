@@ -2,18 +2,17 @@
 
 namespace Webkul\Support\Filament\Forms\Components;
 
-use Filament\Forms\Components\Repeater as BaseRepeater;
-use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
-use Filament\Tables\Table\Concerns\HasColumnManager;
-use Filament\Support\Enums\Size;
-use Filament\Support\Icons\Heroicon;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Repeater as BaseRepeater;
+use Filament\Support\Enums\Size;
+use Filament\Tables\Table\Concerns\HasColumnManager;
+use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 
 class Repeater extends BaseRepeater
 {
     use HasColumnManager;
 
-    protected string | null $columnManagerSessionKey = null;
+    protected ?string $columnManagerSessionKey = null;
 
     public function getDefaultView(): string
     {
@@ -21,12 +20,12 @@ class Repeater extends BaseRepeater
             return 'support::filament.forms.components.repeater.table';
         }
 
-        return parent::getDefaultView();
+        return (string) parent::getDefaultView();
     }
 
     public function getColumnManagerSessionKey(): string
     {
-        return $this->columnManagerSessionKey ??= 'repeater_' . $this->getStatePath() . '_column_manager';
+        return $this->columnManagerSessionKey ??= 'repeater_'.$this->getStatePath().'_column_manager';
     }
 
     public function getMappedColumnsForColumnManager(): array
@@ -39,26 +38,23 @@ class Repeater extends BaseRepeater
 
         $savedState = session($this->getColumnManagerSessionKey(), []);
 
-        return array_map(
+        return collect($columns)->map(
             function (TableColumn $column) use ($savedState): array {
                 $columnName = $column->getName();
 
-                $isToggled = isset($savedState[$columnName]) 
-                    ? $savedState[$columnName]['isToggled'] 
-                    : ! $column->isToggledHiddenByDefault();
+                $isToggled = data_get($savedState, "{$columnName}.isToggled", ! $column->isToggledHiddenByDefault());
 
                 return [
-                    'type' => 'column',
-                    'name' => $columnName,
-                    'label' => $column->getLabel(),
-                    'isHidden' => $column->isHidden(),
-                    'isToggled' => $isToggled,
-                    'isToggleable' => $column->isToggleable(),
+                    'type'                     => 'column',
+                    'name'                     => $columnName,
+                    'label'                    => $column->getLabel(),
+                    'isHidden'                 => $column->isHidden(),
+                    'isToggled'                => $isToggled,
+                    'isToggleable'             => $column->isToggleable(),
                     'isToggledHiddenByDefault' => $column->isToggledHiddenByDefault(),
                 ];
-            },
-            $columns,
-        );
+            }
+        )->toArray();
     }
 
     public function getTableColumns(): array
@@ -71,8 +67,7 @@ class Repeater extends BaseRepeater
 
         $savedState = session($this->getColumnManagerSessionKey(), []);
 
-        $visibleColumns = array_filter(
-            $columns,
+        $visibleColumns = collect($columns)->filter(
             function (TableColumn $column) use ($savedState): bool {
                 if ($column->isHidden()) {
                     return false;
@@ -80,28 +75,22 @@ class Repeater extends BaseRepeater
 
                 $columnName = $column->getName();
 
-                if (isset($savedState[$columnName])) {
-                    return $savedState[$columnName]['isToggled'];
+                if (data_get($savedState, $columnName)) {
+                    return data_get($savedState, "{$columnName}.isToggled", false);
                 }
 
                 return ! $column->isToggledHiddenByDefault();
             }
         );
 
-        return array_values($visibleColumns);
+        return $visibleColumns->values()->toArray();
     }
 
     public function hasToggleableColumns(): bool
     {
         $columns = $this->evaluate($this->tableColumns) ?? [];
 
-        foreach ($columns as $column) {
-            if ($column->isToggleable()) {
-                return true;
-            }
-        }
-
-        return false;
+        return collect($columns)->contains(fn ($column) => $column->isToggleable());
     }
 
     public function getColumnManagerApplyAction(): Action
@@ -127,7 +116,7 @@ class Repeater extends BaseRepeater
         $action = Action::make('openColumnManager')
             ->label(__('filament-tables::table.actions.column_manager.label'))
             ->iconButton()
-            ->icon(Heroicon::ViewColumns)
+            ->icon('heroicon-s-view-columns')
             ->color('gray')
             ->livewireClickHandlerEnabled(false)
             ->authorize(true);
@@ -139,7 +128,7 @@ class Repeater extends BaseRepeater
         }
 
         if ($action->getView() === Action::BUTTON_VIEW) {
-            $action->defaultSize(Size::Small);
+            $action->defaultSize(Size::Small->value);
         }
 
         return $action;
@@ -147,20 +136,19 @@ class Repeater extends BaseRepeater
 
     public function applyTableColumnManager(?array $columns = null): void
     {
-        if (! $columns) {
+        if (blank($columns)) {
             return;
         }
 
-        $columnState = [];
-
-        foreach ($columns as $column) {
-            if (isset($column['name']) && isset($column['isToggled'])) {
-                $columnState[$column['name']] = [
-                    'isToggled' => $column['isToggled'],
-                    'isToggleable' => $column['isToggleable'] ?? true,
-                ];
-            }
-        }
+        $columnState = collect($columns)
+            ->filter(fn ($column) => filled(data_get($column, 'name')) && ! is_null(data_get($column, 'isToggled')))
+            ->mapWithKeys(fn ($column) => [
+                data_get($column, 'name') => [
+                    'isToggled'    => data_get($column, 'isToggled'),
+                    'isToggleable' => data_get($column, 'isToggleable', true),
+                ],
+            ])
+            ->toArray();
 
         session([$this->getColumnManagerSessionKey() => $columnState]);
     }
