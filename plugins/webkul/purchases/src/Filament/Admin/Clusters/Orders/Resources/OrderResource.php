@@ -698,8 +698,7 @@ class OrderResource extends Resource
                 TableColumn::make('product_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.product'))
                     ->width(300)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('planned_at')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.expected-arrival'))
                     ->width(250)
@@ -708,8 +707,7 @@ class OrderResource extends Resource
                 TableColumn::make('product_qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.quantity'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('qty_received')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.received'))
                     ->width(150)
@@ -740,8 +738,7 @@ class OrderResource extends Resource
                 TableColumn::make('price_unit')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.unit-price'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('taxes')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.taxes'))
                     ->width(250)
@@ -752,8 +749,7 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('price_subtotal')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.amount'))
-                    ->width(150)
-                    ->toggleable(),
+                    ->width(150),
             ])
             ->schema([
                 Select::make('product_id')

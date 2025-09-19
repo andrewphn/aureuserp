@@ -499,8 +499,7 @@ class BillResource extends Resource
                 TableColumn::make('price_unit')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.unit-price'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('price_subtotal')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.sub-total'))
                     ->width(150)

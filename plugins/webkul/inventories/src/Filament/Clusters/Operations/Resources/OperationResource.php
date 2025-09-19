@@ -611,8 +611,7 @@ class OperationResource extends Resource
                 TableColumn::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.product'))
                     ->width(250)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('final_location_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.final-location'))
                     ->width(250)
@@ -633,25 +632,21 @@ class OperationResource extends Resource
                 TableColumn::make('product_packaging_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.packaging'))
                     ->width(250)
-                    ->visible(fn () => resolve(ProductSettings::class)->enable_packagings)
-                    ->toggleable(),
+                    ->visible(fn () => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('product_uom_qty')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.demand'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.quantity'))
                     ->width(150)
                     ->markAsRequired()
-                    ->visible(fn () => $record?->moves->contains(fn ($move) => $move->id && $move->state !== MoveState::DRAFT))
-                    ->toggleable(),
+                    ->visible(fn () => $record?->moves->contains(fn ($move) => $move->id && $move->state !== MoveState::DRAFT)),
                 TableColumn::make('uom_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.unit'))
                     ->width(200)
                     ->markAsRequired()
-                    ->visible(fn () => resolve(ProductSettings::class)->enable_uom)
-                    ->toggleable(),
+                    ->visible(fn () => resolve(ProductSettings::class)->enable_uom),
                 TableColumn::make('is_picked')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.picked'))
                     ->width(80)

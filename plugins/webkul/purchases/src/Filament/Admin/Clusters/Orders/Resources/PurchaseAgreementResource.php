@@ -233,24 +233,20 @@ class PurchaseAgreementResource extends Resource
                 TableColumn::make('product_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.product'))
                     ->width(250)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.quantity'))
                     ->width(250)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('uom_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.uom'))
                     ->width(250)
                     ->visible(fn () => resolve(ProductSettings::class)->enable_uom)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('price_unit')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.unit-price'))
                     ->width(250)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
             ])
             ->schema([
                 Select::make('product_id')

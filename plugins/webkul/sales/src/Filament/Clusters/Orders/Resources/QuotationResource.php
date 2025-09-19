@@ -876,7 +876,7 @@ class QuotationResource extends Resource
                 return $product->name ?? null;
             })
             ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
-            ->table(fn ($record) => [
+            ->table([
                 TableColumn::make('product_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.product'))
                     ->width(250)
@@ -890,8 +890,7 @@ class QuotationResource extends Resource
                 TableColumn::make('quantity')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.quantity'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('product_uom_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.uom'))
                     ->width(150)
@@ -900,8 +899,7 @@ class QuotationResource extends Resource
                 TableColumn::make('price_unit')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.unit-price'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('discount')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.discount-percentage'))
                     ->width(150)
@@ -1053,8 +1051,7 @@ class QuotationResource extends Resource
                 TableColumn::make('product_qty')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.quantity'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('qty_delivered')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-delivered'))
                     ->width(150)
@@ -1071,7 +1068,6 @@ class QuotationResource extends Resource
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.uom'))
                     ->width(150)
                     ->markAsRequired()
-                    ->toggleable()
                     ->visible(fn () => resolve(ProductSettings::class)->enable_uom),
                 TableColumn::make('customer_lead')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.lead-time'))
@@ -1091,8 +1087,7 @@ class QuotationResource extends Resource
                 TableColumn::make('price_unit')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.unit-price'))
                     ->width(150)
-                    ->markAsRequired()
-                    ->toggleable(),
+                    ->markAsRequired(),
                 TableColumn::make('margin')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin'))
                     ->width(100)
