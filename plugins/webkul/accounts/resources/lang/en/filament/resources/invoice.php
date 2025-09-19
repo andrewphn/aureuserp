@@ -43,7 +43,7 @@ return [
                             'quantity'            => 'Quantity',
                             'unit'                => 'Unit',
                             'taxes'               => 'Taxes',
-                            'discount-percentage' => 'Discount Percentage',
+                            'discount-percentage' => 'Discount',
                             'unit-price'          => 'Unit Price',
                             'sub-total'           => 'Sub Total',
                         ],

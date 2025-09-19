@@ -19,7 +19,7 @@ class Repeater extends BaseRepeater
 
     public function getDefaultView(): string
     {
-        if ($this->isTable()) {
+        if ($this->hasTableView()) {
             return 'support::filament.forms.components.repeater.table';
         }
 
@@ -35,7 +35,7 @@ class Repeater extends BaseRepeater
         return $this;
     }
 
-    public function isTable(): bool
+    public function hasTableView(): bool
     {
         return $this->evaluate($this->isRepeaterHasTableView) || filled($this->getTableColumns());
     }
