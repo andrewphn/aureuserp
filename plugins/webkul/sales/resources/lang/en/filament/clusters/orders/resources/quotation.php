@@ -29,6 +29,7 @@ return [
                     'products' => [
                         'title'       => 'Products',
                         'add-product' => 'Add Product',
+
                         'columns'     => [
                             'product'             => 'Product',
                             'product-variants'    => 'Product Variants',
@@ -73,6 +74,16 @@ return [
                     'product-optional' => [
                         'title'       => 'Optional Products',
                         'add-product' => 'Add Product',
+
+                        'columns' => [
+                            'product'             => 'Product',
+                            'description'         => 'Description',
+                            'quantity'            => 'Quantity',
+                            'uom'                 => 'Unit Of Measure',
+                            'unit-price'          => 'Unit Price',
+                            'discount-percentage' => 'Discount (%)',
+                        ],
+
                         'fields'      => [
                             'product'             => 'Product',
                             'description'         => 'Description',

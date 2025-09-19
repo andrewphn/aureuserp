@@ -698,18 +698,22 @@ class OrderResource extends Resource
                 TableColumn::make('product_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.product'))
                     ->width(300)
+                    ->markAsRequired()
                     ->toggleable(),
                 TableColumn::make('planned_at')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.expected-arrival'))
                     ->width(250)
+                    ->markAsRequired()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('product_qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.quantity'))
                     ->width(150)
+                    ->markAsRequired()
                     ->toggleable(),
                 TableColumn::make('qty_received')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.received'))
                     ->width(150)
+                    ->markAsRequired()
                     ->visible(fn ($record): bool => in_array($record?->state, [OrderState::PURCHASE, OrderState::DONE]))
                     ->toggleable(),
                 TableColumn::make('qty_invoiced')
@@ -720,6 +724,7 @@ class OrderResource extends Resource
                 TableColumn::make('uom_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.unit'))
                     ->width(150)
+                    ->markAsRequired()
                     ->visible(fn () => resolve(ProductSettings::class)->enable_uom)
                     ->toggleable(),
                 TableColumn::make('product_packaging_qty')
@@ -735,6 +740,7 @@ class OrderResource extends Resource
                 TableColumn::make('price_unit')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.unit-price'))
                     ->width(150)
+                    ->markAsRequired()
                     ->toggleable(),
                 TableColumn::make('taxes')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.taxes'))
