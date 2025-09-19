@@ -482,7 +482,7 @@ class BillResource extends Resource
                     ->toggleable(),
                 TableColumn::make('uom_id')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.unit'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom)
                     ->toggleable(),
                 TableColumn::make('taxes')
@@ -492,7 +492,7 @@ class BillResource extends Resource
                 TableColumn::make('discount')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.discount-percentage'))
                     ->width(150)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('price_unit')
                     ->label(__('accounts::filament/resources/bill.form.tabs.invoice-lines.repeater.products.columns.unit-price'))
                     ->width(150)

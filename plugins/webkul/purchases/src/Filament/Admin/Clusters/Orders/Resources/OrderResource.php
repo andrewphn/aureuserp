@@ -701,30 +701,30 @@ class OrderResource extends Resource
                     ->toggleable(),
                 TableColumn::make('planned_at')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.expected-arrival'))
-                    ->width(300)
-                    ->toggleable(),
+                    ->width(250)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('product_qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.quantity'))
                     ->width(150)
                     ->toggleable(),
                 TableColumn::make('qty_received')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.received'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn ($record): bool => in_array($record?->state, [OrderState::PURCHASE, OrderState::DONE]))
                     ->toggleable(),
                 TableColumn::make('qty_invoiced')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.billed'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn ($record): bool => in_array($record?->state, [OrderState::PURCHASE, OrderState::DONE]))
                     ->toggleable(),
                 TableColumn::make('uom_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.unit'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn () => resolve(ProductSettings::class)->enable_uom)
                     ->toggleable(),
                 TableColumn::make('product_packaging_qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.packaging-qty'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn () => resolve(ProductSettings::class)->enable_packagings)
                     ->toggleable(),
                 TableColumn::make('product_packaging_id')
@@ -743,7 +743,7 @@ class OrderResource extends Resource
                 TableColumn::make('discount')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.discount-percentage'))
                     ->width(150)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('price_subtotal')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.amount'))
                     ->width(150)

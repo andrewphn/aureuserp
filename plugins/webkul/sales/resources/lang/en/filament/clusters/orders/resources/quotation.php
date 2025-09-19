@@ -34,7 +34,7 @@ return [
                             'product-variants'    => 'Product Variants',
                             'product-simple'      => 'Product Simple',
                             'quantity'            => 'Quantity',
-                            'uom'                 => 'Unit Of Measure',
+                            'uom'                 => 'UOM',
                             'lead-time'           => 'Lead Time',
                             'qty-delivered'       => 'Quantity Delivered',
                             'qty-invoiced'        => 'Quantity Invoiced',

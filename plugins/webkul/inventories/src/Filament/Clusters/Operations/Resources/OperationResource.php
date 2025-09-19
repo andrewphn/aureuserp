@@ -606,6 +606,7 @@ class OperationResource extends Resource
                     'productPackaging',
                 ])
             )
+            ->columnManagerColumns(2)
             ->table(fn($record) => [
                 TableColumn::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.product'))
@@ -615,19 +616,19 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.final-location'))
                     ->width(250)
                     ->visible(fn() => resolve(WarehouseSettings::class)->enable_locations)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('description_picking')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.description'))
                     ->width(250)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.scheduled-at'))
                     ->width(250)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('deadline')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.deadline'))
                     ->width(250)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('product_packaging_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.packaging'))
                     ->width(250)
@@ -719,11 +720,13 @@ class OperationResource extends Resource
                 DateTimePicker::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.scheduled-at'))
                     ->default(now())
+                    ->suffixIcon('heroicon-o-calendar')
                     ->native(false)
                     ->disabled(fn($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED])),
                 DateTimePicker::make('deadline')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.deadline'))
                     ->native(false)
+                    ->suffixIcon('heroicon-o-calendar')
                     ->disabled(fn($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED])),
                 Select::make('product_packaging_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.packaging'))

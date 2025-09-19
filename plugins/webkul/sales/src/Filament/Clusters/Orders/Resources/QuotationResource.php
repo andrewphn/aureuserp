@@ -1031,55 +1031,55 @@ class QuotationResource extends Resource
                     ->toggleable(),
                 TableColumn::make('qty_delivered')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-delivered'))
-                    ->width(100)
+                    ->width(150)
                     ->toggleable()
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('qty_invoiced')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-invoiced'))
-                    ->width(100)
+                    ->width(150)
                     ->toggleable()
                     ->visible(fn() => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('product_uom_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.uom'))
-                    ->width(100)
+                    ->width(150)
                     ->toggleable()
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom),
                 TableColumn::make('customer_lead')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.lead-time'))
                     ->width(150)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('product_packaging_qty')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->width(100)
+                    ->toggleable()
+                    ->width(180)
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.packaging-qty'))
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('product_packaging_id')
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->width(200)
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.packaging'))
                     ->visible(fn() => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('price_unit')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.unit-price'))
-                    ->width(100)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('margin')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin'))
                     ->width(100)
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('margin_percent')
-                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin-percent'))
+                    ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin-percentage'))
                     ->width(100)
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->visible(fn() => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('taxes')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.taxes'))
                     ->width(250)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TableColumn::make('discount')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.discount-percentage'))
                     ->width(250)
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->visible(fn() => resolve(Settings\PriceSettings::class)->enable_discount),
                 TableColumn::make('price_subtotal')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.amount'))

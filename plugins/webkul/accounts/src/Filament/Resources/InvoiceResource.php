@@ -745,11 +745,11 @@ class InvoiceResource extends Resource
                     ->toggleable(),
                 TableColumn::make('quantity')
                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.quantity'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('uom_id')
                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.unit'))
-                    ->width(250)
+                    ->width(150)
                     ->visible(fn() => resolve(ProductSettings::class)->enable_uom)
                     ->toggleable(),
                 TableColumn::make('taxes')
@@ -758,15 +758,15 @@ class InvoiceResource extends Resource
                     ->toggleable(),
                 TableColumn::make('discount')
                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.discount-percentage'))
-                    ->width(250)
-                    ->toggleable(),
+                    ->width(150)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('price_unit')
                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.unit-price'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
                 TableColumn::make('price_subtotal')
                     ->label(__('accounts::filament/resources/invoice.form.tabs.invoice-lines.repeater.products.fields.sub-total'))
-                    ->width(250)
+                    ->width(150)
                     ->toggleable(),
             ])
             ->itemLabel(function ($state) {
