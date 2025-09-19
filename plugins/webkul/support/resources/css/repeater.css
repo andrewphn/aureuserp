@@ -1,6 +1,26 @@
 .fi-fo-table-repeater {
-    @apply grid gap-3;
-    overflow-x: scroll;
+    @apply grid gap-3 p-2;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgb(156 163 175) transparent;
+
+    &::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        @apply bg-gray-100 dark:bg-gray-800;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        @apply bg-gray-400 rounded dark:bg-gray-600;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        @apply bg-gray-500 dark:bg-gray-500;
+    }
 
     & > table {
         @apply block w-full bg-white divide-y divide-gray-200 shadow-sm rounded-xl ring-1 ring-gray-950/5 dark:divide-white/10 dark:bg-gray-900 dark:ring-white/10;
@@ -168,5 +188,11 @@
         &.fi-align-right {
             @apply justify-end;
         }
+    }
+}
+
+.fi-select-input {
+    & .fi-select-input-ctn {
+        @apply static;
     }
 }
