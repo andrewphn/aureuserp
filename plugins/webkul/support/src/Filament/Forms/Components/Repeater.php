@@ -2,6 +2,7 @@
 
 namespace Webkul\Support\Filament\Forms\Components;
 
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater as BaseRepeater;
 use Filament\Support\Enums\Size;
@@ -14,6 +15,8 @@ class Repeater extends BaseRepeater
 
     protected ?string $columnManagerSessionKey = null;
 
+    protected bool | Closure | null $isRepeaterHasTableView = false;
+
     public function getDefaultView(): string
     {
         if ($this->isTable()) {
@@ -23,12 +26,26 @@ class Repeater extends BaseRepeater
         return (string) parent::getDefaultView();
     }
 
+    public function table(array | Closure | null $columns): static
+    {
+        $this->isRepeaterHasTableView = true;
+
+        $this->tableColumns = $columns;
+
+        return $this;
+    }
+
+    public function isTable(): bool
+    {
+        return $this->evaluate($this->isRepeaterHasTableView) || filled($this->getTableColumns());
+    }
+
     public function getColumnManagerSessionKey(): string
     {
         return $this->columnManagerSessionKey ??= 'repeater_'.$this->getStatePath().'_column_manager';
     }
 
-    public function getMappedColumnsForColumnManager(): array
+    public function getMappedColumns(): array
     {
         $columns = $this->evaluate($this->tableColumns);
 

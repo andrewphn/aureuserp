@@ -2,10 +2,7 @@
     use Filament\Actions\Action;
     use Filament\Actions\ActionGroup;
     use Filament\Support\Enums\Alignment;
-    use Illuminate\Support\Js;
     use Illuminate\View\ComponentAttributeBag;
-
-    $fieldWrapperView = $getFieldWrapperView();
 
     $items = $getItems();
 
@@ -36,7 +33,7 @@
 @endphp
 
 <x-dynamic-component
-    :component="$fieldWrapperView"
+    :component="$getFieldWrapperView()"
     :field="$field"
 >
     <div
@@ -50,31 +47,35 @@
             <table class="fi-absolute-positioning-context">
                 <thead>
                     <tr>
-                        @if ((count($items) > 1) && ($isReorderableWithButtons || $isReorderableWithDragAndDrop))
-                            <th
-                                class="fi-fo-table-repeater-empty-header-cell"
-                            ></th>
+                        @if (
+                            (count($items) > 1) 
+                            && (
+                                $isReorderableWithButtons 
+                                || $isReorderableWithDragAndDrop
+                            )
+                        )
+                            <th class="fi-fo-table-repeater-empty-header-cell"></th>
                         @endif
 
-                        @foreach ($tableColumns as $column)
+                        @foreach ($tableColumns as $tableColumn)
                             <th
                                 @class([
-                                    'fi-wrapped' => $column->canHeaderWrap(),
-                                    (($columnAlignment = $column->getAlignment()) instanceof Alignment) ? ('fi-align-' . $columnAlignment->value) : $columnAlignment,
+                                    'fi-wrapped' => $tableColumn->canHeaderWrap(),
+                                    (($columnAlignment = $tableColumn->getAlignment()) instanceof Alignment) ? ('fi-align-' . $columnAlignment->value) : $columnAlignment,
                                 ])
                                 @style([
-                                    ('width: ' . ($columnWidth = $column->getWidth())) => filled($columnWidth),
+                                    ('width: ' . ($columnWidth = $tableColumn->getWidth())) => filled($columnWidth),
                                 ])
                             >
-                                @if (! $column->isHeaderLabelHidden())
-                                    {{ $column->getLabel() }}
+                                @if (! $tableColumn->isHeaderLabelHidden())
+                                    {{ $tableColumn->getLabel() }}
 
-                                    @if ($column->isMarkedAsRequired())
+                                    @if ($tableColumn->isMarkedAsRequired())
                                         <sup class="fi-fo-table-repeater-header-required-mark">*</sup>
                                     @endif
                                 @else
                                     <span class="fi-sr-only">
-                                        {{ $column->getLabel() }}
+                                        {{ $tableColumn->getLabel() }}
                                     </span>
                                 @endif
                             </th>
@@ -87,17 +88,11 @@
                         )
                             <th class="text-center !w-[50px] align-middle fi-fo-table-repeater-empty-header-cell">
                                 @if ($hasColumnManagerDropdown)
-                                    @php
-                                        $columnManagerMaxHeight = $getColumnManagerMaxHeight();
-                                        $columnManagerWidth = $getColumnManagerWidth();
-                                        $columnManagerColumns = $getColumnManagerColumns();
-                                    @endphp
-
                                     <x-filament::dropdown
-                                        :max-height="$columnManagerMaxHeight"
-                                        placement="bottom-end"
                                         shift
-                                        :width="$columnManagerWidth"
+                                        placement="bottom-end"
+                                        :max-height="$getColumnManagerMaxHeight()"
+                                        :width="$getColumnManagerWidth()"
                                         :wire:key="$this->getId() . '.table.column-manager.' . $statePath"
                                         class="inline-block fi-ta-col-manager-dropdown"
                                     >
@@ -106,12 +101,12 @@
                                         </x-slot>
 
                                         <x-support::column-manager
+                                            heading-tag="h2"
                                             :apply-action="$columnManagerApplyAction"
-                                            :table-columns="$getMappedColumnsForColumnManager()"
-                                            :columns="$columnManagerColumns"
+                                            :table-columns="$getMappedColumns()"
+                                            :columns="$getColumnManagerColumns()"
                                             :has-reorderable-columns="false"
                                             :has-toggleable-columns="$hasToggleableColumns"
-                                            heading-tag="h2"
                                             :reorder-animation-duration="$getReorderAnimationDuration()"
                                             :repeater-key="$statePath"
                                         />
@@ -134,10 +129,7 @@
                 >
                     @foreach ($items as $itemKey => $item)
                         @php
-                            $visibleExtraItemActions = array_filter(
-                                $extraItemActions,
-                                fn (Action $action): bool => $action(['item' => $itemKey])->isVisible(),
-                            );
+                            $visibleExtraItemActions = collect($extraItemActions)->filter(fn (Action $action) => $action(['item' => $itemKey])->isVisible())->values()->all();
                             $cloneAction = $cloneAction(['item' => $itemKey]);
                             $cloneActionIsVisible = $isCloneable && $cloneAction->isVisible();
                             $deleteAction = $deleteAction(['item' => $itemKey]);
@@ -156,7 +148,10 @@
                         >
                             @if (
                                 (count($items) > 1) 
-                                && ($isReorderableWithButtons || $isReorderableWithDragAndDrop)
+                                && (
+                                    $isReorderableWithButtons 
+                                    || $isReorderableWithDragAndDrop
+                                )
                             )
                                 <td>
                                     @if (
@@ -189,18 +184,15 @@
                             @endif
 
                             @php
-                                $counter = 0
-                            @endphp
-
-                            @php
-                                $visibleColumns = collect($tableColumns)->mapWithKeys(fn ($col) => [$col->getName() => $col]);
+                                $counter = 0;
+                                $visibleColumns = collect($tableColumns)->mapWithKeys(fn ($tableColumn) => [$tableColumn->getName() => $tableColumn]);
                             @endphp
 
                             @foreach ($item->getComponents() as $schemaComponent)
                                 @php
                                     throw_unless(
                                         $schemaComponent instanceof \Filament\Schemas\Components\Component,
-                                        new \Exception('Table repeaters must only contain schema components, but [' . $schemaComponent::class . '] was used.'),
+                                        new Exception('Table repeaters must only contain schema components, but [' . $schemaComponent::class . '] was used.'),
                                     );
                                 @endphp
 
@@ -209,7 +201,10 @@
                                         {{ $schemaComponent }}
                                     @else
                                         <td
-                                            @if (! (($schemaComponent instanceof Action) || ($schemaComponent instanceof ActionGroup)))
+                                            @if (! (
+                                                $schemaComponent instanceof Action 
+                                                || $schemaComponent instanceof ActionGroup
+                                            ))
                                                 @php
                                                     $schemaComponentStatePath = $schemaComponent->getStatePath();
                                                 @endphp
@@ -228,9 +223,17 @@
                                 @endif
                             @endforeach
 
-                            @if (count($extraItemActions) || $isCloneable || $isDeletable)
+                            @if (
+                                count($extraItemActions) 
+                                || $isCloneable 
+                                || $isDeletable
+                            )
                                 <td>
-                                    @if ($visibleExtraItemActions || $cloneActionIsVisible || $deleteActionIsVisible)
+                                    @if (
+                                        $visibleExtraItemActions 
+                                        || $cloneActionIsVisible 
+                                        || $deleteActionIsVisible
+                                    )
                                         <div class="flex flex-col gap-2">
                                             @foreach ($visibleExtraItemActions as $extraItemAction)
                                                 <div x-on:click.stop>
@@ -261,7 +264,10 @@
     </div>
 
     <div class="flex items-center justify-center">
-        @if ($isAddable && $addAction->isVisible())
+        @if (
+            $isAddable 
+            && $addAction->isVisible()
+        )
             <div
                 @class([
                     'fi-fo-table-repeater-add',
