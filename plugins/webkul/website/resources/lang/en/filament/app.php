@@ -6,16 +6,20 @@ return [
             'label' => 'Settings',
             'group' => 'Website',
         ],
+
         'account' => [
             'label' => 'My Account',
         ],
+
         'top' => [
             'login'    => 'Login',
             'register' => 'Register',
         ],
+
         'footer' => [
             'home' => 'Home',
         ],
+        
         'social' => [
             'facebook'  => 'Facebook',
             'twitter'   => 'Twitter',
