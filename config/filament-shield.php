@@ -172,8 +172,6 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage'  => [
-            // Only configure your custom resources here if needed
-            // Don't include any RoleResource configuration to avoid conflicts
             \Webkul\Partner\Filament\Resources\BankAccountResource::class => ['view_any', 'view', 'create', 'update', 'delete', 'restore', 'delete_any', 'force_delete', 'force_delete_any', 'restore_any'],
 
             \Webkul\Account\Filament\Resources\PaymentTermResource::class => [],
