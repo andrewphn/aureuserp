@@ -32,7 +32,7 @@ class EditViewAction extends Action
                 $tableViewFavorite = TableViewFavorite::query()
                     ->where('user_id', filament()->auth()->id())
                     ->where('view_type', 'saved')
-                    ->where('view_key', $arguments['view_key'])
+                    ->where('view_key', $tableView->view_key)
                     ->where('filterable_type', $tableView->filterable_type)
                     ->first();
 
@@ -52,7 +52,9 @@ class EditViewAction extends Action
                 IconPicker::make('icon')
                     ->label(__('table-views::filament/actions/edit-view.form.icon'))
                     ->sets(['heroicons'])
-                    ->columns(4),
+                    ->columns(4)
+                    ->gridSearchResults()
+                    ->iconsSearchResults(),
                 Toggle::make('is_favorite')
                     ->label(__('table-views::filament/actions/edit-view.form.add-to-favorites'))
                     ->helperText(__('table-views::filament/actions/edit-view.form.add-to-favorites-help')),
