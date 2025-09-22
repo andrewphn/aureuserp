@@ -1070,7 +1070,7 @@ class OrderResource extends Resource
         if (! $vendorPrices->isEmpty()) {
             $vendorPrice = $vendorPrices->first()->price;
         } else {
-            $vendorPrice = $product->cost ?? $product->price;
+            $vendorPrice = $product->cost ?: $product->price;
         }
 
         if (! $get('uom_id')) {
