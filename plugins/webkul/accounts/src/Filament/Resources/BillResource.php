@@ -618,7 +618,16 @@ class BillResource extends Resource
 
         $set('uom_id', $product->uom_id);
 
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $basePrice = $product->cost;
+
+        if (
+            $basePrice === null
+            || (float) $basePrice == 0.0
+        ) {
+            $basePrice = $product->price;
+        }
+
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $basePrice);
 
         $set('price_unit', round($priceUnit, 2));
 
@@ -656,7 +665,16 @@ class BillResource extends Resource
 
         $product = Product::find($get('product_id'));
 
-        $priceUnit = static::calculateUnitPrice($get('uom_id'), $product->cost ?? $product->price);
+        $basePrice = $product->cost;
+
+        if (
+            $basePrice === null
+            || (float) $basePrice == 0.0
+        ) {
+            $basePrice = $product->price;
+        }
+
+        $priceUnit = static::calculateUnitPrice($get('uom_id'), $basePrice);
 
         $set('price_unit', round($priceUnit, 2));
 
