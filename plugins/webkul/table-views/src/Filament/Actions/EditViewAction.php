@@ -27,19 +27,21 @@ class EditViewAction extends Action
         $this
             ->model(TableView::class)
             ->fillForm(function (array $arguments): array {
+                $tableView = TableView::find($arguments['view_key']);
+
                 $tableViewFavorite = TableViewFavorite::query()
                     ->where('user_id', filament()->auth()->id())
                     ->where('view_type', 'saved')
-                    ->where('view_key', $arguments['view_model']['id'])
-                    ->where('filterable_type', $arguments['view_model']['filterable_type'])
+                    ->where('view_key', $arguments['view_key'])
+                    ->where('filterable_type', $tableView->filterable_type)
                     ->first();
 
                 return [
-                    'name'        => $arguments['view_model']['name'],
-                    'color'       => $arguments['view_model']['color'],
-                    'icon'        => $arguments['view_model']['icon'],
+                    'name'        => $tableView->name,
+                    'color'       => $tableView->color,
+                    'icon'        => $tableView->icon,
                     'is_favorite' => $tableViewFavorite?->is_favorite ?? false,
-                    'is_public'   => $arguments['view_model']['is_public'],
+                    'is_public'   => $tableView->is_public,
                 ];
             })
             ->schema([
@@ -58,29 +60,27 @@ class EditViewAction extends Action
                     ->label(__('table-views::filament/actions/edit-view.form.make-public'))
                     ->helperText(__('table-views::filament/actions/edit-view.form.make-public-help')),
             ])->action(function (array $arguments): void {
-                TableView::find($arguments['view_model']['id'])->update($arguments['view_model']);
+                $tableView = TableView::find($arguments['view_key']);
 
-                $record = $this->process(function (array $data) use ($arguments): TableView {
-                    $record = TableView::find($arguments['view_model']['id']);
-                    $record->fill($data);
-
-                    $record->save();
+                $this->process(function (array $data) use ($tableView): TableView {
+                    $tableView->fill($data);
+                    $tableView->save();
 
                     TableViewFavorite::updateOrCreate(
                         [
                             'view_type'       => 'saved',
-                            'view_key'        => $arguments['view_model']['id'],
-                            'filterable_type' => $record->filterable_type,
+                            'view_key'        => $tableView->id,
+                            'filterable_type' => $tableView->filterable_type,
                             'user_id'         => filament()->auth()->id(),
                         ], [
                             'is_favorite' => $data['is_favorite'],
                         ]
                     );
 
-                    return $record;
+                    return $tableView;
                 });
 
-                $this->record($record);
+                $this->record($tableView);
 
                 $this->success();
             })
