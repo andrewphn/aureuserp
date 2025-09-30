@@ -31,6 +31,7 @@ class ProjectStage extends Model implements Sortable
      */
     protected $fillable = [
         'name',
+        'color',
         'is_active',
         'is_collapsed',
         'sort',

@@ -167,6 +167,11 @@ class Project extends Model implements Sortable
         return $this->hasMany(Task::class);
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(\Webkul\Sale\Models\Order::class);
+    }
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -180,6 +185,56 @@ class Project extends Model implements Sortable
     protected static function booted()
     {
         static::addGlobalScope(new UserPermissionScope('user'));
+
+        // Auto-generate project number when project is created
+        static::created(function ($project) {
+            if ($project->company_id) {
+                $project->generateProjectNumber();
+            }
+        });
+    }
+
+    /**
+     * Generate unique project number based on company acronym and street address
+     */
+    protected function generateProjectNumber(): void
+    {
+        // Get company acronym from direct column access
+        $companyAcronym = $this->company->acronym ?? null;
+
+        if (empty($companyAcronym)) {
+            // Fallback to company initials if no acronym set
+            $companyAcronym = strtoupper(substr($this->company?->name ?? 'PRJ', 0, 3));
+        }
+
+        // Get street address (required for project number)
+        $streetAddress = $this->street_address;
+
+        if (empty($streetAddress)) {
+            // Cannot generate project number without street address
+            return;
+        }
+
+        // Find the highest existing project number for this company
+        $lastProjectNumber = static::where('company_id', $this->company_id)
+            ->where('id', '!=', $this->id)
+            ->whereNotNull('project_number')
+            ->orderBy('id', 'desc')
+            ->value('project_number');
+
+        // Calculate next number (starting from 001)
+        // Pattern matches: TCS-001-MapleAve (extracts 001)
+        $nextNumber = 1;
+        if ($lastProjectNumber && preg_match('/^[A-Z]+-(\d+)-/', $lastProjectNumber, $matches)) {
+            $nextNumber = intval($matches[1]) + 1;
+        }
+
+        // Format: TCS-001-MapleAve, TCS-002-FriendshipLane, etc.
+        $projectNumber = $companyAcronym . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . '-' . $streetAddress;
+
+        // Update the project_number column directly without triggering events
+        $this->project_number = $projectNumber;
+        $this->saveQuietly();
     }
 
     protected static function newFactory(): ProjectFactory

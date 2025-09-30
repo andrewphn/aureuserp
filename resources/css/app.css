@@ -1,1 +1,436 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   TCS TOP NAVIGATION IMPROVEMENTS
+   ============================================ */
+@layer components {
+    /* Top Navigation Bar - Increased height and better spacing */
+    .fi-topbar {
+        @apply py-5 px-8 shadow-md;
+        min-height: 5rem !important;
+    }
+
+    /* Section title spacing - More space between section title and menu items */
+    .fi-topbar nav > ul > p {
+        @apply mr-6 font-semibold text-gray-700 dark:text-gray-300;
+    }
+
+    /* Navigation items - Better spacing and sizing - Override FilamentPHP defaults */
+    .fi-topbar-item {
+        @apply mx-2;
+    }
+
+    .fi-topbar-item-btn {
+        flex-direction: row !important;
+        @apply px-5 py-3 text-base font-medium rounded-lg transition-all duration-200;
+        @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+        gap: 0.75rem !important;
+        min-height: 2.75rem !important;
+    }
+
+    /* Active navigation item - TCS Gold accent */
+    .fi-topbar-item-active .fi-topbar-item-btn {
+        @apply bg-amber-50 dark:bg-amber-900/20;
+        @apply text-amber-700 dark:text-amber-400;
+        @apply font-semibold;
+        @apply shadow-sm;
+        border-bottom: 3px solid #D4A574 !important;
+    }
+
+    /* Navigation text labels */
+    .fi-topbar-item-btn > span:last-child {
+        @apply text-base font-medium;
+        font-size: 0.95rem !important;
+    }
+
+    /* Global search improvements */
+    .fi-topbar [x-data*="global-search"],
+    .fi-topbar .fi-global-search-field {
+        min-width: 22rem !important;
+    }
+
+    .fi-topbar input[type="search"] {
+        @apply px-4 py-3 text-base rounded-lg;
+        @apply border-gray-300 dark:border-gray-600;
+        @apply focus:ring-2 focus:ring-amber-500 focus:border-amber-500;
+        min-height: 2.75rem !important;
+    }
+
+    /* User menu button */
+    .fi-topbar button[aria-label*="User menu"] {
+        @apply p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700;
+        @apply transition-all duration-200;
+        min-width: 3rem !important;
+        min-height: 3rem !important;
+    }
+
+    /* Hamburger menu button */
+    .fi-topbar button[aria-label*="sidebar"] {
+        @apply p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700;
+        @apply transition-all duration-200;
+        min-width: 3rem !important;
+        min-height: 3rem !important;
+    }
+
+    /* Logo container spacing */
+    .fi-topbar a[href$="/admin"] {
+        @apply px-4 py-2;
+    }
+
+    /* Responsive top nav */
+    @media (max-width: 768px) {
+        .fi-topbar {
+            @apply py-3 px-4;
+            min-height: 4rem !important;
+        }
+
+        .fi-topbar-item-btn {
+            @apply text-sm px-3 py-2;
+            min-height: 2.5rem !important;
+        }
+
+        .fi-topbar [x-data*="global-search"] {
+            min-width: 12rem !important;
+        }
+    }
+}
+
+/* Kanban Board Styles */
+@layer components {
+    /* Kanban Stage Header Styles */
+    .kanban-stage-header {
+        @apply p-3 rounded-t-lg flex-shrink-0 text-white;
+    }
+
+    /* Stage-specific header colors with hover effects */
+    .kanban-stage-uncategorized {
+        @apply bg-stage-uncategorized hover:bg-slate-600 transition-colors;
+    }
+
+    .kanban-stage-discovery {
+        @apply bg-stage-discovery hover:bg-amber-600 transition-colors;
+    }
+
+    .kanban-stage-design {
+        @apply bg-stage-design hover:bg-violet-600 transition-colors;
+    }
+
+    .kanban-stage-sourcing {
+        @apply bg-stage-sourcing hover:bg-cyan-700 transition-colors;
+    }
+
+    .kanban-stage-production {
+        @apply bg-stage-production hover:bg-red-700 transition-colors;
+    }
+
+    .kanban-stage-delivery {
+        @apply bg-stage-delivery hover:bg-emerald-700 transition-colors;
+    }
+
+    /* Kanban Card Styles */
+    .kanban-card {
+        @apply bg-white dark:bg-gray-800 rounded-lg px-4 py-5 cursor-pointer 
+               shadow-sm hover:shadow-md transition-all duration-200 
+               border border-gray-200 dark:border-gray-700
+               hover:border-gray-300 dark:hover:border-gray-600;
+    }
+
+    .kanban-card:hover {
+        @apply transform -translate-y-0.5;
+    }
+
+    /* Priority Badges */
+    .priority-high {
+        @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+    }
+
+    .priority-medium {
+        @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+    }
+
+    .priority-low {
+        @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+    }
+
+    /* Kanban Column */
+    .kanban-column {
+        @apply bg-gray-100 dark:bg-gray-900 rounded-lg flex-1 flex flex-col min-w-[320px] 
+               shadow-sm border border-gray-200 dark:border-gray-800;
+    }
+
+    .kanban-column-body {
+        @apply p-3 space-y-3 min-h-[200px] flex-1 overflow-y-auto;
+    }
+
+    /* Stage Count Badge */
+    .stage-count-badge {
+        @apply bg-white/20 text-xs px-2 py-1 rounded-full font-medium;
+    }
+
+    /* Progress Bar */
+    .project-progress-bar {
+        @apply mt-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden h-1;
+    }
+
+    .project-progress-fill {
+        @apply bg-blue-600 h-full transition-all duration-300;
+    }
+}
+
+/* Custom animations for timesheet components */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce-once {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(-10px);
+    }
+    50% {
+        transform: translateY(0);
+    }
+    75% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+}
+
+.animate-bounce-once {
+    animation: bounce-once 1s ease-in-out;
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Smooth transitions for Livewire updates */
+[wire\:loading] {
+    transition: opacity 0.3s ease;
+}
+
+/* FilamentPHP-compatible focus states */
+.fi-btn:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.fi-btn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Desktop Layout Enhancements */
+.desktop-layout {
+    min-height: 100vh;
+    transition: background-color 0.3s ease;
+}
+
+/* Typography standardization */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Ensure consistent icon sizing and alignment */
+svg {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Button text alignment */
+button {
+    font-family: inherit;
+    text-align: center;
+}
+
+/* Fix Filament-specific components */
+.fi-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.fi-btn svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+/* Sidebar Animations */
+.sidebar-left,
+.sidebar-right {
+    transition: width 0.3s ease, transform 0.3s ease;
+}
+
+/* Smooth navigation item transitions */
+.nav-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.nav-item:hover::before {
+    left: 100%;
+}
+
+/* Primary create button pulse effect */
+.primary-create-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.primary-create-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.primary-create-button:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Quick action card hover effects */
+.quick-action-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(14, 165, 233, 0.05) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.quick-action-card:hover::before {
+    transform: translateX(100%);
+}
+
+/* Entry method card animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.entry-method-card:hover {
+    animation: float 2s ease-in-out infinite;
+}
+
+/* Desktop scrollbar styling */
+.sidebar-left::-webkit-scrollbar,
+.sidebar-right::-webkit-scrollbar,
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-left::-webkit-scrollbar-track,
+.sidebar-right::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.sidebar-left::-webkit-scrollbar-thumb,
+.sidebar-right::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.sidebar-left::-webkit-scrollbar-thumb:hover,
+.sidebar-right::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+    .sidebar-left::-webkit-scrollbar-track,
+    .sidebar-right::-webkit-scrollbar-track,
+    .main-content::-webkit-scrollbar-track {
+        background: #374151;
+    }
+    
+    .sidebar-left::-webkit-scrollbar-thumb,
+    .sidebar-right::-webkit-scrollbar-thumb,
+    .main-content::-webkit-scrollbar-thumb {
+        background: #6b7280;
+    }
+    
+    .sidebar-left::-webkit-scrollbar-thumb:hover,
+    .sidebar-right::-webkit-scrollbar-thumb:hover,
+    .main-content::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+}
+
+/* Focus management for ADHD-friendly interaction */
+*:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .entry-method-card:hover {
+        animation: none;
+    }
+}

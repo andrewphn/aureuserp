@@ -1,0 +1,684 @@
+{
+    "generated_at": "2025-09-30 17:59:33",
+    "total_products": 65,
+    "needs_cleanup": 38,
+    "products": [
+        {
+            "id": 47,
+            "original_name": "6\" Sandpaper",
+            "sku": "6-SANDPAPER",
+            "brand": null,
+            "simplified_name": "6\" Sandpaper",
+            "attributes": {
+                "Length": "6\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 108,
+            "original_name": "6\" Sandpaper",
+            "sku": "6-SANDPAPER",
+            "brand": null,
+            "simplified_name": "6\" Sandpaper",
+            "attributes": {
+                "Length": "6\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 30,
+            "original_name": "DEWALT A27941 Sub Base Clamp",
+            "sku": "AMZ-B00Y0JIGSK",
+            "brand": "DEWALT",
+            "simplified_name": "A27941 Sub Base Clamp",
+            "attributes": {
+                "Length": "27941\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 29,
+            "original_name": "Regency Table Stiffner, Metal",
+            "sku": "AMZ-B01DOZDUEK",
+            "brand": "Regency",
+            "simplified_name": "Table Stiffner, Metal",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 27,
+            "original_name": "SST - Regular Mill & Lathe Tramming System - Tram, Align, & Square for Machine Calibration - For Angular Misalignment - Precise & Powerful - 0.0005\" Dial Indicators - Designed in the USA",
+            "sku": "AMZ-B07D84Y1ZD",
+            "brand": "SST",
+            "simplified_name": "SST - Regular Mill",
+            "attributes": {
+                "Length": "0005\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 31,
+            "original_name": "HOZLY 5PCS\/Lot ISO30 Tool Holder Clamp Flame Proof Rubber Claw CNC Machines Automatic Tool Changer",
+            "sku": "AMZ-B07WLCT6F4",
+            "brand": "HOZLY",
+            "simplified_name": "HOZLY 5PCS\/Lot ISO30 Tool",
+            "attributes": {
+                "Length": "30\"",
+                "Pack Size": "5"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 25,
+            "original_name": "EPSON 812 DURABrite Ultra Ink Extra-high Capacity Black Cartridge (T812XXL120-S) Works with WorkForce Pro WF-7310, WF-7820, WF-7840, WorkForce EC-C7000",
+            "sku": "AMZ-B08DX5F6XV",
+            "brand": "EPSON",
+            "simplified_name": "EPSON 812 DURABrite Ultra",
+            "attributes": {
+                "Length": "812\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 34,
+            "original_name": "O'SKOOL 220V Wireless Remote Control Dust Collector Starter Outlet Switch (Battery Included)",
+            "sku": "AMZ-B09QCKYL7K",
+            "brand": "O'SKOOL",
+            "simplified_name": "O'SKOOL 220V Wireless Remote",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 32,
+            "original_name": "PAMAZY 6PCS Heavy Duty Steel D Rings Tie Down Anchors, Ultra Durable 3500 Pound Breaking Strength Surface Mount Hooks Securing Cargo for Trailer, Truck Bed, with Screws & Bolts",
+            "sku": "AMZ-B0B8HXJB48",
+            "brand": "PAMAZY",
+            "simplified_name": "PAMAZY 6PCS Heavy Duty",
+            "attributes": {
+                "Length": "3500\"",
+                "Pack Size": "6"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 26,
+            "original_name": "Serious Grit - 120 Grit Ceramic Grain PSA Sandpaper Roll - Heavy-Duty Stickyback Adhesive Longboard Sanding Roll - 2.75\" x 20 Yard Continuous Sand Paper for Wood, Metal, Autobody, Paint, Air Sanders.",
+            "sku": "AMZ-B0BYTMRKDY",
+            "brand": "Serious Grit",
+            "simplified_name": "Sandpaper",
+            "attributes": {
+                "Grit": "120",
+                "Length": "120\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 33,
+            "original_name": "VBEST Extra Long Bungee Cords with Carabiner Hooks - Large Heavy Duty Outdoor Black Bungie Straps Set of 6 Pieces 72 Inch",
+            "sku": "AMZ-B0DLH1HRJZ",
+            "brand": "VBEST",
+            "simplified_name": "Bungee Cords",
+            "attributes": {
+                "Size": "72\"",
+                "Pack Size": "6"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 28,
+            "original_name": "Labelife TZe-251 TZe TZ Tape 24mm 0.94 Compatible with Brother P Touch Label Maker Tape 24mm .94 Laminated White TZe251 TZ-251 1'' for Brother PT-D600 PT-D610BT PT-P710BT P700 P750W, 5-Pack",
+            "sku": "AMZ-B0F6MPF69J",
+            "brand": "Labelife",
+            "simplified_name": "Labelife TZe-251 TZe TZ",
+            "attributes": {
+                "Length": "251\"",
+                "Pack Size": "5"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 38,
+            "original_name": "Drawer Slides",
+            "sku": "DRAWER-SLIDES",
+            "brand": null,
+            "simplified_name": "Drawer Slides",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 99,
+            "original_name": "Drawer Slides",
+            "sku": "DRAWER-SLIDES",
+            "brand": null,
+            "simplified_name": "Drawer Slides",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 96,
+            "original_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-\" #6)",
+            "sku": "PLAIN-WOOD-SCREW-FLAT-HEAD-QUADREX-DRIVE-1-6",
+            "brand": null,
+            "simplified_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-\" #6)",
+            "attributes": {
+                "Length": "6\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 35,
+            "original_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-\" #6)",
+            "sku": "PLAIN-WOOD-SCREW-FLAT-HEAD-QUADREX-DRIVE-1-6",
+            "brand": null,
+            "simplified_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-\" #6)",
+            "attributes": {
+                "Length": "6\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 19,
+            "original_name": "'' Real Heavy Duty Carabiner Bungee Cords Outdoor with Lbs Max Break Strength, Black Bungee Straps with Upgraded Carabiner Hooks for Luggage Rack, Cargo, Hand Carts, Bike, Camping, etc ( Pcs)",
+            "sku": "REAL-HEAVY-DUTY-CARABINER-BUNGEE-CORDS-OUTDOOR-WIT",
+            "brand": null,
+            "simplified_name": "Bungee Cords",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 43,
+            "original_name": "Serious Grit",
+            "sku": "SERIOUS-GRIT",
+            "brand": "Serious Grit",
+            "simplified_name": "",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 104,
+            "original_name": "Serious Grit",
+            "sku": "SERIOUS-GRIT",
+            "brand": "Serious Grit",
+            "simplified_name": "",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 22,
+            "original_name": "Serious Grit Ceramic Multi-Hole Hook & Loop Sanding Discs - Advanced Grain for Fast Cutting & Long Life - Film-Backed Universal Fit Sandpaper for -in Sanders - Pack Box",
+            "sku": "SERIOUS-GRIT-CERAMIC-MULTI-HOLE-HOOK-LOOP-SANDING-",
+            "brand": "Serious Grit",
+            "simplified_name": "Sanding Discs",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 1,
+            "original_name": "CLIP top BLUMOTION Hinge for Blind Corners",
+            "sku": "TC-HW-HINGE-01",
+            "brand": "Blum",
+            "simplified_name": "CLIP top OTION Hinge for Blind Corners",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 113,
+            "original_name": "West Systems Epoxy",
+            "sku": "TCS-ADH-EPOXY-01",
+            "brand": "West Systems",
+            "simplified_name": "Epoxy",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 114,
+            "original_name": "Titebond II Premium Wood Glue",
+            "sku": "TCS-ADH-GLUE-01",
+            "brand": "Titebond",
+            "simplified_name": "II Wood Glue",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 115,
+            "original_name": "Titebond Speed Set Wood Glue - 4366",
+            "sku": "TCS-ADH-GLUE-02",
+            "brand": "Titebond",
+            "simplified_name": "Speed Set Wood Glue - 4366",
+            "attributes": {
+                "Length": "4366\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 116,
+            "original_name": "Jowatherm 280.3 Unfilled Granular Hot Melt Adhesive",
+            "sku": "TCS-ADH-PELLET-01",
+            "brand": "Jowatherm",
+            "simplified_name": "280.3 Unfilled Granular Hot Melt Adhesive",
+            "attributes": {
+                "Length": "3\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 117,
+            "original_name": "12 inch Chop Saw Blades",
+            "sku": "TCS-BLADE-SAW-02",
+            "brand": null,
+            "simplified_name": "12 inch Chop Saw Blades",
+            "attributes": {
+                "Size": "12\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 118,
+            "original_name": "10 inch Table Saw Blades",
+            "sku": "TCS-BLADE-SAW-03",
+            "brand": null,
+            "simplified_name": "10 inch Table Saw Blades",
+            "attributes": {
+                "Size": "10\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 119,
+            "original_name": "Amana Tool CNC Router Bit",
+            "sku": "TCS-CNC-BIT-01",
+            "brand": "Amana Tool",
+            "simplified_name": "CNC Router Bit",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 120,
+            "original_name": "Amana Tool CNC Router Bit (3\/8\" Compression)",
+            "sku": "TCS-CNC-BIT-02",
+            "brand": "Amana Tool",
+            "simplified_name": "CNC Router Bit ( Compression)",
+            "attributes": {
+                "Length": "3\/8\"",
+                "Type": "3\/8\" Compression"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 121,
+            "original_name": "Amana Tool CNC Router Bit (3\/8\" Down-cut)",
+            "sku": "TCS-CNC-BIT-03",
+            "brand": "Amana Tool",
+            "simplified_name": "CNC Router Bit ( Down-cut)",
+            "attributes": {
+                "Length": "3\/8\"",
+                "Type": "3\/8\" Down-cut"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 122,
+            "original_name": "Amana Tool CNC Router Bit (VERIFY SPECS - May be discontinued\/renamed)",
+            "sku": "TCS-CNC-BIT-04",
+            "brand": "Amana Tool",
+            "simplified_name": "CNC Router Bit (VERIFY SPECS - May be discontinued\/renamed)",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 123,
+            "original_name": "Amana Tool CNC Router Bit (Up-cut)",
+            "sku": "TCS-CNC-BIT-05",
+            "brand": "Amana Tool",
+            "simplified_name": "CNC Router Bit",
+            "attributes": {
+                "Type": "Up-cut"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 124,
+            "original_name": "Amana Tool CNC Router Bit (Spiral)",
+            "sku": "TCS-CNC-BIT-06",
+            "brand": "Amana Tool",
+            "simplified_name": "CNC Router Bit",
+            "attributes": {
+                "Type": "Spiral"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 125,
+            "original_name": "Unfinished Auto Tape Edge Banding (Unfinished)",
+            "sku": "TCS-EDGE-UNF-03",
+            "brand": null,
+            "simplified_name": "Unfinished Auto Tape Edge Banding (Unfinished)",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 126,
+            "original_name": "Edgebanding - Maple (250 ft)",
+            "sku": "TCS-EDGE-WOOD-01",
+            "brand": null,
+            "simplified_name": "Edgebanding - Maple (250 ft)",
+            "attributes": {
+                "Length": "250\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 127,
+            "original_name": "Pre-glued 7\/8\" width (22mm) maple veneer (Finished)",
+            "sku": "TCS-EDGE-WOOD-02",
+            "brand": null,
+            "simplified_name": "Pre-glued width (22mm) maple veneer (Finished)",
+            "attributes": {
+                "Length": "7\/8\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 128,
+            "original_name": "Plain Wood Screw, Flat Head With Nibs (1-1\/2\" #6)",
+            "sku": "TCS-FAST-KREG-03",
+            "brand": null,
+            "simplified_name": "Plain Wood Screw, Flat Head With Nibs (1- #6)",
+            "attributes": {
+                "Length": "1\/2\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 129,
+            "original_name": "Black Phosphate Wood Screw (1-1\/2\" #8)",
+            "sku": "TCS-FAST-KREG-04",
+            "brand": null,
+            "simplified_name": "Black Phosphate Wood Screw (1- #8)",
+            "attributes": {
+                "Length": "1\/2\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 130,
+            "original_name": "RELIABLE Galvanized Brad Nails - 18 Gauge (1-1\/4\")",
+            "sku": "TCS-FAST-NAIL-01",
+            "brand": "RELIABLE",
+            "simplified_name": "Galvanized Brad Nails - 18 Gauge (1-1\/4\")",
+            "attributes": {
+                "Length": "18\"",
+                "Gauge": "18"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 131,
+            "original_name": "RELIABLE Galvanized Brad Nails - 18 Gauge (1\")",
+            "sku": "TCS-FAST-NAIL-02",
+            "brand": "RELIABLE",
+            "simplified_name": "Galvanized Brad Nails - 18 Gauge (1\")",
+            "attributes": {
+                "Length": "18\"",
+                "Gauge": "18"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 132,
+            "original_name": "Headless Pin 23 Gauge (1-3\/8\")",
+            "sku": "TCS-FAST-NAIL-03",
+            "brand": null,
+            "simplified_name": "Headless Pin 23 Gauge (1-3\/8\")",
+            "attributes": {
+                "Length": "23\"",
+                "Gauge": "23"
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 133,
+            "original_name": "RELIABLE Galvanized Brad Nails - 18 Gauge (2\")",
+            "sku": "TCS-FAST-NAIL-04",
+            "brand": "RELIABLE",
+            "simplified_name": "Galvanized Brad Nails - 18 Gauge (2\")",
+            "attributes": {
+                "Length": "18\"",
+                "Gauge": "18"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 134,
+            "original_name": "Plain Wood Screw, Flat Head, Quadrex Drive (2\" #8)",
+            "sku": "TCS-FAST-SCREW-01",
+            "brand": null,
+            "simplified_name": "Plain Wood Screw, Flat Head, Quadrex Drive (2\" #8)",
+            "attributes": {
+                "Length": "2\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 135,
+            "original_name": "Plain Wood Screw, Flat Head, Quadrex Drive (3\" #8)",
+            "sku": "TCS-FAST-SCREW-02",
+            "brand": null,
+            "simplified_name": "Plain Wood Screw, Flat Head, Quadrex Drive (3\" #8)",
+            "attributes": {
+                "Length": "3\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 136,
+            "original_name": "CLIP top BLUMOTION Hinge for Blind Corners",
+            "sku": "TCS-HW-HINGE-01",
+            "brand": "Blum",
+            "simplified_name": "CLIP top OTION Hinge for Blind Corners",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 137,
+            "original_name": "Blum 1\/2 Overlay Hinges (Thick)",
+            "sku": "TCS-HW-HINGE-02",
+            "brand": "Blum",
+            "simplified_name": "Hinges",
+            "attributes": {
+                "Length": "1\/2\"",
+                "Type": "Thick",
+                "Overlay Type": "1\/2 Overlay"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 138,
+            "original_name": "Blum Full Overlay Hinges (Thick)",
+            "sku": "TCS-HW-HINGE-03",
+            "brand": "Blum",
+            "simplified_name": "Hinges",
+            "attributes": {
+                "Type": "Thick",
+                "Overlay Type": "Full Overlay"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 139,
+            "original_name": "Blum Inset Overlay Hinges (Thick)",
+            "sku": "TCS-HW-HINGE-04",
+            "brand": "Blum",
+            "simplified_name": "Hinges",
+            "attributes": {
+                "Type": "Thick",
+                "Overlay Type": "Inset Overlay"
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 140,
+            "original_name": "LeMans II System without Soft-Close Mechanism",
+            "sku": "TCS-HW-LEMANS-01",
+            "brand": "LeMans",
+            "simplified_name": "II System without Soft-Close Mechanism",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 141,
+            "original_name": "Drawer Paddles (Left)",
+            "sku": "TCS-HW-PADDLE-01",
+            "brand": null,
+            "simplified_name": "Drawer Paddles (Left)",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 142,
+            "original_name": "Drawer Paddles (Right)",
+            "sku": "TCS-HW-PADDLE-02",
+            "brand": null,
+            "simplified_name": "Drawer Paddles (Right)",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 143,
+            "original_name": "Inserta Plates",
+            "sku": "TCS-HW-PLATE-01",
+            "brand": null,
+            "simplified_name": "Inserta Plates",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 144,
+            "original_name": "35 qt Soft-close Trash Pull Out",
+            "sku": "TCS-HW-TRASH-01",
+            "brand": null,
+            "simplified_name": "35 qt Soft-close Trash Pull Out",
+            "attributes": {
+                "Length": "35\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 145,
+            "original_name": "Rev-A-Shelf Soft-Close Recycling Center",
+            "sku": "TCS-HW-TRASH-02",
+            "brand": "Rev-A-Shelf",
+            "simplified_name": "Soft-Close Recycling Center",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 146,
+            "original_name": "White Lithium Grease",
+            "sku": "TCS-MAINT-LUB-01",
+            "brand": null,
+            "simplified_name": "White Lithium Grease",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 147,
+            "original_name": "Machine Oil",
+            "sku": "TCS-MAINT-OIL-01",
+            "brand": null,
+            "simplified_name": "Machine Oil",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 148,
+            "original_name": "Serious Grit 120 Grit Ceramic Grain PSA Sandpaper Roll",
+            "sku": "TCS-SAND-ROLL-01",
+            "brand": "Serious Grit",
+            "simplified_name": "Grit Ceramic Grain PSA Sandpaper Roll",
+            "attributes": {
+                "Grit": "120",
+                "Length": "120\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 149,
+            "original_name": "Rectangular Sandpaper (2x4\/2x5)",
+            "sku": "TCS-SAND-SHEET-01",
+            "brand": null,
+            "simplified_name": "Rectangular Sandpaper (2x4\/2x5)",
+            "attributes": {
+                "Length": "5\""
+            },
+            "needs_cleanup": false
+        },
+        {
+            "id": 150,
+            "original_name": "YUEERIO 709563 Upgraded Dust Collection Bag for JET",
+            "sku": "TCS-SHOP-DUST-01",
+            "brand": "YUEERIO",
+            "simplified_name": "709563 Dust Collection Bag for JET",
+            "attributes": {
+                "Length": "709563\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 151,
+            "original_name": "Felder AF22 Dust Collection Bags",
+            "sku": "TCS-SHOP-DUST-02",
+            "brand": "Felder",
+            "simplified_name": "AF22 Dust Collection Bags",
+            "attributes": {
+                "Length": "22\""
+            },
+            "needs_cleanup": true
+        },
+        {
+            "id": 152,
+            "original_name": "Floor Unit Dust Collection Bags",
+            "sku": "TCS-SHOP-DUST-03",
+            "brand": null,
+            "simplified_name": "Floor Unit Dust Collection Bags",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 153,
+            "original_name": "Kreg Jig Drill Bits",
+            "sku": "TCS-TOOL-BIT-01",
+            "brand": "Kreg",
+            "simplified_name": "Jig Drill Bits",
+            "attributes": [],
+            "needs_cleanup": true
+        },
+        {
+            "id": 154,
+            "original_name": "Calipers",
+            "sku": "TCS-TOOL-CAL-01",
+            "brand": null,
+            "simplified_name": "Calipers",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 155,
+            "original_name": "Collets",
+            "sku": "TCS-TOOL-COLL-01",
+            "brand": null,
+            "simplified_name": "Collets",
+            "attributes": [],
+            "needs_cleanup": false
+        },
+        {
+            "id": 156,
+            "original_name": "Rabbit Router Bits (Various)",
+            "sku": "TCS-TOOL-ROUTE-01",
+            "brand": null,
+            "simplified_name": "Rabbit Router Bits (Various)",
+            "attributes": [],
+            "needs_cleanup": false
+        }
+    ]
+}

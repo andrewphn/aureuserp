@@ -38,6 +38,7 @@ class Order extends Model
         'medium_id',
         'company_id',
         'partner_id',
+        'project_id',
         'journal_id',
         'partner_invoice_id',
         'partner_shipping_id',
@@ -77,6 +78,7 @@ class Order extends Model
         'medium.name'          => 'Medium',
         'utmSource.name'       => 'UTM Source',
         'partner.name'         => 'Customer',
+        'project.name'         => 'Project',
         'partnerInvoice.name'  => 'Invoice Address',
         'partnerShipping.name' => 'Shipping Address',
         'fiscalPosition.name'  => 'Fiscal Position',
@@ -121,6 +123,11 @@ class Order extends Model
     public function partner()
     {
         return $this->belongsTo(Partner::class);
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(\Webkul\Project\Models\Project::class);
     }
 
     public function getQtyToInvoiceAttribute()
@@ -227,20 +234,82 @@ class Order extends Model
     {
         parent::boot();
 
-        static::saving(function ($order) {
-            $order->updateName();
+        static::creating(function ($order) {
+            // Set initial name based on state when first created
+            if (empty($order->name)) {
+                $order->updateName();
+            }
         });
 
         static::created(function ($order) {
-            $order->update(['name' => $order->name]);
+            // Update name with actual ID after creation
+            if (empty($order->name) || $order->name === 'SO/') {
+                $order->updateWithoutEvents(['name' => $order->generateName()]);
+            }
         });
     }
 
     /**
      * Update the name based on the state without trigger any additional events.
+     * Only used on initial creation.
      */
     public function updateName()
     {
-        $this->name = 'SO/'.$this->id;
+        $this->name = $this->generateName();
+    }
+
+    /**
+     * Generate order number based on state and project
+     */
+    protected function generateName(): string
+    {
+        $settings = app(\Webkul\Sale\Settings\QuotationAndOrderSettings::class);
+
+        // Check if this order is linked to a project
+        if ($this->project_id && $this->project) {
+            // Get project number (which already includes street address: TCS-001-MapleAve)
+            $projectNumber = $this->project->project_number;
+
+            if ($projectNumber) {
+                // Base prefix based on order state
+                $basePrefix = match($this->state) {
+                    OrderState::DRAFT, OrderState::SENT => $settings->quotation_prefix ?? 'Q',
+                    OrderState::SALE => $settings->sales_order_prefix ?? 'SO',
+                    OrderState::CANCEL => $settings->sales_order_prefix ?? 'SO',
+                    default => $settings->sales_order_prefix ?? 'SO',
+                };
+
+                // Count existing orders for this project with same state prefix
+                $existingCount = static::where('project_id', $this->project_id)
+                    ->where('id', '!=', $this->id)
+                    ->where('name', 'LIKE', "{$projectNumber}-{$basePrefix}%")
+                    ->count();
+
+                $orderNumber = $existingCount + 1;
+
+                // Format: TCS-001-MapleAve-Q1, TCS-002-FriendshipLane-SO1
+                return "{$projectNumber}-{$basePrefix}{$orderNumber}";
+            }
+        }
+
+        // Fallback to company-based numbering if no project
+        $companyAcronym = $this->company?->acronym ?? '';
+
+        // Base prefix based on order state
+        $basePrefix = match($this->state) {
+            OrderState::DRAFT, OrderState::SENT => $settings->quotation_prefix ?? 'Q',
+            OrderState::SALE => $settings->sales_order_prefix ?? 'SO',
+            OrderState::CANCEL => $settings->sales_order_prefix ?? 'SO',
+            default => $settings->sales_order_prefix ?? 'SO',
+        };
+
+        // If company has acronym, use it as prefix
+        if (!empty($companyAcronym)) {
+            $prefix = $companyAcronym . '-' . $basePrefix;
+        } else {
+            $prefix = $basePrefix;
+        }
+
+        return $prefix . '/' . $this->id;
     }
 }

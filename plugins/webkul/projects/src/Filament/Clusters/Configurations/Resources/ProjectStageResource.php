@@ -11,10 +11,12 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
@@ -59,6 +61,11 @@ class ProjectStageResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+
+                ColorPicker::make('color')
+                    ->label('Stage Color')
+                    ->helperText('Color coding for quick visual reference on project pages')
+                    ->default('#3B82F6'),
             ])
             ->columns(1);
     }
@@ -70,6 +77,12 @@ class ProjectStageResource extends Resource
                 TextColumn::make('name')
                     ->label(__('projects::filament/clusters/configurations/resources/project-stage.table.columns.name'))
                     ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (ProjectStage $record): string => $record->color ?? 'gray'),
+
+                ColorColumn::make('color')
+                    ->label('Color')
                     ->sortable(),
             ])
             ->groups([

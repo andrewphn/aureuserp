@@ -1,0 +1,42 @@
+{
+    "generated_at": "2025-09-30 17:17:33",
+    "source_file": "\/Users\/andrewphan\/tcsadmin\/aureuserp\/orders_from_20250901_to_20250930_20250930_0935.csv",
+    "variant_groups": [
+        {
+            "parent_name": "'' Real Heavy Duty Carabiner Bungee Cords Outdoor with Lbs Max Break Strength, Black Bungee Straps with Upgraded Carabiner Hooks for Luggage Rack, Cargo, Hand Carts, Bike, Camping, etc ( Pcs)",
+            "attribute": "Pack Size",
+            "products": [
+                {
+                    "asin": "B0BZL4PL9M",
+                    "original_name": "80'' Real Heavy Duty Carabiner Bungee Cords Outdoor with 190 Lbs Max Break Strength, Black Bungee Straps with Upgraded Carabiner Hooks for Luggage Rack, Cargo, Hand Carts, Bike, Camping, etc (4 Pcs)",
+                    "attribute_value": "4-pack",
+                    "price": 17.09
+                },
+                {
+                    "asin": "B0BZL49345",
+                    "original_name": "96'' Real Heavy Duty Carabiner Bungee Cords Outdoor with 190 Lbs Max Break Strength, Black Bungee Straps with Upgraded Carabiner Hooks for Luggage Rack, Cargo, Hand Carts, Bike, Camping, etc (2 Pcs)",
+                    "attribute_value": "2-pack",
+                    "price": 16.19
+                }
+            ]
+        },
+        {
+            "parent_name": "Serious Grit Ceramic Multi-Hole Hook & Loop Sanding Discs - Advanced Grain for Fast Cutting & Long Life - Film-Backed Universal Fit Sandpaper for -in Sanders - Pack Box",
+            "attribute": "Grit",
+            "products": [
+                {
+                    "asin": "B0D4S6XP21",
+                    "original_name": "Serious Grit 6-Inch 120 Grit Ceramic Multi-Hole Hook & Loop Sanding Discs - Advanced Grain for Fast Cutting & Long Life - Film-Backed Universal Fit Sandpaper for 6-in Sanders - 50 Pack Box",
+                    "attribute_value": "120",
+                    "price": 37.99
+                },
+                {
+                    "asin": "B0D4RB41NV",
+                    "original_name": "Serious Grit 6-Inch 80 Grit Ceramic Multi-Hole Hook & Loop Sanding Discs - Advanced Grain for Fast Cutting & Long Life - Film-Backed Universal Fit Sandpaper for 6-in Sanders - 50 Pack Box",
+                    "attribute_value": "80",
+                    "price": 37.99
+                }
+            ]
+        }
+    ]
+}
