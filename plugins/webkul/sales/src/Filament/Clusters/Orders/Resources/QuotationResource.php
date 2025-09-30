@@ -149,7 +149,96 @@ class QuotationResource extends Resource
                                             ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL]))
                                             ->columnSpan(1)
                                             ->getOptionLabelFromRecordUsing(fn ($record): string => $record->name.($record->trashed() ? ' (Deleted)' : ''))
-                                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)')),
+                                            ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
+                                            ->createOptionForm([
+                                                Select::make('type')
+                                                    ->label(__('Account type'))
+                                                    ->options([
+                                                        'individual' => __('Individual'),
+                                                        'company' => __('Company'),
+                                                    ])
+                                                    ->default('company')
+                                                    ->required(),
+                                                TextInput::make('name')
+                                                    ->label(__('Name'))
+                                                    ->required()
+                                                    ->maxLength(255),
+                                                Grid::make(2)->schema([
+                                                    TextInput::make('phone')
+                                                        ->label(__('Phone'))
+                                                        ->tel()
+                                                        ->maxLength(255),
+                                                    TextInput::make('email')
+                                                        ->label(__('Email'))
+                                                        ->email()
+                                                        ->maxLength(255),
+                                                ]),
+                                                Fieldset::make(__('Address'))
+                                                    ->schema([
+                                                        Grid::make(2)->schema([
+                                                            TextInput::make('street')
+                                                                ->label(__('Street 1'))
+                                                                ->maxLength(255),
+                                                            TextInput::make('street2')
+                                                                ->label(__('Street 2'))
+                                                                ->maxLength(255),
+                                                        ]),
+                                                        Grid::make(3)->schema([
+                                                            TextInput::make('city')
+                                                                ->label(__('City'))
+                                                                ->maxLength(255),
+                                                            TextInput::make('zip')
+                                                                ->label(__('ZIP'))
+                                                                ->maxLength(20),
+                                                            Select::make('state_id')
+                                                                ->label(__('State'))
+                                                                ->relationship('state', 'name')
+                                                                ->searchable()
+                                                                ->preload(),
+                                                        ]),
+                                                        Select::make('country_id')
+                                                            ->label(__('Country'))
+                                                            ->relationship('country', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->default(233), // United States
+                                                    ]),
+                                            ])
+                                            ->createOptionUsing(function (array $data): int {
+                                                $partner = \Webkul\Support\Models\Partner::create([
+                                                    'type' => $data['type'],
+                                                    'sub_type' => 'customer',
+                                                    'name' => $data['name'],
+                                                    'phone' => $data['phone'] ?? null,
+                                                    'email' => $data['email'] ?? null,
+                                                    'street' => $data['street'] ?? null,
+                                                    'street2' => $data['street2'] ?? null,
+                                                    'city' => $data['city'] ?? null,
+                                                    'state_id' => $data['state_id'] ?? null,
+                                                    'zip' => $data['zip'] ?? null,
+                                                    'country_id' => $data['country_id'] ?? 233,
+                                                    'user_id' => auth()->id(),
+                                                ]);
+
+                                                return $partner->id;
+                                            }),
+                                        Select::make('project_id')
+                                            ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.project'))
+                                            ->relationship(
+                                                'project',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query, Get $get) => $query
+                                                    ->when($get('partner_id'), fn ($q, $partnerId) =>
+                                                        $q->whereHas('partner', fn ($pq) => $pq->where('id', $partnerId))
+                                                    )
+                                                    ->orderBy('id', 'desc')
+                                            )
+                                            ->searchable()
+                                            ->preload()
+                                            ->live()
+                                            ->disabled(fn ($record): bool => $record?->locked || in_array($record?->state, [OrderState::CANCEL]))
+                                            ->columnSpan(1)
+                                            ->helperText(__('Select a project to use its address in the order number')),
                                     ]),
                                 DatePicker::make('validity_date')
                                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.section.general.fields.expiration'))

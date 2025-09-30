@@ -113,6 +113,9 @@ class ProjectResource extends Resource
                             ->required()
                             ->visible(static::getTaskSettings()->enable_project_stages)
                             ->options(fn () => ProjectStage::orderBy('sort')->get()->mapWithKeys(fn ($stage) => [$stage->id => $stage->name]))
+                            ->colors(fn () => ProjectStage::orderBy('sort')->get()->mapWithKeys(fn ($stage) => [
+                                $stage->id => $stage->color ? Color::generateV3Palette($stage->color) : 'gray'
+                            ]))
                             ->default(ProjectStage::first()?->id),
                         Section::make(__('projects::filament/resources/project.form.sections.general.title'))
                             ->schema([
@@ -276,6 +279,14 @@ class ProjectResource extends Resource
                             ->sortable(),
                     ])
                         ->visible(fn (Project $record) => filled($record->user)),
+                    Stack::make([
+                        TextColumn::make('stage.name')
+                            ->badge()
+                            ->color(fn (Project $record): string => $record->stage?->color ?? 'gray')
+                            ->icon('heroicon-o-flag')
+                            ->tooltip(__('projects::filament/resources/project.table.columns.stage')),
+                    ])
+                        ->visible(fn (Project $record): bool => static::getTaskSettings()->enable_project_stages && filled($record->stage)),
                     Stack::make([
                         TextColumn::make('tags.name')
                             ->badge()
@@ -553,6 +564,7 @@ class ProjectResource extends Resource
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.current-stage'))
                                             ->icon('heroicon-o-flag')
                                             ->badge()
+                                            ->color(fn (Project $record): string => $record->stage?->color ?? 'gray')
                                             ->visible(static::getTaskSettings()->enable_project_stages),
 
                                         TextEntry::make('tags.name')

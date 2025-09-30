@@ -1,0 +1,121 @@
+{
+    "generated_at": "2025-09-30 17:38:15",
+    "source_file": "\/Users\/andrewphan\/tcsadmin\/aureuserp\/inventory_import_ready.csv",
+    "variant_groups": [
+        {
+            "parent_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-\" #6)",
+            "attribute": "Size",
+            "products": [
+                {
+                    "item_id": "TCS-FAST-SCREW-03",
+                    "original_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-1\/4\" #6)",
+                    "attribute_value": "1\/4\"",
+                    "quantity": 0,
+                    "unit_cost": 90
+                },
+                {
+                    "item_id": "TCS-FAST-SCREW-04",
+                    "original_name": "Plain Wood Screw, Flat Head, Quadrex Drive (1-1\/2\" #6)",
+                    "attribute_value": "1\/2\"",
+                    "quantity": 1,
+                    "unit_cost": 45
+                }
+            ]
+        },
+        {
+            "parent_name": "Drawer Slides",
+            "attribute": "Size",
+            "products": [
+                {
+                    "item_id": "TCS-HW-SLIDE-01",
+                    "original_name": "21 inch Drawer Slides",
+                    "attribute_value": "21\"",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-HW-SLIDE-02",
+                    "original_name": "18 inch Drawer Slides",
+                    "attribute_value": "18\"",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-HW-SLIDE-03",
+                    "original_name": "15 inch Drawer Slides",
+                    "attribute_value": "15\"",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-HW-SLIDE-04",
+                    "original_name": "12 inch Drawer Slides",
+                    "attribute_value": "12\"",
+                    "quantity": 0,
+                    "unit_cost": 0
+                }
+            ]
+        },
+        {
+            "parent_name": "Serious Grit",
+            "attribute": "Grit",
+            "products": [
+                {
+                    "item_id": "TCS-SAND-DISC-01",
+                    "original_name": "Serious Grit 6-Inch 120 Grit",
+                    "attribute_value": "120",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-SAND-DISC-02",
+                    "original_name": "Serious Grit 6-Inch 120 Grit",
+                    "attribute_value": "120",
+                    "quantity": 1,
+                    "unit_cost": 37.99
+                },
+                {
+                    "item_id": "TCS-SAND-DISC-03",
+                    "original_name": "Serious Grit 6-Inch 80 Grit",
+                    "attribute_value": "80",
+                    "quantity": 1,
+                    "unit_cost": 0
+                }
+            ]
+        },
+        {
+            "parent_name": "6\" Sandpaper",
+            "attribute": "Grit",
+            "products": [
+                {
+                    "item_id": "TCS-SAND-GRIT-01",
+                    "original_name": "6\" 100 Grit Sandpaper",
+                    "attribute_value": "100",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-SAND-GRIT-02",
+                    "original_name": "6\" 150 Grit Sandpaper",
+                    "attribute_value": "150",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-SAND-GRIT-03",
+                    "original_name": "6\" 180 Grit Sandpaper",
+                    "attribute_value": "180",
+                    "quantity": 0,
+                    "unit_cost": 0
+                },
+                {
+                    "item_id": "TCS-SAND-GRIT-04",
+                    "original_name": "6\" 220 Grit Sandpaper",
+                    "attribute_value": "220",
+                    "quantity": 2,
+                    "unit_cost": 0
+                }
+            ]
+        }
+    ]
+}
