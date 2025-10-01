@@ -1,0 +1,463 @@
+# PDF Viewer with Annotations - Product Requirements Document
+## TCS Woodwork ERP - AureusERP Integration
+
+## 1. Executive Summary
+
+### Project Overview
+Implement a comprehensive PDF viewing and annotation system for TCS Woodwork ERP using Nutrient Web SDK (PSPDFKit). This feature will enable page-by-page PDF viewing, annotations (highlights, comments, drawings), and seamless integration with the FilamentPHP v3 admin panel.
+
+### Primary Objective
+Create a professional document management system that allows users to upload, view, annotate, and manage PDF documents (shop drawings, quotes, contracts, work orders) directly within the ERP system.
+
+### Success Criteria
+- Users can upload PDF documents to the system
+- Page-by-page viewing of PDFs with smooth navigation
+- Full annotation support (highlights, text comments, drawings, stamps)
+- Annotations persist in database and reload on document view
+- Integration with existing Projects, Sales, and Support modules
+- Mobile-responsive viewer for shop floor use
+- FilamentPHP resource for document management
+
+## 2. Functional Requirements
+
+### 2.1 PDF Upload & Storage
+- **File Upload**: FilamentPHP FileUpload field with PDF validation
+- **Storage Location**: Laravel storage (public/private disks)
+- **File Organization**: Organized by module (projects/, sales/, support/)
+- **Metadata Capture**: File name, size, upload date, uploader, module reference
+- **Version Control**: Optional versioning for document updates
+
+### 2.2 PDF Viewing Features
+- **Page Navigation**: Previous/Next buttons, page selector, thumbnails
+- **Zoom Controls**: Zoom in/out, fit to width, fit to page
+- **Search**: Full-text search within PDF documents
+- **Responsive Design**: Desktop, tablet, and mobile support
+- **Print Support**: Print individual pages or full document
+- **Download**: Download original PDF file
+
+### 2.3 Annotation Features
+- **Highlight Tool**: Text highlighting with color selection
+- **Text Comments**: Add text annotations with author and timestamp
+- **Drawing Tools**: Freehand drawing, shapes (rectangle, circle, arrow)
+- **Stamps**: Custom stamps (Approved, Reviewed, etc.)
+- **Measurement Tools**: For shop drawings (optional Phase 2)
+- **Annotation Editing**: Edit/delete own annotations
+- **Annotation Permissions**: View-only for certain user roles
+
+### 2.4 Database Integration
+- **PDF Documents Table**: Store document metadata
+- **PDF Pages Table**: Track individual pages for large documents
+- **Annotations Table**: Store all annotation data
+- **Module Associations**: Link documents to projects, sales orders, support tickets
+- **Activity Logging**: Track document views and annotation changes
+
+### 2.5 FilamentPHP Integration
+- **DocumentResource**: CRUD interface for document management
+- **Custom PDF Viewer Field**: FilamentPHP custom form field
+- **PDF Viewer Action**: Table action to open viewer modal
+- **Bulk Operations**: Bulk download, delete, move
+- **Search & Filters**: Filter by module, date, uploader, tags
+
+## 3. Technical Requirements
+
+### 3.1 Technology Stack
+- **Frontend**: Nutrient Web SDK v1.7.0 (already installed)
+- **Backend**: Laravel 11 with PHP 8.2+
+- **Admin Panel**: FilamentPHP v3
+- **Database**: MySQL (aureuserp)
+- **Storage**: Laravel filesystem (local/S3)
+- **Real-time**: Livewire for dynamic updates
+
+### 3.2 Nutrient SDK Configuration
+- **License Key**: pdf_live_SeDihzSCxobu2objNyuoWS3BViInKxxtFSORpgNAfRz (already set)
+- **Integration Type**: Standalone mode (no server required)
+- **Supported Formats**: PDF, Office docs (DOCX, XLSX, PPTX), Images
+- **Annotation Storage**: LocalStorage + Database hybrid
+- **License Tier**: Commercial license (small business qualified)
+
+### 3.3 Architecture Requirements
+- **Plugin Structure**: Create new Documents plugin OR extend Projects/Sales
+- **Service Layer**: DocumentService, AnnotationService, PdfProcessorService
+- **Component Layer**: Livewire PdfViewerComponent
+- **Blade Components**: pdf-viewer.blade.php with Nutrient SDK
+- **API Layer**: RESTful endpoints for annotations CRUD
+- **Configuration**: config/nutrient.php for SDK settings
+
+### 3.4 Database Schema
+
+```sql
+-- PDF Documents
+CREATE TABLE pdf_documents (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    module_type VARCHAR(50) NOT NULL, -- 'projects', 'sales', 'support'
+    module_id BIGINT UNSIGNED NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size INT UNSIGNED NOT NULL,
+    mime_type VARCHAR(100) DEFAULT 'application/pdf',
+    page_count INT UNSIGNED DEFAULT 1,
+    uploaded_by BIGINT UNSIGNED NOT NULL,
+    tags JSON NULL,
+    metadata JSON NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_module (module_type, module_id),
+    INDEX idx_uploaded_by (uploaded_by)
+);
+
+-- PDF Pages (for page-level operations)
+CREATE TABLE pdf_pages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    document_id BIGINT UNSIGNED NOT NULL,
+    page_number INT UNSIGNED NOT NULL,
+    thumbnail_path VARCHAR(500) NULL,
+    extracted_text LONGTEXT NULL,
+    page_metadata JSON NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (document_id) REFERENCES pdf_documents(id) ON DELETE CASCADE,
+    INDEX idx_document_page (document_id, page_number)
+);
+
+-- PDF Annotations
+CREATE TABLE pdf_annotations (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    document_id BIGINT UNSIGNED NOT NULL,
+    page_number INT UNSIGNED NOT NULL,
+    annotation_type VARCHAR(50) NOT NULL, -- 'highlight', 'text', 'drawing', 'stamp'
+    annotation_data JSON NOT NULL, -- Nutrient annotation object
+    author_id BIGINT UNSIGNED NOT NULL,
+    author_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (document_id) REFERENCES pdf_documents(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id),
+    INDEX idx_document_page (document_id, page_number),
+    INDEX idx_author (author_id)
+);
+
+-- Document Activity Log
+CREATE TABLE pdf_document_activities (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    document_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    action_type VARCHAR(50) NOT NULL, -- 'viewed', 'annotated', 'downloaded', 'printed'
+    action_details JSON NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (document_id) REFERENCES pdf_documents(id) ON DELETE CASCADE,
+    INDEX idx_document (document_id),
+    INDEX idx_user (user_id),
+    INDEX idx_action (action_type, created_at)
+);
+```
+
+### 3.5 Performance Requirements
+- **Page Load**: Initial viewer load < 2 seconds
+- **PDF Rendering**: First page render < 1 second
+- **Annotation Sync**: Save annotations < 500ms
+- **Search**: Full-text search results < 1 second
+- **Concurrent Users**: Support 20+ simultaneous viewers
+- **File Size Limit**: 50MB per PDF (configurable)
+
+## 4. Implementation Phases
+
+### Phase 1: Database & Models Foundation
+**Tasks:**
+1. Create migration for pdf_documents table
+2. Create migration for pdf_pages table
+3. Create migration for pdf_annotations table
+4. Create migration for pdf_document_activities table
+5. Create PdfDocument Eloquent model with relationships
+6. Create PdfPage Eloquent model
+7. Create PdfAnnotation Eloquent model
+8. Create PdfDocumentActivity Eloquent model
+9. Set up model relationships and scopes
+10. Create database seeders for testing
+
+**Agent Assignment**: implementation-agent
+**Estimated Time**: 2-3 hours
+
+### Phase 2: Nutrient SDK Integration
+**Tasks:**
+1. Create Blade component for PDF viewer (resources/views/components/pdf-viewer.blade.php)
+2. Configure Nutrient SDK initialization with license key
+3. Create JavaScript module for Nutrient SDK (resources/js/nutrient-viewer.js)
+4. Implement Vite build configuration for Nutrient assets
+5. Create config/nutrient.php configuration file
+6. Test standalone PDF viewer with sample document
+7. Implement error handling and fallback UI
+8. Add loading states and progress indicators
+
+**Agent Assignment**: implementation-agent
+**Estimated Time**: 3-4 hours
+
+### Phase 3: FilamentPHP Custom Field
+**Tasks:**
+1. Create PdfViewerField custom FilamentPHP field class
+2. Implement field view template with Nutrient integration
+3. Create PdfViewerAction table action for opening viewer
+4. Build modal/slide-over for full-screen viewing
+5. Add field configuration options (toolbar, features)
+6. Implement field validation and file type checking
+7. Create examples in ProjectResource for testing
+8. Document field usage for developers
+
+**Agent Assignment**: implementation-agent
+**Estimated Time**: 3-4 hours
+
+### Phase 4: Annotation System Backend
+**Tasks:**
+1. Create AnnotationService for CRUD operations
+2. Build API endpoints for annotation sync (save, load, delete)
+3. Implement annotation permission checks
+4. Create annotation validation rules
+5. Build real-time annotation sync (Livewire/polling)
+6. Implement annotation conflict resolution
+7. Add annotation export functionality
+8. Create annotation search/filter capabilities
+
+**Agent Assignment**: implementation-agent
+**Estimated Time**: 4-5 hours
+
+### Phase 5: FilamentPHP Resource Creation
+**Tasks:**
+1. Create DocumentResource for FilamentPHP
+2. Build document table with columns (name, module, pages, uploader, date)
+3. Create form for document upload and metadata
+4. Add filters (module, date range, uploader, tags)
+5. Implement bulk actions (download, delete, move)
+6. Create document detail page with annotations list
+7. Add activity log widget for document tracking
+8. Implement search functionality
+
+**Agent Assignment**: implementation-agent
+**Estimated Time**: 3-4 hours
+
+### Phase 6: Module Integration
+**Tasks:**
+1. Integrate PDF upload into ProjectResource (shop drawings)
+2. Add PDF support to QuotationResource (quote PDFs)
+3. Integrate with Support plugin for ticket attachments
+4. Create HasPdfDocuments trait for polymorphic relations
+5. Add document widgets to respective dashboards
+6. Implement "Add Document" action in each module
+7. Create document count badges/indicators
+8. Build cross-module document search
+
+**Agent Assignment**: integration-systems-architect
+**Estimated Time**: 4-5 hours
+
+### Phase 7: Testing & Quality Assurance
+**Tasks:**
+1. Unit tests for models and services
+2. Feature tests for API endpoints
+3. Browser tests for viewer functionality (Playwright)
+4. Test annotation persistence and retrieval
+5. Permission and security testing
+6. Performance testing with large PDFs
+7. Mobile responsiveness testing
+8. Cross-browser compatibility testing
+
+**Agent Assignment**: qa-testing-expert
+**Estimated Time**: 4-6 hours
+
+### Phase 8: Documentation & Deployment
+**Tasks:**
+1. User guide for PDF viewer and annotations
+2. Developer documentation for field usage
+3. API documentation for annotation endpoints
+4. Migration guide for existing documents
+5. Configuration documentation
+6. Troubleshooting guide
+7. Create demo video/screenshots
+8. Deployment checklist and scripts
+
+**Agent Assignment**: implementation-agent
+**Estimated Time**: 2-3 hours
+
+## 5. Use Cases
+
+### 5.1 Shop Floor Use Case
+**Scenario**: Woodworker needs to view cabinet dimensions on shop drawing
+- User opens project from FilamentPHP
+- Clicks "View Drawings" button
+- PDF opens in full-screen viewer
+- User zooms to dimension detail
+- Adds highlight annotation on critical measurement
+- Annotation syncs and is visible to other team members
+
+### 5.2 Sales Quote Review
+**Scenario**: Manager reviews and approves customer quote
+- User opens quotation in Sales module
+- Clicks PDF preview of quote
+- Reviews line items in PDF
+- Adds "Approved" stamp annotation
+- Adds text comment with approval notes
+- Saves and sends to production team
+
+### 5.3 Support Ticket Documentation
+**Scenario**: Customer uploads damaged cabinet photo as PDF
+- Support agent receives ticket
+- Opens PDF attachment in viewer
+- Highlights damaged area with drawing tool
+- Adds text annotation explaining repair approach
+- Forwards annotated PDF to production for reference
+
+## 6. Security & Permissions
+
+### 6.1 File Upload Security
+- Validate file type (MIME type checking)
+- Scan for malicious content
+- Limit file size (50MB default)
+- Store in private disk with controlled access
+- Generate secure download URLs
+
+### 6.2 Annotation Permissions
+- Users can only edit/delete own annotations
+- View-only mode for restricted roles
+- Admin can manage all annotations
+- Audit log for all annotation changes
+- IP logging for compliance
+
+### 6.3 Data Privacy
+- Respect existing FilamentPHP permissions
+- Filter documents by user role/permissions
+- Hide sensitive documents from unauthorized users
+- Encrypt annotations containing PII
+- GDPR compliance for document deletion
+
+## 7. Configuration Options
+
+### 7.1 Viewer Configuration (config/nutrient.php)
+```php
+return [
+    'license_key' => env('NUTRIENT_LICENSE_KEY'),
+    'default_toolbar' => [
+        'sidebar', 'zoom', 'search', 'print', 'download',
+        'annotation-tools', 'stamp', 'highlight', 'text',
+    ],
+    'enable_annotations' => true,
+    'enable_measurements' => false, // Phase 2
+    'max_file_size' => 50 * 1024 * 1024, // 50MB
+    'allowed_file_types' => ['pdf', 'docx', 'xlsx', 'pptx'],
+    'thumbnail_quality' => 80,
+    'autosave_interval' => 30, // seconds
+];
+```
+
+### 7.2 Document Settings
+- Upload size limits
+- Allowed file types
+- Storage disk configuration
+- Thumbnail generation settings
+- Text extraction options
+- Version control settings
+
+## 8. Success Metrics
+
+### 8.1 Technical Metrics
+- PDF load time < 2 seconds
+- Annotation save time < 500ms
+- Zero security vulnerabilities
+- 99% uptime for viewer
+- Support for 50+ concurrent users
+
+### 8.2 User Adoption Metrics
+- 80%+ of shop drawings digitized within 3 months
+- 90%+ user satisfaction with annotation tools
+- 50%+ reduction in printing costs
+- Average 10+ annotations per document
+- 70%+ mobile usage by shop floor workers
+
+### 8.3 Business Impact
+- Reduced paper waste by 60%
+- Faster quote review process (50% time reduction)
+- Improved collaboration (annotation comments)
+- Better document organization and searchability
+- Enhanced customer communication with annotated PDFs
+
+## 9. Risks & Mitigations
+
+### 9.1 Technical Risks
+- **Risk**: Nutrient SDK license limitations
+  **Mitigation**: Verify license terms, monitor usage, fallback to PDF.js if needed
+
+- **Risk**: Large PDF performance issues
+  **Mitigation**: Implement lazy loading, thumbnail previews, page limits
+
+- **Risk**: Browser compatibility issues
+  **Mitigation**: Comprehensive testing, graceful degradation, modern browser requirements
+
+### 9.2 User Adoption Risks
+- **Risk**: Resistance to digital workflow
+  **Mitigation**: Training sessions, gradual rollout, highlight time savings
+
+- **Risk**: Learning curve for annotations
+  **Mitigation**: Intuitive UI, tooltips, video tutorials, in-app guidance
+
+## 10. Future Enhancements (Post-Launch)
+
+### 10.1 Phase 2 Features
+- OCR for scanned PDFs
+- Form filling capabilities
+- Digital signatures
+- Measurement tools for shop drawings
+- Custom stamp creation
+- Batch annotation operations
+- Annotation templates
+
+### 10.2 Advanced Features
+- AI-powered document analysis
+- Automatic categorization
+- Smart search with ML
+- Integration with external CAD systems
+- Real-time collaborative editing
+- Version comparison tool
+- Mobile app for iOS/Android
+
+## 11. Dependencies
+
+### 11.1 External Dependencies
+- Nutrient Web SDK (installed: v1.7.0)
+- Laravel 11 & FilamentPHP v3 (existing)
+- MySQL database (existing)
+- Vite build system (existing)
+
+### 11.2 Internal Dependencies
+- Existing user authentication system
+- FilamentPHP permission system
+- Laravel storage configuration
+- Existing plugin architecture patterns
+
+## 12. Deliverables
+
+### 12.1 Code Deliverables
+- 4 database migrations
+- 4 Eloquent models
+- 1 FilamentPHP custom field
+- 1 FilamentPHP resource (DocumentResource)
+- 3+ service classes
+- 5+ API endpoints
+- 1 Blade component
+- 1 JavaScript module
+- Configuration files
+
+### 12.2 Documentation Deliverables
+- User guide (PDF viewer usage)
+- Developer guide (field integration)
+- API documentation
+- Configuration guide
+- Migration guide
+- Troubleshooting guide
+
+### 12.3 Testing Deliverables
+- Unit test suite
+- Feature test suite
+- Browser test suite
+- Performance test results
+- Security audit report
+- UAT acceptance report
+
+This PRD provides a comprehensive roadmap for implementing professional PDF viewing and annotation capabilities in the TCS Woodwork ERP system using Nutrient Web SDK.
