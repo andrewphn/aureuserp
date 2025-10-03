@@ -12,6 +12,8 @@ enum WorkLocation: string implements HasColor, HasIcon, HasLabel
 
     case Office = 'office';
 
+    case Shop = 'shop';
+
     case Other = 'other';
 
     public function getLabel(): string
@@ -19,6 +21,7 @@ enum WorkLocation: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::Home   => __('employees::enums/work-location.home'),
             self::Office => __('employees::enums/work-location.office'),
+            self::Shop   => __('employees::enums/work-location.shop'),
             self::Other  => __('employees::enums/work-location.other'),
         };
     }
@@ -28,6 +31,7 @@ enum WorkLocation: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::Home   => 'success',
             self::Office => 'warning',
+            self::Shop   => 'primary',
             self::Other  => 'info',
         };
     }
@@ -37,6 +41,7 @@ enum WorkLocation: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::Home   => 'heroicon-m-home',
             self::Office => 'heroicon-m-building-office-2',
+            self::Shop   => 'heroicon-m-wrench-screwdriver',
             self::Other  => 'heroicon-m-map-pin',
         };
     }

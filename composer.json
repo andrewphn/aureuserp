@@ -20,9 +20,11 @@
         "flowframe/laravel-trend": "^0.3.0",
         "guava/filament-icon-picker": "^3.0",
         "hugomyb/filament-media-action": "^4.0",
+        "jacobtims/inline-date-time-picker": "^2.0",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "milon/barcode": "^11.0",
+        "njxqlus/filament-lightbox": "^4.0",
         "spatie/eloquent-sortable": "^4.4",
         "wikimedia/composer-merge-plugin": "^2.1"
     },

@@ -134,5 +134,71 @@ export default {
         // TCS Chart Widget Classes
         'tcs-chart-widget',
         'tcs-chart-container',
+
+        // Production Estimate Alert System Colors (FilamentPHP semantic colors)
+        // Success (GREEN alert)
+        'bg-success-50',
+        'bg-success-950/30',
+        'border-success-300',
+        'border-success-700',
+        'text-success-700',
+        'text-success-300',
+        'text-success-600',
+        'text-success-400',
+        'ring-success-500/20',
+
+        // Warning (AMBER alert)
+        'bg-warning-50',
+        'bg-warning-950/30',
+        'border-warning-300',
+        'border-warning-700',
+        'text-warning-700',
+        'text-warning-300',
+        'text-warning-600',
+        'text-warning-400',
+        'ring-warning-500/20',
+
+        // Danger (RED alert)
+        'bg-danger-50',
+        'bg-danger-950/30',
+        'border-danger-300',
+        'border-danger-700',
+        'text-danger-700',
+        'text-danger-300',
+        'text-danger-600',
+        'text-danger-400',
+        'ring-danger-500/30',
+
+        // Gray (BLACK alert)
+        'bg-gray-900',
+        'bg-gray-950',
+        'border-gray-900',
+        'border-gray-950',
+        'ring-gray-900/50',
+
+        // Dark mode variants
+        'dark:bg-success-950/30',
+        'dark:border-success-700',
+        'dark:text-success-300',
+        'dark:text-success-400',
+        'dark:bg-warning-950/30',
+        'dark:border-warning-700',
+        'dark:text-warning-300',
+        'dark:text-warning-400',
+        'dark:bg-danger-950/30',
+        'dark:border-danger-700',
+        'dark:text-danger-300',
+        'dark:text-danger-400',
+        'dark:bg-gray-950',
+        'dark:border-gray-950',
+
+        // Production Estimate Card Gradient Classes
+        'bg-gradient-to-br',
+        'from-tcs-gold',
+        'to-tcs-gold-dark',
+        'from-blue-500',
+        'to-blue-600',
+        'shadow-lg',
+        'hover:shadow-xl',
     ]
 };

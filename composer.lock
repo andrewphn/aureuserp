@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1dcd1376091c48c0b7403e0c4a306110",
+    "content-hash": "51a16140321aa1a4c7bb1e17e49a74c9",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2854,6 +2854,80 @@
             "time": "2025-07-28T14:58:05+00:00"
         },
         {
+            "name": "jacobtims/inline-date-time-picker",
+            "version": "v2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Jacobtims/inline-date-time-picker.git",
+                "reference": "23ffa2e67b7d15217efdc6a668b853a99dbeacf6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Jacobtims/inline-date-time-picker/zipball/23ffa2e67b7d15217efdc6a668b853a99dbeacf6",
+                "reference": "23ffa2e67b7d15217efdc6a668b853a99dbeacf6",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^8.0",
+                "orchestra/testbench": "^10.0",
+                "pestphp/pest": "^3.0",
+                "pestphp/pest-plugin-arch": "^3.0",
+                "pestphp/pest-plugin-laravel": "^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "InlineDateTimePicker": "Jacobtims\\InlineDateTimePicker\\Facades\\InlineDateTimePicker"
+                    },
+                    "providers": [
+                        "Jacobtims\\InlineDateTimePicker\\InlineDateTimePickerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jacobtims\\InlineDateTimePicker\\": "src/",
+                    "Jacobtims\\InlineDateTimePicker\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jacobtims",
+                    "email": "jacobtimmer04@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Filament plugin for adding inline Date-time Pickers to your Filament forms.",
+            "homepage": "https://github.com/jacobtims/inline-date-time-picker",
+            "keywords": [
+                "Jacobtims",
+                "inline-date-time-picker",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/jacobtims/inline-date-time-picker/issues",
+                "source": "https://github.com/jacobtims/inline-date-time-picker"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Jacobtims",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-09-02T18:44:39+00:00"
+        },
+        {
             "name": "kirschbaum-development/eloquent-power-joins",
             "version": "4.2.8",
             "source": {
@@ -4747,6 +4821,83 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.6.1"
             },
             "time": "2025-08-13T20:13:15+00:00"
+        },
+        {
+            "name": "njxqlus/filament-lightbox",
+            "version": "4.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/njxqlus/filament-lightbox.git",
+                "reference": "562b33ac174947be070e63a3d7825df696cc51bd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/njxqlus/filament-lightbox/zipball/562b33ac174947be070e63a3d7825df696cc51bd",
+                "reference": "562b33ac174947be070e63a3d7825df696cc51bd",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "illuminate/contracts": "^11.0|^12.0",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^8.0",
+                "nunomaduro/larastan": "^2.0.1",
+                "orchestra/testbench": "^9.0|^10.0",
+                "pestphp/pest": "^2.0|^3.7",
+                "pestphp/pest-plugin-arch": "^2.0|^3.0",
+                "pestphp/pest-plugin-laravel": "^2.0|^3.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "FilamentLightbox": "Njxqlus\\Filament\\Components\\Facades\\FilamentLightbox"
+                    },
+                    "providers": [
+                        "Njxqlus\\Filament\\Components\\FilamentLightboxServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Njxqlus\\Filament\\Components\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mikael Ahabalyants",
+                    "email": "njxqlus@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Lightbox entry for Filament",
+            "homepage": "https://github.com/njxqlus/filament-lightbox",
+            "keywords": [
+                "filament",
+                "filament-lightbox",
+                "laravel",
+                "lightbox",
+                "njxqlus"
+            ],
+            "support": {
+                "issues": "https://github.com/njxqlus/filament-lightbox/issues",
+                "source": "https://github.com/njxqlus/filament-lightbox"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/njxqlus",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-09-21T10:16:15+00:00"
         },
         {
             "name": "nunomaduro/termwind",
@@ -12384,12 +12535,12 @@
     ],
     "aliases": [],
     "minimum-stability": "beta",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
