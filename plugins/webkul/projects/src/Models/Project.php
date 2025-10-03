@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Spatie\EloquentSortable\Sortable;
@@ -197,6 +198,11 @@ class Project extends Model implements Sortable
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'projects_project_tag', 'project_id', 'tag_id');
+    }
+
+    public function pdfDocuments(): MorphMany
+    {
+        return $this->morphMany(\App\Models\PdfDocument::class, 'module');
     }
 
     protected static function booted()

@@ -466,10 +466,14 @@ class ProjectResource extends Resource
                                     ->columnSpanFull()
                                     ->visible(fn ($context) => $context === 'create'),
 
-                                \Filament\Forms\Components\Placeholder::make('pdf_info')
-                                    ->label('')
-                                    ->content('PDF documents can be managed in the "PDF Documents" tab after creating the project.')
-                                    ->visible(fn ($context) => $context === 'edit'),
+                                \Filament\Forms\Components\ViewField::make('uploaded_pdfs')
+                                    ->label('Uploaded PDF Documents')
+                                    ->view('filament.forms.components.uploaded-pdfs-list')
+                                    ->viewData(fn ($record) => [
+                                        'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
+                                    ])
+                                    ->visible(fn ($context) => $context === 'edit')
+                                    ->columnSpanFull(),
                             ])
                             ->collapsible()
                             ->collapsed(false),
