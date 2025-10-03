@@ -448,6 +448,32 @@ class ProjectResource extends Resource
                         //         'style' => 'position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto;'
                         //     ]),
 
+                        Section::make('Architectural PDF Upload')
+                            ->description('Upload architectural plans, blueprints, or technical drawings. PDFs will be available for viewing and annotation after project creation.')
+                            ->schema([
+                                \Filament\Forms\Components\FileUpload::make('architectural_pdfs')
+                                    ->label('Upload PDF Documents')
+                                    ->acceptedFileTypes(['application/pdf'])
+                                    ->maxSize(51200) // 50MB in KB
+                                    ->disk('public')
+                                    ->directory('pdf-documents')
+                                    ->multiple()
+                                    ->reorderable()
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable(false)
+                                    ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
+                                    ->columnSpanFull()
+                                    ->visible(fn ($context) => $context === 'create'),
+
+                                \Filament\Forms\Components\Placeholder::make('pdf_info')
+                                    ->label('')
+                                    ->content('PDF documents can be managed in the "PDF Documents" tab after creating the project.')
+                                    ->visible(fn ($context) => $context === 'edit'),
+                            ])
+                            ->collapsible()
+                            ->collapsed(false),
+
                         Section::make(__('projects::filament/resources/project.form.sections.settings.title'))
                             ->schema([
                                 Radio::make('visibility')
