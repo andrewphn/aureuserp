@@ -11,7 +11,7 @@ class CreateProject extends CreateRecord
 {
     protected static string $resource = ProjectResource::class;
 
-    protected static bool $formActionsAreSticky = true;
+    public static bool $formActionsAreSticky = true;
 
     protected function getFooterWidgets(): array
     {
