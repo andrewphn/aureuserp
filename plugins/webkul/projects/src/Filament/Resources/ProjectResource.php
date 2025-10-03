@@ -486,8 +486,7 @@ class ProjectResource extends Resource
                     ])
                     ->columnSpan(['lg' => 1]),
             ])
-            ->columns(3),
-        ]);
+            ->columns(3);
     }
 
     public static function table(Table $table): Table

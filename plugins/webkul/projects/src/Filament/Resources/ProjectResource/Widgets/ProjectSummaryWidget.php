@@ -69,4 +69,30 @@ class ProjectSummaryWidget extends Widget
             return 'Not selected';
         }
     }
+
+    public function getLinearFeet(): string
+    {
+        try {
+            $data = $this->getOwnerPage()->form->getState();
+            return $data['estimated_linear_feet'] ?? 'Not entered';
+        } catch (\Exception $e) {
+            return 'Not entered';
+        }
+    }
+
+    public function getProductionEstimate(): ?array
+    {
+        try {
+            $data = $this->getOwnerPage()->form->getState();
+            $linearFeet = $data['estimated_linear_feet'] ?? null;
+            $companyId = $data['company_id'] ?? null;
+
+            if ($linearFeet && $companyId) {
+                return \App\Services\ProductionEstimatorService::calculate($linearFeet, $companyId);
+            }
+        } catch (\Exception $e) {
+            // Silent fail
+        }
+        return null;
+    }
 }
