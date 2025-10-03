@@ -13,6 +13,13 @@ class EditProject extends EditRecord
 {
     protected static string $resource = ProjectResource::class;
 
+    public static bool $formActionsAreSticky = true;
+
+    public function getFooter(): ?\Illuminate\Contracts\View\View
+    {
+        return view('filament.pages.project-sticky-footer', ['page' => $this]);
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);

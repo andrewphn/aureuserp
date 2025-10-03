@@ -408,44 +408,45 @@ class ProjectResource extends Resource
 
                 Group::make()
                     ->schema([
-                        Section::make('Project Overview')
-                            ->schema([
-                                \Filament\Forms\Components\Placeholder::make('summary_company')
-                                    ->label('Company')
-                                    ->content(fn (callable $get) => \Webkul\Support\Models\Company::find($get('company_id'))?->name ?? '—'),
-                                \Filament\Forms\Components\Placeholder::make('summary_customer')
-                                    ->label('Customer')
-                                    ->content(fn (callable $get) => \Webkul\Partner\Models\Partner::find($get('partner_id'))?->name ?? '—'),
-                                \Filament\Forms\Components\Placeholder::make('summary_project_type')
-                                    ->label('Type')
-                                    ->content(fn (callable $get) => ucfirst($get('project_type') ?? '—')),
-                                \Filament\Forms\Components\Placeholder::make('summary_linear_feet')
-                                    ->label('Linear Feet')
-                                    ->content(fn (callable $get) => $get('estimated_linear_feet') ? $get('estimated_linear_feet') . ' LF' : '—'),
+                        // Commented out - Project Overview moved to sticky footer
+                        // Section::make('Project Overview')
+                        //     ->schema([
+                        //         \Filament\Forms\Components\Placeholder::make('summary_company')
+                        //             ->label('Company')
+                        //             ->content(fn (callable $get) => \Webkul\Support\Models\Company::find($get('company_id'))?->name ?? '—'),
+                        //         \Filament\Forms\Components\Placeholder::make('summary_customer')
+                        //             ->label('Customer')
+                        //             ->content(fn (callable $get) => \Webkul\Partner\Models\Partner::find($get('partner_id'))?->name ?? '—'),
+                        //         \Filament\Forms\Components\Placeholder::make('summary_project_type')
+                        //             ->label('Type')
+                        //             ->content(fn (callable $get) => ucfirst($get('project_type') ?? '—')),
+                        //         \Filament\Forms\Components\Placeholder::make('summary_linear_feet')
+                        //             ->label('Linear Feet')
+                        //             ->content(fn (callable $get) => $get('estimated_linear_feet') ? $get('estimated_linear_feet') . ' LF' : '—'),
 
-                                \Filament\Forms\Components\ViewField::make('estimated_production_info')
-                                    ->view('filament.forms.components.production-estimate-card')
-                                    ->viewData(function (callable $get) {
-                                        $linearFeet = $get('estimated_linear_feet');
-                                        $companyId = $get('company_id');
+                        //         \Filament\Forms\Components\ViewField::make('estimated_production_info')
+                        //             ->view('filament.forms.components.production-estimate-card')
+                        //             ->viewData(function (callable $get) {
+                        //                 $linearFeet = $get('estimated_linear_feet');
+                        //                 $companyId = $get('company_id');
 
-                                        if (!$linearFeet || !$companyId) {
-                                            return ['estimate' => null];
-                                        }
+                        //                 if (!$linearFeet || !$companyId) {
+                        //                     return ['estimate' => null];
+                        //                 }
 
-                                        // Always use parent company capacity for production calculations
-                                        $estimate = ProductionEstimatorService::calculate($linearFeet, $companyId);
+                        //                 // Always use parent company capacity for production calculations
+                        //                 $estimate = ProductionEstimatorService::calculate($linearFeet, $companyId);
 
-                                        return ['estimate' => $estimate, 'linearFeet' => $linearFeet];
-                                    }),
-                            ])
-                            ->compact()
-                            ->columns(1)
-                            ->collapsible()
-                            ->collapsed(false)
-                            ->extraAttributes([
-                                'style' => 'position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto;'
-                            ]),
+                        //                 return ['estimate' => $estimate, 'linearFeet' => $linearFeet];
+                        //             }),
+                        //     ])
+                        //     ->compact()
+                        //     ->columns(1)
+                        //     ->collapsible()
+                        //     ->collapsed(false)
+                        //     ->extraAttributes([
+                        //         'style' => 'position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto;'
+                        //     ]),
 
                         Section::make(__('projects::filament/resources/project.form.sections.settings.title'))
                             ->schema([

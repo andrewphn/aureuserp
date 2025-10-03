@@ -13,11 +13,9 @@ class CreateProject extends CreateRecord
 
     public static bool $formActionsAreSticky = true;
 
-    protected function getFooterWidgets(): array
+    public function getFooter(): ?\Illuminate\Contracts\View\View
     {
-        return [
-            \Webkul\Project\Filament\Resources\ProjectResource\Widgets\ProjectSummaryWidget::class,
-        ];
+        return view('filament.pages.project-sticky-footer', ['page' => $this]);
     }
 
     protected function getRedirectUrl(): string
