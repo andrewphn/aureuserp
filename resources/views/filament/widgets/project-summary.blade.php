@@ -16,57 +16,68 @@
             Quick preview of your project details (updates live as you fill the form)
         </x-slot>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {{-- Project Number --}}
-            <div>
-                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    Project Number
-                </div>
-                <div class="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {{ $this->getProjectNumber() }}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Assigned on save
-                </div>
-            </div>
-
-            {{-- Location --}}
-            <div>
-                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    📍 Location
-                </div>
-                <div class="text-sm text-gray-900 dark:text-gray-100">
-                    {!! $this->getLocationSummary() !!}
-                </div>
-            </div>
-
-            {{-- Customer --}}
-            <div>
-                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    👤 Customer
-                </div>
-                <div class="text-sm text-gray-900 dark:text-gray-100">
-                    {{ $this->getCustomerName() }}
-                </div>
-            </div>
-
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {{-- Company --}}
             <div>
                 <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    🏢 Company
+                    Company
                 </div>
                 <div class="text-sm text-gray-900 dark:text-gray-100">
                     {{ $this->getCompanyName() }}
                 </div>
             </div>
 
+            {{-- Customer --}}
+            <div>
+                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    Customer
+                </div>
+                <div class="text-sm text-gray-900 dark:text-gray-100">
+                    {{ $this->getCustomerName() }}
+                </div>
+            </div>
+
             {{-- Project Type --}}
             <div>
                 <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    🏷️ Type
+                    Type
                 </div>
                 <div class="text-sm text-gray-900 dark:text-gray-100">
                     {{ $this->getProjectType() }}
+                </div>
+            </div>
+
+            {{-- Linear Feet --}}
+            <div>
+                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    Linear Feet
+                </div>
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {{ $this->getLinearFeet() }} LF
+                </div>
+            </div>
+
+            {{-- Production Estimate --}}
+            @php
+                $estimate = $this->getProductionEstimate();
+            @endphp
+            <div>
+                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    Est. Production
+                </div>
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    @if($estimate)
+                        {{ $estimate['estimatedWeeks'] }} weeks
+                    @else
+                        —
+                    @endif
+                </div>
+            </div>
+
+            {{-- Actions placeholder --}}
+            <div class="flex items-end justify-end">
+                <div class="text-xs text-gray-400">
+                    Actions appear here →
                 </div>
             </div>
         </div>

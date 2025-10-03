@@ -13,12 +13,10 @@ class CreateProject extends CreateRecord
 
     protected static bool $formActionsAreSticky = true;
 
-    protected function getFormActions(): array
+    protected function getFooterWidgets(): array
     {
         return [
-            ...$this->getCreateFormAction(),
-            ...$this->getCreateAnotherFormAction(),
-            $this->getCancelFormAction(),
+            \Webkul\Project\Filament\Resources\ProjectResource\Widgets\ProjectSummaryWidget::class,
         ];
     }
 
