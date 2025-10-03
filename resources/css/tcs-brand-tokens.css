@@ -1,0 +1,236 @@
+/**
+ * ============================================
+ * TCS WOODWORK BRAND DESIGN TOKENS
+ * ============================================
+ *
+ * Brand Website: tcswoodwork.com
+ * Industry: Custom Cabinetry, Fine Millwork & Bespoke Furniture
+ * Brand Values: Craftsmanship, Heritage, Precision, Natural Materials
+ */
+
+:root {
+    /* ============================================
+       PRIMARY BRAND COLORS - TCS Gold Palette
+       ============================================ */
+
+    /* Main TCS Gold - Primary brand color */
+    --tcs-gold-50: #FAF7F2;
+    --tcs-gold-100: #F5E6D3;
+    --tcs-gold-200: #EBCFA7;
+    --tcs-gold-300: #E0B87B;
+    --tcs-gold-400: #D4A574;  /* PRIMARY - Main TCS Gold */
+    --tcs-gold-500: #C9995F;
+    --tcs-gold-600: #B8935E;  /* Dark Gold accent */
+    --tcs-gold-700: #A67F4A;
+    --tcs-gold-800: #8B6B3E;
+    --tcs-gold-900: #705732;
+    --tcs-gold-950: #4A3921;
+
+    /* ============================================
+       WOOD TONE PALETTE - Natural Materials
+       ============================================ */
+
+    /* Walnut Brown - Rich dark wood */
+    --tcs-walnut-50: #F5F2F0;
+    --tcs-walnut-100: #E6DCD6;
+    --tcs-walnut-200: #CEBBB0;
+    --tcs-walnut-300: #A8897A;
+    --tcs-walnut-400: #8A6F5E;
+    --tcs-walnut-500: #6B4E3D;
+    --tcs-walnut-600: #5C4033;  /* PRIMARY Walnut */
+    --tcs-walnut-700: #4A3328;
+    --tcs-walnut-800: #3D2A21;
+    --tcs-walnut-900: #2F1F18;
+    --tcs-walnut-950: #1F140F;
+
+    /* Maple Cream - Light wood tones */
+    --tcs-maple-50: #FDFCFA;
+    --tcs-maple-100: #F9F5ED;
+    --tcs-maple-200: #F5E6D3;  /* PRIMARY Maple */
+    --tcs-maple-300: #EDD9BE;
+    --tcs-maple-400: #E5CBA9;
+    --tcs-maple-500: #DDBD94;
+    --tcs-maple-600: #C9A57A;
+    --tcs-maple-700: #B08D60;
+    --tcs-maple-800: #8E7350;
+    --tcs-maple-900: #6D5940;
+
+    /* ============================================
+       ACCENT COLORS - Natural & Earthy
+       ============================================ */
+
+    /* Forest Green - Natural accent */
+    --tcs-forest-50: #F2F7F0;
+    --tcs-forest-100: #E0EDD8;
+    --tcs-forest-200: #C2DBB1;
+    --tcs-forest-300: #9BC178;
+    --tcs-forest-400: #6FA349;
+    --tcs-forest-500: #4D8327;
+    --tcs-forest-600: #3D6B20;  /* PRIMARY Forest */
+    --tcs-forest-700: #2D5016;
+    --tcs-forest-800: #243F12;
+    --tcs-forest-900: #1B2F0D;
+    --tcs-forest-950: #111D08;
+
+    /* Charcoal - Professional dark neutral */
+    --tcs-charcoal-50: #F6F6F6;
+    --tcs-charcoal-100: #E7E7E7;
+    --tcs-charcoal-200: #D1D1D1;
+    --tcs-charcoal-300: #B0B0B0;
+    --tcs-charcoal-400: #888888;
+    --tcs-charcoal-500: #6D6D6D;
+    --tcs-charcoal-600: #5D5D5D;
+    --tcs-charcoal-700: #4F4F4F;
+    --tcs-charcoal-800: #454545;
+    --tcs-charcoal-900: #3D3D3D;
+    --tcs-charcoal-950: #2A2A2A;
+
+    /* ============================================
+       TYPOGRAPHY SCALE
+       ============================================ */
+
+    /* Font Families */
+    --tcs-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --tcs-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --tcs-font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+    /* Font Sizes */
+    --tcs-text-xs: 0.75rem;      /* 12px - Small labels */
+    --tcs-text-sm: 0.875rem;     /* 14px - Body small */
+    --tcs-text-base: 1rem;       /* 16px - Body */
+    --tcs-text-lg: 1.125rem;     /* 18px - Large body */
+    --tcs-text-xl: 1.25rem;      /* 20px - Small heading */
+    --tcs-text-2xl: 1.5rem;      /* 24px - Medium heading */
+    --tcs-text-3xl: 1.875rem;    /* 30px - Large heading */
+    --tcs-text-4xl: 2.25rem;     /* 36px - Display */
+    --tcs-text-5xl: 3rem;        /* 48px - Hero */
+
+    /* Font Weights */
+    --tcs-font-normal: 400;
+    --tcs-font-medium: 500;
+    --tcs-font-semibold: 600;
+    --tcs-font-bold: 700;
+    --tcs-font-extrabold: 800;
+
+    /* Line Heights */
+    --tcs-leading-tight: 1.25;
+    --tcs-leading-normal: 1.5;
+    --tcs-leading-relaxed: 1.75;
+
+    /* Letter Spacing */
+    --tcs-tracking-tight: -0.025em;
+    --tcs-tracking-normal: 0;
+    --tcs-tracking-wide: 0.025em;
+    --tcs-tracking-wider: 0.05em;
+    --tcs-tracking-widest: 0.1em;
+
+    /* ============================================
+       SPACING SCALE - Consistent rhythm
+       ============================================ */
+
+    --tcs-space-0: 0;
+    --tcs-space-1: 0.25rem;      /* 4px */
+    --tcs-space-2: 0.5rem;       /* 8px */
+    --tcs-space-3: 0.75rem;      /* 12px */
+    --tcs-space-4: 1rem;         /* 16px */
+    --tcs-space-5: 1.25rem;      /* 20px */
+    --tcs-space-6: 1.5rem;       /* 24px */
+    --tcs-space-8: 2rem;         /* 32px */
+    --tcs-space-10: 2.5rem;      /* 40px */
+    --tcs-space-12: 3rem;        /* 48px */
+    --tcs-space-16: 4rem;        /* 64px */
+    --tcs-space-20: 5rem;        /* 80px */
+    --tcs-space-24: 6rem;        /* 96px */
+
+    /* ============================================
+       BORDER RADIUS - Woodwork aesthetic
+       ============================================ */
+
+    --tcs-radius-none: 0;
+    --tcs-radius-sm: 0.25rem;    /* 4px - Subtle */
+    --tcs-radius-base: 0.5rem;   /* 8px - Standard */
+    --tcs-radius-md: 0.75rem;    /* 12px - Comfortable */
+    --tcs-radius-lg: 1rem;       /* 16px - Cards */
+    --tcs-radius-xl: 1.5rem;     /* 24px - Feature elements */
+    --tcs-radius-2xl: 2rem;      /* 32px - Large cards */
+    --tcs-radius-full: 9999px;   /* Pill shape */
+
+    /* ============================================
+       SHADOWS - Depth & Elevation
+       ============================================ */
+
+    --tcs-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --tcs-shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --tcs-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --tcs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --tcs-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --tcs-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+    /* Gold glow for highlights */
+    --tcs-shadow-gold: 0 0 0 4px rgba(212, 165, 116, 0.2);
+    --tcs-shadow-gold-lg: 0 0 0 6px rgba(212, 165, 116, 0.15);
+
+    /* ============================================
+       GRADIENTS - Premium feel
+       ============================================ */
+
+    /* Gold gradients */
+    --tcs-gradient-gold: linear-gradient(135deg, #D4A574 0%, #C9995F 100%);
+    --tcs-gradient-gold-dark: linear-gradient(135deg, #B8935E 0%, #A67F4A 100%);
+
+    /* Wood tone gradients */
+    --tcs-gradient-walnut: linear-gradient(135deg, #6B4E3D 0%, #5C4033 100%);
+    --tcs-gradient-forest: linear-gradient(135deg, #3D6B20 0%, #2D5016 100%);
+    --tcs-gradient-maple: linear-gradient(135deg, #F5E6D3 0%, #EDD9BE 100%);
+
+    /* Subtle overlay gradients */
+    --tcs-gradient-overlay-light: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+    --tcs-gradient-overlay-dark: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.8));
+
+    /* ============================================
+       STATUS COLORS - Using FilamentPHP standards
+       ============================================ */
+
+    /* Success - Use Filament's success color */
+    --tcs-success: var(--success-600);
+
+    /* Warning - Use Filament's warning color */
+    --tcs-warning: var(--warning-600);
+
+    /* Danger - Use Filament's danger color */
+    --tcs-danger: var(--danger-600);
+
+    /* Info - Use Filament's info color */
+    --tcs-info: var(--info-600);
+}
+
+/* ============================================
+   UTILITY CLASSES - Quick application
+   ============================================ */
+
+/* TCS Brand Backgrounds */
+.bg-tcs-gold { background-color: var(--tcs-gold-400); }
+.bg-tcs-gold-dark { background-color: var(--tcs-gold-600); }
+.bg-tcs-walnut { background-color: var(--tcs-walnut-600); }
+.bg-tcs-forest { background-color: var(--tcs-forest-600); }
+.bg-tcs-maple { background-color: var(--tcs-maple-200); }
+
+/* TCS Brand Text Colors */
+.text-tcs-gold { color: var(--tcs-gold-400); }
+.text-tcs-gold-dark { color: var(--tcs-gold-600); }
+.text-tcs-walnut { color: var(--tcs-walnut-600); }
+.text-tcs-forest { color: var(--tcs-forest-600); }
+
+/* TCS Brand Borders */
+.border-tcs-gold { border-color: var(--tcs-gold-400); }
+.border-tcs-gold-dark { border-color: var(--tcs-gold-600); }
+
+/* TCS Gradients */
+.bg-gradient-tcs-gold { background: var(--tcs-gradient-gold); }
+.bg-gradient-tcs-walnut { background: var(--tcs-gradient-walnut); }
+.bg-gradient-tcs-forest { background: var(--tcs-gradient-forest); }
+
+/* Typography Utilities */
+.font-tcs-display { font-family: var(--tcs-font-display); }
+.font-tcs-body { font-family: var(--tcs-font-body); }
+.font-tcs-mono { font-family: var(--tcs-font-mono); }

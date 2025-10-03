@@ -39,6 +39,9 @@ class Project extends Model implements Sortable
      */
     protected $fillable = [
         'name',
+        'project_number',
+        'project_type',
+        'project_type_other',
         'tasks_label',
         'description',
         'visibility',
@@ -46,13 +49,16 @@ class Project extends Model implements Sortable
         'sort',
         'start_date',
         'end_date',
+        'desired_completion_date',
         'allocated_hours',
+        'estimated_linear_feet',
         'allow_timesheets',
         'allow_milestones',
         'allow_task_dependencies',
         'is_active',
         'stage_id',
         'partner_id',
+        'use_customer_address',
         'company_id',
         'user_id',
         'creator_id',
@@ -66,11 +72,7 @@ class Project extends Model implements Sortable
     protected $casts = [
         'start_date'              => 'date',
         'end_date'                => 'date',
-        'is_active'               => 'boolean',
-        'allow_timesheets'        => 'boolean',
-        'allow_milestones'        => 'boolean',
-        'start_date'              => 'date',
-        'end_date'                => 'date',
+        'desired_completion_date' => 'date',
         'is_active'               => 'boolean',
         'allow_timesheets'        => 'boolean',
         'allow_milestones'        => 'boolean',
@@ -160,6 +162,21 @@ class Project extends Model implements Sortable
     public function milestones(): HasMany
     {
         return $this->hasMany(Milestone::class);
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(ProjectAddress::class);
+    }
+
+    public function productionEstimates(): HasMany
+    {
+        return $this->hasMany(\App\Models\ProductionEstimate::class);
+    }
+
+    public function currentProductionEstimate()
+    {
+        return $this->hasOne(\App\Models\ProductionEstimate::class)->where('is_current', true);
     }
 
     public function tasks(): HasMany

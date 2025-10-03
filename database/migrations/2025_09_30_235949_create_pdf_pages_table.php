@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('document_id');
             $table->integer('page_number');
+            $table->integer('width')->nullable();
+            $table->integer('height')->nullable();
+            $table->integer('rotation')->default(0);
             $table->string('thumbnail_path', 500)->nullable();
             $table->longText('extracted_text')->nullable();
             $table->json('page_metadata')->nullable();

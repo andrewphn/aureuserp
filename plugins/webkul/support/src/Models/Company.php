@@ -42,6 +42,11 @@ class Company extends Model implements Sortable
         'state_id',
         'country_id',
         'logo',
+        'shop_capacity_per_day',
+        'shop_capacity_per_month',
+        'shop_capacity_per_hour',
+        'working_hours_per_day',
+        'working_days_per_month',
         'color',
         'is_active',
         'founded_date',
@@ -49,6 +54,7 @@ class Company extends Model implements Sortable
         'currency_id',
         'partner_id',
         'website',
+        'acronym',
     ];
 
     public $sortable = [
@@ -141,6 +147,39 @@ class Company extends Model implements Sortable
     }
 
     /**
+     * Calculate shop capacity values based on changes
+     */
+    protected static function calculateCapacities($company)
+    {
+        // Default working schedule: 4 days/week, 8 hours/day (Monday-Thursday, 8am-5pm with 1hr lunch)
+        $defaultWorkingHoursPerDay = 8;
+        $defaultWorkingDaysPerMonth = 17; // ~4 weeks × 4 days + 1 extra day
+
+        // Set defaults if not provided
+        if (! $company->working_hours_per_day) {
+            $company->working_hours_per_day = $defaultWorkingHoursPerDay;
+        }
+        if (! $company->working_days_per_month) {
+            $company->working_days_per_month = $defaultWorkingDaysPerMonth;
+        }
+
+        // Auto-calculate based on what was changed
+        if ($company->isDirty('shop_capacity_per_day') && $company->shop_capacity_per_day) {
+            // User entered daily capacity → calculate hourly and monthly
+            $company->shop_capacity_per_hour = round($company->shop_capacity_per_day / $company->working_hours_per_day, 2);
+            $company->shop_capacity_per_month = round($company->shop_capacity_per_day * $company->working_days_per_month, 2);
+        } elseif ($company->isDirty('shop_capacity_per_month') && $company->shop_capacity_per_month) {
+            // User entered monthly capacity → calculate daily and hourly
+            $company->shop_capacity_per_day = round($company->shop_capacity_per_month / $company->working_days_per_month, 2);
+            $company->shop_capacity_per_hour = round($company->shop_capacity_per_day / $company->working_hours_per_day, 2);
+        } elseif ($company->isDirty('shop_capacity_per_hour') && $company->shop_capacity_per_hour) {
+            // User entered hourly capacity → calculate daily and monthly
+            $company->shop_capacity_per_day = round($company->shop_capacity_per_hour * $company->working_hours_per_day, 2);
+            $company->shop_capacity_per_month = round($company->shop_capacity_per_day * $company->working_days_per_month, 2);
+        }
+    }
+
+    /**
      * Bootstrap the model and its traits.
      */
     protected static function boot()
@@ -148,6 +187,8 @@ class Company extends Model implements Sortable
         parent::boot();
 
         static::creating(function ($company) {
+            static::calculateCapacities($company);
+
             if (! $company->partner_id) {
                 $partner = Partner::create([
                     'creator_id'       => $company->creator_id ?? Auth::id(),
@@ -172,6 +213,10 @@ class Company extends Model implements Sortable
 
                 $company->partner_id = $partner->id;
             }
+        });
+
+        static::updating(function ($company) {
+            static::calculateCapacities($company);
         });
 
         static::saved(function ($company) {

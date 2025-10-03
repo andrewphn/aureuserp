@@ -1,0 +1,1173 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create Nutrient SDK Integration Service",
+        "description": "Build core service layer for Nutrient Web SDK initialization and configuration with license key management",
+        "details": "Create app/Services/NutrientService.php that handles SDK initialization with the existing license key (pdf_live_SeDihzSCxobu2objNyuoWS3BViInKxxtFSORpgNAfRz). Implement methods for: SDK configuration management, license key validation, viewer instance creation with configurable options (toolbar items, annotation tools, zoom controls), error handling and fallback mechanisms. Create config/nutrient.php with settings for license key, default toolbar configuration, max file size (50MB), allowed file types, and autosave interval. Use Laravel's config caching for performance.",
+        "testStrategy": "Unit tests for service methods using PHPUnit, mock SDK initialization to test configuration options, verify license key is properly loaded from config, test error scenarios with invalid configurations, ensure fallback mechanisms work when SDK fails to load",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T00:39:43.076Z"
+      },
+      {
+        "id": 2,
+        "title": "Build PDF Viewer Blade Component",
+        "description": "Create reusable Blade component for PDF viewing with Nutrient SDK integration and Alpine.js interactivity",
+        "details": "Create resources/views/components/pdf-viewer.blade.php component that integrates Nutrient SDK. Component should accept props for: document ID, viewer options, annotation permissions, toolbar configuration. Create resources/js/pdf-viewer.js module that initializes Nutrient SDK with provided options, handles document loading, manages annotation sync with backend, implements autosave functionality. Use Alpine.js for reactive state management. Include loading states, error boundaries, and mobile-responsive design. Register component in AppServiceProvider.",
+        "testStrategy": "Browser tests using Playwright to verify component renders correctly, test PDF loading with various file sizes, verify annotation tools appear based on permissions, test responsive design on different screen sizes, ensure JavaScript module loads and initializes properly",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T00:44:58.589Z"
+      },
+      {
+        "id": 3,
+        "title": "Implement Annotation API and Service Layer",
+        "description": "Build RESTful API endpoints and service layer for annotation CRUD operations with real-time synchronization using Nutrient SDK's InstantJSON format",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "details": "Create app/Services/AnnotationService.php with methods for: exporting annotations using InstantJSON format via exportInstantJSON(), importing annotations using importInstantJSON(), generating unique IDs with generateInstantId() before saving, handling annotation persistence with ensureChangesSaved(). Create app/Http/Controllers/Api/AnnotationController.php with endpoints: GET /api/pdf/{document}/annotations (retrieve InstantJSON), POST /api/pdf/{document}/annotations (save InstantJSON), PUT /api/pdf/annotations/{id} (update single annotation), DELETE /api/pdf/annotations/{id} (soft delete). Implement validation using Nutrient's annotation schemas from annotation_data field. Add RateLimiter middleware with 60 requests per minute limit. Create app/Http/Resources/AnnotationResource.php for JSON:API formatting. Setup event listeners for annotations.didSave to trigger auto-persistence. Add retry logic with exponential backoff for failed saves.",
+        "testStrategy": "Feature tests for all API endpoints with InstantJSON payloads, test authentication and authorization with Sanctum, verify Nutrient annotation schema validation, test concurrent annotation updates with race conditions, ensure proper JSON:API response formatting, test rate limiting at 60 req/min threshold, mock ensureChangesSaved() responses, test retry logic with simulated failures",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create AnnotationService with InstantJSON export/import methods",
+            "description": "Build service layer to handle Nutrient SDK InstantJSON format for annotations",
+            "status": "done",
+            "dependencies": [],
+            "details": "Create app/Services/AnnotationService.php with methods: exportAnnotationsAsInstantJSON() to serialize annotations from database, importInstantJSON() to parse and store annotations, generateAnnotationId() using ULID for unique IDs, validateAnnotationSchema() against Nutrient presets, ensureAnnotationsSaved() to confirm backend persistence with retry logic",
+            "testStrategy": "",
+            "updatedAt": "2025-10-01T00:50:46.890Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Build API Controller with proper endpoints",
+            "description": "Implement RESTful API endpoints for annotation CRUD operations",
+            "status": "done",
+            "dependencies": [],
+            "details": "Create app/Http/Controllers/Api/AnnotationController.php with: index() method returning InstantJSON for document, store() accepting InstantJSON payload and using AnnotationService, update() for single annotation modifications, destroy() for soft deletion with permission checks, proper dependency injection of AnnotationService",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T00:55:13.551Z"
+          },
+          {
+            "id": 3,
+            "title": "Create AnnotationResource for JSON API responses",
+            "description": "Build resource class for proper JSON:API formatted responses",
+            "status": "done",
+            "dependencies": [],
+            "details": "Create app/Http/Resources/AnnotationResource.php extending JsonResource, implement toArray() method with InstantJSON structure, add meta fields for sync status and timestamps, include relationships to document and author resources, ensure compatibility with Nutrient SDK expectations",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T00:55:46.881Z"
+          },
+          {
+            "id": 4,
+            "title": "Implement validation using Nutrient annotation schemas",
+            "description": "Add request validation based on Nutrient's annotation presets and schemas",
+            "status": "done",
+            "dependencies": [],
+            "details": "Create app/Http/Requests/StoreAnnotationRequest.php with rules matching Nutrient schemas, validate annotation types against config/nutrient.php presets (highlight, text, drawing, arrow, etc.), ensure required fields like page_number, annotation_type, annotation_data are present, validate annotation_data JSON structure per type, add custom validation for coordinate bounds and color formats",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T00:56:44.442Z"
+          },
+          {
+            "id": 5,
+            "title": "Add authentication middleware and rate limiting",
+            "description": "Secure API endpoints with authentication and implement rate limiting",
+            "status": "done",
+            "dependencies": [],
+            "details": "Apply auth:sanctum middleware to all annotation routes, configure RateLimiter in AppServiceProvider with 60 req/min for annotation endpoints, add throttle:annotations middleware group, implement user-specific rate limits based on roles, add headers for rate limit status in responses",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T00:57:37.954Z"
+          },
+          {
+            "id": 6,
+            "title": "Setup event handlers for real-time sync",
+            "description": "Implement Nutrient SDK event listeners for automatic annotation persistence",
+            "status": "done",
+            "dependencies": [],
+            "details": "Add JavaScript event listeners for annotations.didSave in resources/js/pdf-viewer.js, implement debounced auto-save on annotation changes, handle annotations.create/update/delete events, call backend API with InstantJSON payload on events, implement optimistic UI updates with rollback on failure, add console logging for debugging sync issues",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T00:58:50.320Z"
+          }
+        ],
+        "updatedAt": "2025-10-01T00:58:54.847Z"
+      },
+      {
+        "id": 4,
+        "title": "Create FilamentPHP Custom PDF Viewer Field",
+        "description": "Develop custom FilamentPHP v3 field component for PDF viewing and annotation within admin forms",
+        "details": "Create app/Filament/Forms/Components/PdfViewerField.php extending FilamentPHP's Field class. Implement methods for: configuring viewer options (toolbar, features, permissions), handling file uploads with validation, rendering the PDF viewer component, managing annotation state. Create corresponding Blade view in resources/views/filament/forms/components/pdf-viewer-field.blade.php. Add configuration methods like ->enableAnnotations(), ->setToolbar(), ->maxFileSize(). Integrate with Livewire for real-time updates.",
+        "testStrategy": "Test field rendering in various FilamentPHP resources, verify file upload and validation, test configuration methods work correctly, ensure Livewire integration functions properly, test field state management",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T01:02:12.876Z"
+      },
+      {
+        "id": 5,
+        "title": "Build Document Management FilamentPHP Resource",
+        "description": "Create comprehensive DocumentResource for managing PDF documents with full CRUD operations and advanced features",
+        "details": "Create app/Filament/Resources/DocumentResource.php with table columns for: file name, module association, page count, file size, uploader, upload date. Implement filters for module type, date range, uploader, tags. Add bulk actions for download, delete, move between modules. Create form with FileUpload field, module selector, tags input, metadata fields. Implement custom table actions for: viewing PDF (modal/slide-over), downloading original, viewing annotations list. Add activity log widget showing document interactions. Create pages for List, Create, Edit, View.",
+        "testStrategy": "Test all CRUD operations work correctly, verify filters and search functionality, test bulk actions with multiple documents, ensure proper permission checks, test file upload with various sizes, verify activity logging works",
+        "priority": "medium",
+        "dependencies": [
+          "4"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T01:03:50.283Z"
+      },
+      {
+        "id": 6,
+        "title": "Integrate PDF System with Projects Module",
+        "description": "Add PDF document support to existing Projects module for shop drawings and project documentation",
+        "details": "Modify plugins/webkul/projects/src/Models/Project.php to add morphMany relationship for PDF documents. Create HasPdfDocuments trait in app/Traits/HasPdfDocuments.php with methods for: attaching documents, retrieving documents by type, counting documents. Update ProjectResource to include PDF upload section in form, add documents count badge to table, create relation manager for viewing project documents. Add 'View Drawings' table action that opens PDF viewer. Update project detail page to show document list widget.",
+        "testStrategy": "Test document upload from project form, verify polymorphic relationships work correctly, test document count badges update properly, ensure relation manager displays documents, test 'View Drawings' action opens viewer correctly",
+        "priority": "medium",
+        "dependencies": [
+          "4",
+          "5"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T01:14:00.471Z"
+      },
+      {
+        "id": 7,
+        "title": "Implement Document Activity Tracking",
+        "description": "Build comprehensive activity logging system for tracking all document interactions and user actions",
+        "details": "Create app/Services/DocumentActivityService.php with methods for logging: document views, annotation changes, downloads, prints. Implement app/Observers/PdfDocumentObserver.php to automatically log document CRUD operations. Create app/Observers/PdfAnnotationObserver.php for annotation tracking. Add middleware app/Http/Middleware/TrackDocumentActivity.php for logging views. Create FilamentPHP widget for displaying recent activities. Implement activity pruning job to clean old logs after 90 days.",
+        "testStrategy": "Test all activity types are logged correctly, verify observer triggers on model events, test middleware logs document views, ensure activity widget displays correct data, test pruning job removes old records",
+        "priority": "low",
+        "dependencies": [
+          "3"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T01:15:07.184Z"
+      },
+      {
+        "id": 8,
+        "title": "Add Sales and Support Module Integration",
+        "description": "Extend PDF functionality to Sales module for quotations and Support module for ticket attachments",
+        "details": "Apply HasPdfDocuments trait to Sales Order and Support Ticket models. Update QuotationResource in sales module to include PDF preview of quotes, add approval stamp functionality using annotations. Modify Support plugin to allow PDF attachments on tickets, implement annotation tools for marking damaged areas. Create shared components for consistent PDF handling across modules. Add cross-module document search functionality in DocumentResource. Update dashboards to show document statistics per module.",
+        "testStrategy": "Test PDF upload in quotation forms, verify approval stamps save correctly, test support ticket PDF attachments, ensure cross-module search returns correct results, verify dashboard widgets show accurate statistics",
+        "priority": "low",
+        "dependencies": [
+          "6"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-01T01:15:58.799Z"
+      },
+      {
+        "id": 9,
+        "title": "Comprehensive Testing & QA",
+        "description": "Create comprehensive test suite covering unit, feature, browser, security, performance and compatibility testing for PDF viewer functionality with 80%+ code coverage target",
+        "details": "Create tests/Unit/Services/NutrientServiceTest.php for testing NutrientService methods including: license key validation, SDK configuration generation, viewer instance creation, file validation, annotation presets, error handling with mock SDK responses. Create tests/Unit/Models/PdfDocumentTest.php and PdfAnnotationTest.php for model relationships, scopes, accessors and mutators. Implement tests/Feature/Api/AnnotationApiTest.php for testing annotation CRUD endpoints (GET /api/pdf/{document}/annotations, POST/PUT/DELETE operations) with authentication, authorization, validation and rate limiting checks. Create tests/Feature/Filament/DocumentResourceTest.php for testing FilamentPHP resource CRUD operations, filters, bulk actions, file upload validation. Set up Playwright browser testing in package.json with @playwright/test dependency, create playwright.config.ts with webkit/chromium/firefox configurations. Implement tests/Browser/PdfViewerTest.spec.ts for testing: PDF loading with various file sizes (including 50MB+ files), annotation tools functionality (highlight, text, drawing, stamps), toolbar interactions, zoom controls, mobile responsiveness. Create tests/Browser/AnnotationSyncTest.spec.ts for real-time annotation synchronization between multiple browser sessions, autosave functionality, conflict resolution. Add tests/Security/DocumentAccessTest.php for testing permission-based access control, document visibility scopes, unauthorized access attempts, SQL injection prevention in document queries. Create tests/Performance/LargePdfTest.php using PHPUnit with memory and time assertions for handling 50MB+ PDFs, testing page lazy loading, annotation performance with 100+ annotations per document. Implement tests/Browser/CrossBrowserTest.spec.ts for testing across Chrome, Firefox, Safari, Edge with specific focus on PDF.js fallback mechanisms, touch interactions on tablets, print functionality. Set up GitHub Actions workflow in .github/workflows/tests.yml for running PHPUnit tests with MySQL, Playwright tests with multiple browsers, code coverage reporting to Codecov. Create tests/Integration/ModuleIntegrationTest.php for testing PDF system integration with Projects, Sales, and Support modules including polymorphic relationships, trait usage, cross-module search. Add phpunit-coverage.xml configuration for coverage reporting excluding vendor directories, targeting 80% coverage minimum. Implement custom test traits in tests/Traits/CreatesTestPdfs.php for generating test PDF files, tests/Traits/MocksNutrientSdk.php for mocking SDK responses.",
+        "testStrategy": "Run 'composer test' to execute full PHPUnit test suite and verify all unit and feature tests pass. Execute 'npm run test:browser' for Playwright browser tests across all browsers. Run 'composer test:coverage' and verify code coverage exceeds 80% threshold. Test with actual 50MB+ PDF files to verify performance benchmarks are met (load time <3s, annotation save <500ms). Perform manual testing on iPad/tablet devices for touch interactions. Verify GitHub Actions workflow passes all test suites on pull requests. Use 'php artisan test --parallel' for faster test execution. Monitor test database for proper cleanup after test runs. Review Codecov reports for uncovered code paths and add targeted tests.",
+        "status": "in-progress",
+        "dependencies": [
+          "1",
+          "2",
+          "3"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Unit Tests for NutrientService",
+            "description": "Implement comprehensive unit tests for the NutrientService class covering license validation, configuration generation, and error handling scenarios",
+            "dependencies": [],
+            "details": "Create tests/Unit/Services/NutrientServiceTest.php with test methods for: validateLicenseKey() with valid/invalid keys, getSDKConfiguration() with custom options, createViewerInstance() with various parameters, validateFile() with different sizes and MIME types, generateAnnotationId() for unique ID generation, getJavaScriptInitCode() output validation, and getFallbackConfiguration() responses. Mock external dependencies and config values using Laravel's Config facade mocking.\n<info added on 2025-10-01T01:42:27.145Z>\nI'll analyze the codebase to understand the current testing implementation and provide specific details about the unit test fixes needed.Fixed Config facade mocking issues by implementing a comprehensive mock setup in setUp() method that handles all Config::get() calls throughout the test suite. The mock now properly returns specific values for each configuration key:\n- services.nutrient.license_key returns appropriate values per test\n- services.nutrient.max_file_size returns default 50MB\n- nutrient.* keys return proper defaults (enable_forms, autosave_interval, viewer_options, etc.)\n- nutrient.allowed_mime_types returns ['application/pdf']\n- nutrient.allowed_extensions returns ['pdf']\n- app.support_email returns 'support@example.com'\n\nTest run now shows 22/22 tests passing with full coverage of:\n- License validation (3 tests)\n- SDK configuration generation (4 tests)  \n- Viewer instance creation (3 tests)\n- File validation with MIME types and size limits (5 tests)\n- ULID annotation ID generation with timestamp ordering (2 tests)\n- JavaScript code generation (2 tests)\n- Fallback configuration with logging (2 tests)\n- Toolbar and annotation presets configuration (1 test)\n\nAll tests execute successfully with properly mocked Config values, eliminating the previous \"too many arguments\" errors from mismatched mock expectations. The comprehensive mock setup ensures each Config::get() call receives the correct return value for its specific key.\n</info added on 2025-10-01T01:42:27.145Z>",
+            "status": "done",
+            "testStrategy": "Use PHPUnit with Laravel's TestCase, mock Config::get() calls, test exception throwing for invalid license keys, verify return types and array structures, assert proper logging calls for warnings and errors",
+            "updatedAt": "2025-10-01T01:41:38.053Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create Unit Tests for PDF Models",
+            "description": "Implement unit tests for PdfDocument and PdfAnnotation models covering relationships, scopes, accessors, and business logic",
+            "dependencies": [],
+            "details": "Create tests/Unit/Models/PdfDocumentTest.php testing relationships (pages, annotations, activities, uploader, module), scopes (forModule, byUploader, recent), accessors (getFormattedFileSizeAttribute), and mass assignment protection. Create tests/Unit/Models/PdfAnnotationTest.php testing relationships (document, page, author), scopes (byAuthor, byType, forPage), helper methods (isType, getColor, getPosition, getText), and annotation type constants. Use model factories for test data generation.\n<info added on 2025-10-01T01:46:05.881Z>\nI'll analyze the codebase to understand the testing implementation before generating the subtask update.Test execution completed successfully. Both test files (PdfDocumentTest.php with 20 test methods and PdfAnnotationTest.php with 22 test methods) have been implemented with comprehensive coverage. All model factories (PdfDocumentFactory, PdfAnnotationFactory, PdfPageFactory, PdfDocumentActivityFactory) are properly configured and generate realistic test data. Tests validate all model relationships, scopes, accessors, mass assignment protection, and soft delete functionality. The test suite ensures proper array casting for JSON fields (tags, metadata, annotation_data) and validates helper methods for annotation types and data extraction.\n</info added on 2025-10-01T01:46:05.881Z>",
+            "status": "done",
+            "testStrategy": "Use Laravel's database testing features with in-memory SQLite, create model factories, test relationship queries, verify scope functionality with sample data, assert accessor return values match expected formats",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T01:44:58.319Z"
+          },
+          {
+            "id": 3,
+            "title": "Create Feature Tests for Annotation API",
+            "description": "Implement comprehensive feature tests for the annotation CRUD API endpoints with authentication, authorization, and validation testing",
+            "dependencies": [],
+            "details": "Create tests/Feature/Api/AnnotationApiTest.php with test methods for: GET /api/pdf/{document}/annotations endpoint returning InstantJSON format, POST /api/pdf/{document}/annotations with valid/invalid payloads, PUT /api/pdf/{document}/annotations/{id} for updates, DELETE operations, authentication checks using Sanctum, authorization via policies, rate limiting verification (60 req/min), validation of Nutrient annotation schema, concurrent update handling, and proper JSON:API response formatting.",
+            "status": "done",
+            "testStrategy": "Use Laravel's HTTP testing with actual database, create test users and documents, test authenticated/unauthenticated requests, verify response status codes and JSON structure, test rate limiting with multiple requests, mock annotation service methods",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Create Feature Tests for FilamentPHP Document Resource",
+            "description": "Implement feature tests for the FilamentPHP PdfDocumentResource covering CRUD operations, filters, bulk actions, and file upload validation",
+            "dependencies": [],
+            "details": "Create tests/Feature/Filament/DocumentResourceTest.php testing: resource listing with pagination and filters, create form rendering and validation, edit form functionality, delete operations including soft deletes, bulk actions execution, file upload validation (size limits, MIME types), custom field rendering, search functionality, and permission-based access controls. Test both admin user and regular user access scenarios.",
+            "status": "done",
+            "testStrategy": "Use Filament's testing utilities with authenticated admin users, test form submissions with valid/invalid data, verify file upload handling, check filter and search functionality, assert proper authorization checks, test bulk operations on multiple records",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Setup Playwright Browser Testing Infrastructure",
+            "description": "Configure Playwright testing framework with multi-browser support and create base test utilities for PDF viewer browser testing",
+            "dependencies": [],
+            "details": "Add @playwright/test dependency to package.json, create playwright.config.ts with configurations for webkit, chromium, and firefox browsers. Set up test environment with proper viewport settings, base URLs, and timeout configurations. Create tests/Browser directory structure and base test fixtures. Configure test data setup and teardown utilities. Add npm scripts for running browser tests: 'test:browser', 'test:browser:headed', 'test:browser:chrome', etc.",
+            "status": "done",
+            "testStrategy": "Verify Playwright installation across all target browsers, test basic navigation and DOM interaction, ensure test environment isolation, validate configuration options work correctly across different browsers",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Create Browser Tests for PDF Viewer Core Functionality",
+            "description": "Implement comprehensive browser tests for PDF loading, annotation tools, and viewer interactions across multiple browsers",
+            "dependencies": [
+              "9.5"
+            ],
+            "details": "Create tests/Browser/PdfViewerTest.spec.ts with test scenarios for: PDF loading with various file sizes (including 50MB+ files), annotation tools functionality (highlight, text, drawing, stamps), toolbar interactions and button clicks, zoom controls (in/out/fit), page navigation, mobile responsiveness testing, touch interactions on tablets, loading states and error boundaries, keyboard navigation support, and print functionality across browsers.",
+            "status": "done",
+            "testStrategy": "Use actual PDF files of varying sizes, test annotation creation and persistence, verify toolbar button functionality, check responsive design at different viewport sizes, test keyboard shortcuts, validate error handling for failed loads",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Create Browser Tests for Real-time Annotation Synchronization",
+            "description": "Implement browser tests for multi-user annotation synchronization, autosave functionality, and conflict resolution",
+            "dependencies": [
+              "9.5"
+            ],
+            "details": "Create tests/Browser/AnnotationSyncTest.spec.ts testing: real-time annotation synchronization between multiple browser sessions, autosave functionality with configurable intervals, conflict resolution when multiple users edit same annotation, WebSocket/polling connection handling, offline annotation caching and sync on reconnection, annotation persistence across browser refreshes, and performance with high annotation volumes (100+ annotations per document).",
+            "status": "done",
+            "testStrategy": "Use multiple browser contexts to simulate different users, test WebSocket connections, verify annotation updates appear in real-time, test network disconnection scenarios, measure performance with large annotation datasets",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Create Security, Performance, and Integration Tests",
+            "description": "Implement comprehensive security testing, performance benchmarks, and cross-module integration tests with CI/CD pipeline setup",
+            "dependencies": [],
+            "details": "Create tests/Security/DocumentAccessTest.php for permission-based access control, document visibility scopes, unauthorized access attempts, and SQL injection prevention. Implement tests/Performance/LargePdfTest.php with memory and time assertions for 50MB+ PDFs, page lazy loading performance, and annotation performance benchmarks. Create tests/Integration/ModuleIntegrationTest.php for testing PDF system integration with Projects, Sales, and Support modules including polymorphic relationships. Set up .github/workflows/tests.yml for GitHub Actions with PHPUnit, Playwright, and coverage reporting to Codecov. Create phpunit-coverage.xml and custom test traits in tests/Traits/ for PDF generation and SDK mocking.",
+            "status": "done",
+            "testStrategy": "Test security boundaries with different user roles, benchmark performance with large files and many annotations, verify cross-module relationship integrity, ensure CI pipeline runs all test suites and reports coverage accurately to meet 80% threshold",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-01T01:44:58.319Z"
+      },
+      {
+        "id": 10,
+        "title": "Documentation & User Guides",
+        "description": "Create comprehensive documentation suite including user guides, developer documentation, API specs, configuration guides, deployment checklists, and training materials for the PDF viewer and annotation system",
+        "details": "Create documentation structure in /docs directory with subfolders: /user-guides, /developer-docs, /api-specs, /deployment, and /training. For USER DOCUMENTATION: Create docs/user-guides/pdf-viewer-guide.md covering: navigating the PDF viewer interface with screenshots, using annotation tools (highlighter, notes, stamps, drawings), saving and managing annotations, downloading annotated PDFs, keyboard shortcuts reference. Create docs/user-guides/admin-guide.md for: managing PDF documents in FilamentPHP resources, setting viewer permissions per user role, configuring toolbar options, monitoring document activity logs. For DEVELOPER DOCUMENTATION: Create docs/developer-docs/pdf-viewer-field-integration.md with: step-by-step guide for adding PdfViewerField to FilamentPHP resources, code examples for app/Filament/Forms/Components/PdfViewerField.php usage, available configuration methods (->enableAnnotations(), ->setToolbar(), ->maxFileSize()), event hooks and callbacks, Livewire integration patterns. Create docs/developer-docs/nutrient-sdk-guide.md covering: NutrientService class methods and usage from app/Services/NutrientService.php, SDK initialization with license key configuration, customizing annotation presets, implementing custom toolbar buttons, handling SDK errors and fallbacks. For API DOCUMENTATION: Create docs/api-specs/openapi.yaml with OpenAPI 3.0 specification for: GET /api/pdf/{document}/annotations endpoint, POST /api/pdf/{document}/annotations endpoint, PUT /api/pdf/annotations/{id} endpoint, DELETE /api/pdf/annotations/{id} endpoint, authentication schemes and rate limiting. Generate HTML documentation using Redoc or Swagger UI. Include request/response examples, error codes, and authentication requirements. For CONFIGURATION GUIDE: Create docs/deployment/configuration.md documenting all settings in config/nutrient.php: license key setup (NUTRIENT_LICENSE_KEY env variable), toolbar customization arrays, annotation settings, file upload restrictions (50MB limit, allowed MIME types), autosave intervals, viewer options (theme, zoom, scroll modes), performance settings (WebAssembly, caching). For DEPLOYMENT CHECKLIST: Create docs/deployment/production-checklist.md with: pre-deployment verification steps, environment variable requirements, file permission requirements for document storage, CDN setup for Nutrient SDK assets, SSL certificate requirements, backup procedures for annotation data, monitoring setup for SDK errors. For TRAINING MATERIALS: Create docs/training/quick-start-guide.md with step-by-step tutorials for common tasks. Record video tutorials using the actual implementation showing: uploading and viewing PDFs, adding annotations, collaborative annotation workflows, exporting annotated documents. Create docs/training/screenshots/ directory with annotated screenshots of all major features. Develop interactive demo page at /demo/pdf-viewer showcasing all features. Include troubleshooting section with common issues and solutions. All documentation should reference actual file paths from the codebase, use consistent formatting with markdown, include version numbers (@nutrient-sdk/viewer: ^1.7.0 from package.json), and be searchable through a documentation index.",
+        "testStrategy": "Verify all documentation files exist in correct directories using 'ls -la docs/'. Test code examples by copying and running them in a test FilamentPHP resource. Validate OpenAPI spec using 'npx @apidevtools/swagger-cli validate docs/api-specs/openapi.yaml'. Generate and review HTML API documentation. Test all URLs and file paths mentioned in documentation are correct. Verify screenshots are clear and properly annotated. Test video tutorials play correctly and cover all described features. Have a non-developer review user guides for clarity. Validate configuration examples work with actual config/nutrient.php file. Test deployment checklist on staging environment. Ensure all keyboard shortcuts and UI interactions described in documentation work as documented",
+        "status": "pending",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create documentation directory structure and user guides",
+            "description": "Create the main /docs directory structure with subfolders and develop comprehensive user guides for PDF viewer interface and admin functionality",
+            "dependencies": [],
+            "details": "Create docs/ directory with subfolders: /user-guides, /developer-docs, /api-specs, /deployment, and /training. Create docs/user-guides/pdf-viewer-guide.md covering: navigating the PDF viewer interface with screenshots, using annotation tools (highlighter, notes, stamps, drawings), saving and managing annotations, downloading annotated PDFs, keyboard shortcuts reference. Create docs/user-guides/admin-guide.md for: managing PDF documents in FilamentPHP resources, setting viewer permissions per user role, configuring toolbar options, monitoring document activity logs.",
+            "status": "pending",
+            "testStrategy": "Verify directory structure exists using 'ls -la docs/' command. Review markdown files for completeness and proper formatting. Test user workflows by following the documented steps.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create developer documentation for FilamentPHP integration",
+            "description": "Develop comprehensive developer guides for integrating PdfViewerField and using NutrientService class in FilamentPHP applications",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Create docs/developer-docs/pdf-viewer-field-integration.md with: step-by-step guide for adding PdfViewerField to FilamentPHP resources, code examples for app/Filament/Forms/Components/PdfViewerField.php usage, available configuration methods (->enableAnnotations(), ->setToolbar(), ->maxFileSize()), event hooks and callbacks, Livewire integration patterns. Create docs/developer-docs/nutrient-sdk-guide.md covering: NutrientService class methods and usage from app/Services/NutrientService.php, SDK initialization with license key configuration, customizing annotation presets, implementing custom toolbar buttons, handling SDK errors and fallbacks.",
+            "status": "pending",
+            "testStrategy": "Test code examples by copying and running them in a test FilamentPHP resource. Verify all referenced file paths exist and methods are documented correctly. Review integration patterns for accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Generate OpenAPI specification and API documentation",
+            "description": "Create comprehensive API documentation using OpenAPI 3.0 specification for all PDF annotation endpoints with interactive HTML documentation",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Create docs/api-specs/openapi.yaml with OpenAPI 3.0 specification for: GET /api/pdf/{document}/annotations endpoint, POST /api/pdf/{document}/annotations endpoint, PUT /api/pdf/annotations/{id} endpoint, DELETE /api/pdf/annotations/{id} endpoint, authentication schemes (Sanctum) and rate limiting (60 req/min). Generate HTML documentation using Redoc or Swagger UI. Include request/response examples using InstantJSON format, error codes, authentication requirements. Reference actual API routes from routes/api.php and controller methods.",
+            "status": "pending",
+            "testStrategy": "Validate OpenAPI spec using 'npx @apidevtools/swagger-cli validate docs/api-specs/openapi.yaml'. Generate and review HTML API documentation. Test API endpoints match documented schemas.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Create configuration and deployment guides",
+            "description": "Document all configuration options from config/nutrient.php and create production deployment checklist with environment setup requirements",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Create docs/deployment/configuration.md documenting all settings in config/nutrient.php: license key setup (NUTRIENT_LICENSE_KEY env variable), toolbar customization arrays, annotation settings, file upload restrictions (50MB limit, allowed MIME types), autosave intervals, viewer options (theme, zoom, scroll modes), performance settings (WebAssembly, caching). Create docs/deployment/production-checklist.md with: pre-deployment verification steps, environment variable requirements, file permission requirements for document storage, CDN setup for Nutrient SDK assets (@nutrient-sdk/viewer: ^1.7.0), SSL certificate requirements, backup procedures for annotation data, monitoring setup for SDK errors.",
+            "status": "pending",
+            "testStrategy": "Verify all configuration options documented match actual config/nutrient.php file. Test deployment checklist on staging environment. Validate environment variable requirements.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Develop training materials and tutorials",
+            "description": "Create step-by-step training materials, interactive demo page, and comprehensive troubleshooting guides for end users",
+            "dependencies": [
+              "10.1",
+              "10.2"
+            ],
+            "details": "Create docs/training/quick-start-guide.md with step-by-step tutorials for common tasks. Plan video tutorial scripts showing: uploading and viewing PDFs, adding annotations, collaborative annotation workflows, exporting annotated documents. Create docs/training/screenshots/ directory with annotated screenshots of all major features. Develop interactive demo page at /demo/pdf-viewer showcasing all features using actual PdfViewerField component. Include troubleshooting section with common issues and solutions.",
+            "status": "pending",
+            "testStrategy": "Test all tutorial steps by following them exactly as documented. Verify screenshots accurately represent current UI. Test demo page functionality with various PDF documents.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Create documentation index and finalize documentation suite",
+            "description": "Build searchable documentation index, ensure consistent formatting across all documentation, and validate version references",
+            "dependencies": [
+              "10.1",
+              "10.2",
+              "10.3",
+              "10.4",
+              "10.5"
+            ],
+            "details": "Create docs/README.md with navigation index linking to all documentation sections. Ensure consistent markdown formatting across all files. Validate all file path references point to actual files in the codebase. Update version numbers to reference @nutrient-sdk/viewer: ^1.7.0 from package.json. Create docs/.gitignore for generated files. Add metadata headers to all documentation files with creation date and version info. Implement search functionality or recommend documentation tools for searchability.",
+            "status": "pending",
+            "testStrategy": "Verify all internal links work correctly. Check that referenced file paths exist. Validate version numbers match package.json. Test documentation index provides easy navigation to all sections.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Database Schema Enhancement for Project Wizard",
+        "description": "Add required database columns and tables to support the wizard functionality including project types, address handling, and auto-generated project numbers",
+        "details": "Create migration to add new columns to projects_projects table: project_type (VARCHAR 50), project_type_other (VARCHAR 255), use_customer_address (BOOLEAN default true). Verify projects_project_addresses table exists with proper relationship fields. Update Project model to include new fillable fields and hasOne projectAddress relationship. Update ProjectAddress model with belongsTo project relationship. These schema changes are foundational for all wizard functionality.",
+        "testStrategy": "Run migration successfully without errors. Verify new columns exist with correct data types and constraints. Test model relationships by creating sample records and accessing related data. Validate foreign key constraints work properly.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Database Migration File",
+            "description": "Create a new Laravel migration file to add required columns to projects_projects table",
+            "dependencies": [],
+            "details": "Use php artisan make:migration command to create migration file for adding project_type, project_type_other, and use_customer_address columns to projects_projects table. Follow Laravel naming conventions and include descriptive migration name.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Add Project Type Columns to Migration",
+            "description": "Implement the migration up() method to add project_type and project_type_other columns",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Add project_type column as VARCHAR(50) and project_type_other as VARCHAR(255) nullable. Include proper column definitions with appropriate data types and constraints. Implement corresponding down() method for rollback.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add Use Customer Address Boolean Column",
+            "description": "Add the use_customer_address boolean column with default true value",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Add use_customer_address column as BOOLEAN with default value true. Ensure proper MySQL/database compatibility for boolean type. Include rollback logic in down() method.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Update Project Model Relationships and Fillable Fields",
+            "description": "Update the Project model to include new fillable fields and establish ProjectAddress relationship",
+            "dependencies": [
+              "11.2",
+              "11.3"
+            ],
+            "details": "Add project_type, project_type_other, and use_customer_address to fillable array. Implement hasOne projectAddress relationship method. Ensure proper relationship configuration with foreign keys and local keys.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Verify and Test Migration and Model Changes",
+            "description": "Run migration, test model relationships, and validate schema changes",
+            "dependencies": [
+              "11.4"
+            ],
+            "details": "Execute migration using php artisan migrate. Test Project model can create records with new fields. Verify ProjectAddress relationship works by creating sample data. Test rollback functionality. Validate foreign key constraints and data integrity.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-01T19:14:58.755Z"
+      },
+      {
+        "id": 12,
+        "title": "Implement HasWizard Trait in CreateProject Page",
+        "description": "Convert the existing CreateProject page from standard form to multi-step wizard using FilamentPHP v4 HasWizard trait",
+        "details": "Add HasWizard trait to CreateProject class. Implement getSteps() method returning array of 5 wizard steps (Discovery, Design, Sourcing, Production, Delivery). Each step should be a Filament\\Forms\\Components\\Wizard\\Step instance with proper schema. Remove existing form() method dependencies and prepare for field distribution across steps. Import required Filament wizard components including Step, HasWizard trait.",
+        "testStrategy": "Verify wizard loads with 5 steps visible. Test navigation between steps works (next/previous/jump). Confirm each step renders without errors. Validate wizard progress indicator displays correctly.",
+        "priority": "high",
+        "dependencies": [
+          "11"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Import FilamentPHP Wizard Components and Add HasWizard Trait",
+            "description": "Add necessary imports for wizard functionality and implement HasWizard trait in CreateProject class",
+            "dependencies": [],
+            "details": "Import Filament\\Forms\\Components\\Wizard\\Step, Filament\\Resources\\Pages\\CreateRecord\\Concerns\\HasWizard trait. Add HasWizard trait to CreateProject class. Update class docblock and remove any conflicting imports.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T19:19:16.820Z"
+          },
+          {
+            "id": 2,
+            "title": "Remove Existing Form Method Dependencies",
+            "description": "Clean up existing form() method and prepare class structure for wizard implementation",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Remove or comment out existing form() method. Identify and preserve any field definitions that will be redistributed across wizard steps. Clean up any form-specific imports that are no longer needed.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T19:19:17.450Z"
+          },
+          {
+            "id": 3,
+            "title": "Implement getSteps Method with 5 Step Structure",
+            "description": "Create the core getSteps() method returning array of 5 wizard steps with proper Step instances",
+            "dependencies": [
+              "12.2"
+            ],
+            "details": "Implement getSteps() method returning array of Step::make() instances for: Discovery, Design, Sourcing, Production, Delivery. Each step should have proper ID, label, and empty schema initially. Ensure proper method signature and return type.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T19:19:18.094Z"
+          },
+          {
+            "id": 4,
+            "title": "Create Basic Step Schemas with Placeholder Fields",
+            "description": "Add basic schema structure to each wizard step with placeholder fields for testing",
+            "dependencies": [
+              "12.3"
+            ],
+            "details": "Add schema() method to each Step with at least one placeholder field (e.g., TextInput) to ensure steps render properly. Use proper field naming conventions and ensure each step has unique field names to avoid conflicts.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T19:19:18.849Z"
+          },
+          {
+            "id": 5,
+            "title": "Test Wizard Navigation and Progress Indicators",
+            "description": "Verify wizard loads correctly with all 5 steps and navigation functions properly",
+            "dependencies": [
+              "12.4"
+            ],
+            "details": "Test that wizard page loads without errors. Verify all 5 steps are visible in progress indicator. Test next/previous navigation between steps. Ensure step jumping works correctly. Validate wizard progress indicator displays current step properly.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-01T19:19:19.571Z"
+          },
+          {
+            "id": 6,
+            "title": "Implement Form State Management Between Steps",
+            "description": "Ensure form data persists correctly when navigating between wizard steps",
+            "dependencies": [
+              "12.5"
+            ],
+            "details": "Test that form data entered in one step persists when navigating to other steps. Implement proper state management if needed. Verify form submission works correctly from final step. Test validation behavior across steps.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-01T19:19:20.282Z"
+      },
+      {
+        "id": 13,
+        "title": "Discovery Step Implementation with Live Summary Panel",
+        "description": "Implement the Discovery step with project fundamentals and integrate the existing ProjectSummaryPanel component for real-time updates",
+        "details": "Create Discovery step schema with fields in specific order: Live Summary Panel (columnSpanFull at top), Company selection (first - establishes context), Customer/Partner selection, Project Name (large font), Project Address section with toggle for customer address vs custom address, auto-generated Project Number (read-only), Description (RichEditor), Project Manager, Project Type selection. Use Grid layouts for proper field positioning. Implement conditional visibility for project address fields based on use_customer_address toggle.",
+        "testStrategy": "Test field order and layout match requirements. Verify Live Summary Panel renders at top and updates in real-time. Test address toggle shows/hides project address fields properly. Validate all field types render correctly with proper styling.",
+        "priority": "high",
+        "dependencies": [
+          "12"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Discovery Step Schema Structure",
+            "description": "Set up the basic Discovery step schema with proper field ordering and Grid layout configuration",
+            "dependencies": [],
+            "details": "Create the Discovery step schema class with Grid layout wrapper. Define the field order structure: Live Summary Panel at top (columnSpanFull), followed by Company selection, Customer/Partner selection, Project Name, Project Address section, Project Number, Description, Project Manager, and Project Type. Set up proper grid positioning for each field group.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Integrate ProjectSummaryPanel Livewire Component",
+            "description": "Integrate the existing ProjectSummaryPanel component into the Discovery step with proper positioning",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "Use Livewire::make() to integrate the existing ProjectSummaryPanel component at the top of the Discovery step. Configure it with columnSpanFull() to span the entire width. Ensure the component renders properly within the FilamentPHP wizard context and maintains its existing functionality.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Company and Partner Selection Fields",
+            "description": "Create company and partner selection fields with proper relationships and context establishment",
+            "dependencies": [
+              "13.2"
+            ],
+            "details": "Implement company_id selection field with relationship to company model, making it searchable and preloadable. Add partner/customer selection field with proper relationship configuration. Ensure company selection establishes context for other fields and displays first in the field order.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Create Project Name and Number Fields",
+            "description": "Implement project name field with large font styling and auto-generated project number display",
+            "dependencies": [
+              "13.3"
+            ],
+            "details": "Create project name field with large font styling for prominence. Implement auto-generated project number field as read-only with proper formatting. Ensure project number shows appropriate placeholder text during creation and actual number after saving.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement Project Address Section with Conditional Logic",
+            "description": "Create project address section with toggle for customer address vs custom address",
+            "dependencies": [
+              "13.4"
+            ],
+            "details": "Implement project address section with use_customer_address toggle field. Create conditional visibility logic that shows/hides project address fields based on toggle state. When enabled, use customer address; when disabled, show custom address input fields. Ensure proper field grouping and layout.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Add Description, Project Manager, and Project Type Fields",
+            "description": "Implement the remaining core fields with proper styling and relationships",
+            "dependencies": [
+              "13.5"
+            ],
+            "details": "Add description field using RichEditor for rich text input. Implement project manager selection field with user relationship. Create project type selection field with proper options and styling. Ensure all fields maintain consistent styling and proper grid positioning.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Test Discovery Step Integration and Real-time Updates",
+            "description": "Validate Discovery step functionality, field ordering, and ProjectSummaryPanel real-time updates",
+            "dependencies": [
+              "13.6"
+            ],
+            "details": "Test complete Discovery step functionality including field order verification, ProjectSummaryPanel rendering at top with real-time updates, address toggle conditional visibility, proper styling for all field types, and overall layout consistency. Verify integration with wizard flow and data persistence.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Project Number Auto-Generation System",
+        "description": "Implement the complex project number auto-generation logic based on company acronym, project ID, and address parsing",
+        "details": "Implement generateProjectNumber() method with format: {COMPANY_ACRONYM}{UNIQUE_ID}-{STREET_NUMBER}-{STREET_NAME}. Parse company acronym from code field or company name first 3 letters. Extract street number using regex from street1 field. Clean street name by removing number prefix, street type suffixes, special characters, limit to 15 chars. Handle edge cases: no address (use UNNAMED/0), customer address vs project address. Implement in afterCreate() hook since project ID needed. Update mutateFormDataBeforeCreate() to defer generation.",
+        "testStrategy": "Test generation with various address formats. Verify proper parsing of street numbers and names. Test company acronym extraction from different company name formats. Validate edge cases like missing addresses generate fallback values. Confirm project numbers are unique and follow specified format.",
+        "priority": "medium",
+        "dependencies": [
+          "13"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Company Acronym Parsing Logic",
+            "description": "Create logic to extract company acronym from code field or generate from company name first 3 letters",
+            "dependencies": [],
+            "details": "Implement parsing logic that first checks for company.code field, falls back to extracting first 3 letters from company.name if code is empty. Handle edge cases like null values, short names, special characters. Ensure uppercase formatting for consistency.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create Street Address Parsing Functions",
+            "description": "Implement regex-based parsing to extract street number and clean street name from address",
+            "dependencies": [],
+            "details": "Create functions to extract street number using regex patterns from street1 field. Implement street name cleaning logic to remove number prefix, street type suffixes (St, Ave, Rd), special characters. Limit street name to 15 characters and handle various address formats.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Build generateProjectNumber() Core Method",
+            "description": "Create the main generateProjectNumber() method that combines all parsing logic into the required format",
+            "dependencies": [
+              "14.1",
+              "14.2"
+            ],
+            "details": "Implement generateProjectNumber() method in Project model that combines company acronym, unique ID, street number, and street name into format: {COMPANY_ACRONYM}{UNIQUE_ID}-{STREET_NUMBER}-{STREET_NAME}. Handle edge cases for missing addresses using UNNAMED/0 fallback values.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Integrate afterCreate() Hook for Auto-Generation",
+            "description": "Add afterCreate() Eloquent hook to automatically generate project numbers after model creation",
+            "dependencies": [
+              "14.3"
+            ],
+            "details": "Implement afterCreate() observer hook in Project model to call generateProjectNumber() method. Update mutateFormDataBeforeCreate() to defer project number generation until after creation when project ID is available. Ensure proper error handling and database transaction safety.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Test Address Formats and Edge Cases",
+            "description": "Comprehensive testing of project number generation with various address formats and edge cases",
+            "dependencies": [
+              "14.4"
+            ],
+            "details": "Test generation with different address formats (numeric, alphanumeric, apartment numbers). Verify proper handling of missing addresses, customer vs project addresses. Test company acronym extraction from various company name formats. Validate uniqueness and format compliance across different scenarios.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Design Step Implementation",
+        "description": "Create the Design step with project timeline and resource allocation fields including dates, hours, and tags",
+        "details": "Implement Design step with DatePicker fields for start_date and end_date (native: false for FilamentPHP pickers). Add allocated_hours TextInput with numeric type, step 0.5, min 0, suffix translation, helper text for hour format. Implement tags Select with belongsToMany relationship, multiple selection, searchable/preloadable, create option. Use two-column Grid layout for date fields, full width for others. Preserve all existing field configurations from ProjectResource.",
+        "testStrategy": "Test date pickers function properly with FilamentPHP native components. Verify numeric hour input accepts decimal values with proper validation. Test tags selection with multiple values and create new tag functionality. Validate field layouts display correctly in two-column grid.",
+        "priority": "medium",
+        "dependencies": [
+          "13"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Date Picker Fields",
+            "description": "Create start_date and end_date DatePicker fields with FilamentPHP native components in two-column grid layout",
+            "dependencies": [],
+            "details": "Implement DatePicker fields for start_date and end_date with native: false configuration for FilamentPHP pickers. Set up two-column Grid layout for these date fields. Ensure proper date validation and formatting.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Add Allocated Hours Input Field",
+            "description": "Create allocated_hours TextInput with numeric validation, decimal support, and proper formatting",
+            "dependencies": [
+              "15.1"
+            ],
+            "details": "Add allocated_hours TextInput with numeric type, step 0.5, min 0 validation. Include suffix translation and helper text for hour format explanation. Set full width layout and ensure decimal hour input works correctly.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Tags Relationship Field",
+            "description": "Create tags Select field with belongsToMany relationship, multiple selection, and create option functionality",
+            "dependencies": [
+              "15.2"
+            ],
+            "details": "Implement tags Select field with belongsToMany relationship configuration. Enable multiple selection, searchable and preloadable options. Add create option for new tag creation. Set full width layout for the field.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test Design Step Integration",
+            "description": "Validate all Design step fields work correctly with proper layout, data persistence, and user interactions",
+            "dependencies": [
+              "15.3"
+            ],
+            "details": "Test date pickers function properly with FilamentPHP native components. Verify numeric hour input accepts decimal values with proper validation. Test tags selection with multiple values and create new tag functionality. Validate field layouts display correctly in two-column grid for dates and full width for other fields.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Sourcing Step Implementation",
+        "description": "Implement the Sourcing step with vendor and company information plus custom fields integration",
+        "details": "Create Sourcing step with Company selection field (company_id) with relationship to 'company', searchable/preloadable, create option linking to CompanyResource::form(). Integrate custom fields using HasCustomFields::mergeCustomFormFields() method with sourcing context. Wrap in Section titled 'Sourcing Information'. Ensure proper field ordering and layout consistency with other steps.",
+        "testStrategy": "Test company selection works with search and create functionality. Verify custom fields render properly when merged. Test Section layout displays correctly. Validate relationships and data saving work as expected.",
+        "priority": "medium",
+        "dependencies": [
+          "15"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Company Selection Field with Relationship",
+            "description": "Implement the company selection field with proper relationship configuration, searchability, and create option functionality",
+            "dependencies": [],
+            "details": "Create Select field for company_id with relationship('company') configuration. Enable searchable and preloadable options for better UX. Implement createOptionForm() linking to CompanyResource::form() to allow inline company creation. Ensure proper field validation and relationship binding.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Integrate Custom Fields with HasCustomFields Trait",
+            "description": "Integrate the HasCustomFields::mergeCustomFormFields() method with sourcing context for dynamic field addition",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "Use HasCustomFields::mergeCustomFormFields() method with 'sourcing' context parameter to dynamically add custom fields to the form schema. Ensure proper field ordering and that custom fields appear after the company selection field. Handle any edge cases in the trait implementation.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Section Layout and Field Organization",
+            "description": "Wrap the sourcing fields in a proper Section component with consistent styling and field ordering",
+            "dependencies": [
+              "16.2"
+            ],
+            "details": "Create Section component titled 'Sourcing Information' to wrap all sourcing-related fields. Ensure proper field ordering with company selection first, followed by any custom fields. Maintain layout consistency with other wizard steps and apply appropriate styling.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test Relationship Functionality and Data Persistence",
+            "description": "Validate that company relationships, custom fields, and data persistence work correctly across wizard steps",
+            "dependencies": [
+              "16.3"
+            ],
+            "details": "Test company selection search and create functionality works properly. Verify custom fields render correctly and maintain their values. Test data persistence across wizard step navigation. Validate that all sourcing data saves correctly when the wizard is submitted.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Production Step Implementation",
+        "description": "Create the Production step with task management settings and milestone configuration",
+        "details": "Implement Production step with Task Management section containing allow_milestones Toggle (default true, helper text about monitoring milestones, conditional visibility on TaskSettings::enable_milestones). Integrate custom fields using HasCustomFields::mergeCustomFormFields() with production context. Use Fieldset or Section wrapper for task management group. Ensure proper conditional logic for milestone visibility.",
+        "testStrategy": "Test milestone toggle functions with proper default value and helper text. Verify conditional visibility works based on TaskSettings configuration. Test custom fields integration renders correctly. Validate section/fieldset layout displays properly.",
+        "priority": "medium",
+        "dependencies": [
+          "16"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Production Step Schema Foundation",
+            "description": "Set up the basic Production step structure with proper schema definition and form organization",
+            "dependencies": [],
+            "details": "Create the Production step schema within the project wizard form. Set up the basic structure with proper step ordering and form foundation. Ensure the step integrates properly with the existing wizard flow and follows the established patterns from other steps.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Task Management Section with Milestone Toggle",
+            "description": "Create the Task Management section containing the allow_milestones toggle with proper configuration",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "Implement the Task Management section with allow_milestones Toggle field. Set default value to true, add helper text about monitoring milestones, and implement conditional visibility based on TaskSettings::enable_milestones. Use Fieldset or Section wrapper for proper grouping and styling.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Integrate Custom Fields with Production Context",
+            "description": "Add custom fields integration using HasCustomFields trait with production-specific context",
+            "dependencies": [
+              "17.2"
+            ],
+            "details": "Integrate custom fields using HasCustomFields::mergeCustomFormFields() method with production context parameter. Ensure custom fields are properly merged into the form schema and display correctly within the Production step layout.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test Toggle Functionality and Conditional Logic",
+            "description": "Verify milestone toggle works correctly with proper conditional visibility and validation",
+            "dependencies": [
+              "17.3"
+            ],
+            "details": "Test that the allow_milestones toggle functions with proper default value and helper text. Verify conditional visibility works based on TaskSettings::enable_milestones configuration. Test custom fields integration renders correctly and validate section/fieldset layout displays properly.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Create Production Step Form Structure",
+            "description": "Set up the basic Production step form with proper step configuration and section wrapper",
+            "dependencies": [],
+            "details": "Create the Production step in the wizard form structure. Implement the main Section or Fieldset wrapper titled 'Task Management' that will contain all production-related fields. Ensure the step follows the existing wizard pattern and integrates properly with the step navigation flow. Set up the base structure that will hold the milestone toggle and custom fields.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Milestone Toggle Field",
+            "description": "Add the allow_milestones Toggle field with default value and helper text",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "Implement the allow_milestones Toggle field within the Task Management section. Set the default value to true. Add helper text explaining 'Enable milestone tracking for production monitoring'. Configure the field to use the proper FilamentPHP Toggle component with all necessary attributes including name binding and state management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Add Conditional Visibility Logic",
+            "description": "Implement conditional visibility for the milestone toggle based on TaskSettings configuration",
+            "dependencies": [
+              "17.2"
+            ],
+            "details": "Add the visible() method to the allow_milestones Toggle field that checks TaskSettings::enable_milestones value. Implement proper callback function that returns true/false based on the global TaskSettings configuration. Ensure the field only displays when the system-wide milestone feature is enabled. Test that the conditional logic properly hides/shows the field.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Integrate Custom Fields with Production Context",
+            "description": "Merge custom fields using HasCustomFields trait with production-specific context",
+            "dependencies": [
+              "17.3"
+            ],
+            "details": "Call HasCustomFields::mergeCustomFormFields() method with 'production' as the context parameter. Ensure the custom fields are properly appended to the existing form fields in the Production step. Verify the merged fields maintain proper ordering and don't conflict with the milestone toggle. Test that custom fields render correctly within the Task Management section wrapper.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Delivery Step Implementation",
+        "description": "Create the final Delivery step with project visibility settings and timesheet configuration",
+        "details": "Implement Delivery step with Settings section containing visibility Radio field with three options (Private/Internal/Public) with descriptions, default Internal. Add Time Management section with allow_timesheets Toggle (default false, helper text, conditional on TimeSettings::enable_timesheets). Use vertical radio layout and proper section grouping. Preserve all existing ProjectVisibility enum values and helper texts.",
+        "testStrategy": "Test radio button selection with proper default (Internal). Verify all three visibility options display with correct descriptions. Test timesheet toggle with conditional visibility. Validate section groupings display correctly with proper styling.",
+        "priority": "medium",
+        "dependencies": [
+          "17"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Settings Section with Visibility Radio Field",
+            "description": "Implement the Settings section containing the visibility radio field with three options (Private/Internal/Public) including descriptions and Internal as default",
+            "dependencies": [],
+            "details": "Create a Section titled 'Settings' and add a Radio field for project visibility with three options: Private, Internal (default), and Public. Each option should include descriptive text explaining the visibility level. Use vertical radio layout for better readability. Preserve all existing ProjectVisibility enum values and helper texts from the existing codebase.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Time Management Section with Timesheet Toggle",
+            "description": "Create the Time Management section containing the allow_timesheets toggle with conditional visibility based on TimeSettings configuration",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Add a 'Time Management' section with an allow_timesheets Toggle field. Set default value to false and include helper text explaining timesheet functionality. Implement conditional visibility based on TimeSettings::enable_timesheets configuration. Ensure proper section grouping and layout consistency with other wizard steps.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Configure Field Layouts and Section Grouping",
+            "description": "Set up proper section grouping, radio layouts, and overall step organization for the Delivery step",
+            "dependencies": [
+              "18.2"
+            ],
+            "details": "Organize the Delivery step with proper section grouping using FilamentPHP Section components. Configure vertical radio layout for the visibility field. Ensure consistent styling and spacing between sections. Implement proper field ordering with Settings section first, followed by Time Management section.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test Field Interactions and Data Persistence",
+            "description": "Validate all field functionality, conditional visibility, and data saving for the Delivery step",
+            "dependencies": [
+              "18.3"
+            ],
+            "details": "Test radio button selection with proper default (Internal) value. Verify all three visibility options display with correct descriptions. Test timesheet toggle conditional visibility based on TimeSettings configuration. Validate section groupings display correctly with proper styling. Ensure data persistence works correctly for all fields when saving the project.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "title": "Live Summary Panel Integration and Real-time Updates",
+        "description": "Enhance the existing ProjectSummaryPanel component to work with wizard fields and implement real-time updates using Livewire and Alpine.js",
+        "details": "Update ProjectSummaryPanel component to handle new wizard fields: project_type, company_id, partner_id relationships. Implement Alpine.js watchers for real-time field updates without server roundtrips. Add formatters for displaying friendly values (company names vs IDs). Handle project number display showing 'Will be assigned on save' during creation. Position panel using Livewire::make() component with columnSpanFull() in Discovery step. Ensure proper reactive updates as users type/select.",
+        "testStrategy": "Test real-time updates work as user types in form fields. Verify friendly display names show instead of raw IDs. Test panel updates without causing server requests. Validate panel positioning and responsive layout. Confirm project number placeholder displays correctly.",
+        "priority": "high",
+        "dependencies": [
+          "14"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update ProjectSummaryPanel Component Properties",
+            "description": "Modify the existing ProjectSummaryPanel component to handle new wizard fields including project_type, company_id, and partner_id relationships",
+            "dependencies": [],
+            "details": "Update the ProjectSummaryPanel component class to accept and process the new wizard fields: project_type, company_id, and partner_id. Modify the component's properties and methods to handle these new relationship fields. Ensure the component can receive data from the wizard form state and process it appropriately for display.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Alpine.js Watchers for Real-time Updates",
+            "description": "Add Alpine.js watchers to monitor form field changes and update the summary panel without server requests",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Implement Alpine.js watchers using x-data and x-watch directives to monitor changes in project_type, company_id, and partner_id fields. Set up reactive data binding that updates the summary panel in real-time as users type or select values. Ensure updates happen client-side without triggering server requests.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add Value Formatters for Friendly Display",
+            "description": "Create formatters to display human-readable names instead of raw IDs for company and partner relationships",
+            "dependencies": [
+              "19.2"
+            ],
+            "details": "Implement formatters that convert raw IDs to friendly display names. For company_id, display the company name; for partner_id, display the partner name; for project_type, display the formatted type label. Handle cases where relationships haven't been loaded yet or IDs are invalid.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Handle Project Number Placeholder Logic",
+            "description": "Implement logic to show 'Will be assigned on save' placeholder for project number during creation",
+            "dependencies": [
+              "19.3"
+            ],
+            "details": "Add conditional logic to detect when a project is being created (no existing project number) and display the placeholder text 'Will be assigned on save'. Ensure this placeholder is shown appropriately in the summary panel and updates correctly based on the project creation state.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Integrate Component with Livewire and Position in Discovery Step",
+            "description": "Position the ProjectSummaryPanel using Livewire::make() with columnSpanFull() in the Discovery step",
+            "dependencies": [
+              "19.4"
+            ],
+            "details": "Integrate the enhanced ProjectSummaryPanel component into the Discovery step using Livewire::make() component method with columnSpanFull() positioning. Ensure proper placement within the step layout and verify the component renders correctly within the wizard form structure.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Test and Validate Reactive Updates",
+            "description": "Comprehensive testing of real-time updates, form integration, and responsive behavior",
+            "dependencies": [
+              "19.5"
+            ],
+            "details": "Test that real-time updates work as users type in form fields without causing server requests. Verify friendly display names show instead of raw IDs. Test panel updates and positioning work correctly. Validate project number placeholder displays appropriately. Ensure responsive layout and proper integration with the wizard flow.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Project Address Management and Conditional Logic",
+        "description": "Implement the project address system with conditional fields and proper data handling for customer vs custom addresses",
+        "details": "Implement use_customer_address toggle with default true value. Add conditional project address fields (street1, street2, city, state, zip, country) with visible() callback checking toggle state. Update mutateFormDataBeforeCreate() to handle address logic: if using customer address, don't create ProjectAddress record; if custom address, create related ProjectAddress record. Integrate address data into Live Summary Panel and project number generation. Use Grid layout for address fields.",
+        "testStrategy": "Test address toggle shows/hides fields properly. Verify conditional logic saves data correctly based on toggle state. Test customer address vs project address display in summary panel. Validate project address creation only when custom address selected. Test grid layout for address fields displays properly.",
+        "priority": "medium",
+        "dependencies": [
+          "19"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement use_customer_address toggle field with default value",
+            "description": "Add the use_customer_address toggle field to the project creation form with default true value and proper styling",
+            "dependencies": [],
+            "details": "Add Toggle::make('use_customer_address') field to the project form with ->default(true) and ->label('Use Customer Address'). Position the toggle appropriately in the form layout before the address fields section. Ensure the field is properly styled and accessible.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create conditional project address fields with visible() callbacks",
+            "description": "Implement the project address fields (street1, street2, city, state, zip, country) that show/hide based on the toggle state",
+            "dependencies": [
+              "20.1"
+            ],
+            "details": "Add TextInput fields for street1, street2, city, state, zip, and country with ->visible(fn (Get $get) => !$get('use_customer_address')) callbacks. Implement proper validation rules for required fields when custom address is selected. Use Grid layout to organize address fields in a responsive 2-column layout.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Update mutateFormDataBeforeCreate() for conditional address logic",
+            "description": "Implement the address handling logic in the form's mutateFormDataBeforeCreate method",
+            "dependencies": [
+              "20.2"
+            ],
+            "details": "Update the mutateFormDataBeforeCreate() method to check use_customer_address value. If true, remove project address fields from form data to prevent creation of ProjectAddress record. If false, prepare address data for ProjectAddress model creation. Ensure proper data validation and sanitization.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement ProjectAddress record creation logic",
+            "description": "Handle the conditional creation of ProjectAddress records based on the address toggle state",
+            "dependencies": [
+              "20.3"
+            ],
+            "details": "Implement logic to create ProjectAddress records only when use_customer_address is false. Use the existing ProjectAddress model and establish proper relationship with the Project model. Ensure the address data is properly validated and stored with correct foreign key relationships.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Integrate address data into Live Summary Panel",
+            "description": "Update the ProjectSummaryPanel to display appropriate address information based on the toggle state",
+            "dependencies": [
+              "20.4"
+            ],
+            "details": "Modify the ProjectSummaryPanel component to show either customer address or project address based on the use_customer_address toggle. Implement proper address formatting and display logic. Ensure real-time updates when the toggle state changes using Alpine.js watchers.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Update project number generation to use correct address data",
+            "description": "Modify the project number generation logic to use the appropriate address source for parsing street information",
+            "dependencies": [
+              "20.5"
+            ],
+            "details": "Update the generateProjectNumber() method to check use_customer_address flag and extract street information from either customer address or project address accordingly. Ensure proper fallback handling when address data is missing. Test with various address formats and edge cases.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-10-01T19:19:20.283Z",
+      "taskCount": 20,
+      "completedCount": 9,
+      "tags": [
+        "master"
+      ],
+      "created": "2025-10-01T22:35:39.290Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
