@@ -26,39 +26,56 @@
     if (!empty($data['project_type'])) {
         $projectType = ucfirst(str_replace('_', ' ', $data['project_type']));
     }
+
+    // Get project address
+    $projectAddress = '—';
+    if (!empty($data['project_address']['street1'])) {
+        $addressParts = [];
+        if (!empty($data['project_address']['street1'])) {
+            $addressParts[] = $data['project_address']['street1'];
+        }
+        if (!empty($data['project_address']['city'])) {
+            $addressParts[] = $data['project_address']['city'];
+        }
+        if (!empty($data['project_address']['state'])) {
+            $addressParts[] = $data['project_address']['state'];
+        }
+        $projectAddress = implode(', ', $addressParts);
+    }
 @endphp
 
 <div class="fi-section rounded-xl shadow-lg ring-1 ring-gray-950/10 dark:ring-white/10 mt-6" style="position: sticky; bottom: 0; z-index: 40; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid rgb(59, 130, 246);">
     <div class="fi-section-content p-3">
         <div class="flex items-center justify-between gap-4">
-            {{-- Left Column: Double-row info --}}
+            {{-- Column 1: Company, Customer, Project Address --}}
             <div class="flex flex-col gap-2">
-                {{-- Row 1: Company and Customer --}}
-                <div class="flex items-center gap-8 text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-500 dark:text-gray-400">Company:</span>
-                        <span class="text-gray-900 dark:text-gray-100">{{ $companyName }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-500 dark:text-gray-400">Customer:</span>
-                        <span class="text-gray-900 dark:text-gray-100">{{ $customerName }}</span>
-                    </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">Company:</span>
+                    <span class="text-gray-900 dark:text-gray-100">{{ $companyName }}</span>
                 </div>
-
-                {{-- Row 2: Type and Linear Feet --}}
-                <div class="flex items-center gap-8 text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-500 dark:text-gray-400">Type:</span>
-                        <span class="text-gray-900 dark:text-gray-100">{{ $projectType }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-500 dark:text-gray-400">Linear Feet:</span>
-                        <span class="font-semibold text-gray-900 dark:text-gray-100">{{ $linearFeet ? $linearFeet . ' LF' : '—' }}</span>
-                    </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">Customer:</span>
+                    <span class="text-gray-900 dark:text-gray-100">{{ $customerName }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">Project Address:</span>
+                    <span class="text-gray-900 dark:text-gray-100">{{ $projectAddress }}</span>
                 </div>
             </div>
 
-            {{-- Center: Action Buttons --}}
+            {{-- Column 2: Type and Linear Feet --}}
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">Type:</span>
+                    <span class="text-gray-900 dark:text-gray-100">{{ $projectType }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">Linear Feet:</span>
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">{{ $linearFeet ? $linearFeet . ' LF' : '—' }}</span>
+                </div>
+            </div>
+
+            {{-- Column 3: Action Buttons --}}
             <div class="flex items-center gap-3">
                 <x-filament::button
                     type="submit"
