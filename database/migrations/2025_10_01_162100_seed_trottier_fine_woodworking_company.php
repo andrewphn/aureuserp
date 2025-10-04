@@ -21,8 +21,8 @@ return new class extends Migration
         // Get the United States dollar currency ID
         $currencyId = DB::table('currencies')->where('name', 'United States dollar')->value('id');
 
-        // Get the first user ID for creator
-        $creatorId = DB::table('users')->first()->id ?? 1;
+        // Get the first user ID for creator (nullable - will be set later when users exist)
+        $creatorId = DB::table('users')->first()->id ?? null;
 
         // Create a partner for Trottier Fine Woodworking first
         $partnerId = DB::table('partners_partners')->insertGetId([
