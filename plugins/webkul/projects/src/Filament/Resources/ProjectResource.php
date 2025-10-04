@@ -420,22 +420,13 @@ class ProjectResource extends Resource
                                     ->helperText(__('projects::filament/resources/project.form.sections.additional.fields.allocated-hours-helper-text'))
                                     ->visible(static::getTimeSettings()->enable_timesheets)
                                     ->rules(['nullable', 'numeric', 'min:0']),
-                            ]))
-                            ->columns(2),
-
-                        Section::make('Team & Organization')
-                            ->schema([
                                 Select::make('user_id')
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.project-manager'))
                                     ->relationship('user', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->createOptionForm(fn (Schema $schema) => UserResource::form($schema)),
-                                TagSelectorPanel::make('tags')
-                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
-                                    ->relationship(name: 'tags', titleAttribute: 'name')
-                                    ->columnSpan('full'),
-                            ])
+                            ]))
                             ->columns(2),
                     ])
                     ->columnSpan(['lg' => 2]),
@@ -508,6 +499,15 @@ class ProjectResource extends Resource
                                     ])
                                     ->visible(fn ($context) => $context === 'edit')
                                     ->columnSpanFull(),
+                            ])
+                            ->collapsible()
+                            ->collapsed(false),
+
+                        Section::make('Project Tags')
+                            ->schema([
+                                TagSelectorPanel::make('tags')
+                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
+                                    ->columnSpan('full'),
                             ])
                             ->collapsible()
                             ->collapsed(false),
