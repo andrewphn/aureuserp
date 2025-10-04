@@ -14,7 +14,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\View;
+use App\Forms\Components\TagSelectorPanel;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -431,10 +431,9 @@ class ProjectResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->createOptionForm(fn (Schema $schema) => UserResource::form($schema)),
-                                View::make('forms.components.tag-selector-panel')
+                                TagSelectorPanel::make('tags')
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
                                     ->relationship(name: 'tags', titleAttribute: 'name')
-                                    ->statePath('tags')
                                     ->columnSpan('full'),
                             ])
                             ->columns(2),
