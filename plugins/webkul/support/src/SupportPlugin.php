@@ -41,10 +41,11 @@ class SupportPlugin implements Plugin
                 document.addEventListener('livewire:navigated', function() {
                     setTimeout(() => {
                         const activeSidebarItem = document.querySelector('nav .fi-sidebar-item-active');
-
                         const sidebarWrapper = document.querySelector('nav.fi-sidebar-nav');
-    
-                        sidebarWrapper.scrollTo(0, activeSidebarItem.offsetTop - 250);
+
+                        if (activeSidebarItem && sidebarWrapper) {
+                            sidebarWrapper.scrollTo(0, activeSidebarItem.offsetTop - 250);
+                        }
                     }, 0);
                 });
             </script>
