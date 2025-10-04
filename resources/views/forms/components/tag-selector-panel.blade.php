@@ -19,8 +19,10 @@
 
             filteredTags(tags) {
                 if (!this.searchQuery) return tags;
+                const query = this.searchQuery.toLowerCase();
                 return tags.filter(tag =>
-                    tag.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    tag.name.toLowerCase().includes(query) ||
+                    (tag.type && tag.type.toLowerCase().includes(query))
                 );
             },
 
@@ -136,6 +138,7 @@
                                     }"
                                     class="px-2 py-1 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded-md transition-all"
                                     :style="tag.color ? 'border-left: 3px solid ' + tag.color : ''"
+                                    :title="tag.description"
                                     x-text="tag.name"
                                 ></button>
                             </template>
