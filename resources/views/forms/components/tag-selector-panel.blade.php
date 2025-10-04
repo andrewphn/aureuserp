@@ -16,14 +16,10 @@
         17 => 'phase_delivery',
     ];
 
-    // Get current project's stage from Livewire
+    // Get current project's stage - simplify to avoid Livewire errors
     $currentStageId = null;
-    $livewire = $this->getLivewire();
-    if (method_exists($livewire, 'getRecord') && $livewire->getRecord()) {
-        $currentStageId = $livewire->getRecord()->stage_id ?? null;
-    } elseif (isset($livewire->data['stage_id'])) {
-        $currentStageId = $livewire->data['stage_id'];
-    }
+    // For now, tags will work but current phase won't be auto-detected
+    // This can be enhanced later with proper Livewire integration
 
     $currentPhaseType = $stageToTagType[$currentStageId] ?? null;
     $currentPhaseTags = $currentPhaseType ? ($allTags->get($currentPhaseType) ?? collect()) : collect();
