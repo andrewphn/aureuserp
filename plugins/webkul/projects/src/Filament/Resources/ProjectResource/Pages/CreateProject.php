@@ -111,8 +111,8 @@ class CreateProject extends CreateRecord
                     'street2' => $addressData['street2'] ?? null,
                     'city' => $addressData['city'] ?? null,
                     'zip' => $addressData['zip'] ?? null,
-                    'state_id' => null, // We're storing state as text, not ID
-                    'country_id' => null,
+                    'country_id' => $addressData['country_id'] ?? null,
+                    'state_id' => $addressData['state_id'] ?? null,
                     'is_primary' => true,
                 ]);
             }

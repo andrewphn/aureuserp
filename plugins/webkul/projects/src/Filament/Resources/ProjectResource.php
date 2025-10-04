@@ -224,27 +224,42 @@ class ProjectResource extends Resource
                                     ->label('Use customer address for project location')
                                     ->default(true)
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
+                                        // Only auto-populate if this is NOT an edit page with existing address
+                                        $isEditPage = $livewire instanceof \Filament\Resources\Pages\EditRecord;
+                                        $hasExistingAddress = false;
+
+                                        if ($isEditPage && $livewire->record) {
+                                            $hasExistingAddress = $livewire->record->addresses()->count() > 0;
+                                        }
+
+                                        // Don't override if editing and address exists in database
+                                        if ($isEditPage && $hasExistingAddress) {
+                                            return;
+                                        }
+
                                         if ($state) {
                                             // Populate from customer
                                             $partnerId = $get('partner_id');
                                             if ($partnerId) {
-                                                $partner = \Webkul\Partner\Models\Partner::with('state')->find($partnerId);
+                                                $partner = \Webkul\Partner\Models\Partner::with(['state', 'country'])->find($partnerId);
                                                 if ($partner) {
                                                     $set('project_address.street1', $partner->street1);
                                                     $set('project_address.street2', $partner->street2);
                                                     $set('project_address.city', $partner->city);
                                                     $set('project_address.zip', $partner->zip);
-                                                    $set('project_address.state', $partner->state?->name);
+                                                    $set('project_address.country_id', $partner->country_id);
+                                                    $set('project_address.state_id', $partner->state_id);
                                                 }
                                             }
                                         } else {
-                                            // Clear fields
+                                            // Clear fields only if not editing with existing address
                                             $set('project_address.street1', null);
                                             $set('project_address.street2', null);
                                             $set('project_address.city', null);
                                             $set('project_address.zip', null);
-                                            $set('project_address.state', null);
+                                            $set('project_address.country_id', null);
+                                            $set('project_address.state_id', null);
                                         }
                                     })
                                     ->inline()
@@ -271,8 +286,29 @@ class ProjectResource extends Resource
                                         ->label('City')
                                         ->disabled(fn (callable $get) => $get('use_customer_address'))
                                         ->dehydrated(),
-                                    TextInput::make('project_address.state')
+                                    Select::make('project_address.country_id')
+                                        ->label('Country')
+                                        ->options(\Webkul\Support\Models\Country::pluck('name', 'id'))
+                                        ->searchable()
+                                        ->preload()
+                                        ->live()
+                                        ->afterStateUpdated(function (callable $set) {
+                                            $set('project_address.state_id', null);
+                                        })
+                                        ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                        ->dehydrated(),
+                                    Select::make('project_address.state_id')
                                         ->label('State')
+                                        ->options(function (callable $get) {
+                                            $countryId = $get('project_address.country_id');
+                                            if (!$countryId) {
+                                                return [];
+                                            }
+                                            return \Webkul\Support\Models\State::where('country_id', $countryId)
+                                                ->pluck('name', 'id');
+                                        })
+                                        ->searchable()
+                                        ->preload()
                                         ->disabled(fn (callable $get) => $get('use_customer_address'))
                                         ->dehydrated(),
                                     TextInput::make('project_address.zip')
@@ -400,6 +436,72 @@ class ProjectResource extends Resource
                                     ->multiple()
                                     ->searchable()
                                     ->preload()
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
+                                    ->getSearchResultsUsing(function (string $search, $livewire) {
+                                        // Map stage IDs to tag types
+                                        $stageToTagType = [
+                                            13 => 'phase_discovery',  // Discovery stage
+                                            14 => 'phase_design',     // Design stage
+                                            15 => 'phase_sourcing',   // Sourcing stage
+                                            16 => 'phase_production', // Production stage
+                                            17 => 'phase_delivery',   // Delivery stage
+                                        ];
+
+                                        // Get current project's stage
+                                        $currentStageId = null;
+                                        if ($livewire instanceof \Filament\Resources\Pages\EditRecord) {
+                                            $currentStageId = $livewire->record->stage_id;
+                                        } elseif ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
+                                            $currentStageId = $livewire->data['stage_id'] ?? null;
+                                        }
+
+                                        $currentPhaseType = $stageToTagType[$currentStageId] ?? null;
+
+                                        $tags = \Webkul\Project\Models\Tag::where('name', 'like', "%{$search}%")
+                                            ->limit(50)
+                                            ->get();
+
+                                        // Group tags with current phase first
+                                        $grouped = $tags->groupBy(function ($tag) use ($currentPhaseType) {
+                                            $typeLabels = [
+                                                'priority' => '🎯 Priority',
+                                                'health' => '💚 Health Status',
+                                                'risk' => '⚠️ Risk Factors',
+                                                'complexity' => '📊 Complexity',
+                                                'work_scope' => '🔨 Work Scope',
+                                                'phase_discovery' => '🔍 Discovery Phase',
+                                                'phase_design' => '🎨 Design Phase',
+                                                'phase_sourcing' => '📦 Sourcing Phase',
+                                                'phase_production' => '⚙️ Production Phase',
+                                                'phase_delivery' => '🚚 Delivery Phase',
+                                                'special_status' => '⭐ Special Status',
+                                                'lifecycle' => '🔄 Lifecycle',
+                                            ];
+
+                                            $label = $typeLabels[$tag->type] ?? ucfirst($tag->type);
+
+                                            // Add "CURRENT PHASE" prefix if this is the current stage's tags
+                                            if ($currentPhaseType && $tag->type === $currentPhaseType) {
+                                                $label = '⭐ CURRENT PHASE → ' . $label;
+                                            }
+
+                                            return $label;
+                                        });
+
+                                        // Sort so current phase appears first
+                                        $sorted = $grouped->sortBy(function ($tags, $key) {
+                                            return str_starts_with($key, '⭐ CURRENT PHASE') ? 0 : 1;
+                                        });
+
+                                        return $sorted->flatMap(function ($tags, $group) {
+                                            return [$group => $tags->pluck('name', 'id')];
+                                        })->toArray();
+                                    })
+                                    ->getOptionLabelsUsing(function (array $values) {
+                                        return \Webkul\Project\Models\Tag::whereIn('id', $values)
+                                            ->pluck('name', 'id')
+                                            ->toArray();
+                                    })
                                     ->createOptionForm(fn (Schema $schema) => TagResource::form($schema)),
                             ])
                             ->columns(2),
@@ -819,6 +921,11 @@ class ProjectResource extends Resource
                             ->schema(static::mergeCustomInfolistEntries([
                                 Grid::make(2)
                                     ->schema([
+                                        TextEntry::make('project_number')
+                                            ->label('Project Number')
+                                            ->icon('heroicon-o-hashtag')
+                                            ->placeholder('—'),
+
                                         TextEntry::make('user.name')
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.project-manager'))
                                             ->icon('heroicon-o-user')
@@ -828,6 +935,26 @@ class ProjectResource extends Resource
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.customer'))
                                             ->icon('heroicon-o-phone')
                                             ->placeholder('—'),
+
+                                        TextEntry::make('project_address')
+                                            ->label('Project Address')
+                                            ->icon('heroicon-o-map-pin')
+                                            ->state(function (Project $record): string {
+                                                if ($record->addresses()->count() > 0) {
+                                                    $address = $record->addresses()->where('is_primary', true)->first()
+                                                               ?? $record->addresses()->first();
+
+                                                    $parts = array_filter([
+                                                        $address->street1,
+                                                        $address->city,
+                                                        $address->state?->name,
+                                                    ]);
+
+                                                    return !empty($parts) ? implode(', ', $parts) : '—';
+                                                }
+
+                                                return '—';
+                                            }),
 
                                         TextEntry::make('planned_date')
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.project-timeline'))
