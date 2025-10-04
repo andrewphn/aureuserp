@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Create Nutrient SDK Integration Service",
         "description": "Build core service layer for Nutrient Web SDK initialization and configuration with license key management",
         "details": "Create app/Services/NutrientService.php that handles SDK initialization with the existing license key (pdf_live_SeDihzSCxobu2objNyuoWS3BViInKxxtFSORpgNAfRz). Implement methods for: SDK configuration management, license key validation, viewer instance creation with configurable options (toolbar items, annotation tools, zoom controls), error handling and fallback mechanisms. Create config/nutrient.php with settings for license key, default toolbar configuration, max file size (50MB), allowed file types, and autosave interval. Use Laravel's config caching for performance.",
@@ -14,7 +14,7 @@
         "updatedAt": "2025-10-01T00:39:43.076Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Build PDF Viewer Blade Component",
         "description": "Create reusable Blade component for PDF viewing with Nutrient SDK integration and Alpine.js interactivity",
         "details": "Create resources/views/components/pdf-viewer.blade.php component that integrates Nutrient SDK. Component should accept props for: document ID, viewer options, annotation permissions, toolbar configuration. Create resources/js/pdf-viewer.js module that initializes Nutrient SDK with provided options, handles document loading, manages annotation sync with backend, implements autosave functionality. Use Alpine.js for reactive state management. Include loading states, error boundaries, and mobile-responsive design. Register component in AppServiceProvider.",
@@ -28,7 +28,7 @@
         "updatedAt": "2025-10-01T00:44:58.589Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Implement Annotation API and Service Layer",
         "description": "Build RESTful API endpoints and service layer for annotation CRUD operations with real-time synchronization using Nutrient SDK's InstantJSON format",
         "status": "done",
@@ -107,7 +107,7 @@
         "updatedAt": "2025-10-01T00:58:54.847Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Create FilamentPHP Custom PDF Viewer Field",
         "description": "Develop custom FilamentPHP v3 field component for PDF viewing and annotation within admin forms",
         "details": "Create app/Filament/Forms/Components/PdfViewerField.php extending FilamentPHP's Field class. Implement methods for: configuring viewer options (toolbar, features, permissions), handling file uploads with validation, rendering the PDF viewer component, managing annotation state. Create corresponding Blade view in resources/views/filament/forms/components/pdf-viewer-field.blade.php. Add configuration methods like ->enableAnnotations(), ->setToolbar(), ->maxFileSize(). Integrate with Livewire for real-time updates.",
@@ -122,7 +122,7 @@
         "updatedAt": "2025-10-01T01:02:12.876Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Build Document Management FilamentPHP Resource",
         "description": "Create comprehensive DocumentResource for managing PDF documents with full CRUD operations and advanced features",
         "details": "Create app/Filament/Resources/DocumentResource.php with table columns for: file name, module association, page count, file size, uploader, upload date. Implement filters for module type, date range, uploader, tags. Add bulk actions for download, delete, move between modules. Create form with FileUpload field, module selector, tags input, metadata fields. Implement custom table actions for: viewing PDF (modal/slide-over), downloading original, viewing annotations list. Add activity log widget showing document interactions. Create pages for List, Create, Edit, View.",
@@ -136,7 +136,7 @@
         "updatedAt": "2025-10-01T01:03:50.283Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Integrate PDF System with Projects Module",
         "description": "Add PDF document support to existing Projects module for shop drawings and project documentation",
         "details": "Modify plugins/webkul/projects/src/Models/Project.php to add morphMany relationship for PDF documents. Create HasPdfDocuments trait in app/Traits/HasPdfDocuments.php with methods for: attaching documents, retrieving documents by type, counting documents. Update ProjectResource to include PDF upload section in form, add documents count badge to table, create relation manager for viewing project documents. Add 'View Drawings' table action that opens PDF viewer. Update project detail page to show document list widget.",
@@ -151,7 +151,7 @@
         "updatedAt": "2025-10-01T01:14:00.471Z"
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Implement Document Activity Tracking",
         "description": "Build comprehensive activity logging system for tracking all document interactions and user actions",
         "details": "Create app/Services/DocumentActivityService.php with methods for logging: document views, annotation changes, downloads, prints. Implement app/Observers/PdfDocumentObserver.php to automatically log document CRUD operations. Create app/Observers/PdfAnnotationObserver.php for annotation tracking. Add middleware app/Http/Middleware/TrackDocumentActivity.php for logging views. Create FilamentPHP widget for displaying recent activities. Implement activity pruning job to clean old logs after 90 days.",
@@ -165,7 +165,7 @@
         "updatedAt": "2025-10-01T01:15:07.184Z"
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Add Sales and Support Module Integration",
         "description": "Extend PDF functionality to Sales module for quotations and Support module for ticket attachments",
         "details": "Apply HasPdfDocuments trait to Sales Order and Support Ticket models. Update QuotationResource in sales module to include PDF preview of quotes, add approval stamp functionality using annotations. Modify Support plugin to allow PDF attachments on tickets, implement annotation tools for marking damaged areas. Create shared components for consistent PDF handling across modules. Add cross-module document search functionality in DocumentResource. Update dashboards to show document statistics per module.",
@@ -179,7 +179,7 @@
         "updatedAt": "2025-10-01T01:15:58.799Z"
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Comprehensive Testing & QA",
         "description": "Create comprehensive test suite covering unit, feature, browser, security, performance and compatibility testing for PDF viewer functionality with 80%+ code coverage target",
         "details": "Create tests/Unit/Services/NutrientServiceTest.php for testing NutrientService methods including: license key validation, SDK configuration generation, viewer instance creation, file validation, annotation presets, error handling with mock SDK responses. Create tests/Unit/Models/PdfDocumentTest.php and PdfAnnotationTest.php for model relationships, scopes, accessors and mutators. Implement tests/Feature/Api/AnnotationApiTest.php for testing annotation CRUD endpoints (GET /api/pdf/{document}/annotations, POST/PUT/DELETE operations) with authentication, authorization, validation and rate limiting checks. Create tests/Feature/Filament/DocumentResourceTest.php for testing FilamentPHP resource CRUD operations, filters, bulk actions, file upload validation. Set up Playwright browser testing in package.json with @playwright/test dependency, create playwright.config.ts with webkit/chromium/firefox configurations. Implement tests/Browser/PdfViewerTest.spec.ts for testing: PDF loading with various file sizes (including 50MB+ files), annotation tools functionality (highlight, text, drawing, stamps), toolbar interactions, zoom controls, mobile responsiveness. Create tests/Browser/AnnotationSyncTest.spec.ts for real-time annotation synchronization between multiple browser sessions, autosave functionality, conflict resolution. Add tests/Security/DocumentAccessTest.php for testing permission-based access control, document visibility scopes, unauthorized access attempts, SQL injection prevention in document queries. Create tests/Performance/LargePdfTest.php using PHPUnit with memory and time assertions for handling 50MB+ PDFs, testing page lazy loading, annotation performance with 100+ annotations per document. Implement tests/Browser/CrossBrowserTest.spec.ts for testing across Chrome, Firefox, Safari, Edge with specific focus on PDF.js fallback mechanisms, touch interactions on tablets, print functionality. Set up GitHub Actions workflow in .github/workflows/tests.yml for running PHPUnit tests with MySQL, Playwright tests with multiple browsers, code coverage reporting to Codecov. Create tests/Integration/ModuleIntegrationTest.php for testing PDF system integration with Projects, Sales, and Support modules including polymorphic relationships, trait usage, cross-module search. Add phpunit-coverage.xml configuration for coverage reporting excluding vendor directories, targeting 80% coverage minimum. Implement custom test traits in tests/Traits/CreatesTestPdfs.php for generating test PDF files, tests/Traits/MocksNutrientSdk.php for mocking SDK responses.",
@@ -282,7 +282,7 @@
         "updatedAt": "2025-10-01T01:44:58.319Z"
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Documentation & User Guides",
         "description": "Create comprehensive documentation suite including user guides, developer documentation, API specs, configuration guides, deployment checklists, and training materials for the PDF viewer and annotation system",
         "details": "Create documentation structure in /docs directory with subfolders: /user-guides, /developer-docs, /api-specs, /deployment, and /training. For USER DOCUMENTATION: Create docs/user-guides/pdf-viewer-guide.md covering: navigating the PDF viewer interface with screenshots, using annotation tools (highlighter, notes, stamps, drawings), saving and managing annotations, downloading annotated PDFs, keyboard shortcuts reference. Create docs/user-guides/admin-guide.md for: managing PDF documents in FilamentPHP resources, setting viewer permissions per user role, configuring toolbar options, monitoring document activity logs. For DEVELOPER DOCUMENTATION: Create docs/developer-docs/pdf-viewer-field-integration.md with: step-by-step guide for adding PdfViewerField to FilamentPHP resources, code examples for app/Filament/Forms/Components/PdfViewerField.php usage, available configuration methods (->enableAnnotations(), ->setToolbar(), ->maxFileSize()), event hooks and callbacks, Livewire integration patterns. Create docs/developer-docs/nutrient-sdk-guide.md covering: NutrientService class methods and usage from app/Services/NutrientService.php, SDK initialization with license key configuration, customizing annotation presets, implementing custom toolbar buttons, handling SDK errors and fallbacks. For API DOCUMENTATION: Create docs/api-specs/openapi.yaml with OpenAPI 3.0 specification for: GET /api/pdf/{document}/annotations endpoint, POST /api/pdf/{document}/annotations endpoint, PUT /api/pdf/annotations/{id} endpoint, DELETE /api/pdf/annotations/{id} endpoint, authentication schemes and rate limiting. Generate HTML documentation using Redoc or Swagger UI. Include request/response examples, error codes, and authentication requirements. For CONFIGURATION GUIDE: Create docs/deployment/configuration.md documenting all settings in config/nutrient.php: license key setup (NUTRIENT_LICENSE_KEY env variable), toolbar customization arrays, annotation settings, file upload restrictions (50MB limit, allowed MIME types), autosave intervals, viewer options (theme, zoom, scroll modes), performance settings (WebAssembly, caching). For DEPLOYMENT CHECKLIST: Create docs/deployment/production-checklist.md with: pre-deployment verification steps, environment variable requirements, file permission requirements for document storage, CDN setup for Nutrient SDK assets, SSL certificate requirements, backup procedures for annotation data, monitoring setup for SDK errors. For TRAINING MATERIALS: Create docs/training/quick-start-guide.md with step-by-step tutorials for common tasks. Record video tutorials using the actual implementation showing: uploading and viewing PDFs, adding annotations, collaborative annotation workflows, exporting annotated documents. Create docs/training/screenshots/ directory with annotated screenshots of all major features. Develop interactive demo page at /demo/pdf-viewer showcasing all features. Include troubleshooting section with common issues and solutions. All documentation should reference actual file paths from the codebase, use consistent formatting with markdown, include version numbers (@nutrient-sdk/viewer: ^1.7.0 from package.json), and be searchable through a documentation index.",
@@ -379,7 +379,7 @@
         ]
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Database Schema Enhancement for Project Wizard",
         "description": "Add required database columns and tables to support the wizard functionality including project types, address handling, and auto-generated project numbers",
         "details": "Create migration to add new columns to projects_projects table: project_type (VARCHAR 50), project_type_other (VARCHAR 255), use_customer_address (BOOLEAN default true). Verify projects_project_addresses table exists with proper relationship fields. Update Project model to include new fillable fields and hasOne projectAddress relationship. Update ProjectAddress model with belongsTo project relationship. These schema changes are foundational for all wizard functionality.",
@@ -451,7 +451,7 @@
         "updatedAt": "2025-10-01T19:14:58.755Z"
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Implement HasWizard Trait in CreateProject Page",
         "description": "Convert the existing CreateProject page from standard form to multi-step wizard using FilamentPHP v4 HasWizard trait",
         "details": "Add HasWizard trait to CreateProject class. Implement getSteps() method returning array of 5 wizard steps (Discovery, Design, Sourcing, Production, Delivery). Each step should be a Filament\\Forms\\Components\\Wizard\\Step instance with proper schema. Remove existing form() method dependencies and prepare for field distribution across steps. Import required Filament wizard components including Step, HasWizard trait.",
@@ -541,7 +541,7 @@
         "updatedAt": "2025-10-01T19:19:20.282Z"
       },
       {
-        "id": 13,
+        "id": "13",
         "title": "Discovery Step Implementation with Live Summary Panel",
         "description": "Implement the Discovery step with project fundamentals and integrate the existing ProjectSummaryPanel component for real-time updates",
         "details": "Create Discovery step schema with fields in specific order: Live Summary Panel (columnSpanFull at top), Company selection (first - establishes context), Customer/Partner selection, Project Name (large font), Project Address section with toggle for customer address vs custom address, auto-generated Project Number (read-only), Description (RichEditor), Project Manager, Project Type selection. Use Grid layouts for proper field positioning. Implement conditional visibility for project address fields based on use_customer_address toggle.",
@@ -637,7 +637,7 @@
         ]
       },
       {
-        "id": 14,
+        "id": "14",
         "title": "Project Number Auto-Generation System",
         "description": "Implement the complex project number auto-generation logic based on company acronym, project ID, and address parsing",
         "details": "Implement generateProjectNumber() method with format: {COMPANY_ACRONYM}{UNIQUE_ID}-{STREET_NUMBER}-{STREET_NAME}. Parse company acronym from code field or company name first 3 letters. Extract street number using regex from street1 field. Clean street name by removing number prefix, street type suffixes, special characters, limit to 15 chars. Handle edge cases: no address (use UNNAMED/0), customer address vs project address. Implement in afterCreate() hook since project ID needed. Update mutateFormDataBeforeCreate() to defer generation.",
@@ -708,7 +708,7 @@
         ]
       },
       {
-        "id": 15,
+        "id": "15",
         "title": "Design Step Implementation",
         "description": "Create the Design step with project timeline and resource allocation fields including dates, hours, and tags",
         "details": "Implement Design step with DatePicker fields for start_date and end_date (native: false for FilamentPHP pickers). Add allocated_hours TextInput with numeric type, step 0.5, min 0, suffix translation, helper text for hour format. Implement tags Select with belongsToMany relationship, multiple selection, searchable/preloadable, create option. Use two-column Grid layout for date fields, full width for others. Preserve all existing field configurations from ProjectResource.",
@@ -768,7 +768,7 @@
         ]
       },
       {
-        "id": 16,
+        "id": "16",
         "title": "Sourcing Step Implementation",
         "description": "Implement the Sourcing step with vendor and company information plus custom fields integration",
         "details": "Create Sourcing step with Company selection field (company_id) with relationship to 'company', searchable/preloadable, create option linking to CompanyResource::form(). Integrate custom fields using HasCustomFields::mergeCustomFormFields() method with sourcing context. Wrap in Section titled 'Sourcing Information'. Ensure proper field ordering and layout consistency with other steps.",
@@ -828,7 +828,7 @@
         ]
       },
       {
-        "id": 17,
+        "id": "17",
         "title": "Production Step Implementation",
         "description": "Create the Production step with task management settings and milestone configuration",
         "details": "Implement Production step with Task Management section containing allow_milestones Toggle (default true, helper text about monitoring milestones, conditional visibility on TaskSettings::enable_milestones). Integrate custom fields using HasCustomFields::mergeCustomFormFields() with production context. Use Fieldset or Section wrapper for task management group. Ensure proper conditional logic for milestone visibility.",
@@ -892,7 +892,8 @@
             "dependencies": [],
             "details": "Create the Production step in the wizard form structure. Implement the main Section or Fieldset wrapper titled 'Task Management' that will contain all production-related fields. Ensure the step follows the existing wizard pattern and integrates properly with the step navigation flow. Set up the base structure that will hold the milestone toggle and custom fields.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -903,7 +904,8 @@
             ],
             "details": "Implement the allow_milestones Toggle field within the Task Management section. Set the default value to true. Add helper text explaining 'Enable milestone tracking for production monitoring'. Configure the field to use the proper FilamentPHP Toggle component with all necessary attributes including name binding and state management.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -914,7 +916,8 @@
             ],
             "details": "Add the visible() method to the allow_milestones Toggle field that checks TaskSettings::enable_milestones value. Implement proper callback function that returns true/false based on the global TaskSettings configuration. Ensure the field only displays when the system-wide milestone feature is enabled. Test that the conditional logic properly hides/shows the field.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "",
+            "parentId": "undefined"
           },
           {
             "id": 8,
@@ -925,12 +928,13 @@
             ],
             "details": "Call HasCustomFields::mergeCustomFormFields() method with 'production' as the context parameter. Ensure the custom fields are properly appended to the existing form fields in the Production step. Verify the merged fields maintain proper ordering and don't conflict with the milestone toggle. Test that custom fields render correctly within the Task Management section wrapper.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 18,
+        "id": "18",
         "title": "Delivery Step Implementation",
         "description": "Create the final Delivery step with project visibility settings and timesheet configuration",
         "details": "Implement Delivery step with Settings section containing visibility Radio field with three options (Private/Internal/Public) with descriptions, default Internal. Add Time Management section with allow_timesheets Toggle (default false, helper text, conditional on TimeSettings::enable_timesheets). Use vertical radio layout and proper section grouping. Preserve all existing ProjectVisibility enum values and helper texts.",
@@ -990,7 +994,7 @@
         ]
       },
       {
-        "id": 19,
+        "id": "19",
         "title": "Live Summary Panel Integration and Real-time Updates",
         "description": "Enhance the existing ProjectSummaryPanel component to work with wizard fields and implement real-time updates using Livewire and Alpine.js",
         "details": "Update ProjectSummaryPanel component to handle new wizard fields: project_type, company_id, partner_id relationships. Implement Alpine.js watchers for real-time field updates without server roundtrips. Add formatters for displaying friendly values (company names vs IDs). Handle project number display showing 'Will be assigned on save' during creation. Position panel using Livewire::make() component with columnSpanFull() in Discovery step. Ensure proper reactive updates as users type/select.",
@@ -1074,7 +1078,7 @@
         ]
       },
       {
-        "id": 20,
+        "id": "20",
         "title": "Project Address Management and Conditional Logic",
         "description": "Implement the project address system with conditional fields and proper data handling for customer vs custom addresses",
         "details": "Implement use_customer_address toggle with default true value. Add conditional project address fields (street1, street2, city, state, zip, country) with visible() callback checking toggle state. Update mutateFormDataBeforeCreate() to handle address logic: if using customer address, don't create ProjectAddress record; if custom address, create related ProjectAddress record. Integrate address data into Live Summary Panel and project number generation. Use Grid layout for address fields.",
@@ -1158,139 +1162,152 @@
         ]
       },
       {
-        "id": 21,
+        "id": "21",
         "title": "Create Tag Selector Panel Blade Component",
         "description": "Create the main Blade view component for the tag selector panel following FilamentPHP v4 patterns",
         "details": "Create `resources/views/forms/components/tag-selector-panel.blade.php` using the `<x-dynamic-component>` wrapper pattern. Implement Alpine.js state management for panel visibility, search input, expanded categories, and selected tags. Use existing `project-type-cards.blade.php` as reference for Livewire entanglement. Include slide-in panel layout (400px width, right-side, z-index 50), auto-focused search bar, and mobile-responsive design (full-screen modal on <768px). Follow current FilamentPHP v4 component conventions and use Tailwind CSS classes consistent with existing codebase.",
         "testStrategy": "Test panel opens/closes, search auto-focuses, selection syncs with Livewire state, and mobile layout adapts correctly. Verify component integrates with existing form structure.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:49:54.985Z"
       },
       {
-        "id": 22,
+        "id": "22",
         "title": "Implement Tag Data Loading and Caching",
         "description": "Set up tag data loading with proper caching and grouping by type",
-        "details": "Implement PHP logic to load all 131 tags from `projects_tags` table with 1-hour cache using `Cache::remember('project_tags_grouped', 3600, ...)`. Group tags by `type` field (phase_discovery, phase_design, etc.) for efficient rendering. Map stage IDs to tag types: 13=>phase_discovery, 14=>phase_design, 15=>phase_sourcing, 16=>phase_production, 17=>phase_delivery. Create helper functions for tag type labels with emojis (🔍 Discovery Phase, 🎨 Design Phase, etc.). Ensure data structure supports current phase prioritization and search filtering.",
-        "testStrategy": "Verify all 131 tags load correctly, caching works, grouping by type is accurate, and stage-to-tag-type mapping functions properly. Test with different project stages.",
-        "priority": "high",
+        "status": "done",
         "dependencies": [
-          21
+          "21"
         ],
-        "status": "pending",
-        "subtasks": []
+        "priority": "high",
+        "details": "COMPLETED: Tag data loading and caching functionality has been fully implemented within the tag selector panel component (resources/views/forms/components/tag-selector-panel.blade.php). Implementation includes:\n\n✅ Cache::remember('project_tags_grouped', 3600) with 1-hour cache duration (line 6)\n✅ All 131 tags loaded from projects_tags table and grouped by type using groupBy('type') (line 7)\n✅ Complete stage-to-tag-type mapping: 13=>phase_discovery, 14=>phase_design, 15=>phase_sourcing, 16=>phase_production, 17=>phase_delivery (lines 11-17)\n✅ Type labels with emojis for all tag categories including phases (🔍 Discovery, 🎨 Design, 📦 Sourcing, ⚙️ Production, 🚚 Delivery) and other types (lines 31-44)\n✅ Current phase prioritization logic that detects project stage from Livewire context (lines 19-29)\n✅ Data structure supports efficient filtering and search functionality (lines 106-110)\n\nThe implementation is production-ready and verified to be working with all 131 tags in the database.",
+        "testStrategy": "Verification completed: All 131 tags load correctly from database, caching mechanism confirmed working with 1-hour TTL, grouping by type verified in component, stage-to-tag-type mapping functions properly, and current phase prioritization displays correctly in the UI.",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:20.641Z"
       },
       {
-        "id": 23,
+        "id": "23",
         "title": "Build Client-Side Search and Filtering",
         "description": "Implement instant client-side search with fuzzy matching and highlighting",
         "details": "Create Alpine.js reactive search functionality with instant filtering (<50ms response). Implement fuzzy string matching across tag names using JavaScript `includes()` or `indexOf()` for simplicity and speed. Add search text highlighting with yellow background using `<mark>` tags or CSS highlighting. Include clear search button (X icon) to reset filter. Ensure search is case-insensitive and works across all tag types. Store search state in Alpine component data and reactive filters for tag display.",
         "testStrategy": "Test search responds instantly, fuzzy matching works correctly, highlighting appears on matched text, clear button resets search, and performance remains smooth with 131 tags.",
         "priority": "high",
         "dependencies": [
-          22
+          "22"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.156Z"
       },
       {
-        "id": 24,
+        "id": "24",
         "title": "Implement Current Phase Tag Prioritization",
         "description": "Add smart phase detection and current phase tag prioritization logic",
         "details": "Detect current project stage from Livewire component context (create vs edit pages). Map stage_id to appropriate tag type using existing mapping (13=>phase_discovery, etc.). Display current phase tags in always-visible section with header '⭐ CURRENT PHASE → [Icon] [Phase Name]'. Use phase colors from `projects_project_stages` table for section styling. Fall back to Priority+Health tags if no stage is set. Ensure current phase tags appear first in display order and are never collapsed.",
         "testStrategy": "Verify correct stage detection in both create/edit contexts, appropriate tag filtering for current phase, proper color application, and fallback behavior when stage is undefined.",
         "priority": "high",
         "dependencies": [
-          22
+          "22"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.160Z"
       },
       {
-        "id": 25,
+        "id": "25",
         "title": "Create Visual Tag Pills with Color Coding",
         "description": "Design and implement color-coded tag pills with selection states",
         "details": "Create tag pill components using existing tag colors at 20% opacity for unselected state and 40% opacity for selected state. Add checkmark icon for selected tags using heroicon checkmark. Implement hover effects (scale 1.02, darker border) and one-click toggle functionality. Use flex-wrap layout with max 2 pills per row for optimal ADHD-friendly viewing. Apply consistent spacing and typography following FilamentPHP design system. Include loading skeleton states for better perceived performance.",
         "testStrategy": "Test color application from database values, selection states toggle correctly, hover effects work smoothly, layout maintains 2-per-row constraint, and visual hierarchy is clear for quick scanning.",
         "priority": "medium",
         "dependencies": [
-          22
+          "22"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.164Z"
       },
       {
-        "id": 26,
+        "id": "26",
         "title": "Add Recent Tags Memory with LocalStorage",
         "description": "Implement localStorage-based recent tags memory system",
         "details": "Create localStorage system with key pattern `tcs_recent_tags_user_{id}` storing last 5 used tags across all projects. Implement JSON serialization/deserialization for tag objects with id, name, and color. Update recent tags on every tag selection with automatic deduplication and LRU (Least Recently Used) eviction. Display recent tags in dedicated horizontal-scroll section near top of panel. Handle localStorage errors gracefully with fallback to session-only memory. Include user ID in key for multi-user systems.",
         "testStrategy": "Verify tags save to localStorage on selection, recent list updates correctly, 5-tag limit enforced, persistence works across browser sessions, and graceful degradation when localStorage unavailable.",
         "priority": "medium",
         "dependencies": [
-          25
+          "25"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.166Z"
       },
       {
-        "id": 27,
+        "id": "27",
         "title": "Build Collapsible Category Sections",
         "description": "Create expandable/collapsible sections for non-current tag categories",
         "details": "Implement collapsible sections for all tag categories except current phase (Priority, Health, Risk, Complexity, Work Scope, Special Status, Lifecycle). Use Alpine.js state management for expand/collapse with smooth CSS transitions. Start all sections in collapsed state to reduce cognitive load. Add click handlers to category headers with expand/collapse icons (chevron-down/chevron-up). Hide phase categories that are already shown in Current Phase section to avoid duplication. Include section tag counts in headers for quick reference.",
         "testStrategy": "Test all sections start collapsed, expand/collapse animations work smoothly, current phase categories are properly hidden from collapsed sections, and tag counts are accurate.",
         "priority": "medium",
         "dependencies": [
-          24
+          "24"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.167Z"
       },
       {
-        "id": 28,
+        "id": "28",
         "title": "Add Selection Counter and Validation Warnings",
         "description": "Implement dynamic selection counter with warning system for too many tags",
         "details": "Create bottom bar showing '✓ X tags selected' with real-time updates. Add warning indicator '⚠️ Many tags - consider simplifying' when more than 5 tags selected. Style warnings with appropriate colors (amber/yellow) following FilamentPHP design system. Update counter instantly on any tag toggle without debounce. Include subtle animations for counter changes to provide feedback. Position counter as sticky bottom bar for constant visibility during tag selection.",
         "testStrategy": "Verify counter updates immediately on selection changes, warning appears at 6+ tags, styling follows design system, and animations provide appropriate feedback without being distracting.",
         "priority": "low",
         "dependencies": [
-          25
+          "25"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.169Z"
       },
       {
-        "id": 29,
+        "id": "29",
         "title": "Integrate with ProjectResource Form",
         "description": "Replace existing Select field with custom tag selector panel in ProjectResource",
         "details": "Modify `plugins/webkul/projects/src/Filament/Resources/ProjectResource.php` line 433 to replace the existing `Select::make('tags')` with the new tag selector panel component. Maintain existing relationship mapping and option handling. Ensure proper Livewire state binding using `$wire.$entangle('{$getStatePath()}')`. Add trigger button showing 'Select Tags (X selected)' with dynamic count. Preserve existing functionality for search results grouping and current phase detection. Test both create and edit form contexts.",
         "testStrategy": "Verify form integration works in both create/edit modes, existing tag relationships are preserved, Livewire state syncs correctly, and no regression in tag saving functionality.",
         "priority": "high",
         "dependencies": [
-          21
+          "21"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-04T00:52:47.171Z"
       },
       {
-        "id": 30,
+        "id": "30",
         "title": "Add Keyboard Navigation and Accessibility",
         "description": "Implement full keyboard navigation and accessibility features",
         "details": "Add comprehensive keyboard support: Tab navigation through all interactive elements, Enter to select/deselect tags, Escape to close panel, Arrow keys for tag navigation within sections. Implement ARIA labels, roles, and states for screen readers. Add focus management ensuring logical tab order and visible focus indicators. Include aria-expanded for collapsible sections and aria-selected for tag states. Ensure panel opens with focus on search input and closes with focus return to trigger button. Follow WCAG 2.1 AA guidelines for accessibility compliance.",
         "testStrategy": "Test complete keyboard navigation workflow, screen reader compatibility, focus management, ARIA states accuracy, and compliance with accessibility standards using automated tools.",
         "priority": "medium",
         "dependencies": [
-          27,
-          28
+          "27",
+          "28"
         ],
         "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-10-01T22:35:39.290Z",
-      "updated": "2025-10-04T00:44:05.708Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2025-10-04T00:52:47.171Z",
+      "taskCount": 30,
+      "completedCount": 18,
+      "tags": [
+        "master"
+      ]
     }
   }
 }
