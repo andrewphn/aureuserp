@@ -14,6 +14,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\View;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -430,79 +431,11 @@ class ProjectResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->createOptionForm(fn (Schema $schema) => UserResource::form($schema)),
-                                Select::make('tags')
+                                View::make('forms.components.tag-selector-panel')
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
                                     ->relationship(name: 'tags', titleAttribute: 'name')
-                                    ->multiple()
-                                    ->searchable()
-                                    ->preload()
-                                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
-                                    ->getSearchResultsUsing(function (string $search, $livewire) {
-                                        // Map stage IDs to tag types
-                                        $stageToTagType = [
-                                            13 => 'phase_discovery',  // Discovery stage
-                                            14 => 'phase_design',     // Design stage
-                                            15 => 'phase_sourcing',   // Sourcing stage
-                                            16 => 'phase_production', // Production stage
-                                            17 => 'phase_delivery',   // Delivery stage
-                                        ];
-
-                                        // Get current project's stage
-                                        $currentStageId = null;
-                                        if ($livewire instanceof \Filament\Resources\Pages\EditRecord) {
-                                            $currentStageId = $livewire->record->stage_id;
-                                        } elseif ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
-                                            $currentStageId = $livewire->data['stage_id'] ?? null;
-                                        }
-
-                                        $currentPhaseType = $stageToTagType[$currentStageId] ?? null;
-
-                                        $tags = \Webkul\Project\Models\Tag::where('name', 'like', "%{$search}%")
-                                            ->limit(50)
-                                            ->get();
-
-                                        // Group tags with current phase first
-                                        $grouped = $tags->groupBy(function ($tag) use ($currentPhaseType) {
-                                            $typeLabels = [
-                                                'priority' => '🎯 Priority',
-                                                'health' => '💚 Health Status',
-                                                'risk' => '⚠️ Risk Factors',
-                                                'complexity' => '📊 Complexity',
-                                                'work_scope' => '🔨 Work Scope',
-                                                'phase_discovery' => '🔍 Discovery Phase',
-                                                'phase_design' => '🎨 Design Phase',
-                                                'phase_sourcing' => '📦 Sourcing Phase',
-                                                'phase_production' => '⚙️ Production Phase',
-                                                'phase_delivery' => '🚚 Delivery Phase',
-                                                'special_status' => '⭐ Special Status',
-                                                'lifecycle' => '🔄 Lifecycle',
-                                            ];
-
-                                            $label = $typeLabels[$tag->type] ?? ucfirst($tag->type);
-
-                                            // Add "CURRENT PHASE" prefix if this is the current stage's tags
-                                            if ($currentPhaseType && $tag->type === $currentPhaseType) {
-                                                $label = '⭐ CURRENT PHASE → ' . $label;
-                                            }
-
-                                            return $label;
-                                        });
-
-                                        // Sort so current phase appears first
-                                        $sorted = $grouped->sortBy(function ($tags, $key) {
-                                            return str_starts_with($key, '⭐ CURRENT PHASE') ? 0 : 1;
-                                        });
-
-                                        return $sorted->flatMap(function ($tags, $group) {
-                                            return [$group => $tags->pluck('name', 'id')];
-                                        })->toArray();
-                                    })
-                                    ->getOptionLabelsUsing(function (array $values) {
-                                        return \Webkul\Project\Models\Tag::whereIn('id', $values)
-                                            ->pluck('name', 'id')
-                                            ->toArray();
-                                    })
-                                    ->createOptionForm(fn (Schema $schema) => TagResource::form($schema)),
+                                    ->statePath('tags')
+                                    ->columnSpan('full'),
                             ])
                             ->columns(2),
                     ])
