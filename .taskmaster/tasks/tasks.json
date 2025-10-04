@@ -1156,17 +1156,140 @@
             "parentId": "undefined"
           }
         ]
+      },
+      {
+        "id": 21,
+        "title": "Create Tag Selector Panel Blade Component",
+        "description": "Create the main Blade view component for the tag selector panel following FilamentPHP v4 patterns",
+        "details": "Create `resources/views/forms/components/tag-selector-panel.blade.php` using the `<x-dynamic-component>` wrapper pattern. Implement Alpine.js state management for panel visibility, search input, expanded categories, and selected tags. Use existing `project-type-cards.blade.php` as reference for Livewire entanglement. Include slide-in panel layout (400px width, right-side, z-index 50), auto-focused search bar, and mobile-responsive design (full-screen modal on <768px). Follow current FilamentPHP v4 component conventions and use Tailwind CSS classes consistent with existing codebase.",
+        "testStrategy": "Test panel opens/closes, search auto-focuses, selection syncs with Livewire state, and mobile layout adapts correctly. Verify component integrates with existing form structure.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Implement Tag Data Loading and Caching",
+        "description": "Set up tag data loading with proper caching and grouping by type",
+        "details": "Implement PHP logic to load all 131 tags from `projects_tags` table with 1-hour cache using `Cache::remember('project_tags_grouped', 3600, ...)`. Group tags by `type` field (phase_discovery, phase_design, etc.) for efficient rendering. Map stage IDs to tag types: 13=>phase_discovery, 14=>phase_design, 15=>phase_sourcing, 16=>phase_production, 17=>phase_delivery. Create helper functions for tag type labels with emojis (🔍 Discovery Phase, 🎨 Design Phase, etc.). Ensure data structure supports current phase prioritization and search filtering.",
+        "testStrategy": "Verify all 131 tags load correctly, caching works, grouping by type is accurate, and stage-to-tag-type mapping functions properly. Test with different project stages.",
+        "priority": "high",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Build Client-Side Search and Filtering",
+        "description": "Implement instant client-side search with fuzzy matching and highlighting",
+        "details": "Create Alpine.js reactive search functionality with instant filtering (<50ms response). Implement fuzzy string matching across tag names using JavaScript `includes()` or `indexOf()` for simplicity and speed. Add search text highlighting with yellow background using `<mark>` tags or CSS highlighting. Include clear search button (X icon) to reset filter. Ensure search is case-insensitive and works across all tag types. Store search state in Alpine component data and reactive filters for tag display.",
+        "testStrategy": "Test search responds instantly, fuzzy matching works correctly, highlighting appears on matched text, clear button resets search, and performance remains smooth with 131 tags.",
+        "priority": "high",
+        "dependencies": [
+          22
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Implement Current Phase Tag Prioritization",
+        "description": "Add smart phase detection and current phase tag prioritization logic",
+        "details": "Detect current project stage from Livewire component context (create vs edit pages). Map stage_id to appropriate tag type using existing mapping (13=>phase_discovery, etc.). Display current phase tags in always-visible section with header '⭐ CURRENT PHASE → [Icon] [Phase Name]'. Use phase colors from `projects_project_stages` table for section styling. Fall back to Priority+Health tags if no stage is set. Ensure current phase tags appear first in display order and are never collapsed.",
+        "testStrategy": "Verify correct stage detection in both create/edit contexts, appropriate tag filtering for current phase, proper color application, and fallback behavior when stage is undefined.",
+        "priority": "high",
+        "dependencies": [
+          22
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Create Visual Tag Pills with Color Coding",
+        "description": "Design and implement color-coded tag pills with selection states",
+        "details": "Create tag pill components using existing tag colors at 20% opacity for unselected state and 40% opacity for selected state. Add checkmark icon for selected tags using heroicon checkmark. Implement hover effects (scale 1.02, darker border) and one-click toggle functionality. Use flex-wrap layout with max 2 pills per row for optimal ADHD-friendly viewing. Apply consistent spacing and typography following FilamentPHP design system. Include loading skeleton states for better perceived performance.",
+        "testStrategy": "Test color application from database values, selection states toggle correctly, hover effects work smoothly, layout maintains 2-per-row constraint, and visual hierarchy is clear for quick scanning.",
+        "priority": "medium",
+        "dependencies": [
+          22
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 26,
+        "title": "Add Recent Tags Memory with LocalStorage",
+        "description": "Implement localStorage-based recent tags memory system",
+        "details": "Create localStorage system with key pattern `tcs_recent_tags_user_{id}` storing last 5 used tags across all projects. Implement JSON serialization/deserialization for tag objects with id, name, and color. Update recent tags on every tag selection with automatic deduplication and LRU (Least Recently Used) eviction. Display recent tags in dedicated horizontal-scroll section near top of panel. Handle localStorage errors gracefully with fallback to session-only memory. Include user ID in key for multi-user systems.",
+        "testStrategy": "Verify tags save to localStorage on selection, recent list updates correctly, 5-tag limit enforced, persistence works across browser sessions, and graceful degradation when localStorage unavailable.",
+        "priority": "medium",
+        "dependencies": [
+          25
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 27,
+        "title": "Build Collapsible Category Sections",
+        "description": "Create expandable/collapsible sections for non-current tag categories",
+        "details": "Implement collapsible sections for all tag categories except current phase (Priority, Health, Risk, Complexity, Work Scope, Special Status, Lifecycle). Use Alpine.js state management for expand/collapse with smooth CSS transitions. Start all sections in collapsed state to reduce cognitive load. Add click handlers to category headers with expand/collapse icons (chevron-down/chevron-up). Hide phase categories that are already shown in Current Phase section to avoid duplication. Include section tag counts in headers for quick reference.",
+        "testStrategy": "Test all sections start collapsed, expand/collapse animations work smoothly, current phase categories are properly hidden from collapsed sections, and tag counts are accurate.",
+        "priority": "medium",
+        "dependencies": [
+          24
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 28,
+        "title": "Add Selection Counter and Validation Warnings",
+        "description": "Implement dynamic selection counter with warning system for too many tags",
+        "details": "Create bottom bar showing '✓ X tags selected' with real-time updates. Add warning indicator '⚠️ Many tags - consider simplifying' when more than 5 tags selected. Style warnings with appropriate colors (amber/yellow) following FilamentPHP design system. Update counter instantly on any tag toggle without debounce. Include subtle animations for counter changes to provide feedback. Position counter as sticky bottom bar for constant visibility during tag selection.",
+        "testStrategy": "Verify counter updates immediately on selection changes, warning appears at 6+ tags, styling follows design system, and animations provide appropriate feedback without being distracting.",
+        "priority": "low",
+        "dependencies": [
+          25
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 29,
+        "title": "Integrate with ProjectResource Form",
+        "description": "Replace existing Select field with custom tag selector panel in ProjectResource",
+        "details": "Modify `plugins/webkul/projects/src/Filament/Resources/ProjectResource.php` line 433 to replace the existing `Select::make('tags')` with the new tag selector panel component. Maintain existing relationship mapping and option handling. Ensure proper Livewire state binding using `$wire.$entangle('{$getStatePath()}')`. Add trigger button showing 'Select Tags (X selected)' with dynamic count. Preserve existing functionality for search results grouping and current phase detection. Test both create and edit form contexts.",
+        "testStrategy": "Verify form integration works in both create/edit modes, existing tag relationships are preserved, Livewire state syncs correctly, and no regression in tag saving functionality.",
+        "priority": "high",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 30,
+        "title": "Add Keyboard Navigation and Accessibility",
+        "description": "Implement full keyboard navigation and accessibility features",
+        "details": "Add comprehensive keyboard support: Tab navigation through all interactive elements, Enter to select/deselect tags, Escape to close panel, Arrow keys for tag navigation within sections. Implement ARIA labels, roles, and states for screen readers. Add focus management ensuring logical tab order and visible focus indicators. Include aria-expanded for collapsible sections and aria-selected for tag states. Ensure panel opens with focus on search input and closes with focus return to trigger button. Follow WCAG 2.1 AA guidelines for accessibility compliance.",
+        "testStrategy": "Test complete keyboard navigation workflow, screen reader compatibility, focus management, ARIA states accuracy, and compliance with accessibility standards using automated tools.",
+        "priority": "medium",
+        "dependencies": [
+          27,
+          28
+        ],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
-      "version": "1.0.0",
-      "lastModified": "2025-10-01T19:19:20.283Z",
-      "taskCount": 20,
-      "completedCount": 9,
-      "tags": [
-        "master"
-      ],
       "created": "2025-10-01T22:35:39.290Z",
+      "updated": "2025-10-04T00:44:05.708Z",
       "description": "Tasks for master context"
     }
   }

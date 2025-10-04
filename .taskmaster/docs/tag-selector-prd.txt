@@ -1,0 +1,422 @@
+<context>
+# Overview
+ADHD-friendly tag selector panel for TCS Woodwork's project management system. Replaces slow dropdown with fast, visual, search-first interface optimized for Bryan (Owner) who manages 10-20 projects daily while juggling multiple tasks.
+
+Problem: Current tag dropdown requires scrolling through 131 tags. Bryan's ADHD needs minimal clicks, visual summaries, instant response. He frequently switches between projects (Discovery→Design→Production) and needs context-aware tag suggestions.
+
+Solution: Slide-in panel with auto-focused search, current-phase prioritization, visual color-coded pills, and localStorage memory of recent tags. Built as FilamentPHP v4 custom form component using pure Blade (no new PHP classes needed).
+
+# Core Features
+## 1. Slide-In Panel UI
+- Trigger: Button showing "Select Tags (X selected)"
+- Panel: 400px wide, slides from right, z-index 50
+- Close: Click outside or X button
+- Mobile: Full-screen modal on <768px
+- Position: Fixed overlay, always accessible
+
+## 2. Auto-Focused Search
+- Search bar at top, auto-focused when panel opens
+- Instant client-side filtering (no debounce)
+- Fuzzy matching across all 131 tags
+- Highlight matched text with yellow background
+- Clear button (X icon) to reset
+
+## 3. Current Phase Section
+- Always visible, never collapsed
+- Header: "⭐ CURRENT PHASE → [Icon] [Phase Name]"
+- Shows tags for project's current stage (Discovery/Design/Sourcing/Production/Delivery)
+- Falls back to Priority+Health tags if no stage set
+- Color matches phase color from projects_project_stages table
+
+## 4. Visual Tag Pills
+- Color-coded buttons using tag's color at 20% opacity
+- Selected state: 40% opacity + checkmark icon
+- One-click toggle (no confirmation)
+- Flex wrap layout, max 2 pills per row
+- Hover: Scale 1.02, darker border
+
+## 5. Recent Tags Memory
+- Shows last 5 tags used across ALL projects (user-specific)
+- Stored in localStorage: `tcs_recent_tags_user_{id}`
+- Updates on every tag selection
+- Horizontal scroll if >2 tags
+
+## 6. Collapsed Categories
+- All other tag types collapsed by default
+- Click header to expand
+- Categories: Priority, Health, Risk, Complexity, Work Scope, Special Status, Lifecycle
+- Hide phase categories already shown in Current Phase
+
+## 7. Selection Counter
+- Bottom bar: "✓ X tags selected"
+- Warning if >5 tags: "⚠️ Many tags - consider simplifying"
+- Updates instantly on toggle
+
+# User Experience
+## User Persona: Bryan Patton (Owner)
+- ADHD: Needs minimal clicks, visual cues, instant feedback
+- Volume: Tags 10-20 projects per day
+- Context switching: Jumps between Discovery, Design, Production projects
+- Speed priority: Can't afford hunting through dropdowns
+- Visual preference: Colors > text, pills > lists
+
+## Key User Flows
+### Flow 1: Quick Tag (Current Phase) - < 5 seconds
+1. Open project in Production stage
+2. Click "Select Tags"
+3. Panel opens, Production tags visible
+4. Click "Material Prep" pill → selected
+5. Click "Rush Production" pill → selected
+6. Click outside → panel closes, saved
+
+### Flow 2: Search Tag - < 3 seconds
+1. Click "Select Tags"
+2. Type "material" (auto-focused)
+3. See all material tags instantly
+4. Click "Material Shortage"
+5. Click outside → saved
+
+### Flow 3: Recent Tag - < 2 seconds
+1. Click "Select Tags"
+2. See "Rush Production" in Recent
+3. Click → selected
+4. Click outside → saved
+
+## UI/UX Considerations
+- ADHD-optimized: Search first, visual hierarchy, no nested menus
+- Color psychology: Phase colors match existing system
+- Keyboard accessible: Tab navigation, Enter to select, Escape to close
+- Loading states: Skeleton for tags (though instant from cache)
+- Error states: "No tags match '[term]'" if search empty
+</context>
+
+<PRD>
+# Technical Architecture
+## System Components
+### FilamentPHP v4 Integration
+- Custom Blade view component (NOT custom Field class)
+- Location: `resources/views/forms/components/tag-selector-panel.blade.php`
+- Pattern: `<x-dynamic-component>` wrapper with Alpine.js state
+- Binding: `$applyStateBindingModifiers()` for Livewire entangle
+
+### Database Schema (No Changes)
+- `projects_tags` table: id, name, type, color (131 tags exist)
+- `projects_project_tag` pivot: project_id, tag_id
+- `projects_project_stages` table: id, name, color (stage→phase mapping)
+- Relationship: BelongsToMany via Project model
+
+### State Management
+- Livewire: `$wire.$entangle('{$getStatePath()}')` for two-way binding
+- Alpine.js: Client-side UI state (open/close, search, expanded sections)
+- LocalStorage: Recent tags persistence per user
+
+## Data Models
+### Tag Model (Existing)
+```php
+Tag {
+  id: int
+  name: string
+  type: string  // phase_discovery, phase_design, etc.
+  color: string // #3B82F6, #8B5CF6, etc.
+}
+```
+
+### Project Model (Existing)
+```php
+Project {
+  stage_id: int // 13=Discovery, 14=Design, 15=Sourcing, 16=Production, 17=Delivery
+  tags(): BelongsToMany // Relationship to Tag
+}
+```
+
+### Stage to Tag Type Mapping
+```php
+[
+  13 => 'phase_discovery',
+  14 => 'phase_design',
+  15 => 'phase_sourcing',
+  16 => 'phase_production',
+  17 => 'phase_delivery'
+]
+```
+
+## APIs and Integrations
+### Blade to Livewire Communication
+- Form state path: `$getStatePath()` returns 'tags'
+- Auto-sync: Filament handles relationship saving
+- No manual save logic needed
+
+### LocalStorage API
+```javascript
+// Save recent tags
+localStorage.setItem('tcs_recent_tags_user_1', JSON.stringify([
+  {id: 47, name: "50% Deposit", color: "#6D28D9"},
+  ...
+]))
+
+// Load recent tags
+const recent = JSON.parse(localStorage.getItem('tcs_recent_tags_user_1') || '[]')
+```
+
+### Tag Loading Strategy
+```php
+@php
+  // Cache for 1 hour
+  $allTags = Cache::remember('project_tags_grouped', 3600, function() {
+    return Tag::all()->groupBy('type');
+  });
+@endphp
+```
+
+## Infrastructure Requirements
+- NO new migrations
+- NO new models
+- NO new routes
+- NO JavaScript build changes
+- Uses existing FilamentPHP v4 + Alpine.js + Tailwind CSS
+
+# Development Roadmap
+## Phase 1: Core Panel Structure (MVP)
+**What**: Basic panel with search and tag display
+
+Features:
+- Slide-in panel component (400px, right side)
+- Trigger button replacing Select field
+- Auto-focused search bar
+- Tag pills with color styling
+- Close panel (click outside)
+- Livewire state binding
+
+Files:
+- Create: `resources/views/forms/components/tag-selector-panel.blade.php`
+- Modify: `plugins/webkul/projects/src/Filament/Resources/ProjectResource.php` (line 433)
+
+Acceptance:
+- Panel opens/closes smoothly
+- Tags render with correct colors
+- Selection syncs to form state
+- Works on create + edit pages
+
+## Phase 2: Smart Filtering & Search
+**What**: Search functionality and current phase detection
+
+Features:
+- Instant client-side search filter
+- Current phase tag prioritization
+- Phase-to-tag type mapping logic
+- Search highlighting
+- "No results" state
+
+Logic:
+- Detect project stage_id
+- Map to tag type
+- Show phase tags first
+- Filter all tags on search
+
+Acceptance:
+- Search responds <50ms
+- Phase tags show for correct stage
+- Search matches partial strings
+- Clear search resets view
+
+## Phase 3: Enhanced UX
+**What**: Recent tags, collapsed categories, selection counter
+
+Features:
+- localStorage recent tags (last 5)
+- Collapsed category sections
+- Expand/collapse animations
+- Selection counter bar
+- Warning for >5 tags
+
+LocalStorage:
+- Save on every tag toggle
+- Load on panel open
+- Per-user keying
+
+Acceptance:
+- Recent tags persist across sessions
+- Categories expand/collapse
+- Counter updates instantly
+- Warning shows appropriately
+
+## Phase 4: Polish & Accessibility
+**What**: Keyboard nav, mobile responsive, loading states
+
+Features:
+- Keyboard navigation (Tab, Enter, Escape)
+- Mobile full-screen modal (<768px)
+- Loading skeleton (if cache miss)
+- Error boundaries
+- Performance optimization
+
+Responsive:
+- Desktop: 400px slide-in
+- Tablet: 350px slide-in
+- Mobile: Full-screen modal
+
+Acceptance:
+- Keyboard fully navigable
+- Mobile UX smooth
+- No performance regression
+- Graceful error handling
+
+# Logical Dependency Chain
+## Foundation First (Must Build In Order)
+1. **Panel Shell** - Blade component with trigger button
+   - Replaces Select field
+   - Panel opens/closes
+   - Alpine.js scaffolding
+
+2. **State Binding** - Wire up form connection
+   - Livewire entangle
+   - Tag selection updates state
+   - Form saves tags correctly
+
+3. **Tag Display** - Render all tags with pills
+   - Query all tags
+   - Group by type
+   - Color-coded pills
+   - Toggle functionality
+
+4. **Search Filter** - Client-side filtering
+   - Search input
+   - Filter logic
+   - Real-time updates
+
+5. **Phase Detection** - Smart defaults
+   - Read project stage
+   - Map to tag type
+   - Prioritize phase tags
+
+6. **Recent Tags** - Memory feature
+   - localStorage save/load
+   - Update on selection
+   - Display in panel
+
+7. **Categories** - Organize remaining tags
+   - Collapsible sections
+   - Hide duplicate phases
+   - Expand/collapse
+
+8. **Polish** - Accessibility + responsive
+   - Keyboard support
+   - Mobile breakpoint
+   - Performance tuning
+
+## Getting to Usable Frontend ASAP
+**Target: Working panel in 2 hours**
+
+Sprint 1 (30 min): Panel shell + trigger
+Sprint 2 (30 min): Tag pills + selection
+Sprint 3 (30 min): Livewire binding + save
+Sprint 4 (30 min): Basic search
+
+Result: Usable tag selector, can iterate from there
+
+## Atomic but Buildable Features
+Each feature standalone but enhances previous:
+- Panel works alone
+- + Pills = visual selection
+- + Binding = saves to DB
+- + Search = faster finding
+- + Phase = smarter defaults
+- + Recent = memory boost
+- + Categories = full coverage
+- + Polish = production ready
+
+# Risks and Mitigations
+## Technical Challenges
+**Risk**: Livewire state sync breaks
+- Likelihood: Low
+- Impact: High
+- Mitigation: Use proven `$entangle()` pattern from existing `project-type-cards.blade.php`
+
+**Risk**: Performance with 131 tags
+- Likelihood: Low
+- Impact: Medium
+- Mitigation: Cache tags, filter client-side, use Alpine.js reactivity
+
+**Risk**: Mobile UX poor
+- Likelihood: Medium
+- Impact: Medium
+- Mitigation: Full-screen modal on mobile, test on real devices
+
+**Risk**: FilamentPHP v4 compatibility
+- Likelihood: Very Low
+- Impact: High
+- Mitigation: Already verified v4 uses same patterns as v3
+
+## MVP Scope
+**Must Have (MVP)**:
+- Panel with search
+- Tag selection/deselection
+- Livewire state sync
+- Basic styling
+
+**Nice to Have (Post-MVP)**:
+- Recent tags memory
+- Collapsed categories
+- Keyboard navigation
+- Advanced animations
+
+**Future Enhancement**:
+- Bulk tag actions
+- Tag presets/combinations
+- ML-based suggestions
+- Tag usage analytics
+
+## Resource Constraints
+**Time**: ~3 hours total (MVP in 2 hours)
+**Skills**: Blade, Alpine.js, FilamentPHP v4 (all in-house)
+**Dependencies**: None - uses existing stack
+**Testing**: Manual (Bryan's workflow)
+
+# Appendix
+## Research Findings
+### FilamentPHP v4 Custom Components
+- Same pattern as v3
+- `<x-dynamic-component>` wrapper required
+- `$applyStateBindingModifiers()` for proper entangle
+- No PHP class needed for simple components
+
+### ADHD UX Best Practices
+- Auto-focus critical fields
+- Visual > textual feedback
+- Minimal clicks to complete task
+- Instant response (<100ms)
+- Smart defaults reduce decisions
+
+### Tag System Analysis
+- 131 tags across 12 types
+- Colors aligned with phase stages
+- BelongsToMany works perfectly
+- No schema changes needed
+
+## Technical Specifications
+### Browser Support
+- Chrome/Edge (primary)
+- Safari (secondary)
+- Firefox (secondary)
+
+### Performance Targets
+- Panel open: <100ms
+- Search response: <50ms
+- Tag toggle: <50ms
+- Cache hit: <10ms
+
+### File Structure
+```
+resources/views/forms/components/
+  └── tag-selector-panel.blade.php (NEW)
+
+plugins/webkul/projects/src/Filament/Resources/
+  └── ProjectResource.php (MODIFIED line 433)
+```
+
+### Rollback Plan
+1. Revert ProjectResource.php changes
+2. Delete tag-selector-panel.blade.php
+3. Clear cache: `php artisan view:clear`
+4. Zero downtime, instant rollback
+</PRD>
