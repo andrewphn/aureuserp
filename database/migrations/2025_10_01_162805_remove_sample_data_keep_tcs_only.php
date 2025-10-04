@@ -13,22 +13,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Remove sample partners (all with @example.com emails)
-        DB::table('partners_partners')
-            ->where('email', 'like', '%@example.com')
-            ->delete();
+        // Remove sample partners (all with @example.com emails) - only if table exists
+        if (Schema::hasTable('partners_partners')) {
+            DB::table('partners_partners')
+                ->where('email', 'like', '%@example.com')
+                ->delete();
+        }
 
-        // Remove sample employees (IDs 21-30 which have no user linked)
-        DB::table('employees_employees')
-            ->whereIn('id', [21, 22, 23, 24, 25, 26, 27, 28, 29, 30])
-            ->delete();
+        // Remove sample employees (IDs 21-30 which have no user linked) - only if table exists
+        if (Schema::hasTable('employees_employees')) {
+            DB::table('employees_employees')
+                ->whereIn('id', [21, 22, 23, 24, 25, 26, 27, 28, 29, 30])
+                ->delete();
+        }
 
         // Log what we kept
         \Log::info('Sample data removed. Kept real data:', [
             'users' => DB::table('users')->count(),
             'companies' => DB::table('companies')->count(),
-            'partners' => DB::table('partners_partners')->count(),
-            'employees' => DB::table('employees_employees')->count(),
+            'partners' => Schema::hasTable('partners_partners') ? DB::table('partners_partners')->count() : 0,
+            'employees' => Schema::hasTable('employees_employees') ? DB::table('employees_employees')->count() : 0,
         ]);
     }
 

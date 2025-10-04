@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->decimal('shop_capacity_per_day', 10, 2)->nullable()->after('logo')->comment('Linear feet production capacity per day');
+            $table->decimal('shop_capacity_per_day', 10, 2)->nullable()->comment('Linear feet production capacity per day');
             $table->decimal('shop_capacity_per_month', 10, 2)->nullable()->after('shop_capacity_per_day')->comment('Linear feet production capacity per month');
         });
     }
