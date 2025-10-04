@@ -16,12 +16,13 @@
         17 => 'phase_delivery',
     ];
 
-    // Get current project's stage
+    // Get current project's stage from Livewire
     $currentStageId = null;
-    if (isset($this->record)) {
-        $currentStageId = $this->record->stage_id;
-    } elseif (isset($this->data['stage_id'])) {
-        $currentStageId = $this->data['stage_id'];
+    $livewire = $this->getLivewire();
+    if (method_exists($livewire, 'getRecord') && $livewire->getRecord()) {
+        $currentStageId = $livewire->getRecord()->stage_id ?? null;
+    } elseif (isset($livewire->data['stage_id'])) {
+        $currentStageId = $livewire->data['stage_id'];
     }
 
     $currentPhaseType = $stageToTagType[$currentStageId] ?? null;
@@ -45,7 +46,7 @@
 
     // Get phase color from stage
     $phaseColor = null;
-    if ($currentStageId && isset($this->record)) {
+    if ($currentStageId) {
         $stage = \Webkul\Project\Models\ProjectStage::find($currentStageId);
         $phaseColor = $stage?->color;
     }
