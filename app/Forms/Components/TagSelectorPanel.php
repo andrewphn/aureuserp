@@ -3,6 +3,8 @@
 namespace App\Forms\Components;
 
 use Filament\Forms\Components\Field;
+use Illuminate\Support\Facades\Cache;
+use Webkul\Project\Models\Tag;
 
 class TagSelectorPanel extends Field
 {
@@ -15,11 +17,28 @@ class TagSelectorPanel extends Field
         $this->default([]);
     }
 
-    public function relationship(string $name, string $titleAttribute): static
+    public function getTagsByType(): \Illuminate\Support\Collection
     {
-        $this->relationship = $name;
-        $this->titleAttribute = $titleAttribute;
+        return Cache::remember('project_tags_grouped', 3600, function() {
+            return Tag::all()->groupBy('type');
+        });
+    }
 
-        return $this;
+    public function getTypeLabels(): array
+    {
+        return [
+            'priority' => ['label' => 'Priority', 'icon' => '🎯'],
+            'health' => ['label' => 'Health Status', 'icon' => '💚'],
+            'risk' => ['label' => 'Risk Factors', 'icon' => '⚠️'],
+            'complexity' => ['label' => 'Complexity', 'icon' => '📊'],
+            'work_scope' => ['label' => 'Work Scope', 'icon' => '🔨'],
+            'phase_discovery' => ['label' => 'Discovery Phase', 'icon' => '🔍'],
+            'phase_design' => ['label' => 'Design Phase', 'icon' => '🎨'],
+            'phase_sourcing' => ['label' => 'Sourcing Phase', 'icon' => '📦'],
+            'phase_production' => ['label' => 'Production Phase', 'icon' => '⚙️'],
+            'phase_delivery' => ['label' => 'Delivery Phase', 'icon' => '🚚'],
+            'special_status' => ['label' => 'Special Status', 'icon' => '⭐'],
+            'lifecycle' => ['label' => 'Lifecycle', 'icon' => '🔄'],
+        ];
     }
 }
