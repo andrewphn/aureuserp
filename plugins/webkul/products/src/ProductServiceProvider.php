@@ -34,6 +34,14 @@ class ProductServiceProvider extends PackageServiceProvider
                 '2025_02_18_112837_create_products_product_price_lists_table',
                 '2025_02_21_053249 _create_products_product_combinations_table',
                 '2025_07_28_080116_alter_products_products_table',
+                '2025_09_30_154900_seed_tcs_product_categories',
+                '2025_09_30_160000_seed_tcs_vendors_and_prices',
+                '2025_09_30_160500_fix_vendor_price_currencies',
+                '2025_09_30_162300_seed_product_tags',
+                '2025_09_30_163000_add_vendor_url_to_product_suppliers',
+                '2025_09_30_164000_cleanup_test_vendor_pricing',
+                '2025_10_01_170000_create_product_attributes',
+                '2025_10_01_171000_consolidate_sanding_disc_variants',
             ])
             ->hasSeeder('Webkul\\Product\\Database\Seeders\\DatabaseSeeder')
             ->runsMigrations()
