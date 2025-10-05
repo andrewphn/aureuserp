@@ -10,7 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id') ?? 1;
+        $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id');
 
         // Get Richelieu ID (already exists)
         $richelieuId = DB::table('partners_partners')->where('name', 'Richelieu Hardware')->value('id');
