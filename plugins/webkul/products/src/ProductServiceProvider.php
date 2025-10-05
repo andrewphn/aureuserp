@@ -45,6 +45,7 @@ class ProductServiceProvider extends PackageServiceProvider
                 '2025_09_30_168000_validate_product_import',
                 '2025_09_30_181047_restructure_products_with_variants_and_brands',
                 '2025_10_01_170000_create_product_attributes',
+                '2025_10_01_171000_consolidate_sanding_disc_variants',
                 '2025_10_01_172000_import_amazon_products_with_variants',
                 '2025_10_01_173000_import_inventory_products_with_variants_and_quantities',
             ])
