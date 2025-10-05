@@ -12,7 +12,6 @@
     "require": {
         "php": "^8.2",
         "awcodes/filament-badgeable-column": "^3.0",
-        "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "^4.0",
         "filament/filament": "^4.0",
@@ -20,13 +19,16 @@
         "flowframe/laravel-trend": "^0.3.0",
         "guava/filament-icon-picker": "^3.0",
         "hugomyb/filament-media-action": "^4.0",
+        "jacobtims/inline-date-time-picker": "^2.0",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "milon/barcode": "^11.0",
+        "njxqlus/filament-lightbox": "^4.0",
         "spatie/eloquent-sortable": "^4.4",
         "wikimedia/composer-merge-plugin": "^2.1"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.16",
         "fakerphp/faker": "^1.23",
         "filament/upgrade": "^4.0",
         "laravel/boost": "^1.1",

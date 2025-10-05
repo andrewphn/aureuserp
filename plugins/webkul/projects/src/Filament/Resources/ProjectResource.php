@@ -14,6 +14,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use App\Forms\Components\TagSelectorPanel;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -46,6 +47,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ProductionEstimatorService;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Partner\Filament\Resources\PartnerResource;
@@ -117,46 +119,299 @@ class ProjectResource extends Resource
                                 $stage->id => $stage->color ? Color::generateV3Palette($stage->color) : 'gray'
                             ]))
                             ->default(ProjectStage::first()?->id),
-                        Section::make(__('projects::filament/resources/project.form.sections.general.title'))
+                        Section::make('Project Details')
                             ->schema([
-                                TextInput::make('name')
-                                    ->label(__('projects::filament/resources/project.form.sections.general.fields.name'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->autofocus()
-                                    ->placeholder(__('projects::filament/resources/project.form.sections.general.fields.name-placeholder'))
-                                    ->extraInputAttributes(['style' => 'font-size: 1.5rem;height: 3rem;']),
+                                Grid::make(2)->schema([
+                                    Select::make('company_id')
+                                        ->relationship('company', 'name', fn ($query) => $query->whereNull('parent_id'))
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            // Clear branch selection when company changes
+                                            $set('branch_id', null);
+                                            // Update project number preview when company changes
+                                            static::updateProjectNumberPreview($state, $get, $set);
+                                            // Trigger production time recalculation
+                                            static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                        })
+                                        ->label(__('projects::filament/resources/project.form.sections.additional.fields.company'))
+                                        ->createOptionForm(fn (Schema $schema) => CompanyResource::form($schema)),
+                                    Select::make('branch_id')
+                                        ->label('Branch')
+                                        ->options(function (callable $get) {
+                                            $companyId = $get('company_id');
+                                            if (!$companyId) {
+                                                return [];
+                                            }
+                                            return \Webkul\Support\Models\Company::where('parent_id', $companyId)
+                                                ->pluck('name', 'id');
+                                        })
+                                        ->searchable()
+                                        ->reactive()
+                                        ->visible(fn (callable $get) => $get('company_id') !== null)
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            // Update project number preview when branch changes
+                                            static::updateProjectNumberPreview($get('company_id'), $get, $set);
+                                            // Update project name when branch changes
+                                            static::updateProjectName($get, $set);
+                                            // Trigger production time recalculation using branch capacity if selected
+                                            static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                        })
+                                        ->helperText('Optional: Select a specific branch if applicable'),
+                                    Select::make('partner_id')
+                                        ->label(__('projects::filament/resources/project.form.sections.additional.fields.customer'))
+                                        ->relationship('partner', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            if ($state && $get('use_customer_address')) {
+                                                $partner = \Webkul\Partner\Models\Partner::with('state')->find($state);
+                                                if ($partner) {
+                                                    $set('project_address.street1', $partner->street1);
+                                                    $set('project_address.street2', $partner->street2);
+                                                    $set('project_address.city', $partner->city);
+                                                    $set('project_address.zip', $partner->zip);
+                                                    $set('project_address.state', $partner->state?->name);
+
+                                                    // Update project number preview
+                                                    static::updateProjectNumberPreview($get('company_id'), $get, $set);
+                                                    // Update project name
+                                                    static::updateProjectName($get, $set);
+                                                }
+                                            }
+                                        })
+                                        ->createOptionForm(fn (Schema $schema) => PartnerResource::form($schema))
+                                        ->editOptionForm(fn (Schema $schema) => PartnerResource::form($schema)),
+                                    Select::make('project_type')
+                                        ->label('Project Type')
+                                        ->options([
+                                            'residential' => 'Residential',
+                                            'commercial' => 'Commercial',
+                                            'furniture' => 'Furniture',
+                                            'millwork' => 'Millwork',
+                                            'other' => 'Other',
+                                        ])
+                                        ->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            // Update project name when project type changes
+                                            static::updateProjectName($get, $set);
+                                        })
+                                        ->native(false),
+                                ]),
+                                Grid::make(2)->schema([
+                                    TextInput::make('project_number')
+                                        ->label('Project Number')
+                                        ->placeholder('Auto-generated if left blank')
+                                        ->maxLength(255)
+                                        ->unique(ignoreRecord: true),
+                                    TextInput::make('name')
+                                        ->label(__('projects::filament/resources/project.form.sections.general.fields.name'))
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->placeholder(__('projects::filament/resources/project.form.sections.general.fields.name-placeholder')),
+                                ]),
                                 RichEditor::make('description')
                                     ->label(__('projects::filament/resources/project.form.sections.general.fields.description')),
                             ]),
 
-                        Section::make(__('projects::filament/resources/project.form.sections.additional.title'))
+                        Section::make('Project Location')
+                            ->schema([
+                                Toggle::make('use_customer_address')
+                                    ->label('Use customer address for project location')
+                                    ->default(true)
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
+                                        // Only auto-populate if this is NOT an edit page with existing address
+                                        $isEditPage = $livewire instanceof \Filament\Resources\Pages\EditRecord;
+                                        $hasExistingAddress = false;
+
+                                        if ($isEditPage && $livewire->record) {
+                                            $hasExistingAddress = $livewire->record->addresses()->count() > 0;
+                                        }
+
+                                        // Don't override if editing and address exists in database
+                                        if ($isEditPage && $hasExistingAddress) {
+                                            return;
+                                        }
+
+                                        if ($state) {
+                                            // Populate from customer
+                                            $partnerId = $get('partner_id');
+                                            if ($partnerId) {
+                                                $partner = \Webkul\Partner\Models\Partner::with(['state', 'country'])->find($partnerId);
+                                                if ($partner) {
+                                                    $set('project_address.street1', $partner->street1);
+                                                    $set('project_address.street2', $partner->street2);
+                                                    $set('project_address.city', $partner->city);
+                                                    $set('project_address.zip', $partner->zip);
+                                                    $set('project_address.country_id', $partner->country_id);
+                                                    $set('project_address.state_id', $partner->state_id);
+                                                }
+                                            }
+                                        } else {
+                                            // Clear fields only if not editing with existing address
+                                            $set('project_address.street1', null);
+                                            $set('project_address.street2', null);
+                                            $set('project_address.city', null);
+                                            $set('project_address.zip', null);
+                                            $set('project_address.country_id', null);
+                                            $set('project_address.state_id', null);
+                                        }
+                                    })
+                                    ->inline()
+                                    ->columnSpanFull(),
+                                TextInput::make('project_address.street1')
+                                    ->label('Street Address Line 1')
+                                    ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                    ->dehydrated()
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        // Update project number preview when street address changes
+                                        static::updateProjectNumberPreview($get('company_id'), $get, $set);
+                                        // Update project name when street address changes
+                                        static::updateProjectName($get, $set);
+                                    })
+                                    ->columnSpanFull(),
+                                TextInput::make('project_address.street2')
+                                    ->label('Street Address Line 2')
+                                    ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                    ->dehydrated()
+                                    ->columnSpanFull(),
+                                Grid::make(3)->schema([
+                                    TextInput::make('project_address.city')
+                                        ->label('City')
+                                        ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                        ->dehydrated(),
+                                    Select::make('project_address.country_id')
+                                        ->label('Country')
+                                        ->options(\Webkul\Support\Models\Country::pluck('name', 'id'))
+                                        ->searchable()
+                                        ->preload()
+                                        ->live()
+                                        ->afterStateUpdated(function (callable $set) {
+                                            $set('project_address.state_id', null);
+                                        })
+                                        ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                        ->dehydrated(),
+                                    Select::make('project_address.state_id')
+                                        ->label('State')
+                                        ->options(function (callable $get) {
+                                            $countryId = $get('project_address.country_id');
+                                            if (!$countryId) {
+                                                return [];
+                                            }
+                                            return \Webkul\Support\Models\State::where('country_id', $countryId)
+                                                ->pluck('name', 'id');
+                                        })
+                                        ->searchable()
+                                        ->preload()
+                                        ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                        ->dehydrated(),
+                                    TextInput::make('project_address.zip')
+                                        ->label('Zip Code')
+                                        ->disabled(fn (callable $get) => $get('use_customer_address'))
+                                        ->dehydrated(),
+                                ]),
+                            ]),
+
+                        Section::make('Timeline & Scope')
                             ->schema(static::mergeCustomFormFields([
-                                Select::make('user_id')
-                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.project-manager'))
-                                    ->relationship('user', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->createOptionForm(fn (Schema $schema) => UserResource::form($schema)),
-                                Select::make('partner_id')
-                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.customer'))
-                                    ->relationship('partner', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->createOptionForm(fn (Schema $schema) => PartnerResource::form($schema))
-                                    ->editOptionForm(fn (Schema $schema) => PartnerResource::form($schema)),
+                                TextInput::make('estimated_linear_feet')
+                                    ->label('Estimated Linear Feet')
+                                    ->suffix('ft')
+                                    ->minValue(0)
+                                    ->numeric()
+                                    ->step(0.01)
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        // Calculate estimated production time and update allocated hours
+                                        static::calculateEstimatedProductionTime($state, $get, $set);
+
+                                        // Auto-populate allocated_hours based on linear feet
+                                        if ($state && $get('company_id')) {
+                                            $estimate = ProductionEstimatorService::calculate($state, $get('company_id'));
+                                            if ($estimate) {
+                                                $set('allocated_hours', $estimate['hours']);
+                                            }
+                                        }
+                                    })
+                                    ->helperText('Estimated total linear feet for this project')
+                                    ->rules(['nullable', 'numeric', 'min:0']),
                                 DatePicker::make('start_date')
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.start-date'))
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
-                                    ->requiredWith('end_date')
-                                    ->beforeOrEqual('start_date'),
-                                DatePicker::make('end_date')
-                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.end-date'))
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        // Auto-suggest desired completion date based on production estimate
+                                        if ($state && $get('estimated_linear_feet') && $get('company_id')) {
+                                            $estimate = ProductionEstimatorService::calculate($get('estimated_linear_feet'), $get('company_id'));
+                                            if ($estimate) {
+                                                // Get company calendar to calculate actual working days
+                                                $companyId = $get('company_id');
+                                                $calendar = \DB::selectOne('SELECT id FROM employees_calendars WHERE company_id = ? AND deleted_at IS NULL LIMIT 1', [$companyId]);
+
+                                                if ($calendar) {
+                                                    // Get working days from calendar
+                                                    $workingDayNames = \DB::select('SELECT DISTINCT LOWER(day_of_week) as day_of_week FROM employees_calendar_attendances WHERE calendar_id = ?', [$calendar->id]);
+                                                    $workingDayNames = array_map(fn($row) => $row->day_of_week, $workingDayNames);
+
+                                                    $dayMap = ['monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4, 'friday' => 5, 'saturday' => 6, 'sunday' => 0];
+                                                    $workingDayNumbers = array_map(fn($day) => $dayMap[$day] ?? null, $workingDayNames);
+                                                    $workingDayNumbers = array_filter($workingDayNumbers, fn($num) => $num !== null);
+                                                } else {
+                                                    $workingDayNumbers = [1, 2, 3, 4]; // Mon-Thu fallback
+                                                }
+
+                                                // Calculate desired completion date by adding working days
+                                                $daysNeeded = ceil($estimate['days']);
+                                                $startDate = \Carbon\Carbon::parse($state);
+                                                $currentDate = $startDate->copy();
+                                                $workingDaysAdded = 0;
+
+                                                while ($workingDaysAdded < $daysNeeded) {
+                                                    $currentDate->addDay();
+                                                    if (in_array($currentDate->dayOfWeek, $workingDayNumbers)) {
+                                                        $workingDaysAdded++;
+                                                    }
+                                                }
+
+                                                $set('desired_completion_date', $currentDate->format('Y-m-d'));
+                                            }
+                                        }
+
+                                        // Trigger production time recalculation when start date changes
+                                        static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                    }),
+                                DatePicker::make('desired_completion_date')
+                                    ->label('Desired Completion Date')
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
-                                    ->requiredWith('start_date')
-                                    ->afterOrEqual('start_date'),
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        // Trigger production time recalculation when desired completion date changes
+                                        static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                    })
+                                    ->helperText(function (callable $get) {
+                                        $linearFeet = $get('estimated_linear_feet');
+                                        $companyId = $get('company_id');
+
+                                        if (!$linearFeet || !$companyId) {
+                                            return null;
+                                        }
+
+                                        $estimate = \App\Services\ProductionEstimatorService::calculate($linearFeet, $companyId);
+                                        if (!$estimate) {
+                                            return null;
+                                        }
+
+                                        return "⚠️ Production time needed: {$estimate['formatted']}";
+                                    }),
                                 TextInput::make('allocated_hours')
                                     ->label(__('projects::filament/resources/project.form.sections.additional.fields.allocated-hours'))
                                     ->suffixIcon('heroicon-o-clock')
@@ -165,19 +420,12 @@ class ProjectResource extends Resource
                                     ->helperText(__('projects::filament/resources/project.form.sections.additional.fields.allocated-hours-helper-text'))
                                     ->visible(static::getTimeSettings()->enable_timesheets)
                                     ->rules(['nullable', 'numeric', 'min:0']),
-                                Select::make('tags')
-                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
-                                    ->relationship(name: 'tags', titleAttribute: 'name')
-                                    ->multiple()
+                                Select::make('user_id')
+                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.project-manager'))
+                                    ->relationship('user', 'name')
                                     ->searchable()
                                     ->preload()
-                                    ->createOptionForm(fn (Schema $schema) => TagResource::form($schema)),
-                                Select::make('company_id')
-                                    ->relationship('company', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.company'))
-                                    ->createOptionForm(fn (Schema $schema) => CompanyResource::form($schema)),
+                                    ->createOptionForm(fn (Schema $schema) => UserResource::form($schema)),
                             ]))
                             ->columns(2),
                     ])
@@ -185,6 +433,85 @@ class ProjectResource extends Resource
 
                 Group::make()
                     ->schema([
+                        // Commented out - Project Overview moved to sticky footer
+                        // Section::make('Project Overview')
+                        //     ->schema([
+                        //         \Filament\Forms\Components\Placeholder::make('summary_company')
+                        //             ->label('Company')
+                        //             ->content(fn (callable $get) => \Webkul\Support\Models\Company::find($get('company_id'))?->name ?? '—'),
+                        //         \Filament\Forms\Components\Placeholder::make('summary_customer')
+                        //             ->label('Customer')
+                        //             ->content(fn (callable $get) => \Webkul\Partner\Models\Partner::find($get('partner_id'))?->name ?? '—'),
+                        //         \Filament\Forms\Components\Placeholder::make('summary_project_type')
+                        //             ->label('Type')
+                        //             ->content(fn (callable $get) => ucfirst($get('project_type') ?? '—')),
+                        //         \Filament\Forms\Components\Placeholder::make('summary_linear_feet')
+                        //             ->label('Linear Feet')
+                        //             ->content(fn (callable $get) => $get('estimated_linear_feet') ? $get('estimated_linear_feet') . ' LF' : '—'),
+
+                        //         \Filament\Forms\Components\ViewField::make('estimated_production_info')
+                        //             ->view('filament.forms.components.production-estimate-card')
+                        //             ->viewData(function (callable $get) {
+                        //                 $linearFeet = $get('estimated_linear_feet');
+                        //                 $companyId = $get('company_id');
+
+                        //                 if (!$linearFeet || !$companyId) {
+                        //                     return ['estimate' => null];
+                        //                 }
+
+                        //                 // Always use parent company capacity for production calculations
+                        //                 $estimate = ProductionEstimatorService::calculate($linearFeet, $companyId);
+
+                        //                 return ['estimate' => $estimate, 'linearFeet' => $linearFeet];
+                        //             }),
+                        //     ])
+                        //     ->compact()
+                        //     ->columns(1)
+                        //     ->collapsible()
+                        //     ->collapsed(false)
+                        //     ->extraAttributes([
+                        //         'style' => 'position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto;'
+                        //     ]),
+
+                        Section::make('Architectural PDF Upload')
+                            ->description('Upload architectural plans, blueprints, or technical drawings. PDFs will be available for viewing and annotation after project creation.')
+                            ->schema([
+                                \Filament\Forms\Components\FileUpload::make('architectural_pdfs')
+                                    ->label('Upload PDF Documents')
+                                    ->acceptedFileTypes(['application/pdf'])
+                                    ->maxSize(51200) // 50MB in KB
+                                    ->disk('public')
+                                    ->directory('pdf-documents')
+                                    ->multiple()
+                                    ->reorderable()
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable(false)
+                                    ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
+                                    ->columnSpanFull()
+                                    ->visible(fn ($context) => $context === 'create'),
+
+                                \Filament\Forms\Components\ViewField::make('uploaded_pdfs')
+                                    ->label('Uploaded PDF Documents')
+                                    ->view('filament.forms.components.uploaded-pdfs-list')
+                                    ->viewData(fn ($record) => [
+                                        'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
+                                    ])
+                                    ->visible(fn ($context) => $context === 'edit')
+                                    ->columnSpanFull(),
+                            ])
+                            ->collapsible()
+                            ->collapsed(false),
+
+                        Section::make('Project Tags')
+                            ->schema([
+                                TagSelectorPanel::make('tags')
+                                    ->label(__('projects::filament/resources/project.form.sections.additional.fields.tags'))
+                                    ->columnSpan('full'),
+                            ])
+                            ->collapsible()
+                            ->collapsed(false),
+
                         Section::make(__('projects::filament/resources/project.form.sections.settings.title'))
                             ->schema([
                                 Radio::make('visibility')
@@ -203,6 +530,7 @@ class ProjectResource extends Resource
                                         Toggle::make('allow_timesheets')
                                             ->label(__('projects::filament/resources/project.form.sections.settings.fields.allow-timesheets'))
                                             ->helperText(__('projects::filament/resources/project.form.sections.settings.fields.allow-timesheets-helper-text'))
+                                            ->default(true)
                                             ->visible(static::getTimeSettings()->enable_timesheets),
                                     ])
                                     ->columns(1)
@@ -214,8 +542,8 @@ class ProjectResource extends Resource
                                         Toggle::make('allow_milestones')
                                             ->label(__('projects::filament/resources/project.form.sections.settings.fields.allow-milestones'))
                                             ->helperText(__('projects::filament/resources/project.form.sections.settings.fields.allow-milestones-helper-text'))
-                                            ->visible(static::getTaskSettings()->enable_milestones)
-                                            ->default(static::getTaskSettings()->enable_milestones),
+                                            ->default(true)
+                                            ->visible(static::getTaskSettings()->enable_milestones),
                                     ])
                                     ->columns(1)
                                     ->visible(static::getTaskSettings()->enable_milestones),
@@ -525,6 +853,11 @@ class ProjectResource extends Resource
                             ->schema(static::mergeCustomInfolistEntries([
                                 Grid::make(2)
                                     ->schema([
+                                        TextEntry::make('project_number')
+                                            ->label('Project Number')
+                                            ->icon('heroicon-o-hashtag')
+                                            ->placeholder('—'),
+
                                         TextEntry::make('user.name')
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.project-manager'))
                                             ->icon('heroicon-o-user')
@@ -534,6 +867,26 @@ class ProjectResource extends Resource
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.customer'))
                                             ->icon('heroicon-o-phone')
                                             ->placeholder('—'),
+
+                                        TextEntry::make('project_address')
+                                            ->label('Project Address')
+                                            ->icon('heroicon-o-map-pin')
+                                            ->state(function (Project $record): string {
+                                                if ($record->addresses()->count() > 0) {
+                                                    $address = $record->addresses()->where('is_primary', true)->first()
+                                                               ?? $record->addresses()->first();
+
+                                                    $parts = array_filter([
+                                                        $address->street1,
+                                                        $address->city,
+                                                        $address->state?->name,
+                                                    ]);
+
+                                                    return !empty($parts) ? implode(', ', $parts) : '—';
+                                                }
+
+                                                return '—';
+                                            }),
 
                                         TextEntry::make('planned_date')
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.project-timeline'))
@@ -692,6 +1045,89 @@ class ProjectResource extends Resource
             ])
                 ->icon('heroicon-o-flag'),
         ];
+    }
+
+    protected static function calculateEstimatedProductionTime($linearFeet, callable $get, callable $set): void
+    {
+        // This method is primarily used to trigger reactive updates
+        // The actual calculation is done in the Placeholder content function
+        // This ensures the placeholder updates when linear feet or company changes
+    }
+
+    protected static function updateProjectName(callable $get, callable $set): void
+    {
+        // Only generate name if we have both street address and project type
+        $street = $get('project_address.street1');
+        $projectType = $get('project_type');
+
+        if (!$street || !$projectType) {
+            return;
+        }
+
+        // Get the project type label
+        $projectTypeLabels = [
+            'residential' => 'Residential',
+            'commercial' => 'Commercial',
+            'furniture' => 'Furniture',
+            'millwork' => 'Millwork',
+            'other' => 'Other',
+        ];
+
+        $typeLabel = $projectTypeLabels[$projectType] ?? $projectType;
+
+        // Format: "15B Correia Lane - Residential"
+        $projectName = "{$street} - {$typeLabel}";
+
+        // Set the project name
+        $set('name', $projectName);
+    }
+
+    protected static function updateProjectNumberPreview(?int $companyId, callable $get, callable $set): void
+    {
+        // Only generate preview if we have both company and street address
+        if (!$companyId || !$get('project_address.street1')) {
+            return;
+        }
+
+        // Get company acronym - use branch if selected, otherwise parent company
+        $branchId = $get('branch_id');
+        $companyToUse = $branchId ? \Webkul\Support\Models\Company::find($branchId) : \Webkul\Support\Models\Company::find($companyId);
+
+        if (!$companyToUse) {
+            return;
+        }
+
+        $companyAcronym = $companyToUse->acronym ?? strtoupper(substr($companyToUse->name ?? 'UNK', 0, 3));
+
+        // Get next sequential number for this company/branch
+        $lastProject = Project::where('company_id', $companyId)
+            ->where('project_number', 'like', "{$companyAcronym}-%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $sequentialNumber = 1;
+        if ($lastProject && $lastProject->project_number) {
+            // Extract number from format: TCS-0001-Street
+            preg_match('/-(\d+)-/', $lastProject->project_number, $matches);
+            if (!empty($matches[1])) {
+                $sequentialNumber = intval($matches[1]) + 1;
+            }
+        }
+
+        // Get street address (remove spaces and special chars)
+        $street = $get('project_address.street1');
+        $streetAbbr = preg_replace('/[^a-zA-Z0-9]/', '', $street);
+
+        // Format: TCS-0001-15BCorreiaLane
+        $projectNumber = sprintf(
+            '%s-%04d-%s',
+            $companyAcronym,
+            $sequentialNumber,
+            $streetAbbr
+        );
+
+        // Set the preview in the project_number field
+        $set('project_number', $projectNumber);
     }
 
     public static function getPages(): array
