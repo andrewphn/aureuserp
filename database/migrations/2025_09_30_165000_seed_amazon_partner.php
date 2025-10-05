@@ -10,8 +10,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id') ?? 1;
-        $companyId = DB::table('companies')->where('name', "The Carpenter's Son LLC")->value('id') ?? 1;
+        $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id');
+        $companyId = DB::table('companies')->where('name', "The Carpenter's Son LLC")->value('id');
 
         // Check if Amazon Business partner already exists
         $amazonId = DB::table('partners_partners')

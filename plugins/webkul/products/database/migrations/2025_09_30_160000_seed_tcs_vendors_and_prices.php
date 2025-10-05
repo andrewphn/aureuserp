@@ -10,10 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id') ?? 1;
-
-        // Get Richelieu ID (already exists)
-        $richelieuId = DB::table('partners_partners')->where('name', 'Richelieu Hardware')->value('id');
+        $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id');
 
         // State IDs for USA
         $stateIds = [
@@ -28,6 +25,18 @@ return new class extends Migration
 
         // Vendor partners data
         $vendors = [
+            [
+                'name' => 'Richelieu Hardware',
+                'sub_type' => 'supplier',
+                'email' => '[email protected]',
+                'phone' => '1-800-361-6000',
+                'website' => 'www.richelieu.com',
+                'street1' => '7900 Henri-Bourassa West',
+                'city' => 'Ville Saint-Laurent',
+                'state_id' => 543,  // Quebec
+                'zip' => 'H4S 1V4',
+                'country_id' => 38,  // Canada
+            ],
             [
                 'name' => 'Serious Grit',
                 'sub_type' => 'supplier',
@@ -141,9 +150,6 @@ return new class extends Migration
                 ]);
             }
         }
-
-        // Add Richelieu to vendorIds
-        $vendorIds['Richelieu Hardware'] = $richelieuId;
 
         // Vendor prices data from CSV
         $vendorPrices = [
