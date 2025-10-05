@@ -42,7 +42,6 @@ return new class extends Migration
         // Insert Trottier Fine Woodworking company
         DB::table('companies')->insert([
             'name' => 'Trottier Fine Woodworking',
-            'acronym' => 'TFW',
             'company_id' => 'TROTWOOD001',
             'partner_id' => $partnerId,
             'email' => 'jeremybtrottier@gmail.com',
