@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-10-01T19:04:25.634Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 20,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 11,
+			"taskTitle": "Database Schema Enhancement for Project Wizard",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into specific migration tasks: creating the migration file, adding project_type and project_type_other columns, adding use_customer_address boolean column, verifying projects_project_addresses table relationship, updating Project model fillable fields and relationships, and updating ProjectAddress model relationships. Include validation and rollback testing.",
+			"reasoning": "Schema changes are straightforward in Laravel with existing migration patterns. The ProjectAddress table already exists and relationships are partially implemented. Adding 3 new columns is low-risk with clear patterns to follow."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Implement HasWizard Trait in CreateProject Page",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Convert CreateProject page to wizard by: importing FilamentPHP wizard components, adding HasWizard trait, implementing getSteps() method with 5 step structure, removing existing form() method dependencies, creating step schemas with proper imports, testing wizard navigation and progress indicators, and handling form state management between steps.",
+			"reasoning": "FilamentPHP wizard implementation requires understanding of the form component architecture. The existing CreateProject page is simple but needs significant restructuring. Wizard state management and step navigation can be complex with potential edge cases."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Discovery Step Implementation with Live Summary Panel",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Implement Discovery step by: creating step schema with proper field ordering, integrating existing ProjectSummaryPanel Livewire component with columnSpanFull, implementing company/partner selection fields with relationships, adding project address section with conditional visibility, implementing project name and description fields with proper styling, adding auto-generated project number display, and testing real-time summary updates.",
+			"reasoning": "Complex integration of existing Livewire component into FilamentPHP wizard. Requires understanding of both FilamentPHP form schemas and Livewire component integration. The ProjectSummaryPanel already exists but needs wizard integration. Conditional field logic adds complexity."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Project Number Auto-Generation System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Implement auto-generation by: creating generateProjectNumber() method with company acronym parsing, implementing street address parsing with regex for number extraction, handling street name cleaning and formatting, implementing unique ID generation logic, adding afterCreate() hook integration, and testing various address formats and edge cases.",
+			"reasoning": "String parsing and formatting logic with multiple edge cases. The Project model already has some auto-generation implemented but needs enhancement. Regex parsing and business logic for unique numbering requires careful testing across different address formats."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Design Step Implementation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Create Design step by: implementing date picker fields with FilamentPHP native components, adding allocated hours numeric input with proper validation, implementing tags relationship with belongsToMany functionality and create options, setting up two-column grid layout, and testing field interactions and data persistence.",
+			"reasoning": "Standard FilamentPHP form implementation with existing patterns. Tags relationship and date fields are common components. Two-column layout is straightforward. Some complexity with numeric validation and relationship handling."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Sourcing Step Implementation",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Implement Sourcing step by: creating company selection field with relationship and create option, integrating HasCustomFields::mergeCustomFormFields() with sourcing context, implementing proper section wrapping and layout, testing relationship functionality and custom field rendering, and validating data persistence across wizard steps.",
+			"reasoning": "Requires understanding of HasCustomFields trait integration which appears to be a custom pattern in this codebase. Company relationship already exists but needs proper integration. Custom fields merging may have complex edge cases depending on the trait implementation."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Production Step Implementation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Create Production step by: implementing Task Management section with allow_milestones toggle, adding conditional visibility based on TaskSettings::enable_milestones, integrating custom fields with production context, implementing proper fieldset/section wrapping, and testing toggle functionality and conditional logic.",
+			"reasoning": "Uses existing TaskSettings class and patterns. Toggle implementation is straightforward in FilamentPHP. Custom fields integration follows established patterns. Conditional visibility is a standard FilamentPHP feature."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Delivery Step Implementation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Implement Delivery step by: creating Settings section with visibility radio field and three options, implementing Time Management section with allow_timesheets toggle, adding conditional visibility based on TimeSettings::enable_timesheets, setting up proper section grouping and radio layouts, and testing field interactions and data persistence.",
+			"reasoning": "Similar complexity to Production step with radio buttons instead of toggles. TimeSettings class already exists. Radio field implementation and section grouping are standard FilamentPHP patterns. Visibility enum integration is straightforward."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Live Summary Panel Integration and Real-time Updates",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Enhance ProjectSummaryPanel by: updating component to handle new wizard fields (project_type, company_id, partner_id), implementing Alpine.js watchers for real-time updates, adding formatters for friendly value display, handling project number placeholder during creation, implementing Livewire component integration with columnSpanFull positioning, and testing reactive updates without server requests.",
+			"reasoning": "Complex integration requiring knowledge of Livewire, Alpine.js, and FilamentPHP component integration. The existing ProjectSummaryPanel has some functionality but needs significant enhancement. Real-time updates without server requests requires careful Alpine.js implementation and form state management."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Project Address Management and Conditional Logic",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Implement address management by: creating use_customer_address toggle with default true value, implementing conditional project address fields with visible() callbacks, updating mutateFormDataBeforeCreate() for address logic handling, integrating address data into Live Summary Panel, updating project number generation to use address data, and implementing proper grid layout for address fields.",
+			"reasoning": "Complex conditional logic spanning multiple systems (form fields, data persistence, summary panel, project number generation). The ProjectAddress model exists but the conditional creation logic needs careful implementation. Integration with multiple other components increases complexity and potential for bugs."
+		}
+	]
+}

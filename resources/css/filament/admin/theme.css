@@ -1,0 +1,151 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../tcs-brand-tokens.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/components/**/*';
+
+@layer components {
+    /* ============================================
+       PROJECT TYPE CARDS
+       ============================================ */
+
+    /* Target the options grid directly */
+    .fi-fo-checkbox-list-options.project-type-cards .fi-fo-checkbox-list-option-ctn {
+        @apply mb-2;
+    }
+
+    .fi-fo-checkbox-list-options.project-type-cards .fi-fo-checkbox-list-option {
+        @apply flex items-center p-4 border-2 border-gray-300 dark:border-gray-600
+               rounded-lg bg-white dark:bg-gray-800 transition-all cursor-pointer;
+    }
+
+    .fi-fo-checkbox-list-options.project-type-cards .fi-fo-checkbox-list-option:hover {
+        @apply border-gray-400 dark:border-gray-500;
+    }
+
+    .fi-fo-checkbox-list-options.project-type-cards .fi-fo-checkbox-list-option:has(input[type="checkbox"]:checked) {
+        @apply bg-amber-500 border-amber-500 dark:bg-amber-600 dark:border-amber-600;
+    }
+
+    .fi-fo-checkbox-list-options.project-type-cards .fi-fo-checkbox-list-option:has(input[type="checkbox"]:checked) * {
+        @apply text-white;
+    }
+
+    /* ============================================
+       TCS METRIC CARD - Reusable component
+       ============================================ */
+
+    .tcs-metric-card {
+        @apply rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow;
+    }
+
+    .tcs-metric-card-label {
+        @apply text-[10px] font-semibold text-white/60 uppercase tracking-widest mb-3;
+    }
+
+    .tcs-metric-card-value {
+        @apply text-6xl font-black text-white leading-none mb-3 tracking-tight;
+    }
+
+    .tcs-metric-card-unit {
+        @apply text-xs font-bold text-white uppercase tracking-wider opacity-90;
+    }
+
+    /* ============================================
+       FORM DESIGN - TCS Woodwork Clean Aesthetic
+       Inspired by tcswoodwork.com minimal design
+       ============================================ */
+
+    /* Section Headers - Clean minimal style */
+    .fi-section-header {
+        @apply border-b border-gray-200 dark:border-gray-700 pb-3 mb-6;
+    }
+
+    .fi-section-header-heading {
+        @apply text-lg font-medium text-gray-900 dark:text-gray-100;
+    }
+
+    /* Form sections - Minimal clean cards */
+    .fi-section {
+        @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-4;
+    }
+
+    /* Input fields - Clean minimal borders */
+    .fi-input-wrapper input[type="text"],
+    .fi-input-wrapper input[type="email"],
+    .fi-input-wrapper input[type="number"],
+    .fi-input-wrapper select,
+    .fi-input-wrapper textarea {
+        @apply border-gray-200 dark:border-gray-700
+               focus:border-gray-400 dark:focus:border-gray-500
+               focus:ring-0
+               rounded-md transition-colors
+               bg-white dark:bg-gray-900;
+    }
+
+    /* Select inputs - Minimal focus style */
+    .fi-select-input {
+        @apply rounded-md border-gray-200 dark:border-gray-700
+               focus:border-gray-400 dark:focus:border-gray-500
+               focus:ring-0
+               transition-colors;
+    }
+
+    /* Field labels - Clean typography */
+    .fi-fo-field-wrp-label label {
+        @apply font-normal text-gray-700 dark:text-gray-300 text-sm mb-1.5;
+    }
+
+    /* Helper text - Subtle */
+    .fi-fo-field-wrp-hint-text {
+        @apply text-xs text-gray-500 dark:text-gray-500 mt-1;
+    }
+
+    /* Radio and checkbox groups - Clean spacing */
+    .fi-fo-radio-list,
+    .fi-fo-checkbox-list {
+        @apply space-y-2;
+    }
+
+    /* Radio/checkbox options - Minimal card style like TCS website */
+    .fi-fo-radio-list-option,
+    .fi-fo-checkbox-list-option {
+        @apply border border-gray-200 dark:border-gray-700
+               rounded-md p-3 transition-all duration-150
+               hover:border-gray-300 dark:hover:border-gray-600
+               bg-white dark:bg-gray-900;
+    }
+
+    .fi-fo-radio-list-option:has(input:checked),
+    .fi-fo-checkbox-list-option:has(input:checked) {
+        @apply border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-800;
+    }
+
+    /* Form grid - Better spacing */
+    .fi-fo-grid {
+        @apply gap-5;
+    }
+
+    /* Fieldset groups - Minimal styling */
+    .fi-fieldset {
+        @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
+               rounded-lg p-4 mb-4;
+    }
+
+    .fi-fieldset-header {
+        @apply mb-3 pb-2 border-b border-gray-200 dark:border-gray-700;
+    }
+
+    /* Disabled inputs - Subtle indication */
+    .fi-input-wrapper input:disabled,
+    .fi-input-wrapper select:disabled,
+    .fi-input-wrapper textarea:disabled {
+        @apply bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed;
+    }
+
+    /* Toggle switches - Minimal accent */
+    .fi-toggle {
+        @apply focus:ring-0 focus:ring-offset-0 checked:bg-gray-800 dark:checked:bg-gray-600;
+    }
+}

@@ -1,0 +1,300 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\PdfDocumentResource\Pages;
+use App\Models\PdfDocument;
+use App\Filament\Forms\Components\PdfViewerField;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+
+class PdfDocumentResource extends Resource
+{
+    protected static ?string $model = PdfDocument::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    protected static ?string $navigationLabel = 'PDF Documents';
+
+    protected static ?string $navigationGroup = 'Documents';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make('Document Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('title')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Enter document title'),
+
+                        Forms\Components\Textarea::make('description')
+                            ->rows(3)
+                            ->maxLength(1000)
+                            ->placeholder('Enter document description'),
+
+                        Forms\Components\FileUpload::make('file_path')
+                            ->label('PDF File')
+                            ->disk('public')
+                            ->directory('pdf-documents')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->maxSize(51200) // 50MB in KB
+                            ->required()
+                            ->downloadable()
+                            ->openable()
+                            ->previewable(false)
+                            ->helperText('Maximum file size: 50MB. Accepted format: PDF only.'),
+
+                        Forms\Components\Select::make('folder_id')
+                            ->relationship('folder', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\Textarea::make('description')
+                                    ->rows(2),
+                            ])
+                            ->nullable(),
+
+                        Forms\Components\Select::make('category_id')
+                            ->relationship('category', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\ColorPicker::make('color')
+                                    ->default('#3b82f6'),
+                            ])
+                            ->nullable(),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Classification')
+                    ->schema([
+                        Forms\Components\Select::make('documentable_type')
+                            ->label('Related To')
+                            ->options([
+                                'App\\Models\\Project' => 'Project',
+                                'App\\Models\\Partner' => 'Partner',
+                                'App\\Models\\Quote' => 'Quote',
+                                'App\\Models\\WorkOrder' => 'Work Order',
+                            ])
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('documentable_id', null))
+                            ->nullable(),
+
+                        Forms\Components\Select::make('documentable_id')
+                            ->label('Select Record')
+                            ->options(function (callable $get) {
+                                $type = $get('documentable_type');
+
+                                if (!$type) {
+                                    return [];
+                                }
+
+                                $model = app($type);
+
+                                return $model->pluck('name', 'id')->toArray();
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->visible(fn (callable $get) => filled($get('documentable_type')))
+                            ->nullable(),
+
+                        Forms\Components\TagsInput::make('tags')
+                            ->placeholder('Add tags')
+                            ->helperText('Press Enter after each tag'),
+
+                        Forms\Components\Toggle::make('is_public')
+                            ->label('Public Document')
+                            ->helperText('Allow all users to view this document')
+                            ->default(false),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('PDF Viewer')
+                    ->schema([
+                        PdfViewerField::make('id')
+                            ->label('Document Preview')
+                            ->documentId(fn ($record) => $record?->id)
+                            ->fullEditor()
+                            ->height('700px')
+                            ->visible(fn ($record) => $record !== null && $record->file_path !== null),
+                    ])
+                    ->collapsible()
+                    ->collapsed(false),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('title')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30),
+
+                Tables\Columns\TextColumn::make('folder.name')
+                    ->label('Folder')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('gray'),
+
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category')
+                    ->badge()
+                    ->color(fn ($record) => $record->category?->color ?? 'primary'),
+
+                Tables\Columns\TextColumn::make('documentable_type')
+                    ->label('Related To')
+                    ->formatStateUsing(fn ($state) => class_basename($state))
+                    ->badge()
+                    ->color('success')
+                    ->visible(fn () => Auth::user()->hasRole('admin')),
+
+                Tables\Columns\TextColumn::make('file_size')
+                    ->label('Size')
+                    ->formatStateUsing(fn ($state) => number_format($state / 1024, 2) . ' KB')
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('is_public')
+                    ->label('Public')
+                    ->boolean()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('uploader.name')
+                    ->label('Uploaded By')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Uploaded')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('folder_id')
+                    ->label('Folder')
+                    ->relationship('folder', 'name')
+                    ->multiple()
+                    ->preload(),
+
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('category', 'name')
+                    ->multiple()
+                    ->preload(),
+
+                Tables\Filters\SelectFilter::make('documentable_type')
+                    ->label('Related To')
+                    ->options([
+                        'App\\Models\\Project' => 'Project',
+                        'App\\Models\\Partner' => 'Partner',
+                        'App\\Models\\Quote' => 'Quote',
+                        'App\\Models\\WorkOrder' => 'Work Order',
+                    ])
+                    ->multiple(),
+
+                Tables\Filters\TernaryFilter::make('is_public')
+                    ->label('Public Documents')
+                    ->placeholder('All documents')
+                    ->trueLabel('Public only')
+                    ->falseLabel('Private only'),
+
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from')
+                            ->label('Uploaded from'),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->label('Uploaded until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('download')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (PdfDocument $record) => route('pdf.download', $record))
+                    ->openUrlInNewTab(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPdfDocuments::route('/'),
+            'create' => Pages\CreatePdfDocument::route('/create'),
+            'edit' => Pages\EditPdfDocument::route('/{record}/edit'),
+            'view' => Pages\ViewPdfDocument::route('/{record}'),
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        $user = Auth::user();
+
+        // Admin can see all documents
+        if ($user->hasRole('admin')) {
+            return $query;
+        }
+
+        // Regular users can see:
+        // 1. Documents they uploaded
+        // 2. Public documents
+        // 3. Documents attached to records they have access to
+        return $query->where(function (Builder $query) use ($user) {
+            $query->where('uploaded_by', $user->id)
+                  ->orWhere('is_public', true);
+            // Add polymorphic relationship checks here based on your access control
+        });
+    }
+}

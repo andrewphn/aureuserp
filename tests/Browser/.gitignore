@@ -1,0 +1,14 @@
+# Playwright Test Results
+reports/
+test-results/
+playwright-report/
+
+# Screenshots and videos
+screenshots/
+videos/
+
+# Trace files
+trace/
+
+# Browser downloads
+downloads/

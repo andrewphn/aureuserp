@@ -1,0 +1,43 @@
+/* Card-style Project Type Checkboxes */
+.project-type-cards label {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid rgb(209, 213, 219);
+    border-radius: 0.5rem;
+    background-color: white;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.dark .project-type-cards label {
+    background-color: rgb(31, 41, 55);
+    border-color: rgb(75, 85, 99);
+}
+
+.project-type-cards label:hover {
+    border-color: rgb(156, 163, 175);
+}
+
+.dark .project-type-cards label:hover {
+    border-color: rgb(107, 114, 128);
+}
+
+.project-type-cards input[type="checkbox"]:checked + span {
+    font-weight: 600;
+}
+
+.project-type-cards input[type="checkbox"]:checked ~ * {
+    color: white;
+}
+
+.project-type-cards label:has(input[type="checkbox"]:checked) {
+    background-color: rgb(245, 158, 11);
+    border-color: rgb(245, 158, 11);
+}
+
+.dark .project-type-cards label:has(input[type="checkbox"]:checked) {
+    background-color: rgb(217, 119, 6);
+    border-color: rgb(217, 119, 6);
+}

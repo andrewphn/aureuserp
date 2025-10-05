@@ -12,6 +12,7 @@ use Webkul\Account\Models\FiscalPosition;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move;
 use Webkul\Account\Models\PaymentTerm;
+use App\Traits\HasPdfDocuments;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -29,7 +30,7 @@ use Webkul\Support\Models\UTMSource;
 
 class Order extends Model
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, HasPdfDocuments, SoftDeletes;
 
     protected $table = 'sales_orders';
 

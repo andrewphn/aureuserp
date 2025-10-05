@@ -25,6 +25,8 @@ class WorkLocation extends Model
         'name',
         'location_type',
         'location_number',
+        'latitude',
+        'longitude',
         'is_active',
     ];
 

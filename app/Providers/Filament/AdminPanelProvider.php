@@ -32,6 +32,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->darkMode()
             ->login()
             ->favicon(asset('images/favicon.ico'))
             ->brandLogo(asset('images/logo-light.svg'))
@@ -42,7 +44,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile()
             ->colors([
                 'primary' => Color::hex('#D4A574'), // TCS Gold - woodworking theme
-                'gray' => Color::Slate,
+                'gray' => Color::Neutral, // Changed from Slate to Neutral for true gray (no blue tint)
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
                 'danger' => Color::Red,

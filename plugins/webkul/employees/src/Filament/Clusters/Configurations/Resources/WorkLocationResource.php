@@ -78,6 +78,22 @@ class WorkLocationResource extends Resource
                     ->required(),
                 TextInput::make('location_number')
                     ->label(__('employees::filament/clusters/configurations/resources/work-location.form.location-number')),
+                TextInput::make('latitude')
+                    ->label('GPS Latitude')
+                    ->numeric()
+                    ->step(0.00000001)
+                    ->minValue(-90)
+                    ->maxValue(90)
+                    ->placeholder('e.g., 40.7128')
+                    ->helperText('GPS latitude coordinate (-90 to 90)'),
+                TextInput::make('longitude')
+                    ->label('GPS Longitude')
+                    ->numeric()
+                    ->step(0.00000001)
+                    ->minValue(-180)
+                    ->maxValue(180)
+                    ->placeholder('e.g., -74.0060')
+                    ->helperText('GPS longitude coordinate (-180 to 180)'),
                 Select::make('company_id')
                     ->searchable()
                     ->label(__('employees::filament/clusters/configurations/resources/work-location.form.company'))
