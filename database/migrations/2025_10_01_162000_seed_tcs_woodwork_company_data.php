@@ -26,6 +26,7 @@ return new class extends Migration
             ->where('id', 1)
             ->update([
                 'name' => 'TCS Woodwork',
+                'acronym' => 'TCS',
                 'company_id' => 'TCSWOOD001',
                 'tax_id' => 'TCS123456',
                 'registration_number' => 'TCSREG789',
