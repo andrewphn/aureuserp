@@ -37,6 +37,7 @@ class ProductServiceProvider extends PackageServiceProvider
                 '2025_09_30_154900_seed_tcs_product_categories',
                 '2025_09_30_160000_seed_tcs_vendors_and_prices',
                 '2025_09_30_160500_fix_vendor_price_currencies',
+                '2025_09_30_162300_seed_product_tags',
             ])
             ->hasSeeder('Webkul\\Product\\Database\Seeders\\DatabaseSeeder')
             ->runsMigrations()
