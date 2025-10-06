@@ -171,6 +171,25 @@ class PdfDocumentResource extends Resource
                     ->formatStateUsing(fn ($state) => number_format($state / 1024, 2) . ' KB')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('processing_status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'gray',
+                        'processing' => 'warning',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('metadata_reviewed')
+                    ->label('Reviewed')
+                    ->boolean()
+                    ->sortable()
+                    ->toggleable(),
+
                 Tables\Columns\IconColumn::make('is_public')
                     ->label('Public')
                     ->boolean()
@@ -245,6 +264,16 @@ class PdfDocumentResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('review')
+                    ->label('Review Data')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('warning')
+                    ->url(fn (PdfDocument $record) => static::getUrl('review', ['record' => $record]))
+                    ->visible(fn (PdfDocument $record) =>
+                        $record->processing_status === 'completed' &&
+                        !$record->metadata_reviewed &&
+                        !empty($record->extracted_metadata)
+                    ),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('download')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -273,6 +302,7 @@ class PdfDocumentResource extends Resource
             'create' => Pages\CreatePdfDocument::route('/create'),
             'edit' => Pages\EditPdfDocument::route('/{record}/edit'),
             'view' => Pages\ViewPdfDocument::route('/{record}'),
+            'review' => Pages\ReviewExtractedData::route('/{record}/review'),
         ];
     }
 

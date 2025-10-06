@@ -3,7 +3,14 @@
 namespace App\Services;
 
 use App\Models\PdfDocument;
+use App\Models\Partner;
+use App\Models\Project;
+use App\Models\ProjectAddress;
+use App\Models\State;
+use App\Models\Country;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 /**
  * PDF Data Extraction Service
@@ -393,5 +400,344 @@ class PdfDataExtractor
         }
 
         return $materials;
+    }
+
+    /**
+     * Extract metadata AND save to database tables
+     *
+     * @param PdfDocument $document
+     * @return array ['project' => Project, 'customer' => Partner, 'metadata' => array]
+     */
+    public function extractAndSaveToDatabase(PdfDocument $document): array
+    {
+        // Extract metadata first
+        $metadata = $this->extractMetadata($document);
+
+        if (empty($metadata)) {
+            Log::warning('No metadata extracted, skipping database save', [
+                'document_id' => $document->id,
+            ]);
+            return ['metadata' => []];
+        }
+
+        // Save to database
+        return $this->saveToDatabase($metadata, $document);
+    }
+
+    /**
+     * Save extracted metadata to proper database tables
+     *
+     * @param array $metadata
+     * @param PdfDocument $document
+     * @return array
+     */
+    protected function saveToDatabase(array $metadata, PdfDocument $document): array
+    {
+        return DB::transaction(function () use ($metadata, $document) {
+            $results = ['metadata' => $metadata];
+
+            // Flatten confidence-scored values for database insertion
+            $flatMetadata = $this->flattenMetadata($metadata);
+
+            // 1. Create/Update Customer (Partner)
+            if (!empty($flatMetadata['client'])) {
+                $customer = $this->createOrUpdateCustomer($flatMetadata);
+                $results['customer'] = $customer;
+            }
+
+            // 2. Create Project
+            if (!empty($flatMetadata['project'])) {
+                $project = $this->createProject($flatMetadata, $customer ?? null);
+                $results['project'] = $project;
+
+                // 3. Create Project Address
+                if (!empty($flatMetadata['project']['street_address'])) {
+                    $address = $this->createProjectAddress($flatMetadata['project'], $project);
+                    $results['address'] = $address;
+                }
+
+                // 4. Link PDF Document to Project
+                $document->update([
+                    'module_type' => 'projects',
+                    'module_id' => $project->id,
+                    'extracted_metadata' => $metadata, // Keep full metadata with confidence scores
+                    'processing_status' => 'completed',
+                    'extracted_at' => now(),
+                ]);
+
+                Log::info('PDF metadata saved to database', [
+                    'document_id' => $document->id,
+                    'project_id' => $project->id,
+                    'customer_id' => $customer->id ?? null,
+                ]);
+            }
+
+            return $results;
+        });
+    }
+
+    /**
+     * Flatten metadata structure (remove confidence scores for database)
+     *
+     * @param array $metadata
+     * @return array
+     */
+    protected function flattenMetadata(array $metadata): array
+    {
+        $flat = [];
+
+        foreach ($metadata as $section => $data) {
+            if (is_array($data)) {
+                $flat[$section] = [];
+                foreach ($data as $key => $value) {
+                    // If value has 'value' and 'confidence', extract just the value
+                    if (is_array($value) && isset($value['value'])) {
+                        $flat[$section][$key] = $value['value'];
+                    } else {
+                        $flat[$section][$key] = $value;
+                    }
+                }
+            }
+        }
+
+        return $flat;
+    }
+
+    /**
+     * Create or update customer (Partner) record
+     *
+     * @param array $flatMetadata
+     * @return Partner|null
+     */
+    protected function createOrUpdateCustomer(array $flatMetadata): ?Partner
+    {
+        $clientData = $flatMetadata['client'] ?? [];
+        $projectData = $flatMetadata['project'] ?? [];
+
+        // Need at least name or email to create a customer
+        if (empty($clientData['name']) && empty($clientData['email'])) {
+            return null;
+        }
+
+        // Find or create by email (most unique identifier)
+        $searchCriteria = $clientData['email']
+            ? ['email' => $clientData['email']]
+            : ['name' => $clientData['name']];
+
+        $customer = Partner::updateOrCreate(
+            $searchCriteria,
+            [
+                'name' => $clientData['name'] ?? $clientData['email'],
+                'account_type' => 'individual',
+                'sub_type' => 'customer',
+                'email' => $clientData['email'] ?? null,
+                'phone' => $clientData['phone'] ?? null,
+                'website' => $clientData['website'] ?? null,
+                'company_registry' => $clientData['company'] ?? null,
+                // Add address from project if available
+                'street1' => $projectData['street_address'] ?? null,
+                'city' => $projectData['city'] ?? null,
+                'state_id' => isset($projectData['state'])
+                    ? $this->getStateId($projectData['state'])
+                    : null,
+                'zip' => $projectData['zip'] ?? null,
+                'country_id' => $this->getCountryId('US'),
+                'is_active' => true,
+            ]
+        );
+
+        return $customer;
+    }
+
+    /**
+     * Create project record
+     *
+     * @param array $flatMetadata
+     * @param Partner|null $customer
+     * @return Project
+     */
+    protected function createProject(array $flatMetadata, ?Partner $customer): Project
+    {
+        $projectData = $flatMetadata['project'] ?? [];
+        $documentData = $flatMetadata['document'] ?? [];
+        $measurements = $flatMetadata['measurements'] ?? [];
+
+        // Calculate total linear feet
+        $totalLinearFeet = $this->calculateTotalLinearFeet($measurements);
+
+        // Get latest revision date
+        $revisionDate = $this->getLatestRevisionDate($documentData);
+
+        // Build project name
+        $projectName = $this->buildProjectName($projectData, $customer);
+
+        $project = Project::create([
+            'name' => $projectName,
+            'project_type' => $projectData['type'] ?? 'Kitchen Cabinetry',
+            'start_date' => $revisionDate,
+            'estimated_linear_feet' => $totalLinearFeet,
+            'description' => $this->buildProjectDescription($documentData, $measurements),
+            'partner_id' => $customer?->id,
+            'creator_id' => auth()->id() ?? 1, // Fallback to admin user
+            'is_active' => true,
+        ]);
+
+        return $project;
+    }
+
+    /**
+     * Create project address record
+     *
+     * @param array $projectData
+     * @param Project $project
+     * @return ProjectAddress
+     */
+    protected function createProjectAddress(array $projectData, Project $project): ProjectAddress
+    {
+        return ProjectAddress::create([
+            'project_id' => $project->id,
+            'type' => 'project',
+            'street1' => $projectData['street_address'] ?? null,
+            'street2' => $projectData['street2'] ?? null,
+            'city' => $projectData['city'] ?? null,
+            'state_id' => isset($projectData['state'])
+                ? $this->getStateId($projectData['state'])
+                : null,
+            'zip' => $projectData['zip'] ?? null,
+            'country_id' => $this->getCountryId('US'),
+            'is_primary' => true,
+        ]);
+    }
+
+    /**
+     * Get state ID from state code (e.g., "MA")
+     */
+    protected function getStateId(string $stateCode): ?int
+    {
+        $state = State::where('code', strtoupper($stateCode))->first();
+        return $state?->id;
+    }
+
+    /**
+     * Get country ID from country code (e.g., "US")
+     */
+    protected function getCountryId(string $countryCode): ?int
+    {
+        $country = Country::where('code', strtoupper($countryCode))->first();
+        return $country?->id ?? 1; // Default to US if not found
+    }
+
+    /**
+     * Calculate total linear feet from measurements
+     */
+    protected function calculateTotalLinearFeet(array $measurements): ?float
+    {
+        $total = 0;
+
+        // Add tier cabinetry
+        if (!empty($measurements['tiers'])) {
+            foreach ($measurements['tiers'] as $tier) {
+                if (isset($tier['linear_feet'])) {
+                    $total += is_array($tier['linear_feet'])
+                        ? $tier['linear_feet']['value']
+                        : $tier['linear_feet'];
+                }
+            }
+        }
+
+        // Add floating shelves
+        if (!empty($measurements['floating_shelves_lf'])) {
+            $total += is_array($measurements['floating_shelves_lf'])
+                ? $measurements['floating_shelves_lf']['value']
+                : $measurements['floating_shelves_lf'];
+        }
+
+        return $total > 0 ? $total : null;
+    }
+
+    /**
+     * Get latest revision date from document data
+     */
+    protected function getLatestRevisionDate(array $documentData): ?Carbon
+    {
+        if (!empty($documentData['revisions'])) {
+            // Get the last revision (highest number)
+            $lastRevision = end($documentData['revisions']);
+            if (!empty($lastRevision['date'])) {
+                try {
+                    return Carbon::createFromFormat('n/j/y', $lastRevision['date']);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to parse revision date', [
+                        'date' => $lastRevision['date'],
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Build project name from available data
+     */
+    protected function buildProjectName(array $projectData, ?Partner $customer): string
+    {
+        $parts = [];
+
+        // Add customer name if available
+        if ($customer && $customer->name) {
+            $parts[] = $customer->name;
+        }
+
+        // Add project type
+        if (!empty($projectData['type'])) {
+            $parts[] = $projectData['type'];
+        }
+
+        // Add address if available
+        if (!empty($projectData['address'])) {
+            $parts[] = 'at ' . $projectData['address'];
+        } elseif (!empty($projectData['street_address'])) {
+            $parts[] = 'at ' . $projectData['street_address'];
+        }
+
+        return !empty($parts)
+            ? implode(' - ', $parts)
+            : 'Untitled Project';
+    }
+
+    /**
+     * Build project description from document and measurements data
+     */
+    protected function buildProjectDescription(array $documentData, array $measurements): string
+    {
+        $parts = [];
+
+        // Add drawn by info
+        if (!empty($documentData['drawn_by'])) {
+            $parts[] = "Drawn by: {$documentData['drawn_by']}";
+        }
+
+        // Add revision info
+        if (!empty($documentData['revisions'])) {
+            $revisionCount = count($documentData['revisions']);
+            $parts[] = "Revision {$revisionCount}";
+        }
+
+        // Add linear feet breakdown
+        if (!empty($measurements['tiers'])) {
+            $tierInfo = [];
+            foreach ($measurements['tiers'] as $tier) {
+                $tierNum = is_array($tier['tier']) ? $tier['tier']['value'] : $tier['tier'];
+                $lf = is_array($tier['linear_feet']) ? $tier['linear_feet']['value'] : $tier['linear_feet'];
+                $tierInfo[] = "Tier {$tierNum}: {$lf} LF";
+            }
+            if (!empty($tierInfo)) {
+                $parts[] = implode(', ', $tierInfo);
+            }
+        }
+
+        return !empty($parts) ? implode('. ', $parts) : '';
     }
 }
