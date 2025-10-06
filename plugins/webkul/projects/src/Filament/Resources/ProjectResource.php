@@ -488,16 +488,15 @@ class ProjectResource extends Resource
                                     ->openable()
                                     ->previewable(false)
                                     ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
-                                    ->columnSpanFull()
-                                    ->visible(fn ($context) => $context === 'create'),
+                                    ->columnSpanFull(),
 
                                 \Filament\Forms\Components\ViewField::make('uploaded_pdfs')
-                                    ->label('Uploaded PDF Documents')
+                                    ->label('Previously Uploaded PDF Documents')
                                     ->view('filament.forms.components.uploaded-pdfs-list')
                                     ->viewData(fn ($record) => [
                                         'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
                                     ])
-                                    ->visible(fn ($context) => $context === 'edit')
+                                    ->visible(fn ($context, $record) => $context === 'edit' && $record?->pdfDocuments()->count() > 0)
                                     ->columnSpanFull(),
                             ])
                             ->collapsible()
