@@ -97,6 +97,11 @@ class CompanyResource extends Resource
                                             ->required()
                                             ->maxLength(255)
                                             ->live(onBlur: true),
+                                        TextInput::make('acronym')
+                                            ->label(__('security::filament/resources/company.form.sections.company-information.fields.acronym'))
+                                            ->maxLength(10)
+                                            ->placeholder('e.g., TCS')
+                                            ->hintIcon('heroicon-o-question-mark-circle', tooltip: 'Short abbreviation used in project numbers and identifiers'),
                                         TextInput::make('registration_number')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.registration-number'))
                                             ->maxLength(255),
@@ -329,6 +334,12 @@ class CompanyResource extends Resource
                     ->label(__('security::filament/resources/company.table.columns.company-name'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('acronym')
+                    ->label(__('security::filament/resources/company.table.columns.acronym'))
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->placeholder('—'),
                 TextColumn::make('branches.name')
                     ->label(__('security::filament/resources/company.table.columns.branches'))
                     ->placeholder('-')
