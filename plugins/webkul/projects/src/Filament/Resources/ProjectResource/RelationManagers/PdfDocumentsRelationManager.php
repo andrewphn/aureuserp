@@ -3,6 +3,7 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\PdfDocument;
+use App\Jobs\ProcessPdfJob;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -10,10 +11,15 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -83,24 +89,74 @@ class PdfDocumentsRelationManager extends RelationManager
                 TextColumn::make('file_name')
                     ->label('File Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('medium'),
 
-                TextColumn::make('formatted_file_size')
-                    ->label('Size'),
+                TextColumn::make('processing_status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'gray',
+                        'processing' => 'warning',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'pending' => 'heroicon-o-clock',
+                        'processing' => 'heroicon-o-arrow-path',
+                        'completed' => 'heroicon-o-check-circle',
+                        'failed' => 'heroicon-o-exclamation-circle',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->sortable()
+                    ->tooltip(fn (PdfDocument $record): ?string =>
+                        $record->processing_status === 'failed' && $record->processing_error
+                            ? "Error: {$record->processing_error}"
+                            : null
+                    ),
 
                 TextColumn::make('page_count')
                     ->label('Pages')
-                    ->default('—'),
+                    ->default('—')
+                    ->formatStateUsing(fn (?int $state): string =>
+                        $state ? (string) $state : '—'
+                    )
+                    ->alignCenter(),
+
+                TextColumn::make('formatted_file_size')
+                    ->label('Size')
+                    ->alignCenter(),
+
+                TextColumn::make('processed_at')
+                    ->label('Processed')
+                    ->dateTime('M j, g:i A')
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Not processed'),
 
                 TextColumn::make('uploader.name')
                     ->label('Uploaded By')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('created_at')
                     ->label('Uploaded At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime('M j, g:i A')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->filters([
+                SelectFilter::make('processing_status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'processing' => 'Processing',
+                        'completed' => 'Completed',
+                        'failed' => 'Failed',
+                    ])
+                    ->multiple(),
+            ])
+            ->defaultSort('created_at', 'desc')
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
@@ -137,7 +193,65 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
+
+                Action::make('reprocess')
+                    ->label('Reprocess')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->visible(fn (PdfDocument $record): bool =>
+                        in_array($record->processing_status, ['failed', 'pending'])
+                    )
+                    ->requiresConfirmation()
+                    ->modalHeading('Reprocess PDF Document')
+                    ->modalDescription('This will queue the PDF for reprocessing. Page extraction and thumbnails will be regenerated.')
+                    ->action(function (PdfDocument $record) {
+                        // Mark as pending and dispatch job
+                        $record->update([
+                            'processing_status' => 'pending',
+                            'processing_error' => null,
+                        ]);
+
+                        ProcessPdfJob::dispatch($record);
+
+                        Notification::make()
+                            ->title('PDF Queued for Processing')
+                            ->body("'{$record->file_name}' has been queued for reprocessing.")
+                            ->success()
+                            ->send();
+                    }),
+
                 EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkAction::make('reprocessFailed')
+                    ->label('Reprocess Selected')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Reprocess Selected PDFs')
+                    ->modalDescription('This will queue all selected PDFs for reprocessing.')
+                    ->action(function (Collection $records) {
+                        $count = 0;
+                        foreach ($records as $record) {
+                            if (in_array($record->processing_status, ['failed', 'pending'])) {
+                                $record->update([
+                                    'processing_status' => 'pending',
+                                    'processing_error' => null,
+                                ]);
+                                ProcessPdfJob::dispatch($record);
+                                $count++;
+                            }
+                        }
+
+                        Notification::make()
+                            ->title('PDFs Queued for Processing')
+                            ->body("{$count} document(s) have been queued for reprocessing.")
+                            ->success()
+                            ->send();
+                    })
+                    ->deselectRecordsAfterCompletion(),
+
                 DeleteAction::make(),
             ]);
     }

@@ -2,12 +2,14 @@
 
 namespace App\Observers;
 
+use App\Jobs\ProcessPdfJob;
 use App\Models\PdfDocument;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Facades\LogActivity;
 
 /**
  * Observer for PdfDocument model to log activities on the parent module
+ * and dispatch background processing jobs
  */
 class PdfDocumentObserver
 {
@@ -29,6 +31,9 @@ class PdfDocumentObserver
                 ])
                 ->log("uploaded PDF document \"{$document->file_name}\" ({$document->formatted_file_size})");
         }
+
+        // Dispatch background job to process PDF (extract pages, generate thumbnails, etc.)
+        ProcessPdfJob::dispatch($document);
     }
 
     /**
@@ -45,6 +50,14 @@ class PdfDocumentObserver
                     'file_name' => $document->file_name,
                 ])
                 ->log("deleted PDF document \"{$document->file_name}\"");
+        }
+
+        // Clean up generated thumbnails
+        if ($document->id) {
+            $thumbnailDirectory = "pdf-thumbnails/{$document->id}";
+            if (Storage::disk('public')->exists($thumbnailDirectory)) {
+                Storage::disk('public')->deleteDirectory($thumbnailDirectory);
+            }
         }
     }
 }
