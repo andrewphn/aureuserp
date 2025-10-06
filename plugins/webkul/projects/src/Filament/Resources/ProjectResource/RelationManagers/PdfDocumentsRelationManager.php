@@ -9,6 +9,7 @@ use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -262,7 +263,7 @@ class PdfDocumentsRelationManager extends RelationManager
                         $extractedData = $record->extracted_metadata ?? $extractor->extractMetadata($record);
 
                         return [
-                            Forms\Components\Section::make('Project Information')
+                            Section::make('Project Information')
                                 ->schema([
                                     Forms\Components\TextInput::make('metadata.project.address')
                                         ->label('Project Address')
@@ -287,7 +288,7 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ])
                                 ->collapsed(empty($extractedData['project'] ?? null)),
 
-                            Forms\Components\Section::make('Client Information')
+                            Section::make('Client Information')
                                 ->schema([
                                     Forms\Components\TextInput::make('metadata.client.name')
                                         ->label('Owner Name')
@@ -318,7 +319,7 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ])
                                 ->collapsed(empty($extractedData['client'] ?? null)),
 
-                            Forms\Components\Section::make('Document Details')
+                            Section::make('Document Details')
                                 ->schema([
                                     Forms\Components\TextInput::make('metadata.document.drawing_file')
                                         ->label('Drawing File')
@@ -346,7 +347,7 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ])
                                 ->collapsed(empty($extractedData['document'] ?? null)),
 
-                            Forms\Components\Section::make('Measurements & Linear Feet')
+                            Section::make('Measurements & Linear Feet')
                                 ->description('🟢 High confidence fields - extracted from labeled measurements')
                                 ->schema([
                                     Forms\Components\Repeater::make('metadata.measurements.tiers')
@@ -388,7 +389,7 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ])
                                 ->collapsed(empty($extractedData['measurements'] ?? null)),
 
-                            Forms\Components\Section::make('Equipment & Appliances')
+                            Section::make('Equipment & Appliances')
                                 ->schema([
                                     Forms\Components\Repeater::make('metadata.equipment')
                                         ->label('Equipment List')
@@ -406,7 +407,7 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ])
                                 ->collapsed(empty($extractedData['equipment'] ?? null)),
 
-                            Forms\Components\Section::make('Materials')
+                            Section::make('Materials')
                                 ->schema([
                                     Forms\Components\TagsInput::make('metadata.materials.wood_types')
                                         ->label('Wood Types')
