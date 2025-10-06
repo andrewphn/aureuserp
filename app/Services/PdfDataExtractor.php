@@ -127,10 +127,22 @@ class PdfDataExtractor
         if (preg_match('/(?:Renovations at:|Project at:)\s*([^\n]+?)(?:Approved|Revision|Drawn|\n)/i', $text, $matches)) {
             $addressLine = trim($matches[1]);
 
-            // Try to parse components from this line
-            if (preg_match('/(.+?)\s+([A-Za-z\s]+),\s*([A-Z]{2})\s*(\d{5})?/i', $addressLine, $parts)) {
-                $project['street_address'] = trim($parts[1]);
-                $project['city'] = trim($parts[2]);
+            // Try to parse: "[street] [city], [state] [zip]"
+            // City is the last word(s) before the comma, everything else is street
+            if (preg_match('/^(.+?)\s+([A-Za-z\s]+?),\s*([A-Z]{2})(?:\s+(\d{5}))?$/i', $addressLine, $parts)) {
+                // Split what's before the comma into street and city
+                // City is likely the last 1-2 words before comma
+                $beforeComma = trim($parts[1] . ' ' . $parts[2]);
+
+                // Try to identify city as last word before comma
+                if (preg_match('/^(.+)\s+([A-Z][a-z]+)$/i', $beforeComma, $split)) {
+                    $project['street_address'] = trim($split[1]);
+                    $project['city'] = trim($split[2]);
+                } else {
+                    // Fallback: everything before comma is street, use state for city lookup later
+                    $project['street_address'] = $beforeComma;
+                }
+
                 $project['state'] = trim($parts[3]);
                 if (!empty($parts[4])) {
                     $project['zip'] = $parts[4];
