@@ -43,15 +43,15 @@ return new class extends Migration
                 'updated_at' => now(),
             ]);
         
-        // Check if Trottier's Son already exists
-        $trottierId = DB::table('companies')->where('company_id', 'TROTWOOD001')->value('id');
-        
+        // Check if Trottier Fine Woodworking branch already exists
+        $trottierId = DB::table('companies')->where('company_id', 'TFWWOOD001')->value('id');
+
         if (!$trottierId) {
             // Get or create partner for Trottier
             $partnerId = DB::table('partners_partners')
                 ->where('email', 'jeremybtrottier@gmail.com')
                 ->value('id');
-                
+
             if (!$partnerId) {
                 $partnerId = DB::table('partners_partners')->insertGetId([
                     'name' => 'Trottier Fine Woodworking',
@@ -66,13 +66,22 @@ return new class extends Migration
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+            } else {
+                // Update partner to ensure state_id and country_id are set
+                DB::table('partners_partners')
+                    ->where('id', $partnerId)
+                    ->update([
+                        'state_id' => $maStateId,
+                        'country_id' => $usCountryId,
+                        'updated_at' => now(),
+                    ]);
             }
-            
-            // Create Trottier's Son as a branch of TCS
+
+            // Create Trottier Fine Woodworking as a branch of TCS
             DB::table('companies')->insert([
-                'name' => 'Trottier\'s Son',
+                'name' => 'Trottier Fine Woodworking',
                 'acronym' => 'TFW',
-                'company_id' => 'TROTWOOD001',
+                'company_id' => 'TFWWOOD001',
                 'parent_id' => 1, // TCS company ID
                 'partner_id' => $partnerId,
                 'email' => 'jeremybtrottier@gmail.com',
@@ -96,9 +105,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remove Trottier's Son if it exists
+        // Remove Trottier Fine Woodworking branch if it exists
         DB::table('companies')
-            ->where('company_id', 'TROTWOOD001')
+            ->where('company_id', 'TFWWOOD001')
             ->delete();
     }
 };
