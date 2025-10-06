@@ -92,6 +92,7 @@ return [
         'columns' => [
             'logo'                 => 'Logo',
             'company-name'         => 'Company Name',
+            'acronym'              => 'Acronym',
             'branches'             => 'Branches',
             'email'                => 'Email',
             'city'                 => 'City',
