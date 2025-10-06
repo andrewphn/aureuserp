@@ -474,6 +474,23 @@ class ProjectResource extends Resource
                         //         'style' => 'position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto;'
                         //     ]),
 
+                        Section::make('Architectural PDFs')
+                            ->description('Plans, blueprints & drawings')
+                            ->schema([
+                                \Filament\Forms\Components\ViewField::make('pdf_upload_section')
+                                    ->label('')
+                                    ->view('filament.forms.components.compact-pdf-upload')
+                                    ->viewData(fn ($record, $context) => [
+                                        'record' => $record,
+                                        'context' => $context,
+                                        'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
+                                    ])
+                                    ->columnSpanFull(),
+                            ])
+                            ->collapsible()
+                            ->collapsed(false)
+                            ->compact(),
+
                         Section::make('Project Tags')
                             ->schema([
                                 TagSelectorPanel::make('tags')
