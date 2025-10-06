@@ -487,6 +487,11 @@ class CompanyResource extends Resource
                                             ->icon('heroicon-o-building-office')
                                             ->placeholder('—')
                                             ->label(__('security::filament/resources/company.infolist.sections.company-information.entries.name')),
+                                        TextEntry::make('acronym')
+                                            ->icon('heroicon-o-hashtag')
+                                            ->placeholder('—')
+                                            ->badge()
+                                            ->label(__('security::filament/resources/company.infolist.sections.company-information.entries.acronym')),
                                         TextEntry::make('registration_number')
                                             ->icon('heroicon-o-document-text')
                                             ->placeholder('—')
