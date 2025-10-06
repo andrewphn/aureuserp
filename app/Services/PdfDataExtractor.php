@@ -124,10 +124,11 @@ class PdfDataExtractor
         $project = [];
 
         // Try to extract full address with street suffix (highest confidence)
-        if (preg_match('/(\d+\s+[A-Za-z\s]+(?:Lane|Road|Street|Ave|Avenue|Drive|Boulevard|Blvd|Rd|St|Ln))[,\s]+([A-Za-z\s]+),\s*([A-Z]{2})/i', $text, $matches)) {
-            $project['street_address'] = trim($matches[1]);
-            $project['city'] = trim($matches[2]);
-            $project['state'] = trim($matches[3]);
+        // Look for pattern: "number streetname Lane/Road/etc, City, ST"
+        if (preg_match('/\b(\d{1,5})\s+([A-Za-z\s]+?(?:Lane|Road|Street|Ave|Avenue|Drive|Boulevard|Blvd|Rd|St|Ln))\s*,\s*([A-Za-z\s]+?),\s*([A-Z]{2})\b/i', $text, $matches)) {
+            $project['street_address'] = trim($matches[1] . ' ' . $matches[2]);
+            $project['city'] = trim($matches[3]);
+            $project['state'] = trim($matches[4]);
 
             // Build full address
             $project['address'] = "{$project['street_address']}, {$project['city']}, {$project['state']}";
@@ -221,35 +222,39 @@ class PdfDataExtractor
     {
         $document = [];
 
-        // Extract drawing file name
+        // Extract drawing file name (with optional numeric prefix)
         if (preg_match('/([A-Za-z0-9_]+\.dwg)/i', $text, $matches)) {
             $document['drawing_file'] = $matches[1];
         }
 
-        // Extract drawn by - capture only the name (up to first non-name word)
-        if (preg_match('/Drawn\s+By:\s*([A-Z][a-z]+(?:\s+[A-Z]\.?)(?:\s+[A-Z][a-z]+)?)/i', $text, $matches)) {
+        // Extract drawn by - more flexible pattern for names
+        if (preg_match('/Drawn\s+By:\s*([A-Z]\.?\s*[A-Za-z]+|[A-Z][a-z]+\s+[A-Z]\.?\s*[A-Za-z]+)/i', $text, $matches)) {
             $document['drawn_by'] = trim($matches[1]);
         }
 
         // Extract revision history
         $revisions = [];
+        $seenRevisions = []; // Track unique revision numbers to avoid duplicates
 
-        // Pattern 1: Revision number with date on same line (e.g., "Revision 4 9/27/25")
+        // Pattern: Revision number with date on same line (e.g., "Revision 4 9/27/25")
         if (preg_match_all('/Revision\s+(\d+)\s+(\d{1,2}\/\d{1,2}\/\d{2,4})/i', $text, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $revisions[] = [
-                    'number' => $match[1],
-                    'date' => $match[2],
-                ];
+                $revNum = $match[1];
+                // Only add if we haven't seen this revision number yet
+                if (!isset($seenRevisions[$revNum])) {
+                    $revisions[] = [
+                        'number' => $revNum,
+                        'date' => $match[2],
+                    ];
+                    $seenRevisions[$revNum] = true;
+                }
             }
         }
 
-        // Pattern 2: Look for dates near "Drawn By" line that might indicate revision dates
+        // Look for dates near "Drawn By" line that might indicate revision dates
         if (preg_match('/Drawn\s+By:.*?(\d{1,2}\/\d{1,2}\/\d{2,4})/i', $text, $matches)) {
             // This might be the initial draft date
-            if (empty($revisions)) {
-                $document['initial_draft_date'] = $matches[1];
-            }
+            $document['initial_draft_date'] = $matches[1];
         }
 
         if (!empty($revisions)) {
@@ -261,8 +266,8 @@ class PdfDataExtractor
             $document['approved_date'] = $matches[1];
         }
 
-        // Extract project/drawing ID if present
-        if (preg_match('/ID#\s*(.+?)(?:\n|Revision|Drawn)/i', $text, $matches)) {
+        // Extract project/drawing ID if present (skip "of [Company]" pattern)
+        if (preg_match('/ID#\s*([A-Z0-9-]+)/i', $text, $matches)) {
             $document['project_id'] = trim($matches[1]);
         }
 
