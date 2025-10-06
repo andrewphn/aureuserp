@@ -140,6 +140,23 @@ class EditProject extends EditRecord
                 }
             }
         }
+
+        // Save architectural PDFs if uploaded
+        if (!empty($data['architectural_pdfs'])) {
+            foreach ($data['architectural_pdfs'] as $pdfPath) {
+                $filename = basename($pdfPath);
+                $fileSize = Storage::disk('public')->size($pdfPath);
+
+                $this->record->pdfDocuments()->create([
+                    'file_path' => $pdfPath,
+                    'file_name' => $filename,
+                    'file_size' => $fileSize,
+                    'mime_type' => 'application/pdf',
+                    'document_type' => 'drawing', // Default to drawing/blueprint
+                    'uploaded_by' => Auth::id(),
+                ]);
+            }
+        }
     }
 
     public function uploadPdfs()
