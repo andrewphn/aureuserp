@@ -1050,9 +1050,44 @@ class ProjectResource extends Resource
 
     protected static function calculateEstimatedProductionTime($linearFeet, callable $get, callable $set): void
     {
-        // This method is primarily used to trigger reactive updates
-        // The actual calculation is done in the Placeholder content function
-        // This ensures the placeholder updates when linear feet or company changes
+        // Calculate estimated linear feet from date range if dates are set
+        $startDate = $get('start_date');
+        $desiredCompletionDate = $get('desired_completion_date');
+        $companyId = $get('company_id');
+
+        // Only auto-calculate if we have both dates and company, but no linear feet entered
+        if ($startDate && $desiredCompletionDate && $companyId && !$linearFeet) {
+            try {
+                $company = \Webkul\Support\Models\Company::find($companyId);
+
+                if ($company && $company->shop_capacity_per_day) {
+                    $start = new \DateTime($startDate);
+                    $end = new \DateTime($desiredCompletionDate);
+
+                    // Calculate calendar days
+                    $calendarDays = $start->diff($end)->days;
+
+                    // TCS works 4 days per week (Mon-Thu), so approximately 17 working days per month
+                    // Calculate working days: (calendar days / 7) * 4 working days per week
+                    $workingDaysPerWeek = 4;
+                    $workingDays = ($calendarDays / 7) * $workingDaysPerWeek;
+
+                    // Calculate estimated linear feet based on working days and shop capacity
+                    $estimatedLinearFeet = round($workingDays * $company->shop_capacity_per_day, 2);
+
+                    // Auto-populate the estimated linear feet field
+                    $set('estimated_linear_feet', $estimatedLinearFeet);
+
+                    // Also update allocated hours
+                    if ($company->shop_capacity_per_hour) {
+                        $allocatedHours = round($estimatedLinearFeet / $company->shop_capacity_per_hour, 2);
+                        $set('allocated_hours', $allocatedHours);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Silently fail if date calculation errors occur
+            }
+        }
     }
 
     protected static function updateProjectName(callable $get, callable $set): void
