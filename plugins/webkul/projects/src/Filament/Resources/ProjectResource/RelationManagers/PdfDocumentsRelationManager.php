@@ -52,26 +52,22 @@ class PdfDocumentsRelationManager extends RelationManager
                 \Filament\Forms\Components\Select::make('document_type')
                     ->label('Document Type')
                     ->options([
-                        'drawing' => 'Drawing/Blueprint',
+                        'drawing' => 'Architectural Drawing',
+                        'blueprint' => 'Blueprint',
                         'specification' => 'Specification',
                         'contract' => 'Contract',
-                        'invoice' => 'Invoice',
-                        'proposal' => 'Proposal',
                         'permit' => 'Permit',
-                        'photo' => 'Photo/Reference',
+                        'photo' => 'Photo/Image',
                         'other' => 'Other',
                     ])
-                    ->required(),
-
-                \Filament\Forms\Components\TagsInput::make('tags')
-                    ->label('Tags')
-                    ->placeholder('Add tags (e.g., kitchen, cabinet, hardware)')
-                    ->helperText('Press Enter to add each tag'),
+                    ->default('drawing')
+                    ->required()
+                    ->helperText('Select the type of document(s) you are uploading'),
 
                 \Filament\Forms\Components\Textarea::make('notes')
                     ->label('Notes')
                     ->rows(3)
-                    ->placeholder('Optional notes about this document'),
+                    ->helperText('Optional notes about these documents'),
 
                 Hidden::make('file_size'),
                 Hidden::make('mime_type'),
