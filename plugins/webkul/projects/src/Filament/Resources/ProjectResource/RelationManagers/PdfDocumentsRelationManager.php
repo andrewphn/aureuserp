@@ -31,8 +31,8 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->label('PDF Document')
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(51200) // 50MB
+                    ->disk('public')
                     ->directory('pdf-documents')
-                    ->preserveFilenames()
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($state, $set) {
@@ -111,7 +111,7 @@ class PdfDocumentsRelationManager extends RelationManager
 
                         // Get file size if not set
                         if (empty($data['file_size']) && !empty($data['file_path'])) {
-                            $data['file_size'] = Storage::size($data['file_path']);
+                            $data['file_size'] = Storage::disk('public')->size($data['file_path']);
                         }
 
                         // Set mime type if not set
