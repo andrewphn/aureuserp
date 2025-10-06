@@ -60,6 +60,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\MilestonesRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\PdfDocumentsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\TaskStagesRelationManager;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
@@ -488,15 +489,13 @@ class ProjectResource extends Resource
                                     ->openable()
                                     ->previewable(false)
                                     ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->visible(fn ($context) => $context === 'create'),
 
-                                \Filament\Forms\Components\ViewField::make('uploaded_pdfs')
-                                    ->label('Previously Uploaded PDF Documents')
-                                    ->view('filament.forms.components.uploaded-pdfs-list')
-                                    ->viewData(fn ($record) => [
-                                        'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
-                                    ])
-                                    ->visible(fn ($context, $record) => $context === 'edit' && $record?->pdfDocuments()->count() > 0)
+                                \Filament\Forms\Components\Placeholder::make('pdf_upload_note')
+                                    ->label('')
+                                    ->content('To upload or manage PDF documents, use the "PDF Documents" tab above after creating the project.')
+                                    ->visible(fn ($context) => $context === 'edit')
                                     ->columnSpanFull(),
                             ])
                             ->collapsible()
@@ -1034,6 +1033,11 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
+            RelationGroup::make('Documents', [
+                PdfDocumentsRelationManager::class,
+            ])
+                ->icon('heroicon-o-document-text'),
+
             RelationGroup::make('Task Stages', [
                 TaskStagesRelationManager::class,
             ])
