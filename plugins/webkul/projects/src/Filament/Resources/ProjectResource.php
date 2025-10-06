@@ -270,13 +270,6 @@ class ProjectResource extends Resource
                                     ->label('Street Address Line 1')
                                     ->disabled(fn (callable $get) => $get('use_customer_address'))
                                     ->dehydrated()
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        // Update project number preview when street address changes
-                                        static::updateProjectNumberPreview($get('company_id'), $get, $set);
-                                        // Update project name when street address changes
-                                        static::updateProjectName($get, $set);
-                                    })
                                     ->columnSpanFull(),
                                 TextInput::make('project_address.street2')
                                     ->label('Street Address Line 2')
