@@ -4,20 +4,11 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\PdfDocument;
 use App\Jobs\ProcessPdfJob;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +24,7 @@ class PdfDocumentsRelationManager extends RelationManager
     {
         return $schema
             ->schema([
-                FileUpload::make('file_path')
+                Forms\Components\FileUpload::make('file_path')
                     ->label('PDF Document')
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(51200) // 50MB
@@ -51,11 +42,11 @@ class PdfDocumentsRelationManager extends RelationManager
                         }
                     }),
 
-                TextInput::make('file_name')
+                Forms\Components\TextInput::make('file_name')
                     ->label('File Name (auto-filled)')
                     ->placeholder('Will be auto-filled from uploaded file'),
 
-                \Filament\Forms\Components\Select::make('document_type')
+                Forms\Components\Select::make('document_type')
                     ->label('Document Type')
                     ->options([
                         'drawing' => 'Architectural Drawing',
@@ -70,14 +61,14 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->required()
                     ->helperText('Select the type of document(s) you are uploading'),
 
-                \Filament\Forms\Components\Textarea::make('notes')
+                Forms\Components\Textarea::make('notes')
                     ->label('Notes')
                     ->rows(3)
                     ->helperText('Optional notes about these documents'),
 
-                Hidden::make('file_size'),
-                Hidden::make('mime_type'),
-                Hidden::make('uploaded_by')
+                Forms\Components\Hidden::make('file_size'),
+                Forms\Components\Hidden::make('mime_type'),
+                Forms\Components\Hidden::make('uploaded_by')
                     ->default(Auth::id()),
             ]);
     }
@@ -86,13 +77,13 @@ class PdfDocumentsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('file_name')
+                Tables\Columns\TextColumn::make('file_name')
                     ->label('File Name')
                     ->searchable()
                     ->sortable()
                     ->weight('medium'),
 
-                TextColumn::make('processing_status')
+                Tables\Columns\TextColumn::make('processing_status')
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -115,7 +106,7 @@ class PdfDocumentsRelationManager extends RelationManager
                             : null
                     ),
 
-                TextColumn::make('page_count')
+                Tables\Columns\TextColumn::make('page_count')
                     ->label('Pages')
                     ->default('—')
                     ->formatStateUsing(fn (?int $state): string =>
@@ -123,30 +114,30 @@ class PdfDocumentsRelationManager extends RelationManager
                     )
                     ->alignCenter(),
 
-                TextColumn::make('formatted_file_size')
+                Tables\Columns\TextColumn::make('formatted_file_size')
                     ->label('Size')
                     ->alignCenter(),
 
-                TextColumn::make('processed_at')
+                Tables\Columns\TextColumn::make('processed_at')
                     ->label('Processed')
                     ->dateTime('M j, g:i A')
                     ->sortable()
                     ->toggleable()
                     ->placeholder('Not processed'),
 
-                TextColumn::make('uploader.name')
+                Tables\Columns\TextColumn::make('uploader.name')
                     ->label('Uploaded By')
                     ->sortable()
                     ->toggleable(),
 
-                TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('created_at')
                     ->label('Uploaded At')
                     ->dateTime('M j, g:i A')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('processing_status')
+                Tables\Filters\SelectFilter::make('processing_status')
                     ->label('Status')
                     ->options([
                         'pending' => 'Pending',
@@ -158,7 +149,7 @@ class PdfDocumentsRelationManager extends RelationManager
             ])
             ->defaultSort('created_at', 'desc')
             ->headerActions([
-                CreateAction::make()
+                Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         // Extract file name from uploaded file path if not provided
                         if (empty($data['file_name']) && !empty($data['file_path'])) {
@@ -182,7 +173,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Action::make('view')
+                Tables\Actions\Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
                     ->modalHeading(fn (PdfDocument $record) => 'View PDF: ' . $record->file_name)
@@ -194,7 +185,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
 
-                Action::make('reprocess')
+                Tables\Actions\Action::make('reprocess')
                     ->label('Reprocess')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
@@ -220,39 +211,41 @@ class PdfDocumentsRelationManager extends RelationManager
                             ->send();
                     }),
 
-                EditAction::make(),
-                DeleteAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                BulkAction::make('reprocessFailed')
-                    ->label('Reprocess Selected')
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->modalHeading('Reprocess Selected PDFs')
-                    ->modalDescription('This will queue all selected PDFs for reprocessing.')
-                    ->action(function (Collection $records) {
-                        $count = 0;
-                        foreach ($records as $record) {
-                            if (in_array($record->processing_status, ['failed', 'pending'])) {
-                                $record->update([
-                                    'processing_status' => 'pending',
-                                    'processing_error' => null,
-                                ]);
-                                ProcessPdfJob::dispatch($record);
-                                $count++;
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('reprocessFailed')
+                        ->label('Reprocess Selected')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('Reprocess Selected PDFs')
+                        ->modalDescription('This will queue all selected PDFs for reprocessing.')
+                        ->action(function (Collection $records) {
+                            $count = 0;
+                            foreach ($records as $record) {
+                                if (in_array($record->processing_status, ['failed', 'pending'])) {
+                                    $record->update([
+                                        'processing_status' => 'pending',
+                                        'processing_error' => null,
+                                    ]);
+                                    ProcessPdfJob::dispatch($record);
+                                    $count++;
+                                }
                             }
-                        }
 
-                        Notification::make()
-                            ->title('PDFs Queued for Processing')
-                            ->body("{$count} document(s) have been queued for reprocessing.")
-                            ->success()
-                            ->send();
-                    })
-                    ->deselectRecordsAfterCompletion(),
+                            Notification::make()
+                                ->title('PDFs Queued for Processing')
+                                ->body("{$count} document(s) have been queued for reprocessing.")
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
 
-                DeleteAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }
