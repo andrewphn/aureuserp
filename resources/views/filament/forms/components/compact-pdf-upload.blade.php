@@ -78,7 +78,7 @@
     @if($context === 'edit' && $record)
         <button
             type="button"
-            wire:click="$dispatch('open-modal', { id: 'upload-pdf-modal' })"
+            wire:click="mountAction('uploadPdfsModal')"
             class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
         >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

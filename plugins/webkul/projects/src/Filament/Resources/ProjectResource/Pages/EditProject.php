@@ -22,8 +22,6 @@ class EditProject extends EditRecord
 
     public static bool $formActionsAreSticky = true;
 
-    public $uploadData = [];
-
     public function getUploadForm(): array
     {
         return [
@@ -37,10 +35,9 @@ class EditProject extends EditRecord
                 ->reorderable()
                 ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
                 ->required()
-                ->statePath('uploadData.new_pdfs')
                 ->columnSpanFull(),
 
-            \Filament\Forms\Components\Select::make('uploadData.document_type')
+            Select::make('document_type')
                 ->label('Document Type')
                 ->options([
                     'drawing' => 'Architectural Drawing',
@@ -56,7 +53,7 @@ class EditProject extends EditRecord
                 ->helperText('Select the type of document(s) you are uploading')
                 ->columnSpanFull(),
 
-            \Filament\Forms\Components\Textarea::make('uploadData.notes')
+            Textarea::make('notes')
                 ->label('Notes')
                 ->rows(3)
                 ->helperText('Optional notes about these documents')
@@ -187,11 +184,11 @@ class EditProject extends EditRecord
 
     public function uploadPdfs()
     {
-        if (!empty($this->uploadData['new_pdfs'])) {
-            $documentType = $this->uploadData['document_type'] ?? 'drawing';
-            $notes = $this->uploadData['notes'] ?? null;
+        if (!empty($this->data['new_pdfs'])) {
+            $documentType = $this->data['document_type'] ?? 'drawing';
+            $notes = $this->data['notes'] ?? null;
 
-            foreach ($this->uploadData['new_pdfs'] as $pdfPath) {
+            foreach ($this->data['new_pdfs'] as $pdfPath) {
                 $filename = basename($pdfPath);
                 $fileSize = Storage::disk('public')->size($pdfPath);
 
@@ -206,14 +203,10 @@ class EditProject extends EditRecord
                 ]);
             }
 
-            $this->uploadData = [];
-
             Notification::make()
                 ->success()
                 ->title('PDF(s) uploaded successfully')
                 ->send();
-
-            $this->dispatch('close-modal', id: 'upload-pdf-modal');
         }
     }
 
@@ -231,8 +224,7 @@ class EditProject extends EditRecord
                 ->modalDescription('Upload architectural plans, blueprints, or technical drawings with metadata.')
                 ->modalSubmitActionLabel('Upload')
                 ->form($this->getUploadForm())
-                ->action(fn () => $this->uploadPdfs())
-                ->modalId('upload-pdf-modal'),
+                ->action(fn () => $this->uploadPdfs()),
             DeleteAction::make()
                 ->successNotification(
                     Notification::make()
