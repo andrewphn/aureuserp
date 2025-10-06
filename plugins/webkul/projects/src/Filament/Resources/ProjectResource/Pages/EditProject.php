@@ -3,7 +3,10 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -34,7 +37,30 @@ class EditProject extends EditRecord
                 ->reorderable()
                 ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
                 ->required()
-                ->statePath('uploadData.new_pdfs'),
+                ->statePath('uploadData.new_pdfs')
+                ->columnSpanFull(),
+
+            \Filament\Forms\Components\Select::make('uploadData.document_type')
+                ->label('Document Type')
+                ->options([
+                    'drawing' => 'Architectural Drawing',
+                    'blueprint' => 'Blueprint',
+                    'specification' => 'Specification',
+                    'contract' => 'Contract',
+                    'permit' => 'Permit',
+                    'photo' => 'Photo/Image',
+                    'other' => 'Other',
+                ])
+                ->default('drawing')
+                ->required()
+                ->helperText('Select the type of document(s) you are uploading')
+                ->columnSpanFull(),
+
+            \Filament\Forms\Components\Textarea::make('uploadData.notes')
+                ->label('Notes')
+                ->rows(3)
+                ->helperText('Optional notes about these documents')
+                ->columnSpanFull(),
         ];
     }
 
@@ -162,6 +188,9 @@ class EditProject extends EditRecord
     public function uploadPdfs()
     {
         if (!empty($this->uploadData['new_pdfs'])) {
+            $documentType = $this->uploadData['document_type'] ?? 'drawing';
+            $notes = $this->uploadData['notes'] ?? null;
+
             foreach ($this->uploadData['new_pdfs'] as $pdfPath) {
                 $filename = basename($pdfPath);
                 $fileSize = Storage::disk('public')->size($pdfPath);
@@ -171,7 +200,8 @@ class EditProject extends EditRecord
                     'file_name' => $filename,
                     'file_size' => $fileSize,
                     'mime_type' => 'application/pdf',
-                    'document_type' => 'drawing',
+                    'document_type' => $documentType,
+                    'notes' => $notes,
                     'uploaded_by' => Auth::id(),
                 ]);
             }
@@ -193,6 +223,16 @@ class EditProject extends EditRecord
             ChatterAction::make()
                 ->setResource(static::$resource)
                 ->setActivityPlans($this->getActivityPlans()),
+            Action::make('uploadPdfsModal')
+                ->label('Upload PDFs')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('primary')
+                ->modalHeading('Upload PDF Documents')
+                ->modalDescription('Upload architectural plans, blueprints, or technical drawings with metadata.')
+                ->modalSubmitActionLabel('Upload')
+                ->form($this->getUploadForm())
+                ->action(fn () => $this->uploadPdfs())
+                ->modalId('upload-pdf-modal'),
             DeleteAction::make()
                 ->successNotification(
                     Notification::make()
