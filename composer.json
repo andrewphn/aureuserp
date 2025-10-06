@@ -24,6 +24,7 @@
         "laravel/tinker": "^2.9",
         "milon/barcode": "^11.0",
         "njxqlus/filament-lightbox": "^4.0",
+        "smalot/pdfparser": "^2.12",
         "spatie/eloquent-sortable": "^4.4",
         "wikimedia/composer-merge-plugin": "^2.1"
     },

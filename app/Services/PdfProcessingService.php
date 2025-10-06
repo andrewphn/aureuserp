@@ -239,9 +239,7 @@ class PdfProcessingService
     }
 
     /**
-     * Extract text from a page
-     *
-     * Basic implementation - can be enhanced with pdftotext or OCR
+     * Extract text from a page using smalot/pdfparser
      *
      * @param string $pdfPath
      * @param int $pageNumber
@@ -250,13 +248,26 @@ class PdfProcessingService
     public function extractText(string $pdfPath, int $pageNumber): ?string
     {
         try {
-            // Method 1: Try using pdftotext command (if available)
-            if ($this->isPdfToTextAvailable()) {
-                return $this->extractTextWithPdfToText($pdfPath, $pageNumber);
+            // Use smalot/pdfparser for pure PHP text extraction
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf = $parser->parseFile($pdfPath);
+
+            // Get all pages
+            $pages = $pdf->getPages();
+
+            // Check if requested page exists (1-based index)
+            if (!isset($pages[$pageNumber - 1])) {
+                return null;
             }
 
-            // Method 2: Fallback to Imagick OCR (basic, not accurate)
-            return $this->extractTextWithImagick($pdfPath, $pageNumber);
+            // Extract text from specific page
+            $page = $pages[$pageNumber - 1];
+            $text = $page->getText();
+
+            // Clean up whitespace
+            $text = trim(preg_replace('/\s+/', ' ', $text));
+
+            return $text ?: null;
 
         } catch (\Exception $e) {
             Log::warning("Text extraction failed", [
@@ -264,81 +275,6 @@ class PdfProcessingService
                 'error' => $e->getMessage(),
             ]);
 
-            return null;
-        }
-    }
-
-    /**
-     * Check if pdftotext command is available
-     *
-     * @return bool
-     */
-    protected function isPdfToTextAvailable(): bool
-    {
-        exec('which pdftotext', $output, $returnCode);
-        return $returnCode === 0;
-    }
-
-    /**
-     * Extract text using pdftotext command
-     *
-     * @param string $pdfPath
-     * @param int $pageNumber
-     * @return string|null
-     */
-    protected function extractTextWithPdfToText(string $pdfPath, int $pageNumber): ?string
-    {
-        try {
-            $tempFile = storage_path('app/temp/text-' . uniqid() . '.txt');
-
-            // Create temp directory if it doesn't exist
-            @mkdir(dirname($tempFile), 0755, true);
-
-            // Extract text for specific page
-            $command = sprintf(
-                'pdftotext -f %d -l %d %s %s 2>&1',
-                $pageNumber,
-                $pageNumber,
-                escapeshellarg($pdfPath),
-                escapeshellarg($tempFile)
-            );
-
-            exec($command, $output, $returnCode);
-
-            if ($returnCode === 0 && file_exists($tempFile)) {
-                $text = file_get_contents($tempFile);
-                @unlink($tempFile); // Clean up temp file
-                return trim($text) ?: null;
-            }
-
-            return null;
-
-        } catch (\Exception $e) {
-            Log::warning("pdftotext extraction failed", ['error' => $e->getMessage()]);
-            return null;
-        }
-    }
-
-    /**
-     * Extract text using Imagick (basic, not very accurate)
-     *
-     * @param string $pdfPath
-     * @param int $pageNumber
-     * @return string|null
-     */
-    protected function extractTextWithImagick(string $pdfPath, int $pageNumber): ?string
-    {
-        try {
-            // Note: Imagick doesn't have built-in OCR
-            // This is a placeholder - real OCR would require Tesseract or similar
-            // For now, return null and log that OCR is not available
-            Log::info("Basic Imagick text extraction not implemented (requires Tesseract OCR)", [
-                'page' => $pageNumber,
-            ]);
-
-            return null;
-
-        } catch (\Exception $e) {
             return null;
         }
     }
