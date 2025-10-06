@@ -15,7 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Webkul\Inventory\Filament\Clusters\Products;
+use Webkul\Inventories\Filament\Clusters\Products;
 use Webkul\Project\Filament\Resources\CabinetReportResource\Pages;
 use Webkul\Project\Models\CabinetSpecification;
 
