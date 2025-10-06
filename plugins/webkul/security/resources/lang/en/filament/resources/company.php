@@ -19,6 +19,7 @@ return [
                 'title'  => 'Company Information',
                 'fields' => [
                     'name'                  => 'Company Name',
+                    'acronym'               => 'Acronym',
                     'registration-number'   => 'Registration Number',
                     'company-id'            => 'Company ID',
                     'tax-id'                => 'Tax ID',
@@ -180,6 +181,7 @@ return [
                 'title'   => 'Company Information',
                 'entries' => [
                     'name'                  => 'Company Name',
+                    'acronym'               => 'Acronym',
                     'registration-number'   => 'Registration Number',
                     'company-id'            => 'Company ID',
                     'tax-id'                => 'Tax ID',
