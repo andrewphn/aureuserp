@@ -225,7 +225,6 @@
                 <x-filament::button
                     type="submit"
                     form="form"
-                    wire:click="save"
                 >
                     Save changes
                 </x-filament::button>
