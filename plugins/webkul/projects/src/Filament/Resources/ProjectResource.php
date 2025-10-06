@@ -169,13 +169,14 @@ class ProjectResource extends Resource
                                         ->reactive()
                                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                             if ($state && $get('use_customer_address')) {
-                                                $partner = \Webkul\Partner\Models\Partner::with('state')->find($state);
+                                                $partner = \Webkul\Partner\Models\Partner::with(['state', 'country'])->find($state);
                                                 if ($partner) {
                                                     $set('project_address.street1', $partner->street1);
                                                     $set('project_address.street2', $partner->street2);
                                                     $set('project_address.city', $partner->city);
                                                     $set('project_address.zip', $partner->zip);
-                                                    $set('project_address.state', $partner->state?->name);
+                                                    $set('project_address.country_id', $partner->country_id);
+                                                    $set('project_address.state_id', $partner->state_id);
 
                                                     // Update project number preview
                                                     static::updateProjectNumberPreview($get('company_id'), $get, $set);
