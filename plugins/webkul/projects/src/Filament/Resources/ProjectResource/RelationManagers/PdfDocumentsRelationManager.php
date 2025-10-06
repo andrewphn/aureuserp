@@ -22,6 +22,43 @@ class PdfDocumentsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'file_name';
 
+    /**
+     * Extract value from field with confidence scoring
+     */
+    protected function getFieldValue($field): mixed
+    {
+        if (is_array($field) && isset($field['value'])) {
+            return $field['value'];
+        }
+        return $field;
+    }
+
+    /**
+     * Get confidence badge HTML
+     */
+    protected function getConfidenceBadge($field): ?string
+    {
+        if (!is_array($field) || !isset($field['confidence'])) {
+            return null;
+        }
+
+        return match($field['confidence']) {
+            'high' => '🟢 High Confidence',
+            'medium' => '🟡 Medium Confidence',
+            'low' => '🔴 Low Confidence',
+            default => null,
+        };
+    }
+
+    /**
+     * Get helper text with confidence level
+     */
+    protected function getConfidenceHelper($field): ?string
+    {
+        $badge = $this->getConfidenceBadge($field);
+        return $badge ? "Confidence: {$badge}" : null;
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -254,25 +291,30 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ->schema([
                                     Forms\Components\TextInput::make('metadata.client.name')
                                         ->label('Owner Name')
-                                        ->default($extractedData['client']['name'] ?? null),
+                                        ->default($this->getFieldValue($extractedData['client']['name'] ?? null))
+                                        ->helperText($this->getConfidenceHelper($extractedData['client']['name'] ?? null)),
                                     Forms\Components\TextInput::make('metadata.client.company')
                                         ->label('Company')
-                                        ->default($extractedData['client']['company'] ?? null),
+                                        ->default($this->getFieldValue($extractedData['client']['company'] ?? null))
+                                        ->helperText($this->getConfidenceHelper($extractedData['client']['company'] ?? null)),
                                     Forms\Components\Grid::make(2)
                                         ->schema([
                                             Forms\Components\TextInput::make('metadata.client.email')
                                                 ->label('Email')
                                                 ->email()
-                                                ->default($extractedData['client']['email'] ?? null),
+                                                ->default($this->getFieldValue($extractedData['client']['email'] ?? null))
+                                                ->helperText($this->getConfidenceHelper($extractedData['client']['email'] ?? null)),
                                             Forms\Components\TextInput::make('metadata.client.phone')
                                                 ->label('Phone')
                                                 ->tel()
-                                                ->default($extractedData['client']['phone'] ?? null),
+                                                ->default($this->getFieldValue($extractedData['client']['phone'] ?? null))
+                                                ->helperText($this->getConfidenceHelper($extractedData['client']['phone'] ?? null)),
                                         ]),
                                     Forms\Components\TextInput::make('metadata.client.website')
                                         ->label('Website')
                                         ->url()
-                                        ->default($extractedData['client']['website'] ?? null),
+                                        ->default($this->getFieldValue($extractedData['client']['website'] ?? null))
+                                        ->helperText($this->getConfidenceHelper($extractedData['client']['website'] ?? null)),
                                 ])
                                 ->collapsed(empty($extractedData['client'] ?? null)),
 
@@ -305,6 +347,7 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ->collapsed(empty($extractedData['document'] ?? null)),
 
                             Forms\Components\Section::make('Measurements & Linear Feet')
+                                ->description('🟢 High confidence fields - extracted from labeled measurements')
                                 ->schema([
                                     Forms\Components\Repeater::make('metadata.measurements.tiers')
                                         ->label('Tier Cabinetry')
@@ -317,7 +360,12 @@ class PdfDocumentsRelationManager extends RelationManager
                                                 ->numeric()
                                                 ->suffix('LF'),
                                         ])
-                                        ->default($extractedData['measurements']['tiers'] ?? [])
+                                        ->default(collect($extractedData['measurements']['tiers'] ?? [])->map(function($tier) {
+                                            return [
+                                                'tier' => $this->getFieldValue($tier['tier'] ?? null),
+                                                'linear_feet' => $this->getFieldValue($tier['linear_feet'] ?? null),
+                                            ];
+                                        })->toArray())
                                         ->collapsed()
                                         ->itemLabel(fn (array $state): ?string =>
                                             isset($state['tier']) ? "Tier {$state['tier']}" : null
@@ -328,12 +376,14 @@ class PdfDocumentsRelationManager extends RelationManager
                                                 ->label('Floating Shelves')
                                                 ->numeric()
                                                 ->suffix('LF')
-                                                ->default($extractedData['measurements']['floating_shelves_lf'] ?? null),
+                                                ->default($this->getFieldValue($extractedData['measurements']['floating_shelves_lf'] ?? null))
+                                                ->helperText($this->getConfidenceHelper($extractedData['measurements']['floating_shelves_lf'] ?? null)),
                                             Forms\Components\TextInput::make('metadata.measurements.countertops_sf')
                                                 ->label('Countertops')
                                                 ->numeric()
                                                 ->suffix('SF')
-                                                ->default($extractedData['measurements']['countertops_sf'] ?? null),
+                                                ->default($this->getFieldValue($extractedData['measurements']['countertops_sf'] ?? null))
+                                                ->helperText($this->getConfidenceHelper($extractedData['measurements']['countertops_sf'] ?? null)),
                                         ]),
                                 ])
                                 ->collapsed(empty($extractedData['measurements'] ?? null)),

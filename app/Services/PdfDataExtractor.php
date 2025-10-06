@@ -10,9 +10,17 @@ use Illuminate\Support\Facades\Log;
  *
  * Semi-assisted extraction of structured data from PDF text
  * Uses regex patterns to identify common fields in architectural drawings
+ * Includes confidence scoring for each extracted field
  */
 class PdfDataExtractor
 {
+    /**
+     * Confidence levels
+     */
+    const CONFIDENCE_HIGH = 'high';      // 80-100% confidence
+    const CONFIDENCE_MEDIUM = 'medium';  // 50-79% confidence
+    const CONFIDENCE_LOW = 'low';        // 0-49% confidence
+
     /**
      * Extract structured metadata from a PDF document
      *
@@ -60,6 +68,55 @@ class PdfDataExtractor
     }
 
     /**
+     * Create a field with value and confidence score
+     *
+     * @param mixed $value
+     * @param string $confidence
+     * @return array
+     */
+    protected function field($value, string $confidence = self::CONFIDENCE_MEDIUM): array
+    {
+        return [
+            'value' => $value,
+            'confidence' => $confidence,
+        ];
+    }
+
+    /**
+     * Validate email and adjust confidence
+     */
+    protected function validateEmail(string $email): string
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? self::CONFIDENCE_HIGH : self::CONFIDENCE_MEDIUM;
+    }
+
+    /**
+     * Validate phone format and adjust confidence
+     */
+    protected function validatePhone(string $phone): string
+    {
+        // US phone format validation
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
+        return (strlen($cleaned) === 10 || strlen($cleaned) === 11) ? self::CONFIDENCE_HIGH : self::CONFIDENCE_LOW;
+    }
+
+    /**
+     * Calculate confidence based on pattern specificity
+     */
+    protected function calculateConfidence(bool $hasLabel, bool $isValidated, int $occurrences = 1): string
+    {
+        $score = 50; // Base score
+
+        if ($hasLabel) $score += 20;        // Found with clear label
+        if ($isValidated) $score += 20;     // Validated format
+        if ($occurrences > 1) $score += 10; // Multiple occurrences
+
+        if ($score >= 80) return self::CONFIDENCE_HIGH;
+        if ($score >= 50) return self::CONFIDENCE_MEDIUM;
+        return self::CONFIDENCE_LOW;
+    }
+
+    /**
      * Extract project information (address, name, type)
      */
     protected function extractProjectInfo(string $text): array
@@ -95,27 +152,41 @@ class PdfDataExtractor
 
         // Extract owner name
         if (preg_match('/Owner:\s*([A-Za-z\s\.]+(?:\n|$))/i', $text, $matches)) {
-            $client['name'] = trim($matches[1]);
+            $name = trim($matches[1]);
+            $client['name'] = $this->field($name, self::CONFIDENCE_HIGH); // Has label "Owner:"
         }
 
         // Extract email
         if (preg_match('/(?:Email:)?\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i', $text, $matches)) {
-            $client['email'] = trim($matches[1]);
+            $email = trim($matches[1]);
+            $hasLabel = stripos($text, 'Email:') !== false;
+            $client['email'] = $this->field($email, $this->calculateConfidence(
+                $hasLabel,
+                filter_var($email, FILTER_VALIDATE_EMAIL) !== false
+            ));
         }
 
         // Extract phone
         if (preg_match('/(?:Phone:)?\s*(\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4})/i', $text, $matches)) {
-            $client['phone'] = trim($matches[1]);
+            $phone = trim($matches[1]);
+            $hasLabel = stripos($text, 'Phone:') !== false;
+            $cleaned = preg_replace('/[^0-9]/', '', $phone);
+            $isValid = (strlen($cleaned) === 10 || strlen($cleaned) === 11);
+            $client['phone'] = $this->field($phone, $this->calculateConfidence($hasLabel, $isValid));
         }
 
         // Extract website
         if (preg_match('/(www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i', $text, $matches)) {
-            $client['website'] = trim($matches[1]);
+            $website = trim($matches[1]);
+            // Websites without http:// are medium confidence
+            $client['website'] = $this->field($website, self::CONFIDENCE_MEDIUM);
         }
 
         // Extract company name
         if (preg_match('/(?:of|by)\s+([A-Za-z\s]+(?:Woodworking|Construction|Builders|Design|Inc|LLC))/i', $text, $matches)) {
-            $client['company'] = trim($matches[1]);
+            $company = trim($matches[1]);
+            // Strong pattern with business suffix = high confidence
+            $client['company'] = $this->field($company, self::CONFIDENCE_HIGH);
         }
 
         return $client;
@@ -172,8 +243,9 @@ class PdfDataExtractor
             $tiers = [];
             foreach ($matches as $match) {
                 $tiers[] = [
-                    'tier' => (int) $match[1],
-                    'linear_feet' => (float) $match[2],
+                    'tier' => $this->field((int) $match[1], self::CONFIDENCE_HIGH),
+                    'linear_feet' => $this->field((float) $match[2], self::CONFIDENCE_HIGH),
+                    // Exact pattern with label and unit = highest confidence
                 ];
             }
             $measurements['tiers'] = $tiers;
@@ -181,12 +253,14 @@ class PdfDataExtractor
 
         // Extract floating shelves
         if (preg_match('/Floating\s+Shelves:\s*([\d.]+)\s*LF/i', $text, $matches)) {
-            $measurements['floating_shelves_lf'] = (float) $matches[1];
+            // Clear label + unit + numeric = high confidence
+            $measurements['floating_shelves_lf'] = $this->field((float) $matches[1], self::CONFIDENCE_HIGH);
         }
 
         // Extract countertops
         if (preg_match('/(?:Millwork\s+)?Countertops:\s*([\d.]+)\s*SF/i', $text, $matches)) {
-            $measurements['countertops_sf'] = (float) $matches[1];
+            // Clear label + unit + numeric = high confidence
+            $measurements['countertops_sf'] = $this->field((float) $matches[1], self::CONFIDENCE_HIGH);
         }
 
         return $measurements;
