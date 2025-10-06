@@ -123,18 +123,8 @@ class PdfDataExtractor
     {
         $project = [];
 
-        // Try to extract full address with street suffix (highest confidence)
-        // Look for pattern: "number streetname Lane/Road/etc, City, ST"
-        if (preg_match('/\b(\d{1,5})\s+([A-Za-z\s]+?(?:Lane|Road|Street|Ave|Avenue|Drive|Boulevard|Blvd|Rd|St|Ln))\s*,\s*([A-Za-z\s]+?),\s*([A-Z]{2})\b/i', $text, $matches)) {
-            $project['street_address'] = trim($matches[1] . ' ' . $matches[2]);
-            $project['city'] = trim($matches[3]);
-            $project['state'] = trim($matches[4]);
-
-            // Build full address
-            $project['address'] = "{$project['street_address']}, {$project['city']}, {$project['state']}";
-        }
-        // Fallback: Extract from "Renovations at:" pattern
-        elseif (preg_match('/(?:Renovations at:|Project at:)\s*([^\n]+?)(?:Approved|Revision|Drawn|\n)/i', $text, $matches)) {
+        // Strategy 1: Look for "Renovations at:" pattern (most reliable for PDFs with labeled addresses)
+        if (preg_match('/(?:Renovations at:|Project at:)\s*([^\n]+?)(?:Approved|Revision|Drawn|\n)/i', $text, $matches)) {
             $addressLine = trim($matches[1]);
 
             // Try to parse components from this line
@@ -150,6 +140,30 @@ class PdfDataExtractor
                 $project['address'] = trim($addressLine);
             } else {
                 $project['address'] = $addressLine;
+            }
+        }
+        // Strategy 2: Find all complete address patterns and take the shortest street number
+        // (to avoid PDF concatenation issues like "2525" instead of "25")
+        elseif (preg_match_all('/\b(\d{1,5})\s+([A-Za-z\s]+?(?:Lane|Road|Street|Ave|Avenue|Drive|Boulevard|Blvd|Rd|St|Ln))\s*,\s*([A-Za-z\s]+?),\s*([A-Z]{2})\b/i', $text, $matches, PREG_SET_ORDER)) {
+            // Find match with shortest street number (most likely to be correct, avoiding concatenation)
+            $shortestMatch = null;
+            $shortestLength = PHP_INT_MAX;
+
+            foreach ($matches as $match) {
+                $numLength = strlen($match[1]);
+                if ($numLength < $shortestLength) {
+                    $shortestLength = $numLength;
+                    $shortestMatch = $match;
+                }
+            }
+
+            if ($shortestMatch) {
+                $project['street_address'] = trim($shortestMatch[1] . ' ' . $shortestMatch[2]);
+                $project['city'] = trim($shortestMatch[3]);
+                $project['state'] = trim($shortestMatch[4]);
+
+                // Build full address
+                $project['address'] = "{$project['street_address']}, {$project['city']}, {$project['state']}";
             }
         }
 
