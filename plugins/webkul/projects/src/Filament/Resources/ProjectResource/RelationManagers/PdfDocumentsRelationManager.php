@@ -7,6 +7,10 @@ use App\Jobs\ProcessPdfJob;
 use App\Services\PdfDataExtractor;
 use Filament\Actions;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
@@ -82,7 +86,7 @@ class PdfDocumentsRelationManager extends RelationManager
                         }
                     }),
 
-                Forms\Components\TextInput::make('file_name')
+                TextInput::make('file_name')
                     ->label('File Name (auto-filled)')
                     ->placeholder('Will be auto-filled from uploaded file'),
 
@@ -265,24 +269,24 @@ class PdfDocumentsRelationManager extends RelationManager
                         return [
                             Section::make('Project Information')
                                 ->schema([
-                                    Forms\Components\TextInput::make('metadata.project.address')
+                                    TextInput::make('metadata.project.address')
                                         ->label('Project Address')
                                         ->default($extractedData['project']['address'] ?? null),
-                                    Forms\Components\Grid::make(3)
+                                    Grid::make(3)
                                         ->schema([
-                                            Forms\Components\TextInput::make('metadata.project.city')
+                                            TextInput::make('metadata.project.city')
                                                 ->label('City')
                                                 ->default($extractedData['project']['city'] ?? null),
-                                            Forms\Components\TextInput::make('metadata.project.state')
+                                            TextInput::make('metadata.project.state')
                                                 ->label('State')
                                                 ->maxLength(2)
                                                 ->default($extractedData['project']['state'] ?? null),
-                                            Forms\Components\TextInput::make('metadata.project.zip')
+                                            TextInput::make('metadata.project.zip')
                                                 ->label('ZIP')
                                                 ->maxLength(5)
                                                 ->default($extractedData['project']['zip'] ?? null),
                                         ]),
-                                    Forms\Components\TextInput::make('metadata.project.type')
+                                    TextInput::make('metadata.project.type')
                                         ->label('Project Type')
                                         ->default($extractedData['project']['type'] ?? null),
                                 ])
@@ -290,28 +294,28 @@ class PdfDocumentsRelationManager extends RelationManager
 
                             Section::make('Client Information')
                                 ->schema([
-                                    Forms\Components\TextInput::make('metadata.client.name')
+                                    TextInput::make('metadata.client.name')
                                         ->label('Owner Name')
                                         ->default($this->getFieldValue($extractedData['client']['name'] ?? null))
                                         ->helperText($this->getConfidenceHelper($extractedData['client']['name'] ?? null)),
-                                    Forms\Components\TextInput::make('metadata.client.company')
+                                    TextInput::make('metadata.client.company')
                                         ->label('Company')
                                         ->default($this->getFieldValue($extractedData['client']['company'] ?? null))
                                         ->helperText($this->getConfidenceHelper($extractedData['client']['company'] ?? null)),
-                                    Forms\Components\Grid::make(2)
+                                    Grid::make(2)
                                         ->schema([
-                                            Forms\Components\TextInput::make('metadata.client.email')
+                                            TextInput::make('metadata.client.email')
                                                 ->label('Email')
                                                 ->email()
                                                 ->default($this->getFieldValue($extractedData['client']['email'] ?? null))
                                                 ->helperText($this->getConfidenceHelper($extractedData['client']['email'] ?? null)),
-                                            Forms\Components\TextInput::make('metadata.client.phone')
+                                            TextInput::make('metadata.client.phone')
                                                 ->label('Phone')
                                                 ->tel()
                                                 ->default($this->getFieldValue($extractedData['client']['phone'] ?? null))
                                                 ->helperText($this->getConfidenceHelper($extractedData['client']['phone'] ?? null)),
                                         ]),
-                                    Forms\Components\TextInput::make('metadata.client.website')
+                                    TextInput::make('metadata.client.website')
                                         ->label('Website')
                                         ->url()
                                         ->default($this->getFieldValue($extractedData['client']['website'] ?? null))
@@ -321,22 +325,22 @@ class PdfDocumentsRelationManager extends RelationManager
 
                             Section::make('Document Details')
                                 ->schema([
-                                    Forms\Components\TextInput::make('metadata.document.drawing_file')
+                                    TextInput::make('metadata.document.drawing_file')
                                         ->label('Drawing File')
                                         ->default($extractedData['document']['drawing_file'] ?? null),
-                                    Forms\Components\TextInput::make('metadata.document.drawn_by')
+                                    TextInput::make('metadata.document.drawn_by')
                                         ->label('Drawn By')
                                         ->default($extractedData['document']['drawn_by'] ?? null),
-                                    Forms\Components\TextInput::make('metadata.document.approved_date')
+                                    TextInput::make('metadata.document.approved_date')
                                         ->label('Approved Date')
                                         ->default($extractedData['document']['approved_date'] ?? null),
-                                    Forms\Components\Repeater::make('metadata.document.revisions')
+                                    Repeater::make('metadata.document.revisions')
                                         ->label('Revision History')
                                         ->schema([
-                                            Forms\Components\TextInput::make('number')
+                                            TextInput::make('number')
                                                 ->label('Revision #')
                                                 ->numeric(),
-                                            Forms\Components\TextInput::make('date')
+                                            TextInput::make('date')
                                                 ->label('Date'),
                                         ])
                                         ->default($extractedData['document']['revisions'] ?? [])
@@ -350,13 +354,13 @@ class PdfDocumentsRelationManager extends RelationManager
                             Section::make('Measurements & Linear Feet')
                                 ->description('🟢 High confidence fields - extracted from labeled measurements')
                                 ->schema([
-                                    Forms\Components\Repeater::make('metadata.measurements.tiers')
+                                    Repeater::make('metadata.measurements.tiers')
                                         ->label('Tier Cabinetry')
                                         ->schema([
-                                            Forms\Components\TextInput::make('tier')
+                                            TextInput::make('tier')
                                                 ->label('Tier #')
                                                 ->numeric(),
-                                            Forms\Components\TextInput::make('linear_feet')
+                                            TextInput::make('linear_feet')
                                                 ->label('Linear Feet')
                                                 ->numeric()
                                                 ->suffix('LF'),
@@ -371,15 +375,15 @@ class PdfDocumentsRelationManager extends RelationManager
                                         ->itemLabel(fn (array $state): ?string =>
                                             isset($state['tier']) ? "Tier {$state['tier']}" : null
                                         ),
-                                    Forms\Components\Grid::make(2)
+                                    Grid::make(2)
                                         ->schema([
-                                            Forms\Components\TextInput::make('metadata.measurements.floating_shelves_lf')
+                                            TextInput::make('metadata.measurements.floating_shelves_lf')
                                                 ->label('Floating Shelves')
                                                 ->numeric()
                                                 ->suffix('LF')
                                                 ->default($this->getFieldValue($extractedData['measurements']['floating_shelves_lf'] ?? null))
                                                 ->helperText($this->getConfidenceHelper($extractedData['measurements']['floating_shelves_lf'] ?? null)),
-                                            Forms\Components\TextInput::make('metadata.measurements.countertops_sf')
+                                            TextInput::make('metadata.measurements.countertops_sf')
                                                 ->label('Countertops')
                                                 ->numeric()
                                                 ->suffix('SF')
@@ -391,12 +395,12 @@ class PdfDocumentsRelationManager extends RelationManager
 
                             Section::make('Equipment & Appliances')
                                 ->schema([
-                                    Forms\Components\Repeater::make('metadata.equipment')
+                                    Repeater::make('metadata.equipment')
                                         ->label('Equipment List')
                                         ->schema([
-                                            Forms\Components\TextInput::make('brand')
+                                            TextInput::make('brand')
                                                 ->label('Brand'),
-                                            Forms\Components\TextInput::make('model')
+                                            TextInput::make('model')
                                                 ->label('Model Number'),
                                         ])
                                         ->default($extractedData['equipment'] ?? [])
@@ -409,13 +413,13 @@ class PdfDocumentsRelationManager extends RelationManager
 
                             Section::make('Materials')
                                 ->schema([
-                                    Forms\Components\TagsInput::make('metadata.materials.wood_types')
+                                    TagsInput::make('metadata.materials.wood_types')
                                         ->label('Wood Types')
                                         ->default($extractedData['materials']['wood_types'] ?? []),
-                                    Forms\Components\TagsInput::make('metadata.materials.finishes')
+                                    TagsInput::make('metadata.materials.finishes')
                                         ->label('Finishes')
                                         ->default($extractedData['materials']['finishes'] ?? []),
-                                    Forms\Components\TextInput::make('metadata.materials.hardware')
+                                    TextInput::make('metadata.materials.hardware')
                                         ->label('Hardware')
                                         ->default($extractedData['materials']['hardware'] ?? null),
                                 ])
