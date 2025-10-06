@@ -24,6 +24,99 @@
         $estimate = \App\Services\ProductionEstimatorService::calculate($linearFeet, $companyId);
     }
 
+    // Get start and desired completion dates from form for alert calculation
+    $startDate = $data['start_date'] ?? ($page->record ? $page->record->start_date : null);
+    $desiredDate = $data['desired_completion_date'] ?? ($page->record ? $page->record->desired_completion_date : null);
+
+    // Calculate project-specific daily rate if dates are provided
+    $projectDailyRate = null;
+    $projectDays = null;
+    $workingDays = null;
+    $workingHours = null;
+    $rateDifference = null;
+    $ratePercentage = null;
+    $alertLevel = null;
+    $alertMessage = null;
+    $alertIcon = null;
+    $capacityUtilization = null;
+
+    if ($desiredDate && $companyId && $linearFeet && $estimate) {
+        // Get company's calendar and working days from database
+        // Try company-specific calendar first, then fall back to global calendar (company_id IS NULL)
+        $calendar = \DB::selectOne('SELECT id, hours_per_day FROM employees_calendars WHERE (company_id = ? OR company_id IS NULL) AND deleted_at IS NULL ORDER BY company_id DESC LIMIT 1', [$companyId]);
+
+        if ($calendar) {
+            // Get working days from calendar_attendances
+            $workingDayNames = \DB::select('SELECT DISTINCT LOWER(day_of_week) as day_of_week FROM employees_calendar_attendances WHERE calendar_id = ?', [$calendar->id]);
+            $workingDayNames = array_map(fn($row) => $row->day_of_week, $workingDayNames);
+
+            // Map day names to Carbon day of week numbers
+            $dayMap = ['monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4, 'friday' => 5, 'saturday' => 6, 'sunday' => 0];
+            $workingDayNumbers = array_map(fn($day) => $dayMap[$day] ?? null, $workingDayNames);
+            $workingDayNumbers = array_filter($workingDayNumbers, fn($num) => $num !== null);
+
+            $hoursPerDay = $calendar->hours_per_day ?? 8;
+        } else {
+            // Fallback to hardcoded Mon-Thu, 8 hours if no calendar found
+            $workingDayNumbers = [1, 2, 3, 4]; // Monday-Thursday
+            $hoursPerDay = 8;
+        }
+
+        // Use start date if provided, otherwise use current date
+        $start = $startDate ? \Carbon\Carbon::parse($startDate) : \Carbon\Carbon::now();
+        $end = \Carbon\Carbon::parse($desiredDate);
+
+        // Calculate total calendar days
+        $projectDays = $start->diffInDays($end);
+
+        if ($projectDays > 0) {
+            // Calculate actual working days based on company calendar
+            $workingDays = 0;
+            $currentDate = $start->copy();
+
+            while ($currentDate->lte($end)) {
+                // Check if current day is in the working days list
+                if (in_array($currentDate->dayOfWeek, $workingDayNumbers)) {
+                    $workingDays++;
+                }
+                $currentDate->addDay();
+            }
+
+            // Calculate working hours
+            $workingHours = $workingDays * $hoursPerDay;
+
+            // Calculate daily rate based on working days
+            if ($workingDays > 0) {
+                $projectDailyRate = $linearFeet / $workingDays;
+                $baseRate = $estimate['shop_capacity_per_day'];
+                $rateDifference = $projectDailyRate - $baseRate;
+                $ratePercentage = ($rateDifference / $baseRate) * 100;
+
+                // Calculate capacity utilization
+                $capacityUtilization = ($projectDailyRate / $baseRate) * 100;
+
+                // 4-TIER ALERT SYSTEM
+                if ($capacityUtilization <= 100) {
+                    $alertLevel = 'green';
+                    $alertMessage = 'Comfortable Timeline';
+                    $alertIcon = 'heroicon-o-check-circle';
+                } elseif ($capacityUtilization <= 125) {
+                    $alertLevel = 'amber';
+                    $alertMessage = 'Slight Pressure';
+                    $alertIcon = 'heroicon-o-exclamation-triangle';
+                } elseif ($capacityUtilization <= 150) {
+                    $alertLevel = 'red';
+                    $alertMessage = 'EXTREME PRESSURE';
+                    $alertIcon = 'heroicon-o-fire';
+                } else {
+                    $alertLevel = 'black';
+                    $alertMessage = 'IMPOSSIBLE';
+                    $alertIcon = 'heroicon-o-x-circle';
+                }
+            }
+        }
+    }
+
     // Get project number
     $projectNumber = '—';
     if ($page->record && $page->record->project_number) {
@@ -215,6 +308,57 @@
                         </svg>
                         <div class="text-xs font-bold text-teal-900 dark:text-teal-100">{{ number_format($estimate['months'], 1) }}</div>
                         <div class="text-[10px] text-teal-600 dark:text-teal-400">mos</div>
+                    </div>
+                </div>
+                @endif
+
+                @if($alertLevel && $projectDailyRate)
+                {{-- Project Timeline Alert --}}
+                @php
+                    // Define alert styling based on level
+                    $alertStyles = [
+                        'green' => [
+                            'bg' => 'bg-green-50 dark:bg-green-900/20',
+                            'border' => 'border-green-300 dark:border-green-700',
+                            'text' => 'text-green-700 dark:text-green-300',
+                            'icon' => 'text-green-600 dark:text-green-400',
+                        ],
+                        'amber' => [
+                            'bg' => 'bg-amber-50 dark:bg-amber-900/20',
+                            'border' => 'border-amber-300 dark:border-amber-700',
+                            'text' => 'text-amber-700 dark:text-amber-300',
+                            'icon' => 'text-amber-600 dark:text-amber-400',
+                        ],
+                        'red' => [
+                            'bg' => 'bg-red-50 dark:bg-red-900/20',
+                            'border' => 'border-red-300 dark:border-red-700',
+                            'text' => 'text-red-700 dark:text-red-300',
+                            'icon' => 'text-red-600 dark:text-red-400',
+                        ],
+                        'black' => [
+                            'bg' => 'bg-gray-900 dark:bg-gray-950',
+                            'border' => 'border-gray-900 dark:border-gray-950',
+                            'text' => 'text-white',
+                            'icon' => 'text-white',
+                        ],
+                    ];
+                    $style = $alertStyles[$alertLevel];
+                @endphp
+                <div class="mt-2 p-2 rounded-md border {{ $style['bg'] }} {{ $style['border'] }}">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <x-filament::icon
+                            :icon="$alertIcon"
+                            class="h-3.5 w-3.5 {{ $style['icon'] }}"
+                        />
+                        <div class="text-xs font-bold uppercase {{ $style['text'] }}">
+                            {{ $alertMessage }}
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-medium {{ $style['text'] }}">
+                        {{ number_format($projectDailyRate, 1) }} LF/day
+                        ({{ $rateDifference >= 0 ? '+' : '' }}{{ number_format($ratePercentage, 0) }}%)
+                        • {{ $workingDays }} days
+                        • {{ number_format($capacityUtilization, 0) }}% capacity
                     </div>
                 </div>
                 @endif
