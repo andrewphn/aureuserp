@@ -474,13 +474,23 @@ class ProjectResource extends Resource
                         //         'style' => 'position: sticky; top: 5rem; max-height: calc(100vh - 6rem); overflow-y: auto;'
                         //     ]),
 
-                        Section::make('Architectural PDF Upload')
-                            ->description('Upload architectural plans, blueprints, or technical drawings. PDFs will be available for viewing and annotation after project creation.')
+                        Section::make('Architectural PDFs')
+                            ->description('Plans, blueprints & drawings')
                             ->schema([
+                                \Filament\Forms\Components\ViewField::make('pdf_upload_section')
+                                    ->label('')
+                                    ->view('filament.forms.components.compact-pdf-upload')
+                                    ->viewData(fn ($record, $context) => [
+                                        'record' => $record,
+                                        'context' => $context,
+                                        'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
+                                    ])
+                                    ->columnSpanFull(),
+
                                 \Filament\Forms\Components\FileUpload::make('architectural_pdfs')
-                                    ->label('Upload PDF Documents')
+                                    ->label('')
                                     ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(51200) // 50MB in KB
+                                    ->maxSize(51200)
                                     ->disk('public')
                                     ->directory('pdf-documents')
                                     ->multiple()
@@ -488,20 +498,13 @@ class ProjectResource extends Resource
                                     ->downloadable()
                                     ->openable()
                                     ->previewable(false)
-                                    ->helperText('Maximum file size: 50MB per file. You can upload multiple PDFs.')
-                                    ->columnSpanFull(),
-
-                                \Filament\Forms\Components\ViewField::make('uploaded_pdfs')
-                                    ->label('Previously Uploaded PDF Documents')
-                                    ->view('filament.forms.components.uploaded-pdfs-list')
-                                    ->viewData(fn ($record) => [
-                                        'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
-                                    ])
-                                    ->visible(fn ($context, $record) => $context === 'edit' && $record?->pdfDocuments()->count() > 0)
-                                    ->columnSpanFull(),
+                                    ->hiddenLabel()
+                                    ->columnSpanFull()
+                                    ->extraAttributes(['class' => 'compact-pdf-uploader']),
                             ])
                             ->collapsible()
-                            ->collapsed(false),
+                            ->collapsed(false)
+                            ->compact(),
 
                         Section::make('Project Tags')
                             ->schema([
