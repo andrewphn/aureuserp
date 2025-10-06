@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'google' => [
+        // Google Cloud project ID
+        'project_id' => env('GOOGLE_PROJECT_ID'),
+
+        // API key for Document AI and Vision API
+        'vision_api_key' => env('GOOGLE_VISION_API_KEY'),
+
+        // Document AI processor ID (create in Google Cloud Console)
+        'document_ai_processor_id' => env('GOOGLE_DOCUMENT_AI_PROCESSOR_ID'),
+
+        // Location: 'us' (default) or 'eu'
+        'location' => env('GOOGLE_LOCATION', 'us'),
+    ],
+
 ];

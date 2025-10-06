@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $page_number
  * @property string|null $thumbnail_path
  * @property string|null $extracted_text
+ * @property string|null $ocr_text
+ * @property int|null $extraction_time_ms
+ * @property int|null $ocr_time_ms
  * @property array|null $page_metadata
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -36,6 +39,9 @@ class PdfPage extends Model
         'page_number',
         'thumbnail_path',
         'extracted_text',
+        'ocr_text',
+        'extraction_time_ms',
+        'ocr_time_ms',
         'page_metadata',
     ];
 

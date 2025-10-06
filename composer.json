@@ -17,6 +17,8 @@
         "filament/filament": "^4.0",
         "filament/spatie-laravel-settings-plugin": "^4.0",
         "flowframe/laravel-trend": "^0.3.0",
+        "google/cloud-document-ai": "^2.4",
+        "google/cloud-vision": "^2.1",
         "guava/filament-icon-picker": "^3.0",
         "hugomyb/filament-media-action": "^4.0",
         "jacobtims/inline-date-time-picker": "^2.0",
@@ -26,6 +28,7 @@
         "njxqlus/filament-lightbox": "^4.0",
         "smalot/pdfparser": "^2.12",
         "spatie/eloquent-sortable": "^4.4",
+        "thiagoalessio/tesseract_ocr": "^2.13",
         "wikimedia/composer-merge-plugin": "^2.1"
     },
     "require-dev": {
