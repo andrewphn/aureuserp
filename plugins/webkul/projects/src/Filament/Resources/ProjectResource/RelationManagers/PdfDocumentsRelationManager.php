@@ -132,7 +132,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->modalHeading(fn (PdfDocument $record) => 'View PDF: ' . $record->file_name)
                     ->modalContent(fn (PdfDocument $record) => view('filament.modals.pdf-viewer', [
                         'documentId' => $record->id,
-                        'documentUrl' => Storage::url($record->file_path),
+                        'documentUrl' => Storage::disk('public')->url($record->file_path),
                     ]))
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false)
