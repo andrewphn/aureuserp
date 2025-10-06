@@ -48,6 +48,8 @@ class PdfDocument extends Model
         'file_size',
         'mime_type',
         'page_count',
+        'document_type',
+        'notes',
         'uploaded_by',
         'tags',
         'metadata',

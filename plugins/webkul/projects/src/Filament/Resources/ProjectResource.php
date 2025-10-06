@@ -486,21 +486,6 @@ class ProjectResource extends Resource
                                         'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
                                     ])
                                     ->columnSpanFull(),
-
-                                \Filament\Forms\Components\FileUpload::make('architectural_pdfs')
-                                    ->label('')
-                                    ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(51200)
-                                    ->disk('public')
-                                    ->directory('pdf-documents')
-                                    ->multiple()
-                                    ->reorderable()
-                                    ->downloadable()
-                                    ->openable()
-                                    ->previewable(false)
-                                    ->hiddenLabel()
-                                    ->columnSpanFull()
-                                    ->extraAttributes(['class' => 'compact-pdf-uploader']),
                             ])
                             ->collapsible()
                             ->collapsed(false)
