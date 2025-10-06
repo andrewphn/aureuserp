@@ -112,18 +112,19 @@ class GoogleDocumentAiService
             $document = $response->getDocument();
             $extractedText = $document->getText();
 
-            // Calculate average confidence from pages
+            // Calculate average confidence from image quality scores
             $confidence = 0.0;
             $pageCount = 0;
 
             foreach ($document->getPages() as $page) {
-                if ($page->hasConfidence()) {
-                    $confidence += $page->getConfidence();
+                $qualityScores = $page->getImageQualityScores();
+                if ($qualityScores && $qualityScores->getQualityScore() > 0) {
+                    $confidence += $qualityScores->getQualityScore();
                     $pageCount++;
                 }
             }
 
-            $confidence = $pageCount > 0 ? ($confidence / $pageCount) : 0.0;
+            $confidence = $pageCount > 0 ? ($confidence / $pageCount) : 0.95; // Default high confidence if no scores
 
             // Calculate processing time
             $endTime = microtime(true);
@@ -229,7 +230,12 @@ class GoogleDocumentAiService
                     }
                 }
 
-                $pageConfidence = $page->hasConfidence() ? $page->getConfidence() : 0.0;
+                // Get confidence from image quality scores
+                $pageConfidence = 0.95; // Default high confidence
+                $qualityScores = $page->getImageQualityScores();
+                if ($qualityScores && $qualityScores->getQualityScore() > 0) {
+                    $pageConfidence = $qualityScores->getQualityScore();
+                }
                 $totalConfidence += $pageConfidence;
 
                 $pages[] = [
