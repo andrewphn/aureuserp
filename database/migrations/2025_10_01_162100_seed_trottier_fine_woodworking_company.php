@@ -39,11 +39,17 @@ return new class extends Migration
             'updated_at' => now(),
         ]);
 
-        // Insert Trottier Fine Woodworking company
+        // Get TCS parent company ID (should be company ID 1)
+        $parentCompanyId = DB::table('companies')
+            ->where('acronym', 'TCS')
+            ->value('id');
+
+        // Insert Trottier's Son as a branch of The Carpenter's Son
         DB::table('companies')->insert([
-            'name' => 'Trottier Fine Woodworking',
+            'name' => 'Trottier\'s Son',
             'acronym' => 'TFW',
             'company_id' => 'TROTWOOD001',
+            'parent_id' => $parentCompanyId,
             'partner_id' => $partnerId,
             'email' => 'jeremybtrottier@gmail.com',
             'phone' => '(508) 332-8671',
@@ -65,7 +71,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remove Trottier Fine Woodworking company
+        // Remove Trottier's Son company
         DB::table('companies')
             ->where('company_id', 'TROTWOOD001')
             ->delete();

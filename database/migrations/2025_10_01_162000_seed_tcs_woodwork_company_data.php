@@ -25,7 +25,7 @@ return new class extends Migration
         DB::table('companies')
             ->where('id', 1)
             ->update([
-                'name' => 'TCS Woodwork',
+                'name' => 'The Carpenter\'s Son Woodworking LLC',
                 'acronym' => 'TCS',
                 'company_id' => 'TCSWOOD001',
                 'tax_id' => 'TCS123456',
