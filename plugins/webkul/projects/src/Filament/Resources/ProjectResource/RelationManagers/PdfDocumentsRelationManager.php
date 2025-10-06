@@ -4,6 +4,7 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\PdfDocument;
 use App\Jobs\ProcessPdfJob;
+use App\Services\PdfDataExtractor;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -208,6 +209,182 @@ class PdfDocumentsRelationManager extends RelationManager
                         Notification::make()
                             ->title('PDF Queued for Processing')
                             ->body("'{$record->file_name}' has been queued for reprocessing.")
+                            ->success()
+                            ->send();
+                    }),
+
+                Actions\Action::make('extractData')
+                    ->label('Extract Data')
+                    ->icon('heroicon-o-document-magnifying-glass')
+                    ->color('info')
+                    ->visible(fn (PdfDocument $record): bool =>
+                        $record->processing_status === 'completed' && $record->page_count > 0
+                    )
+                    ->form(function (PdfDocument $record) {
+                        $extractor = app(PdfDataExtractor::class);
+                        $extractedData = $record->extracted_metadata ?? $extractor->extractMetadata($record);
+
+                        return [
+                            Forms\Components\Section::make('Project Information')
+                                ->schema([
+                                    Forms\Components\TextInput::make('metadata.project.address')
+                                        ->label('Project Address')
+                                        ->default($extractedData['project']['address'] ?? null),
+                                    Forms\Components\Grid::make(3)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('metadata.project.city')
+                                                ->label('City')
+                                                ->default($extractedData['project']['city'] ?? null),
+                                            Forms\Components\TextInput::make('metadata.project.state')
+                                                ->label('State')
+                                                ->maxLength(2)
+                                                ->default($extractedData['project']['state'] ?? null),
+                                            Forms\Components\TextInput::make('metadata.project.zip')
+                                                ->label('ZIP')
+                                                ->maxLength(5)
+                                                ->default($extractedData['project']['zip'] ?? null),
+                                        ]),
+                                    Forms\Components\TextInput::make('metadata.project.type')
+                                        ->label('Project Type')
+                                        ->default($extractedData['project']['type'] ?? null),
+                                ])
+                                ->collapsed(empty($extractedData['project'] ?? null)),
+
+                            Forms\Components\Section::make('Client Information')
+                                ->schema([
+                                    Forms\Components\TextInput::make('metadata.client.name')
+                                        ->label('Owner Name')
+                                        ->default($extractedData['client']['name'] ?? null),
+                                    Forms\Components\TextInput::make('metadata.client.company')
+                                        ->label('Company')
+                                        ->default($extractedData['client']['company'] ?? null),
+                                    Forms\Components\Grid::make(2)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('metadata.client.email')
+                                                ->label('Email')
+                                                ->email()
+                                                ->default($extractedData['client']['email'] ?? null),
+                                            Forms\Components\TextInput::make('metadata.client.phone')
+                                                ->label('Phone')
+                                                ->tel()
+                                                ->default($extractedData['client']['phone'] ?? null),
+                                        ]),
+                                    Forms\Components\TextInput::make('metadata.client.website')
+                                        ->label('Website')
+                                        ->url()
+                                        ->default($extractedData['client']['website'] ?? null),
+                                ])
+                                ->collapsed(empty($extractedData['client'] ?? null)),
+
+                            Forms\Components\Section::make('Document Details')
+                                ->schema([
+                                    Forms\Components\TextInput::make('metadata.document.drawing_file')
+                                        ->label('Drawing File')
+                                        ->default($extractedData['document']['drawing_file'] ?? null),
+                                    Forms\Components\TextInput::make('metadata.document.drawn_by')
+                                        ->label('Drawn By')
+                                        ->default($extractedData['document']['drawn_by'] ?? null),
+                                    Forms\Components\TextInput::make('metadata.document.approved_date')
+                                        ->label('Approved Date')
+                                        ->default($extractedData['document']['approved_date'] ?? null),
+                                    Forms\Components\Repeater::make('metadata.document.revisions')
+                                        ->label('Revision History')
+                                        ->schema([
+                                            Forms\Components\TextInput::make('number')
+                                                ->label('Revision #')
+                                                ->numeric(),
+                                            Forms\Components\TextInput::make('date')
+                                                ->label('Date'),
+                                        ])
+                                        ->default($extractedData['document']['revisions'] ?? [])
+                                        ->collapsed()
+                                        ->itemLabel(fn (array $state): ?string =>
+                                            isset($state['number']) ? "Revision {$state['number']}" : null
+                                        ),
+                                ])
+                                ->collapsed(empty($extractedData['document'] ?? null)),
+
+                            Forms\Components\Section::make('Measurements & Linear Feet')
+                                ->schema([
+                                    Forms\Components\Repeater::make('metadata.measurements.tiers')
+                                        ->label('Tier Cabinetry')
+                                        ->schema([
+                                            Forms\Components\TextInput::make('tier')
+                                                ->label('Tier #')
+                                                ->numeric(),
+                                            Forms\Components\TextInput::make('linear_feet')
+                                                ->label('Linear Feet')
+                                                ->numeric()
+                                                ->suffix('LF'),
+                                        ])
+                                        ->default($extractedData['measurements']['tiers'] ?? [])
+                                        ->collapsed()
+                                        ->itemLabel(fn (array $state): ?string =>
+                                            isset($state['tier']) ? "Tier {$state['tier']}" : null
+                                        ),
+                                    Forms\Components\Grid::make(2)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('metadata.measurements.floating_shelves_lf')
+                                                ->label('Floating Shelves')
+                                                ->numeric()
+                                                ->suffix('LF')
+                                                ->default($extractedData['measurements']['floating_shelves_lf'] ?? null),
+                                            Forms\Components\TextInput::make('metadata.measurements.countertops_sf')
+                                                ->label('Countertops')
+                                                ->numeric()
+                                                ->suffix('SF')
+                                                ->default($extractedData['measurements']['countertops_sf'] ?? null),
+                                        ]),
+                                ])
+                                ->collapsed(empty($extractedData['measurements'] ?? null)),
+
+                            Forms\Components\Section::make('Equipment & Appliances')
+                                ->schema([
+                                    Forms\Components\Repeater::make('metadata.equipment')
+                                        ->label('Equipment List')
+                                        ->schema([
+                                            Forms\Components\TextInput::make('brand')
+                                                ->label('Brand'),
+                                            Forms\Components\TextInput::make('model')
+                                                ->label('Model Number'),
+                                        ])
+                                        ->default($extractedData['equipment'] ?? [])
+                                        ->collapsed()
+                                        ->itemLabel(fn (array $state): ?string =>
+                                            isset($state['brand']) ? "{$state['brand']}" : null
+                                        ),
+                                ])
+                                ->collapsed(empty($extractedData['equipment'] ?? null)),
+
+                            Forms\Components\Section::make('Materials')
+                                ->schema([
+                                    Forms\Components\TagsInput::make('metadata.materials.wood_types')
+                                        ->label('Wood Types')
+                                        ->default($extractedData['materials']['wood_types'] ?? []),
+                                    Forms\Components\TagsInput::make('metadata.materials.finishes')
+                                        ->label('Finishes')
+                                        ->default($extractedData['materials']['finishes'] ?? []),
+                                    Forms\Components\TextInput::make('metadata.materials.hardware')
+                                        ->label('Hardware')
+                                        ->default($extractedData['materials']['hardware'] ?? null),
+                                ])
+                                ->collapsed(empty($extractedData['materials'] ?? null)),
+                        ];
+                    })
+                    ->modalHeading('Review & Edit Extracted Data')
+                    ->modalDescription('Review the automatically extracted data and make any necessary corrections.')
+                    ->modalSubmitActionLabel('Save Metadata')
+                    ->modalWidth('5xl')
+                    ->action(function (PdfDocument $record, array $data) {
+                        $record->update([
+                            'extracted_metadata' => $data['metadata'],
+                            'metadata_reviewed' => true,
+                            'extracted_at' => now(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Metadata Saved')
+                            ->body('Extracted data has been saved and marked as reviewed.')
                             ->success()
                             ->send();
                     }),

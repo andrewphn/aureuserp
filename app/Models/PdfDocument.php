@@ -57,6 +57,9 @@ class PdfDocument extends Model
         'processing_status',
         'processing_error',
         'processed_at',
+        'extracted_metadata',
+        'metadata_reviewed',
+        'extracted_at',
     ];
 
     /**
@@ -81,10 +84,13 @@ class PdfDocument extends Model
         return [
             'tags' => 'array',
             'metadata' => 'array',
+            'extracted_metadata' => 'array',
+            'metadata_reviewed' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'processed_at' => 'datetime',
+            'extracted_at' => 'datetime',
         ];
     }
 
