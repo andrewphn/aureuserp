@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 
 /**
  * PdfDocument Model
@@ -32,7 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class PdfDocument extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasChatter, HasLogActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -52,6 +54,18 @@ class PdfDocument extends Model
         'uploaded_by',
         'tags',
         'metadata',
+    ];
+
+    /**
+     * Attributes to log for activity tracking.
+     *
+     * @var array
+     */
+    protected array $logAttributes = [
+        'file_name',
+        'file_size',
+        'document_type',
+        'uploader.name' => 'Uploaded By',
     ];
 
     /**
