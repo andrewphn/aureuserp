@@ -123,16 +123,38 @@ class PdfDataExtractor
     {
         $project = [];
 
-        // Extract address patterns
-        if (preg_match('/(?:at:|Renovations at:|Project:)\s*([^\n]+(?:Lane|Road|Street|Ave|Drive|Rd|St|Ln)[^\n]+)/i', $text, $matches)) {
-            $project['address'] = trim($matches[1]);
+        // Try to extract full address with street suffix (highest confidence)
+        if (preg_match('/(\d+\s+[A-Za-z\s]+(?:Lane|Road|Street|Ave|Avenue|Drive|Boulevard|Blvd|Rd|St|Ln))[,\s]+([A-Za-z\s]+),\s*([A-Z]{2})/i', $text, $matches)) {
+            $project['street_address'] = trim($matches[1]);
+            $project['city'] = trim($matches[2]);
+            $project['state'] = trim($matches[3]);
+
+            // Build full address
+            $project['address'] = "{$project['street_address']}, {$project['city']}, {$project['state']}";
+        }
+        // Fallback: Extract from "Renovations at:" pattern
+        elseif (preg_match('/(?:Renovations at:|Project at:)\s*([^\n]+?)(?:Approved|Revision|Drawn|\n)/i', $text, $matches)) {
+            $addressLine = trim($matches[1]);
+
+            // Try to parse components from this line
+            if (preg_match('/(.+?)\s+([A-Za-z\s]+),\s*([A-Z]{2})\s*(\d{5})?/i', $addressLine, $parts)) {
+                $project['street_address'] = trim($parts[1]);
+                $project['city'] = trim($parts[2]);
+                $project['state'] = trim($parts[3]);
+                if (!empty($parts[4])) {
+                    $project['zip'] = $parts[4];
+                }
+
+                // Build full address
+                $project['address'] = trim($addressLine);
+            } else {
+                $project['address'] = $addressLine;
+            }
         }
 
-        // Extract city, state, zip
-        if (preg_match('/([A-Za-z\s]+),\s*([A-Z]{2})\s*(\d{5})/i', $text, $matches)) {
-            $project['city'] = trim($matches[1]);
-            $project['state'] = $matches[2];
-            $project['zip'] = $matches[3];
+        // Extract ZIP code separately if not found
+        if (empty($project['zip']) && preg_match('/\b(\d{5})(?:-\d{4})?\b/', $text, $matches)) {
+            $project['zip'] = $matches[1];
         }
 
         // Extract project type
@@ -204,14 +226,16 @@ class PdfDataExtractor
             $document['drawing_file'] = $matches[1];
         }
 
-        // Extract drawn by
-        if (preg_match('/Drawn\s+By:\s*([A-Za-z\s\.]+)/i', $text, $matches)) {
+        // Extract drawn by - capture only the name (up to first non-name word)
+        if (preg_match('/Drawn\s+By:\s*([A-Z][a-z]+(?:\s+[A-Z]\.?)(?:\s+[A-Z][a-z]+)?)/i', $text, $matches)) {
             $document['drawn_by'] = trim($matches[1]);
         }
 
         // Extract revision history
         $revisions = [];
-        if (preg_match_all('/Revision\s+(\d+).*?(\d{1,2}\/\d{1,2}\/\d{2,4})/i', $text, $matches, PREG_SET_ORDER)) {
+
+        // Pattern 1: Revision number with date on same line (e.g., "Revision 4 9/27/25")
+        if (preg_match_all('/Revision\s+(\d+)\s+(\d{1,2}\/\d{1,2}\/\d{2,4})/i', $text, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $revisions[] = [
                     'number' => $match[1],
@@ -219,6 +243,15 @@ class PdfDataExtractor
                 ];
             }
         }
+
+        // Pattern 2: Look for dates near "Drawn By" line that might indicate revision dates
+        if (preg_match('/Drawn\s+By:.*?(\d{1,2}\/\d{1,2}\/\d{2,4})/i', $text, $matches)) {
+            // This might be the initial draft date
+            if (empty($revisions)) {
+                $document['initial_draft_date'] = $matches[1];
+            }
+        }
+
         if (!empty($revisions)) {
             $document['revisions'] = $revisions;
         }
@@ -226,6 +259,11 @@ class PdfDataExtractor
         // Extract approval date
         if (preg_match('/Approved\s+By:.*?Date:\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i', $text, $matches)) {
             $document['approved_date'] = $matches[1];
+        }
+
+        // Extract project/drawing ID if present
+        if (preg_match('/ID#\s*(.+?)(?:\n|Revision|Drawn)/i', $text, $matches)) {
+            $document['project_id'] = trim($matches[1]);
         }
 
         return $document;
