@@ -4,6 +4,7 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\PdfDocument;
 use App\Jobs\ProcessPdfJob;
+use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -149,7 +150,7 @@ class PdfDocumentsRelationManager extends RelationManager
             ])
             ->defaultSort('created_at', 'desc')
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         // Extract file name from uploaded file path if not provided
                         if (empty($data['file_name']) && !empty($data['file_path'])) {
@@ -173,7 +174,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\Action::make('view')
+                Actions\Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
                     ->modalHeading(fn (PdfDocument $record) => 'View PDF: ' . $record->file_name)
@@ -185,7 +186,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
 
-                Tables\Actions\Action::make('reprocess')
+                Actions\Action::make('reprocess')
                     ->label('Reprocess')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
@@ -211,12 +212,12 @@ class PdfDocumentsRelationManager extends RelationManager
                             ->send();
                     }),
 
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('reprocessFailed')
+                Actions\BulkActionGroup::make([
+                    Actions\BulkAction::make('reprocessFailed')
                         ->label('Reprocess Selected')
                         ->icon('heroicon-o-arrow-path')
                         ->color('warning')
@@ -244,7 +245,7 @@ class PdfDocumentsRelationManager extends RelationManager
                         })
                         ->deselectRecordsAfterCompletion(),
 
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
