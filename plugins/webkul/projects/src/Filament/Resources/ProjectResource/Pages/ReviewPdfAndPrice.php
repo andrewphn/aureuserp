@@ -33,8 +33,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public $currentPage = 1;
 
-    public function mount(): void
+    public function mount(int|string $record): void
     {
+        // Resolve the Project model from the route parameter
+        $this->record = ProjectResource::resolveRecordRouteBinding($record);
+
         $pdfId = request()->get('pdf');
         $this->pdfDocument = PdfDocument::findOrFail($pdfId);
 
