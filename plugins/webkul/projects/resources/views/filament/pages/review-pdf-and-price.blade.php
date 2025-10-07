@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-6 pb-32">
+    <div class="grid grid-cols-2 gap-6">
         {{-- PDF Viewer Side --}}
         <div class="space-y-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -99,7 +99,43 @@
         {{-- Data Entry Side --}}
         <div class="space-y-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                <h3 class="text-lg font-medium mb-4">Manual Pricing Entry</h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium">Manual Pricing Entry</h3>
+
+                    <div class="flex gap-2">
+                        <x-filament::button
+                            type="button"
+                            color="warning"
+                            wire:click="tryAutomatic"
+                            icon="heroicon-o-sparkles"
+                            size="sm"
+                            outlined
+                        >
+                            Auto-Parse
+                        </x-filament::button>
+
+                        <x-filament::button
+                            type="button"
+                            color="gray"
+                            tag="a"
+                            :href="\Webkul\Project\Filament\Resources\ProjectResource::getUrl('view', ['record' => $this->record])"
+                            size="sm"
+                            outlined
+                        >
+                            Cancel
+                        </x-filament::button>
+
+                        <x-filament::button
+                            type="button"
+                            color="success"
+                            wire:click="createSalesOrder"
+                            icon="heroicon-o-document-check"
+                            size="sm"
+                        >
+                            Create Order
+                        </x-filament::button>
+                    </div>
+                </div>
 
                 <form wire:submit.prevent="createSalesOrder" class="relative">
                     {{ $this->form }}
@@ -112,42 +148,6 @@
                 <p class="text-sm text-blue-700 dark:text-blue-300">
                     Enter items above to see live pricing calculation
                 </p>
-            </div>
-        </div>
-    </div>
-
-    {{-- Sticky Footer with Actions --}}
-    <div class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 z-50" style="box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);">
-        <div class="mx-auto px-6 py-3">
-            <div class="flex justify-end items-center gap-3">
-                <x-filament::button
-                    type="button"
-                    color="warning"
-                    wire:click="tryAutomatic"
-                    icon="heroicon-o-sparkles"
-                    outlined
-                >
-                    Try Auto-Parse
-                </x-filament::button>
-
-                <x-filament::button
-                    type="button"
-                    color="gray"
-                    tag="a"
-                    :href="\Webkul\Project\Filament\Resources\ProjectResource::getUrl('view', ['record' => $this->record])"
-                    outlined
-                >
-                    Cancel
-                </x-filament::button>
-
-                <x-filament::button
-                    type="button"
-                    color="success"
-                    wire:click="createSalesOrder"
-                    icon="heroicon-o-document-check"
-                >
-                    Create Sales Order
-                </x-filament::button>
             </div>
         </div>
     </div>
