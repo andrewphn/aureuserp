@@ -170,6 +170,21 @@ class PdfDocumentsRelationManager extends RelationManager
                             $data['mime_type'] = 'application/pdf';
                         }
 
+                        // Extract page count from PDF
+                        if (empty($data['page_count']) && !empty($data['file_path'])) {
+                            try {
+                                $fullPath = Storage::disk('public')->path($data['file_path']);
+                                if (file_exists($fullPath)) {
+                                    $content = file_get_contents($fullPath);
+                                    if (preg_match_all('/\/Page\W/', $content, $matches)) {
+                                        $data['page_count'] = count($matches[0]);
+                                    }
+                                }
+                            } catch (\Exception $e) {
+                                \Log::warning('Could not extract page count from PDF: ' . $e->getMessage());
+                            }
+                        }
+
                         $data['module_type'] = get_class($project);
                         $data['module_id'] = $project->id;
                         $data['uploaded_by'] = Auth::id();
