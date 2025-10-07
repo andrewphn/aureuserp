@@ -4,7 +4,9 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use App\Models\PdfDocument;
 use App\Services\PdfParsingService;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -51,6 +53,47 @@ class ReviewPdfAndPrice extends Page implements HasForms
     {
         return $schema
             ->components([
+                Section::make('Extracted Cover Page Information')
+                    ->description('Edit the extracted information below and click "Save to Project" to update')
+                    ->headerActions([
+                        FormAction::make('saveExtractedData')
+                            ->label('Save to Project')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->color('success')
+                            ->action('saveExtractedData')
+                    ])
+                    ->schema([
+                        TextInput::make('extracted_customer_name')
+                            ->label('Customer Name')
+                            ->placeholder('Not extracted'),
+
+                        TextInput::make('extracted_customer_email')
+                            ->label('Customer Email')
+                            ->email()
+                            ->placeholder('Not extracted'),
+
+                        TextInput::make('extracted_customer_phone')
+                            ->label('Customer Phone')
+                            ->tel()
+                            ->placeholder('Not extracted'),
+
+                        TextInput::make('extracted_project_name')
+                            ->label('Project Name')
+                            ->placeholder('Not extracted'),
+
+                        TextInput::make('extracted_project_address')
+                            ->label('Project Address')
+                            ->placeholder('Not extracted')
+                            ->columnSpanFull(),
+
+                        TextInput::make('extracted_project_date')
+                            ->label('Date')
+                            ->placeholder('Not extracted'),
+                    ])
+                    ->columns(2)
+                    ->visible(fn() => !empty($this->coverPageData) && array_filter($this->coverPageData))
+                    ->collapsible(),
+
                 Repeater::make('rooms')
                     ->label('Rooms & Cabinet Runs')
                     ->schema([
@@ -399,6 +442,16 @@ class ReviewPdfAndPrice extends Page implements HasForms
             $parsingService = app(PdfParsingService::class);
             $this->coverPageData = $parsingService->parseCoverPage($this->pdfDocument);
 
+            // Fill form with extracted data
+            $formData = $this->form->getState();
+            $formData['extracted_customer_name'] = $this->coverPageData['customer_name'] ?? '';
+            $formData['extracted_customer_email'] = $this->coverPageData['customer_email'] ?? '';
+            $formData['extracted_customer_phone'] = $this->coverPageData['customer_phone'] ?? '';
+            $formData['extracted_project_name'] = $this->coverPageData['project_name'] ?? '';
+            $formData['extracted_project_address'] = $this->coverPageData['project_address'] ?? '';
+            $formData['extracted_project_date'] = $this->coverPageData['project_date'] ?? '';
+            $this->form->fill($formData);
+
             // Count how many fields were extracted
             $extractedFields = array_filter($this->coverPageData, fn($value) => !empty($value));
             $count = count($extractedFields);
@@ -406,7 +459,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             if ($count > 0) {
                 Notification::make()
                     ->title('Cover Page Parsed')
-                    ->body("Extracted {$count} fields from cover page. Review the information below.")
+                    ->body("Extracted {$count} fields from cover page. Review and edit the information in the form below, then click 'Save to Project'.")
                     ->success()
                     ->send();
             } else {
@@ -420,6 +473,93 @@ class ReviewPdfAndPrice extends Page implements HasForms
             Notification::make()
                 ->title('Cover Page Parsing Failed')
                 ->body("Could not parse cover page: {$e->getMessage()}")
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function saveExtractedData(): void
+    {
+        $data = $this->form->getState();
+
+        try {
+            $updated = [];
+
+            // Update project fields
+            if (!empty($data['extracted_project_name'])) {
+                $this->record->name = $data['extracted_project_name'];
+                $updated[] = 'project name';
+            }
+
+            // Update project address (primary address)
+            if (!empty($data['extracted_project_address'])) {
+                $address = $this->record->addresses()->where('is_primary', true)->first();
+                if ($address) {
+                    // Parse address components
+                    $addressParts = explode(',', $data['extracted_project_address']);
+                    if (count($addressParts) >= 1) {
+                        $address->street1 = trim($addressParts[0]);
+                    }
+                    if (count($addressParts) >= 2) {
+                        $address->city = trim($addressParts[1]);
+                    }
+                    if (count($addressParts) >= 3) {
+                        // Extract state from last part (e.g., "MA 02554")
+                        $lastPart = trim($addressParts[2]);
+                        preg_match('/([A-Z]{2})/', $lastPart, $stateMatch);
+                        if (!empty($stateMatch[1])) {
+                            $state = \DB::table('states')->where('code', $stateMatch[1])->first();
+                            if ($state) {
+                                $address->state_id = $state->id;
+                            }
+                        }
+                        // Extract zip
+                        preg_match('/(\d{5})/', $lastPart, $zipMatch);
+                        if (!empty($zipMatch[1])) {
+                            $address->postcode = $zipMatch[1];
+                        }
+                    }
+                    $address->save();
+                    $updated[] = 'project address';
+                }
+            }
+
+            // Update customer (partner) fields
+            if ($this->record->partner_id) {
+                $partner = \DB::table('partners_partners')->where('id', $this->record->partner_id)->first();
+                if ($partner) {
+                    $partnerUpdates = [];
+
+                    if (!empty($data['extracted_customer_email'])) {
+                        $partnerUpdates['email'] = $data['extracted_customer_email'];
+                        $updated[] = 'customer email';
+                    }
+
+                    if (!empty($data['extracted_customer_phone'])) {
+                        $partnerUpdates['phone'] = $data['extracted_customer_phone'];
+                        $updated[] = 'customer phone';
+                    }
+
+                    if (!empty($partnerUpdates)) {
+                        \DB::table('partners_partners')
+                            ->where('id', $this->record->partner_id)
+                            ->update($partnerUpdates);
+                    }
+                }
+            }
+
+            $this->record->save();
+
+            Notification::make()
+                ->title('Data Saved Successfully')
+                ->body('Updated: ' . implode(', ', $updated))
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Save Failed')
+                ->body("Could not save extracted data: {$e->getMessage()}")
                 ->danger()
                 ->send();
         }

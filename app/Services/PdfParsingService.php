@@ -17,10 +17,23 @@ class PdfParsingService
      */
     public function parseCoverPage(PdfDocument $pdfDocument): array
     {
-        // Initialize PDF parser
-        $parser = new PdfParser();
+        // Try Google Document AI first for better accuracy
+        try {
+            $googleDocAi = app(GoogleDocumentAiService::class);
+            $result = $googleDocAi->extractFromPdf($pdfDocument->file_path);
 
-        // Get file path and parse
+            if (!empty($result['pages']) && isset($result['pages'][0])) {
+                $firstPageText = $result['pages'][0]['text'];
+                return $this->extractCoverPageData($firstPageText);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Google Document AI failed, falling back to PDF parser', [
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Fallback to basic PDF parser
+        $parser = new PdfParser();
         $filePath = Storage::disk('public')->path($pdfDocument->file_path);
 
         if (!file_exists($filePath)) {
@@ -28,18 +41,13 @@ class PdfParsingService
         }
 
         $pdf = $parser->parseFile($filePath);
-
-        // Get first page text only
         $pages = $pdf->getPages();
         $firstPageText = '';
         if (!empty($pages)) {
             $firstPageText = $pages[0]->getText();
         }
 
-        // Extract cover page information
-        $coverData = $this->extractCoverPageData($firstPageText);
-
-        return $coverData;
+        return $this->extractCoverPageData($firstPageText);
     }
 
     /**
@@ -65,8 +73,15 @@ class PdfParsingService
         }
 
         // Extract phone numbers (various formats)
+        // Try formatted phone first: (508) 228-9300, 508-228-9300, 508.228.9300
         if (preg_match('/(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/', $text, $matches)) {
-            $data['customer_phone'] = $matches[1];
+            // Clean and format phone number
+            $phone = preg_replace('/[^0-9]/', '', $matches[1]);
+            if (strlen($phone) === 10) {
+                $data['customer_phone'] = '(' . substr($phone, 0, 3) . ') ' . substr($phone, 3, 3) . '-' . substr($phone, 6);
+            } else {
+                $data['customer_phone'] = $matches[1];
+            }
         }
 
         // Extract addresses (street address pattern)
