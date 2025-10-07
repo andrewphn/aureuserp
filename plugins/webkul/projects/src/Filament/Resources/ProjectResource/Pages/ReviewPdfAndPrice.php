@@ -30,8 +30,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public $currentPage = 1;
 
-    public function mount(): void
+    public function mount($record): void
     {
+        parent::mount($record);
+
         $pdfId = request()->get('pdf');
         $this->pdfDocument = PdfDocument::findOrFail($pdfId);
 
