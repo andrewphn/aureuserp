@@ -129,6 +129,7 @@ class ProjectResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->required()
+                                        ->default(1) // Default to TCS (The Carpenter's Son Woodworking LLC)
                                         ->reactive()
                                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                             // Clear branch selection when company changes
