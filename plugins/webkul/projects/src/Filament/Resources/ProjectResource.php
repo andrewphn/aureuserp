@@ -58,6 +58,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\Pages\EditProject;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
+use Webkul\Project\Filament\Resources\ProjectResource\Pages\ReviewPdfAndPrice;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\MilestonesRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\PdfDocumentsRelationManager;
@@ -1167,6 +1168,7 @@ class ProjectResource extends Resource
             'view'       => ViewProject::route('/{record}'),
             'milestones' => ManageMilestones::route('/{record}/milestones'),
             'tasks'      => ManageTasks::route('/{record}/tasks'),
+            'pdf-review' => ReviewPdfAndPrice::route('/{record}/pdf-review'),
         ];
     }
 }

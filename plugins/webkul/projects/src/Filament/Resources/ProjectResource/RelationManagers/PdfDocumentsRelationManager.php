@@ -3,15 +3,19 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\PdfDocument;
+use App\Services\PdfParsingService;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
@@ -126,6 +130,15 @@ class PdfDocumentsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
+                TableAction::make('reviewAndPrice')
+                    ->label('Review & Price')
+                    ->icon('heroicon-o-document-magnifying-glass')
+                    ->color('primary')
+                    ->visible(fn (PdfDocument $record) => $record->document_type === 'drawing')
+                    ->url(fn (PdfDocument $record) => route('filament.admin.projects.resources.projects.pdf-review', [
+                        'record' => $this->getOwnerRecord()->id,
+                        'pdf' => $record->id,
+                    ])),
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
