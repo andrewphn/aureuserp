@@ -94,14 +94,14 @@ class ReviewPdfAndPrice extends Page implements HasForms
                             Repeater::make('page_metadata')
                                 ->label('Pages')
                                 ->schema([
-                                    \Filament\Forms\Components\View::make('webkul-project::filament.components.pdf-page-thumbnail')
+                                    \Filament\Schemas\Components\View::make('webkul-project::filament.components.pdf-page-thumbnail')
                                         ->viewData(fn ($get) => [
                                             'pdfUrl' => $this->getPdfUrl(),
                                             'pageNumber' => $get('page_number') ?? 1,
                                         ])
                                         ->columnSpan(1),
 
-                                    \Filament\Forms\Components\Section::make()
+                                    \Filament\Schemas\Components\Section::make()
                                         ->schema([
                                             \Filament\Forms\Components\TextInput::make('page_number')
                                                 ->label('Page')
