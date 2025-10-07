@@ -134,10 +134,9 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->icon('heroicon-o-document-magnifying-glass')
                     ->color('primary')
                     ->visible(fn (PdfDocument $record) => $record->document_type === 'drawing')
-                    ->url(fn (PdfDocument $record) => route('filament.admin.projects.resources.projects.pdf-review', [
+                    ->url(fn (PdfDocument $record) => \Webkul\Project\Filament\Resources\ProjectResource\Pages\ReviewPdfAndPrice::getUrl([
                         'record' => $this->getOwnerRecord()->id,
-                        'pdf' => $record->id,
-                    ])),
+                    ]) . '?pdf=' . $record->id),
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
