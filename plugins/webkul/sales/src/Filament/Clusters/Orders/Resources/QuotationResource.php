@@ -736,6 +736,35 @@ class QuotationResource extends Resource
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.product'))
                                             ->icon('heroicon-o-cube'),
+
+                                        // Dynamic attribute displays for configurable products
+                                        TextEntry::make('attribute_selections')
+                                            ->label('Configuration')
+                                            ->placeholder('-')
+                                            ->formatStateUsing(function ($state, $record) {
+                                                if (empty($state)) {
+                                                    return '-';
+                                                }
+
+                                                $selections = is_string($state) ? json_decode($state, true) : $state;
+                                                if (empty($selections) || !is_array($selections)) {
+                                                    return '-';
+                                                }
+
+                                                $display = [];
+                                                foreach ($selections as $selection) {
+                                                    $name = $selection['attribute_name'] ?? '';
+                                                    $value = $selection['option_name'] ?? '';
+                                                    if ($name && $value) {
+                                                        $display[] = "{$name}: {$value}";
+                                                    }
+                                                }
+
+                                                return !empty($display) ? implode(' | ', $display) : '-';
+                                            })
+                                            ->visible(fn ($record) => !empty($record->attribute_selections))
+                                            ->icon('heroicon-o-cog-6-tooth'),
+
                                         TextEntry::make('product_uom_qty')
                                             ->placeholder('-')
                                             ->label(__('sales::filament/clusters/orders/resources/quotation.infolist.tabs.order-line.repeater.products.entries.quantity'))
