@@ -4,7 +4,6 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use App\Models\PdfDocument;
 use App\Services\PdfParsingService;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -54,14 +53,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
         return $schema
             ->components([
                 Section::make('Extracted Cover Page Information')
-                    ->description('Edit the extracted information below and click "Save to Project" to update')
-                    ->headerActions([
-                        FormAction::make('saveExtractedData')
-                            ->label('Save to Project')
-                            ->icon('heroicon-o-arrow-down-tray')
-                            ->color('success')
-                            ->action('saveExtractedData')
-                    ])
+                    ->description('Edit the extracted information below then click the "Save to Project" button at the bottom')
                     ->schema([
                         TextInput::make('extracted_customer_name')
                             ->label('Customer Name')

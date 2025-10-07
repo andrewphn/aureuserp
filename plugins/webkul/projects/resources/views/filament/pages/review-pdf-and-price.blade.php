@@ -153,6 +153,20 @@
 
                 <form wire:submit.prevent="createSalesOrder" class="relative">
                     {{ $this->form }}
+
+                    @if(!empty($coverPageData) && array_filter($coverPageData))
+                    <div class="mt-4 flex justify-end">
+                        <x-filament::button
+                            type="button"
+                            color="success"
+                            wire:click="saveExtractedData"
+                            icon="heroicon-o-arrow-down-tray"
+                            size="sm"
+                        >
+                            Save to Project
+                        </x-filament::button>
+                    </div>
+                    @endif
                 </form>
             </div>
 
