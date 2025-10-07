@@ -13,14 +13,10 @@ class TrottierFineWoodworkingSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check if Trottier Fine Woodworking already exists
-        $exists = DB::table('partners_partners')
-            ->where('name', 'Trottier Fine Woodworking')
-            ->exists();
-
-        if (!$exists) {
-            DB::table('partners_partners')->insert([
-                'name' => 'Trottier Fine Woodworking',
+        // Insert or update Trottier Fine Woodworking
+        DB::table('partners_partners')->updateOrInsert(
+            ['name' => 'Trottier Fine Woodworking'],
+            [
                 'sub_type' => 'customer',
                 'account_type' => 'company',
                 'email' => 'contact@trottierfine.com',
@@ -31,13 +27,10 @@ class TrottierFineWoodworkingSeeder extends Seeder
                 'state_id' => null, // Massachusetts
                 'country_id' => 233, // USA
                 'zip' => '02554',
-                'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]
+        );
 
-            $this->command->info('✓ Created Trottier Fine Woodworking as customer');
-        } else {
-            $this->command->info('✓ Trottier Fine Woodworking already exists');
-        }
+        $this->command->info('✓ Trottier Fine Woodworking created/updated with Nantucket address');
     }
 }
