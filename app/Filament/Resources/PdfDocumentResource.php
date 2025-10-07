@@ -19,13 +19,25 @@ class PdfDocumentResource extends Resource
 {
     protected static ?string $model = PdfDocument::class;
 
-    protected static $navigationIcon = 'heroicon-o-document-text';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-document-text';
+    }
 
-    protected static $navigationLabel = 'PDF Documents';
+    public static function getNavigationLabel(): string
+    {
+        return 'PDF Documents';
+    }
 
-    protected static $navigationGroup = 'Documents';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Documents';
+    }
 
-    protected static $navigationSort = 1;
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
 
     public static function form(Form $form): Form
     {
