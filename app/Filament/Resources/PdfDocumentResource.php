@@ -19,13 +19,13 @@ class PdfDocumentResource extends Resource
 {
     protected static ?string $model = PdfDocument::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel = 'PDF Documents';
+    protected static $navigationLabel = 'PDF Documents';
 
-    protected static ?string $navigationGroup = 'Documents';
+    protected static $navigationGroup = 'Documents';
 
-    protected static ?int $navigationSort = 1;
+    protected static $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

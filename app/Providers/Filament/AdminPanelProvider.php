@@ -99,6 +99,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label(__('admin.navigation.setting'))
                     ->icon('icon-settings'),
             ])
+            ->resources([
+                \App\Filament\Resources\PdfDocumentResource::class,
+            ])
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->gridColumns([
