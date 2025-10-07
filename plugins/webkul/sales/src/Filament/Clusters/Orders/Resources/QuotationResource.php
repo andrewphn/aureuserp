@@ -37,7 +37,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\QueryBuilder;
@@ -1204,22 +1203,6 @@ class QuotationResource extends Resource
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.amount'))
                     ->width(100)
                     ->toggleable(),
-
-                // Attribute columns for configurable products
-                SelectColumn::make('attribute_27')
-                    ->label('Pricing Level')
-                    ->options(fn ($record) => $this->getAttributeOptions(27, $record))
-                    ->visible(fn ($record) => $this->isAttributeVisible(27, $record)),
-
-                SelectColumn::make('attribute_28')
-                    ->label('Material')
-                    ->options(fn ($record) => $this->getAttributeOptions(28, $record))
-                    ->visible(fn ($record) => $this->isAttributeVisible(28, $record)),
-
-                SelectColumn::make('attribute_29')
-                    ->label('Finish')
-                    ->options(fn ($record) => $this->getAttributeOptions(29, $record))
-                    ->visible(fn ($record) => $this->isAttributeVisible(29, $record)),
             ])
             ->schema([
                 Select::make('product_id')
@@ -1691,50 +1674,6 @@ class QuotationResource extends Resource
 
         // Recalculate line totals
         static::calculateLineTotals($set, $get);
-    }
-
-    private static function getAttributeOptions(int $attributeId, $record): array
-    {
-        if (!$record || !$record->product_id) {
-            return [];
-        }
-
-        $product = Product::withTrashed()->find($record->product_id);
-        if (!$product || !$product->is_configurable) {
-            return [];
-        }
-
-        $hasAttr = \DB::table('products_product_attributes')
-            ->where('product_id', $product->id)
-            ->where('attribute_id', $attributeId)
-            ->exists();
-
-        if (!$hasAttr) {
-            return [];
-        }
-
-        return \DB::table('products_attribute_options')
-            ->where('attribute_id', $attributeId)
-            ->orderBy('sort')
-            ->pluck('name', 'id')
-            ->toArray();
-    }
-
-    private static function isAttributeVisible(int $attributeId, $record): bool
-    {
-        if (!$record || !$record->product_id) {
-            return false;
-        }
-
-        $product = Product::withTrashed()->find($record->product_id);
-        if (!$product || !$product->is_configurable) {
-            return false;
-        }
-
-        return \DB::table('products_product_attributes')
-            ->where('product_id', $product->id)
-            ->where('attribute_id', $attributeId)
-            ->exists();
     }
 
     public static function mutateProductRelationship(array $data, $record): array
