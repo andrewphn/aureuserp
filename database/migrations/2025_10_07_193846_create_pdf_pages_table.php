@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pdf_pages', function (Blueprint $table) {
+        Schema::create('pdf_page_metadata', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pdf_document_id');
             $table->integer('page_number');
@@ -42,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pdf_pages');
+        Schema::dropIfExists('pdf_page_metadata');
     }
 };

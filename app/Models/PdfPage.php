@@ -11,6 +11,8 @@ class PdfPage extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'pdf_page_metadata';
+
     protected $fillable = [
         'pdf_document_id',
         'page_number',
