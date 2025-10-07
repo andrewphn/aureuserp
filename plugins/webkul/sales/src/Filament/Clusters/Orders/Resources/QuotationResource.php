@@ -1172,7 +1172,23 @@ class QuotationResource extends Resource
                         ->markAsRequired()
                         ->toggleable(),
                 ],
-                // Physical characteristic columns (visible by default)
+                // Pricing configuration columns (visible by default - main columns)
+                collect(static::getPricingAttributes())
+                    ->map(function ($attributeName, $attributeId) {
+                        return TableColumn::make("attribute_{$attributeId}")
+                            ->label($attributeName)
+                            ->width(match($attributeName) {
+                                'Pricing Level' => 220,
+                                'Material Category' => 280,
+                                'Finish Option' => 250,
+                                default => 200,
+                            })
+                            ->toggleable()
+                            ->toggledHiddenByDefault(false);
+                    })
+                    ->values()
+                    ->toArray(),
+                // Physical characteristic columns (hidden by default, toggleable)
                 collect(static::getPhysicalAttributes())
                     ->map(function ($attributeName, $attributeId) {
                         return TableColumn::make("attribute_{$attributeId}")
@@ -1186,22 +1202,6 @@ class QuotationResource extends Resource
                                 'Drawer Box Construction' => 240,
                                 'Door Overlay Type' => 200,
                                 'Box Material' => 180,
-                                default => 200,
-                            })
-                            ->toggleable()
-                            ->toggledHiddenByDefault(false);
-                    })
-                    ->values()
-                    ->toArray(),
-                // Pricing configuration columns (hidden by default, toggleable)
-                collect(static::getPricingAttributes())
-                    ->map(function ($attributeName, $attributeId) {
-                        return TableColumn::make("attribute_{$attributeId}")
-                            ->label($attributeName)
-                            ->width(match($attributeName) {
-                                'Pricing Level' => 220,
-                                'Material Category' => 280,
-                                'Finish Option' => 250,
                                 default => 200,
                             })
                             ->toggleable()
@@ -1321,45 +1321,7 @@ class QuotationResource extends Resource
                     ->required()
                     ->selectablePlaceholder(false),
 
-                // Physical characteristic selectors (Construction Style, Door Style, etc.)
-                ...collect(static::getPhysicalAttributes())
-                    ->map(function ($attributeName, $attributeId) {
-                        return Select::make("attribute_{$attributeId}")
-                            ->label($attributeName)
-                            ->options(function (Get $get) use ($attributeId) {
-                                $productId = $get('product_id');
-                                if (!$productId) return [];
-
-                                $hasAttr = \DB::table('products_product_attributes')
-                                    ->where('product_id', $productId)
-                                    ->where('attribute_id', $attributeId)
-                                    ->exists();
-                                if (!$hasAttr) return [];
-
-                                return \DB::table('products_attribute_options')
-                                    ->where('attribute_id', $attributeId)
-                                    ->orderBy('sort')
-                                    ->pluck('name', 'id')
-                                    ->toArray();
-                            })
-                            ->visible(function (Get $get) use ($attributeId) {
-                                $productId = $get('product_id');
-                                if (!$productId) return false;
-
-                                $product = \Webkul\Sale\Models\Product::find($productId);
-                                if (!$product || !$product->is_configurable) return false;
-
-                                return \DB::table('products_product_attributes')
-                                    ->where('product_id', $productId)
-                                    ->where('attribute_id', $attributeId)
-                                    ->exists();
-                            })
-                            ->live()
-                            ->afterStateUpdated(fn (Set $set, Get $get) => static::updatePriceWithAttributes($set, $get));
-                    })
-                    ->toArray(),
-
-                // Pricing configuration selectors (Pricing Level, Material Category, Finish Option)
+                // Pricing configuration selectors (Pricing Level, Material Category, Finish Option) - main selectors
                 ...collect(static::getPricingAttributes())
                     ->map(function ($attributeName, $attributeId) {
                         return Select::make("attribute_{$attributeId}")
@@ -1407,6 +1369,44 @@ class QuotationResource extends Resource
                                 }
                                 return null;
                             });
+                    })
+                    ->toArray(),
+
+                // Physical characteristic selectors (Construction Style, Door Style, etc.)
+                ...collect(static::getPhysicalAttributes())
+                    ->map(function ($attributeName, $attributeId) {
+                        return Select::make("attribute_{$attributeId}")
+                            ->label($attributeName)
+                            ->options(function (Get $get) use ($attributeId) {
+                                $productId = $get('product_id');
+                                if (!$productId) return [];
+
+                                $hasAttr = \DB::table('products_product_attributes')
+                                    ->where('product_id', $productId)
+                                    ->where('attribute_id', $attributeId)
+                                    ->exists();
+                                if (!$hasAttr) return [];
+
+                                return \DB::table('products_attribute_options')
+                                    ->where('attribute_id', $attributeId)
+                                    ->orderBy('sort')
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->visible(function (Get $get) use ($attributeId) {
+                                $productId = $get('product_id');
+                                if (!$productId) return false;
+
+                                $product = \Webkul\Sale\Models\Product::find($productId);
+                                if (!$product || !$product->is_configurable) return false;
+
+                                return \DB::table('products_product_attributes')
+                                    ->where('product_id', $productId)
+                                    ->where('attribute_id', $attributeId)
+                                    ->exists();
+                            })
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set, Get $get) => static::updatePriceWithAttributes($set, $get));
                     })
                     ->toArray(),
 
