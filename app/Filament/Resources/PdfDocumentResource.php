@@ -7,11 +7,10 @@ use App\Models\PdfDocument;
 use App\Filament\Forms\Components\PdfViewerField;
 use App\Services\PdfDataExtractor;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,10 +38,10 @@ class PdfDocumentResource extends Resource
         return 1;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Forms\Components\Section::make('Document Information')
                     ->schema([
                         Forms\Components\TextInput::make('title')
