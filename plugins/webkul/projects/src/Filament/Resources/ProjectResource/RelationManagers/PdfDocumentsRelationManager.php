@@ -129,16 +129,15 @@ class PdfDocumentsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                // TODO: Implement PDF Review & Price page before enabling this action
-                // Action::make('reviewAndPrice')
-                //     ->label('Review & Price')
-                //     ->icon('heroicon-o-document-magnifying-glass')
-                //     ->color('primary')
-                //     ->visible(fn (PdfDocument $record) => $record->document_type === 'drawing')
-                //     ->url(fn (PdfDocument $record) => route('filament.admin.projects.resources.projects.pdf-review', [
-                //         'record' => $this->getOwnerRecord()->id,
-                //         'pdf' => $record->id,
-                //     ])),
+                Action::make('reviewAndPrice')
+                    ->label('Review & Price')
+                    ->icon('heroicon-o-document-magnifying-glass')
+                    ->color('primary')
+                    ->visible(fn (PdfDocument $record) => $record->document_type === 'drawing')
+                    ->url(fn (PdfDocument $record) => route('filament.admin.resources.project.projects.pdf-review', [
+                        'record' => $this->getOwnerRecord()->id,
+                        'pdf' => $record->id,
+                    ])),
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
