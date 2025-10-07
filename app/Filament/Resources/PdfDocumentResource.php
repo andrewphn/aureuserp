@@ -275,8 +275,8 @@ class PdfDocumentResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
                 Tables\Actions\Action::make('review')
                     ->label('Review Data')
                     ->icon('heroicon-o-clipboard-document-check')
@@ -337,7 +337,7 @@ class PdfDocumentResource extends Resource
                             ]);
                         }
                     }),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('download')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn (PdfDocument $record) => route('pdf.download', $record))
@@ -401,7 +401,7 @@ class PdfDocumentResource extends Resource
                                     ->send();
                             }
                         }),
-                    Tables\Actions\DeleteBulkAction::make(),
+                    \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
