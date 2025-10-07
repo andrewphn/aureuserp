@@ -55,7 +55,20 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 ->send();
         }
 
+        // Pre-fill page metadata for each page
+        $pageMetadata = [];
+        for ($i = 1; $i <= $this->getTotalPages(); $i++) {
+            $pageMetadata[] = [
+                'page_number' => $i,
+                'room_name' => '',
+                'room_type' => '',
+                'detail_number' => '',
+                'notes' => '',
+            ];
+        }
+
         $this->form->fill([
+            'page_metadata' => $pageMetadata,
             'rooms' => [],
         ]);
     }
@@ -70,49 +83,69 @@ class ReviewPdfAndPrice extends Page implements HasForms
         return $form
             ->schema([
                 Wizard::make([
-                    Step::make('Assign Pages to Rooms')
-                        ->description('Review PDF pages and organize them by room')
+                    Step::make('Page Metadata')
+                        ->description('Fill in metadata for each PDF page')
                         ->schema([
                             \Filament\Forms\Components\Placeholder::make('pdf_info')
                                 ->label('Document Information')
                                 ->content(fn () => "**{$this->pdfDocument->file_name}** — Total Pages: {$this->getTotalPages()}")
                                 ->columnSpanFull(),
 
-                            Repeater::make('page_assignments')
-                                ->label('Page Assignments')
+                            Repeater::make('page_metadata')
+                                ->label('Pages')
                                 ->schema([
+                                    \Filament\Forms\Components\Hidden::make('page_number'),
+
+                                    \Filament\Forms\Components\Placeholder::make('page_preview')
+                                        ->label(fn ($state, $get) => 'Page ' . ($get('page_number') ?? ''))
+                                        ->content(function ($state, $get) {
+                                            $pageNum = $get('page_number') ?? 1;
+                                            $pdfUrl = $this->getPdfUrl();
+                                            return view('webkul-project::filament.components.pdf-page-preview', [
+                                                'pdfUrl' => $pdfUrl,
+                                                'pageNumber' => $pageNum,
+                                            ]);
+                                        })
+                                        ->columnSpanFull(),
+
                                     TextInput::make('room_name')
                                         ->label('Room Name')
-                                        ->required()
-                                        ->placeholder('e.g., Kitchen, Pantry, Master Bathroom')
-                                        ->live()
+                                        ->placeholder('e.g., Kitchen, Master Bath')
                                         ->columnSpan(1),
 
-                                    Select::make('pages')
-                                        ->label('PDF Pages')
-                                        ->multiple()
-                                        ->options(function () {
-                                            $pages = [];
-                                            for ($i = 1; $i <= $this->getTotalPages(); $i++) {
-                                                $pages[$i] = "Page {$i}";
-                                            }
-                                            return $pages;
-                                        })
-                                        ->placeholder('Select which pages show this room')
-                                        ->required()
+                                    Select::make('room_type')
+                                        ->label('Room Type')
+                                        ->options([
+                                            'kitchen' => 'Kitchen',
+                                            'bathroom' => 'Bathroom',
+                                            'bedroom' => 'Bedroom',
+                                            'pantry' => 'Pantry',
+                                            'laundry' => 'Laundry',
+                                            'office' => 'Office',
+                                            'closet' => 'Closet',
+                                            'mudroom' => 'Mudroom',
+                                            'other' => 'Other',
+                                        ])
+                                        ->placeholder('Select type')
+                                        ->columnSpan(1),
+
+                                    TextInput::make('detail_number')
+                                        ->label('Detail/Drawing Number')
+                                        ->placeholder('e.g., A-101, D-3')
                                         ->columnSpan(1),
 
                                     \Filament\Forms\Components\Textarea::make('notes')
-                                        ->label('Room Notes')
-                                        ->placeholder('Any special details about this room...')
+                                        ->label('Notes')
+                                        ->placeholder('Special details about this page...')
                                         ->rows(2)
-                                        ->columnSpanFull(),
+                                        ->columnSpan(1),
                                 ])
                                 ->columns(2)
-                                ->defaultItems(1)
-                                ->reorderable()
-                                ->collapsible()
-                                ->columnSpanFull(),
+                                ->reorderable(false)
+                                ->addable(false)
+                                ->deletable(false)
+                                ->columnSpanFull()
+                                ->itemLabel(fn ($state, $get) => 'Page ' . ($get('page_number') ?? '')),
                         ]),
 
                     Step::make('Enter Pricing Details')
@@ -234,20 +267,23 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
         $now = now();
 
-        // Step 1: Save page assignments as Room records
-        if (!empty($data['page_assignments'])) {
-            $sortOrder = 1;
-            foreach ($data['page_assignments'] as $assignment) {
-                // Create room record for each page assignment
-                Room::create([
-                    'project_id' => $this->record->id,
-                    'name' => $assignment['room_name'],
-                    'pdf_page_number' => !empty($assignment['pages']) ? min($assignment['pages']) : null,
-                    'pdf_notes' => !empty($assignment['notes']) ? $assignment['notes'] : null,
-                    'notes' => !empty($assignment['notes']) ? $assignment['notes'] : null,
-                    'sort_order' => $sortOrder++,
-                    'creator_id' => Auth::id(),
-                ]);
+        // Step 1: Save page metadata as Room records
+        if (!empty($data['page_metadata'])) {
+            foreach ($data['page_metadata'] as $pageMeta) {
+                // Only create room if at least room_name is filled
+                if (!empty($pageMeta['room_name'])) {
+                    Room::create([
+                        'project_id' => $this->record->id,
+                        'name' => $pageMeta['room_name'],
+                        'room_type' => $pageMeta['room_type'] ?? null,
+                        'pdf_page_number' => $pageMeta['page_number'] ?? null,
+                        'pdf_detail_number' => $pageMeta['detail_number'] ?? null,
+                        'pdf_notes' => $pageMeta['notes'] ?? null,
+                        'notes' => $pageMeta['notes'] ?? null,
+                        'sort_order' => $pageMeta['page_number'] ?? null,
+                        'creator_id' => Auth::id(),
+                    ]);
+                }
             }
         }
 
