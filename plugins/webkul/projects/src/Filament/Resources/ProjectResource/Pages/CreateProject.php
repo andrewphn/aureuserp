@@ -167,12 +167,28 @@ class CreateProject extends CreateRecord
                 // Rename the actual file in storage
                 \Storage::disk('public')->move($pdfPath, $newPath);
 
+                // Extract page count from PDF
+                $pageCount = null;
+                try {
+                    $fullPath = \Storage::disk('public')->path($newPath);
+                    if (file_exists($fullPath)) {
+                        // Use a simple regex to count pages in PDF
+                        $content = file_get_contents($fullPath);
+                        if (preg_match_all('/\/Page\W/', $content, $matches)) {
+                            $pageCount = count($matches[0]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Could not extract page count from PDF: ' . $e->getMessage());
+                }
+
                 $project->pdfDocuments()->create([
                     'file_path' => $newPath,
                     'file_name' => $newFilename,
                     'file_size' => $fileSize,
                     'mime_type' => 'application/pdf',
                     'document_type' => 'drawing',
+                    'page_count' => $pageCount,
                     'uploaded_by' => Auth::id(),
                     'metadata' => json_encode([
                         'revision' => $revisionNumber,
