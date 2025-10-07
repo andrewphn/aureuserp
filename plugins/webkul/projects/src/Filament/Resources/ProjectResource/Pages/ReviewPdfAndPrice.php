@@ -33,6 +33,8 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public $currentPage = 1;
 
+    public $coverPageData = [];
+
     public function mount($record): void
     {
         $this->record = \Webkul\Project\Models\Project::findOrFail($record);
@@ -386,6 +388,38 @@ class ReviewPdfAndPrice extends Page implements HasForms
             Notification::make()
                 ->title('Automatic Parsing Failed')
                 ->body("Could not automatically parse PDF: {$e->getMessage()}")
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function parseCoverPage(): void
+    {
+        try {
+            $parsingService = app(PdfParsingService::class);
+            $this->coverPageData = $parsingService->parseCoverPage($this->pdfDocument);
+
+            // Count how many fields were extracted
+            $extractedFields = array_filter($this->coverPageData, fn($value) => !empty($value));
+            $count = count($extractedFields);
+
+            if ($count > 0) {
+                Notification::make()
+                    ->title('Cover Page Parsed')
+                    ->body("Extracted {$count} fields from cover page. Review the information below.")
+                    ->success()
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('No Information Found')
+                    ->body("Could not extract customer or project details from the cover page.")
+                    ->warning()
+                    ->send();
+            }
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Cover Page Parsing Failed')
+                ->body("Could not parse cover page: {$e->getMessage()}")
                 ->danger()
                 ->send();
         }

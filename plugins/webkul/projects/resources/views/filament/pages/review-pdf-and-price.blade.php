@@ -1,6 +1,20 @@
 <x-filament-panels::page>
     {{-- Project Information Header --}}
     <div class="bg-gradient-to-r from-primary-50 to-primary-100 dark:from-gray-800 dark:to-gray-700 rounded-lg shadow-sm border border-primary-200 dark:border-gray-600 p-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Project Information</h3>
+            <x-filament::button
+                type="button"
+                color="primary"
+                wire:click="parseCoverPage"
+                icon="heroicon-o-document-magnifying-glass"
+                size="xs"
+                outlined
+            >
+                Extract from PDF
+            </x-filament::button>
+        </div>
+
         <div class="flex items-start justify-between gap-6">
             <div class="flex-1 grid grid-cols-2 gap-x-8 gap-y-3">
                 <div>
@@ -46,6 +60,66 @@
             @endif
         </div>
     </div>
+
+    {{-- Extracted Cover Page Data --}}
+    @if(!empty($coverPageData) && array_filter($coverPageData))
+    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-4 mb-4">
+        <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Extracted Information from Cover Page
+        </h4>
+
+        <div class="grid grid-cols-2 gap-4">
+            @if(!empty($coverPageData['customer_name']))
+            <div class="bg-white dark:bg-gray-800 rounded px-3 py-2">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Customer Name</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $coverPageData['customer_name'] }}</p>
+            </div>
+            @endif
+
+            @if(!empty($coverPageData['customer_email']))
+            <div class="bg-white dark:bg-gray-800 rounded px-3 py-2">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Email</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $coverPageData['customer_email'] }}</p>
+            </div>
+            @endif
+
+            @if(!empty($coverPageData['customer_phone']))
+            <div class="bg-white dark:bg-gray-800 rounded px-3 py-2">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Phone</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $coverPageData['customer_phone'] }}</p>
+            </div>
+            @endif
+
+            @if(!empty($coverPageData['project_name']))
+            <div class="bg-white dark:bg-gray-800 rounded px-3 py-2">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Project Name</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $coverPageData['project_name'] }}</p>
+            </div>
+            @endif
+
+            @if(!empty($coverPageData['project_address']))
+            <div class="bg-white dark:bg-gray-800 rounded px-3 py-2 col-span-2">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Project Address</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $coverPageData['project_address'] }}</p>
+            </div>
+            @endif
+
+            @if(!empty($coverPageData['project_date']))
+            <div class="bg-white dark:bg-gray-800 rounded px-3 py-2">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Date</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $coverPageData['project_date'] }}</p>
+            </div>
+            @endif
+        </div>
+
+        <p class="text-xs text-blue-700 dark:text-blue-300 mt-3">
+            Review the extracted information above and manually update the project if needed.
+        </p>
+    </div>
+    @endif
 
     <div class="grid grid-cols-2 gap-6">
         {{-- PDF Viewer Side --}}

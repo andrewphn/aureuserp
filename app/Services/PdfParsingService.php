@@ -10,6 +10,94 @@ use Smalot\PdfParser\Parser as PdfParser;
 class PdfParsingService
 {
     /**
+     * Parse cover page to extract customer and project details
+     *
+     * @param PdfDocument $pdfDocument
+     * @return array
+     */
+    public function parseCoverPage(PdfDocument $pdfDocument): array
+    {
+        // Initialize PDF parser
+        $parser = new PdfParser();
+
+        // Get file path and parse
+        $filePath = Storage::disk('public')->path($pdfDocument->file_path);
+
+        if (!file_exists($filePath)) {
+            throw new \Exception("PDF file not found: {$filePath}");
+        }
+
+        $pdf = $parser->parseFile($filePath);
+
+        // Get first page text only
+        $pages = $pdf->getPages();
+        $firstPageText = '';
+        if (!empty($pages)) {
+            $firstPageText = $pages[0]->getText();
+        }
+
+        // Extract cover page information
+        $coverData = $this->extractCoverPageData($firstPageText);
+
+        return $coverData;
+    }
+
+    /**
+     * Extract customer and project details from cover page text
+     *
+     * @param string $text
+     * @return array
+     */
+    protected function extractCoverPageData(string $text): array
+    {
+        $data = [
+            'customer_name' => null,
+            'customer_email' => null,
+            'customer_phone' => null,
+            'project_address' => null,
+            'project_name' => null,
+            'project_date' => null,
+        ];
+
+        // Extract email addresses
+        if (preg_match('/[\w\.-]+@[\w\.-]+\.\w+/', $text, $matches)) {
+            $data['customer_email'] = $matches[0];
+        }
+
+        // Extract phone numbers (various formats)
+        if (preg_match('/(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/', $text, $matches)) {
+            $data['customer_phone'] = $matches[1];
+        }
+
+        // Extract addresses (street address pattern)
+        if (preg_match('/(\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl|Boulevard|Blvd))/i', $text, $matches)) {
+            $data['project_address'] = trim($matches[1]);
+
+            // Try to get full address with city, state
+            if (preg_match('/' . preg_quote($matches[1], '/') . '[,\s]+([A-Za-z\s]+),?\s+([A-Z]{2})/i', $text, $fullMatch)) {
+                $data['project_address'] = trim($matches[1]) . ', ' . trim($fullMatch[1]) . ', ' . trim($fullMatch[2]);
+            }
+        }
+
+        // Extract customer name (look for common patterns like "Client:", "Customer:", "For:", or names before addresses)
+        if (preg_match('/(Client|Customer|For|Attn):\s*([A-Za-z\s\.]+)/i', $text, $matches)) {
+            $data['customer_name'] = trim($matches[2]);
+        }
+
+        // Extract project name (often at the top of document or after "Project:")
+        if (preg_match('/(Project|Property|Site):\s*([A-Za-z0-9\s\-]+)/i', $text, $matches)) {
+            $data['project_name'] = trim($matches[2]);
+        }
+
+        // Extract dates (various formats)
+        if (preg_match('/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/', $text, $matches)) {
+            $data['project_date'] = $matches[1];
+        }
+
+        return $data;
+    }
+
+    /**
      * Parse architectural PDF and extract line items for sales order
      *
      * @param PdfDocument $pdfDocument
