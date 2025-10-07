@@ -18,6 +18,7 @@ use Webkul\Project\Filament\Resources\ProjectResource;
 class ReviewPdfAndPrice extends Page implements HasForms
 {
     use InteractsWithForms;
+
     protected static string $resource = ProjectResource::class;
 
     protected string $view = 'webkul-project::filament.pages.review-pdf-and-price';
@@ -25,6 +26,8 @@ class ReviewPdfAndPrice extends Page implements HasForms
     protected static ?string $title = 'Review PDF & Create Pricing';
 
     public ?array $data = [];
+
+    public $record; // Project model from route binding
 
     public $pdfDocument;
 
