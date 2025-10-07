@@ -19,7 +19,7 @@ class ReviewPdfAndPrice extends Page
 
     protected string $view = 'projects::filament.pages.review-pdf-and-price';
 
-    protected ?string $title = 'Review PDF & Create Pricing';
+    protected static ?string $title = 'Review PDF & Create Pricing';
 
     public ?array $data = [];
 
