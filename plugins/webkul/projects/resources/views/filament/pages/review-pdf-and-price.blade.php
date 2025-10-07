@@ -117,41 +117,37 @@
     </div>
 
     {{-- Sticky Footer with Actions --}}
-    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t-2 border-primary-500 dark:border-primary-600 shadow-2xl z-50" style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);">
-        <div class="mx-auto px-6 py-4">
-            <div class="flex justify-between items-center gap-4">
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 z-50" style="box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);">
+        <div class="mx-auto px-6 py-3">
+            <div class="flex justify-end items-center gap-3">
                 <x-filament::button
                     type="button"
                     color="warning"
                     wire:click="tryAutomatic"
                     icon="heroicon-o-sparkles"
-                    size="lg"
+                    outlined
                 >
-                    Try Automatic Parsing
+                    Try Auto-Parse
                 </x-filament::button>
 
-                <div class="flex gap-3">
-                    <x-filament::button
-                        type="button"
-                        color="gray"
-                        tag="a"
-                        :href="\Webkul\Project\Filament\Resources\ProjectResource::getUrl('view', ['record' => $this->record])"
-                        icon="heroicon-o-x-mark"
-                        size="lg"
-                    >
-                        Cancel
-                    </x-filament::button>
+                <x-filament::button
+                    type="button"
+                    color="gray"
+                    tag="a"
+                    :href="\Webkul\Project\Filament\Resources\ProjectResource::getUrl('view', ['record' => $this->record])"
+                    outlined
+                >
+                    Cancel
+                </x-filament::button>
 
-                    <x-filament::button
-                        type="button"
-                        color="success"
-                        wire:click="createSalesOrder"
-                        icon="heroicon-o-document-plus"
-                        size="lg"
-                    >
-                        Create Sales Order
-                    </x-filament::button>
-                </div>
+                <x-filament::button
+                    type="button"
+                    color="success"
+                    wire:click="createSalesOrder"
+                    icon="heroicon-o-document-check"
+                >
+                    Create Sales Order
+                </x-filament::button>
             </div>
         </div>
     </div>
