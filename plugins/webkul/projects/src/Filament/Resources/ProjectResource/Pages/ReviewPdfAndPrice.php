@@ -7,14 +7,17 @@ use App\Services\PdfParsingService;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Project\Filament\Resources\ProjectResource;
 
-class ReviewPdfAndPrice extends Page
+class ReviewPdfAndPrice extends Page implements HasForms
 {
+    use InteractsWithForms;
     protected static string $resource = ProjectResource::class;
 
     protected string $view = 'projects::filament.pages.review-pdf-and-price';
