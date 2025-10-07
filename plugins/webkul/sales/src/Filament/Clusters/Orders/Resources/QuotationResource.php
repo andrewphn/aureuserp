@@ -1128,6 +1128,7 @@ class QuotationResource extends Resource
             ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.title'))
             ->addActionLabel(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.add-product'))
             ->collapsible()
+            ->collapsed(false)  // Show attribute selectors by default
             ->defaultItems(0)
             ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
             ->deletable(fn ($record): bool => ! in_array($record?->state, [OrderState::CANCEL]) && $record?->state !== OrderState::SALE)
