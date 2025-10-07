@@ -111,17 +111,35 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
                                             Select::make('page_type')
                                                 ->label('Page Type')
-                                                ->options([
-                                                    'floor_plan' => 'Floor Plan',
-                                                    'elevation' => 'Elevation',
-                                                    'section' => 'Section',
-                                                    'detail' => 'Detail',
-                                                    'schedule' => 'Schedule',
-                                                    'site_plan' => 'Site Plan',
-                                                    'rendering' => 'Rendering',
-                                                    'other' => 'Other',
+                                                ->options(function () {
+                                                    // Get predefined options
+                                                    $predefined = [
+                                                        'floor_plan' => 'Floor Plan',
+                                                        'elevation' => 'Elevation',
+                                                        'section' => 'Section',
+                                                        'detail' => 'Detail',
+                                                        'schedule' => 'Schedule',
+                                                        'site_plan' => 'Site Plan',
+                                                        'rendering' => 'Rendering',
+                                                        'other' => 'Other',
+                                                    ];
+
+                                                    // Get unique page types from database
+                                                    $existingTypes = \App\Models\PdfPage::whereNotNull('page_type')
+                                                        ->distinct()
+                                                        ->pluck('page_type', 'page_type')
+                                                        ->toArray();
+
+                                                    return array_merge($predefined, $existingTypes);
+                                                })
+                                                ->searchable()
+                                                ->allowHtml()
+                                                ->getSearchResultsUsing(fn (string $search) => [
+                                                    $search => "Create: {$search}",
                                                 ])
-                                                ->placeholder('Select page type'),
+                                                ->getOptionLabelUsing(fn ($value): string => ucwords(str_replace('_', ' ', $value)))
+                                                ->placeholder('Select or type to create new')
+                                                ->helperText('Type to create a custom page type'),
 
                                             TextInput::make('room_name')
                                                 ->label('Room Name')
