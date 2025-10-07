@@ -94,24 +94,15 @@ class ReviewPdfAndPrice extends Page implements HasForms
                             Repeater::make('page_metadata')
                                 ->label('Pages')
                                 ->schema([
-                                    \Filament\Forms\Components\Hidden::make('page_number'),
-
-                                    \Filament\Forms\Components\Placeholder::make('page_preview')
-                                        ->label(fn ($state, $get) => 'Page ' . ($get('page_number') ?? ''))
-                                        ->content(function ($state, $get) {
-                                            $pageNum = $get('page_number') ?? 1;
-                                            $pdfUrl = $this->getPdfUrl();
-                                            return view('webkul-project::filament.components.pdf-page-preview', [
-                                                'pdfUrl' => $pdfUrl,
-                                                'pageNumber' => $pageNum,
-                                            ]);
-                                        })
-                                        ->columnSpanFull(),
+                                    \Filament\Forms\Components\TextInput::make('page_number')
+                                        ->label('Page')
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->prefix('Page'),
 
                                     TextInput::make('room_name')
                                         ->label('Room Name')
-                                        ->placeholder('e.g., Kitchen, Master Bath')
-                                        ->columnSpan(1),
+                                        ->placeholder('e.g., Kitchen, Master Bath'),
 
                                     Select::make('room_type')
                                         ->label('Room Type')
@@ -126,26 +117,23 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                             'mudroom' => 'Mudroom',
                                             'other' => 'Other',
                                         ])
-                                        ->placeholder('Select type')
-                                        ->columnSpan(1),
+                                        ->placeholder('Select type'),
 
                                     TextInput::make('detail_number')
                                         ->label('Detail/Drawing Number')
-                                        ->placeholder('e.g., A-101, D-3')
-                                        ->columnSpan(1),
+                                        ->placeholder('e.g., A-101, D-3'),
 
                                     \Filament\Forms\Components\Textarea::make('notes')
                                         ->label('Notes')
                                         ->placeholder('Special details about this page...')
                                         ->rows(2)
-                                        ->columnSpan(1),
+                                        ->columnSpanFull(),
                                 ])
                                 ->columns(2)
                                 ->reorderable(false)
                                 ->addable(false)
                                 ->deletable(false)
-                                ->columnSpanFull()
-                                ->itemLabel(fn ($state, $get) => 'Page ' . ($get('page_number') ?? '')),
+                                ->columnSpanFull(),
                         ]),
 
                     Step::make('Enter Pricing Details')
