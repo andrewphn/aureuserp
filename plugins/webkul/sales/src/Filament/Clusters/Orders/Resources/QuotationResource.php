@@ -1251,60 +1251,8 @@ class QuotationResource extends Resource
                     ->selectablePlaceholder(false),
 
                 // Dynamic attribute selectors for configurable products
-                Group::make()
-                    ->schema(function (Get $get) {
-                        $productId = $get('product_id');
-                        if (!$productId) {
-                            return [];
-                        }
+                ...static::getAttributeSelectorFields(),
 
-                        $product = \Webkul\Sale\Models\Product::find($productId);
-                        if (!$product || !$product->is_configurable) {
-                            return [];
-                        }
-
-                        // Get product attributes
-                        $attributes = \DB::table('products_product_attributes')
-                            ->join('products_attributes', 'products_product_attributes.attribute_id', '=', 'products_attributes.id')
-                            ->where('products_product_attributes.product_id', $productId)
-                            ->orderBy('products_product_attributes.sort')
-                            ->select('products_attributes.*')
-                            ->get();
-
-                        $attributeFields = [];
-                        foreach ($attributes as $attribute) {
-                            // Get attribute options
-                            $options = \DB::table('products_attribute_options')
-                                ->where('attribute_id', $attribute->id)
-                                ->orderBy('sort')
-                                ->pluck('name', 'id')
-                                ->toArray();
-
-                            $attributeFields[] = Select::make("attribute_{$attribute->id}")
-                                ->label($attribute->name)
-                                ->options($options)
-                                ->live()
-                                ->afterStateUpdated(function (Set $set, Get $get) {
-                                    static::updatePriceWithAttributes($set, $get);
-                                })
-                                ->helperText(function (Get $get) use ($attribute) {
-                                    $selectedOptionId = $get("attribute_{$attribute->id}");
-                                    if ($selectedOptionId) {
-                                        $option = \DB::table('products_attribute_options')
-                                            ->where('id', $selectedOptionId)
-                                            ->first();
-                                        if ($option && $option->extra_price > 0) {
-                                            return '+$' . number_format($option->extra_price, 2) . ' / LF';
-                                        }
-                                    }
-                                    return null;
-                                });
-                        }
-
-                        return $attributeFields;
-                    })
-                    ->visible(fn (Get $get) => $get('product_id') && \Webkul\Sale\Models\Product::find($get('product_id'))?->is_configurable)
-                    ->columnSpanFull(),
                 TextInput::make('product_qty')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.quantity'))
                     ->required()
@@ -1446,6 +1394,85 @@ class QuotationResource extends Resource
             ])
             ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
             ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+    }
+
+    private static function getAttributeSelectorFields(): array
+    {
+        $fields = [];
+
+        // Get all possible attributes that could be used by configurable products
+        $attributeNames = ['Pricing Level', 'Material Category', 'Finish Option'];
+
+        foreach ($attributeNames as $attributeName) {
+            $attribute = \DB::table('products_attributes')
+                ->where('name', $attributeName)
+                ->first(['id', 'name']);
+
+            if ($attribute) {
+                $fields[] = Select::make("attribute_{$attribute->id}")
+                    ->label($attribute->name)
+                    ->options(function (Get $get) use ($attribute) {
+                        $productId = $get('product_id');
+                        if (!$productId) {
+                            return [];
+                        }
+
+                        // Check if this product has this attribute
+                        $hasAttribute = \DB::table('products_product_attributes')
+                            ->where('product_id', $productId)
+                            ->where('attribute_id', $attribute->id)
+                            ->exists();
+
+                        if (!$hasAttribute) {
+                            return [];
+                        }
+
+                        // Get options for this attribute
+                        return \DB::table('products_attribute_options')
+                            ->where('attribute_id', $attribute->id)
+                            ->orderBy('sort')
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->visible(function (Get $get) use ($attribute) {
+                        $productId = $get('product_id');
+                        if (!$productId) {
+                            return false;
+                        }
+
+                        // Only show if product is configurable and has this attribute
+                        $product = \Webkul\Sale\Models\Product::find($productId);
+                        if (!$product || !$product->is_configurable) {
+                            return false;
+                        }
+
+                        return \DB::table('products_product_attributes')
+                            ->where('product_id', $productId)
+                            ->where('attribute_id', $attribute->id)
+                            ->exists();
+                    })
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set, Get $get) => static::updatePriceWithAttributes($set, $get))
+                    ->helperText(function (Get $get) use ($attribute) {
+                        $selectedOptionId = $get("attribute_{$attribute->id}");
+                        if (!$selectedOptionId) {
+                            return null;
+                        }
+
+                        $option = \DB::table('products_attribute_options')
+                            ->where('id', $selectedOptionId)
+                            ->first(['extra_price']);
+
+                        if ($option && $option->extra_price > 0) {
+                            return '+ $' . number_format($option->extra_price, 2) . ' / LF';
+                        }
+
+                        return null;
+                    });
+            }
+        }
+
+        return $fields;
     }
 
     private static function updatePriceWithAttributes(Set $set, Get $get): void
