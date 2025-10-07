@@ -45,6 +45,10 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_10_03_190205_seed_complete_tcs_tag_system',
                 '2025_10_03_193000_fix_phase_tag_colors_to_match_stages',
                 '2025_10_04_124625_create_projects_cabinet_specifications_table',
+                '2025_10_07_161656_create_projects_rooms_table',
+                '2025_10_07_161931_create_projects_room_locations_table',
+                '2025_10_07_161947_create_projects_cabinet_runs_table',
+                '2025_10_07_162003_add_room_and_run_columns_to_projects_cabinet_specifications',
             ])
             ->runsMigrations()
             ->hasSettings([
