@@ -94,45 +94,59 @@ class ReviewPdfAndPrice extends Page implements HasForms
                             Repeater::make('page_metadata')
                                 ->label('Pages')
                                 ->schema([
-                                    \Filament\Forms\Components\TextInput::make('page_number')
-                                        ->label('Page')
-                                        ->disabled()
-                                        ->dehydrated()
-                                        ->prefix('Page'),
-
-                                    TextInput::make('room_name')
-                                        ->label('Room Name')
-                                        ->placeholder('e.g., Kitchen, Master Bath'),
-
-                                    Select::make('room_type')
-                                        ->label('Room Type')
-                                        ->options([
-                                            'kitchen' => 'Kitchen',
-                                            'bathroom' => 'Bathroom',
-                                            'bedroom' => 'Bedroom',
-                                            'pantry' => 'Pantry',
-                                            'laundry' => 'Laundry',
-                                            'office' => 'Office',
-                                            'closet' => 'Closet',
-                                            'mudroom' => 'Mudroom',
-                                            'other' => 'Other',
+                                    \Filament\Forms\Components\View::make('webkul-project::filament.components.pdf-page-thumbnail')
+                                        ->viewData(fn ($get) => [
+                                            'pdfUrl' => $this->getPdfUrl(),
+                                            'pageNumber' => $get('page_number') ?? 1,
                                         ])
-                                        ->placeholder('Select type'),
+                                        ->columnSpan(1),
 
-                                    TextInput::make('detail_number')
-                                        ->label('Detail/Drawing Number')
-                                        ->placeholder('e.g., A-101, D-3'),
+                                    \Filament\Forms\Components\Section::make()
+                                        ->schema([
+                                            \Filament\Forms\Components\TextInput::make('page_number')
+                                                ->label('Page')
+                                                ->disabled()
+                                                ->dehydrated()
+                                                ->prefix('Page'),
 
-                                    \Filament\Forms\Components\Textarea::make('notes')
-                                        ->label('Notes')
-                                        ->placeholder('Special details about this page...')
-                                        ->rows(2)
-                                        ->columnSpanFull(),
+                                            TextInput::make('room_name')
+                                                ->label('Room Name')
+                                                ->placeholder('e.g., Kitchen, Master Bath'),
+
+                                            Select::make('room_type')
+                                                ->label('Room Type')
+                                                ->options([
+                                                    'kitchen' => 'Kitchen',
+                                                    'bathroom' => 'Bathroom',
+                                                    'bedroom' => 'Bedroom',
+                                                    'pantry' => 'Pantry',
+                                                    'laundry' => 'Laundry',
+                                                    'office' => 'Office',
+                                                    'closet' => 'Closet',
+                                                    'mudroom' => 'Mudroom',
+                                                    'other' => 'Other',
+                                                ])
+                                                ->placeholder('Select type'),
+
+                                            TextInput::make('detail_number')
+                                                ->label('Detail/Drawing Number')
+                                                ->placeholder('e.g., A-101, D-3'),
+
+                                            \Filament\Forms\Components\Textarea::make('notes')
+                                                ->label('Notes')
+                                                ->placeholder('Special details about this page...')
+                                                ->rows(2),
+                                        ])
+                                        ->columns(2)
+                                        ->columnSpan(1),
                                 ])
                                 ->columns(2)
                                 ->reorderable(false)
                                 ->addable(false)
                                 ->deletable(false)
+                                ->collapsible()
+                                ->collapsed()
+                                ->itemLabel(fn ($state) => 'Page ' . ($state['page_number'] ?? ''))
                                 ->columnSpanFull(),
                         ]),
 
