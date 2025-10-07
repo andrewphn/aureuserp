@@ -15,7 +15,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
@@ -130,7 +129,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                TableAction::make('reviewAndPrice')
+                Action::make('reviewAndPrice')
                     ->label('Review & Price')
                     ->icon('heroicon-o-document-magnifying-glass')
                     ->color('primary')
