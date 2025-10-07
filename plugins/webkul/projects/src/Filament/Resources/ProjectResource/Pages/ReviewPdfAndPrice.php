@@ -17,9 +17,9 @@ class ReviewPdfAndPrice extends Page
 {
     protected static string $resource = ProjectResource::class;
 
-    protected static string $view = 'projects::filament.pages.review-pdf-and-price';
+    protected string $view = 'projects::filament.pages.review-pdf-and-price';
 
-    protected static ?string $title = 'Review PDF & Create Pricing';
+    protected ?string $title = 'Review PDF & Create Pricing';
 
     public ?array $data = [];
 
