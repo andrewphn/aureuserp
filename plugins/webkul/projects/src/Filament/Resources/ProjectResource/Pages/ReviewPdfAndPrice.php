@@ -10,14 +10,16 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Schema;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Project\Filament\Resources\ProjectResource;
 
 class ReviewPdfAndPrice extends Page implements HasForms
 {
     use InteractsWithForms;
+    use InteractsWithRecord;
 
     protected static string $resource = ProjectResource::class;
 
@@ -27,16 +29,14 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public ?array $data = [];
 
-    public $record; // Project model from route binding
-
     public $pdfDocument;
 
     public $currentPage = 1;
 
     public function mount(int|string $record): void
     {
-        // Resolve the Project model from the route parameter
-        $this->record = ProjectResource::resolveRecordRouteBinding($record);
+        // Resolve the Project model using InteractsWithRecord trait
+        $this->record = $this->resolveRecord($record);
 
         $pdfId = request()->get('pdf');
         $this->pdfDocument = PdfDocument::findOrFail($pdfId);
