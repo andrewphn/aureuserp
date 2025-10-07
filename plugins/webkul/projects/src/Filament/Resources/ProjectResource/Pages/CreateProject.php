@@ -137,18 +137,50 @@ class CreateProject extends CreateRecord
 
         // Save architectural PDFs if uploaded
         if (!empty($data['architectural_pdfs'])) {
-            foreach ($data['architectural_pdfs'] as $pdfPath) {
-                $filename = basename($pdfPath);
+            $revisionNumber = 1;
+
+            foreach ($data['architectural_pdfs'] as $index => $pdfPath) {
+                $originalFilename = basename($pdfPath);
                 $fileSize = \Storage::disk('public')->size($pdfPath);
 
+                // Generate proper filename: ProjectNumber-RevX-OriginalName.pdf
+                // Example: TCS-0001-15BCorreiaLane-Rev1-FloorPlan.pdf
+                $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+                $originalName = pathinfo($originalFilename, PATHINFO_FILENAME);
+
+                // Clean up the original filename (remove hash if present from FileUpload)
+                // Filament adds a unique hash to filenames, let's strip that if it exists
+                $cleanOriginalName = preg_replace('/^[0-9A-Z]{26}_/', '', $originalName);
+
+                $newFilename = sprintf(
+                    '%s-Rev%d-%s.%s',
+                    $project->project_number,
+                    $revisionNumber,
+                    $cleanOriginalName ?: 'Drawing',
+                    $extension
+                );
+
+                // Build new path in same directory
+                $directory = dirname($pdfPath);
+                $newPath = $directory . '/' . $newFilename;
+
+                // Rename the actual file in storage
+                \Storage::disk('public')->move($pdfPath, $newPath);
+
                 $project->pdfDocuments()->create([
-                    'file_path' => $pdfPath,
-                    'file_name' => $filename,
+                    'file_path' => $newPath,
+                    'file_name' => $newFilename,
                     'file_size' => $fileSize,
                     'mime_type' => 'application/pdf',
-                    'document_type' => 'drawing', // Default to drawing/blueprint
+                    'document_type' => 'drawing',
                     'uploaded_by' => Auth::id(),
+                    'metadata' => json_encode([
+                        'revision' => $revisionNumber,
+                        'original_filename' => $originalFilename,
+                    ]),
                 ]);
+
+                $revisionNumber++;
             }
         }
     }

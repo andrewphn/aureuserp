@@ -38,19 +38,42 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->directory('pdf-documents')
                     ->required()
                     ->live()
-                    ->afterStateUpdated(function ($state, $set) {
+                    ->afterStateUpdated(function ($state, $set, $livewire) {
                         if ($state) {
-                            // Auto-fill file_name from uploaded file
+                            // Get original filename
                             $filename = is_string($state) ? basename($state) : (is_object($state) ? $state->getClientOriginalName() : null);
+
                             if ($filename) {
-                                $set('file_name', $filename);
+                                // Get project and calculate next revision
+                                $project = $livewire->getOwnerRecord();
+                                $existingPdfCount = $project->pdfDocuments()->count();
+                                $nextRevision = $existingPdfCount + 1;
+
+                                // Clean up original filename
+                                $extension = pathinfo($filename, PATHINFO_EXTENSION);
+                                $originalName = pathinfo($filename, PATHINFO_FILENAME);
+                                $cleanOriginalName = preg_replace('/^[0-9A-Z]{26}_/', '', $originalName);
+
+                                // Generate proper filename with project number and revision
+                                $newFilename = sprintf(
+                                    '%s-Rev%d-%s.%s',
+                                    $project->project_number,
+                                    $nextRevision,
+                                    $cleanOriginalName ?: 'Drawing',
+                                    $extension
+                                );
+
+                                $set('file_name', $newFilename);
                             }
                         }
                     }),
 
                 TextInput::make('file_name')
-                    ->label('File Name (auto-filled)')
-                    ->placeholder('Will be auto-filled from uploaded file'),
+                    ->label('File Name')
+                    ->placeholder('Auto-filled with Project#-Rev#-Name.pdf')
+                    ->helperText('Will be auto-generated as: ProjectNumber-Rev#-OriginalName.pdf')
+                    ->disabled()
+                    ->dehydrated(),
 
                 \Filament\Forms\Components\Select::make('document_type')
                     ->label('Document Type')
@@ -107,9 +130,27 @@ class PdfDocumentsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        // Extract file name from uploaded file path if not provided
-                        if (empty($data['file_name']) && !empty($data['file_path'])) {
-                            $data['file_name'] = basename($data['file_path']);
+                        $project = $this->getOwnerRecord();
+                        $originalPath = $data['file_path'];
+
+                        // If file_name was auto-generated with proper format, rename the actual file
+                        if (!empty($data['file_name']) && !empty($originalPath)) {
+                            // Build new path with proper filename
+                            $directory = dirname($originalPath);
+                            $newPath = $directory . '/' . $data['file_name'];
+
+                            // Rename the actual file in storage
+                            Storage::disk('public')->move($originalPath, $newPath);
+
+                            // Update path in data
+                            $data['file_path'] = $newPath;
+
+                            // Store metadata about original filename
+                            $existingPdfCount = $project->pdfDocuments()->count();
+                            $data['metadata'] = json_encode([
+                                'revision' => $existingPdfCount + 1,
+                                'original_filename' => basename($originalPath),
+                            ]);
                         }
 
                         // Get file size if not set
@@ -122,8 +163,8 @@ class PdfDocumentsRelationManager extends RelationManager
                             $data['mime_type'] = 'application/pdf';
                         }
 
-                        $data['module_type'] = get_class($this->getOwnerRecord());
-                        $data['module_id'] = $this->getOwnerRecord()->id;
+                        $data['module_type'] = get_class($project);
+                        $data['module_id'] = $project->id;
                         $data['uploaded_by'] = Auth::id();
                         return $data;
                     }),
