@@ -1,54 +1,53 @@
 <x-filament-panels::page>
     {{-- Project Information Header --}}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
-        <div class="grid grid-cols-4 gap-4">
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project</p>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $this->record->name }}</p>
-            </div>
+    <div class="bg-gradient-to-r from-primary-50 to-primary-100 dark:from-gray-800 dark:to-gray-700 rounded-lg shadow-sm border border-primary-200 dark:border-gray-600 p-4 mb-4">
+        <div class="flex items-start justify-between gap-6">
+            <div class="flex-1 grid grid-cols-2 gap-x-8 gap-y-3">
+                <div>
+                    <p class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider mb-1">Project</p>
+                    <p class="text-base font-bold text-gray-900 dark:text-white">{{ $this->record->name }}</p>
+                </div>
 
-            @if($this->record->project_number)
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project #</p>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $this->record->project_number }}</p>
-            </div>
-            @endif
-
-            @if($this->record->partner)
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Customer</p>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $this->record->partner->name }}</p>
-            </div>
-            @endif
-
-            @if($this->record->user)
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project Manager</p>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $this->record->user->name }}</p>
-            </div>
-            @endif
-        </div>
-
-        @php
-            $address = $this->record->addresses()->where('is_primary', true)->first()
-                       ?? $this->record->addresses()->first();
-        @endphp
-
-        @if($address)
-        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project Address</p>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-                {{ $address->street1 }}
-                @if($address->street2), {{ $address->street2 }}@endif
-                @if($address->city || $address->state)
-                    <br>{{ $address->city }}@if($address->city && $address->state), @endif{{ $address->state?->name }} {{ $address->postcode }}
+                @if($this->record->project_number)
+                <div>
+                    <p class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider mb-1">Project Code</p>
+                    <p class="text-sm font-mono font-medium text-gray-900 dark:text-white">{{ $this->record->project_number }}</p>
+                </div>
                 @endif
-            </p>
+
+                @if($this->record->partner)
+                <div>
+                    <p class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider mb-1">Customer</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $this->record->partner->name }}</p>
+                </div>
+                @endif
+
+                @if($this->record->user)
+                <div>
+                    <p class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider mb-1">Manager</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $this->record->user->name }}</p>
+                </div>
+                @endif
+            </div>
+
+            @php
+                $address = $this->record->addresses()->where('is_primary', true)->first()
+                           ?? $this->record->addresses()->first();
+            @endphp
+
+            @if($address)
+            <div class="flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-600">
+                <p class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider mb-1">Address</p>
+                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {{ $address->street1 }}<br>
+                    {{ $address->city }}, {{ $address->state?->name }} {{ $address->postcode }}
+                </p>
+            </div>
+            @endif
         </div>
-        @endif
     </div>
 
-    <div class="grid grid-cols-2 gap-6 pb-24">
+    <div class="grid grid-cols-2 gap-6 pb-32">
         {{-- PDF Viewer Side --}}
         <div class="space-y-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -118,18 +117,16 @@
     </div>
 
     {{-- Sticky Footer with Actions --}}
-    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center gap-3">
+    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t-2 border-primary-500 dark:border-primary-600 shadow-2xl z-50" style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);">
+        <div class="mx-auto px-6 py-4">
+            <div class="flex justify-between items-center gap-4">
                 <x-filament::button
                     type="button"
                     color="warning"
                     wire:click="tryAutomatic"
+                    icon="heroicon-o-sparkles"
                     size="lg"
                 >
-                    <x-slot name="icon">
-                        heroicon-o-sparkles
-                    </x-slot>
                     Try Automatic Parsing
                 </x-filament::button>
 
@@ -139,6 +136,7 @@
                         color="gray"
                         tag="a"
                         :href="\Webkul\Project\Filament\Resources\ProjectResource::getUrl('view', ['record' => $this->record])"
+                        icon="heroicon-o-x-mark"
                         size="lg"
                     >
                         Cancel
@@ -148,11 +146,9 @@
                         type="button"
                         color="success"
                         wire:click="createSalesOrder"
+                        icon="heroicon-o-document-plus"
                         size="lg"
                     >
-                        <x-slot name="icon">
-                            heroicon-o-document-plus
-                        </x-slot>
                         Create Sales Order
                     </x-filament::button>
                 </div>
