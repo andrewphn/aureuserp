@@ -6,7 +6,7 @@ use App\Filament\Resources\PdfDocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists;
-use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 
 class ViewPdfDocument extends ViewRecord
 {
@@ -20,10 +20,10 @@ class ViewPdfDocument extends ViewRecord
         ];
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 Infolists\Components\Section::make('Document Information')
                     ->schema([
                         Infolists\Components\TextEntry::make('title')
