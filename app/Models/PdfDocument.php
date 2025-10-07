@@ -91,7 +91,7 @@ class PdfDocument extends Model
      */
     public function pages(): HasMany
     {
-        return $this->hasMany(PdfPage::class, 'document_id');
+        return $this->hasMany(PdfPage::class, 'pdf_document_id');
     }
 
     /**
