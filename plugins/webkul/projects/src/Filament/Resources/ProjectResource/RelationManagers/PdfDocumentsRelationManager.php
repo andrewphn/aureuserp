@@ -129,6 +129,13 @@ class PdfDocumentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->after(function ($record) {
+                        // Redirect to Review & Price wizard after upload
+                        return redirect()->route('filament.admin.resources.project.projects.pdf-review', [
+                            'record' => $this->getOwnerRecord()->id,
+                            'pdf' => $record->id,
+                        ]);
+                    })
                     ->mutateFormDataUsing(function (array $data): array {
                         $project = $this->getOwnerRecord();
                         $originalPath = $data['file_path'];

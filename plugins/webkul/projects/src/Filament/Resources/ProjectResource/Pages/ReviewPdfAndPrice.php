@@ -7,14 +7,18 @@ use App\Services\PdfParsingService;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Models\Room;
 
 class ReviewPdfAndPrice extends Page implements HasForms
 {
@@ -56,81 +60,143 @@ class ReviewPdfAndPrice extends Page implements HasForms
         ]);
     }
 
+    public function getTotalPages(): int
+    {
+        return $this->pdfDocument->page_count ?? 1;
+    }
+
     public function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                Repeater::make('rooms')
-                    ->label('Rooms & Cabinet Runs')
-                    ->schema([
-                        TextInput::make('room_name')
-                            ->label('Room Name')
-                            ->required()
-                            ->placeholder('e.g., Kitchen, Pantry, Bathroom'),
+                Wizard::make([
+                    Step::make('Assign Pages to Rooms')
+                        ->description('Review PDF pages and organize them by room')
+                        ->schema([
+                            \Filament\Forms\Components\Placeholder::make('pdf_info')
+                                ->label('Document Information')
+                                ->content(fn () => "**{$this->pdfDocument->file_name}** — Total Pages: {$this->getTotalPages()}")
+                                ->columnSpanFull(),
 
-                        Repeater::make('cabinet_runs')
-                            ->label('Cabinet Runs in this Room')
-                            ->schema([
-                                TextInput::make('run_name')
-                                    ->label('Run Name')
-                                    ->required()
-                                    ->placeholder('e.g., Sink Wall, Pantry Wall, Island'),
+                            Repeater::make('page_assignments')
+                                ->label('Page Assignments')
+                                ->schema([
+                                    TextInput::make('room_name')
+                                        ->label('Room Name')
+                                        ->required()
+                                        ->placeholder('e.g., Kitchen, Pantry, Master Bathroom')
+                                        ->live()
+                                        ->columnSpan(1),
 
-                                Select::make('cabinet_level')
-                                    ->label('Cabinet Level')
-                                    ->options([
-                                        '1' => 'Level 1 - Basic ($138/LF)',
-                                        '2' => 'Level 2 - Standard ($168/LF)',
-                                        '3' => 'Level 3 - Enhanced ($192/LF)',
-                                        '4' => 'Level 4 - Premium ($210/LF)',
-                                        '5' => 'Level 5 - Custom ($225/LF)',
-                                    ])
-                                    ->default('2')
-                                    ->required(),
+                                    Select::make('pages')
+                                        ->label('PDF Pages')
+                                        ->multiple()
+                                        ->options(function () {
+                                            $pages = [];
+                                            for ($i = 1; $i <= $this->getTotalPages(); $i++) {
+                                                $pages[$i] = "Page {$i}";
+                                            }
+                                            return $pages;
+                                        })
+                                        ->placeholder('Select which pages show this room')
+                                        ->required()
+                                        ->columnSpan(1),
 
-                                TextInput::make('linear_feet')
-                                    ->label('Linear Feet')
-                                    ->numeric()
-                                    ->required()
-                                    ->step(0.25)
-                                    ->suffix('LF'),
+                                    \Filament\Forms\Components\Textarea::make('notes')
+                                        ->label('Room Notes')
+                                        ->placeholder('Any special details about this room...')
+                                        ->rows(2)
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2)
+                                ->defaultItems(1)
+                                ->reorderable()
+                                ->collapsible()
+                                ->columnSpanFull(),
+                        ]),
 
-                                TextInput::make('notes')
-                                    ->label('Notes')
-                                    ->placeholder('Material, finish, special details...')
-                                    ->columnSpanFull(),
-                            ])
-                            ->columns(3)
-                            ->defaultItems(1)
-                            ->reorderable()
-                            ->collapsible(),
-                    ])
-                    ->columns(1)
-                    ->defaultItems(1)
-                    ->reorderable()
-                    ->collapsible(),
+                    Step::make('Enter Pricing Details')
+                        ->description('Add cabinet runs and linear feet for each room')
+                        ->schema([
+                            Repeater::make('rooms')
+                                ->label('Rooms & Cabinet Runs')
+                                ->schema([
+                                    TextInput::make('room_name')
+                                        ->label('Room Name')
+                                        ->required()
+                                        ->placeholder('e.g., Kitchen, Pantry, Bathroom'),
 
-                Repeater::make('additional_items')
-                    ->label('Additional Items (Countertops, Shelves, etc.)')
-                    ->schema([
-                        Select::make('product_id')
-                            ->label('Product')
-                            ->relationship('product', 'name')
-                            ->searchable()
-                            ->required(),
+                                    Repeater::make('cabinet_runs')
+                                        ->label('Cabinet Runs in this Room')
+                                        ->schema([
+                                            TextInput::make('run_name')
+                                                ->label('Run Name')
+                                                ->required()
+                                                ->placeholder('e.g., Sink Wall, Pantry Wall, Island'),
 
-                        TextInput::make('quantity')
-                            ->label('Quantity')
-                            ->numeric()
-                            ->required()
-                            ->step(0.25),
+                                            Select::make('cabinet_level')
+                                                ->label('Cabinet Level')
+                                                ->options([
+                                                    '1' => 'Level 1 - Basic ($138/LF)',
+                                                    '2' => 'Level 2 - Standard ($168/LF)',
+                                                    '3' => 'Level 3 - Enhanced ($192/LF)',
+                                                    '4' => 'Level 4 - Premium ($210/LF)',
+                                                    '5' => 'Level 5 - Custom ($225/LF)',
+                                                ])
+                                                ->default('2')
+                                                ->required(),
 
-                        TextInput::make('notes')
-                            ->label('Notes')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2)
-                    ->defaultItems(0),
+                                            TextInput::make('linear_feet')
+                                                ->label('Linear Feet')
+                                                ->numeric()
+                                                ->required()
+                                                ->step(0.25)
+                                                ->suffix('LF'),
+
+                                            TextInput::make('notes')
+                                                ->label('Notes')
+                                                ->placeholder('Material, finish, special details...')
+                                                ->columnSpanFull(),
+                                        ])
+                                        ->columns(3)
+                                        ->defaultItems(1)
+                                        ->reorderable()
+                                        ->collapsible(),
+                                ])
+                                ->columns(1)
+                                ->defaultItems(1)
+                                ->reorderable()
+                                ->collapsible()
+                                ->columnSpanFull(),
+                        ]),
+
+                    Step::make('Additional Items')
+                        ->description('Add countertops, shelves, or other non-cabinet items')
+                        ->schema([
+                            Repeater::make('additional_items')
+                                ->label('Additional Items')
+                                ->schema([
+                                    Select::make('product_id')
+                                        ->label('Product')
+                                        ->relationship('product', 'name')
+                                        ->searchable()
+                                        ->required(),
+
+                                    TextInput::make('quantity')
+                                        ->label('Quantity')
+                                        ->numeric()
+                                        ->required()
+                                        ->step(0.25),
+
+                                    TextInput::make('notes')
+                                        ->label('Notes')
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2)
+                                ->defaultItems(0)
+                                ->columnSpanFull(),
+                        ]),
+                ])->columnSpanFull(),
             ])
             ->statePath('data');
     }
@@ -167,6 +233,23 @@ class ReviewPdfAndPrice extends Page implements HasForms
         }
 
         $now = now();
+
+        // Step 1: Save page assignments as Room records
+        if (!empty($data['page_assignments'])) {
+            $sortOrder = 1;
+            foreach ($data['page_assignments'] as $assignment) {
+                // Create room record for each page assignment
+                Room::create([
+                    'project_id' => $this->record->id,
+                    'name' => $assignment['room_name'],
+                    'pdf_page_number' => !empty($assignment['pages']) ? min($assignment['pages']) : null,
+                    'pdf_notes' => !empty($assignment['notes']) ? $assignment['notes'] : null,
+                    'notes' => !empty($assignment['notes']) ? $assignment['notes'] : null,
+                    'sort_order' => $sortOrder++,
+                    'creator_id' => Auth::id(),
+                ]);
+            }
+        }
 
         // Create sales order
         $salesOrderId = \DB::table('sales_orders')->insertGetId([
