@@ -41,6 +41,16 @@ class ReviewPdfAndPrice extends Page implements HasForms
         $pdfId = request()->get('pdf');
         $this->pdfDocument = PdfDocument::findOrFail($pdfId);
 
+        // Check if PDF file actually exists
+        if (!Storage::disk('public')->exists($this->pdfDocument->file_path)) {
+            Notification::make()
+                ->title('PDF File Not Found')
+                ->body('The PDF file "' . $this->pdfDocument->file_name . '" is missing from storage. Please re-upload it.')
+                ->danger()
+                ->persistent()
+                ->send();
+        }
+
         $this->form->fill([
             'rooms' => [],
         ]);
