@@ -109,6 +109,20 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->dehydrated()
                                                 ->prefix('Page'),
 
+                                            Select::make('page_type')
+                                                ->label('Page Type')
+                                                ->options([
+                                                    'floor_plan' => 'Floor Plan',
+                                                    'elevation' => 'Elevation',
+                                                    'section' => 'Section',
+                                                    'detail' => 'Detail',
+                                                    'schedule' => 'Schedule',
+                                                    'site_plan' => 'Site Plan',
+                                                    'rendering' => 'Rendering',
+                                                    'other' => 'Other',
+                                                ])
+                                                ->placeholder('Select page type'),
+
                                             TextInput::make('room_name')
                                                 ->label('Room Name')
                                                 ->placeholder('e.g., Kitchen, Master Bath'),
@@ -126,7 +140,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                     'mudroom' => 'Mudroom',
                                                     'other' => 'Other',
                                                 ])
-                                                ->placeholder('Select type'),
+                                                ->placeholder('Select room type'),
 
                                             TextInput::make('detail_number')
                                                 ->label('Detail/Drawing Number')
@@ -135,7 +149,8 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                             \Filament\Forms\Components\Textarea::make('notes')
                                                 ->label('Notes')
                                                 ->placeholder('Special details about this page...')
-                                                ->rows(2),
+                                                ->rows(2)
+                                                ->columnSpanFull(),
                                         ])
                                         ->columns(2)
                                         ->columnSpan(1),
@@ -268,10 +283,22 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
         $now = now();
 
-        // Step 1: Save page metadata as Room records
+        // Step 1: Save page metadata to pdf_pages table
         if (!empty($data['page_metadata'])) {
             foreach ($data['page_metadata'] as $pageMeta) {
-                // Only create room if at least room_name is filled
+                // Create page record for each page (even if metadata is minimal)
+                $pageRecord = \App\Models\PdfPage::create([
+                    'pdf_document_id' => $this->pdfDocument->id,
+                    'page_number' => $pageMeta['page_number'] ?? null,
+                    'page_type' => $pageMeta['page_type'] ?? null,
+                    'room_name' => $pageMeta['room_name'] ?? null,
+                    'room_type' => $pageMeta['room_type'] ?? null,
+                    'detail_number' => $pageMeta['detail_number'] ?? null,
+                    'notes' => $pageMeta['notes'] ?? null,
+                    'creator_id' => Auth::id(),
+                ]);
+
+                // Also create room record if room_name is provided
                 if (!empty($pageMeta['room_name'])) {
                     Room::create([
                         'project_id' => $this->record->id,
