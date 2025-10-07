@@ -18,7 +18,12 @@ class CabinetSpecification extends Model
     protected $fillable = [
         'order_line_id',
         'project_id',
+        'room_id',
+        'cabinet_run_id',
         'product_variant_id',
+        'cabinet_number',
+        'position_in_run',
+        'wall_position_start_inches',
         'length_inches',
         'width_inches',
         'depth_inches',
@@ -42,6 +47,8 @@ class CabinetSpecification extends Model
         'quantity' => 'integer',
         'unit_price_per_lf' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'position_in_run' => 'integer',
+        'wall_position_start_inches' => 'decimal:2',
     ];
 
     /**
@@ -55,6 +62,16 @@ class CabinetSpecification extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function cabinetRun(): BelongsTo
+    {
+        return $this->belongsTo(CabinetRun::class, 'cabinet_run_id');
     }
 
     public function productVariant(): BelongsTo

@@ -205,6 +205,16 @@ class Project extends Model implements Sortable
         return $this->morphMany(\App\Models\PdfDocument::class, 'module');
     }
 
+    public function rooms(): HasMany
+    {
+        return $this->hasMany(Room::class);
+    }
+
+    public function cabinetSpecifications(): HasMany
+    {
+        return $this->hasMany(CabinetSpecification::class);
+    }
+
     protected static function booted()
     {
         static::addGlobalScope(new UserPermissionScope('user'));
