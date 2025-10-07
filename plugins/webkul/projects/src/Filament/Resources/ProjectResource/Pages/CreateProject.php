@@ -167,16 +167,15 @@ class CreateProject extends CreateRecord
                 // Rename the actual file in storage
                 \Storage::disk('public')->move($pdfPath, $newPath);
 
-                // Extract page count from PDF
+                // Extract page count from PDF using proper parser
                 $pageCount = null;
                 try {
                     $fullPath = \Storage::disk('public')->path($newPath);
                     if (file_exists($fullPath)) {
-                        // Use a simple regex to count pages in PDF
-                        $content = file_get_contents($fullPath);
-                        if (preg_match_all('/\/Page\W/', $content, $matches)) {
-                            $pageCount = count($matches[0]);
-                        }
+                        $parser = new \Smalot\PdfParser\Parser();
+                        $pdf = $parser->parseFile($fullPath);
+                        $pages = $pdf->getPages();
+                        $pageCount = count($pages);
                     }
                 } catch (\Exception $e) {
                     \Log::warning('Could not extract page count from PDF: ' . $e->getMessage());

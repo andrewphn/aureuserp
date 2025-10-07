@@ -170,15 +170,15 @@ class PdfDocumentsRelationManager extends RelationManager
                             $data['mime_type'] = 'application/pdf';
                         }
 
-                        // Extract page count from PDF
+                        // Extract page count from PDF using proper parser
                         if (empty($data['page_count']) && !empty($data['file_path'])) {
                             try {
                                 $fullPath = Storage::disk('public')->path($data['file_path']);
                                 if (file_exists($fullPath)) {
-                                    $content = file_get_contents($fullPath);
-                                    if (preg_match_all('/\/Page\W/', $content, $matches)) {
-                                        $data['page_count'] = count($matches[0]);
-                                    }
+                                    $parser = new \Smalot\PdfParser\Parser();
+                                    $pdf = $parser->parseFile($fullPath);
+                                    $pages = $pdf->getPages();
+                                    $data['page_count'] = count($pages);
                                 }
                             } catch (\Exception $e) {
                                 \Log::warning('Could not extract page count from PDF: ' . $e->getMessage());
