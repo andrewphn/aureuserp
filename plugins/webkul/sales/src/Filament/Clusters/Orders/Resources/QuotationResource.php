@@ -1145,13 +1145,13 @@ class QuotationResource extends Resource
                 // Dynamic attribute selectors for configurable products
                 TableColumn::make('attribute_27')
                     ->label('Pricing Level')
-                    ->width(180),
+                    ->width(220),
                 TableColumn::make('attribute_28')
                     ->label('Material')
-                    ->width(200),
+                    ->width(280),
                 TableColumn::make('attribute_29')
                     ->label('Finish')
-                    ->width(200),
+                    ->width(250),
 
                 TableColumn::make('product_qty')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.quantity'))
