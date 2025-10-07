@@ -13,6 +13,7 @@ return [
                 'title'  => 'General',
                 'fields' => [
                     'customer'       => 'Customer',
+                    'project'        => 'Project',
                     'expiration'     => 'Expiration',
                     'quotation-date' => 'Quotation Date',
                     'order-date'     => 'Order Date',
@@ -262,6 +263,7 @@ return [
                 'title'   => 'General',
                 'entries' => [
                     'customer'       => 'Customer',
+                    'project'        => 'Project',
                     'expiration'     => 'Expiration',
                     'quotation-date' => 'Quotation Date',
                     'payment-term'   => 'Payment Term',
