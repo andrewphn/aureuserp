@@ -129,7 +129,7 @@ class ProjectResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->required()
-                                        ->default(1) // Default to TCS (The Carpenter's Son Woodworking LLC)
+                                        ->default(fn () => \Webkul\Support\Models\Company::where('is_default', true)->value('id'))
                                         ->reactive()
                                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                             // Clear branch selection when company changes
