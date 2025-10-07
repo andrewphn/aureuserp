@@ -5,8 +5,8 @@ namespace App\Filament\Resources\PdfDocumentResource\Pages;
 use App\Filament\Resources\PdfDocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
+use Filament\Infolists\Components;
+use Filament\Schemas\Schema;
 
 class ViewPdfDocument extends ViewRecord
 {
@@ -20,81 +20,81 @@ class ViewPdfDocument extends ViewRecord
         ];
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
-                Infolists\Components\Section::make('Document Information')
-                    ->schema([
-                        Infolists\Components\TextEntry::make('title')
-                            ->size(Infolists\Components\TextEntry\TextEntrySize::Large)
+        return $schema
+            ->components([
+                Components\Section::make('Document Information')
+                    ->components([
+                        Components\TextEntry::make('title')
+                            ->size(Components\TextEntry\TextEntrySize::Large)
                             ->weight('bold'),
 
-                        Infolists\Components\TextEntry::make('description')
+                        Components\TextEntry::make('description')
                             ->columnSpanFull(),
 
-                        Infolists\Components\TextEntry::make('file_path')
+                        Components\TextEntry::make('file_path')
                             ->label('File')
                             ->formatStateUsing(fn ($state) => basename($state))
                             ->url(fn ($record) => Storage::url($record->file_path))
                             ->openUrlInNewTab(),
 
-                        Infolists\Components\TextEntry::make('file_size')
+                        Components\TextEntry::make('file_size')
                             ->label('Size')
                             ->formatStateUsing(fn ($state) => number_format($state / 1024, 2) . ' KB'),
 
-                        Infolists\Components\TextEntry::make('page_count')
+                        Components\TextEntry::make('page_count')
                             ->label('Pages')
                             ->default('N/A'),
 
-                        Infolists\Components\TextEntry::make('mime_type')
+                        Components\TextEntry::make('mime_type')
                             ->label('Type')
                             ->badge()
                             ->color('gray'),
                     ])
                     ->columns(3),
 
-                Infolists\Components\Section::make('Classification')
-                    ->schema([
-                        Infolists\Components\TextEntry::make('folder.name')
+                Components\Section::make('Classification')
+                    ->components([
+                        Components\TextEntry::make('folder.name')
                             ->label('Folder')
                             ->badge()
                             ->color('gray')
                             ->default('None'),
 
-                        Infolists\Components\TextEntry::make('category.name')
+                        Components\TextEntry::make('category.name')
                             ->label('Category')
                             ->badge()
                             ->color(fn ($record) => $record->category?->color ?? 'primary')
                             ->default('None'),
 
-                        Infolists\Components\TextEntry::make('documentable_type')
+                        Components\TextEntry::make('documentable_type')
                             ->label('Related To')
                             ->formatStateUsing(fn ($state) => $state ? class_basename($state) : 'None')
                             ->badge()
                             ->color('success'),
 
-                        Infolists\Components\TextEntry::make('tags')
+                        Components\TextEntry::make('tags')
                             ->badge()
                             ->separator(',')
                             ->default('None'),
 
-                        Infolists\Components\IconEntry::make('is_public')
+                        Components\IconEntry::make('is_public')
                             ->label('Public')
                             ->boolean(),
                     ])
                     ->columns(3),
 
-                Infolists\Components\Section::make('Metadata')
-                    ->schema([
-                        Infolists\Components\TextEntry::make('uploader.name')
+                Components\Section::make('Metadata')
+                    ->components([
+                        Components\TextEntry::make('uploader.name')
                             ->label('Uploaded By'),
 
-                        Infolists\Components\TextEntry::make('created_at')
+                        Components\TextEntry::make('created_at')
                             ->label('Uploaded')
                             ->dateTime(),
 
-                        Infolists\Components\TextEntry::make('updated_at')
+                        Components\TextEntry::make('updated_at')
                             ->label('Last Modified')
                             ->dateTime(),
                     ])
