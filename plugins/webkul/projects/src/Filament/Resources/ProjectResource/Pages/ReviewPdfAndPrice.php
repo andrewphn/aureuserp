@@ -27,12 +27,16 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public ?array $data = [];
 
+    public $record;
+
     public $pdfDocument;
 
     public $currentPage = 1;
 
-    public function mount(): void
+    public function mount($record): void
     {
+        $this->record = \Webkul\Project\Models\Project::findOrFail($record);
+
         $pdfId = request()->get('pdf');
         $this->pdfDocument = PdfDocument::findOrFail($pdfId);
 
