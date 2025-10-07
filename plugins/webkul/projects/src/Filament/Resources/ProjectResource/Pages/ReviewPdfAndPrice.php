@@ -145,7 +145,6 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                 ->addable(false)
                                 ->deletable(false)
                                 ->collapsible()
-                                ->collapsed()
                                 ->itemLabel(fn ($state) => 'Page ' . ($state['page_number'] ?? ''))
                                 ->columnSpanFull(),
                         ]),
