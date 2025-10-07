@@ -164,7 +164,7 @@ class ProjectResource extends Resource
                                         ->helperText('Optional: Select a specific branch if applicable'),
                                     Select::make('partner_id')
                                         ->label(__('projects::filament/resources/project.form.sections.additional.fields.customer'))
-                                        ->relationship('partner', 'name', fn ($query) => $query->where('subtype', 'customer'))
+                                        ->relationship('partner', 'name', fn ($query) => $query->where('sub_type', 'customer'))
                                         ->searchable()
                                         ->preload()
                                         ->required()
