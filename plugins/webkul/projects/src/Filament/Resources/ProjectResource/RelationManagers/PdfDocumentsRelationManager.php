@@ -90,6 +90,33 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->required()
                     ->helperText('Select the type of document(s) you are uploading'),
 
+                \Filament\Forms\Components\Select::make('document_tags')
+                    ->label('Tags')
+                    ->multiple()
+                    ->relationship('documentTags', 'name')
+                    ->preload()
+                    ->createOptionForm([
+                        \Filament\Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        \Filament\Forms\Components\Select::make('type')
+                            ->options([
+                                'status' => 'Status',
+                                'category' => 'Category',
+                                'priority' => 'Priority',
+                                'custom' => 'Custom',
+                            ])
+                            ->default('custom'),
+                        \Filament\Forms\Components\TextInput::make('color')
+                            ->label('Color (hex)')
+                            ->placeholder('#3B82F6')
+                            ->prefix('#')
+                            ->maxLength(7),
+                        \Filament\Forms\Components\Textarea::make('description')
+                            ->rows(2),
+                    ])
+                    ->helperText('Select or create tags to organize this document'),
+
                 \Filament\Forms\Components\Textarea::make('notes')
                     ->label('Notes')
                     ->rows(3)
@@ -117,6 +144,13 @@ class PdfDocumentsRelationManager extends RelationManager
                 TextColumn::make('page_count')
                     ->label('Pages')
                     ->default('—'),
+
+                TextColumn::make('documentTags.name')
+                    ->label('Tags')
+                    ->badge()
+                    ->separator(',')
+                    ->limitList(3)
+                    ->searchable(),
 
                 TextColumn::make('uploader.name')
                     ->label('Uploaded By')

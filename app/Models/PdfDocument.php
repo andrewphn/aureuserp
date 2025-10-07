@@ -95,6 +95,17 @@ class PdfDocument extends Model
     }
 
     /**
+     * Get all tags for this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function documentTags()
+    {
+        return $this->belongsToMany(\Webkul\Project\Models\Tag::class, 'pdf_document_tag', 'pdf_document_id', 'tag_id')
+                    ->withTimestamps();
+    }
+
+    /**
      * Get all annotations for this document.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
