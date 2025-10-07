@@ -1249,6 +1249,62 @@ class QuotationResource extends Resource
                     ->afterStateUpdated(fn (Set $set, Get $get) => static::afterProductUpdated($set, $get))
                     ->required()
                     ->selectablePlaceholder(false),
+
+                // Dynamic attribute selectors for configurable products
+                Group::make()
+                    ->schema(function (Get $get) {
+                        $productId = $get('product_id');
+                        if (!$productId) {
+                            return [];
+                        }
+
+                        $product = \Webkul\Sale\Models\Product::find($productId);
+                        if (!$product || !$product->is_configurable) {
+                            return [];
+                        }
+
+                        // Get product attributes
+                        $attributes = \DB::table('products_product_attributes')
+                            ->join('products_attributes', 'products_product_attributes.attribute_id', '=', 'products_attributes.id')
+                            ->where('products_product_attributes.product_id', $productId)
+                            ->orderBy('products_product_attributes.sort')
+                            ->select('products_attributes.*')
+                            ->get();
+
+                        $attributeFields = [];
+                        foreach ($attributes as $attribute) {
+                            // Get attribute options
+                            $options = \DB::table('products_attribute_options')
+                                ->where('attribute_id', $attribute->id)
+                                ->orderBy('sort')
+                                ->pluck('name', 'id')
+                                ->toArray();
+
+                            $attributeFields[] = Select::make("attribute_{$attribute->id}")
+                                ->label($attribute->name)
+                                ->options($options)
+                                ->live()
+                                ->afterStateUpdated(function (Set $set, Get $get) {
+                                    static::updatePriceWithAttributes($set, $get);
+                                })
+                                ->helperText(function (Get $get) use ($attribute) {
+                                    $selectedOptionId = $get("attribute_{$attribute->id}");
+                                    if ($selectedOptionId) {
+                                        $option = \DB::table('products_attribute_options')
+                                            ->where('id', $selectedOptionId)
+                                            ->first();
+                                        if ($option && $option->extra_price > 0) {
+                                            return '+$' . number_format($option->extra_price, 2) . ' / LF';
+                                        }
+                                    }
+                                    return null;
+                                });
+                        }
+
+                        return $attributeFields;
+                    })
+                    ->visible(fn (Get $get) => $get('product_id') && \Webkul\Sale\Models\Product::find($get('product_id'))?->is_configurable)
+                    ->columnSpanFull(),
                 TextInput::make('product_qty')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.quantity'))
                     ->required()
@@ -1385,9 +1441,76 @@ class QuotationResource extends Resource
                 Hidden::make('purchase_price')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.fields.cost'))
                     ->default(0),
+                Hidden::make('attribute_selections')
+                    ->default('[]'),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire))
             ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record, $livewire) => static::mutateProductRelationship($data, $record, $livewire));
+    }
+
+    private static function updatePriceWithAttributes(Set $set, Get $get): void
+    {
+        $productId = $get('product_id');
+        if (!$productId) {
+            return;
+        }
+
+        $product = Product::withTrashed()->find($productId);
+        if (!$product || !$product->is_configurable) {
+            return;
+        }
+
+        // Start with base product price
+        $basePrice = floatval($product->price ?? 0);
+        $totalAttributePrice = 0;
+
+        // Get all product attributes
+        $attributes = \DB::table('products_product_attributes')
+            ->where('product_id', $productId)
+            ->pluck('attribute_id')
+            ->toArray();
+
+        // Collect attribute selections for storage
+        $attributeSelections = [];
+
+        foreach ($attributes as $attributeId) {
+            $selectedOptionId = $get("attribute_{$attributeId}");
+
+            if ($selectedOptionId) {
+                // Get the option details
+                $option = \DB::table('products_attribute_options')
+                    ->where('id', $selectedOptionId)
+                    ->first();
+
+                if ($option) {
+                    $totalAttributePrice += floatval($option->extra_price);
+
+                    // Get attribute name
+                    $attribute = \DB::table('products_attributes')
+                        ->where('id', $attributeId)
+                        ->first();
+
+                    // Store selection for database
+                    $attributeSelections[] = [
+                        'attribute_id' => $attributeId,
+                        'attribute_name' => $attribute->name ?? '',
+                        'option_id' => $option->id,
+                        'option_name' => $option->name,
+                        'extra_price' => floatval($option->extra_price),
+                    ];
+                }
+            }
+        }
+
+        // Update the unit price with base + all attribute prices
+        $finalPrice = $basePrice + $totalAttributePrice;
+        $set('price_unit', round($finalPrice, 2));
+
+        // Store attribute selections as JSON
+        $set('attribute_selections', json_encode($attributeSelections));
+
+        // Recalculate line totals
+        static::calculateLineTotals($set, $get);
     }
 
     public static function mutateProductRelationship(array $data, $record): array
@@ -1426,9 +1549,24 @@ class QuotationResource extends Resource
 
         $set('product_uom_qty', round($uomQuantity, 2));
 
-        $priceUnit = static::calculateUnitPrice($get);
-
-        $set('price_unit', round($priceUnit, 2));
+        // For configurable products, use base price and let attributes add to it
+        if ($product->is_configurable) {
+            $set('price_unit', round(floatval($product->price ?? 0), 2));
+            // Clear any previous attribute selections
+            $set('attribute_selections', '[]');
+            // Clear attribute fields
+            $attributes = \DB::table('products_product_attributes')
+                ->where('product_id', $product->id)
+                ->pluck('attribute_id')
+                ->toArray();
+            foreach ($attributes as $attributeId) {
+                $set("attribute_{$attributeId}", null);
+            }
+        } else {
+            // For non-configurable products, use vendor price calculation
+            $priceUnit = static::calculateUnitPrice($get);
+            $set('price_unit', round($priceUnit, 2));
+        }
 
         $set('taxes', $product->productTaxes->pluck('id')->toArray());
 
