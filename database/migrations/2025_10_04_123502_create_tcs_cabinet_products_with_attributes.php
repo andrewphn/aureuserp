@@ -22,6 +22,7 @@ return new class extends Migration
         if (!$categoryId) {
             DB::table('products_categories')->insert([
                 'name' => 'Woodwork Services',
+                'full_name' => 'Woodwork Services',
                 'creator_id' => 1,
                 'created_at' => $now,
                 'updated_at' => $now,
