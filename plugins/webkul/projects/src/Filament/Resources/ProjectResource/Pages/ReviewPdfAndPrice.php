@@ -20,7 +20,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
     use InteractsWithForms;
     protected static string $resource = ProjectResource::class;
 
-    protected string $view = 'projects::filament.pages.review-pdf-and-price';
+    protected string $view = 'webkul-project::filament.pages.review-pdf-and-price';
 
     protected static ?string $title = 'Review PDF & Create Pricing';
 
