@@ -53,10 +53,38 @@ class ReviewPdfAndPrice extends Page implements HasForms
         return $schema
             ->components([
                 Section::make('Extracted Cover Page Information')
-                    ->description('Edit the extracted information below then click the "Save to Project" button at the bottom')
+                    ->description('Select or create a customer, then edit the extracted information and save')
                     ->schema([
+                        Select::make('selected_partner_id')
+                            ->label('Select Customer')
+                            ->options(function () {
+                                return \Webkul\Partner\Models\Partner::query()
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->default(fn() => $this->record->partner_id)
+                            ->createOptionUsing(function (array $data) {
+                                $partner = \Webkul\Partner\Models\Partner::create($data);
+                                return $partner->id;
+                            })
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->label('Customer Name')
+                                    ->required(),
+                                TextInput::make('email')
+                                    ->label('Email')
+                                    ->email(),
+                                TextInput::make('phone')
+                                    ->label('Phone')
+                                    ->tel(),
+                            ])
+                            ->helperText('Select an existing customer or create a new one')
+                            ->columnSpanFull(),
+
                         TextInput::make('extracted_customer_name')
-                            ->label('Customer Name')
+                            ->label('Customer Name (from PDF)')
                             ->placeholder('Not extracted'),
 
                         TextInput::make('extracted_customer_email')
@@ -477,6 +505,12 @@ class ReviewPdfAndPrice extends Page implements HasForms
         try {
             $updated = [];
 
+            // Update project customer if selected
+            if (!empty($data['selected_partner_id'])) {
+                $this->record->partner_id = $data['selected_partner_id'];
+                $updated[] = 'customer';
+            }
+
             // Update project fields
             if (!empty($data['extracted_project_name'])) {
                 $this->record->name = $data['extracted_project_name'];
@@ -517,8 +551,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
             }
 
             // Update customer (partner) fields
-            if ($this->record->partner_id) {
-                $partner = \DB::table('partners_partners')->where('id', $this->record->partner_id)->first();
+            $partnerId = !empty($data['selected_partner_id']) ? $data['selected_partner_id'] : $this->record->partner_id;
+
+            if ($partnerId) {
+                $partner = \DB::table('partners_partners')->where('id', $partnerId)->first();
                 if ($partner) {
                     $partnerUpdates = [];
 
@@ -534,7 +570,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
                     if (!empty($partnerUpdates)) {
                         \DB::table('partners_partners')
-                            ->where('id', $this->record->partner_id)
+                            ->where('id', $partnerId)
                             ->update($partnerUpdates);
                     }
                 }
