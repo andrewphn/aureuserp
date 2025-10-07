@@ -24,7 +24,7 @@ class ReviewExtractedData extends Page
 {
     protected static string $resource = PdfDocumentResource::class;
 
-    protected static string $view = 'filament.resources.pdf-document-resource.pages.review-extracted-data';
+    protected string $view = 'filament.resources.pdf-document-resource.pages.review-extracted-data';
 
     public PdfDocument $record;
     public ?array $extractedData = null;
