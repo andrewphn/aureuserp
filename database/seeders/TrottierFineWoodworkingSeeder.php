@@ -24,12 +24,13 @@ class TrottierFineWoodworkingSeeder extends Seeder
                 'sub_type' => 'customer',
                 'account_type' => 'company',
                 'email' => 'contact@trottierfine.com',
-                'phone' => '(555) 123-4567',
-                'street1' => '123 Main Street',
-                'city' => 'Burlington',
-                'state_id' => null, // Set appropriate state ID if needed
-                'country_id' => 233, // USA country ID (adjust if needed)
-                'zip' => '05401',
+                'phone' => null,
+                'street1' => '15 Correia Ln',
+                'street2' => null,
+                'city' => 'Nantucket',
+                'state_id' => null, // Massachusetts
+                'country_id' => 233, // USA
+                'zip' => '02554',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
