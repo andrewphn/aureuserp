@@ -5,8 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PdfDocumentResource\Pages;
 use App\Models\PdfDocument;
 use App\Filament\Forms\Components\PdfViewerField;
+use App\Services\PdfDataExtractor;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -274,6 +276,56 @@ class PdfDocumentResource extends Resource
                         !$record->metadata_reviewed &&
                         !empty($record->extracted_metadata)
                     ),
+                Tables\Actions\Action::make('reextract')
+                    ->label('Re-extract Metadata')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading('Re-extract Metadata')
+                    ->modalDescription('This will re-run the extraction process using the latest extraction logic. Any previous metadata will be overwritten.')
+                    ->modalSubmitActionLabel('Re-extract')
+                    ->visible(fn (PdfDocument $record) =>
+                        !empty($record->file_path) &&
+                        $record->pages()->count() > 0
+                    )
+                    ->action(function (PdfDocument $record) {
+                        try {
+                            $extractor = app(PdfDataExtractor::class);
+
+                            // Re-extract metadata
+                            $metadata = $extractor->extractMetadata($record);
+
+                            // Re-extract room data
+                            $roomData = $extractor->extractRoomData($record);
+
+                            // Update the record
+                            $record->update([
+                                'extracted_metadata' => array_merge($metadata, ['rooms' => $roomData]),
+                                'processing_status' => 'completed',
+                                'metadata_reviewed' => false, // Reset so they can review new data
+                                'extracted_at' => now(),
+                            ]);
+
+                            Notification::make()
+                                ->title('Metadata Re-extracted Successfully')
+                                ->body('The document has been re-processed with the latest extraction logic.')
+                                ->success()
+                                ->send();
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Re-extraction Failed')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+
+                            \Log::error('PDF re-extraction failed', [
+                                'pdf_id' => $record->id,
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                        }
+                    }),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('download')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -282,6 +334,62 @@ class PdfDocumentResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('reextractBulk')
+                        ->label('Re-extract Metadata')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->modalHeading('Re-extract Metadata for Selected Documents')
+                        ->modalDescription('This will re-run the extraction process for all selected documents using the latest extraction logic.')
+                        ->modalSubmitActionLabel('Re-extract All')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $extractor = app(PdfDataExtractor::class);
+                            $successCount = 0;
+                            $errorCount = 0;
+
+                            foreach ($records as $record) {
+                                try {
+                                    // Re-extract metadata
+                                    $metadata = $extractor->extractMetadata($record);
+
+                                    // Re-extract room data
+                                    $roomData = $extractor->extractRoomData($record);
+
+                                    // Update the record
+                                    $record->update([
+                                        'extracted_metadata' => array_merge($metadata, ['rooms' => $roomData]),
+                                        'processing_status' => 'completed',
+                                        'metadata_reviewed' => false,
+                                        'extracted_at' => now(),
+                                    ]);
+
+                                    $successCount++;
+
+                                } catch (\Exception $e) {
+                                    $errorCount++;
+                                    \Log::error('PDF re-extraction failed', [
+                                        'pdf_id' => $record->id,
+                                        'error' => $e->getMessage(),
+                                    ]);
+                                }
+                            }
+
+                            if ($successCount > 0) {
+                                Notification::make()
+                                    ->title('Bulk Re-extraction Complete')
+                                    ->body("Successfully re-extracted {$successCount} document(s)." . ($errorCount > 0 ? " {$errorCount} failed." : ''))
+                                    ->success()
+                                    ->send();
+                            }
+
+                            if ($errorCount > 0 && $successCount === 0) {
+                                Notification::make()
+                                    ->title('Bulk Re-extraction Failed')
+                                    ->body("Failed to re-extract {$errorCount} document(s).")
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])

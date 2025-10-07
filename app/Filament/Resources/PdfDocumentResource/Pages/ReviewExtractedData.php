@@ -9,7 +9,9 @@ use App\Models\Project;
 use App\Models\ProjectAddress;
 use App\Models\State;
 use App\Models\Country;
+use App\Models\CabinetSpecification;
 use App\Services\PdfDataExtractor;
+use App\Services\ProductMatcher;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -43,6 +45,58 @@ class ReviewExtractedData extends Page
     }
 
     /**
+     * Format phone number to (XXX) XXX-XXXX format
+     */
+    protected function formatPhoneNumber(?string $phone): ?string
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        // Remove all non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Handle 10-digit US numbers
+        if (strlen($phone) == 10) {
+            return sprintf("(%s) %s-%s",
+                substr($phone, 0, 3),
+                substr($phone, 3, 3),
+                substr($phone, 6, 4)
+            );
+        }
+
+        // Handle 11-digit numbers (with country code)
+        if (strlen($phone) == 11 && $phone[0] == '1') {
+            return sprintf("(%s) %s-%s",
+                substr($phone, 1, 3),
+                substr($phone, 4, 3),
+                substr($phone, 7, 4)
+            );
+        }
+
+        // Return as-is if not standard format
+        return $phone;
+    }
+
+    /**
+     * Parse address into street1 and street2
+     */
+    protected function parseStreetAddress(?string $fullAddress): array
+    {
+        if (empty($fullAddress)) {
+            return ['street1' => null, 'street2' => null];
+        }
+
+        // Simple parsing - split on comma, newline, or "Unit"/"Apt"/"Suite"
+        $parts = preg_split('/[,\n]|(?=Unit|Apt|Ste|Suite)/i', $fullAddress, 2);
+
+        return [
+            'street1' => trim($parts[0] ?? ''),
+            'street2' => isset($parts[1]) ? trim($parts[1]) : null
+        ];
+    }
+
+    /**
      * Find potential matching customers
      */
     protected function findCustomerMatches(): void
@@ -58,7 +112,7 @@ class ReviewExtractedData extends Page
         $matches = [];
 
         // Search by email (exact match)
-        if (!empty($clientData['email']['value'])) {
+        if (!empty($clientData['email']['value'] ?? null)) {
             $emailMatches = (clone $query)
                 ->where('email', $clientData['email']['value'])
                 ->get();
@@ -73,7 +127,7 @@ class ReviewExtractedData extends Page
         }
 
         // Search by phone (exact match)
-        if (!empty($clientData['phone']['value'])) {
+        if (!empty($clientData['phone']['value'] ?? null)) {
             $phone = preg_replace('/[^0-9]/', '', $clientData['phone']['value']);
             $phoneMatches = (clone $query)
                 ->where('phone', 'LIKE', '%' . $phone . '%')
@@ -90,11 +144,14 @@ class ReviewExtractedData extends Page
             }
         }
 
-        // Search by name (fuzzy match)
-        if (!empty($clientData['name']['value'])) {
-            $name = $clientData['name']['value'];
+        // Search by name or company (fuzzy match)
+        $searchName = $clientData['name']['value'] ?? $clientData['company']['value'] ?? null;
+        if (!empty($searchName)) {
             $nameMatches = (clone $query)
-                ->where('name', 'LIKE', '%' . $name . '%')
+                ->where(function ($q) use ($searchName) {
+                    $q->where('name', 'LIKE', '%' . $searchName . '%')
+                      ->orWhere('company_registry', 'LIKE', '%' . $searchName . '%');
+                })
                 ->get();
 
             foreach ($nameMatches as $match) {
@@ -140,12 +197,19 @@ class ReviewExtractedData extends Page
                                     ->required(),
                             ]),
 
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('street1')
+                                    ->label('Street Address Line 1')
+                                    ->default($this->parseStreetAddress($this->extractedData['project']['street_address'] ?? null)['street1']),
+
+                                Forms\Components\TextInput::make('street2')
+                                    ->label('Street Address Line 2')
+                                    ->default($this->parseStreetAddress($this->extractedData['project']['street_address'] ?? null)['street2']),
+                            ]),
+
                         Forms\Components\Grid::make(3)
                             ->schema([
-                                Forms\Components\TextInput::make('street_address')
-                                    ->label('Street Address')
-                                    ->default($this->extractedData['project']['street_address'] ?? null),
-
                                 Forms\Components\TextInput::make('city')
                                     ->label('City')
                                     ->default($this->extractedData['project']['city'] ?? null),
@@ -219,7 +283,11 @@ class ReviewExtractedData extends Page
                             ->schema([
                                 Forms\Components\TextInput::make('customer_name')
                                     ->label('Name')
-                                    ->default($this->extractedData['client']['name']['value'] ?? null)
+                                    ->default(
+                                        $this->extractedData['client']['name']['value']
+                                        ?? $this->extractedData['client']['company']['value']
+                                        ?? null
+                                    )
                                     ->required()
                                     ->visible(fn($get) => $get('customer_action') === 'new'),
 
@@ -232,13 +300,18 @@ class ReviewExtractedData extends Page
                                 Forms\Components\TextInput::make('customer_phone')
                                     ->label('Phone')
                                     ->tel()
-                                    ->default($this->extractedData['client']['phone']['value'] ?? null)
+                                    ->default($this->formatPhoneNumber($this->extractedData['client']['phone']['value'] ?? null))
                                     ->visible(fn($get) => $get('customer_action') === 'new'),
 
                                 Forms\Components\TextInput::make('customer_website')
                                     ->label('Website')
                                     ->url()
                                     ->default($this->extractedData['client']['website']['value'] ?? null)
+                                    ->visible(fn($get) => $get('customer_action') === 'new'),
+
+                                Forms\Components\TextInput::make('customer_company')
+                                    ->label('Company')
+                                    ->default($this->extractedData['client']['company']['value'] ?? null)
                                     ->visible(fn($get) => $get('customer_action') === 'new'),
                             ]),
                     ]),
@@ -283,8 +356,13 @@ class ReviewExtractedData extends Page
     {
         $parts = [];
 
-        if (!empty($this->extractedData['client']['name']['value'])) {
-            $parts[] = $this->extractedData['client']['name']['value'];
+        // Use client name, or company name as fallback
+        $clientName = $this->extractedData['client']['name']['value']
+            ?? $this->extractedData['client']['company']['value']
+            ?? null;
+
+        if (!empty($clientName)) {
+            $parts[] = $clientName;
         }
 
         if (!empty($this->extractedData['project']['type'])) {
@@ -415,7 +493,9 @@ class ReviewExtractedData extends Page
                     'email' => $data['customer_email'] ?? null,
                     'phone' => $data['customer_phone'] ?? null,
                     'website' => $data['customer_website'] ?? null,
-                    'street1' => $data['street_address'] ?? null,
+                    'company_registry' => $data['customer_company'] ?? null,
+                    'street1' => $data['street1'] ?? null,
+                    'street2' => $data['street2'] ?? null,
                     'city' => $data['city'] ?? null,
                     'state_id' => $data['state_id'] ?? null,
                     'zip' => $data['zip'] ?? null,
@@ -439,11 +519,12 @@ class ReviewExtractedData extends Page
             ]);
 
             // 3. Create project address
-            if (!empty($data['street_address'])) {
+            if (!empty($data['street1'])) {
                 ProjectAddress::create([
                     'project_id' => $project->id,
                     'type' => 'project',
-                    'street1' => $data['street_address'],
+                    'street1' => $data['street1'],
+                    'street2' => $data['street2'] ?? null,
                     'city' => $data['city'] ?? null,
                     'state_id' => $data['state_id'] ?? null,
                     'zip' => $data['zip'] ?? null,
@@ -452,7 +533,10 @@ class ReviewExtractedData extends Page
                 ]);
             }
 
-            // 4. Link PDF to project
+            // 4. Create cabinet specifications from extracted room equipment
+            $this->createCabinetSpecifications($project);
+
+            // 5. Link PDF to project
             $this->record->update([
                 'module_type' => 'projects',
                 'module_id' => $project->id,
@@ -470,5 +554,59 @@ class ReviewExtractedData extends Page
             ->send();
 
         $this->redirect(PdfDocumentResource::getUrl('index'));
+    }
+
+    /**
+     * Create cabinet specifications from extracted room equipment
+     *
+     * @param Project $project
+     * @return void
+     */
+    protected function createCabinetSpecifications(Project $project): void
+    {
+        // Get room data from extracted metadata
+        $rooms = $this->extractedData['rooms'] ?? [];
+
+        if (empty($rooms)) {
+            return;
+        }
+
+        $matcher = app(ProductMatcher::class);
+        $createdCount = 0;
+
+        foreach ($rooms as $roomName => $roomData) {
+            $equipment = $roomData['equipment'] ?? [];
+
+            if (empty($equipment)) {
+                continue;
+            }
+
+            foreach ($equipment as $item) {
+                // Try to match equipment to existing product
+                $product = $matcher->matchEquipment($item);
+
+                // Format equipment description
+                $equipmentString = $matcher->formatEquipmentString($item);
+
+                // Create cabinet specification
+                CabinetSpecification::create([
+                    'project_id' => $project->id,
+                    'product_variant_id' => $product?->id,
+                    'hardware_notes' => $equipmentString,
+                    'custom_modifications' => "Room: {$roomName}",
+                    'shop_notes' => $product
+                        ? "Auto-matched to product: {$product->name}"
+                        : "No product match found - manual selection required",
+                    'quantity' => 1,
+                    'creator_id' => auth()->id(),
+                ]);
+
+                $createdCount++;
+            }
+        }
+
+        if ($createdCount > 0) {
+            \Log::info("Created {$createdCount} cabinet specifications for project {$project->id}");
+        }
     }
 }

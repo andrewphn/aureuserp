@@ -75,6 +75,104 @@ class PdfDataExtractor
     }
 
     /**
+     * Extract room/location-specific data from individual pages
+     * This preserves duplicate equipment across different rooms
+     *
+     * @param PdfDocument $document
+     * @return array
+     */
+    public function extractRoomData(PdfDocument $document): array
+    {
+        $rooms = [];
+
+        // Process each page individually (pages 2+ typically have room-specific data)
+        $pages = $document->pages()
+            ->whereNotNull('extracted_text')
+            ->where('page_number', '>', 1) // Skip cover page
+            ->orderBy('page_number')
+            ->get();
+
+        foreach ($pages as $page) {
+            $text = $page->extracted_text;
+
+            // Identify room/location from page
+            $roomName = $this->identifyRoom($text);
+
+            if ($roomName) {
+                // Initialize room if not exists
+                if (!isset($rooms[$roomName])) {
+                    $rooms[$roomName] = [
+                        'pages' => [],
+                        'equipment' => [],
+                        'sections' => [],
+                    ];
+                }
+
+                // Track which pages contain this room
+                $rooms[$roomName]['pages'][] = $page->page_number;
+
+                // Extract equipment specific to this page/room
+                $equipment = $this->extractEquipment($text);
+                if (!empty($equipment)) {
+                    // Merge and deduplicate by brand+model combination
+                    foreach ($equipment as $item) {
+                        $key = strtolower($item['brand'] . '_' . $item['model']);
+                        $rooms[$roomName]['equipment'][$key] = $item;
+                    }
+                }
+
+                // Extract sections/elevations (e.g., "Section A", "Elevation F")
+                if (preg_match_all('/(?:Section|Elevation)\s+([A-Z])/i', $text, $matches)) {
+                    $rooms[$roomName]['sections'] = array_unique(array_merge(
+                        $rooms[$roomName]['sections'] ?? [],
+                        $matches[0]
+                    ));
+                }
+            }
+        }
+
+        // Convert equipment from associative array back to indexed array
+        foreach ($rooms as $roomName => &$roomData) {
+            if (!empty($roomData['equipment'])) {
+                $roomData['equipment'] = array_values($roomData['equipment']);
+            }
+        }
+
+        return $rooms;
+    }
+
+    /**
+     * Identify room/location name from page text
+     *
+     * @param string $text
+     * @return string|null
+     */
+    protected function identifyRoom(string $text): ?string
+    {
+        // Check for common room identifiers
+        $roomPatterns = [
+            'Island' => '/\bIsland\s+(?:Front\s+)?Elevation/i',
+            'Sink Wall' => '/\bSink\s+Wall\s+(?:Overview\s+)?Elevation/i',
+            'Fridge Wall' => '/\bFridge\s+Wall\s+(?:Overview\s+)?Elevation/i',
+            'Pantry' => '/\bPantry\s+(?:Exterior\s+Wall\s+)?Elevation/i',
+            'Kitchen' => '/\bKitchen\s+Plan\s+View/i',
+        ];
+
+        foreach ($roomPatterns as $room => $pattern) {
+            if (preg_match($pattern, $text)) {
+                return $room;
+            }
+        }
+
+        // Fallback: check for simple mentions
+        if (preg_match('/\b(Island|Sink\s+Wall|Fridge\s+Wall|Pantry)\b/i', $text, $match)) {
+            return ucwords(strtolower($match[1]));
+        }
+
+        return null;
+    }
+
+    /**
      * Create a field with value and confidence score
      *
      * @param mixed $value
@@ -348,6 +446,7 @@ class PdfDataExtractor
     protected function extractEquipment(string $text): array
     {
         $equipment = [];
+        $seen = []; // Track unique brand+model combinations
 
         // Common appliance brands and patterns
         $patterns = [
@@ -362,10 +461,17 @@ class PdfDataExtractor
         foreach ($patterns as $brand => $pattern) {
             if (preg_match_all($pattern, $text, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
-                    $equipment[] = [
-                        'brand' => $brand,
-                        'model' => trim($match[1]),
-                    ];
+                    $model = trim($match[1]);
+                    $key = strtolower($brand . '_' . $model);
+
+                    // Only add if not already seen (deduplication)
+                    if (!isset($seen[$key])) {
+                        $equipment[] = [
+                            'brand' => $brand,
+                            'model' => $model,
+                        ];
+                        $seen[$key] = true;
+                    }
                 }
             }
         }
