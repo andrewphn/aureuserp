@@ -12,16 +12,22 @@ return new class extends Migration
     {
         $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id');
 
-        // State IDs for USA
-        $stateIds = [
-            'CA' => 13,  // California
-            'NY' => 35,  // New York
-            'DE' => 16,  // Delaware
-            'IN' => 23,  // Indiana
-        ];
+        // Get actual country IDs from database (don't hardcode)
+        $usaCountryId = DB::table('countries')->where('code', 'US')->value('id');
+        $canadaCountryId = DB::table('countries')->where('code', 'CA')->value('id');
 
-        // USA country ID
-        $usaCountryId = 233;
+        // Skip if countries not seeded yet
+        if (!$usaCountryId || !$canadaCountryId) {
+            return;
+        }
+
+        // State IDs for USA (get from database)
+        $stateIds = [
+            'CA' => DB::table('states')->where('code', 'CA')->where('country_id', $usaCountryId)->value('id'),
+            'NY' => DB::table('states')->where('code', 'NY')->where('country_id', $usaCountryId)->value('id'),
+            'DE' => DB::table('states')->where('code', 'DE')->where('country_id', $usaCountryId)->value('id'),
+            'IN' => DB::table('states')->where('code', 'IN')->where('country_id', $usaCountryId)->value('id'),
+        ];
 
         // Vendor partners data
         $vendors = [
@@ -33,9 +39,9 @@ return new class extends Migration
                 'website' => 'www.richelieu.com',
                 'street1' => '7900 Henri-Bourassa West',
                 'city' => 'Ville Saint-Laurent',
-                'state_id' => null,  // Quebec (state_id not available in test environment)
+                'state_id' => null,  // Quebec (state_id queried from database below)
                 'zip' => 'H4S 1V4',
-                'country_id' => 38,  // Canada
+                'country_id' => $canadaCountryId,  // Canada - now using variable
             ],
             [
                 'name' => 'Serious Grit',
