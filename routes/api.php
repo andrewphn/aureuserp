@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // PDF Annotation API Routes
-Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('pdf')->name('api.pdf.')->group(function () {
+Route::middleware(['auth:web', 'throttle:api'])->prefix('pdf')->name('api.pdf.')->group(function () {
     // Document-level annotation operations
     Route::get('/{documentId}/annotations', [PdfAnnotationController::class, 'index'])->name('annotations.index');
     Route::post('/{documentId}/annotations', [PdfAnnotationController::class, 'store'])->middleware('throttle:60,1')->name('annotations.store');

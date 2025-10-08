@@ -39,6 +39,11 @@ trait HasLogActivity
     {
         $user = filament()->auth()->user();
 
+        // Skip logging if no authenticated user (CLI, tests, etc.)
+        if (!$user) {
+            return null;
+        }
+
         try {
             $changes = $this->determineChanges($event);
 
@@ -314,6 +319,7 @@ trait HasLogActivity
 
         if (
             ! is_array($value)
+            && $value !== null
             && json_decode($value, true)
         ) {
             $value = json_decode($value, true);
