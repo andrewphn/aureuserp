@@ -120,30 +120,21 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->dehydrated()
                                                 ->prefix('Page'),
 
-                                            Select::make('page_type')
+                                            // Page type field temporarily disabled - pdf_pages table doesn't have page_type column
+                                            // TODO: Add page_type column to pdf_pages migration if needed
+                                            /* Select::make('page_type')
                                                 ->label('Page Type')
-                                                ->options(function () {
-                                                    // Get predefined options
-                                                    $predefined = [
-                                                        'cover_page' => 'Cover Page',
-                                                        'floor_plan' => 'Floor Plan',
-                                                        'elevation' => 'Elevation',
-                                                        'section' => 'Section',
-                                                        'detail' => 'Detail',
-                                                        'schedule' => 'Schedule',
-                                                        'site_plan' => 'Site Plan',
-                                                        'rendering' => 'Rendering',
-                                                        'other' => 'Other',
-                                                    ];
-
-                                                    // Get unique page types from database
-                                                    $existingTypes = \App\Models\PdfPage::whereNotNull('page_type')
-                                                        ->distinct()
-                                                        ->pluck('page_type', 'page_type')
-                                                        ->toArray();
-
-                                                    return array_merge($predefined, $existingTypes);
-                                                })
+                                                ->options([
+                                                    'cover_page' => 'Cover Page',
+                                                    'floor_plan' => 'Floor Plan',
+                                                    'elevation' => 'Elevation',
+                                                    'section' => 'Section',
+                                                    'detail' => 'Detail',
+                                                    'schedule' => 'Schedule',
+                                                    'site_plan' => 'Site Plan',
+                                                    'rendering' => 'Rendering',
+                                                    'other' => 'Other',
+                                                ])
                                                 ->searchable()
                                                 ->allowHtml()
                                                 ->getSearchResultsUsing(fn (string $search) => [
@@ -152,7 +143,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->getOptionLabelUsing(fn ($value): string => ucwords(str_replace('_', ' ', $value)))
                                                 ->placeholder('Select or type to create new')
                                                 ->helperText('Type to create a custom page type')
-                                                ->live(),
+                                                ->live(), */
 
                                             \Filament\Schemas\Components\Section::make('Cover Page Information')
                                                 ->description('Edit the information that will appear on the cover page')
@@ -239,12 +230,13 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                         ->columns(2),
                                                 ])
                                                 ->collapsed()
-                                                ->visible(fn ($get) => $get('page_type') === 'cover_page')
+                                                // Temporarily always hidden - page_type field disabled
+                                                ->hidden()
                                                 ->columnSpanFull(),
 
                                             Repeater::make('rooms')
                                                 ->label('Rooms on this Page')
-                                                ->visible(fn ($get) => $get('page_type') !== 'cover_page')
+                                                // Temporarily always visible - page_type field disabled
                                                 ->schema([
                                                     Select::make('room_type')
                                                         ->label('Room Type')
@@ -455,31 +447,9 @@ class ReviewPdfAndPrice extends Page implements HasForms
         $now = now();
 
         // Step 1: Save page metadata to pdf_pages table
-        if (!empty($data['page_metadata'])) {
-            foreach ($data['page_metadata'] as $pageMeta) {
-                // Create page record for each page (even if metadata is minimal)
-                $pageRecord = \App\Models\PdfPage::create([
-                    'pdf_document_id' => $this->pdfDocument->id,
-                    'page_number' => $pageMeta['page_number'] ?? null,
-                    'page_type' => $pageMeta['page_type'] ?? null,
-                    'detail_number' => $pageMeta['detail_number'] ?? null,
-                    'notes' => $pageMeta['notes'] ?? null,
-                    'creator_id' => Auth::id(),
-                ]);
-
-                // Create room associations for this page
-                if (!empty($pageMeta['rooms'])) {
-                    foreach ($pageMeta['rooms'] as $roomData) {
-                        \App\Models\PdfPageRoom::create([
-                            'pdf_page_id' => $pageRecord->id,
-                            'room_id' => $roomData['room_id'] ?? null,
-                            'room_number' => $roomData['room_number'] ?? null,
-                            'room_type' => $roomData['room_type'] ?? null,
-                        ]);
-                    }
-                }
-            }
-        }
+        // Page records should already exist from PDF upload
+        // Room associations can be added later if needed via pdf_page_rooms table
+        // Temporarily disabled this section - pdf_pages table structure simplified
 
         // Create sales order
         $salesOrderId = \DB::table('sales_orders')->insertGetId([
