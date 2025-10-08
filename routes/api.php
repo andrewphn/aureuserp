@@ -30,4 +30,13 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('pdf')->name('api.pd
     Route::get('/annotations/{annotationId}', [PdfAnnotationController::class, 'show'])->name('annotations.show');
     Route::put('/annotations/{annotationId}', [PdfAnnotationController::class, 'update'])->middleware('throttle:60,1')->name('annotations.update');
     Route::delete('/annotations/{annotationId}', [PdfAnnotationController::class, 'destroy'])->middleware('throttle:30,1')->name('annotations.destroy');
+
+    // Page-level metadata operations
+    Route::get('/page/{pdfPageId}/project-number', [PdfAnnotationController::class, 'getProjectNumber'])->name('page.project-number');
+    Route::get('/annotations/page/{pdfPageId}/cabinet-runs', [PdfAnnotationController::class, 'getCabinetRuns'])->name('page.cabinet-runs');
+    Route::get('/page/{pdfPageId}/context', [PdfAnnotationController::class, 'getAnnotationContext'])->name('page.context');
+
+    // Page-level annotation operations
+    Route::post('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'savePageAnnotations'])->middleware('throttle:60,1')->name('page.annotations.save');
+    Route::get('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'loadPageAnnotations'])->name('page.annotations.load');
 });
