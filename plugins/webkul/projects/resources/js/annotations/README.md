@@ -5,11 +5,14 @@ Modular JavaScript for PDF annotation functionality. These modules reduce the si
 ## Module Structure
 
 ### `context-loader.js`
-Handles API calls to load dropdown data and existing annotations.
+Handles API calls to load dropdown data, existing annotations, and metadata.
 
 **Exports**:
 - `loadAnnotationContext(pdfPageId)` - Loads rooms, locations, runs, cabinets
 - `loadExistingAnnotations(pdfPageId)` - Loads saved annotations for page
+- `loadCabinetRuns(pdfPageId)` - Loads cabinet runs for page
+- `loadProjectNumber(pdfPageId)` - Loads project number
+- `loadAllMetadata(pdfPageId)` - Loads all metadata in parallel
 
 ### `cascade-filters.js`
 Manages hierarchical dropdown filtering logic.
@@ -26,6 +29,66 @@ Handles saving annotations with automatic entity creation.
 
 **Exports**:
 - `saveAnnotationsWithEntities(pdfPageId, annotations, annotationType, context)` - Saves annotations and creates linked entities
+
+### `canvas-renderer.js`
+PDF.js canvas rendering, zoom, rotation, and view management.
+
+**Exports**:
+- `createCanvasRenderer()` - Returns renderer object with methods:
+  - `renderCanvas(pdfPageCache, pdfCanvas, annotationCanvas, baseScale, zoomLevel, rotation)`
+  - `calculateFitToPage(pdfPageCache, container, baseScale, rotation)`
+  - `calculateFitToWidth(pdfPageCache, container, baseScale, rotation)`
+  - `calculateFitToHeight(pdfPageCache, container, baseScale, rotation)`
+  - `zoomIn(currentZoom, step, max)`
+  - `zoomOut(currentZoom, step, min)`
+  - `resetZoom()`
+  - `rotateClockwise(currentRotation)`
+  - `rotateCounterClockwise(currentRotation)`
+  - `resetView()`
+  - `saveView(zoomLevel, rotation, pageNum)`
+  - `loadPdfPage(pdfjsLib, pdfUrl, pageNum)`
+  - `calculateBaseScale(viewport, metadataPanelWidth, padding)`
+
+### `annotation-drawer.js`
+Drawing interactions for creating annotation rectangles on canvas.
+
+**Exports**:
+- `createAnnotationDrawer()` - Returns drawer object with methods:
+  - `startDrawing(e, canvas, currentTool)`
+  - `drawPreview(e, canvas, drawState, annotations, redrawCallback)`
+  - `stopDrawing(e, canvas, drawState, options, existingAnnotations)`
+  - `getAnnotationColor(annotationType, roomType, roomColors)`
+  - `generateLabel(annotationType, roomType, projectNumber, roomCodes, annotationCount)`
+  - `redrawAnnotations(annotations, canvas)`
+  - `setCursor(canvas, tool)`
+
+### `annotation-editor.js`
+Undo/redo, selection, and deletion of annotations.
+
+**Exports**:
+- `createAnnotationEditor()` - Returns editor object with methods:
+  - `saveState(annotations, undoStack, maxStackSize)`
+  - `undo(annotations, undoStack, redoStack)`
+  - `redo(annotations, undoStack, redoStack)`
+  - `deleteSelected(annotations, selectedId)`
+  - `removeAnnotation(annotations, index)`
+  - `clearLastAnnotation(annotations)`
+  - `clearAllAnnotations(annotations, confirmCallback)`
+  - `selectAnnotation(annotations, x, y, tolerance)`
+  - `deselectAnnotation()`
+
+### `page-navigator.js`
+PDF page navigation (next, previous, first, last, go to page).
+
+**Exports**:
+- `createPageNavigator()` - Returns navigator object with methods:
+  - `goToPage(pdfDocument, pageNum, totalPages)`
+  - `goToFirstPage(pdfDocument, totalPages)`
+  - `goToLastPage(pdfDocument, totalPages)`
+  - `goToNextPage(pdfDocument, currentPage, totalPages)`
+  - `goToPreviousPage(pdfDocument, currentPage, totalPages)`
+  - `isValidPageNumber(pageNum, totalPages)`
+  - `sanitizePageInput(input, totalPages)`
 
 ## Usage in Blade Components
 
