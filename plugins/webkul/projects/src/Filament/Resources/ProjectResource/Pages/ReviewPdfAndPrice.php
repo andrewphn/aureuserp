@@ -37,6 +37,8 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public $currentPage = 1;
 
+    protected $pdfPageIdCache = [];
+
     public function mount(int|string $record): void
     {
         // Resolve the Project model using InteractsWithRecord trait
@@ -104,9 +106,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                             'pdfId' => $this->pdfDocument->id,
                                             'pdfDocument' => $this->pdfDocument,
                                             'pageNumber' => $get('page_number') ?? 1,
-                                            'pdfPageId' => \App\Models\PdfPage::where('pdf_document_id', $this->pdfDocument->id)
-                                                ->where('page_number', $get('page_number') ?? 1)
-                                                ->first()->id ?? null,
+                                            'pdfPageId' => $this->getPdfPageId($get('page_number') ?? 1),
                                             'itemKey' => 'page-' . ($get('page_number') ?? 1),
                                         ])
                                         ->key(fn ($get) => 'thumbnail-page-' . ($get('page_number') ?? 1))
@@ -713,5 +713,19 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 ->danger()
                 ->send();
         }
+    }
+
+    /**
+     * Get PDF page ID with caching to avoid N+1 queries
+     */
+    protected function getPdfPageId(int $pageNumber): ?int
+    {
+        if (!isset($this->pdfPageIdCache[$pageNumber])) {
+            $this->pdfPageIdCache[$pageNumber] = \App\Models\PdfPage::where('pdf_document_id', $this->pdfDocument->id)
+                ->where('page_number', $pageNumber)
+                ->value('id');
+        }
+
+        return $this->pdfPageIdCache[$pageNumber];
     }
 }
