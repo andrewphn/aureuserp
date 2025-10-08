@@ -22,29 +22,33 @@ class InstallAllPlugins extends Command
 
     /**
      * Plugin installation order (respects dependencies)
+     *
+     * IMPORTANT: Do NOT run erp:install separately!
+     * This command handles the complete installation in the correct order.
      */
     protected $pluginOrder = [
         // Core ERP first
         'erp',
 
-        // Foundation plugins
+        // Foundation plugins (must come before products)
         'employees',
         'partners',
         'contacts',
 
-        // Product & Inventory
+        // Product & Inventory (required by sales)
         'products',
         'inventories',
 
-        // Accounting
+        // Accounting (required by sales)
         'accounts',
         'payments',
 
-        // Sales & Invoicing
+        // Sales & Invoicing (required by projects)
         'invoices',
         'sales',
 
-        // Projects (depends on sales)
+        // Projects (depends on sales, products, accounts)
+        // PDF migrations are in projects plugin
         'projects',
 
         // Supporting modules
@@ -64,6 +68,20 @@ class InstallAllPlugins extends Command
     {
         $this->info('🚀 Starting full ERP installation...');
         $this->newLine();
+
+        // Check if already installed
+        if (!$this->option('fresh') && $this->isAlreadyInstalled()) {
+            $this->warn('⚠️  ERP appears to be already installed.');
+            $this->warn('   Running individual plugin installs may cause dependency issues.');
+            $this->newLine();
+
+            if (!$this->confirm('Continue anyway?', false)) {
+                $this->info('💡 Tip: Use --fresh flag for a clean installation:');
+                $this->info('   php artisan install:all --fresh');
+                return 0;
+            }
+            $this->newLine();
+        }
 
         // Check if fresh install requested
         if ($this->option('fresh')) {
@@ -144,6 +162,19 @@ class InstallAllPlugins extends Command
         try {
             $commands = array_keys($this->getApplication()->all());
             return in_array($command, $commands);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if ERP is already installed
+     */
+    protected function isAlreadyInstalled(): bool
+    {
+        try {
+            // Check if migrations table exists and has entries
+            return \DB::table('migrations')->count() > 0;
         } catch (\Exception $e) {
             return false;
         }
