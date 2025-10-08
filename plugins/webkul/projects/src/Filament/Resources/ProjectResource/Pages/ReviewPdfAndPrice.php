@@ -60,7 +60,13 @@ class ReviewPdfAndPrice extends Page implements HasForms
         for ($i = 1; $i <= $this->getTotalPages(); $i++) {
             $pageMetadata[] = [
                 'page_number' => $i,
-                'rooms' => [],
+                'rooms' => [
+                    [
+                        'room_number' => '',
+                        'room_type' => '',
+                        'room_id' => null,
+                    ]
+                ],
                 'detail_number' => '',
                 'notes' => '',
             ];
@@ -142,35 +148,16 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->helperText('Type to create a custom page type'),
 
                                             Repeater::make('rooms')
-                                                ->label('Rooms')
+                                                ->label('Rooms on this Page')
                                                 ->schema([
-                                                    Select::make('room_id')
-                                                        ->label('Project Room')
-                                                        ->options(function () {
-                                                            return Room::where('project_id', $this->record->id)
-                                                                ->pluck('name', 'id')
-                                                                ->toArray();
-                                                        })
-                                                        ->searchable()
-                                                        ->placeholder('Link to existing room (optional)')
-                                                        ->helperText('Select an existing project room or leave blank')
-                                                        ->live()
-                                                        ->afterStateUpdated(function ($state, $set) {
-                                                            if ($state) {
-                                                                $room = Room::find($state);
-                                                                if ($room) {
-                                                                    $set('room_number', $room->room_number ?? '');
-                                                                    $set('room_type', $room->room_type ?? '');
-                                                                }
-                                                            }
-                                                        }),
-
                                                     TextInput::make('room_number')
                                                         ->label('Room Number')
-                                                        ->placeholder('e.g., 101, B-1'),
+                                                        ->required()
+                                                        ->placeholder('e.g., 101, B-1, Kitchen'),
 
                                                     Select::make('room_type')
                                                         ->label('Room Type')
+                                                        ->required()
                                                         ->options([
                                                             'kitchen' => 'Kitchen',
                                                             'bathroom' => 'Bathroom',
@@ -182,15 +169,33 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                             'mudroom' => 'Mudroom',
                                                             'dining_room' => 'Dining Room',
                                                             'living_room' => 'Living Room',
+                                                            'family_room' => 'Family Room',
+                                                            'entryway' => 'Entryway',
+                                                            'hallway' => 'Hallway',
                                                             'other' => 'Other',
                                                         ])
                                                         ->searchable()
                                                         ->placeholder('Select room type'),
+
+                                                    Select::make('room_id')
+                                                        ->label('Link to Project Room')
+                                                        ->options(function () {
+                                                            return Room::where('project_id', $this->record->id)
+                                                                ->get()
+                                                                ->mapWithKeys(fn ($room) => [
+                                                                    $room->id => ($room->room_number ?? $room->name) . ' - ' . ($room->room_type ?? 'Unknown Type')
+                                                                ])
+                                                                ->toArray();
+                                                        })
+                                                        ->searchable()
+                                                        ->placeholder('Optional: Link to existing project room')
+                                                        ->helperText('Leave blank to create new room later'),
                                                 ])
                                                 ->columns(3)
-                                                ->defaultItems(0)
+                                                ->defaultItems(1)
                                                 ->collapsible()
-                                                ->itemLabel(fn ($state) => ($state['room_number'] ?? '') ?: 'Room')
+                                                ->itemLabel(fn ($state) => ($state['room_number'] ?? 'New Room'))
+                                                ->addActionLabel('Add Another Room')
                                                 ->columnSpanFull(),
 
                                             TextInput::make('detail_number')
