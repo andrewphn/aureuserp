@@ -721,7 +721,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
     protected function getPdfPageId(int $pageNumber): ?int
     {
         if (!isset($this->pdfPageIdCache[$pageNumber])) {
-            $this->pdfPageIdCache[$pageNumber] = \App\Models\PdfPage::where('pdf_document_id', $this->pdfDocument->id)
+            $this->pdfPageIdCache[$pageNumber] = \App\Models\PdfPage::where('document_id', $this->pdfDocument->id)
                 ->where('page_number', $pageNumber)
                 ->value('id');
         }
