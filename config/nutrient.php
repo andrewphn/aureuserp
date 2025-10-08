@@ -16,6 +16,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Nutrient Cloud API Key
+    |--------------------------------------------------------------------------
+    |
+    | API key for server-side PDF processing via Nutrient DWS Processor API.
+    | Used for rendering PDFs as images, OCR, conversions, etc.
+    |
+    */
+
+    'cloud_api_key' => env('NUTRIENT_CLOUD_API_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nutrient Base URL
+    |--------------------------------------------------------------------------
+    |
+    | Base URL for serving Nutrient SDK assets
+    |
+    */
+
+    'base_url' => env('NUTRIENT_BASE_URL', '/'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Toolbar Configuration
     |--------------------------------------------------------------------------
     |
