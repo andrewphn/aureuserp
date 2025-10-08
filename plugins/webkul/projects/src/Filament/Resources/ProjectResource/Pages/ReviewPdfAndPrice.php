@@ -145,7 +145,74 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ])
                                                 ->getOptionLabelUsing(fn ($value): string => ucwords(str_replace('_', ' ', $value)))
                                                 ->placeholder('Select or type to create new')
-                                                ->helperText('Type to create a custom page type'),
+                                                ->helperText('Type to create a custom page type')
+                                                ->live(),
+
+                                            \Filament\Schemas\Components\Section::make('Cover Page Information')
+                                                ->schema([
+                                                    \Filament\Forms\Components\Fieldset::make('Customer Details')
+                                                        ->schema([
+                                                            \Filament\Forms\Components\Placeholder::make('customer_name')
+                                                                ->label('Customer Name')
+                                                                ->content(fn () => $this->record->partner->name ?? 'No customer assigned'),
+
+                                                            \Filament\Forms\Components\Placeholder::make('customer_address')
+                                                                ->label('Address')
+                                                                ->content(function () {
+                                                                    $partner = $this->record->partner;
+                                                                    if (!$partner) return 'N/A';
+                                                                    $address = collect([
+                                                                        $partner->street1,
+                                                                        $partner->street2,
+                                                                        $partner->city,
+                                                                        $partner->state,
+                                                                        $partner->zip,
+                                                                    ])->filter()->implode(', ');
+                                                                    return $address ?: 'N/A';
+                                                                }),
+
+                                                            \Filament\Forms\Components\Placeholder::make('customer_phone')
+                                                                ->label('Phone')
+                                                                ->content(fn () => $this->record->partner->phone ?? 'N/A'),
+
+                                                            \Filament\Forms\Components\Placeholder::make('customer_email')
+                                                                ->label('Email')
+                                                                ->content(fn () => $this->record->partner->email ?? 'N/A'),
+                                                        ])
+                                                        ->columns(2),
+
+                                                    \Filament\Forms\Components\Fieldset::make('Project Details')
+                                                        ->schema([
+                                                            \Filament\Forms\Components\Placeholder::make('project_number')
+                                                                ->label('Project Number')
+                                                                ->content(fn () => $this->record->project_number ?? 'N/A'),
+
+                                                            \Filament\Forms\Components\Placeholder::make('project_name')
+                                                                ->label('Project Name')
+                                                                ->content(fn () => $this->record->name ?? 'N/A'),
+
+                                                            \Filament\Forms\Components\Placeholder::make('project_address')
+                                                                ->label('Project Address')
+                                                                ->content(function () {
+                                                                    $address = collect([
+                                                                        $this->record->street1,
+                                                                        $this->record->street2,
+                                                                        $this->record->city,
+                                                                        $this->record->state,
+                                                                        $this->record->zip,
+                                                                    ])->filter()->implode(', ');
+                                                                    return $address ?: 'N/A';
+                                                                }),
+
+                                                            \Filament\Forms\Components\Placeholder::make('project_date')
+                                                                ->label('Date')
+                                                                ->content(fn () => $this->record->created_at?->format('F d, Y') ?? 'N/A'),
+                                                        ])
+                                                        ->columns(2),
+                                                ])
+                                                ->collapsed()
+                                                ->visible(fn ($get) => $get('page_type') === 'cover_page')
+                                                ->columnSpanFull(),
 
                                             Repeater::make('rooms')
                                                 ->label('Rooms on this Page')
