@@ -232,6 +232,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
                                             Repeater::make('rooms')
                                                 ->label('Rooms on this Page')
+                                                ->visible(fn ($get) => $get('page_type') !== 'cover_page')
                                                 ->schema([
                                                     Select::make('room_type')
                                                         ->label('Room Type')
