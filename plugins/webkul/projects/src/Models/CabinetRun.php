@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Security\Models\User;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 
 class CabinetRun extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasChatter, HasLogActivity;
 
     protected $table = 'projects_cabinet_runs';
 
@@ -31,6 +33,20 @@ class CabinetRun extends Model
         'start_wall_measurement' => 'decimal:2',
         'end_wall_measurement' => 'decimal:2',
         'sort_order' => 'integer',
+    ];
+
+    /**
+     * Attributes to log for Chatter activity tracking
+     */
+    protected $logAttributes = [
+        'roomLocation.room.name' => 'Room',
+        'roomLocation.name' => 'Location',
+        'name' => 'Cabinet Run Name',
+        'run_type' => 'Run Type',
+        'total_linear_feet' => 'Total Linear Feet',
+        'start_wall_measurement' => 'Start Measurement',
+        'end_wall_measurement' => 'End Measurement',
+        'notes' => 'Notes',
     ];
 
     /**

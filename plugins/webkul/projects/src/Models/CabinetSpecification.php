@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Product\Models\Product;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Security\Models\User;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 
 class CabinetSpecification extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasChatter, HasLogActivity;
 
     protected $table = 'projects_cabinet_specifications';
 
@@ -49,6 +51,27 @@ class CabinetSpecification extends Model
         'total_price' => 'decimal:2',
         'position_in_run' => 'integer',
         'wall_position_start_inches' => 'decimal:2',
+    ];
+
+    /**
+     * Attributes to log for Chatter activity tracking
+     */
+    protected $logAttributes = [
+        'cabinetRun.roomLocation.room.name' => 'Room',
+        'cabinetRun.name' => 'Cabinet Run',
+        'cabinet_number' => 'Cabinet Number',
+        'position_in_run' => 'Position in Run',
+        'length_inches' => 'Length (inches)',
+        'width_inches' => 'Width (inches)',
+        'depth_inches' => 'Depth (inches)',
+        'height_inches' => 'Height (inches)',
+        'linear_feet' => 'Linear Feet',
+        'quantity' => 'Quantity',
+        'unit_price_per_lf' => 'Unit Price (per LF)',
+        'total_price' => 'Total Price',
+        'hardware_notes' => 'Hardware Notes',
+        'custom_modifications' => 'Custom Modifications',
+        'shop_notes' => 'Shop Notes',
     ];
 
     /**

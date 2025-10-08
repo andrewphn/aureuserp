@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Security\Models\User;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 
 class PdfPageAnnotation extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasChatter, HasLogActivity;
 
     protected $table = 'pdf_page_annotations';
 
@@ -25,22 +27,45 @@ class PdfPageAnnotation extends Model
         'y',
         'width',
         'height',
+        'room_type',
+        'color',
         'cabinet_run_id',
+        'room_id',
         'cabinet_specification_id',
         'visual_properties',
         'nutrient_annotation_id',
         'nutrient_data',
         'notes',
+        'metadata',
+        'created_by',
         'creator_id',
     ];
 
     protected $casts = [
-        'x' => 'decimal:4',
-        'y' => 'decimal:4',
-        'width' => 'decimal:4',
-        'height' => 'decimal:4',
+        'x' => 'decimal:6',
+        'y' => 'decimal:6',
+        'width' => 'decimal:6',
+        'height' => 'decimal:6',
         'visual_properties' => 'array',
         'nutrient_data' => 'array',
+        'metadata' => 'array',
+    ];
+
+    /**
+     * Attributes to log for Chatter activity tracking
+     */
+    protected $logAttributes = [
+        'annotation_type' => 'Annotation Type',
+        'label' => 'Label',
+        'room_type' => 'Room Type',
+        'x' => 'X Position',
+        'y' => 'Y Position',
+        'width' => 'Width',
+        'height' => 'Height',
+        'cabinet_run_id' => 'Cabinet Run',
+        'room_id' => 'Room',
+        'cabinet_specification_id' => 'Cabinet',
+        'notes' => 'Notes',
     ];
 
     /**

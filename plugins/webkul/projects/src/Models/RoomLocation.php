@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Security\Models\User;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 
 class RoomLocation extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasChatter, HasLogActivity;
 
     protected $table = 'projects_room_locations';
 
@@ -28,6 +30,18 @@ class RoomLocation extends Model
     protected $casts = [
         'sequence' => 'integer',
         'sort_order' => 'integer',
+    ];
+
+    /**
+     * Attributes to log for Chatter activity tracking
+     */
+    protected $logAttributes = [
+        'room.name' => 'Room',
+        'name' => 'Location Name',
+        'location_type' => 'Location Type',
+        'sequence' => 'Sequence',
+        'elevation_reference' => 'Elevation Reference',
+        'notes' => 'Notes',
     ];
 
     /**
