@@ -18,14 +18,6 @@
 			],
 			"description": "Advanced context management for AI interactions"
 		},
-		"semgrep": {
-			"type": "stdio",
-			"command": "uvx",
-			"args": [
-				"semgrep-mcp"
-			],
-			"description": "Static code analysis and security scanning with Semgrep"
-		},
 		"exa": {
 			"type": "stdio",
 			"command": "npx",
