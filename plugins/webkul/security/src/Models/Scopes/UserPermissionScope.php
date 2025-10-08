@@ -27,6 +27,16 @@ class UserPermissionScope implements Scope
     {
         $user = Auth::user();
 
+        // Skip scope if no authenticated user (e.g., CLI/tinker context)
+        if (!$user) {
+            return;
+        }
+
+        // Skip scope if user doesn't have resource_permission set
+        if (!isset($user->resource_permission)) {
+            return;
+        }
+
         if ($user->resource_permission === PermissionType::GLOBAL->value) {
             return;
         }
