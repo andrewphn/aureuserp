@@ -13,13 +13,9 @@ return new class extends Migration
         $userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id');
 
         // Get actual country IDs from database (don't hardcode)
+        // Countries are seeded by erp:install, so they will exist when partners:install runs
         $usaCountryId = DB::table('countries')->where('code', 'US')->value('id');
         $canadaCountryId = DB::table('countries')->where('code', 'CA')->value('id');
-
-        // Skip if countries not seeded yet
-        if (!$usaCountryId || !$canadaCountryId) {
-            return;
-        }
 
         // State IDs for USA (get from database)
         $stateIds = [
