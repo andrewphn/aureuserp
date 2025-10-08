@@ -9,7 +9,7 @@ use Webkul\Project\Models\Room;
 
 class PdfPage extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'pdf_pages';
 
