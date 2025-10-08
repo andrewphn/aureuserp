@@ -19,7 +19,7 @@
         <span class="text-sm font-medium text-white">Page {{ $pageNumber }}</span>
     </div>
 
-    <!-- Modal for larger preview -->
+    <!-- Modal for larger preview with Nutrient -->
     <div
         x-show="showModal"
         x-cloak
@@ -29,15 +29,15 @@
         style="display: none;"
     >
         <div
-            class="relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-auto"
+            class="relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-7xl w-full max-h-[90vh] flex flex-col"
             @click.stop
         >
-            <div class="sticky top-0 z-10 flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     Page {{ $pageNumber }} - Full Preview
                 </h3>
                 <button
-                    @click="showModal = false"
+                    @click="showModal = false; cleanupNutrient()"
                     class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,11 +45,11 @@
                     </svg>
                 </button>
             </div>
-            <div class="p-4 flex items-center justify-center">
-                <canvas
-                    x-ref="modalCanvas"
-                    class="max-w-full h-auto"
-                ></canvas>
+            <div class="flex-1 relative" style="min-height: 600px;">
+                <div
+                    x-ref="nutrientContainer"
+                    class="absolute inset-0"
+                ></div>
             </div>
         </div>
     </div>
@@ -57,16 +57,21 @@
 
 @once
     @push('scripts')
+    <!-- PDF.js for thumbnails -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <!-- Nutrient SDK for modal viewer -->
+    <script src="https://cdn.cloud.pspdfkit.com/pspdfkit-web@2024.8.0/pspdfkit.js"></script>
+    <link rel="stylesheet" href="https://cdn.cloud.pspdfkit.com/pspdfkit-web@2024.8.0/pspdfkit.css" />
+
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('pdfThumbnail', () => ({
                 rendered: false,
-                modalRendered: false,
                 showModal: false,
-                pdfDoc: null,
+                nutrientInstance: null,
                 currentPdfUrl: null,
                 currentPageNum: null,
 
@@ -80,7 +85,6 @@
                     const container = canvas.parentElement;
 
                     pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-                        this.pdfDoc = pdf;
                         pdf.getPage(pageNum).then(page => {
                             // Calculate scale to fit container width (with padding)
                             const containerWidth = container.clientWidth - 16;
@@ -105,41 +109,42 @@
                     });
                 },
 
-                renderModalCanvas() {
-                    if (this.modalRendered || !this.pdfDoc) return;
+                async loadNutrient() {
+                    if (this.nutrientInstance || !this.$refs.nutrientContainer) return;
 
-                    const modalCanvas = this.$refs.modalCanvas;
-                    if (!modalCanvas) return;
+                    try {
+                        const container = this.$refs.nutrientContainer;
 
-                    const modalContainer = modalCanvas.parentElement;
-
-                    this.pdfDoc.getPage(this.currentPageNum).then(page => {
-                        // Get available width in modal (accounting for padding)
-                        const maxWidth = modalContainer.clientWidth - 32;
-
-                        // Calculate scale to fit modal width
-                        const unscaledViewport = page.getViewport({ scale: 1 });
-                        const scale = Math.min(maxWidth / unscaledViewport.width, 3); // Cap at 3x for quality
-
-                        const viewport = page.getViewport({ scale: scale });
-                        const context = modalCanvas.getContext('2d');
-
-                        modalCanvas.height = viewport.height;
-                        modalCanvas.width = viewport.width;
-
-                        page.render({
-                            canvasContext: context,
-                            viewport: viewport
-                        }).promise.then(() => {
-                            this.modalRendered = true;
+                        // Initialize Nutrient SDK
+                        this.nutrientInstance = await PSPDFKit.load({
+                            container: container,
+                            document: this.currentPdfUrl,
+                            licenseKey: '{{ config("nutrient.license_key") }}',
+                            baseUrl: '{{ config("nutrient.base_url") }}',
+                            initialViewState: new PSPDFKit.ViewState({
+                                currentPageIndex: this.currentPageNum - 1,
+                                zoom: PSPDFKit.ZoomMode.FIT_TO_WIDTH,
+                            }),
+                            toolbarItems: PSPDFKit.defaultToolbarItems.filter(item =>
+                                ['sidebar-thumbnails', 'sidebar-bookmarks', 'search', 'zoom-in', 'zoom-out', 'print'].includes(item.type)
+                            ),
                         });
-                    });
+                    } catch (error) {
+                        console.error('Nutrient loading error:', error);
+                    }
+                },
+
+                cleanupNutrient() {
+                    if (this.nutrientInstance) {
+                        PSPDFKit.unload(this.nutrientInstance);
+                        this.nutrientInstance = null;
+                    }
                 },
 
                 init() {
                     this.$watch('showModal', (value) => {
-                        if (value && !this.modalRendered) {
-                            setTimeout(() => this.renderModalCanvas(), 50);
+                        if (value) {
+                            setTimeout(() => this.loadNutrient(), 100);
                         }
                     });
                 }
