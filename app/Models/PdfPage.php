@@ -11,23 +11,21 @@ class PdfPage extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'pdf_page_metadata';
+    protected $table = 'pdf_pages';
 
     protected $fillable = [
-        'pdf_document_id',
+        'document_id',
         'page_number',
-        'page_type',
-        'room_id',
-        'room_name',
-        'room_type',
-        'detail_number',
-        'notes',
-        'metadata',
-        'creator_id',
+        'width',
+        'height',
+        'rotation',
+        'thumbnail_path',
+        'extracted_text',
+        'page_metadata',
     ];
 
     protected $casts = [
-        'metadata' => 'array',
+        'page_metadata' => 'array',
     ];
 
     /**
@@ -35,30 +33,22 @@ class PdfPage extends Model
      */
     public function pdfDocument()
     {
-        return $this->belongsTo(PdfDocument::class);
+        return $this->belongsTo(PdfDocument::class, 'document_id');
     }
 
     /**
-     * Get the room this page is associated with
-     */
-    public function room()
-    {
-        return $this->belongsTo(Room::class);
-    }
-
-    /**
-     * Get the user who created this page record
-     */
-    public function creator()
-    {
-        return $this->belongsTo(\Webkul\User\Models\User::class, 'creator_id');
-    }
-
-    /**
-     * Get all rooms associated with this page
+     * Get all rooms associated with this page (via pivot table)
      */
     public function rooms()
     {
         return $this->hasMany(PdfPageRoom::class, 'pdf_page_id');
+    }
+
+    /**
+     * Get all annotations on this page
+     */
+    public function annotations()
+    {
+        return $this->hasMany(PdfPageAnnotation::class, 'pdf_page_id');
     }
 }
