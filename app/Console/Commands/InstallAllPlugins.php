@@ -113,9 +113,16 @@ class InstallAllPlugins extends Command
                     continue;
                 }
 
-                $exitCode = $this->call($command, [
-                    '--no-interaction' => true,
-                ]);
+                // Special handling for erp:install when running fresh
+                $params = ['--no-interaction' => true];
+                if ($plugin === 'erp' && $this->option('fresh')) {
+                    $params['--force'] = true;
+                    $params['--admin-name'] = 'Admin';
+                    $params['--admin-email'] = 'info@tcswoodwork.com';
+                    $params['--admin-password'] = 'Lola2024!';
+                }
+
+                $exitCode = $this->call($command, $params);
 
                 if ($exitCode === 0) {
                     $this->info("   ✅ {$plugin} installed successfully");
