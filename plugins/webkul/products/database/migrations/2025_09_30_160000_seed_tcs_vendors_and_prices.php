@@ -33,7 +33,7 @@ return new class extends Migration
                 'website' => 'www.richelieu.com',
                 'street1' => '7900 Henri-Bourassa West',
                 'city' => 'Ville Saint-Laurent',
-                'state_id' => 543,  // Quebec
+                'state_id' => null,  // Quebec (state_id not available in test environment)
                 'zip' => 'H4S 1V4',
                 'country_id' => 38,  // Canada
             ],
