@@ -150,11 +150,6 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                             Repeater::make('rooms')
                                                 ->label('Rooms on this Page')
                                                 ->schema([
-                                                    TextInput::make('room_number')
-                                                        ->label('Room Number')
-                                                        ->required()
-                                                        ->placeholder('e.g., 101, B-1, Kitchen'),
-
                                                     Select::make('room_type')
                                                         ->label('Room Type')
                                                         ->required()
@@ -175,7 +170,31 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                             'other' => 'Other',
                                                         ])
                                                         ->searchable()
-                                                        ->placeholder('Select room type'),
+                                                        ->placeholder('Select room type')
+                                                        ->live()
+                                                        ->afterStateUpdated(function ($state, $set, $get) {
+                                                            // Check if this room type already exists in other pages
+                                                            $allPages = $this->form->getState()['page_metadata'] ?? [];
+                                                            $currentPageNum = $get('../../page_number');
+
+                                                            $existingRoomTypes = [];
+                                                            foreach ($allPages as $page) {
+                                                                if ($page['page_number'] != $currentPageNum && !empty($page['rooms'])) {
+                                                                    foreach ($page['rooms'] as $room) {
+                                                                        if (!empty($room['room_type'])) {
+                                                                            $existingRoomTypes[] = $room['room_type'];
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            // Room number will be auto-calculated later
+                                                        }),
+
+                                                    TextInput::make('room_number')
+                                                        ->label('Room Number')
+                                                        ->placeholder('Auto-calculated or enter manually')
+                                                        ->helperText('Will be auto-numbered based on room occurrences'),
 
                                                     Select::make('room_id')
                                                         ->label('Link to Project Room')
@@ -194,7 +213,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->columns(3)
                                                 ->defaultItems(1)
                                                 ->collapsible()
-                                                ->itemLabel(fn ($state) => ($state['room_number'] ?? 'New Room'))
+                                                ->itemLabel(fn ($state) => ucwords(str_replace('_', ' ', $state['room_type'] ?? 'New Room')))
                                                 ->addActionLabel('Add Another Room')
                                                 ->columnSpanFull(),
 
