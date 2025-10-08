@@ -103,7 +103,9 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                         ->viewData(fn ($get) => [
                                             'pdfUrl' => $this->getPdfUrl(),
                                             'pageNumber' => $get('page_number') ?? 1,
+                                            'itemKey' => 'page-' . ($get('page_number') ?? 1),
                                         ])
+                                        ->key(fn ($get) => 'thumbnail-page-' . ($get('page_number') ?? 1))
                                         ->columnSpan(1),
 
                                     \Filament\Schemas\Components\Section::make()
