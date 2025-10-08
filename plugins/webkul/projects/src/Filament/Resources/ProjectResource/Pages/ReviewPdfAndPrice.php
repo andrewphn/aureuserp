@@ -150,15 +150,17 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
                                             \Filament\Schemas\Components\Section::make('Cover Page Information')
                                                 ->schema([
-                                                    \Filament\Forms\Components\Fieldset::make('Customer Details')
+                                                    \Filament\Schemas\Components\Section::make('Customer Details')
                                                         ->schema([
-                                                            \Filament\Forms\Components\Placeholder::make('customer_name')
+                                                            TextInput::make('customer_name_display')
                                                                 ->label('Customer Name')
-                                                                ->content(fn () => $this->record->partner->name ?? 'No customer assigned'),
+                                                                ->default(fn () => $this->record->partner->name ?? 'No customer assigned')
+                                                                ->disabled()
+                                                                ->dehydrated(false),
 
-                                                            \Filament\Forms\Components\Placeholder::make('customer_address')
+                                                            TextInput::make('customer_address_display')
                                                                 ->label('Address')
-                                                                ->content(function () {
+                                                                ->default(function () {
                                                                     $partner = $this->record->partner;
                                                                     if (!$partner) return 'N/A';
                                                                     $address = collect([
@@ -169,31 +171,41 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                         $partner->zip,
                                                                     ])->filter()->implode(', ');
                                                                     return $address ?: 'N/A';
-                                                                }),
+                                                                })
+                                                                ->disabled()
+                                                                ->dehydrated(false),
 
-                                                            \Filament\Forms\Components\Placeholder::make('customer_phone')
+                                                            TextInput::make('customer_phone_display')
                                                                 ->label('Phone')
-                                                                ->content(fn () => $this->record->partner->phone ?? 'N/A'),
+                                                                ->default(fn () => $this->record->partner->phone ?? 'N/A')
+                                                                ->disabled()
+                                                                ->dehydrated(false),
 
-                                                            \Filament\Forms\Components\Placeholder::make('customer_email')
+                                                            TextInput::make('customer_email_display')
                                                                 ->label('Email')
-                                                                ->content(fn () => $this->record->partner->email ?? 'N/A'),
+                                                                ->default(fn () => $this->record->partner->email ?? 'N/A')
+                                                                ->disabled()
+                                                                ->dehydrated(false),
                                                         ])
                                                         ->columns(2),
 
-                                                    \Filament\Forms\Components\Fieldset::make('Project Details')
+                                                    \Filament\Schemas\Components\Section::make('Project Details')
                                                         ->schema([
-                                                            \Filament\Forms\Components\Placeholder::make('project_number')
+                                                            TextInput::make('project_number_display')
                                                                 ->label('Project Number')
-                                                                ->content(fn () => $this->record->project_number ?? 'N/A'),
+                                                                ->default(fn () => $this->record->project_number ?? 'N/A')
+                                                                ->disabled()
+                                                                ->dehydrated(false),
 
-                                                            \Filament\Forms\Components\Placeholder::make('project_name')
+                                                            TextInput::make('project_name_display')
                                                                 ->label('Project Name')
-                                                                ->content(fn () => $this->record->name ?? 'N/A'),
+                                                                ->default(fn () => $this->record->name ?? 'N/A')
+                                                                ->disabled()
+                                                                ->dehydrated(false),
 
-                                                            \Filament\Forms\Components\Placeholder::make('project_address')
+                                                            TextInput::make('project_address_display')
                                                                 ->label('Project Address')
-                                                                ->content(function () {
+                                                                ->default(function () {
                                                                     $address = collect([
                                                                         $this->record->street1,
                                                                         $this->record->street2,
@@ -202,11 +214,15 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                         $this->record->zip,
                                                                     ])->filter()->implode(', ');
                                                                     return $address ?: 'N/A';
-                                                                }),
+                                                                })
+                                                                ->disabled()
+                                                                ->dehydrated(false),
 
-                                                            \Filament\Forms\Components\Placeholder::make('project_date')
+                                                            TextInput::make('project_date_display')
                                                                 ->label('Date')
-                                                                ->content(fn () => $this->record->created_at?->format('F d, Y') ?? 'N/A'),
+                                                                ->default(fn () => $this->record->created_at?->format('F d, Y') ?? 'N/A')
+                                                                ->disabled()
+                                                                ->dehydrated(false),
                                                         ])
                                                         ->columns(2),
                                                 ])
