@@ -31,4 +31,8 @@ Route::prefix('api/pdf/annotations')->group(function () {
         ->name('pdf.annotations.cabinet-runs');
     Route::get('/cabinet-run/{cabinetRunId}/cabinets', [PdfAnnotationController::class, 'getCabinetsInRun'])
         ->name('pdf.annotations.run-cabinets');
+
+    // Save entire annotated PDF using Nutrient Processor API
+    Route::post('/document/{pdfId}/save', [PdfAnnotationController::class, 'saveAnnotatedPdf'])
+        ->name('pdf.annotations.save-document');
 });

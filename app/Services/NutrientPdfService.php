@@ -34,17 +34,21 @@ class NutrientPdfService
                 return null;
             }
 
-            // Build the instructions to export specific page as PNG
+            // Build the instructions to render specific page as PNG
+            // Using Nutrient Cloud API - pages go in output, not in actions
             $instructions = [
                 'parts' => [
-                    ['file' => 'document']
-                ],
-                'actions' => [
                     [
-                        'type' => 'exportPages',
-                        'pages' => [$pageNumber - 1], // Nutrient uses 0-indexed pages
-                        'format' => 'png',
-                        'width' => $width,
+                        'file' => 'document'
+                    ]
+                ],
+                'output' => [
+                    'type' => 'image',
+                    'format' => 'png',
+                    'dpi' => 150,
+                    'pages' => [
+                        'start' => $pageNumber - 1,  // Nutrient uses 0-indexed pages
+                        'end' => $pageNumber - 1
                     ]
                 ]
             ];

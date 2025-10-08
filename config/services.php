@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'nutrient' => [
+        'license_key'     => env('NUTRIENT_LICENSE_KEY'),
+        'cloud_api_key'   => env('NUTRIENT_CLOUD_API_KEY'),
+    ],
+
 ];

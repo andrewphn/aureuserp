@@ -362,4 +362,158 @@ class PdfAnnotationController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Save annotated PDF using Nutrient Processor API
+     * POST /api/pdf/annotations/document/{pdfId}/save
+     *
+     * @param int $pdfId PDF Document ID
+     * @param Request $request Contains Instant JSON annotations
+     * @return JsonResponse
+     */
+    public function saveAnnotatedPdf(int $pdfId, Request $request): JsonResponse
+    {
+        try {
+            // Verify PDF document exists
+            $pdfDocument = PdfDocument::findOrFail($pdfId);
+            $this->authorize('update', $pdfDocument);
+
+            // Validate request
+            $validated = $request->validate([
+                'annotations' => 'required|string', // Instant JSON string
+            ]);
+
+            // Get original PDF path
+            $originalPdfPath = storage_path('app/public/' . $pdfDocument->file_path);
+
+            if (!file_exists($originalPdfPath)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Original PDF file not found'
+                ], 404);
+            }
+
+            // Save annotations as temporary JSON file
+            $annotationsJsonPath = storage_path('app/temp/annotations_' . $pdfId . '_' . time() . '.json');
+            @mkdir(dirname($annotationsJsonPath), 0755, true);
+            file_put_contents($annotationsJsonPath, $validated['annotations']);
+
+            // Prepare output path for annotated PDF
+            $outputPath = storage_path('app/temp/annotated_' . $pdfId . '_' . time() . '.pdf');
+
+            // Call Nutrient Processor API
+            $apiKey = config('services.nutrient.license_key');
+            $apiUrl = 'https://api.nutrient.io/build';
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $apiUrl,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_POSTFIELDS => [
+                    'instructions' => json_encode([
+                        'parts' => [
+                            ['file' => 'document']
+                        ],
+                        'actions' => [
+                            [
+                                'type' => 'applyInstantJson',
+                                'file' => 'annotations.json'
+                            ]
+                        ]
+                    ]),
+                    'document' => new \CURLFile($originalPdfPath),
+                    'annotations.json' => new \CURLFile($annotationsJsonPath)
+                ],
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $apiKey
+                ],
+            ]);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $error = curl_error($curl);
+            curl_close($curl);
+
+            // Clean up temporary annotations file
+            @unlink($annotationsJsonPath);
+
+            if ($error) {
+                Log::error('Nutrient API curl error', ['error' => $error]);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to connect to Nutrient API: ' . $error
+                ], 500);
+            }
+
+            if ($httpCode !== 200) {
+                Log::error('Nutrient API error', [
+                    'http_code' => $httpCode,
+                    'response' => $response
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Nutrient API returned error: ' . $httpCode
+                ], 500);
+            }
+
+            // Save the annotated PDF
+            file_put_contents($outputPath, $response);
+
+            // Generate new filename for annotated version
+            $pathInfo = pathinfo($pdfDocument->file_path);
+            $newFilename = $pathInfo['filename'] . '_annotated_' . time() . '.' . $pathInfo['extension'];
+            $newStoragePath = 'pdfs/' . $newFilename;
+            $newFullPath = storage_path('app/public/' . $newStoragePath);
+
+            // Move annotated PDF to permanent storage
+            @mkdir(dirname($newFullPath), 0755, true);
+            rename($outputPath, $newFullPath);
+
+            // Update PDF document record or create new version
+            $pdfDocument->update([
+                'file_path' => $newStoragePath,
+                'updated_at' => now(),
+            ]);
+
+            Log::info('PDF annotations saved successfully', [
+                'pdf_id' => $pdfId,
+                'new_path' => $newStoragePath
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Annotations saved successfully',
+                'pdf_id' => $pdfId,
+                'new_file_path' => $newStoragePath,
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'PDF document not found'
+            ], 404);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Invalid request data',
+                'validation_errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to save annotated PDF', [
+                'pdf_id' => $pdfId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to save annotations: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
