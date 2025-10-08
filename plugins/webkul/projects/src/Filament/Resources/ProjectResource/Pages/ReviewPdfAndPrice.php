@@ -152,77 +152,69 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->schema([
                                                     \Filament\Schemas\Components\Section::make('Customer Details')
                                                         ->schema([
-                                                            TextInput::make('customer_name_display')
+                                                            \Filament\Infolists\Components\TextEntry::make('partner.name')
                                                                 ->label('Customer Name')
-                                                                ->default(fn () => $this->record->partner->name ?? 'No customer assigned')
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->default('No customer assigned'),
 
-                                                            TextInput::make('customer_address_display')
-                                                                ->label('Address')
-                                                                ->default(function () {
+                                                            \Filament\Infolists\Components\TextEntry::make('partner_address')
+                                                                ->label('Customer Address')
+                                                                ->state(function () {
                                                                     $partner = $this->record->partner;
                                                                     if (!$partner) return 'N/A';
                                                                     $address = collect([
                                                                         $partner->street1,
                                                                         $partner->street2,
                                                                         $partner->city,
-                                                                        $partner->state,
+                                                                        $partner->state?->name,
                                                                         $partner->zip,
                                                                     ])->filter()->implode(', ');
                                                                     return $address ?: 'N/A';
-                                                                })
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                }),
 
-                                                            TextInput::make('customer_phone_display')
+                                                            \Filament\Infolists\Components\TextEntry::make('partner.phone')
                                                                 ->label('Phone')
-                                                                ->default(fn () => $this->record->partner->phone ?? 'N/A')
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->default('N/A'),
 
-                                                            TextInput::make('customer_email_display')
+                                                            \Filament\Infolists\Components\TextEntry::make('partner.email')
                                                                 ->label('Email')
-                                                                ->default(fn () => $this->record->partner->email ?? 'N/A')
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->default('N/A'),
                                                         ])
                                                         ->columns(2),
 
                                                     \Filament\Schemas\Components\Section::make('Project Details')
                                                         ->schema([
-                                                            TextInput::make('project_number_display')
+                                                            \Filament\Infolists\Components\TextEntry::make('project_number')
                                                                 ->label('Project Number')
-                                                                ->default(fn () => $this->record->project_number ?? 'N/A')
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->default('N/A'),
 
-                                                            TextInput::make('project_name_display')
+                                                            \Filament\Infolists\Components\TextEntry::make('name')
                                                                 ->label('Project Name')
-                                                                ->default(fn () => $this->record->name ?? 'N/A')
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->default('N/A'),
 
-                                                            TextInput::make('project_address_display')
+                                                            \Filament\Infolists\Components\TextEntry::make('project_address')
                                                                 ->label('Project Address')
-                                                                ->default(function () {
-                                                                    $address = collect([
-                                                                        $this->record->street1,
-                                                                        $this->record->street2,
-                                                                        $this->record->city,
-                                                                        $this->record->state,
-                                                                        $this->record->zip,
-                                                                    ])->filter()->implode(', ');
-                                                                    return $address ?: 'N/A';
-                                                                })
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->state(function () {
+                                                                    if ($this->record->addresses()->count() > 0) {
+                                                                        $address = $this->record->addresses()->where('is_primary', true)->first()
+                                                                                   ?? $this->record->addresses()->first();
 
-                                                            TextInput::make('project_date_display')
+                                                                        $parts = array_filter([
+                                                                            $address->street1,
+                                                                            $address->street2,
+                                                                            $address->city,
+                                                                            $address->state?->name,
+                                                                            $address->zip,
+                                                                        ]);
+
+                                                                        return !empty($parts) ? implode(', ', $parts) : 'N/A';
+                                                                    }
+
+                                                                    return 'N/A';
+                                                                }),
+
+                                                            \Filament\Infolists\Components\TextEntry::make('created_at')
                                                                 ->label('Date')
-                                                                ->default(fn () => $this->record->created_at?->format('F d, Y') ?? 'N/A')
-                                                                ->disabled()
-                                                                ->dehydrated(false),
+                                                                ->formatStateUsing(fn ($state) => $state?->format('F d, Y') ?? 'N/A'),
                                                         ])
                                                         ->columns(2),
                                                 ])
