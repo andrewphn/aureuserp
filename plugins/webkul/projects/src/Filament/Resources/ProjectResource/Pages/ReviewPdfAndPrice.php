@@ -149,18 +149,21 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->live(),
 
                                             \Filament\Schemas\Components\Section::make('Cover Page Information')
+                                                ->description('Edit the information that will appear on the cover page')
                                                 ->schema([
                                                     \Filament\Schemas\Components\Section::make('Customer Details')
                                                         ->schema([
-                                                            \Filament\Infolists\Components\TextEntry::make('partner.name')
+                                                            TextInput::make('cover_customer_name')
                                                                 ->label('Customer Name')
-                                                                ->default('No customer assigned'),
+                                                                ->default(fn () => $this->record->partner->name ?? '')
+                                                                ->placeholder('Customer name')
+                                                                ->columnSpanFull(),
 
-                                                            \Filament\Infolists\Components\TextEntry::make('partner_address')
+                                                            TextInput::make('cover_customer_address')
                                                                 ->label('Customer Address')
-                                                                ->state(function () {
+                                                                ->default(function () {
                                                                     $partner = $this->record->partner;
-                                                                    if (!$partner) return 'N/A';
+                                                                    if (!$partner) return '';
                                                                     $address = collect([
                                                                         $partner->street1,
                                                                         $partner->street2,
@@ -168,32 +171,40 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                         $partner->state?->name,
                                                                         $partner->zip,
                                                                     ])->filter()->implode(', ');
-                                                                    return $address ?: 'N/A';
-                                                                }),
+                                                                    return $address;
+                                                                })
+                                                                ->placeholder('Customer address')
+                                                                ->columnSpanFull(),
 
-                                                            \Filament\Infolists\Components\TextEntry::make('partner.phone')
+                                                            TextInput::make('cover_customer_phone')
                                                                 ->label('Phone')
-                                                                ->default('N/A'),
+                                                                ->default(fn () => $this->record->partner->phone ?? '')
+                                                                ->placeholder('Phone number')
+                                                                ->tel(),
 
-                                                            \Filament\Infolists\Components\TextEntry::make('partner.email')
+                                                            TextInput::make('cover_customer_email')
                                                                 ->label('Email')
-                                                                ->default('N/A'),
+                                                                ->default(fn () => $this->record->partner->email ?? '')
+                                                                ->placeholder('Email address')
+                                                                ->email(),
                                                         ])
                                                         ->columns(2),
 
                                                     \Filament\Schemas\Components\Section::make('Project Details')
                                                         ->schema([
-                                                            \Filament\Infolists\Components\TextEntry::make('project_number')
+                                                            TextInput::make('cover_project_number')
                                                                 ->label('Project Number')
-                                                                ->default('N/A'),
+                                                                ->default(fn () => $this->record->project_number ?? '')
+                                                                ->placeholder('Project number'),
 
-                                                            \Filament\Infolists\Components\TextEntry::make('name')
+                                                            TextInput::make('cover_project_name')
                                                                 ->label('Project Name')
-                                                                ->default('N/A'),
+                                                                ->default(fn () => $this->record->name ?? '')
+                                                                ->placeholder('Project name'),
 
-                                                            \Filament\Infolists\Components\TextEntry::make('project_address')
+                                                            TextInput::make('cover_project_address')
                                                                 ->label('Project Address')
-                                                                ->state(function () {
+                                                                ->default(function () {
                                                                     if ($this->record->addresses()->count() > 0) {
                                                                         $address = $this->record->addresses()->where('is_primary', true)->first()
                                                                                    ?? $this->record->addresses()->first();
@@ -206,15 +217,18 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                             $address->zip,
                                                                         ]);
 
-                                                                        return !empty($parts) ? implode(', ', $parts) : 'N/A';
+                                                                        return !empty($parts) ? implode(', ', $parts) : '';
                                                                     }
 
-                                                                    return 'N/A';
-                                                                }),
+                                                                    return '';
+                                                                })
+                                                                ->placeholder('Project address')
+                                                                ->columnSpanFull(),
 
-                                                            \Filament\Infolists\Components\TextEntry::make('created_at')
+                                                            TextInput::make('cover_project_date')
                                                                 ->label('Date')
-                                                                ->formatStateUsing(fn ($state) => $state?->format('F d, Y') ?? 'N/A'),
+                                                                ->default(fn () => $this->record->created_at?->format('F d, Y') ?? now()->format('F d, Y'))
+                                                                ->placeholder('Date'),
                                                         ])
                                                         ->columns(2),
                                                 ])
