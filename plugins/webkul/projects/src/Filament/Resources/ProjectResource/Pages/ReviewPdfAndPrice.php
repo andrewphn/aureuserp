@@ -114,6 +114,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->options(function () {
                                                     // Get predefined options
                                                     $predefined = [
+                                                        'cover_page' => 'Cover Page',
                                                         'floor_plan' => 'Floor Plan',
                                                         'elevation' => 'Elevation',
                                                         'section' => 'Section',
