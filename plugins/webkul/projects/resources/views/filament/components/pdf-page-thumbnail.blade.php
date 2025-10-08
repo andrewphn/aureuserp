@@ -111,9 +111,17 @@
                     const modalCanvas = this.$refs.modalCanvas;
                     if (!modalCanvas) return;
 
+                    const modalContainer = modalCanvas.parentElement;
+
                     this.pdfDoc.getPage(this.currentPageNum).then(page => {
-                        // Render at higher quality for modal (2x scale)
-                        const viewport = page.getViewport({ scale: 2 });
+                        // Get available width in modal (accounting for padding)
+                        const maxWidth = modalContainer.clientWidth - 32;
+
+                        // Calculate scale to fit modal width
+                        const unscaledViewport = page.getViewport({ scale: 1 });
+                        const scale = Math.min(maxWidth / unscaledViewport.width, 3); // Cap at 3x for quality
+
+                        const viewport = page.getViewport({ scale: scale });
                         const context = modalCanvas.getContext('2d');
 
                         modalCanvas.height = viewport.height;
