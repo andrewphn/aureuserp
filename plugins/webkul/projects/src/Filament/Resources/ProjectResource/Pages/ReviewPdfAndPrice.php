@@ -60,8 +60,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
         for ($i = 1; $i <= $this->getTotalPages(); $i++) {
             $pageMetadata[] = [
                 'page_number' => $i,
-                'room_name' => '',
-                'room_type' => '',
+                'rooms' => [],
                 'detail_number' => '',
                 'notes' => '',
             ];
@@ -142,24 +141,57 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->placeholder('Select or type to create new')
                                                 ->helperText('Type to create a custom page type'),
 
-                                            TextInput::make('room_name')
-                                                ->label('Room Name')
-                                                ->placeholder('e.g., Kitchen, Master Bath'),
+                                            Repeater::make('rooms')
+                                                ->label('Rooms')
+                                                ->schema([
+                                                    Select::make('room_id')
+                                                        ->label('Project Room')
+                                                        ->options(function () {
+                                                            return Room::where('project_id', $this->record->id)
+                                                                ->pluck('name', 'id')
+                                                                ->toArray();
+                                                        })
+                                                        ->searchable()
+                                                        ->placeholder('Link to existing room (optional)')
+                                                        ->helperText('Select an existing project room or leave blank')
+                                                        ->live()
+                                                        ->afterStateUpdated(function ($state, $set) {
+                                                            if ($state) {
+                                                                $room = Room::find($state);
+                                                                if ($room) {
+                                                                    $set('room_number', $room->room_number ?? '');
+                                                                    $set('room_type', $room->room_type ?? '');
+                                                                }
+                                                            }
+                                                        }),
 
-                                            Select::make('room_type')
-                                                ->label('Room Type')
-                                                ->options([
-                                                    'kitchen' => 'Kitchen',
-                                                    'bathroom' => 'Bathroom',
-                                                    'bedroom' => 'Bedroom',
-                                                    'pantry' => 'Pantry',
-                                                    'laundry' => 'Laundry',
-                                                    'office' => 'Office',
-                                                    'closet' => 'Closet',
-                                                    'mudroom' => 'Mudroom',
-                                                    'other' => 'Other',
+                                                    TextInput::make('room_number')
+                                                        ->label('Room Number')
+                                                        ->placeholder('e.g., 101, B-1'),
+
+                                                    Select::make('room_type')
+                                                        ->label('Room Type')
+                                                        ->options([
+                                                            'kitchen' => 'Kitchen',
+                                                            'bathroom' => 'Bathroom',
+                                                            'bedroom' => 'Bedroom',
+                                                            'pantry' => 'Pantry',
+                                                            'laundry' => 'Laundry',
+                                                            'office' => 'Office',
+                                                            'closet' => 'Closet',
+                                                            'mudroom' => 'Mudroom',
+                                                            'dining_room' => 'Dining Room',
+                                                            'living_room' => 'Living Room',
+                                                            'other' => 'Other',
+                                                        ])
+                                                        ->searchable()
+                                                        ->placeholder('Select room type'),
                                                 ])
-                                                ->placeholder('Select room type'),
+                                                ->columns(3)
+                                                ->defaultItems(0)
+                                                ->collapsible()
+                                                ->itemLabel(fn ($state) => ($state['room_number'] ?? '') ?: 'Room')
+                                                ->columnSpanFull(),
 
                                             TextInput::make('detail_number')
                                                 ->label('Detail/Drawing Number')
@@ -310,26 +342,21 @@ class ReviewPdfAndPrice extends Page implements HasForms
                     'pdf_document_id' => $this->pdfDocument->id,
                     'page_number' => $pageMeta['page_number'] ?? null,
                     'page_type' => $pageMeta['page_type'] ?? null,
-                    'room_name' => $pageMeta['room_name'] ?? null,
-                    'room_type' => $pageMeta['room_type'] ?? null,
                     'detail_number' => $pageMeta['detail_number'] ?? null,
                     'notes' => $pageMeta['notes'] ?? null,
                     'creator_id' => Auth::id(),
                 ]);
 
-                // Also create room record if room_name is provided
-                if (!empty($pageMeta['room_name'])) {
-                    Room::create([
-                        'project_id' => $this->record->id,
-                        'name' => $pageMeta['room_name'],
-                        'room_type' => $pageMeta['room_type'] ?? null,
-                        'pdf_page_number' => $pageMeta['page_number'] ?? null,
-                        'pdf_detail_number' => $pageMeta['detail_number'] ?? null,
-                        'pdf_notes' => $pageMeta['notes'] ?? null,
-                        'notes' => $pageMeta['notes'] ?? null,
-                        'sort_order' => $pageMeta['page_number'] ?? null,
-                        'creator_id' => Auth::id(),
-                    ]);
+                // Create room associations for this page
+                if (!empty($pageMeta['rooms'])) {
+                    foreach ($pageMeta['rooms'] as $roomData) {
+                        \App\Models\PdfPageRoom::create([
+                            'pdf_page_id' => $pageRecord->id,
+                            'room_id' => $roomData['room_id'] ?? null,
+                            'room_number' => $roomData['room_number'] ?? null,
+                            'room_type' => $roomData['room_type'] ?? null,
+                        ]);
+                    }
                 }
             }
         }

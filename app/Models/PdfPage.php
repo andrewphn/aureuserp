@@ -53,4 +53,12 @@ class PdfPage extends Model
     {
         return $this->belongsTo(\Webkul\User\Models\User::class, 'creator_id');
     }
+
+    /**
+     * Get all rooms associated with this page
+     */
+    public function rooms()
+    {
+        return $this->hasMany(PdfPageRoom::class, 'pdf_page_id');
+    }
 }
