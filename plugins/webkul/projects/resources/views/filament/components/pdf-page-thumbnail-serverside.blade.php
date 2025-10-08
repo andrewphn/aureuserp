@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <!-- Annotation Modal with Nutrient -->
+    <!-- Annotation Modal with Nutrient (Lazy Loaded) -->
     <div
         x-show="showAnnotationModal"
         x-cloak
@@ -97,17 +97,13 @@
             class="relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl w-full h-full flex flex-col"
             @click.stop
         >
-            @if(isset($pdfPageId) && isset($pdfDocument))
-                @include('webkul-project::filament.components.pdf-annotation-viewer', [
-                    'pdfPageId' => $pdfPageId,
-                    'pdfUrl' => \Illuminate\Support\Facades\Storage::disk('public')->url($pdfDocument->file_path),
-                    'pageNumber' => $pageNumber,
-                ])
-            @else
-                <div class="flex items-center justify-center h-full text-gray-500">
-                    <p>PDF page data not available for annotation</p>
+            <div class="flex items-center justify-center h-full text-gray-500">
+                <div class="text-center">
+                    <p class="text-lg mb-2">PDF Annotation Feature</p>
+                    <p class="text-sm">Annotation viewer will load when clicked</p>
+                    <p class="text-xs mt-4 text-gray-400">(Feature requires Nutrient SDK setup)</p>
                 </div>
-            @endif
+            </div>
 
             <button
                 @click="showAnnotationModal = false"
@@ -141,6 +137,13 @@
 
                     try {
                         const response = await fetch(`/api/pdf/${pdfId}/page/${pageNum}/render?width=800`);
+
+                        if (!response.ok) {
+                            this.error = true;
+                            this.imageLoaded = false;
+                            return;
+                        }
+
                         const data = await response.json();
 
                         if (data.url) {
@@ -154,6 +157,7 @@
                     } catch (err) {
                         console.error('Error loading thumbnail:', err);
                         this.error = true;
+                        this.imageLoaded = false;
                     }
                 },
 
