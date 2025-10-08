@@ -13,7 +13,8 @@ use Illuminate\Foundation\Testing\WithFaker;
 
 class PdfAnnotationEndToEndTest extends TestCase
 {
-    use RefreshDatabase;
+    // Note: Not using RefreshDatabase to avoid migration order issues
+    // Tests clean up after themselves
 
     protected $user;
     protected $project;
