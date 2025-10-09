@@ -71,68 +71,174 @@
     >
         <div class="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full p-6" @click.stop>
             <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                Link Annotation to <span x-text="currentAnnotationType === 'cabinet_run' ? 'Cabinet Run' : 'Cabinet'"></span>
+                Create Annotation
             </h3>
 
+            <!-- Annotation Type Selector -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    What are you annotating?
+                </label>
+                <select
+                    x-model="annotationType"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                >
+                    <option value="room">Room (Floor Plan)</option>
+                    <option value="room_location">Room Location (Wall/Island)</option>
+                    <option value="cabinet_run">Cabinet Run (Elevation)</option>
+                    <option value="cabinet">Individual Cabinet</option>
+                </select>
+            </div>
+
+            <!-- Room Annotation -->
+            <div x-show="annotationType === 'room'" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Room Name
+                    </label>
+                    <input
+                        type="text"
+                        x-model="currentAnnotationLabel"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        placeholder="e.g., Kitchen, Master Bath"
+                    >
+                </div>
+            </div>
+
+            <!-- Room Location Annotation -->
+            <div x-show="annotationType === 'room_location'" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Select Room
+                    </label>
+                    <select
+                        x-model="selectedRoomId"
+                        @change="filterRoomLocations()"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    >
+                        <option value="">-- Select Room --</option>
+                        <template x-for="room in availableRooms" :key="room.id">
+                            <option :value="room.id" x-text="room.display_name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Location Name
+                    </label>
+                    <input
+                        type="text"
+                        x-model="currentAnnotationLabel"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        placeholder="e.g., North Wall, Island"
+                    >
+                </div>
+            </div>
+
             <!-- Cabinet Run Selection (for cabinet_run annotations) -->
-            <div x-show="currentAnnotationType === 'cabinet_run'" class="space-y-4">
+            <div x-show="annotationType === 'cabinet_run'" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Select Room
+                    </label>
+                    <select
+                        x-model="selectedRoomId"
+                        @change="filterRoomLocations()"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    >
+                        <option value="">-- Select Room --</option>
+                        <template x-for="room in availableRooms" :key="room.id">
+                            <option :value="room.id" x-text="room.display_name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Select Location
+                    </label>
+                    <select
+                        x-model="selectedRoomLocationId"
+                        @change="filterCabinetRuns()"
+                        :disabled="!selectedRoomId"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    >
+                        <option value="">-- Select Location --</option>
+                        <template x-for="location in filteredRoomLocations" :key="location.id">
+                            <option :value="location.id" x-text="location.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Run Name
+                    </label>
+                    <input
+                        type="text"
+                        x-model="currentAnnotationLabel"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        placeholder="e.g., Base Run 1, Wall Run A"
+                    >
+                </div>
+            </div>
+
+            <!-- Cabinet Selection (for cabinet annotations) -->
+            <div x-show="annotationType === 'cabinet'" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Select Room
+                    </label>
+                    <select
+                        x-model="selectedRoomId"
+                        @change="filterRoomLocations()"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    >
+                        <option value="">-- Select Room --</option>
+                        <template x-for="room in availableRooms" :key="room.id">
+                            <option :value="room.id" x-text="room.display_name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Select Location
+                    </label>
+                    <select
+                        x-model="selectedRoomLocationId"
+                        @change="filterCabinetRuns()"
+                        :disabled="!selectedRoomId"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    >
+                        <option value="">-- Select Location --</option>
+                        <template x-for="location in filteredRoomLocations" :key="location.id">
+                            <option :value="location.id" x-text="location.name"></option>
+                        </template>
+                    </select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Select Cabinet Run
                     </label>
                     <select
                         x-model="selectedCabinetRunId"
+                        @change="filterCabinets()"
+                        :disabled="!selectedRoomLocationId"
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     >
-                        <option value="">-- Select a Cabinet Run --</option>
-                        <template x-for="run in availableCabinetRuns" :key="run.id">
-                            <option :value="run.id" x-text="`${run.name} (${run.room_name}) - ${run.cabinet_count} cabinets`"></option>
+                        <option value="">-- Select Cabinet Run --</option>
+                        <template x-for="run in filteredCabinetRuns" :key="run.id">
+                            <option :value="run.id" x-text="run.name"></option>
                         </template>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Label (optional)
+                        Cabinet Label
                     </label>
                     <input
                         type="text"
                         x-model="currentAnnotationLabel"
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        placeholder="e.g., Base Run 1"
-                    >
-                </div>
-            </div>
-
-            <!-- Cabinet Selection (for cabinet annotations) -->
-            <div x-show="currentAnnotationType === 'cabinet'" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Parent Cabinet Run: <strong x-text="selectedRunAnnotation?.label || 'None'"></strong>
-                    </label>
-                </div>
-                <div x-show="cabinetsInRun.length > 0">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Select Cabinet
-                    </label>
-                    <select
-                        x-model="selectedCabinetId"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="">-- Select a Cabinet --</option>
-                        <template x-for="cabinet in cabinetsInRun" :key="cabinet.id">
-                            <option :value="cabinet.id" x-text="`Cabinet ${cabinet.cabinet_number} - ${cabinet.linear_feet} LF`"></option>
-                        </template>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Label (optional)
-                    </label>
-                    <input
-                        type="text"
-                        x-model="currentAnnotationLabel"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        placeholder="e.g., Cabinet 1"
+                        placeholder="e.g., Cabinet 1, Upper Corner"
                     >
                 </div>
             </div>
@@ -175,6 +281,22 @@
                 selectedCabinetId: '',
                 availableCabinetRuns: [],
                 cabinetsInRun: [],
+
+                // Multi-pass annotation system state
+                annotationType: 'cabinet_run', // 'room' | 'room_location' | 'cabinet_run' | 'cabinet'
+                selectedRoomId: null,
+                selectedRoomLocationId: null,
+                projectId: null,
+
+                // Available entities (from context API)
+                availableRooms: [],
+                availableRoomLocations: [],
+                availableCabinets: [],
+
+                // Filtered entities based on parent selection
+                filteredRoomLocations: [],
+                filteredCabinetRuns: [],
+                filteredCabinets: [],
 
                 async init(pdfPageId, pdfUrl, pageNumber) {
                     this.pdfPageId = pdfPageId;
@@ -284,9 +406,44 @@
                 },
 
                 async loadAvailableCabinetRuns() {
-                    const response = await fetch(`/api/pdf/annotations/page/${this.pdfPageId}/cabinet-runs`);
-                    const data = await response.json();
-                    this.availableCabinetRuns = data.cabinet_runs || [];
+                    // Load full context data from new Context API
+                    try {
+                        const response = await fetch(`/api/pdf/page/${this.pdfPageId}/context`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                            }
+                        });
+
+                        if (response.ok) {
+                            const contextData = await response.json();
+                            const context = contextData.context || {};
+
+                            // Populate all context data
+                            this.availableRooms = context.rooms || [];
+                            this.availableRoomLocations = context.room_locations || [];
+                            this.availableCabinetRuns = context.cabinet_runs || [];
+                            this.availableCabinets = context.cabinets || [];
+                            this.projectId = context.project_id;
+
+                            console.log('✅ Loaded context data:', {
+                                rooms: this.availableRooms.length,
+                                locations: this.availableRoomLocations.length,
+                                runs: this.availableCabinetRuns.length,
+                                cabinets: this.availableCabinets.length,
+                                projectId: this.projectId
+                            });
+                        } else {
+                            console.error('Failed to load context data:', response.status);
+                            // Fallback to old endpoint for backwards compatibility
+                            const fallbackResponse = await fetch(`/api/pdf/annotations/page/${this.pdfPageId}/cabinet-runs`);
+                            const fallbackData = await fallbackResponse.json();
+                            this.availableCabinetRuns = fallbackData.cabinet_runs || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading context data:', error);
+                        this.availableCabinetRuns = [];
+                    }
                 },
 
                 async loadCabinetsInRun() {
@@ -298,6 +455,45 @@
                     const response = await fetch(`/api/pdf/annotations/cabinet-run/${this.selectedRunAnnotation.customData.cabinet_run_id}/cabinets`);
                     const data = await response.json();
                     this.cabinetsInRun = data.cabinets || [];
+                },
+
+                // Cascade filtering functions for multi-pass annotation system
+                filterRoomLocations() {
+                    if (!this.selectedRoomId) {
+                        this.filteredRoomLocations = [];
+                        this.selectedRoomLocationId = null;
+                        this.filteredCabinetRuns = [];
+                        return;
+                    }
+                    this.filteredRoomLocations = this.availableRoomLocations.filter(
+                        loc => loc.room_id == this.selectedRoomId
+                    );
+                    this.selectedRoomLocationId = null;
+                    this.filteredCabinetRuns = [];
+                },
+
+                filterCabinetRuns() {
+                    if (!this.selectedRoomLocationId) {
+                        this.filteredCabinetRuns = [];
+                        this.selectedCabinetRunId = null;
+                        return;
+                    }
+                    this.filteredCabinetRuns = this.availableCabinetRuns.filter(
+                        run => run.room_location_id == this.selectedRoomLocationId
+                    );
+                    this.selectedCabinetRunId = null;
+                },
+
+                filterCabinets() {
+                    if (!this.selectedCabinetRunId) {
+                        this.filteredCabinets = [];
+                        this.selectedCabinetId = null;
+                        return;
+                    }
+                    this.filteredCabinets = this.availableCabinets.filter(
+                        cab => cab.cabinet_run_id == this.selectedCabinetRunId
+                    );
+                    this.selectedCabinetId = null;
                 },
 
                 async confirmLinking() {
