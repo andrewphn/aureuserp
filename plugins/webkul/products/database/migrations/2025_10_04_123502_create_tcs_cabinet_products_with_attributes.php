@@ -23,7 +23,7 @@ return new class extends Migration
             DB::table('products_categories')->insert([
                 'name' => 'Woodwork Services',
                 'full_name' => 'Woodwork Services',
-                'creator_id' => 1,
+                'creator_id' => DB::table('users')->value('id'), // Use first available user or NULL
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -58,7 +58,7 @@ return new class extends Migration
             if (!$categoryUomId) {
                 DB::table('unit_of_measure_categories')->insert([
                     'name' => 'Length',
-                    'creator_id' => 1,
+                    'creator_id' => DB::table('users')->value('id'), // Use first available user or NULL
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
@@ -71,7 +71,7 @@ return new class extends Migration
                 'type' => 'bigger',
                 'factor' => 1,
                 'rounding' => 0.01,
-                'creator_id' => 1,
+                'creator_id' => DB::table('users')->value('id'), // Use first available user or NULL
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -90,7 +90,7 @@ return new class extends Migration
             'company_id' => $companyId,
             'uom_id' => $uomId,
             'uom_po_id' => $uomId,
-            'creator_id' => 1,
+            'creator_id' => DB::table('users')->value('id'), // Use first available user or NULL
             'created_at' => $now,
             'updated_at' => $now,
         ];
@@ -124,7 +124,7 @@ return new class extends Migration
                     'sort' => $sort++,
                     'product_id' => $productId,
                     'attribute_id' => $attributeId,
-                    'creator_id' => 1,
+                    'creator_id' => DB::table('users')->value('id'), // Use first available user or NULL
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
