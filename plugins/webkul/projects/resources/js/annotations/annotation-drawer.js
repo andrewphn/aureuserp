@@ -162,13 +162,18 @@ export function createAnnotationDrawer() {
          * Redraw all annotations on canvas
          * @param {Array} annotations - Array of annotations to draw
          * @param {HTMLCanvasElement} canvas - Annotation canvas
-         * @param {number|null} selectedAnnotationId - ID of selected annotation for highlighting
+         * @param {number|number[]|null} selectedAnnotationId - ID(s) of selected annotation(s) for highlighting
          */
         redrawAnnotations(annotations, canvas, selectedAnnotationId = null) {
             if (!canvas) return;
 
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Support both single ID and array of IDs for bulk selection
+            const selectedIds = Array.isArray(selectedAnnotationId)
+                ? selectedAnnotationId
+                : (selectedAnnotationId ? [selectedAnnotationId] : []);
 
             // Draw all saved annotations
             // Convert normalized coordinates (0-1) to actual canvas pixels
@@ -178,7 +183,7 @@ export function createAnnotationDrawer() {
                 const width = annotation.width * canvas.width;
                 const height = annotation.height * canvas.height;
 
-                const isSelected = selectedAnnotationId && annotation.id === selectedAnnotationId;
+                const isSelected = selectedIds.includes(annotation.id);
 
                 // Draw annotation rectangle
                 ctx.strokeStyle = annotation.color || '#3B82F6';
@@ -193,8 +198,13 @@ export function createAnnotationDrawer() {
                     ctx.strokeRect(x - 3, y - 3, width + 6, height + 6);
                     ctx.setLineDash([]); // Reset to solid
 
-                    // Draw resize handles at corners
-                    this.drawResizeHandles(ctx, x, y, width, height);
+                    // Draw resize handles at corners (only if single selection)
+                    if (selectedIds.length === 1) {
+                        this.drawResizeHandles(ctx, x, y, width, height);
+                    } else {
+                        // Multi-selection indicator (small corner markers)
+                        this.drawMultiSelectionMarkers(ctx, x, y, width, height);
+                    }
                 }
 
                 // Draw label text
@@ -203,6 +213,36 @@ export function createAnnotationDrawer() {
                     ctx.font = 'bold 16px sans-serif';
                     ctx.fillText(annotation.text, x + 5, y - 5);
                 }
+            });
+        },
+
+        /**
+         * Draw multi-selection markers (smaller than resize handles)
+         * @param {CanvasRenderingContext2D} ctx - Canvas context
+         * @param {number} x - Annotation x position
+         * @param {number} y - Annotation y position
+         * @param {number} width - Annotation width
+         * @param {number} height - Annotation height
+         */
+        drawMultiSelectionMarkers(ctx, x, y, width, height) {
+            const markerSize = 6;
+            const markerColor = '#10B981'; // Green for multi-select
+
+            const markers = [
+                { x: x, y: y },                           // Top-left
+                { x: x + width, y: y },                   // Top-right
+                { x: x, y: y + height },                  // Bottom-left
+                { x: x + width, y: y + height }           // Bottom-right
+            ];
+
+            markers.forEach(marker => {
+                ctx.fillStyle = markerColor;
+                ctx.fillRect(
+                    marker.x - markerSize / 2,
+                    marker.y - markerSize / 2,
+                    markerSize,
+                    markerSize
+                );
             });
         },
 
