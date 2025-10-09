@@ -95,7 +95,23 @@ class ReviewPdfAndPrice extends Page implements HasForms
                         ->schema([
                             \Filament\Forms\Components\Placeholder::make('pdf_info')
                                 ->label('Document Information')
-                                ->content(fn () => "**{$this->pdfDocument->file_name}** — Total Pages: {$this->getTotalPages()}")
+                                ->content(function () {
+                                    $info = "**{$this->pdfDocument->file_name}** — Total Pages: {$this->getTotalPages()}";
+
+                                    // Add version information
+                                    if ($this->pdfDocument->version_number > 1 || !$this->pdfDocument->is_latest_version) {
+                                        $versionBadge = $this->pdfDocument->is_latest_version
+                                            ? "Version {$this->pdfDocument->version_number} (Latest)"
+                                            : "Version {$this->pdfDocument->version_number}";
+                                        $info .= " — **{$versionBadge}**";
+
+                                        if ($this->pdfDocument->version_metadata && isset($this->pdfDocument->version_metadata['version_notes'])) {
+                                            $info .= "\n\n📝 **Version Notes:** {$this->pdfDocument->version_metadata['version_notes']}";
+                                        }
+                                    }
+
+                                    return $info;
+                                })
                                 ->columnSpanFull(),
 
                             Repeater::make('page_metadata')

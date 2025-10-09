@@ -12,6 +12,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -19,6 +20,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\PdfPage;
+use App\Models\PdfPageAnnotation;
 
 class PdfDocumentsRelationManager extends RelationManager
 {
@@ -137,7 +140,18 @@ class PdfDocumentsRelationManager extends RelationManager
                 TextColumn::make('file_name')
                     ->label('File Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (PdfDocument $record) => $record->version_number > 1
+                        ? "Version {$record->version_number}"
+                        : null),
+
+                TextColumn::make('version_number')
+                    ->label('Version')
+                    ->badge()
+                    ->color(fn (PdfDocument $record) => $record->is_latest_version ? 'success' : 'gray')
+                    ->formatStateUsing(fn ($state, PdfDocument $record) => $record->is_latest_version
+                        ? "v{$state} (Latest)"
+                        : "v{$state}"),
 
                 TextColumn::make('formatted_file_size')
                     ->label('Size'),
@@ -236,6 +250,99 @@ class PdfDocumentsRelationManager extends RelationManager
                         'record' => $this->getOwnerRecord()->id,
                         'pdf' => $record->id,
                     ])),
+
+                Action::make('uploadNewVersion')
+                    ->label('Upload New Version')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('warning')
+                    ->visible(fn (PdfDocument $record) => $record->is_latest_version)
+                    ->form([
+                        FileUpload::make('new_version_file')
+                            ->label('New PDF Version')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->required()
+                            ->disk('public')
+                            ->directory('pdf-documents')
+                            ->helperText('Upload a new version of this PDF. Annotations will be migrated.'),
+
+                        Textarea::make('version_notes')
+                            ->label('Version Notes')
+                            ->rows(3)
+                            ->placeholder('What changed in this version?')
+                            ->helperText('Describe changes made in this version'),
+
+                        Toggle::make('migrate_annotations')
+                            ->label('Migrate Annotations')
+                            ->default(true)
+                            ->helperText('Automatically migrate annotations from previous version'),
+                    ])
+                    ->action(function (PdfDocument $record, array $data) {
+                        // Mark current version as no longer latest
+                        $record->update(['is_latest_version' => false]);
+
+                        // Create new version
+                        $newVersion = $record->replicate();
+                        $newVersion->version_number = $record->version_number + 1;
+                        $newVersion->previous_version_id = $record->id;
+                        $newVersion->is_latest_version = true;
+                        $newVersion->file_path = $data['new_version_file'];
+                        $newVersion->uploaded_by = Auth::id();
+
+                        // Extract page count from new PDF
+                        try {
+                            $fullPath = Storage::disk('public')->path($data['new_version_file']);
+                            if (file_exists($fullPath)) {
+                                $parser = new \Smalot\PdfParser\Parser();
+                                $pdf = $parser->parseFile($fullPath);
+                                $pages = $pdf->getPages();
+                                $newVersion->page_count = count($pages);
+                                $newVersion->file_size = Storage::disk('public')->size($data['new_version_file']);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::warning('Could not extract page count from new version: ' . $e->getMessage());
+                        }
+
+                        // Store version metadata
+                        $newVersion->version_metadata = [
+                            'version_notes' => $data['version_notes'] ?? null,
+                            'migrate_annotations' => $data['migrate_annotations'] ?? false,
+                            'migration_date' => now()->toIso8601String(),
+                            'migrated_by' => Auth::id(),
+                        ];
+
+                        $newVersion->save();
+
+                        // Migrate annotations if requested
+                        if ($data['migrate_annotations'] ?? false) {
+                            $this->migrateAnnotations($record, $newVersion);
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('New Version Created')
+                            ->body("Version {$newVersion->version_number} has been created successfully.")
+                            ->send();
+
+                        return redirect()->route('filament.admin.resources.project.projects.pdf-review', [
+                            'record' => $this->getOwnerRecord()->id,
+                            'pdf' => $newVersion->id,
+                        ]);
+                    }),
+
+                Action::make('viewVersionHistory')
+                    ->label('Version History')
+                    ->icon('heroicon-o-clock')
+                    ->color('gray')
+                    ->visible(fn (PdfDocument $record) => $record->version_number > 1 || !$record->is_latest_version)
+                    ->modalHeading(fn (PdfDocument $record) => 'Version History: ' . $record->file_name)
+                    ->modalContent(fn (PdfDocument $record) => view('filament.modals.pdf-version-history', [
+                        'versions' => $record->getAllVersions(),
+                        'currentVersion' => $record,
+                    ]))
+                    ->modalWidth('4xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
@@ -250,5 +357,32 @@ class PdfDocumentsRelationManager extends RelationManager
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
+    }
+
+    /**
+     * Migrate annotations from old version to new version
+     */
+    protected function migrateAnnotations(PdfDocument $oldVersion, PdfDocument $newVersion): void
+    {
+        // Get all pages from old version
+        $oldPages = $oldVersion->pages()->with('annotations')->get();
+
+        foreach ($oldPages as $oldPage) {
+            // Create corresponding page in new version
+            $newPage = PdfPage::create([
+                'pdf_document_id' => $newVersion->id,
+                'page_number' => $oldPage->page_number,
+            ]);
+
+            // Copy annotations to new page
+            foreach ($oldPage->annotations as $oldAnnotation) {
+                $newAnnotation = $oldAnnotation->replicate();
+                $newAnnotation->pdf_page_id = $newPage->id;
+                $newAnnotation->save();
+
+                // Log migration in metadata
+                \Log::info("Migrated annotation {$oldAnnotation->id} from page {$oldPage->page_number} (v{$oldVersion->version_number}) to new page {$newPage->id} (v{$newVersion->version_number})");
+            }
+        }
     }
 }
