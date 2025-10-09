@@ -271,6 +271,131 @@ export function createAnnotationDrawer() {
         },
 
         /**
+         * Check if click is on a resize handle
+         * @param {number} clickX - Click X coordinate (canvas pixels)
+         * @param {number} clickY - Click Y coordinate (canvas pixels)
+         * @param {Object} annotation - Annotation object
+         * @param {HTMLCanvasElement} canvas - Canvas element
+         * @returns {string|null} Handle position ('tl', 'tr', 'bl', 'br') or null
+         */
+        getResizeHandle(clickX, clickY, annotation, canvas) {
+            const handleSize = 10;
+            const handleTolerance = 5; // Extra pixels for easier clicking
+
+            const x = annotation.x * canvas.width;
+            const y = annotation.y * canvas.height;
+            const width = annotation.width * canvas.width;
+            const height = annotation.height * canvas.height;
+
+            const handles = [
+                { pos: 'tl', x: x, y: y },                              // Top-left
+                { pos: 'tr', x: x + width, y: y },                      // Top-right
+                { pos: 'bl', x: x, y: y + height },                     // Bottom-left
+                { pos: 'br', x: x + width, y: y + height }              // Bottom-right
+            ];
+
+            // Check each handle
+            for (const handle of handles) {
+                const distance = Math.sqrt(
+                    Math.pow(clickX - handle.x, 2) +
+                    Math.pow(clickY - handle.y, 2)
+                );
+
+                if (distance <= (handleSize / 2 + handleTolerance)) {
+                    return handle.pos;
+                }
+            }
+
+            return null;
+        },
+
+        /**
+         * Resize annotation based on handle drag
+         * @param {Object} annotation - Annotation being resized
+         * @param {string} handlePos - Handle position ('tl', 'tr', 'bl', 'br')
+         * @param {number} newX - New mouse X position (canvas pixels)
+         * @param {number} newY - New mouse Y position (canvas pixels)
+         * @param {HTMLCanvasElement} canvas - Canvas element
+         * @returns {Object} Updated annotation bounds {x, y, width, height} in normalized coords
+         */
+        resizeAnnotation(annotation, handlePos, newX, newY, canvas) {
+            // Convert current annotation to canvas pixels
+            let x = annotation.x * canvas.width;
+            let y = annotation.y * canvas.height;
+            let width = annotation.width * canvas.width;
+            let height = annotation.height * canvas.height;
+
+            // Update bounds based on which handle is being dragged
+            switch (handlePos) {
+                case 'tl': // Top-left: change x, y, width, height
+                    width = (x + width) - newX;
+                    height = (y + height) - newY;
+                    x = newX;
+                    y = newY;
+                    break;
+                case 'tr': // Top-right: change y, width, height
+                    width = newX - x;
+                    height = (y + height) - newY;
+                    y = newY;
+                    break;
+                case 'bl': // Bottom-left: change x, width, height
+                    width = (x + width) - newX;
+                    height = newY - y;
+                    x = newX;
+                    break;
+                case 'br': // Bottom-right: change width, height
+                    width = newX - x;
+                    height = newY - y;
+                    break;
+            }
+
+            // Prevent negative dimensions
+            if (width < 0) {
+                x = x + width;
+                width = Math.abs(width);
+            }
+            if (height < 0) {
+                y = y + height;
+                height = Math.abs(height);
+            }
+
+            // Return normalized coordinates (0-1 range)
+            return {
+                x: x / canvas.width,
+                y: y / canvas.height,
+                width: width / canvas.width,
+                height: height / canvas.height
+            };
+        },
+
+        /**
+         * Move annotation by delta
+         * @param {Object} annotation - Annotation being moved
+         * @param {number} deltaX - Movement in X (canvas pixels)
+         * @param {number} deltaY - Movement in Y (canvas pixels)
+         * @param {HTMLCanvasElement} canvas - Canvas element
+         * @returns {Object} Updated annotation position {x, y} in normalized coords
+         */
+        moveAnnotation(annotation, deltaX, deltaY, canvas) {
+            // Convert to canvas pixels
+            let x = annotation.x * canvas.width + deltaX;
+            let y = annotation.y * canvas.height + deltaY;
+
+            // Keep annotation within canvas bounds
+            const width = annotation.width * canvas.width;
+            const height = annotation.height * canvas.height;
+
+            x = Math.max(0, Math.min(x, canvas.width - width));
+            y = Math.max(0, Math.min(y, canvas.height - height));
+
+            // Return normalized coordinates
+            return {
+                x: x / canvas.width,
+                y: y / canvas.height
+            };
+        },
+
+        /**
          * Change cursor based on tool
          * @param {HTMLCanvasElement} canvas - Annotation canvas
          * @param {string} tool - Current tool ('rectangle' or 'select')
@@ -278,6 +403,33 @@ export function createAnnotationDrawer() {
         setCursor(canvas, tool) {
             if (!canvas) return;
             canvas.style.cursor = tool === 'rectangle' ? 'crosshair' : 'pointer';
+        },
+
+        /**
+         * Set cursor for resize handle
+         * @param {HTMLCanvasElement} canvas - Annotation canvas
+         * @param {string} handlePos - Handle position ('tl', 'tr', 'bl', 'br')
+         */
+        setResizeCursor(canvas, handlePos) {
+            if (!canvas) return;
+
+            const cursors = {
+                'tl': 'nwse-resize',  // ↖↘
+                'tr': 'nesw-resize',  // ↗↙
+                'bl': 'nesw-resize',  // ↗↙
+                'br': 'nwse-resize'   // ↖↘
+            };
+
+            canvas.style.cursor = cursors[handlePos] || 'default';
+        },
+
+        /**
+         * Set cursor for moving
+         * @param {HTMLCanvasElement} canvas - Annotation canvas
+         */
+        setMoveCursor(canvas) {
+            if (!canvas) return;
+            canvas.style.cursor = 'move';
         }
     };
 }

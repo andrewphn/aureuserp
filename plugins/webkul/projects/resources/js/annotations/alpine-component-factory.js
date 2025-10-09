@@ -47,9 +47,17 @@ export function createAnnotationComponent(pdfjsLib) {
 
         // Drawing state
         currentTool: 'rectangle',
+        isDrawing: false,
         startX: 0,
         startY: 0,
         selectedAnnotationId: null,
+
+        // Resize/move state
+        isResizing: false,
+        isMoving: false,
+        resizeHandle: null,
+        moveStartX: 0,
+        moveStartY: 0,
 
         // Undo/redo stacks
         undoStack: [],
@@ -383,12 +391,53 @@ export function createAnnotationComponent(pdfjsLib) {
 
         // ========== DRAWING ==========
         startDrawing(e) {
-            // If using select tool, check for annotation clicks
-            if (this.currentTool === 'select') {
-                const rect = this.$refs.annotationCanvas.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const clickY = e.clientY - rect.top;
+            const rect = this.$refs.annotationCanvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
 
+            // If using select tool, check for resize handles or annotation clicks
+            if (this.currentTool === 'select' && this.selectedAnnotationId) {
+                // Find the selected annotation
+                const selectedAnnotation = this.annotations.find(a => a.id === this.selectedAnnotationId);
+
+                if (selectedAnnotation) {
+                    // Check if clicking on a resize handle
+                    const handlePos = drawer.getResizeHandle(
+                        clickX,
+                        clickY,
+                        selectedAnnotation,
+                        this.$refs.annotationCanvas
+                    );
+
+                    if (handlePos) {
+                        // Start resizing
+                        this.isResizing = true;
+                        this.resizeHandle = handlePos;
+                        this.startX = clickX;
+                        this.startY = clickY;
+                        return;
+                    }
+
+                    // Check if clicking inside the annotation (for moving)
+                    const clickedAnnotation = drawer.getClickedAnnotation(
+                        clickX,
+                        clickY,
+                        this.annotations,
+                        this.$refs.annotationCanvas
+                    );
+
+                    if (clickedAnnotation && clickedAnnotation.id === this.selectedAnnotationId) {
+                        // Start moving
+                        this.isMoving = true;
+                        this.moveStartX = clickX;
+                        this.moveStartY = clickY;
+                        return;
+                    }
+                }
+            }
+
+            // Check for annotation selection with select tool
+            if (this.currentTool === 'select') {
                 const clickedAnnotation = drawer.getClickedAnnotation(
                     clickX,
                     clickY,
@@ -397,6 +446,11 @@ export function createAnnotationComponent(pdfjsLib) {
                 );
 
                 if (clickedAnnotation) {
+                    // Save state before selecting (for undo)
+                    const stateUpdate = editor.saveState(this.annotations, this.undoStack);
+                    this.undoStack = stateUpdate.undoStack;
+                    this.redoStack = stateUpdate.redoStack;
+
                     // Select the annotation
                     this.selectedAnnotationId = clickedAnnotation.id;
                     drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
@@ -418,6 +472,57 @@ export function createAnnotationComponent(pdfjsLib) {
         },
 
         draw(e) {
+            const rect = this.$refs.annotationCanvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            // Handle resizing
+            if (this.isResizing && this.selectedAnnotationId) {
+                const selectedAnnotation = this.annotations.find(a => a.id === this.selectedAnnotationId);
+                if (selectedAnnotation) {
+                    const newBounds = drawer.resizeAnnotation(
+                        selectedAnnotation,
+                        this.resizeHandle,
+                        currentX,
+                        currentY,
+                        this.$refs.annotationCanvas
+                    );
+
+                    // Update annotation bounds
+                    Object.assign(selectedAnnotation, newBounds);
+                    drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                }
+                return;
+            }
+
+            // Handle moving
+            if (this.isMoving && this.selectedAnnotationId) {
+                const selectedAnnotation = this.annotations.find(a => a.id === this.selectedAnnotationId);
+                if (selectedAnnotation) {
+                    const deltaX = currentX - this.moveStartX;
+                    const deltaY = currentY - this.moveStartY;
+
+                    const newPos = drawer.moveAnnotation(
+                        selectedAnnotation,
+                        deltaX,
+                        deltaY,
+                        this.$refs.annotationCanvas
+                    );
+
+                    // Update annotation position
+                    selectedAnnotation.x = newPos.x;
+                    selectedAnnotation.y = newPos.y;
+
+                    // Update move start for next frame
+                    this.moveStartX = currentX;
+                    this.moveStartY = currentY;
+
+                    drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                }
+                return;
+            }
+
+            // Handle drawing new annotation
             if (!this.isDrawing) return;
 
             const drawState = {
@@ -436,6 +541,32 @@ export function createAnnotationComponent(pdfjsLib) {
         },
 
         stopDrawing(e) {
+            // Handle finishing resize
+            if (this.isResizing) {
+                // Save state for undo
+                const stateUpdate = editor.saveState(this.annotations, this.undoStack);
+                this.undoStack = stateUpdate.undoStack;
+                this.redoStack = stateUpdate.redoStack;
+
+                this.isResizing = false;
+                this.resizeHandle = null;
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                return;
+            }
+
+            // Handle finishing move
+            if (this.isMoving) {
+                // Save state for undo
+                const stateUpdate = editor.saveState(this.annotations, this.undoStack);
+                this.undoStack = stateUpdate.undoStack;
+                this.redoStack = stateUpdate.redoStack;
+
+                this.isMoving = false;
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                return;
+            }
+
+            // Handle finishing new annotation drawing
             if (!this.isDrawing) return;
 
             const drawState = {
