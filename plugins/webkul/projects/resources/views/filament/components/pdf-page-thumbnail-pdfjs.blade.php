@@ -89,6 +89,8 @@
         x-show="showAnnotationModal"
         x-cloak
         @keydown.escape.window="showAnnotationModal = false"
+        @keydown.delete.window="if (selectedAnnotationId && confirm('Delete this annotation? This cannot be undone.')) { deleteSelected(); }"
+        @keydown.backspace.window="if (selectedAnnotationId && confirm('Delete this annotation? This cannot be undone.')) { deleteSelected(); }"
         class="fixed inset-0 z-[9999] bg-black/90"
         style="display: none;"
     >
@@ -221,7 +223,7 @@
                             </button>
                         </div>
 
-                        <!-- Selection Indicator -->
+                        <!-- Selection Indicator & Actions -->
                         <div x-show="selectedAnnotationId !== null" class="flex items-center gap-2 border-r border-gray-700 pr-3">
                             <div class="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded font-medium">
                                 <span>✏️</span>
@@ -234,6 +236,14 @@
                                     ✕
                                 </button>
                             </div>
+                            <button
+                                @click="if (confirm('Delete this annotation? This cannot be undone.')) { deleteSelected(); }"
+                                class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors font-medium"
+                                title="Delete annotation (Delete key)"
+                                dusk="delete-annotation-button"
+                            >
+                                🗑️
+                            </button>
                         </div>
 
                         <!-- Actions -->
