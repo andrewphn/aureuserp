@@ -6,6 +6,11 @@
             expandedSections: {},
 
             toggleTag(tagId) {
+                // Ensure state is always an array
+                if (!Array.isArray(this.state)) {
+                    this.state = [];
+                }
+
                 if (this.state.includes(tagId)) {
                     this.state = this.state.filter(id => id !== tagId)
                 } else {
@@ -52,9 +57,9 @@
         </div>
 
         <!-- Selected Tags -->
-        <div x-show="state.length > 0" class="mb-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+        <div x-show="state && state.length > 0" class="mb-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
             <div class="flex flex-wrap gap-1">
-                <template x-for="tagId in state" :key="tagId">
+                <template x-for="tagId in (state || [])" :key="tagId">
                     <button
                         type="button"
                         @click="toggleTag(tagId)"
@@ -133,8 +138,8 @@
                                     type="button"
                                     @click="toggleTag(tag.id)"
                                     :class="{
-                                        'bg-primary-500 text-white ring-2 ring-primary-500': state.includes(tag.id),
-                                        'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700': !state.includes(tag.id)
+                                        'bg-primary-500 text-white ring-2 ring-primary-500': state && state.includes(tag.id),
+                                        'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700': !state || !state.includes(tag.id)
                                     }"
                                     class="px-2 py-1 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded-md transition-all"
                                     :style="tag.color ? 'border-left: 3px solid ' + tag.color : ''"

@@ -13,6 +13,11 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
+        // Only insert if table is empty (already seeded by erp:install)
+        if (DB::table('countries')->count() > 0) {
+            return;
+        }
+
         $path = base_path('plugins/webkul/security/src/Data/countries.json');
 
         if (File::exists($path)) {

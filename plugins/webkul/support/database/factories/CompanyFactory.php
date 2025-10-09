@@ -34,8 +34,8 @@ class CompanyFactory extends Factory
             'color'                 => $this->faker->hexColor(),
             'is_active'             => $this->faker->boolean(),
             'founded_date'          => $this->faker->date('Y-m-d', '-10 years'),
-            'user_id'               => 1,
-            'currency_id'           => $this->faker->randomElement([1, 2, 3]),
+            'creator_id'            => 1,
+            'currency_id'           => null,
         ];
     }
 }

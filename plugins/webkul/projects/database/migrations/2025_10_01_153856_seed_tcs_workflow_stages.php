@@ -18,31 +18,39 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Delete default stages first
+        \Webkul\Project\Models\ProjectStage::whereIn('name', [
+            'To Do',
+            'In Progress',
+            'Done',
+            'Cancelled',
+        ])->delete();
+
         $stages = [
             [
                 'name' => 'Discovery',
                 'color' => '#3B82F6', // Blue - trust, communication, beginning
-                'sort_order' => 1,
+                'sort' => 1,
             ],
             [
                 'name' => 'Design',
                 'color' => '#8B5CF6', // Purple - creativity, planning, transformation
-                'sort_order' => 2,
+                'sort' => 2,
             ],
             [
                 'name' => 'Sourcing',
                 'color' => '#F59E0B', // Orange - energy, procurement, action
-                'sort_order' => 3,
+                'sort' => 3,
             ],
             [
                 'name' => 'Production',
                 'color' => '#10B981', // Green - growth, progress, building
-                'sort_order' => 4,
+                'sort' => 4,
             ],
             [
                 'name' => 'Delivery',
                 'color' => '#14B8A6', // Teal - success, completion, satisfaction
-                'sort_order' => 5,
+                'sort' => 5,
             ],
         ];
 

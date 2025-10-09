@@ -41,6 +41,12 @@ class ProductServiceProvider extends PackageServiceProvider
                 '2025_09_30_164000_cleanup_test_vendor_pricing',
                 '2025_10_01_170000_create_product_attributes',
                 '2025_10_01_171000_consolidate_sanding_disc_variants',
+                '2025_10_04_121615_seed_tcs_cabinet_product_attributes',
+                '2025_10_04_123502_create_tcs_cabinet_products_with_attributes',
+                '2025_10_04_123550_add_cabinet_type_attribute',
+                '2025_10_06_000001_add_cabinet_pricing_level_attribute',
+                '2025_10_06_000002_create_countertop_product',
+                '2025_10_07_131336_add_tcs_cabinet_pricing_attributes_and_options',
             ])
             ->hasSeeder('Webkul\\Product\\Database\Seeders\\DatabaseSeeder')
             ->runsMigrations()

@@ -479,7 +479,7 @@ class ProjectResource extends Resource
                         Section::make('Architectural PDFs')
                             ->description('Plans, blueprints & drawings')
                             ->schema([
-                                // Show existing PDFs on edit
+                                // Show PDF upload section for both create and edit
                                 \Filament\Forms\Components\ViewField::make('pdf_upload_section')
                                     ->label('')
                                     ->view('filament.forms.components.compact-pdf-upload')
@@ -488,21 +488,7 @@ class ProjectResource extends Resource
                                         'context' => $context,
                                         'pdfs' => $record?->pdfDocuments()->get() ?? collect(),
                                     ])
-                                    ->columnSpanFull()
-                                    ->visible(fn ($context) => $context === 'edit'),
-
-                                // Allow uploading PDFs on create
-                                \Filament\Forms\Components\FileUpload::make('architectural_pdfs')
-                                    ->label('Upload Architectural PDFs')
-                                    ->acceptedFileTypes(['application/pdf'])
-                                    ->multiple()
-                                    ->maxFiles(10)
-                                    ->maxSize(51200) // 50MB per file
-                                    ->disk('public')
-                                    ->directory('pdf-documents')
-                                    ->helperText('Upload architectural drawings, blueprints, or plans (PDF only, max 50MB per file)')
-                                    ->columnSpanFull()
-                                    ->visible(fn ($context) => $context === 'create'),
+                                    ->columnSpanFull(),
                             ])
                             ->collapsible()
                             ->collapsed(false)
