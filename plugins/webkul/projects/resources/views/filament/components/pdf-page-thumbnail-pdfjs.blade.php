@@ -91,6 +91,15 @@
         @keydown.escape.window="showAnnotationModal = false"
         @keydown.delete.window="if (selectedAnnotationId && confirm('Delete this annotation? This cannot be undone.')) { deleteSelected(); }"
         @keydown.backspace.window="if (selectedAnnotationId && confirm('Delete this annotation? This cannot be undone.')) { deleteSelected(); }"
+        @keydown.window="
+            if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+                event.preventDefault();
+                undo();
+            } else if ((event.ctrlKey || event.metaKey) && (event.key === 'y' || (event.key === 'z' && event.shiftKey))) {
+                event.preventDefault();
+                redo();
+            }
+        "
         class="fixed inset-0 z-[9999] bg-black/90"
         style="display: none;"
     >
