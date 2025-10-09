@@ -388,6 +388,132 @@
 
                     <!-- Metadata Form -->
                     <div class="flex-1 p-4 space-y-4 overflow-y-auto">
+                        <!-- TASK 3: Annotation Type Selector -->
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg p-3">
+                            <label class="block text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-2">
+                                📍 What are you annotating?
+                            </label>
+                            <select
+                                x-model="annotationType"
+                                @change="resetChildSelections()"
+                                class="w-full px-3 py-2 border-2 border-indigo-400 dark:border-indigo-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
+                            >
+                                <option value="room">🏠 Room (entire space)</option>
+                                <option value="room_location">📍 Room Location (wall/area)</option>
+                                <option value="cabinet_run">📏 Cabinet Run</option>
+                                <option value="cabinet">🗄️ Individual Cabinet</option>
+                                <option value="dimension">📐 Dimension/Measurement</option>
+                            </select>
+                            <p class="text-xs text-indigo-700 dark:text-indigo-400 mt-1">
+                                Select what type of entity you're marking on this page
+                            </p>
+                        </div>
+
+                        <!-- TASK 4: Cascading Context Dropdowns -->
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg p-3 space-y-3">
+                            <h4 class="text-sm font-bold text-blue-900 dark:text-blue-300">
+                                🎯 Annotation Context
+                            </h4>
+
+                            <!-- Room Selection (always shown) -->
+                            <div>
+                                <label class="block text-xs font-semibold text-blue-800 dark:text-blue-400 mb-1">
+                                    Select Room
+                                </label>
+                                <select
+                                    x-model="selectedRoomId"
+                                    @change="filterRoomLocations(); resetChildSelections();"
+                                    :disabled="loadingMetadata || availableRooms.length === 0"
+                                    class="w-full px-3 py-2 text-sm border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                    <option value="">-- Select Room --</option>
+                                    <template x-for="room in availableRooms" :key="room.id">
+                                        <option :value="room.id" x-text="`${room.name} (${room.room_type})`"></option>
+                                    </template>
+                                </select>
+                                <p class="text-xs text-blue-600 dark:text-blue-500 mt-1" x-show="annotationType === 'room'">
+                                    ✓ Drawing new rooms will use this as template
+                                </p>
+                            </div>
+
+                            <!-- Room Location Selection (if needed) -->
+                            <div x-show="annotationType === 'room_location' || annotationType === 'cabinet_run' || annotationType === 'cabinet'">
+                                <label class="block text-xs font-semibold text-blue-800 dark:text-blue-400 mb-1">
+                                    Select Room Location
+                                </label>
+                                <select
+                                    x-model="selectedRoomLocationId"
+                                    @change="filterCabinetRuns();"
+                                    :disabled="!selectedRoomId || loadingMetadata"
+                                    class="w-full px-3 py-2 text-sm border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50"
+                                >
+                                    <option value="">-- Select Location --</option>
+                                    <template x-for="location in filteredRoomLocations" :key="location.id">
+                                        <option :value="location.id" x-text="`${location.name} (${location.location_type})`"></option>
+                                    </template>
+                                </select>
+                                <p class="text-xs text-blue-600 dark:text-blue-500 mt-1" x-show="annotationType === 'room_location' && !selectedRoomId">
+                                    ⚠️ Select a room first
+                                </p>
+                            </div>
+
+                            <!-- Cabinet Run Selection (if needed) -->
+                            <div x-show="annotationType === 'cabinet_run' || annotationType === 'cabinet'">
+                                <label class="block text-xs font-semibold text-blue-800 dark:text-blue-400 mb-1">
+                                    Select Cabinet Run
+                                </label>
+                                <select
+                                    x-model="selectedCabinetRunId"
+                                    @change="filterCabinets();"
+                                    :disabled="!selectedRoomLocationId || loadingMetadata"
+                                    class="w-full px-3 py-2 text-sm border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50"
+                                >
+                                    <option value="">-- Select Cabinet Run --</option>
+                                    <template x-for="run in filteredCabinetRuns" :key="run.id">
+                                        <option :value="run.id" x-text="`${run.name} (${run.run_type})`"></option>
+                                    </template>
+                                </select>
+                                <p class="text-xs text-blue-600 dark:text-blue-500 mt-1" x-show="!selectedRoomLocationId">
+                                    ⚠️ Select a room location first
+                                </p>
+                            </div>
+
+                            <!-- Cabinet Selection (if annotating individual cabinets) -->
+                            <div x-show="annotationType === 'cabinet'">
+                                <label class="block text-xs font-semibold text-blue-800 dark:text-blue-400 mb-1">
+                                    Select Cabinet (optional)
+                                </label>
+                                <select
+                                    x-model="selectedCabinetId"
+                                    :disabled="!selectedCabinetRunId || loadingMetadata"
+                                    class="w-full px-3 py-2 text-sm border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50"
+                                >
+                                    <option value="">-- Link to existing cabinet --</option>
+                                    <template x-for="cabinet in filteredCabinets" :key="cabinet.id">
+                                        <option :value="cabinet.id" x-text="`${cabinet.name || cabinet.code} - ${cabinet.width}W x ${cabinet.height}H`"></option>
+                                    </template>
+                                </select>
+                                <p class="text-xs text-blue-600 dark:text-blue-500 mt-1" x-show="!selectedCabinetId">
+                                    💡 Leave empty to create new cabinet from annotation
+                                </p>
+                            </div>
+
+                            <!-- Context Summary -->
+                            <div class="bg-white dark:bg-gray-800 rounded p-2 border border-blue-200 dark:border-blue-800">
+                                <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    📋 Active Context:
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                    <span x-show="!selectedRoomId">No context selected</span>
+                                    <span x-show="selectedRoomId && annotationType === 'room'" x-text="`Creating new rooms in: ${availableRooms.find(r => r.id == selectedRoomId)?.name}`"></span>
+                                    <span x-show="selectedRoomId && annotationType === 'room_location' && !selectedRoomLocationId" x-text="`Room: ${availableRooms.find(r => r.id == selectedRoomId)?.name}`"></span>
+                                    <span x-show="selectedRoomLocationId && annotationType === 'room_location'" x-text="`${availableRooms.find(r => r.id == selectedRoomId)?.name} → ${filteredRoomLocations.find(l => l.id == selectedRoomLocationId)?.name}`"></span>
+                                    <span x-show="selectedCabinetRunId && annotationType === 'cabinet_run'" x-text="`${availableRooms.find(r => r.id == selectedRoomId)?.name} → ${filteredCabinetRuns.find(r => r.id == selectedCabinetRunId)?.name}`"></span>
+                                    <span x-show="selectedCabinetRunId && annotationType === 'cabinet'" x-text="`Run: ${filteredCabinetRuns.find(r => r.id == selectedCabinetRunId)?.name}${selectedCabinetId ? ' → Cabinet #' + selectedCabinetId : ' (new cabinet)'}`"></span>
+                                </p>
+                            </div>
+                        </div>
+
                         <!-- Page Type -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
