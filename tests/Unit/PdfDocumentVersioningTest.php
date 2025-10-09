@@ -52,6 +52,9 @@ class PdfDocumentVersioningTest extends TestCase
             'uploaded_by' => $this->user->id,
         ]);
 
+        // Refresh to get database defaults
+        $pdf->refresh();
+
         $this->assertEquals(1, $pdf->version_number);
         $this->assertTrue($pdf->is_latest_version);
         $this->assertNull($pdf->previous_version_id);
