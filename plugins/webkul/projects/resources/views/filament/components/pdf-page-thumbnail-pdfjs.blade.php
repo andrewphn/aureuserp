@@ -718,20 +718,7 @@
     </template>
 </div>
 
+{{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}
 @once
-    @push('scripts')
-    <script type="module">
-        import * as pdfjsLib from 'pdfjs-dist';
-        import { createAnnotationComponent } from '/plugins/webkul/projects/resources/js/annotations/alpine-component-factory.js';
-
-        // Use local worker file
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdf.worker.min.js';
-
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('pdfThumbnailPdfJs', () => {
-                return createAnnotationComponent(pdfjsLib);
-            });
-        });
-    </script>
-    @endpush
+    @vite('resources/js/annotations.js')
 @endonce
