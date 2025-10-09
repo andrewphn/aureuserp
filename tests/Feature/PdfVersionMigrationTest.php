@@ -106,17 +106,17 @@ class PdfVersionMigrationTest extends TestCase
 
         // Create pages for v1
         $page1 = PdfPage::create([
-            'pdf_document_id' => $v1->id,
+            'document_id' => $v1->id,
             'page_number' => 1,
         ]);
 
         $page2 = PdfPage::create([
-            'pdf_document_id' => $v1->id,
+            'document_id' => $v1->id,
             'page_number' => 2,
         ]);
 
         $page3 = PdfPage::create([
-            'pdf_document_id' => $v1->id,
+            'document_id' => $v1->id,
             'page_number' => 3,
         ]);
 
@@ -137,7 +137,7 @@ class PdfVersionMigrationTest extends TestCase
         // Simulate annotation migration
         foreach ($v1->pages as $oldPage) {
             PdfPage::create([
-                'pdf_document_id' => $v2->id,
+                'document_id' => $v2->id,
                 'page_number' => $oldPage->page_number,
             ]);
         }
@@ -171,7 +171,7 @@ class PdfVersionMigrationTest extends TestCase
 
         // Create page for v1
         $page1 = PdfPage::create([
-            'pdf_document_id' => $v1->id,
+            'document_id' => $v1->id,
             'page_number' => 1,
         ]);
 
@@ -212,7 +212,7 @@ class PdfVersionMigrationTest extends TestCase
 
         // Migrate pages and annotations
         $page2 = PdfPage::create([
-            'pdf_document_id' => $v2->id,
+            'document_id' => $v2->id,
             'page_number' => $page1->page_number,
         ]);
 
@@ -250,7 +250,7 @@ class PdfVersionMigrationTest extends TestCase
         ]);
 
         $page1 = PdfPage::create([
-            'pdf_document_id' => $v1->id,
+            'document_id' => $v1->id,
             'page_number' => 1,
         ]);
 
@@ -300,7 +300,7 @@ class PdfVersionMigrationTest extends TestCase
         ]);
 
         $page2 = PdfPage::create([
-            'pdf_document_id' => $v2->id,
+            'document_id' => $v2->id,
             'page_number' => 1,
         ]);
 
