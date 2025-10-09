@@ -410,18 +410,41 @@
 
                 <!-- RIGHT: Metadata Panel -->
                 <div class="w-96 flex-shrink-0 bg-white dark:bg-gray-800 border-l border-gray-700 flex flex-col overflow-y-auto">
-                    <!-- Panel Header -->
+                    <!-- Panel Header with Tabs -->
                     <div class="bg-gray-100 dark:bg-gray-750 p-4 border-b border-gray-300 dark:border-gray-700">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Page Metadata
-                        </h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                             Page <span x-text="currentPageNum"></span>
-                        </p>
+                        </h3>
+                        <div class="flex gap-2" x-data="{ activeTab: 'metadata' }">
+                            <button
+                                @click="activeTab = 'metadata'; $dispatch('tab-changed', 'metadata')"
+                                :class="activeTab === 'metadata' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'"
+                                class="px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                                📋 Metadata
+                            </button>
+                            <button
+                                @click="activeTab = 'discussion'; $dispatch('tab-changed', 'discussion')"
+                                :class="activeTab === 'discussion' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'"
+                                class="px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                                💬 Discussion
+                            </button>
+                            <button
+                                @click="activeTab = 'history'; $dispatch('tab-changed', 'history')"
+                                :class="activeTab === 'history' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'"
+                                class="px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                                📜 History
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Metadata Form -->
-                    <div class="flex-1 p-4 space-y-4 overflow-y-auto">
+                    <!-- Tab Content -->
+                    <div class="flex-1 overflow-y-auto" x-data="{ activeTab: 'metadata' }" @tab-changed.window="activeTab = $event.detail">
+
+                        <!-- Metadata Tab -->
+                        <div x-show="activeTab === 'metadata'" class="p-4 space-y-4">
                         <!-- TASK 3: Annotation Type Selector -->
                         <div class="bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg p-3">
                             <label class="block text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-2">
@@ -698,7 +721,90 @@
                                 </template>
                             </div>
                         </div>
+                        </div>
+                        <!-- END Metadata Tab -->
+
+                        <!-- Discussion Tab (Chatter) -->
+                        <div x-show="activeTab === 'discussion'" class="h-full flex flex-col" style="display: none;">
+                            @if($pdfPage)
+                            <div class="flex-1 overflow-y-auto">
+                                <livewire:chatter-panel
+                                    :record="$pdfPage"
+                                    :activityPlans="collect()"
+                                    resource=""
+                                    lazy
+                                />
+                            </div>
+                            @else
+                            <div class="p-4 text-center text-gray-500">
+                                <p>Discussion will be available after saving annotations.</p>
+                            </div>
+                            @endif
+                        </div>
+
+                        <!-- History Tab -->
+                        <div x-show="activeTab === 'history'" class="p-4" style="display: none;" x-data="{ historyLoading: true, historyEntries: [] }" x-init="
+                            $watch('activeTab', (value) => {
+                                if (value === 'history' && historyEntries.length === 0) {
+                                    historyLoading = true;
+                                    fetch(`/api/pdf/page/${pdfPageId}/annotations/history`)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            historyEntries = data.history || [];
+                                            historyLoading = false;
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to load history:', err);
+                                            historyLoading = false;
+                                        });
+                                }
+                            })
+                        ">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                                Annotation History
+                            </h4>
+
+                            <!-- Loading State -->
+                            <div x-show="historyLoading" class="text-center py-8">
+                                <svg class="animate-spin h-8 w-8 mx-auto text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <p class="text-sm text-gray-500 mt-2">Loading history...</p>
+                            </div>
+
+                            <!-- History Timeline -->
+                            <div x-show="!historyLoading" class="space-y-3">
+                                <template x-if="historyEntries.length === 0">
+                                    <p class="text-sm text-gray-500 text-center py-8">No history yet</p>
+                                </template>
+
+                                <template x-for="entry in historyEntries" :key="entry.id">
+                                    <div class="border-l-2 border-gray-300 dark:border-gray-600 pl-3 pb-3">
+                                        <div class="flex items-start gap-2">
+                                            <span class="inline-block px-2 py-1 text-xs rounded font-medium"
+                                                  :class="{
+                                                      'bg-green-100 text-green-800': entry.action === 'created',
+                                                      'bg-blue-100 text-blue-800': entry.action === 'updated',
+                                                      'bg-red-100 text-red-800': entry.action === 'deleted',
+                                                      'bg-purple-100 text-purple-800': entry.action === 'moved',
+                                                      'bg-yellow-100 text-yellow-800': entry.action === 'resized',
+                                                      'bg-gray-100 text-gray-800': ['selected', 'copied', 'pasted'].includes(entry.action)
+                                                  }"
+                                                  x-text="entry.action.toUpperCase()"></span>
+                                        </div>
+                                        <p class="text-sm text-gray-900 dark:text-white mt-1">
+                                            <strong x-text="entry.user.name"></strong>
+                                            <span x-text="` ${entry.action} an annotation`"></span>
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-1" x-text="entry.created_at_human"></p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
                     </div>
+                    <!-- END Tab Content -->
 
                     <!-- Save Button (sticky bottom) -->
                     <div class="p-4 bg-gray-100 dark:bg-gray-750 border-t border-gray-300 dark:border-gray-700">

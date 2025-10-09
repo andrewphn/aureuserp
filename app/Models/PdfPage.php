@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Project\Models\Room;
+use Webkul\Chatter\Traits\HasChatter;
 
 class PdfPage extends Model
 {
-    use HasFactory;
+    use HasFactory, HasChatter;
 
     protected $table = 'pdf_pages';
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AnnotationService;
 use App\Models\PdfDocument;
+use App\Models\PdfAnnotationHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -486,6 +487,18 @@ class PdfAnnotationController extends Controller
 
             $createEntities = $validated['create_entities'] ?? false;
 
+            // Log deletion of existing annotations before deleting them
+            $existingAnnotations = \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)->get();
+            foreach ($existingAnnotations as $annotation) {
+                PdfAnnotationHistory::logAction(
+                    pdfPageId: $pdfPageId,
+                    action: 'deleted',
+                    beforeData: $annotation->toArray(),
+                    afterData: null,
+                    annotationId: $annotation->id
+                );
+            }
+
             // Delete existing annotations for this page (replace strategy)
             \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)->delete();
 
@@ -510,6 +523,15 @@ class PdfAnnotationController extends Controller
                     'notes' => $annotation['notes'] ?? null,
                     'created_by' => Auth::id(),
                 ]);
+
+                // Log annotation creation
+                PdfAnnotationHistory::logAction(
+                    pdfPageId: $pdfPageId,
+                    action: 'created',
+                    beforeData: null,
+                    afterData: $savedAnnotation->toArray(),
+                    annotationId: $savedAnnotation->id
+                );
 
                 // If create_entities flag is true and context provided, create linked entity
                 if ($createEntities && isset($annotation['context']) && $project) {
@@ -864,6 +886,83 @@ class PdfAnnotationController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to retrieve context data'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get annotation history for a PDF page
+     * GET /api/pdf/page/{pdfPageId}/annotations/history
+     *
+     * @param int $pdfPageId PDF Page ID
+     * @return JsonResponse
+     */
+    public function getAnnotationHistory(int $pdfPageId): JsonResponse
+    {
+        try {
+            $pdfPage = \App\Models\PdfPage::findOrFail($pdfPageId);
+            $pdfDocument = $pdfPage->pdfDocument;
+
+            if (!$pdfDocument) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'PDF document not found for this page'
+                ], 404);
+            }
+
+            // Verify user has access
+            $this->authorize('view', $pdfDocument);
+
+            // Get history for this page
+            $history = PdfAnnotationHistory::forPage($pdfPageId);
+
+            // Format history entries for frontend
+            $formattedHistory = $history->map(function ($entry) {
+                return [
+                    'id' => $entry->id,
+                    'annotation_id' => $entry->annotation_id,
+                    'action' => $entry->action,
+                    'user' => [
+                        'id' => $entry->user_id,
+                        'name' => $entry->user->name ?? 'Unknown',
+                        'email' => $entry->user->email ?? null,
+                    ],
+                    'before_data' => $entry->before_data,
+                    'after_data' => $entry->after_data,
+                    'metadata' => $entry->metadata,
+                    'ip_address' => $entry->ip_address,
+                    'created_at' => $entry->created_at->toIso8601String(),
+                    'created_at_human' => $entry->created_at->diffForHumans(),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'history' => $formattedHistory,
+                'count' => $history->count(),
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized access to document'
+            ], 403);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'PDF page not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get annotation history', [
+                'pdf_page_id' => $pdfPageId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to retrieve annotation history'
             ], 500);
         }
     }
