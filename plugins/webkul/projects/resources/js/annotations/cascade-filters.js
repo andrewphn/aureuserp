@@ -12,7 +12,7 @@ export function createCascadeFilters() {
          * @returns {Array}
          */
         filterRoomLocations(selectedRoomId, allRoomLocations) {
-            if (!selectedRoomId) {
+            if (!selectedRoomId || !allRoomLocations) {
                 return [];
             }
             return allRoomLocations.filter(loc => loc.room_id == selectedRoomId);
@@ -25,7 +25,7 @@ export function createCascadeFilters() {
          * @returns {Array}
          */
         filterCabinetRuns(selectedRoomLocationId, allCabinetRuns) {
-            if (!selectedRoomLocationId) {
+            if (!selectedRoomLocationId || !allCabinetRuns) {
                 return [];
             }
             return allCabinetRuns.filter(run => run.room_location_id == selectedRoomLocationId);
@@ -38,7 +38,7 @@ export function createCascadeFilters() {
          * @returns {Array}
          */
         filterCabinets(selectedCabinetRunId, allCabinets) {
-            if (!selectedCabinetRunId) {
+            if (!selectedCabinetRunId || !allCabinets) {
                 return [];
             }
             return allCabinets.filter(cab => cab.cabinet_run_id == selectedCabinetRunId);
