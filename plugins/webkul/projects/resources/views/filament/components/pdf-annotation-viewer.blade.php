@@ -499,9 +499,36 @@
                 async confirmLinking() {
                     if (!this.currentPendingAnnotation) return;
 
+                    // Build context data based on annotation type
+                    const context = {
+                        project_id: this.projectId
+                    };
+
+                    if (this.annotationType === 'room') {
+                        // Room annotation - just needs name
+                        context.room_name = this.currentAnnotationLabel;
+                    } else if (this.annotationType === 'room_location') {
+                        // Room location - needs room_id and name
+                        context.room_id = this.selectedRoomId;
+                        context.location_name = this.currentAnnotationLabel;
+                    } else if (this.annotationType === 'cabinet_run') {
+                        // Cabinet run - needs room, location, and run name
+                        context.room_id = this.selectedRoomId;
+                        context.room_location_id = this.selectedRoomLocationId;
+                        context.run_name = this.currentAnnotationLabel;
+                    } else if (this.annotationType === 'cabinet') {
+                        // Cabinet - needs full hierarchy
+                        context.room_id = this.selectedRoomId;
+                        context.room_location_id = this.selectedRoomLocationId;
+                        context.cabinet_run_id = this.selectedCabinetRunId;
+                        context.cabinet_label = this.currentAnnotationLabel;
+                    }
+
                     const customData = {
-                        annotation_type: this.currentAnnotationType,
+                        annotation_type: this.annotationType,
                         label: this.currentAnnotationLabel,
+                        context: context,
+                        // Legacy fields for backward compatibility
                         parent_id: this.selectedRunAnnotation?.customData?.db_id || null,
                         cabinet_run_id: this.selectedCabinetRunId || null,
                         cabinet_specification_id: this.selectedCabinetId || null,
@@ -509,6 +536,8 @@
 
                     const updated = this.currentPendingAnnotation.set('customData', customData);
                     await this.nutrientInstance.update(updated);
+
+                    console.log('✅ Annotation linked with context:', customData);
 
                     this.closeLinkingModal();
                     this.exitAnnotationMode();
@@ -518,8 +547,17 @@
                     this.showLinkingModal = false;
                     this.currentPendingAnnotation = null;
                     this.currentAnnotationLabel = '';
+
+                    // Reset all selection state
+                    this.selectedRoomId = null;
+                    this.selectedRoomLocationId = null;
                     this.selectedCabinetRunId = '';
                     this.selectedCabinetId = '';
+
+                    // Clear filtered lists
+                    this.filteredRoomLocations = [];
+                    this.filteredCabinetRuns = [];
+                    this.filteredCabinets = [];
                 },
 
                 async saveAnnotations() {
@@ -533,13 +571,29 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         },
-                        body: JSON.stringify(instantJson),
+                        body: JSON.stringify({
+                            ...instantJson,
+                            create_entities: true  // Enable automatic entity creation from annotations
+                        }),
                     });
 
                     const result = await response.json();
 
                     if (result.success) {
-                        alert(`Saved ${result.saved_count} annotations successfully!`);
+                        let message = `Saved ${result.saved_count} annotations successfully!`;
+
+                        // Show created entities if any
+                        if (result.created_entities && result.created_entities.length > 0) {
+                            message += '\n\nCreated entities:';
+                            result.created_entities.forEach(entity => {
+                                message += `\n- ${entity.type}: ${entity.name}`;
+                            });
+                        }
+
+                        alert(message);
+                        console.log('✅ Save result:', result);
+                    } else {
+                        alert('Failed to save annotations: ' + (result.message || 'Unknown error'));
                     }
                 },
 
