@@ -49,6 +49,10 @@ class PdfDocument extends Model
         'file_size',
         'mime_type',
         'page_count',
+        'version_number',
+        'previous_version_id',
+        'is_latest_version',
+        'version_metadata',
         'document_type',
         'notes',
         'uploaded_by',
@@ -78,6 +82,8 @@ class PdfDocument extends Model
         return [
             'tags' => 'array',
             'metadata' => 'array',
+            'version_metadata' => 'array',
+            'is_latest_version' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
@@ -143,6 +149,51 @@ class PdfDocument extends Model
     public function module(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'module_type', 'module_id');
+    }
+
+    /**
+     * Get the previous version of this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function previousVersion(): BelongsTo
+    {
+        return $this->belongsTo(PdfDocument::class, 'previous_version_id');
+    }
+
+    /**
+     * Get the next version(s) of this document.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function nextVersions(): HasMany
+    {
+        return $this->hasMany(PdfDocument::class, 'previous_version_id');
+    }
+
+    /**
+     * Get all versions of this document (including itself).
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAllVersions()
+    {
+        // Find the root (first) version
+        $root = $this;
+        while ($root->previous_version_id) {
+            $root = $root->previousVersion;
+        }
+
+        // Build chain from root
+        $versions = collect([$root]);
+        $current = $root;
+
+        while ($nextVersion = $current->nextVersions()->first()) {
+            $versions->push($nextVersion);
+            $current = $nextVersion;
+        }
+
+        return $versions;
     }
 
     /**
