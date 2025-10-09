@@ -56,7 +56,11 @@ class CurrencySeeder extends Seeder
             'JOD' => 'Jordanian Dinar',
         ];
 
-        Currency::query()->delete();
+        // Only insert if table is empty
+        if (Currency::count() > 0) {
+            echo "Currencies already seeded, skipping...\n";
+            return;
+        }
 
         $currencyData = collect($currencies)->map(function ($name, $code) {
             return [

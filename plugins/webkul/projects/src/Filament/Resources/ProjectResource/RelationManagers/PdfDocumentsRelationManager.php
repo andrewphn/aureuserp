@@ -38,6 +38,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->directory('pdf-documents')
                     ->required()
                     ->live()
+                    ->extraAttributes(['wire:ignore' => true])
                     ->afterStateUpdated(function ($state, $set, $livewire) {
                         if ($state) {
                             // Get original filename

@@ -13,12 +13,19 @@ class CurrencySeeder extends Seeder
      */
     public function run(): void
     {
+        // Only insert if table is empty (already seeded by erp:install)
+        if (DB::table('currencies')->count() > 0) {
+            return;
+        }
+
         $path = base_path('plugins/webkul/security/src/Data/currencies.json');
 
         if (File::exists($path)) {
             $currencies = json_decode(File::get($path), true);
 
             $currencies = collect($currencies)->map(function ($currency) {
+                // Map 'name' field from JSON to 'code' field in database
+                $currency['code'] = $currency['name'] ?? '';
                 $currency['iso_numeric'] = (int) ($currency['iso_numeric'] ?? null);
                 $currency['decimal_places'] = (int) ($currency['decimal_places'] ?? null);
                 $currency['rounding'] = (float) ($currency['rounding'] ?? 0.00);

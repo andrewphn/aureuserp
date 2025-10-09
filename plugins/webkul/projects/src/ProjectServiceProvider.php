@@ -15,6 +15,9 @@ class ProjectServiceProvider extends PackageServiceProvider
     {
         $package->name(static::$name)
             ->hasTranslations()
+            ->hasDependencies([
+                'sales',
+            ])
             ->hasMigrations([
                 '2024_12_12_074920_create_projects_project_stages_table',
                 '2024_12_12_074929_create_projects_projects_table',
@@ -49,6 +52,14 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_10_07_161931_create_projects_room_locations_table',
                 '2025_10_07_161947_create_projects_cabinet_runs_table',
                 '2025_10_07_162003_add_room_and_run_columns_to_projects_cabinet_specifications',
+                '2025_10_06_000003_add_project_id_to_sales_orders',
+                '2025_10_07_131429_add_attribute_selections_to_sales_order_lines',
+                '2025_10_07_193846_create_pdf_pages_table',
+                '2025_10_07_194258_create_pdf_document_tag_pivot_table',
+                '2025_10_07_200202_create_pdf_page_rooms_table',
+                '2025_10_08_000001_create_pdf_page_annotations_table',
+                '2025_10_08_173125_add_room_fields_to_pdf_page_annotations_table',
+                '2025_10_08_180053_add_versioning_to_pdf_documents_table',
             ])
             ->runsMigrations()
             ->hasSettings([

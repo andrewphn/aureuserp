@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();  // Added: currency code (USD, EUR, etc.)
             $table->string('name');
             $table->string('symbol')->nullable();
             $table->integer('iso_numeric')->nullable();

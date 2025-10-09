@@ -13,7 +13,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $this->userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id') ?? 1;
+        // Get the user ID, or null if user doesn't exist yet (will be set during erp:install)
+        $this->userId = DB::table('users')->where('email', 'info@tcswoodwork.com')->value('id');
 
         echo "\n";
         echo "╔═══════════════════════════════════════════════════════════════════════════╗\n";
@@ -64,14 +65,20 @@ return new class extends Migration
                 echo "  ✓ Attribute '{$attribute['name']}' already exists (ID: {$existingId})\n";
                 $this->attributeIds[$attribute['name']] = $existingId;
             } else {
-                $id = DB::table('products_attributes')->insertGetId([
+                $data = [
                     'name' => $attribute['name'],
                     'type' => $attribute['type'],
                     'sort' => $attribute['sort'],
-                    'creator_id' => $this->userId,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]);
+                ];
+
+                // Only set creator_id if a user exists
+                if ($this->userId) {
+                    $data['creator_id'] = $this->userId;
+                }
+
+                $id = DB::table('products_attributes')->insertGetId($data);
 
                 $this->attributeIds[$attribute['name']] = $id;
                 echo "  + Created attribute: {$attribute['name']} (ID: {$id})\n";

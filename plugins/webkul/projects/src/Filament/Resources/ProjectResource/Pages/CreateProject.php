@@ -6,12 +6,60 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Support\Models\Company;
 
 class CreateProject extends CreateRecord
 {
     protected static string $resource = ProjectResource::class;
 
     public static bool $formActionsAreSticky = true;
+
+    public function mount(): void
+    {
+        // Create a draft project immediately and redirect to edit
+        $defaultCompany = Company::where('is_default', true)->first();
+
+        // Get the first project stage (To Do)
+        $initialStage = \Webkul\Project\Models\ProjectStage::orderBy('sort')->first();
+
+        $project = \Webkul\Project\Models\Project::create([
+            'name' => 'New Project (Draft)',
+            'company_id' => $defaultCompany?->id,
+            'creator_id' => Auth::id(),
+            'project_number' => $this->generateDraftProjectNumber($defaultCompany?->id),
+            'stage_id' => $initialStage?->id,
+            'visibility' => 'internal',
+            'allow_milestones' => true,
+        ]);
+
+        // Redirect to edit page
+        $this->redirect(ProjectResource::getUrl('edit', ['record' => $project->id]));
+    }
+
+    protected function generateDraftProjectNumber(?int $companyId): string
+    {
+        $companyAcronym = 'UNK';
+        if ($companyId) {
+            $company = Company::find($companyId);
+            $companyAcronym = $company?->acronym ?? strtoupper(substr($company?->name ?? 'UNK', 0, 3));
+        }
+
+        // Get next sequential number for drafts
+        $lastProject = \Webkul\Project\Models\Project::where('company_id', $companyId)
+            ->where('project_number', 'like', "{$companyAcronym}-DRAFT-%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $sequentialNumber = 1;
+        if ($lastProject && $lastProject->project_number) {
+            preg_match('/-DRAFT-(\d+)$/', $lastProject->project_number, $matches);
+            if (!empty($matches[1])) {
+                $sequentialNumber = intval($matches[1]) + 1;
+            }
+        }
+
+        return sprintf('%s-DRAFT-%04d', $companyAcronym, $sequentialNumber);
+    }
 
     public function getFooter(): ?\Illuminate\Contracts\View\View
     {
