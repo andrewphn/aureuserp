@@ -103,11 +103,11 @@ class User extends BaseUser implements FilamentUser
             'creator_id' => Auth::user()->id ?? $user->id,
             'user_id'    => $user->id,
             'sub_type'   => 'partner',
-            ...Arr::except($user->toArray(), ['id']),
+            ...Arr::except($user->toArray(), ['id', 'partner_id', 'password', 'remember_token', 'email_verified_at']),
         ]);
 
         $user->partner_id = $partner->id;
-        $user->save();
+        $user->saveQuietly(); // Use saveQuietly to prevent infinite loop
     }
 
     private function handlePartnerUpdation(self $user)
@@ -118,13 +118,13 @@ class User extends BaseUser implements FilamentUser
                 'creator_id' => Auth::user()->id ?? $user->id,
                 'user_id'    => $user->id,
                 'sub_type'   => 'partner',
-                ...Arr::except($user->toArray(), ['id']),
+                ...Arr::except($user->toArray(), ['id', 'partner_id', 'password', 'remember_token', 'email_verified_at']),
             ]
         );
 
         if ($user->partner_id !== $partner->id) {
             $user->partner_id = $partner->id;
-            $user->save();
+            $user->saveQuietly(); // Use saveQuietly to prevent infinite loop
         }
     }
 }
