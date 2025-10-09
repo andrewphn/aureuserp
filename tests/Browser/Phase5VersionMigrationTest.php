@@ -274,7 +274,7 @@ class Phase5VersionMigrationTest extends DuskTestCase
     {
         // Create page and annotation on v1
         $page1 = PdfPage::create([
-            'pdf_document_id' => $this->pdfDocument->id,
+            'document_id' => $this->pdfDocument->id,
             'page_number' => 1,
         ]);
 
@@ -306,7 +306,7 @@ class Phase5VersionMigrationTest extends DuskTestCase
 
         // Simulate migration
         $page2 = PdfPage::create([
-            'pdf_document_id' => $v2->id,
+            'document_id' => $v2->id,
             'page_number' => 1,
         ]);
 
