@@ -50,7 +50,8 @@ export function createAnnotationComponent(pdfjsLib) {
         isDrawing: false,
         startX: 0,
         startY: 0,
-        selectedAnnotationId: null,
+        selectedAnnotationId: null,  // Legacy - will migrate to selectedAnnotationIds
+        selectedAnnotationIds: [],   // NEW: Array for bulk selection
 
         // Resize/move state
         isResizing: false,
@@ -62,6 +63,21 @@ export function createAnnotationComponent(pdfjsLib) {
         // Undo/redo stacks
         undoStack: [],
         redoStack: [],
+
+        // Clipboard (Phase 6b: Copy/Paste)
+        clipboard: [],
+
+        // Templates (Phase 6c: Annotation Templates)
+        availableTemplates: [],
+
+        // Auto-save (Phase 6e: Draft Persistence)
+        draftSaveTimer: null,
+        hasUnsavedChanges: false,
+        lastSavedAt: null,
+
+        // Measurement (Phase 6d: Measurement Tools)
+        measurements: [],
+        measurementMode: null, // 'distance' or 'area'
 
         // Saved view
         savedView: null,
@@ -451,13 +467,13 @@ export function createAnnotationComponent(pdfjsLib) {
                     this.undoStack = stateUpdate.undoStack;
                     this.redoStack = stateUpdate.redoStack;
 
-                    // Select the annotation
-                    this.selectedAnnotationId = clickedAnnotation.id;
-                    drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                    // Use toggleSelection to support Shift+Click bulk selection
+                    this.toggleSelection(clickedAnnotation.id, e.shiftKey);
                 } else {
-                    // Deselect if clicking empty space
-                    this.selectedAnnotationId = null;
-                    drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                    // Deselect if clicking empty space (unless Shift is held)
+                    if (!e.shiftKey) {
+                        this.deselectAll();
+                    }
                 }
                 return;
             }
@@ -722,8 +738,250 @@ export function createAnnotationComponent(pdfjsLib) {
             }
         },
 
+        // ========== PHASE 6a: BULK SELECTION ==========
+        toggleSelection(annotationId, isShiftClick) {
+            if (isShiftClick) {
+                // Add to selection or remove if already selected
+                const index = this.selectedAnnotationIds.indexOf(annotationId);
+                if (index > -1) {
+                    this.selectedAnnotationIds.splice(index, 1);
+                } else {
+                    this.selectedAnnotationIds.push(annotationId);
+                }
+            } else {
+                // Single selection (replace all)
+                this.selectedAnnotationIds = [annotationId];
+            }
+            // Maintain backward compatibility
+            this.selectedAnnotationId = this.selectedAnnotationIds.length > 0
+                ? this.selectedAnnotationIds[0]
+                : null;
+
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
+        },
+
+        selectAll() {
+            this.selectedAnnotationIds = this.annotations.map(a => a.id);
+            this.selectedAnnotationId = this.selectedAnnotationIds[0] || null;
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
+        },
+
+        deselectAll() {
+            this.selectedAnnotationIds = [];
+            this.selectedAnnotationId = null;
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
+        },
+
+        // ========== PHASE 6b: COPY/PASTE ==========
+        copySelected() {
+            if (this.selectedAnnotationIds.length === 0) {
+                alert('No annotations selected to copy');
+                return;
+            }
+
+            this.clipboard = this.annotations
+                .filter(a => this.selectedAnnotationIds.includes(a.id))
+                .map(a => JSON.parse(JSON.stringify(a))); // Deep clone
+
+            alert(`✅ Copied ${this.clipboard.length} annotation(s)`);
+        },
+
+        pasteFromClipboard() {
+            if (this.clipboard.length === 0) {
+                alert('Clipboard is empty');
+                return;
+            }
+
+            const stateUpdate = editor.saveState(this.annotations, this.undoStack);
+            this.undoStack = stateUpdate.undoStack;
+            this.redoStack = stateUpdate.redoStack;
+
+            const newAnnotations = this.clipboard.map(a => ({
+                ...a,
+                id: Date.now() + Math.random(), // New unique ID
+                x: a.x + 0.05, // Offset by 5%
+                y: a.y + 0.05,
+            }));
+
+            this.annotations.push(...newAnnotations);
+            this.selectedAnnotationIds = newAnnotations.map(a => a.id);
+            this.selectedAnnotationId = this.selectedAnnotationIds[0];
+            this.markUnsavedChanges();
+
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
+            alert(`✅ Pasted ${newAnnotations.length} annotation(s)`);
+        },
+
+        // ========== PHASE 6c: ANNOTATION TEMPLATES ==========
+        saveAsTemplate() {
+            if (this.selectedAnnotationIds.length !== 1) {
+                alert('Select exactly one annotation to save as template');
+                return;
+            }
+
+            const annotation = this.annotations.find(a => a.id === this.selectedAnnotationIds[0]);
+            const templateName = prompt('Enter template name:', `${annotation.annotation_type} Template`);
+
+            if (!templateName) return;
+
+            const template = {
+                id: Date.now(),
+                name: templateName,
+                annotation_type: annotation.annotation_type,
+                room_type: annotation.room_type,
+                color: annotation.color,
+                width: annotation.width,
+                height: annotation.height,
+            };
+
+            this.availableTemplates.push(template);
+            this.saveTemplatesToLocalStorage();
+            alert(`✅ Template "${templateName}" saved!`);
+        },
+
+        applyTemplate(templateId) {
+            const template = this.availableTemplates.find(t => t.id === templateId);
+            if (!template) return;
+
+            const stateUpdate = editor.saveState(this.annotations, this.undoStack);
+            this.undoStack = stateUpdate.undoStack;
+            this.redoStack = stateUpdate.redoStack;
+
+            const newAnnotation = {
+                id: Date.now(),
+                x: 0.1,
+                y: 0.1,
+                width: template.width,
+                height: template.height,
+                text: this.generateLabel(template.annotation_type, template.room_type),
+                room_type: template.room_type,
+                color: template.color,
+                annotation_type: template.annotation_type,
+            };
+
+            this.annotations.push(newAnnotation);
+            this.selectedAnnotationIds = [newAnnotation.id];
+            this.selectedAnnotationId = newAnnotation.id;
+            this.markUnsavedChanges();
+
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
+        },
+
+        saveTemplatesToLocalStorage() {
+            localStorage.setItem('pdf_annotation_templates', JSON.stringify(this.availableTemplates));
+        },
+
+        loadTemplatesFromLocalStorage() {
+            const stored = localStorage.getItem('pdf_annotation_templates');
+            if (stored) {
+                this.availableTemplates = JSON.parse(stored);
+            }
+        },
+
+        // ========== PHASE 6d: MEASUREMENT TOOLS ==========
+        setMeasurementTool(type) {
+            this.measurementMode = type; // 'distance' or 'area'
+            this.currentTool = 'measurement';
+        },
+
+        calculateDistance(x1, y1, x2, y2) {
+            // Convert normalized coords to canvas pixels
+            const canvas = this.$refs.annotationCanvas;
+            const px1 = x1 * canvas.width;
+            const py1 = y1 * canvas.height;
+            const px2 = x2 * canvas.width;
+            const py2 = y2 * canvas.height;
+
+            const pixels = Math.sqrt(Math.pow(px2 - px1, 2) + Math.pow(py2 - py1, 2));
+
+            // Assuming standard 8.5x11 page at 72 DPI
+            // Convert pixels to inches then to feet
+            const inches = pixels / (this.baseScale * 72);
+            const feet = inches / 12;
+
+            return { pixels, inches, feet };
+        },
+
+        calculateArea(points) {
+            // Shoelace formula for polygon area
+            const canvas = this.$refs.annotationCanvas;
+            let area = 0;
+
+            for (let i = 0; i < points.length; i++) {
+                const j = (i + 1) % points.length;
+                const x1 = points[i].x * canvas.width;
+                const y1 = points[i].y * canvas.height;
+                const x2 = points[j].x * canvas.width;
+                const y2 = points[j].y * canvas.height;
+
+                area += x1 * y2;
+                area -= x2 * y1;
+            }
+
+            area = Math.abs(area / 2);
+
+            // Convert to square feet
+            const sqInches = area / Math.pow(this.baseScale * 72, 2);
+            const sqFeet = sqInches / 144;
+
+            return { pixels: area, sqInches, sqFeet };
+        },
+
+        // ========== PHASE 6e: AUTO-SAVE DRAFTS ==========
+        markUnsavedChanges() {
+            this.hasUnsavedChanges = true;
+            this.scheduleDraftSave();
+        },
+
+        scheduleDraftSave() {
+            if (this.draftSaveTimer) {
+                clearTimeout(this.draftSaveTimer);
+            }
+
+            this.draftSaveTimer = setTimeout(() => {
+                this.saveDraft();
+            }, 30000); // Auto-save after 30 seconds
+        },
+
+        saveDraft() {
+            const draft = {
+                pdfPageId: this.pdfPageId,
+                annotations: this.annotations,
+                savedAt: new Date().toISOString(),
+            };
+
+            localStorage.setItem(`pdf_annotation_draft_${this.pdfPageId}`, JSON.stringify(draft));
+            this.lastSavedAt = draft.savedAt;
+            console.log('✅ Draft auto-saved at', this.lastSavedAt);
+        },
+
+        loadDraft() {
+            const stored = localStorage.getItem(`pdf_annotation_draft_${this.pdfPageId}`);
+            if (!stored) return false;
+
+            const draft = JSON.parse(stored);
+
+            if (confirm(`Restore unsaved annotations from ${new Date(draft.savedAt).toLocaleString()}?`)) {
+                this.annotations = draft.annotations;
+                this.lastSavedAt = draft.savedAt;
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
+                return true;
+            }
+
+            return false;
+        },
+
+        clearDraft() {
+            localStorage.removeItem(`pdf_annotation_draft_${this.pdfPageId}`);
+            this.hasUnsavedChanges = false;
+            this.lastSavedAt = null;
+        },
+
         // ========== INIT ==========
         init() {
+            // Load templates and drafts on initialization
+            this.loadTemplatesFromLocalStorage();
+
             // Watch for modal open
             this.$watch('showModal', (value) => {
                 if (value) {
@@ -734,6 +992,17 @@ export function createAnnotationComponent(pdfjsLib) {
             this.$watch('showAnnotationModal', (value) => {
                 if (value && !this.annotationViewerLoaded) {
                     this.loadCanvasAnnotationViewer();
+                    // Attempt to load draft after annotation viewer loads
+                    setTimeout(() => {
+                        this.loadDraft();
+                    }, 500);
+                }
+            });
+
+            // Watch for unsaved changes
+            this.$watch('annotations', () => {
+                if (this.annotationViewerLoaded) {
+                    this.markUnsavedChanges();
                 }
             });
 
@@ -741,6 +1010,7 @@ export function createAnnotationComponent(pdfjsLib) {
             document.addEventListener('keydown', (e) => {
                 if (!this.showAnnotationModal) return;
 
+                // Undo/Redo
                 if (e.ctrlKey && e.key === 'z') {
                     e.preventDefault();
                     this.undo();
@@ -749,10 +1019,36 @@ export function createAnnotationComponent(pdfjsLib) {
                     e.preventDefault();
                     this.redo();
                 }
-                if (e.key === 'Delete' && this.selectedAnnotationId !== null) {
+
+                // Copy/Paste (Phase 6b)
+                if (e.ctrlKey && e.key === 'c') {
+                    e.preventDefault();
+                    this.copySelected();
+                }
+                if (e.ctrlKey && e.key === 'v') {
+                    e.preventDefault();
+                    this.pasteFromClipboard();
+                }
+
+                // Select All (Phase 6a)
+                if (e.ctrlKey && e.key === 'a') {
+                    e.preventDefault();
+                    this.selectAll();
+                }
+
+                // Delete
+                if (e.key === 'Delete' && this.selectedAnnotationIds.length > 0) {
                     e.preventDefault();
                     this.deleteSelected();
                 }
+
+                // Deselect (Escape)
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.deselectAll();
+                }
+
+                // Tool shortcuts
                 if (e.key === 'r' || e.key === 'R') {
                     e.preventDefault();
                     this.setTool('rectangle');
@@ -760,6 +1056,10 @@ export function createAnnotationComponent(pdfjsLib) {
                 if (e.key === 'v' || e.key === 'V') {
                     e.preventDefault();
                     this.setTool('select');
+                }
+                if (e.key === 'm' || e.key === 'M') {
+                    e.preventDefault();
+                    this.setMeasurementTool('distance');
                 }
             });
         }
