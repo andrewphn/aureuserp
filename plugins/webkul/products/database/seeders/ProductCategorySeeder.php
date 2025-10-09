@@ -13,7 +13,10 @@ class ProductCategorySeeder extends Seeder
      */
     public function run(): void
     {
+        // Disable foreign key checks to allow deletion of categories with parent/child relationships
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('products_categories')->delete();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $user = User::first();
 
