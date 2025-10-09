@@ -721,11 +721,11 @@
 @once
     @push('scripts')
     <script type="module">
-        import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/+esm';
+        import * as pdfjsLib from 'pdfjs-dist';
         import { createAnnotationComponent } from '/plugins/webkul/projects/resources/js/annotations/alpine-component-factory.js';
 
-        // Set worker path
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs';
+        // Use local worker file
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdf.worker.min.js';
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('pdfThumbnailPdfJs', () => {
