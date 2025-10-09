@@ -69,19 +69,30 @@ class PopulateMissingPdfPages extends Command
             $this->line("Processing: {$document->file_name}...");
 
             for ($i = 1; $i <= $document->page_count; $i++) {
-                PdfPage::create([
+                $data = [
                     'document_id' => $document->id,
                     'page_number' => $i,
-                    'width' => 612,  // Standard US Letter width in points (8.5 inches)
-                    'height' => 792, // Standard US Letter height in points (11 inches)
-                    'rotation' => 0,
                     'thumbnail_path' => null, // Will be generated on-demand
                     'extracted_text' => null, // Can be extracted later if needed
                     'page_metadata' => [
                         'populated_by' => 'populate-pages-command',
                         'populated_at' => now()->toDateTimeString(),
                     ],
-                ]);
+                ];
+
+                // Add optional columns if they exist in the table
+                $columns = \Schema::getColumnListing('pdf_pages');
+                if (in_array('width', $columns)) {
+                    $data['width'] = 612;  // Standard US Letter width in points
+                }
+                if (in_array('height', $columns)) {
+                    $data['height'] = 792; // Standard US Letter height in points
+                }
+                if (in_array('rotation', $columns)) {
+                    $data['rotation'] = 0;
+                }
+
+                PdfPage::create($data);
                 $totalPages++;
             }
 
