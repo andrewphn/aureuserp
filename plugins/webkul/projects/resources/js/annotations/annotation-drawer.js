@@ -162,8 +162,9 @@ export function createAnnotationDrawer() {
          * Redraw all annotations on canvas
          * @param {Array} annotations - Array of annotations to draw
          * @param {HTMLCanvasElement} canvas - Annotation canvas
+         * @param {number|null} selectedAnnotationId - ID of selected annotation for highlighting
          */
-        redrawAnnotations(annotations, canvas) {
+        redrawAnnotations(annotations, canvas, selectedAnnotationId = null) {
             if (!canvas) return;
 
             const ctx = canvas.getContext('2d');
@@ -177,9 +178,24 @@ export function createAnnotationDrawer() {
                 const width = annotation.width * canvas.width;
                 const height = annotation.height * canvas.height;
 
+                const isSelected = selectedAnnotationId && annotation.id === selectedAnnotationId;
+
+                // Draw annotation rectangle
                 ctx.strokeStyle = annotation.color || '#3B82F6';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = isSelected ? 4 : 3;
                 ctx.strokeRect(x, y, width, height);
+
+                // Draw selection highlight with dashed border
+                if (isSelected) {
+                    ctx.strokeStyle = '#F59E0B'; // Orange selection border
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([8, 4]); // Dashed line
+                    ctx.strokeRect(x - 3, y - 3, width + 6, height + 6);
+                    ctx.setLineDash([]); // Reset to solid
+
+                    // Draw resize handles at corners
+                    this.drawResizeHandles(ctx, x, y, width, height);
+                }
 
                 // Draw label text
                 if (annotation.text) {
@@ -191,13 +207,77 @@ export function createAnnotationDrawer() {
         },
 
         /**
+         * Draw resize handles at annotation corners
+         * @param {CanvasRenderingContext2D} ctx - Canvas context
+         * @param {number} x - Annotation x position
+         * @param {number} y - Annotation y position
+         * @param {number} width - Annotation width
+         * @param {number} height - Annotation height
+         */
+        drawResizeHandles(ctx, x, y, width, height) {
+            const handleSize = 10;
+            const handleColor = '#F59E0B'; // Orange
+
+            const handles = [
+                { x: x, y: y },                           // Top-left
+                { x: x + width, y: y },                   // Top-right
+                { x: x, y: y + height },                  // Bottom-left
+                { x: x + width, y: y + height }           // Bottom-right
+            ];
+
+            handles.forEach(handle => {
+                ctx.fillStyle = handleColor;
+                ctx.fillRect(
+                    handle.x - handleSize / 2,
+                    handle.y - handleSize / 2,
+                    handleSize,
+                    handleSize
+                );
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(
+                    handle.x - handleSize / 2,
+                    handle.y - handleSize / 2,
+                    handleSize,
+                    handleSize
+                );
+            });
+        },
+
+        /**
+         * Check if a click is inside an annotation
+         * @param {number} clickX - Click X coordinate (canvas pixels)
+         * @param {number} clickY - Click Y coordinate (canvas pixels)
+         * @param {Array} annotations - Array of annotations
+         * @param {HTMLCanvasElement} canvas - Canvas element
+         * @returns {Object|null} Clicked annotation or null
+         */
+        getClickedAnnotation(clickX, clickY, annotations, canvas) {
+            // Check annotations in reverse order (top to bottom)
+            for (let i = annotations.length - 1; i >= 0; i--) {
+                const annotation = annotations[i];
+                const x = annotation.x * canvas.width;
+                const y = annotation.y * canvas.height;
+                const width = annotation.width * canvas.width;
+                const height = annotation.height * canvas.height;
+
+                // Check if click is inside this annotation's bounds
+                if (clickX >= x && clickX <= x + width &&
+                    clickY >= y && clickY <= y + height) {
+                    return annotation;
+                }
+            }
+            return null;
+        },
+
+        /**
          * Change cursor based on tool
          * @param {HTMLCanvasElement} canvas - Annotation canvas
          * @param {string} tool - Current tool ('rectangle' or 'select')
          */
         setCursor(canvas, tool) {
             if (!canvas) return;
-            canvas.style.cursor = tool === 'rectangle' ? 'crosshair' : 'default';
+            canvas.style.cursor = tool === 'rectangle' ? 'crosshair' : 'pointer';
         }
     };
 }

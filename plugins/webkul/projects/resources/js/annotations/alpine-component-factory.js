@@ -235,8 +235,8 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.rotation
             );
 
-            // Redraw annotations
-            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+            // Redraw annotations with selection highlighting
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
         },
 
         // ========== ZOOM CONTROLS ==========
@@ -383,6 +383,32 @@ export function createAnnotationComponent(pdfjsLib) {
 
         // ========== DRAWING ==========
         startDrawing(e) {
+            // If using select tool, check for annotation clicks
+            if (this.currentTool === 'select') {
+                const rect = this.$refs.annotationCanvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                const clickedAnnotation = drawer.getClickedAnnotation(
+                    clickX,
+                    clickY,
+                    this.annotations,
+                    this.$refs.annotationCanvas
+                );
+
+                if (clickedAnnotation) {
+                    // Select the annotation
+                    this.selectedAnnotationId = clickedAnnotation.id;
+                    drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                } else {
+                    // Deselect if clicking empty space
+                    this.selectedAnnotationId = null;
+                    drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
+                }
+                return;
+            }
+
+            // Handle rectangle tool drawing
             const drawState = drawer.startDrawing(e, this.$refs.annotationCanvas, this.currentTool);
             if (drawState) {
                 this.isDrawing = drawState.isDrawing;
@@ -405,7 +431,7 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.$refs.annotationCanvas,
                 drawState,
                 this.annotations,
-                (annotations, canvas) => drawer.redrawAnnotations(annotations, canvas)
+                (annotations, canvas) => drawer.redrawAnnotations(annotations, canvas, this.selectedAnnotationId)
             );
         },
 
@@ -440,7 +466,7 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.redoStack = stateUpdate.redoStack;
 
                 this.annotations.push(newAnnotation);
-                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
             }
 
             this.isDrawing = false;
@@ -449,7 +475,7 @@ export function createAnnotationComponent(pdfjsLib) {
         cancelDrawing() {
             if (this.isDrawing) {
                 this.isDrawing = false;
-                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
             }
         },
 
@@ -460,7 +486,7 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.annotations = result.annotations;
                 this.undoStack = result.undoStack;
                 this.redoStack = result.redoStack;
-                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
             }
         },
 
@@ -470,7 +496,7 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.annotations = result.annotations;
                 this.undoStack = result.undoStack;
                 this.redoStack = result.redoStack;
-                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
             }
         },
 
@@ -483,7 +509,7 @@ export function createAnnotationComponent(pdfjsLib) {
 
                 this.annotations = result.annotations;
                 this.selectedAnnotationId = result.selectedId;
-                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+                drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
             }
         },
 
@@ -493,7 +519,7 @@ export function createAnnotationComponent(pdfjsLib) {
             this.redoStack = stateUpdate.redoStack;
 
             this.annotations = editor.removeAnnotation(this.annotations, index);
-            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
         },
 
         clearLastAnnotation() {
@@ -502,7 +528,7 @@ export function createAnnotationComponent(pdfjsLib) {
             this.redoStack = stateUpdate.redoStack;
 
             this.annotations = editor.clearLastAnnotation(this.annotations);
-            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
         },
 
         clearAllAnnotations() {
@@ -511,7 +537,7 @@ export function createAnnotationComponent(pdfjsLib) {
             this.redoStack = stateUpdate.redoStack;
 
             this.annotations = editor.clearAllAnnotations(this.annotations, confirm);
-            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas);
+            drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationId);
         },
 
         // ========== CASCADE FILTERS ==========

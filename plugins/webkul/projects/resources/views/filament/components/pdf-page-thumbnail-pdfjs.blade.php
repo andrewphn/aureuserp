@@ -215,10 +215,25 @@
                                 @click="setTool('select')"
                                 :class="currentTool === 'select' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'"
                                 class="px-3 py-2 rounded font-medium transition-colors"
-                                title="Select Tool"
+                                title="Select Tool (Click annotation to edit)"
                             >
                                 ↖️
                             </button>
+                        </div>
+
+                        <!-- Selection Indicator -->
+                        <div x-show="selectedAnnotationId !== null" class="flex items-center gap-2 border-r border-gray-700 pr-3">
+                            <div class="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded font-medium">
+                                <span>✏️</span>
+                                <span class="text-sm">Editing</span>
+                                <button
+                                    @click="selectedAnnotationId = null; renderCanvas()"
+                                    class="ml-1 text-xs bg-orange-700 hover:bg-orange-800 px-2 py-1 rounded"
+                                    title="Deselect"
+                                >
+                                    ✕
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Actions -->
