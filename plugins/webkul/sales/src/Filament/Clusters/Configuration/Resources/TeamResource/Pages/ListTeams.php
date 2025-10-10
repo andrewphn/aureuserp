@@ -5,7 +5,6 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pag
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
-use Webkul\Sale\Models\Team;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
