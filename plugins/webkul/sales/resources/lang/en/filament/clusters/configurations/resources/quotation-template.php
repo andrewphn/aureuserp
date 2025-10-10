@@ -9,6 +9,17 @@ return [
     ],
 
     'form' => [
+        'fields' => [
+            'name'                  => 'Template Name',
+            'number_of_days'        => 'Validity (Days)',
+            'journal'               => 'Sale Journal',
+            'note'                  => 'Terms & Conditions',
+            'is_active'             => 'Active',
+            'require_signature'     => 'Require Signature',
+            'require_payment'       => 'Require Payment',
+            'prepayment_percentage' => 'Prepayment %',
+        ],
+
         'tabs' => [
             'products' => [
                 'title'  => 'Products',
@@ -52,14 +63,14 @@ return [
 
     'table' => [
         'columns' => [
-            'created-by'            => 'Created by',
-            'company'               => 'Company',
-            'name'                  => 'Name',
-            'number-of-days'        => 'Number of days',
-            'journal'               => 'Sale Journal',
-            'signature-required'    => 'Signature Required',
-            'payment-required'      => 'Payment Required',
-            'prepayment-percentage' => 'Prepayment Percentage',
+            'created-by'         => 'Created by',
+            'company'            => 'Company',
+            'name'               => 'Name',
+            'number_of_days'     => 'Validity',
+            'journal'            => 'Journal',
+            'is_active'          => 'Active',
+            'require_signature'  => 'Signature',
+            'require_payment'    => 'Payment',
         ],
         'groups'  => [
             'company' => 'Company',
@@ -74,19 +85,24 @@ return [
             'updated-at' => 'Updated At',
         ],
         'actions' => [
+            'edit' => [
+                'notification' => [
+                    'title' => 'Template updated',
+                    'body'  => 'The quotation template has been updated successfully.',
+                ],
+            ],
             'delete' => [
                 'notification' => [
-                    'title' => 'Quotation template deleted',
+                    'title' => 'Template deleted',
                     'body'  => 'The quotation template has been deleted successfully.',
                 ],
             ],
-
         ],
         'bulk-actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Quotation template deleted',
-                    'body'  => 'The quotation template has been deleted successfully.',
+                    'title' => 'Templates deleted',
+                    'body'  => 'The quotation templates have been deleted successfully.',
                 ],
             ],
         ],
@@ -117,11 +133,13 @@ return [
             'section-name'          => 'Section Name',
             'note-title'            => 'Note Title',
             'name'                  => 'Template Name',
-            'quotation-validity'    => 'Quotation Validity',
-            'sale-journal'          => 'Sale Journal',
-            'online-signature'      => 'Online Signature',
-            'online-payment'        => 'Online Payment',
-            'prepayment-percentage' => 'Prepayment Percentage',
+            'number_of_days'        => 'Validity',
+            'journal'               => 'Journal',
+            'note'                  => 'Terms & Conditions',
+            'is_active'             => 'Status',
+            'require_signature'     => 'Signature Required',
+            'require_payment'       => 'Payment Required',
+            'prepayment_percentage' => 'Prepayment %',
         ],
     ],
 ];
