@@ -7,10 +7,24 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\AccountTagResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListAccountTags extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = AccountTagResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('accounts::filament/resources/account-tag/pages/list-account-tags.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
