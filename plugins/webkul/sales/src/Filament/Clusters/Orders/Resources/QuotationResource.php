@@ -205,13 +205,13 @@ class QuotationResource extends Resource
                                                     ]),
                                             ])
                                             ->createOptionUsing(function (array $data): int {
-                                                $partner = \Webkul\Support\Models\Partner::create([
-                                                    'type' => $data['type'],
+                                                $partner = \Webkul\Partner\Models\Partner::create([
+                                                    'account_type' => $data['type'],
                                                     'sub_type' => 'customer',
                                                     'name' => $data['name'],
                                                     'phone' => $data['phone'] ?? null,
                                                     'email' => $data['email'] ?? null,
-                                                    'street' => $data['street'] ?? null,
+                                                    'street1' => $data['street'] ?? null,
                                                     'street2' => $data['street2'] ?? null,
                                                     'city' => $data['city'] ?? null,
                                                     'state_id' => $data['state_id'] ?? null,
