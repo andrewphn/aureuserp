@@ -8,28 +8,31 @@ use Filament\Actions\CreateAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Mail;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Mail\UserInvitationMail;
 use Webkul\Security\Models\Invitation;
 use Webkul\Security\Models\User;
 use Webkul\Security\Settings\UserSettings;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListUsers extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = UserResource::class;
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            'all' => Tab::make(__('security::filament/resources/user/pages/list-user.tabs.all'))
-                ->badge(User::count()),
-            'archived' => Tab::make(__('security::filament/resources/user/pages/list-user.tabs.archived'))
-                ->badge(User::onlyTrashed()->count())
-                ->modifyQueryUsing(function ($query) {
-                    return $query->onlyTrashed();
-                }),
+            'all' => PresetView::make(__('security::filament/resources/user/pages/list-user.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+            'archived' => PresetView::make(__('security::filament/resources/user/pages/list-user.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 
