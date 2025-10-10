@@ -25,7 +25,7 @@ class ListQuotationTemplates extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'all' => PresetView::make(__('sales::filament/clusters/configuration/resources/quotation-template/pages/list-quotation-templates.tabs.all'))
+            'all' => PresetView::make(__('sales::filament/clusters/configurations/resources/quotation-template/pages/list-quotation-templates.tabs.all'))
                 ->icon('heroicon-s-queue-list')
                 ->favorite()
                 ->setAsDefault(),

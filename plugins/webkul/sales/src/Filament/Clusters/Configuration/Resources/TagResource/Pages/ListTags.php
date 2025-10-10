@@ -31,7 +31,7 @@ class ListTags extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'all' => PresetView::make(__('sales::filament/clusters/configuration/resources/tag/pages/list-tags.tabs.all'))
+            'all' => PresetView::make(__('sales::filament/clusters/configurations/resources/tag/pages/list-tags.tabs.all'))
                 ->icon('heroicon-s-queue-list')
                 ->favorite()
                 ->setAsDefault(),
