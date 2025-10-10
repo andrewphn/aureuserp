@@ -4,12 +4,15 @@ namespace Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeRes
 
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource;
 use Webkul\TimeOff\Models\LeaveType;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListLeaveTypes extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = LeaveTypeResource::class;
 
     protected function getHeaderActions(): array
@@ -21,16 +24,16 @@ class ListLeaveTypes extends ListRecords
         ];
     }
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            'all' => Tab::make(__('time-off::filament/clusters/configurations/resources/leave-type/pages/list-leave-type.tabs.all'))
-                ->badge(LeaveType::whereNull('deleted_at')->count()),
-            'archived' => Tab::make(__('time-off::filament/clusters/configurations/resources/leave-type/pages/list-leave-type.tabs.archived'))
-                ->badge(LeaveType::onlyTrashed()->count())
-                ->modifyQueryUsing(function ($query) {
-                    return $query->onlyTrashed();
-                }),
+            'all' => PresetView::make(__('time-off::filament/clusters/configurations/resources/leave-type/pages/list-leave-type.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+            'archived' => PresetView::make(__('time-off::filament/clusters/configurations/resources/leave-type/pages/list-leave-type.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }
