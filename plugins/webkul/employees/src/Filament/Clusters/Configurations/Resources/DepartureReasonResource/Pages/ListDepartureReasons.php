@@ -6,10 +6,25 @@ use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\DepartureReasonResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
+
 
 class ListDepartureReasons extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = DepartureReasonResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('employees::filament/clusters/configurations/resources/departure-reason/pages/list-departure-reasons.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {

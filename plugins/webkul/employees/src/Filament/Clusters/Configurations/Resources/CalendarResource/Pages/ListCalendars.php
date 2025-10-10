@@ -5,12 +5,15 @@ namespace Webkul\Employee\Filament\Clusters\Configurations\Resources\CalendarRes
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\CalendarResource;
 use Webkul\Employee\Models\Calendar;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListCalendars extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = CalendarResource::class;
 
     protected function getHeaderActions(): array
@@ -28,16 +31,16 @@ class ListCalendars extends ListRecords
         ];
     }
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            'all' => Tab::make(__('employees::filament/clusters/configurations/resources/calendar/pages/list-calendar.tabs.all'))
-                ->badge(Calendar::count()),
-            'archived' => Tab::make(__('employees::filament/clusters/configurations/resources/calendar/pages/list-calendar.tabs.archived'))
-                ->badge(Calendar::onlyTrashed()->count())
-                ->modifyQueryUsing(function ($query) {
-                    return $query->onlyTrashed();
-                }),
+            'all' => PresetView::make(__('employees::filament/clusters/configurations/resources/calendar/pages/list-calendar.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+            'archived' => PresetView::make(__('employees::filament/clusters/configurations/resources/calendar/pages/list-calendar.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
 }
