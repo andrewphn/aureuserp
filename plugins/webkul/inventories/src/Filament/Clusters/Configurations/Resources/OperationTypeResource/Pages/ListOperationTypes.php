@@ -5,13 +5,16 @@ namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationT
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource;
 use Webkul\Inventory\Models\OperationType;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListOperationTypes extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = OperationTypeResource::class;
 
     protected function getHeaderActions(): array
@@ -38,12 +41,17 @@ class ListOperationTypes extends ListRecords
         ];
     }
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            'all' => Tab::make(__('inventories::filament/clusters/configurations/resources/operation-type/pages/list-operation-types.tabs.all'))
+            'all' => PresetView::make(__('inventories::filament/clusters/configurations/resources/operation-type/pages/list-operation-types.tabs.all'))
+                ->icon('heroicon-s-cog-6-tooth')
+                ->favorite()
+                ->setAsDefault()
                 ->badge(OperationType::count()),
-            'archived' => Tab::make(__('inventories::filament/clusters/configurations/resources/operation-type/pages/list-operation-types.tabs.archived'))
+            'archived' => PresetView::make(__('inventories::filament/clusters/configurations/resources/operation-type/pages/list-operation-types.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->favorite()
                 ->badge(OperationType::onlyTrashed()->count())
                 ->modifyQueryUsing(function ($query) {
                     return $query->onlyTrashed();
