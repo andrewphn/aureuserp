@@ -17,6 +17,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Url;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Models\Room;
 
@@ -39,13 +40,25 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     protected $pdfPageIdCache = [];
 
+    #[Url]
+    public $pdf;
+
     public function mount(int|string $record): void
     {
         // Resolve the Project model using InteractsWithRecord trait
         $this->record = $this->resolveRecord($record);
 
-        $pdfId = request()->get('pdf');
-        $this->pdfDocument = PdfDocument::findOrFail($pdfId);
+        if (!$this->pdf) {
+            Notification::make()
+                ->title('PDF Not Specified')
+                ->body('Please select a PDF document to review.')
+                ->danger()
+                ->send();
+            $this->redirect(ProjectResource::getUrl('view', ['record' => $this->record]));
+            return;
+        }
+
+        $this->pdfDocument = PdfDocument::findOrFail($this->pdf);
 
         // Check if PDF file actually exists
         if (!Storage::disk('public')->exists($this->pdfDocument->file_path)) {
@@ -124,6 +137,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                             'pdfUrl' => \Illuminate\Support\Facades\Storage::disk('public')->url($this->pdfDocument->file_path),
                                             'pageNumber' => $get('page_number') ?? 1,
                                             'pdfPageId' => $this->getPdfPageId($get('page_number') ?? 1),
+                                            'pdfPage' => $this->getPdfPageId($get('page_number') ?? 1) ? \App\Models\PdfPage::find($this->getPdfPageId($get('page_number') ?? 1)) : null,
                                             'itemKey' => 'page-' . ($get('page_number') ?? 1),
                                         ])
                                         ->key(fn ($get) => 'thumbnail-page-' . ($get('page_number') ?? 1))

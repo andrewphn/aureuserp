@@ -7,10 +7,24 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListStorageCategories extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = StorageCategoryResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('inventories::filament/clusters/configurations/resources/storage-category/pages/list-storage-categories.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
