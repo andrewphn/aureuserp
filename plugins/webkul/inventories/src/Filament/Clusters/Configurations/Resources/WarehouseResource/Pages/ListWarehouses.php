@@ -5,14 +5,17 @@ namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseR
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\WarehouseSettings;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListWarehouses extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = WarehouseResource::class;
 
     protected function getHeaderActions(): array
@@ -40,12 +43,17 @@ class ListWarehouses extends ListRecords
         ];
     }
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            'all' => Tab::make(__('inventories::filament/clusters/configurations/resources/warehouse/pages/list-warehouses.tabs.all'))
+            'all' => PresetView::make(__('inventories::filament/clusters/configurations/resources/warehouse/pages/list-warehouses.tabs.all'))
+                ->icon('heroicon-s-building-office-2')
+                ->favorite()
+                ->setAsDefault()
                 ->badge(Warehouse::count()),
-            'archived' => Tab::make(__('inventories::filament/clusters/configurations/resources/warehouse/pages/list-warehouses.tabs.archived'))
+            'archived' => PresetView::make(__('inventories::filament/clusters/configurations/resources/warehouse/pages/list-warehouses.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->favorite()
                 ->badge(Warehouse::onlyTrashed()->count())
                 ->modifyQueryUsing(function ($query) {
                     return $query->onlyTrashed();
