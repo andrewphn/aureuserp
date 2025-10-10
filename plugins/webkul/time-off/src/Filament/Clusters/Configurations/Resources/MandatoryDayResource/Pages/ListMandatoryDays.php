@@ -7,9 +7,13 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\MandatoryDayResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListMandatoryDays extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = MandatoryDayResource::class;
 
     protected function getHeaderActions(): array
@@ -32,6 +36,16 @@ class ListMandatoryDays extends ListRecords
 
                     return $data;
                 }),
+        ];
+    }
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('time-off::filament/clusters/configurations/resources/mandatory-days/pages/list-mandatory-days.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
         ];
     }
 }

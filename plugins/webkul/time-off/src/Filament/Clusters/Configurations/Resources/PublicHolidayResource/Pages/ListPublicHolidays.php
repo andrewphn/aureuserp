@@ -7,9 +7,13 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListPublicHolidays extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = PublicHolidayResource::class;
 
     protected function getHeaderActions(): array
@@ -32,6 +36,16 @@ class ListPublicHolidays extends ListRecords
 
                     return $data;
                 }),
+        ];
+    }
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('time-off::filament/clusters/configurations/resources/public-holiday/pages/list-public-holidays.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
         ];
     }
 }
