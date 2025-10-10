@@ -5,11 +5,14 @@ namespace Webkul\Employee\Filament\Clusters\Configurations\Resources\WorkLocatio
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\WorkLocationResource;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListWorkLocations extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = WorkLocationResource::class;
 
     protected function getHeaderActions(): array
@@ -27,17 +30,22 @@ class ListWorkLocations extends ListRecords
         ];
     }
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            null     => Tab::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.all')),
-            'office' => Tab::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.office'))
+            'all' => PresetView::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+            'office' => PresetView::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.office'))
                 ->icon('heroicon-m-building-office-2')
-                ->query(fn ($query) => $query->where('location_type', 'office')),
-            'home'   => Tab::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.home'))
-                ->icon('heroicon-m-home')->query(fn ($query) => $query->where('location_type', 'home')),
-            'other'  => Tab::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.other'))
-                ->icon('heroicon-m-map-pin')->query(fn ($query) => $query->where('location_type', 'other')),
+                ->modifyQueryUsing(fn ($query) => $query->where('location_type', 'office')),
+            'home' => PresetView::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.home'))
+                ->icon('heroicon-m-home')
+                ->modifyQueryUsing(fn ($query) => $query->where('location_type', 'home')),
+            'other' => PresetView::make(__('employees::filament/clusters/configurations/resources/work-location/pages/list-work-location.tabs.other'))
+                ->icon('heroicon-m-map-pin')
+                ->modifyQueryUsing(fn ($query) => $query->where('location_type', 'other')),
         ];
     }
 }
