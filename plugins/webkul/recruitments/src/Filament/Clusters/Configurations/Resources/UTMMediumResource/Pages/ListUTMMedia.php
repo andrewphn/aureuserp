@@ -6,9 +6,14 @@ use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\UTMMediumResource;
+use Webkul\Recruitment\Models\UTMMedium;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListUTMMedia extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = UTMMediumResource::class;
 
     protected function getHeaderActions(): array
@@ -23,6 +28,17 @@ class ListUTMMedia extends ListRecords
                         ->title(__('recruitments::filament/clusters/configurations/resources/medium/pages/list-medium.header-actions.create.notification.title'))
                         ->body(__('recruitments::filament/clusters/configurations/resources/medium/pages/list-medium.header-actions.create.notification.body'))
                 ),
+        ];
+    }
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('recruitments::filament/clusters/configurations/resources/medium/pages/list-medium.tabs.all'))
+                ->icon('heroicon-s-globe-alt')
+                ->favorite()
+                ->setAsDefault()
+                ->badge(UTMMedium::count()),
         ];
     }
 }
