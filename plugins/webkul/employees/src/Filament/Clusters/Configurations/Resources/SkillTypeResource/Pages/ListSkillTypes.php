@@ -5,13 +5,29 @@ namespace Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeRe
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource;
 use Webkul\Employee\Models\SkillType;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListSkillTypes extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = SkillTypeResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('employees::filament/clusters/configurations/resources/skill-type/pages/list-skill-type.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+            'archived' => PresetView::make(__('employees::filament/clusters/configurations/resources/skill-type/pages/list-skill-type.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -31,19 +47,6 @@ class ListSkillTypes extends ListRecords
                         ->title(__('employees::filament/clusters/configurations/resources/skill-type/pages/list-skill-type.header-actions.create.notification.title'))
                         ->body(__('employees::filament/clusters/configurations/resources/skill-type/pages/list-skill-type.header-actions.create.notification.body')),
                 ),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make(__('employees::filament/clusters/configurations/resources/skill-type/pages/list-skill-type.tabs.all'))
-                ->badge(SkillType::count()),
-            'archived' => Tab::make(__('employees::filament/clusters/configurations/resources/skill-type/pages/list-skill-type.tabs.archived'))
-                ->badge(SkillType::onlyTrashed()->count())
-                ->modifyQueryUsing(function ($query) {
-                    return $query->onlyTrashed();
-                }),
         ];
     }
 }
