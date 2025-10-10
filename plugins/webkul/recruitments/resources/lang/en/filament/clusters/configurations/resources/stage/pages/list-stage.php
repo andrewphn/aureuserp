@@ -6,4 +6,8 @@ return [
             'label' => 'New Stage',
         ],
     ],
+
+    'tabs' => [
+        'all' => 'All',
+    ],
 ];
