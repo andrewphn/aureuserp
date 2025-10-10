@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // PDF Annotation API Routes
-Route::middleware(['auth:web', 'throttle:api'])->prefix('pdf')->name('api.pdf.')->group(function () {
+Route::middleware(['web', 'auth:web', 'throttle:120,1'])->prefix('pdf')->name('api.pdf.')->group(function () {
     // Document-level annotation operations
     Route::get('/{documentId}/annotations', [PdfAnnotationController::class, 'index'])->name('annotations.index');
     Route::post('/{documentId}/annotations', [PdfAnnotationController::class, 'store'])->middleware('throttle:60,1')->name('annotations.store');
@@ -38,6 +38,23 @@ Route::middleware(['auth:web', 'throttle:api'])->prefix('pdf')->name('api.pdf.')
 
     // Page-level annotation operations
     Route::post('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'savePageAnnotations'])->middleware('throttle:60,1')->name('page.annotations.save');
-    Route::get('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'loadPageAnnotations'])->name('page.annotations.load');
+    Route::get('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'getPageAnnotations'])->name('page.annotations.load');
     Route::get('/page/{pdfPageId}/annotations/history', [PdfAnnotationController::class, 'getAnnotationHistory'])->name('page.annotations.history');
+});
+
+// Project Tags API Routes
+Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
+    Route::post('/{projectId}/tags', function (Request $request, $projectId) {
+        $project = \Webkul\Project\Models\Project::findOrFail($projectId);
+        $tagIds = $request->input('tag_ids', []);
+
+        // Sync tags to the project
+        $project->tags()->sync($tagIds);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tags updated successfully',
+            'tag_count' => count($tagIds)
+        ]);
+    })->name('api.projects.tags.update');
 });
