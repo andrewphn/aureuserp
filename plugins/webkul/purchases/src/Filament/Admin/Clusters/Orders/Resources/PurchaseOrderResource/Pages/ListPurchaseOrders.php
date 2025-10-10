@@ -8,9 +8,12 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Pages\ListOrders;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource;
 use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListPurchaseOrders extends ListOrders
 {
+    use HasTableViews;
+
     protected static string $resource = PurchaseOrderResource::class;
 
     public function getPresetTableViews(): array
