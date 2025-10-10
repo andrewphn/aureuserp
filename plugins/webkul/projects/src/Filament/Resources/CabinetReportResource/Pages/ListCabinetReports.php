@@ -7,10 +7,24 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\DB;
 use Webkul\Project\Filament\Resources\CabinetReportResource;
 use Webkul\Project\Models\CabinetSpecification;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListCabinetReports extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = CabinetReportResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('projects::filament/resources/cabinet-report/pages/list-cabinet-reports.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {

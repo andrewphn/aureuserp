@@ -10,12 +10,26 @@ use Illuminate\Database\Eloquent\Collection;
 use Webkul\Blog\Filament\Customer\Resources\CategoryResource;
 use Webkul\Blog\Models\Category;
 use Webkul\Blog\Models\Post;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListCategories extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = CategoryResource::class;
 
     protected string $view = 'blogs::filament.customer.resources.category.pages.list-records';
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('blogs::filament/customer/resources/category/pages/list-categories.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+        ];
+    }
 
     public function getTitle(): string|Htmlable
     {

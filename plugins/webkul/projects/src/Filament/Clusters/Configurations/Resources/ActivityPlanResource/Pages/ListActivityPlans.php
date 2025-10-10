@@ -5,14 +5,30 @@ namespace Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlan
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResource;
-use Webkul\Support\Models\ActivityPlan;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListActivityPlans extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = ActivityPlanResource::class;
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault()
+                ->modifyQueryUsing(fn ($query) => $query->where('plugin', 'projects')),
+            'archived' => PresetView::make(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
+                ->modifyQueryUsing(fn ($query) => $query->where('plugin', 'projects')->onlyTrashed()),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -37,19 +53,6 @@ class ListActivityPlans extends ListRecords
                         ->title(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.notification.title'))
                         ->body(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.notification.body')),
                 ),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.all'))
-                ->badge(ActivityPlan::where('plugin', 'projects')->count()),
-            'archived' => Tab::make(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.archived'))
-                ->badge(ActivityPlan::where('plugin', 'projects')->onlyTrashed()->count())
-                ->modifyQueryUsing(function ($query) {
-                    return $query->onlyTrashed();
-                }),
         ];
     }
 }
