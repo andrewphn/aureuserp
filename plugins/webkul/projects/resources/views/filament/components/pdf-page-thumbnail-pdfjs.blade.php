@@ -1,7 +1,7 @@
 <div
     class="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900"
     x-data="pdfThumbnailPdfJs"
-    x-init="loadThumbnail('{{ $pdfUrl }}', {{ $pageNumber }}, {{ $pdfPageId ?? 'null' }})"
+    x-init="loadThumbnail('{{ $pdfUrl }}', {{ $pageNumber }}, {{ $pdfPageId ?? 'null' }});"
     wire:ignore
 >
     <div
@@ -445,6 +445,269 @@
 
                         <!-- Metadata Tab -->
                         <div x-show="activeTab === 'metadata'" class="p-4 space-y-4">
+                        <!-- Page Type (FIRST QUESTION) -->
+                        <div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 rounded-lg p-3">
+                            <label class="block text-sm font-bold text-green-900 dark:text-green-300 mb-2">
+                                📄 What type of page is this?
+                            </label>
+                            <select
+                                x-model="pageType"
+                                @change="resetPageTypeFields()"
+                                class="w-full px-3 py-2 border-2 border-green-400 dark:border-green-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
+                            >
+                                <option value="">-- Select Page Type --</option>
+                                <option value="floor_plan">Floor Plan</option>
+                                <option value="elevation">Elevation</option>
+                                <option value="detail">Detail</option>
+                                <option value="cover">Cover</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <p class="text-xs text-green-700 dark:text-green-400 mt-1">
+                                Identify the type of drawing on this page
+                            </p>
+                        </div>
+
+                        <!-- COVER PAGE FIELDS (Only show when page type is Cover) -->
+                        <div x-show="pageType === 'cover'" class="space-y-4">
+                            <div class="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-300 dark:border-purple-700 rounded-lg p-4">
+                                <h3 class="text-sm font-bold text-purple-900 dark:text-purple-300 mb-3 flex items-center gap-2">
+                                    📋 Cover Page Information
+                                </h3>
+
+                                <!-- Customer -->
+                                <div class="mb-3">
+                                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        Customer
+                                    </label>
+                                    <div class="flex gap-2 items-start">
+                                        <select
+                                            x-model="coverCustomerId"
+                                            class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            id="customer-select"
+                                        >
+                                            <option value="">-- Select Customer --</option>
+                                            @foreach(\Webkul\Partner\Models\Partner::where('sub_type', 'customer')->orderBy('name')->get() as $partner)
+                                                <option value="{{ $partner->id }}">
+                                                    {{ $partner->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="flex gap-1">
+                                            <button
+                                                type="button"
+                                                @click="window.open('/admin/partner/partners/create?sub_type=customer', 'createCustomer', 'width=800,height=600'); setTimeout(() => location.reload(), 3000);"
+                                                class="px-2 py-2 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
+                                                title="Create New Customer"
+                                            >
+                                                ➕
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="if(coverCustomerId) { window.open('/admin/partner/partners/' + coverCustomerId + '/edit', 'editCustomer', 'width=800,height=600'); setTimeout(() => location.reload(), 3000); } else { alert('Please select a customer first'); }"
+                                                class="px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
+                                                title="Edit Selected Customer"
+                                                :class="!coverCustomerId && 'opacity-50 cursor-not-allowed'"
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="location.reload()"
+                                                class="px-2 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                                                title="Refresh Customer List"
+                                            >
+                                                🔄
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Company -->
+                                <div class="mb-3">
+                                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        Company
+                                    </label>
+                                    <div class="flex gap-2 items-start">
+                                        <select
+                                            x-model="coverCompanyId"
+                                            @change="coverBranchId = ''"
+                                            class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            id="company-select"
+                                        >
+                                            <option value="">-- Select Company --</option>
+                                            @foreach(\Webkul\Support\Models\Company::whereNull('parent_id')->orderBy('name')->get() as $company)
+                                                <option value="{{ $company->id }}">
+                                                    {{ $company->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="flex gap-1">
+                                            <button
+                                                type="button"
+                                                @click="window.open('/admin/support/companies/create', 'createCompany', 'width=800,height=600'); setTimeout(() => location.reload(), 3000);"
+                                                class="px-2 py-2 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
+                                                title="Create New Company"
+                                            >
+                                                ➕
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="location.reload()"
+                                                class="px-2 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                                                title="Refresh Company List"
+                                            >
+                                                🔄
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Branch (conditional on company selection) -->
+                                <div x-show="coverCompanyId" class="mb-3">
+                                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        Branch (Optional)
+                                    </label>
+                                    <div class="flex gap-2 items-start">
+                                        <select
+                                            x-model="coverBranchId"
+                                            class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            id="branch-select"
+                                        >
+                                            <option value="">-- Select Branch --</option>
+                                            <template x-if="coverCompanyId">
+                                                @foreach(\Webkul\Support\Models\Company::all() as $company)
+                                                    @if($company->parent_id)
+                                                        <option value="{{ $company->id }}"
+                                                            x-show="coverCompanyId == {{ $company->parent_id }}">
+                                                            {{ $company->name }}
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </template>
+                                        </select>
+                                        <div class="flex gap-1">
+                                            <button
+                                                type="button"
+                                                @click="window.open('/admin/support/companies/create?parent_id=' + coverCompanyId, 'createBranch', 'width=800,height=600'); setTimeout(() => location.reload(), 3000);"
+                                                class="px-2 py-2 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
+                                                title="Create New Branch"
+                                            >
+                                                ➕
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="location.reload()"
+                                                class="px-2 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                                                title="Refresh Branch List"
+                                            >
+                                                🔄
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Project Address Section -->
+                                <div class="mt-4 pt-4 border-t border-purple-200 dark:border-purple-800">
+                                    <h4 class="text-xs font-bold text-purple-900 dark:text-purple-300 mb-2">
+                                        📍 Project Address
+                                    </h4>
+
+                                    <!-- Street Address Line 1 -->
+                                    <div class="mb-2">
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Street Address Line 1
+                                        </label>
+                                        <input
+                                            type="text"
+                                            x-model="coverAddressStreet1"
+                                            placeholder="123 Main Street"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                        />
+                                    </div>
+
+                                    <!-- Street Address Line 2 -->
+                                    <div class="mb-2">
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Street Address Line 2
+                                        </label>
+                                        <input
+                                            type="text"
+                                            x-model="coverAddressStreet2"
+                                            placeholder="Apt, Suite, Unit, etc. (optional)"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                        />
+                                    </div>
+
+                                    <!-- City, State, Zip (Grid) -->
+                                    <div class="grid grid-cols-3 gap-2 mb-2">
+                                        <!-- City -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                City
+                                            </label>
+                                            <input
+                                                type="text"
+                                                x-model="coverAddressCity"
+                                                placeholder="City"
+                                                class="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+
+                                        <!-- State -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                State
+                                            </label>
+                                            <select
+                                                x-model="coverAddressStateId"
+                                                class="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            >
+                                                <option value="">State</option>
+                                                @foreach(\Webkul\Support\Models\State::where('country_id', 226)->orderBy('name')->get() as $state)
+                                                    <option value="{{ $state->id }}">{{ $state->code }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Zip -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                Zip Code
+                                            </label>
+                                            <input
+                                                type="text"
+                                                x-model="coverAddressZip"
+                                                placeholder="Zip"
+                                                class="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Country -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Country
+                                        </label>
+                                        <select
+                                            x-model="coverAddressCountryId"
+                                            @change="coverAddressStateId = ''"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                        >
+                                            <option value="">-- Select Country --</option>
+                                            @foreach(\Webkul\Support\Models\Country::orderBy('name')->get() as $country)
+                                                <option value="{{ $country->id }}">
+                                                    {{ $country->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ANNOTATION OPTIONS (Only show after page type is selected) -->
+                        <div x-show="pageType && pageType !== 'cover'" class="space-y-4">
+
                         <!-- TASK 3: Annotation Type Selector -->
                         <div class="bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg p-3">
                             <label class="block text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-2">
@@ -574,20 +837,6 @@
                                     <span x-show="selectedCabinetRunId && annotationType === 'cabinet'" x-text="`Run: ${filteredCabinetRuns.find(r => r.id == selectedCabinetRunId)?.name}${selectedCabinetId ? ' → Cabinet #' + selectedCabinetId : ' (new cabinet)'}`"></span>
                                 </p>
                             </div>
-                        </div>
-
-                        <!-- Page Type -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Page Type
-                            </label>
-                            <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option>Floor Plan</option>
-                                <option>Elevation</option>
-                                <option>Detail</option>
-                                <option>Cover</option>
-                                <option>Other</option>
-                            </select>
                         </div>
 
                         <!-- Current Room for Annotation (Floor Plans with multiple rooms) -->
@@ -721,6 +970,168 @@
                                 </template>
                             </div>
                         </div>
+
+                        </div>
+                        <!-- END ANNOTATION OPTIONS (page type conditional) -->
+
+                        <!-- PROJECT TAGS SECTION -->
+                        @php
+                            $project = $pdfPage?->pdfDocument?->module;
+                            $allTags = \Webkul\Project\Models\Tag::orderBy('type')->orderBy('name')->get()->groupBy('type');
+                            $projectTagIds = $project ? $project->tags->pluck('id')->toArray() : [];
+
+                            $typeLabels = [
+                                'priority' => ['label' => 'Priority', 'icon' => '🎯'],
+                                'health' => ['label' => 'Health Status', 'icon' => '💚'],
+                                'risk' => ['label' => 'Risk Factors', 'icon' => '⚠️'],
+                                'complexity' => ['label' => 'Complexity', 'icon' => '📊'],
+                                'work_scope' => ['label' => 'Work Scope', 'icon' => '🔨'],
+                                'phase_discovery' => ['label' => 'Discovery Phase', 'icon' => '🔍'],
+                                'phase_design' => ['label' => 'Design Phase', 'icon' => '🎨'],
+                                'phase_sourcing' => ['label' => 'Sourcing Phase', 'icon' => '📦'],
+                                'phase_production' => ['label' => 'Production Phase', 'icon' => '⚙️'],
+                                'phase_delivery' => ['label' => 'Delivery Phase', 'icon' => '🚚'],
+                                'special_status' => ['label' => 'Special Status', 'icon' => '⭐'],
+                                'lifecycle' => ['label' => 'Lifecycle', 'icon' => '🔄'],
+                            ];
+                        @endphp
+
+                        @if($project && $allTags->count() > 0)
+                        <div
+                            class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-4 mt-4"
+                            x-data="{
+                                selectedTags: {{ json_encode($projectTagIds) }},
+                                projectId: {{ $project->id }},
+                                searchQuery: '',
+                                expandedSections: {},
+                                saving: false,
+
+                                toggleTag(tagId) {
+                                    if (this.selectedTags.includes(tagId)) {
+                                        this.selectedTags = this.selectedTags.filter(id => id !== tagId);
+                                    } else {
+                                        this.selectedTags.push(tagId);
+                                    }
+                                    this.saveTags();
+                                },
+
+                                toggleSection(type) {
+                                    this.expandedSections[type] = !this.expandedSections[type];
+                                },
+
+                                async saveTags() {
+                                    this.saving = true;
+                                    try {
+                                        const response = await fetch(`/api/projects/${this.projectId}/tags`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                            },
+                                            body: JSON.stringify({ tag_ids: this.selectedTags })
+                                        });
+
+                                        if (!response.ok) {
+                                            throw new Error('Failed to save tags');
+                                        }
+                                    } catch (error) {
+                                        console.error('Error saving tags:', error);
+                                        alert('Failed to save tags. Please try again.');
+                                    } finally {
+                                        this.saving = false;
+                                    }
+                                }
+                            }"
+                        >
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-bold text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                                    🏷️ Project Tags
+                                </h3>
+                                <div x-show="saving" class="text-xs text-blue-600 dark:text-blue-400">
+                                    Saving...
+                                </div>
+                            </div>
+
+                            <!-- Search -->
+                            <div class="mb-3">
+                                <input
+                                    type="text"
+                                    x-model="searchQuery"
+                                    placeholder="Search tags..."
+                                    class="w-full px-3 py-2 text-sm border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                />
+                            </div>
+
+                            <!-- Selected Tags Display -->
+                            <div x-show="selectedTags.length > 0" class="mb-3 flex flex-wrap gap-2">
+                                @foreach($allTags as $type => $tags)
+                                    @foreach($tags as $tag)
+                                        <span
+                                            x-show="selectedTags.includes({{ $tag->id }})"
+                                            @click="toggleTag({{ $tag->id }})"
+                                            class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full cursor-pointer transition-all hover:opacity-80"
+                                            style="background-color: {{ $tag->color }}20; border: 1px solid {{ $tag->color }}; color: {{ $tag->color }};"
+                                        >
+                                            <span>{{ $tag->name }}</span>
+                                            <span>×</span>
+                                        </span>
+                                    @endforeach
+                                @endforeach
+                            </div>
+
+                            <!-- Tag Groups -->
+                            <div class="space-y-2 max-h-96 overflow-y-auto">
+                                @foreach($allTags as $type => $tags)
+                                    @php
+                                        $typeInfo = $typeLabels[$type] ?? ['label' => ucfirst(str_replace('_', ' ', $type)), 'icon' => '🏷️'];
+                                    @endphp
+                                    <div class="border border-blue-200 dark:border-blue-700 rounded-lg overflow-hidden">
+                                        <!-- Category Header -->
+                                        <button
+                                            @click="toggleSection('{{ $type }}')"
+                                            class="w-full px-3 py-2 bg-blue-100 dark:bg-blue-800/30 hover:bg-blue-150 dark:hover:bg-blue-800/50 transition-colors flex items-center justify-between text-left"
+                                        >
+                                            <span class="text-sm font-medium text-blue-900 dark:text-blue-200">
+                                                {{ $typeInfo['icon'] }} {{ $typeInfo['label'] }}
+                                            </span>
+                                            <svg
+                                                class="w-4 h-4 text-blue-600 dark:text-blue-300 transition-transform"
+                                                :class="{ 'rotate-180': expandedSections['{{ $type }}'] }"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+
+                                        <!-- Tags List -->
+                                        <div
+                                            x-show="expandedSections['{{ $type }}']"
+                                            x-collapse
+                                            class="bg-white dark:bg-gray-800 p-2"
+                                        >
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach($tags as $tag)
+                                                    <button
+                                                        @click="toggleTag({{ $tag->id }})"
+                                                        :class="selectedTags.includes({{ $tag->id }}) ? 'ring-2 ring-offset-1' : ''"
+                                                        class="px-3 py-1.5 text-xs rounded-full transition-all hover:scale-105"
+                                                        style="background-color: {{ $tag->color }}20; border: 1px solid {{ $tag->color }}; color: {{ $tag->color }};"
+                                                        x-show="!searchQuery || '{{ strtolower($tag->name) }}'.includes(searchQuery.toLowerCase())"
+                                                    >
+                                                        {{ $tag->name }}
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        <!-- END PROJECT TAGS SECTION -->
+
                         </div>
                         <!-- END Metadata Tab -->
 
