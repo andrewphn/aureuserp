@@ -7,9 +7,14 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ApplicantCategoryResource;
+use Webkul\Recruitment\Models\ApplicantCategory;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListApplicantCategories extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = ApplicantCategoryResource::class;
 
     protected function getHeaderActions(): array
@@ -29,6 +34,17 @@ class ListApplicantCategories extends ListRecords
                         ->title(__('recruitments::filament/clusters/configurations/resources/applicant-category/pages/list-applicant-categories.notification.title'))
                         ->body(__('recruitments::filament/clusters/configurations/resources/applicant-category/pages/list-applicant-categories.notification.body'))
                 ),
+        ];
+    }
+
+    public function getPresetTableViews(): array
+    {
+        return [
+            'all' => PresetView::make(__('recruitments::filament/clusters/configurations/resources/applicant-category/pages/list-applicant-categories.tabs.all'))
+                ->icon('heroicon-s-tag')
+                ->favorite()
+                ->setAsDefault()
+                ->badge(ApplicantCategory::count()),
         ];
     }
 }
