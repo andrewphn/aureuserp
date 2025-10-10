@@ -128,6 +128,40 @@ class QuotationResource extends Resource
                 Section::make(__('sales::filament/clusters/orders/resources/quotation.form.section.general.title'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
+                        Select::make('sale_order_template_id')
+                            ->label(__('Quotation Template'))
+                            ->relationship(
+                                'quotationTemplate',
+                                'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->where('is_active', true)
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, Get $get, $state) {
+                                if (! $state) {
+                                    return;
+                                }
+
+                                $template = \Webkul\Sale\Models\OrderTemplate::find($state);
+
+                                if (! $template) {
+                                    return;
+                                }
+
+                                // Set validity date based on template's number_of_days
+                                if ($template->number_of_days) {
+                                    $set('validity_date', now()->addDays($template->number_of_days));
+                                }
+
+                                // Set note (terms & conditions)
+                                if ($template->note) {
+                                    $set('note', $template->note);
+                                }
+                            })
+                            ->helperText(__('Select a template to auto-fill default values'))
+                            ->columnSpanFull()
+                            ->hidden(fn ($record) => $record), // Hide on edit
                         Group::make()
                             ->schema([
                                 Group::make()

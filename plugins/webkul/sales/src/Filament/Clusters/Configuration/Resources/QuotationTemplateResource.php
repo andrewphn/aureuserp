@@ -40,6 +40,11 @@ class QuotationTemplateResource extends Resource
         return true;
     }
 
+    public static function canCreate(): bool
+    {
+        return true;
+    }
+
     public static function getModelLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/quotation-template.title');
