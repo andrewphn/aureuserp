@@ -53,12 +53,12 @@ class ListActivityPlans extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'all' => PresetView::make(__('sales::filament/clusters/configuration/resources/activity-plan/pages/list-activity-plan.tabs.all'))
+            'all' => PresetView::make(__('sales::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plan.tabs.all'))
                 ->icon('heroicon-s-queue-list')
                 ->favorite()
                 ->setAsDefault()
                 ->modifyQueryUsing(fn ($query) => $query->where('plugin', static::getPluginName())),
-            'archived' => PresetView::make(__('sales::filament/clusters/configuration/resources/activity-plan/pages/list-activity-plan.tabs.archived'))
+            'archived' => PresetView::make(__('sales::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plan.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->modifyQueryUsing(fn ($query) => $query->where('plugin', static::getPluginName())->onlyTrashed()),
         ];
