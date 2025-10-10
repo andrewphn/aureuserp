@@ -8,8 +8,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -79,9 +79,22 @@ class QuotationTemplateResource extends Resource
                     ->relationship('journal', 'name')
                     ->searchable()
                     ->preload(),
-                Textarea::make('note')
+                RichEditor::make('note')
                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.fields.note'))
-                    ->rows(3)
+                    ->toolbarButtons([
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
                     ->columnSpanFull(),
                 Checkbox::make('is_active')
                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.form.fields.is_active'))
@@ -184,6 +197,7 @@ class QuotationTemplateResource extends Resource
                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.infolist.entries.journal')),
                 TextEntry::make('note')
                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.infolist.entries.note'))
+                    ->html()
                     ->placeholder('-'),
                 TextEntry::make('is_active')
                     ->label(__('sales::filament/clusters/configurations/resources/quotation-template.infolist.entries.is_active'))
