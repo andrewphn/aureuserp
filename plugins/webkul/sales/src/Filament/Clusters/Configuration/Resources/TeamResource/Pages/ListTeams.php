@@ -4,12 +4,15 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pag
 
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
 use Webkul\Sale\Models\Team;
+use Webkul\TableViews\Filament\Components\PresetView;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class ListTeams extends ListRecords
 {
+    use HasTableViews;
+
     protected static string $resource = TeamResource::class;
 
     protected function getHeaderActions(): array
@@ -20,13 +23,15 @@ class ListTeams extends ListRecords
         ];
     }
 
-    public function getTabs(): array
+    public function getPresetTableViews(): array
     {
         return [
-            'all' => Tab::make(__('All'))
-                ->badge(Team::count()),
-            'archived' => Tab::make(__('Archived'))
-                ->badge(Team::onlyTrashed()->count())
+            'all' => PresetView::make(__('sales::filament/clusters/configuration/resources/team/pages/list-teams.tabs.all'))
+                ->icon('heroicon-s-queue-list')
+                ->favorite()
+                ->setAsDefault(),
+            'archived' => PresetView::make(__('sales::filament/clusters/configuration/resources/team/pages/list-teams.tabs.archived'))
+                ->icon('heroicon-s-archive-box')
                 ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
         ];
     }
