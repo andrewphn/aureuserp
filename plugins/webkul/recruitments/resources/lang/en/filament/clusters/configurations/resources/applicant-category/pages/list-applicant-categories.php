@@ -11,4 +11,8 @@ return [
             'label' => 'New Tag',
         ],
     ],
+
+    'tabs' => [
+        'all' => 'All',
+    ],
 ];

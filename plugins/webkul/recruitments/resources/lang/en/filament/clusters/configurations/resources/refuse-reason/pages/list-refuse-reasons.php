@@ -5,4 +5,8 @@ return [
         'title' => 'Refuse reason created',
         'body'  => 'The refuse reason has been created successfully.',
     ],
+
+    'tabs' => [
+        'all' => 'All',
+    ],
 ];
