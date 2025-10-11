@@ -45,6 +45,7 @@ class Order extends Model
         'partner_shipping_id',
         'fiscal_position_id',
         'sale_order_template_id',
+        'document_template_id',
         'payment_term_id',
         'currency_id',
         'user_id',
@@ -219,6 +220,11 @@ class Order extends Model
     public function quotationTemplate()
     {
         return $this->belongsTo(OrderTemplate::class, 'sale_order_template_id');
+    }
+
+    public function documentTemplate()
+    {
+        return $this->belongsTo(DocumentTemplate::class, 'document_template_id');
     }
 
     public function warehouse(): BelongsTo

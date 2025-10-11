@@ -162,6 +162,19 @@ class QuotationResource extends Resource
                             ->helperText(__('Select a template to auto-fill default values'))
                             ->columnSpanFull()
                             ->hidden(fn ($record) => $record), // Hide on edit
+                        Select::make('document_template_id')
+                            ->label(__('Proposal Document Template'))
+                            ->relationship(
+                                'documentTemplate',
+                                'name',
+                                modifyQueryUsing: fn (Builder $query) => $query
+                                    ->where('type', 'proposal')
+                                    ->orWhere('is_default', true)
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->helperText(__('Select the document template for the proposal preview'))
+                            ->columnSpanFull(),
                         Group::make()
                             ->schema([
                                 Group::make()
