@@ -3,6 +3,7 @@
 namespace Webkul\TableViews;
 
 use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
@@ -32,6 +33,7 @@ class TableViewsServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->registerCustomCss();
+        $this->registerCustomJs();
     }
 
     public function packageRegistered()
@@ -51,6 +53,13 @@ class TableViewsServiceProvider extends PackageServiceProvider
     {
         FilamentAsset::register([
             Css::make('table-views', __DIR__.'/../resources/dist/table-views.css'),
+        ], 'table-views');
+    }
+
+    public function registerCustomJs()
+    {
+        FilamentAsset::register([
+            Js::make('table-view-persistence', __DIR__.'/../resources/js/table-view-persistence.js'),
         ], 'table-views');
     }
 }
