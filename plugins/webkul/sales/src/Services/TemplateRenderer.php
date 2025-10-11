@@ -96,8 +96,22 @@ class TemplateRenderer
                 '30',
         ];
 
-        // Add line item variables (up to 5 items)
-        for ($i = 0; $i < 5; $i++) {
+        // Add project location (for job site address separate from billing)
+        $projectLocation = $this->getProjectLocation($project, $partner);
+        $variables = array_merge($variables, $projectLocation);
+
+        // Add invoice status label
+        $variables['INVOICE_STATUS'] = $order->state?->getLabel() ?? '';
+        $variables['INVOICE_STATUS_COLOR'] = match($order->state?->value) {
+            'draft' => '#999',
+            'sent' => '#4a90e2',
+            'sale' => '#2e7d2e',
+            'cancel' => '#d32f2f',
+            default => '#d4a574',
+        };
+
+        // Add line item variables (up to 10 items for complex projects)
+        for ($i = 0; $i < 10; $i++) {
             $line = $lines->get($i);
             $itemNum = $i + 1;
 
@@ -126,6 +140,47 @@ class TemplateRenderer
         }
 
         return $variables;
+    }
+
+    /**
+     * Get project location address variables
+     *
+     * @param mixed $project
+     * @param mixed $partner
+     * @return array
+     */
+    protected function getProjectLocation($project, $partner): array
+    {
+        // If project uses customer address or no project exists, use partner address
+        if (!$project || ($project->use_customer_address ?? false)) {
+            return [
+                'PROJECT_LOCATION_STREET' => $partner?->street1 ?? '',
+                'PROJECT_LOCATION_CITY' => $partner?->city ?? '',
+                'PROJECT_LOCATION_STATE' => $partner?->state?->name ?? '',
+                'PROJECT_LOCATION_ZIP' => $partner?->zip ?? '',
+            ];
+        }
+
+        // Try to get project address from addresses relationship
+        if ($project && method_exists($project, 'addresses')) {
+            $address = $project->addresses()->first();
+            if ($address) {
+                return [
+                    'PROJECT_LOCATION_STREET' => $address->street ?? $address->street1 ?? '',
+                    'PROJECT_LOCATION_CITY' => $address->city ?? '',
+                    'PROJECT_LOCATION_STATE' => $address->state?->name ?? '',
+                    'PROJECT_LOCATION_ZIP' => $address->zip ?? '',
+                ];
+            }
+        }
+
+        // Default to partner address if no project address found
+        return [
+            'PROJECT_LOCATION_STREET' => $partner?->street1 ?? '',
+            'PROJECT_LOCATION_CITY' => $partner?->city ?? '',
+            'PROJECT_LOCATION_STATE' => $partner?->state?->name ?? '',
+            'PROJECT_LOCATION_ZIP' => $partner?->zip ?? '',
+        ];
     }
 
     /**
@@ -197,6 +252,12 @@ class TemplateRenderer
             'PROJECT_TYPE' => 'Project type/name',
             'PROJECT_SUBTITLE' => 'Project description',
             'PROJECT_NOTES' => 'Order notes/terms',
+            'PROJECT_LOCATION_STREET' => 'Project site street address',
+            'PROJECT_LOCATION_CITY' => 'Project site city',
+            'PROJECT_LOCATION_STATE' => 'Project site state',
+            'PROJECT_LOCATION_ZIP' => 'Project site ZIP code',
+            'INVOICE_STATUS' => 'Invoice status label (Draft, Sent, Sale, etc.)',
+            'INVOICE_STATUS_COLOR' => 'Hex color code for invoice status',
             'TOTAL_PRICE' => 'Total price (formatted)',
             'SUBTOTAL' => 'Subtotal before tax',
             'TAX_AMOUNT' => 'Tax amount',
@@ -217,7 +278,7 @@ class TemplateRenderer
         ];
 
         $items = [];
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $items["ITEM_{$i}_NAME"] = "Item {$i} product name";
             $items["ITEM_{$i}_DESC"] = "Item {$i} description";
             $items["ITEM_{$i}_QTY"] = "Item {$i} quantity";
