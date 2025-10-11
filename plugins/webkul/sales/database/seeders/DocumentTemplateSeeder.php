@@ -13,13 +13,13 @@ class DocumentTemplateSeeder extends Seeder
     public function run(): void
     {
         $templates = [
-            // Proposal Templates
+            // Proposal Templates - Standard
             [
                 'name' => 'Standard Proposal Template',
                 'type' => DocumentTemplate::TYPE_PROPOSAL,
                 'template_path' => '/Users/andrewphan/tcsadmin/templates/proposals/tcs-proposal-template.html',
                 'description' => 'Standard TCS proposal template with project timeline and specifications',
-                'is_default' => true,
+                'is_default' => false,
                 'variables' => $this->getProposalVariables(),
             ],
             [
@@ -31,12 +31,30 @@ class DocumentTemplateSeeder extends Seeder
                 'variables' => $this->getProposalVariables(),
             ],
 
+            // Proposal Templates - Watchtower Style (Compact, Professional)
+            [
+                'name' => 'Watchtower Proposal Template',
+                'type' => DocumentTemplate::TYPE_PROPOSAL,
+                'template_path' => '/Users/andrewphan/tcsadmin/templates/proposals/watchtower-proposal-template.html',
+                'description' => 'Professional compact proposal template based on Watchtower formatting',
+                'is_default' => true,
+                'variables' => $this->getProposalVariables(),
+            ],
+
             // Invoice Templates - 30% Deposit
             [
-                'name' => '30% Deposit Invoice',
+                'name' => '30% Deposit Invoice (Standard)',
                 'type' => DocumentTemplate::TYPE_INVOICE_DEPOSIT,
                 'template_path' => '/Users/andrewphan/tcsadmin/templates/invoices/tcs-invoice-30percent-template.html',
                 'description' => 'Initial 30% deposit invoice for project start',
+                'is_default' => false,
+                'variables' => $this->getInvoiceVariables(),
+            ],
+            [
+                'name' => 'Watchtower 30% Deposit Invoice',
+                'type' => DocumentTemplate::TYPE_INVOICE_DEPOSIT,
+                'template_path' => '/Users/andrewphan/tcsadmin/templates/invoices/watchtower-invoice-30percent-template.html',
+                'description' => 'Professional 30% deposit invoice based on Watchtower formatting',
                 'is_default' => true,
                 'variables' => $this->getInvoiceVariables(),
             ],
