@@ -48,11 +48,33 @@ trait HasTableViews
     {
         if (filled($this->activeTableView)) {
             $this->applyTableViewFilters();
+            $this->persistActiveViewToStorage();
 
             return;
         }
 
-        $this->activeTableView = $this->getDefaultActiveTableView();
+        // Try to restore from localStorage first
+        $this->activeTableView = $this->getStoredActiveTableView() ?? $this->getDefaultActiveTableView();
+
+        if (filled($this->activeTableView)) {
+            $this->applyTableViewFilters();
+        }
+    }
+
+    protected function getStoredActiveTableView(): ?string
+    {
+        // This will be called via Alpine.js on the frontend
+        // We'll add a hook to retrieve from localStorage
+        return null;
+    }
+
+    protected function persistActiveViewToStorage(): void
+    {
+        // Dispatch event to Alpine.js to save to localStorage
+        $this->dispatch('table-view-changed', [
+            'resource' => static::class,
+            'view' => $this->activeTableView,
+        ]);
     }
 
     public function loadView($tabKey): void
@@ -330,6 +352,8 @@ trait HasTableViews
                 $this->activeTableView = $arguments['view_key'];
 
                 $this->applyTableViewFilters();
+
+                $this->persistActiveViewToStorage();
             });
     }
 
