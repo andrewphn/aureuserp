@@ -7,6 +7,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -40,6 +41,11 @@ class CustomerPanelProvider extends PanelProvider
             ->plugins([
                 PluginManager::make(),
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .
+                                 \Illuminate\Support\Facades\Blade::render('@vite("resources/js/form-auto-populate.js")')
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

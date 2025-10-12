@@ -1,7 +1,7 @@
 # Form Auto-Population System
 
 ## Overview
-**Single Point of Entry** for Bryan's workflow - select a project once, all forms auto-populate.
+**Single Point of Entry** for Bryan's workflow - select a project once, all forms auto-populate across ALL systems.
 
 ## Problem Solved
 Bryan (Owner) was repeatedly entering the same information:
@@ -14,8 +14,8 @@ This violated ADHD-friendly design principles from his persona documentation.
 ## Solution
 When Bryan selects a project (via footer or dashboard), the system:
 1. Stores it as **active context** in `sessionStorage`
-2. Automatically populates ALL forms across the admin panel
-3. Persists context as he navigates between pages
+2. Automatically populates ALL forms across **all Filament panels** (Admin, Customer)
+3. Persists context as he navigates between pages and systems
 
 ## How It Works
 
@@ -76,9 +76,16 @@ const context = window.getActiveContext()
 ### PHP/Laravel
 - `app/Http/Controllers/Api/FooterApiController.php` - Added `getProject()` method
 - `routes/api.php` - Added `GET /api/projects/{id}` route
-- `app/Providers/Filament/AdminPanelProvider.php` - Load form-auto-populate.js
+- `app/Providers/Filament/AdminPanelProvider.php` - Load form-auto-populate.js in admin panel
+- `app/Providers/Filament/CustomerPanelProvider.php` - Load form-auto-populate.js in customer panel
 - `app/Providers/AppServiceProvider.php` - Register JS asset
 - `vite.config.js` - Build form-auto-populate.js
+
+### Cross-System Support
+The system now works across:
+- **Admin Panel** (`/admin`) - Full functionality with project footer
+- **Customer Panel** (`/`) - Form auto-population for customer-facing features
+- All future Filament panels added to the application
 
 ## API Endpoint
 
