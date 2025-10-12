@@ -24,6 +24,17 @@ class EditProject extends EditRecord
 
     public static bool $formActionsAreSticky = true;
 
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        // Set this project as the active context for global footer
+        $this->dispatch('set-active-context', [
+            'entityType' => 'project',
+            'entityId' => $this->record->id,
+            'data' => $this->form->getState()
+        ]);
+    }
 
     public function getFooter(): ?\Illuminate\Contracts\View\View
     {
@@ -94,6 +105,19 @@ class EditProject extends EditRecord
     protected function afterSave(): void
     {
         $data = $this->form->getState();
+
+        // Clear entity store draft data (saved to database now)
+        $this->dispatch('entity-saved', [
+            'entityType' => 'project',
+            'entityId' => $this->record->id
+        ]);
+
+        // Update active context with fresh data
+        $this->dispatch('set-active-context', [
+            'entityType' => 'project',
+            'entityId' => $this->record->id,
+            'data' => $data
+        ]);
 
         // Update or create project address
         if (!empty($data['project_address'])) {

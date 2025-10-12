@@ -315,6 +315,14 @@ document.addEventListener('livewire:init', () => {
         const { entityType, entityId } = event[0] || event;
         Alpine.store('entityStore').clearEntity(entityType, entityId);
     });
+
+    /**
+     * Set active context when Livewire dispatches event
+     */
+    Livewire.on('set-active-context', (event) => {
+        const { entityType, entityId, data } = event[0] || event;
+        Alpine.store('entityStore').setActiveContext(entityType, entityId, data);
+    });
 });
 
 /**
