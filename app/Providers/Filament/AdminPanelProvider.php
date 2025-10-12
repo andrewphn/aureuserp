@@ -120,7 +120,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")')
+                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .
+                                 \Illuminate\Support\Facades\Blade::render('@vite("resources/js/form-auto-populate.js")')
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,

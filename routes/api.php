@@ -42,8 +42,12 @@ Route::middleware(['web', 'auth:web', 'throttle:120,1'])->prefix('pdf')->name('a
     Route::get('/page/{pdfPageId}/annotations/history', [PdfAnnotationController::class, 'getAnnotationHistory'])->name('page.annotations.history');
 });
 
-// Project Tags API Routes
+// Project API Routes
 Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
+    // Get project details for form auto-population
+    Route::get('/{projectId}', [App\Http\Controllers\Api\FooterApiController::class, 'getProject'])
+        ->name('api.projects.show');
+
     Route::post('/{projectId}/tags', function (Request $request, $projectId) {
         $project = \Webkul\Project\Models\Project::findOrFail($projectId);
         $tagIds = $request->input('tag_ids', []);

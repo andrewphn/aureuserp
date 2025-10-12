@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/pdf-thumbnail.js',
                 'resources/js/annotations.js',
                 'resources/js/centralized-entity-store.js',
+                'resources/js/form-auto-populate.js',
                 'resources/css/filament/admin/theme.css',
             ],
             refresh: true,
