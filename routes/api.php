@@ -59,43 +59,15 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
     })->name('api.projects.tags.update');
 
     // Get project tags for global footer
-    Route::get('/{projectId}/tags', function ($projectId) {
-        $project = \Webkul\Project\Models\Project::findOrFail($projectId);
-
-        return response()->json(
-            $project->tags->map(fn($tag) => [
-                'id' => $tag->id,
-                'name' => $tag->name,
-                'type' => $tag->type,
-                'color' => $tag->color,
-            ])
-        );
-    })->name('api.projects.tags.list');
+    Route::get('/{projectId}/tags', [App\Http\Controllers\Api\FooterApiController::class, 'getProjectTags'])
+        ->name('api.projects.tags.list');
 });
 
 // Global Footer API Routes
 Route::middleware(['web', 'auth:web'])->prefix('admin/api')->group(function () {
-    // Get partner/customer name
-    Route::get('/partners/{partnerId}', function ($partnerId) {
-        $partner = \Webkul\Partner\Models\Partner::findOrFail($partnerId);
+    Route::get('/partners/{partnerId}', [App\Http\Controllers\Api\FooterApiController::class, 'getPartner'])
+        ->name('api.partners.show');
 
-        return response()->json([
-            'id' => $partner->id,
-            'name' => $partner->name,
-        ]);
-    })->name('api.partners.show');
-
-    // Get production estimate
-    Route::get('/production-estimate', function (Request $request) {
-        $linearFeet = $request->input('linear_feet');
-        $companyId = $request->input('company_id');
-
-        if (!$linearFeet || !$companyId) {
-            return response()->json(['error' => 'Missing parameters'], 400);
-        }
-
-        $estimate = \App\Services\ProductionEstimatorService::calculate($linearFeet, $companyId);
-
-        return response()->json($estimate);
-    })->name('api.production-estimate');
+    Route::get('/production-estimate', [App\Http\Controllers\Api\FooterApiController::class, 'getProductionEstimate'])
+        ->name('api.production-estimate');
 });
