@@ -428,13 +428,19 @@ document.addEventListener('livewire:init', () => {
                     }
 
                     try {
-                        if (component.$wire && component.$wire[key] !== undefined) {
+                        // Check if this is a Filament form (has data property)
+                        if (component.$wire && component.$wire.data && component.$wire.data[key] !== undefined) {
+                            // Filament form - set via data.key
+                            component.$wire.set('data.' + key, data[key]);
+                            syncedCount++;
+                        } else if (component.$wire && component.$wire[key] !== undefined) {
+                            // Direct property - set directly
                             component.$wire.set(key, data[key]);
                             syncedCount++;
                         }
                     } catch (e) {
-                        // Property doesn't exist as a public property, skip silently
-                        console.debug(`[EntityStore] Skipped syncing ${key} (form field, not a component property)`);
+                        // Property doesn't exist, skip silently
+                        console.debug(`[EntityStore] Skipped syncing ${key} (not found in component)`);
                     }
                 });
 
@@ -499,14 +505,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         try {
-                            if (component.$wire && component.$wire[key] !== undefined) {
+                            // Check if this is a Filament form (has data property)
+                            if (component.$wire && component.$wire.data && component.$wire.data[key] !== undefined) {
+                                // Filament form - restore via data.key
+                                component.$wire.set('data.' + key, stored[key]);
+                                restoredCount++;
+                            } else if (component.$wire && component.$wire[key] !== undefined) {
+                                // Direct property - restore directly
                                 component.$wire.set(key, stored[key]);
                                 restoredCount++;
                             }
                         } catch (e) {
-                            // Property doesn't exist as a public property on the component
-                            // This is normal for form fields that aren't component properties
-                            console.debug(`[EntityStore] Skipped ${key} (form field, not a component property)`);
+                            // Property doesn't exist, skip silently
+                            console.debug(`[EntityStore] Skipped ${key} during restore (not found in component)`);
                         }
                     });
 
