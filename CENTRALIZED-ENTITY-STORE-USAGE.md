@@ -267,6 +267,115 @@ Alpine.store('entityStore').clearAll();
 
 1. ✅ JavaScript created: `resources/js/centralized-entity-store.js`
 2. ✅ Registered in `AppServiceProvider`
-3. 🔄 **Clear cache**: `php artisan filament:cache-components`
+3. ✅ **Blacklist implementation** for filtering framework state
 4. 🔄 **Test workflow**: Create order → Annotate → Update data → Return to order
 5. 🔄 **Add UI to annotation page** for updating customer/project data
+
+---
+
+## State Management & Blacklist Implementation
+
+### The Problem (Fixed: 2025-10-12)
+
+The EntityStore was initially persisting **ALL** Livewire component data, including:
+- Filament internal state (stage_id, mountedActions, etc.)
+- Livewire framework state (_instance, _memo, etc.)
+- Temporary UI state (table filters, search, etc.)
+
+When the system tried to restore this data on page load, it caused **hundreds of 500 errors**:
+```
+Unable to set component data. Public property [$stage_id] not found
+```
+
+### The Solution: Blacklist Pattern
+
+Based on industry best practices research, we implemented a **comprehensive blacklist** to filter what gets persisted.
+
+#### ✅ What SHOULD Be Persisted
+- **User-entered data**: title, description, notes
+- **Business data**: amounts, prices, dates
+- **Business relationships**: project_id, customer_id, partner_id
+- **Form field values**: data.* fields
+
+#### ❌ What SHOULD NOT Be Persisted (Blacklist)
+
+```javascript
+// Filament internal state
+'stage_id', 'mountedActions', 'mountedActionsArguments', 'mountedActionsData',
+'mountedFormComponentActions', 'mountedInfolistActions', 'defaultTableAction', 'activeTab',
+
+// Table state (temporary UI)
+'tableFilters', 'tableSearch', 'tableSortColumn', 'tableSortDirection',
+'tableGrouping', 'tableRecordsPerPage',
+
+// Livewire framework state
+'_instance', '_syncData', '_memo',
+
+// Relationship UI state
+'users',
+```
+
+### Troubleshooting
+
+#### 500 Error: "Public property [$field] not found"
+
+**Cause**: A framework internal field is being persisted and restored.
+
+**Solution**: Add the field to the blacklist in `resources/js/centralized-entity-store.js`
+
+Update in **four locations**:
+1. `getEntity()` method (line ~24)
+2. `updateEntity()` method (line ~69)
+3. `livewire:init` BLACKLISTED_FIELDS (line ~295)
+4. `DOMContentLoaded` RESTORE_BLACKLIST (line ~482)
+
+Then rebuild assets:
+```bash
+php artisan filament:assets
+php artisan cache:clear
+```
+
+#### Data Not Persisting
+
+**Possible causes**:
+1. Field is in the blacklist (check if it's framework state)
+2. sessionStorage is full (~5MB limit)
+3. Data is older than 24 hours (auto-expired)
+
+**Solution**:
+```javascript
+// Clear old data
+Alpine.store('entityStore').clearAll();
+
+// Check if field is blacklisted
+// Review the BLACKLISTED_FIELDS array in centralized-entity-store.js
+```
+
+### Implementation Details
+
+**Filtering Points** - Data is filtered at four critical stages:
+1. **getEntity()**: When retrieving from storage
+2. **updateEntity()**: Before saving to storage
+3. **Livewire commit hook**: On every component update
+4. **DOMContentLoaded**: When restoring on page load
+
+**Storage Lifetime**: 24 hours (automatically cleared)
+
+**Events Dispatched**:
+- `entity-updated`: When entity data changes
+- `entity-cleared`: When entity is cleared
+- `active-context-changed`: When active context changes
+
+### Testing the Fix
+
+After the blacklist implementation:
+- ✅ Page loads successfully (no timeout)
+- ✅ All network requests return 200 OK (no 500 errors)
+- ✅ No console errors
+- ✅ EntityStore only persists user business data
+- ✅ Framework state is excluded from persistence
+
+### References
+- [State Management Best Practices](https://web.dev/storage-for-the-web/)
+- [Livewire Lifecycle Hooks](https://livewire.laravel.com/docs/lifecycle-hooks)
+- [FilamentPHP Component Architecture](https://filamentphp.com/docs)
