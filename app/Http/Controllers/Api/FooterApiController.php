@@ -30,6 +30,36 @@ class FooterApiController extends Controller
     }
 
     /**
+     * Get full project details for form auto-population
+     */
+    public function getProject($projectId)
+    {
+        try {
+            $project = Project::with(['customer', 'tags'])->findOrFail($projectId);
+
+            return response()->json([
+                'id' => $project->id,
+                'name' => $project->name,
+                'customer_id' => $project->customer_id,
+                'customer_name' => $project->customer?->name,
+                'location' => $project->location,
+                'status' => $project->status,
+                'tags' => $project->tags->map(fn($tag) => [
+                    'id' => $tag->id,
+                    'name' => $tag->name,
+                    'type' => $tag->type,
+                    'color' => $tag->color,
+                ]),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Project not found',
+                'message' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
      * Get project tags
      */
     public function getProjectTags($projectId)
