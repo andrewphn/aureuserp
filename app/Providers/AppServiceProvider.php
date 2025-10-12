@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('centralized-entity-store', public_path('build/assets/centralized-entity-store-CUdMFKpf.js'))
                 ->loadedOnRequest(),
-            Js::make('form-auto-populate', public_path('build/assets/form-auto-populate-DaajNkSp.js'))
+            Js::make('form-auto-populate', public_path('build/assets/form-auto-populate-CMb-TTt1.js'))
                 ->loadedOnRequest(),
         ], 'app');
     }

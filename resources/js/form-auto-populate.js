@@ -32,10 +32,17 @@ document.addEventListener('alpine:init', () => {
  */
 async function populateFormsFromProject(projectId) {
     try {
-        // Fetch project details from API
-        const response = await fetch(`/api/projects/${projectId}`);
+        // Fetch project details from API with credentials
+        const response = await fetch(`/api/projects/${projectId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
         if (!response.ok) {
-            console.warn('[FormAutoPopulate] Failed to fetch project details');
+            console.warn('[FormAutoPopulate] Failed to fetch project details:', response.status);
             return;
         }
 

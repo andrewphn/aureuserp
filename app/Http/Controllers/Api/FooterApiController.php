@@ -35,13 +35,15 @@ class FooterApiController extends Controller
     public function getProject($projectId)
     {
         try {
-            $project = Project::with(['customer', 'tags'])->findOrFail($projectId);
+            $project = Project::with(['partner', 'tags'])->findOrFail($projectId);
 
             return response()->json([
                 'id' => $project->id,
                 'name' => $project->name,
-                'customer_id' => $project->customer_id,
-                'customer_name' => $project->customer?->name,
+                'partner_id' => $project->partner_id,
+                'customer_id' => $project->partner_id, // Alias for compatibility
+                'partner_name' => $project->partner?->name,
+                'customer_name' => $project->partner?->name, // Alias for compatibility
                 'location' => $project->location,
                 'status' => $project->status,
                 'tags' => $project->tags->map(fn($tag) => [
