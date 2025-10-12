@@ -6,7 +6,6 @@
 
 <div
     x-data="projectFooterGlobal()"
-    x-show="hasActiveProject"
     x-cloak
     @active-context-changed.window="handleContextChange($event.detail)"
     @entity-updated.window="handleEntityUpdate($event.detail)"
@@ -14,7 +13,31 @@
     style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid rgb(59, 130, 246);"
 >
     <div class="fi-section-content p-3">
-        <div class="flex items-center justify-between gap-4">
+        {{-- No Project Selected State --}}
+        <div x-show="!hasActiveProject" class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No Project Selected</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Select a project to view context and details</p>
+                </div>
+            </div>
+            <button
+                type="button"
+                @click="openProjectSelector()"
+                class="fi-btn fi-btn-size-md fi-btn-color-primary inline-flex items-center justify-center gap-2 font-semibold rounded-lg px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
+                Select Project
+            </button>
+        </div>
+
+        {{-- Active Project State --}}
+        <div x-show="hasActiveProject" class="flex items-center justify-between gap-4">
             {{-- Column 1: Project Number, Customer, Project Address, Tags --}}
             <div class="flex flex-col gap-1.5">
                 <div class="text-base font-bold text-gray-900 dark:text-gray-100" x-text="projectNumber"></div>
@@ -105,9 +128,20 @@
 
             {{-- Column 3: Action Buttons --}}
             <div class="flex items-center gap-3">
+                <button
+                    type="button"
+                    @click="openProjectSelector()"
+                    class="fi-btn fi-btn-size-md fi-btn-color-primary inline-flex items-center justify-center gap-2 font-semibold rounded-lg px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"></path>
+                    </svg>
+                    Switch Project
+                </button>
+
                 <a
                     :href="`/admin/project/projects/${activeProjectId}/edit`"
-                    class="fi-btn fi-btn-size-md fi-btn-color-primary inline-flex items-center justify-center font-semibold rounded-lg fi-btn-color-primary px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700"
+                    class="fi-btn fi-btn-size-md fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-4 py-2 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
                     Edit Project
                 </a>
@@ -120,6 +154,7 @@
                     Clear Context
                 </button>
             </div>
+        </div>
         </div>
     </div>
 
@@ -379,11 +414,16 @@ function projectFooterGlobal() {
         },
 
         clearContext() {
-            if (confirm('Clear active project context? This will hide the footer until you select another project.')) {
+            if (confirm('Clear active project context?')) {
                 Alpine.store('entityStore').clearActiveContext();
                 this.hasActiveProject = false;
                 this.activeProjectId = null;
             }
+        },
+
+        openProjectSelector() {
+            // Dispatch event to open project selector modal
+            window.dispatchEvent(new CustomEvent('open-project-selector'));
         }
     };
 }

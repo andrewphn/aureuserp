@@ -44,6 +44,10 @@ Route::middleware(['web', 'auth:web', 'throttle:120,1'])->prefix('pdf')->name('a
 
 // Project API Routes
 Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
+    // Get project list with health metrics for project selector
+    Route::get('/list', [App\Http\Controllers\Api\FooterApiController::class, 'getProjectList'])
+        ->name('api.projects.list');
+
     // Get project details for form auto-population
     Route::get('/{projectId}', [App\Http\Controllers\Api\FooterApiController::class, 'getProject'])
         ->name('api.projects.show');
