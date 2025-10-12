@@ -125,7 +125,8 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn (): string => view('filament.components.project-sticky-footer-global')->render()
+                fn (): string => view('filament.components.project-sticky-footer-global')->render() .
+                                 view('filament.components.project-selector-modal')->render()
             )
             ->middleware([
                 EncryptCookies::class,

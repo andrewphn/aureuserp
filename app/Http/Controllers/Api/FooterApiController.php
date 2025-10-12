@@ -123,4 +123,87 @@ class FooterApiController extends Controller
 
         return response()->json($estimate);
     }
+
+    /**
+     * Get project list with health metrics for project selector
+     * ADHD-Friendly: Returns filtered, prioritized list
+     */
+    public function getProjectList(Request $request)
+    {
+        try {
+            // Get active projects only (not archived/completed)
+            $projects = Project::with(['partner'])
+                ->whereIn('status', ['active', 'in_progress', 'planning', 'on_hold'])
+                ->orderBy('updated_at', 'desc')
+                ->get();
+
+            $projectList = $projects->map(function ($project) {
+                // Format project address
+                $address = '';
+                if ($project->project_address) {
+                    $addressData = is_string($project->project_address)
+                        ? json_decode($project->project_address, true)
+                        : $project->project_address;
+
+                    if ($addressData) {
+                        $parts = [];
+                        if (!empty($addressData['street1'])) $parts[] = $addressData['street1'];
+                        if (!empty($addressData['city'])) $parts[] = $addressData['city'];
+                        if (!empty($addressData['state'])) $parts[] = $addressData['state'];
+                        $address = implode(', ', $parts);
+                    }
+                }
+
+                // Calculate health indicators
+                // TODO: Implement actual budget/schedule variance calculations
+                // For now, use placeholder logic based on project age and status
+                $isCritical = false;
+                $statusIndicator = 'on_track';
+                $budgetVariance = null;
+                $scheduleVariance = null;
+
+                // Simple heuristic: mark as critical if status is 'on_hold'
+                if ($project->status === 'on_hold') {
+                    $isCritical = true;
+                    $statusIndicator = 'off_track';
+                    $scheduleVariance = 'On Hold';
+                }
+
+                // Check if project has desired completion date in the past (overdue)
+                if ($project->desired_completion_date && $project->desired_completion_date < now()) {
+                    $isCritical = true;
+                    $statusIndicator = 'off_track';
+                    $daysOverdue = now()->diffInDays($project->desired_completion_date);
+                    $scheduleVariance = $daysOverdue . ' days overdue';
+                }
+
+                return [
+                    'id' => $project->id,
+                    'project_number' => $project->project_number ?? 'P-' . str_pad($project->id, 4, '0', STR_PAD_LEFT),
+                    'customer_name' => $project->partner?->name ?? 'Unknown Customer',
+                    'address' => $address ?: '—',
+                    'status_indicator' => $statusIndicator,
+                    'is_critical' => $isCritical,
+                    'budget_variance' => $budgetVariance,
+                    'schedule_variance' => $scheduleVariance,
+                    'project_type' => $project->project_type,
+                    'estimated_linear_feet' => $project->estimated_linear_feet,
+                ];
+            });
+
+            return response()->json([
+                'projects' => $projectList->values(),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('FooterApiController::getProjectList error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to load projects',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
