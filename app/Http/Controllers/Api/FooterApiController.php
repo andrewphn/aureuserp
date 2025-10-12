@@ -35,9 +35,13 @@ class FooterApiController extends Controller
     public function getProject($projectId)
     {
         try {
+            \Log::info('FooterApiController::getProject called', ['projectId' => $projectId]);
+
             $project = Project::with(['partner', 'tags'])->findOrFail($projectId);
 
-            return response()->json([
+            \Log::info('Project loaded successfully', ['project_id' => $project->id]);
+
+            $response = [
                 'id' => $project->id,
                 'name' => $project->name,
                 'partner_id' => $project->partner_id,
@@ -51,12 +55,23 @@ class FooterApiController extends Controller
                     'name' => $tag->name,
                     'type' => $tag->type,
                     'color' => $tag->color,
-                ]),
-            ]);
+                ])->toArray(),
+            ];
+
+            \Log::info('Returning project response', ['response' => $response]);
+
+            return response()->json($response);
         } catch (\Exception $e) {
+            \Log::error('FooterApiController::getProject error', [
+                'projectId' => $projectId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'error' => 'Project not found',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 404);
         }
     }

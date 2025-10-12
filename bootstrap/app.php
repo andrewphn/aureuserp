@@ -18,7 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // API rate limiting configuration
-        $middleware->throttleApi();
+        // Using standard 'api' limiter instead of custom user-based limiter
+        $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
