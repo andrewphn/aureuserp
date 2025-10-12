@@ -20,6 +20,18 @@ document.addEventListener('alpine:init', () => {
          */
         getEntity(entityType, entityId = null) {
             const key = this.getEntityKey(entityType, entityId);
+            // Fields that should never be stored/retrieved (Filament/Livewire internal state)
+            const BLACKLISTED_FIELDS = [
+                'stage_id', 'mountedActions', 'mountedActionsArguments', 'mountedActionsData',
+                'mountedFormComponentActions', 'mountedFormComponentActionsArguments',
+                'mountedFormComponentActionsData', 'mountedFormComponentActionsComponents',
+                'mountedInfolistActions', 'mountedInfolistActionsData', 'defaultTableAction',
+                'activeTab', 'tableFilters', 'tableSearch', 'tableSearchQuery',
+                'tableSortColumn', 'tableSortDirection', 'tableGrouping',
+                'tableGroupingDirection', 'tableColumnSearches', 'tableRecordsPerPage',
+                '_instance', '_syncData', '_memo', 'users'
+            ];
+
             try {
                 const stored = sessionStorage.getItem(key);
                 if (!stored) return null;
@@ -32,8 +44,16 @@ document.addEventListener('alpine:init', () => {
                     return null;
                 }
 
-                console.log(`[EntityStore] Retrieved ${entityType}:`, parsed.data);
-                return parsed.data;
+                // Filter out blacklisted fields from retrieved data
+                const filteredData = {};
+                for (const [key, value] of Object.entries(parsed.data)) {
+                    if (!BLACKLISTED_FIELDS.includes(key)) {
+                        filteredData[key] = value;
+                    }
+                }
+
+                console.log(`[EntityStore] Retrieved ${entityType}:`, filteredData);
+                return filteredData;
             } catch (e) {
                 console.error('[EntityStore] Failed to retrieve:', e);
                 return null;
@@ -45,12 +65,32 @@ document.addEventListener('alpine:init', () => {
          */
         updateEntity(entityType, entityId = null, updates = {}) {
             const key = this.getEntityKey(entityType, entityId);
+            // Fields that should never be stored (Filament/Livewire internal state)
+            const BLACKLISTED_FIELDS = [
+                'stage_id', 'mountedActions', 'mountedActionsArguments', 'mountedActionsData',
+                'mountedFormComponentActions', 'mountedFormComponentActionsArguments',
+                'mountedFormComponentActionsData', 'mountedFormComponentActionsComponents',
+                'mountedInfolistActions', 'mountedInfolistActionsData', 'defaultTableAction',
+                'activeTab', 'tableFilters', 'tableSearch', 'tableSearchQuery',
+                'tableSortColumn', 'tableSortDirection', 'tableGrouping',
+                'tableGroupingDirection', 'tableColumnSearches', 'tableRecordsPerPage',
+                '_instance', '_syncData', '_memo', 'users'
+            ];
+
             try {
-                // Get existing data or start fresh
+                // Get existing data or start fresh (already filtered in getEntity)
                 const existing = this.getEntity(entityType, entityId) || {};
 
-                // Deep merge updates with existing data
-                const merged = this.deepMerge(existing, updates);
+                // Filter blacklisted fields from updates before merging
+                const filteredUpdates = {};
+                for (const [updateKey, value] of Object.entries(updates)) {
+                    if (!BLACKLISTED_FIELDS.includes(updateKey)) {
+                        filteredUpdates[updateKey] = value;
+                    }
+                }
+
+                // Deep merge filtered updates with existing data
+                const merged = this.deepMerge(existing, filteredUpdates);
 
                 sessionStorage.setItem(key, JSON.stringify({
                     data: merged,
@@ -265,6 +305,81 @@ document.addEventListener('alpine:init', () => {
 
 document.addEventListener('livewire:init', () => {
     /**
+     * Fields that should NOT be auto-synced across pages
+     * These include:
+     * - Filament internal state (stage_id, mountedActions, etc.)
+     * - Livewire framework state (_instance, _memo, etc.)
+     * - Temporary UI state (table filters, search, etc.)
+     * - Relationship fields that are UI-only (users select, etc.)
+     */
+    const BLACKLISTED_FIELDS = [
+        // Filament internal state
+        'stage_id',
+        'mountedActions',
+        'mountedActionsArguments',
+        'mountedActionsData',
+        'mountedFormComponentActions',
+        'mountedFormComponentActionsArguments',
+        'mountedFormComponentActionsData',
+        'mountedFormComponentActionsComponents',
+        'mountedInfolistActions',
+        'mountedInfolistActionsData',
+        'defaultTableAction',
+        'activeTab',
+
+        // Table state (temporary UI state)
+        'tableFilters',
+        'tableSearch',
+        'tableSearchQuery',
+        'tableSortColumn',
+        'tableSortDirection',
+        'tableGrouping',
+        'tableGroupingDirection',
+        'tableColumnSearches',
+        'tableRecordsPerPage',
+
+        // Livewire internal state
+        '_instance',
+        '_syncData',
+        '_memo',
+
+        // Relationship UI state
+        'users',
+    ];
+
+    /**
+     * Intercept Livewire requests and remove blacklisted fields from payload
+     * This prevents form-only fields from being sent to the server as component properties
+     */
+    Livewire.hook('request', ({ options }) => {
+        if (!options.body) return;
+
+        try {
+            const payload = JSON.parse(options.body);
+
+            // Remove blacklisted fields from serverMemo.data
+            if (payload.serverMemo && payload.serverMemo.data) {
+                BLACKLISTED_FIELDS.forEach(field => {
+                    delete payload.serverMemo.data[field];
+                });
+            }
+
+            // Remove blacklisted fields from updates array
+            if (payload.updates && Array.isArray(payload.updates)) {
+                payload.updates = payload.updates.filter(update => {
+                    const fieldName = update.payload?.name || update.name;
+                    return !BLACKLISTED_FIELDS.includes(fieldName);
+                });
+            }
+
+            // Update the request body with filtered payload
+            options.body = JSON.stringify(payload);
+        } catch (e) {
+            console.debug('[EntityStore] Failed to filter request payload:', e);
+        }
+    });
+
+    /**
      * Auto-sync Livewire form data to entity store
      */
     Livewire.hook('commit', ({ component }) => {
@@ -276,11 +391,18 @@ document.addEventListener('livewire:init', () => {
         // Get entity ID if editing existing record
         const entityId = component.$wire?.record?.id || null;
 
-        // Get form data
+        // Get form data, filtering out blacklisted fields
         const formData = component.$wire?.data || {};
+        const filteredData = {};
 
-        if (Object.keys(formData).length > 0) {
-            Alpine.store('entityStore').updateEntity(entityType, entityId, formData);
+        for (const [key, value] of Object.entries(formData)) {
+            if (!BLACKLISTED_FIELDS.includes(key)) {
+                filteredData[key] = value;
+            }
+        }
+
+        if (Object.keys(filteredData).length > 0) {
+            Alpine.store('entityStore').updateEntity(entityType, entityId, filteredData);
         }
     });
 
@@ -296,14 +418,29 @@ document.addEventListener('livewire:init', () => {
             const componentEntityId = component.$wire?.record?.id || null;
 
             if (componentEntityType === entityType && componentEntityId === entityId) {
-                // Update Livewire component with new data
+                // Update Livewire component with new data, filtering out blacklisted fields
+                let syncedCount = 0;
                 Object.keys(data).forEach(key => {
-                    if (component.$wire && component.$wire[key] !== undefined) {
-                        component.$wire.set(key, data[key]);
+                    // Skip blacklisted fields
+                    if (BLACKLISTED_FIELDS.includes(key)) {
+                        console.debug(`[EntityStore] Skipped blacklisted field: ${key}`);
+                        return;
+                    }
+
+                    try {
+                        if (component.$wire && component.$wire[key] !== undefined) {
+                            component.$wire.set(key, data[key]);
+                            syncedCount++;
+                        }
+                    } catch (e) {
+                        // Property doesn't exist as a public property, skip silently
+                        console.debug(`[EntityStore] Skipped syncing ${key} (form field, not a component property)`);
                     }
                 });
 
-                console.log(`[EntityStore] Synced ${entityType} to Livewire component`);
+                if (syncedCount > 0) {
+                    console.log(`[EntityStore] Synced ${syncedCount} ${entityType} field(s) to Livewire component`);
+                }
             }
         });
     });
@@ -341,13 +478,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (stored && Object.keys(stored).length > 0) {
                     // Auto-restore without prompting (since this is cross-page data)
+                    // Blacklist must match BLACKLISTED_FIELDS from livewire:init listener
+                    const RESTORE_BLACKLIST = [
+                        'stage_id', 'mountedActions', 'mountedActionsArguments', 'mountedActionsData',
+                        'mountedFormComponentActions', 'mountedFormComponentActionsArguments',
+                        'mountedFormComponentActionsData', 'mountedFormComponentActionsComponents',
+                        'mountedInfolistActions', 'mountedInfolistActionsData', 'defaultTableAction',
+                        'activeTab', 'tableFilters', 'tableSearch', 'tableSearchQuery',
+                        'tableSortColumn', 'tableSortDirection', 'tableGrouping',
+                        'tableGroupingDirection', 'tableColumnSearches', 'tableRecordsPerPage',
+                        '_instance', '_syncData', '_memo', 'users'
+                    ];
+
+                    let restoredCount = 0;
                     Object.keys(stored).forEach(key => {
-                        if (component.$wire && component.$wire[key] !== undefined) {
-                            component.$wire.set(key, stored[key]);
+                        // Skip blacklisted fields
+                        if (RESTORE_BLACKLIST.includes(key)) {
+                            console.debug(`[EntityStore] Skipped blacklisted field during restore: ${key}`);
+                            return;
+                        }
+
+                        try {
+                            if (component.$wire && component.$wire[key] !== undefined) {
+                                component.$wire.set(key, stored[key]);
+                                restoredCount++;
+                            }
+                        } catch (e) {
+                            // Property doesn't exist as a public property on the component
+                            // This is normal for form fields that aren't component properties
+                            console.debug(`[EntityStore] Skipped ${key} (form field, not a component property)`);
                         }
                     });
 
-                    console.log(`[EntityStore] Restored ${entityType} data from session`);
+                    if (restoredCount > 0) {
+                        console.log(`[EntityStore] Restored ${restoredCount} ${entityType} field(s) from session`);
+                    }
                 }
             }
         }
