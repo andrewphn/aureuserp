@@ -45,10 +45,8 @@ class AppServiceProvider extends ServiceProvider
     protected function registerJavaScriptAssets(): void
     {
         FilamentAsset::register([
-            Js::make('centralized-entity-store', public_path('build/assets/centralized-entity-store-CUdMFKpf.js'))
-                ->loadedOnRequest(),
-            Js::make('form-auto-populate', public_path('build/assets/form-auto-populate-CMb-TTt1.js'))
-                ->loadedOnRequest(),
+            Js::make('centralized-entity-store', __DIR__ . '/../../resources/js/centralized-entity-store.js'),
+            Js::make('form-auto-populate', __DIR__ . '/../../resources/js/form-auto-populate.js'),
         ], 'app');
     }
 }
