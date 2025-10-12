@@ -313,7 +313,7 @@ function projectFooterGlobal() {
 
         async fetchCustomerName(partnerId) {
             try {
-                const response = await fetch(`/admin/api/partners/${partnerId}`);
+                const response = await fetch(`/api/admin/api/partners/${partnerId}`);
                 const data = await response.json();
                 return data.name || '—';
             } catch (e) {
@@ -335,7 +335,7 @@ function projectFooterGlobal() {
 
         async calculateEstimate(linearFeet, companyId) {
             try {
-                const response = await fetch(`/admin/api/production-estimate?linear_feet=${linearFeet}&company_id=${companyId}`);
+                const response = await fetch(`/api/admin/api/production-estimate?linear_feet=${linearFeet}&company_id=${companyId}`);
                 return await response.json();
             } catch (e) {
                 console.error('Failed to calculate estimate:', e);
@@ -351,7 +351,7 @@ function projectFooterGlobal() {
 
         async loadProjectTags() {
             try {
-                const response = await fetch(`/admin/api/projects/${this.activeProjectId}/tags`);
+                const response = await fetch(`/api/projects/${this.activeProjectId}/tags`);
                 const tags = await response.json();
                 this.projectTags = tags;
 
