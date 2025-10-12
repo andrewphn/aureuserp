@@ -176,6 +176,89 @@ document.addEventListener('alpine:init', () => {
             current[keys[keys.length - 1]] = value;
 
             return this.updateEntity(entityType, entityId, update);
+        },
+
+        /**
+         * Set the active context (current entity being worked on)
+         * This maintains context across page navigation
+         */
+        setActiveContext(entityType, entityId, data = null) {
+            try {
+                sessionStorage.setItem('active_context', JSON.stringify({
+                    entityType,
+                    entityId,
+                    timestamp: Date.now()
+                }));
+
+                console.log(`[EntityStore] Set active context: ${entityType} #${entityId || 'new'}`);
+
+                // If data provided, also update entity store
+                if (data) {
+                    this.setEntity(entityType, entityId, data);
+                }
+
+                // Dispatch event so UI can react
+                window.dispatchEvent(new CustomEvent('active-context-changed', {
+                    detail: { entityType, entityId }
+                }));
+
+                return true;
+            } catch (e) {
+                console.error('[EntityStore] Failed to set active context:', e);
+                return false;
+            }
+        },
+
+        /**
+         * Get the currently active context
+         */
+        getActiveContext() {
+            try {
+                const stored = sessionStorage.getItem('active_context');
+                if (!stored) return null;
+
+                const context = JSON.parse(stored);
+
+                // Clear context older than 24 hours
+                if (Date.now() - context.timestamp > 86400000) {
+                    this.clearActiveContext();
+                    return null;
+                }
+
+                return context;
+            } catch (e) {
+                console.error('[EntityStore] Failed to get active context:', e);
+                return null;
+            }
+        },
+
+        /**
+         * Clear the active context
+         */
+        clearActiveContext() {
+            try {
+                sessionStorage.removeItem('active_context');
+                console.log('[EntityStore] Cleared active context');
+
+                window.dispatchEvent(new CustomEvent('active-context-changed', {
+                    detail: { entityType: null, entityId: null }
+                }));
+
+                return true;
+            } catch (e) {
+                console.error('[EntityStore] Failed to clear active context:', e);
+                return false;
+            }
+        },
+
+        /**
+         * Check if a specific entity is the active context
+         */
+        isActiveContext(entityType, entityId) {
+            const active = this.getActiveContext();
+            if (!active) return false;
+
+            return active.entityType === entityType && active.entityId === entityId;
         }
     });
 });
@@ -280,4 +363,16 @@ window.updateEntityField = function(entityType, entityId, fieldPath, value) {
 
 window.getEntityField = function(entityType, entityId, fieldPath) {
     return Alpine.store('entityStore').getEntityField(entityType, entityId, fieldPath);
+};
+
+window.setActiveContext = function(entityType, entityId, data = null) {
+    return Alpine.store('entityStore').setActiveContext(entityType, entityId, data);
+};
+
+window.getActiveContext = function() {
+    return Alpine.store('entityStore').getActiveContext();
+};
+
+window.clearActiveContext = function() {
+    return Alpine.store('entityStore').clearActiveContext();
 };
