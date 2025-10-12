@@ -119,6 +119,10 @@ class AdminPanelProvider extends PanelProvider
                 PluginManager::make(),
             ])
             ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")')
+            )
+            ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn (): string => view('filament.components.project-sticky-footer-global')->render()
             )

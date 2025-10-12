@@ -30,7 +30,8 @@ class AppServiceProvider extends ServiceProvider
     protected function registerJavaScriptAssets(): void
     {
         FilamentAsset::register([
-            Js::make('centralized-entity-store', resource_path('js/centralized-entity-store.js')),
+            Js::make('centralized-entity-store', public_path('build/assets/centralized-entity-store-CUdMFKpf.js'))
+                ->loadedOnRequest(),
         ], 'app');
     }
 }

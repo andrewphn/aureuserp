@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/pdf-viewer.js',
                 'resources/js/pdf-thumbnail.js',
                 'resources/js/annotations.js',
+                'resources/js/centralized-entity-store.js',
                 'resources/css/filament/admin/theme.css',
             ],
             refresh: true,
