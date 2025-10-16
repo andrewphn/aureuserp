@@ -415,7 +415,7 @@
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                             Page <span x-text="currentPageNum"></span>
                         </h3>
-                        <div class="flex gap-2" x-data="{ activeTab: 'metadata' }">
+                        <div class="flex gap-2">
                             <button
                                 @click="activeTab = 'metadata'; $dispatch('tab-changed', 'metadata')"
                                 :class="activeTab === 'metadata' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'"
@@ -441,7 +441,7 @@
                     </div>
 
                     <!-- Tab Content -->
-                    <div class="flex-1 overflow-y-auto" x-data="{ activeTab: 'metadata' }" @tab-changed.window="activeTab = $event.detail">
+                    <div class="flex-1 overflow-y-auto" @tab-changed.window="activeTab = $event.detail">
 
                         <!-- Metadata Tab -->
                         <div x-show="activeTab === 'metadata'" class="p-4 space-y-4">
@@ -839,6 +839,199 @@
                             </div>
                         </div>
 
+                        <!-- Measurement Recording Fields -->
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-700 rounded-lg p-3 space-y-3">
+                            <h4 class="text-sm font-bold text-yellow-900 dark:text-yellow-300 flex items-center gap-2">
+                                📏 Measurements
+                            </h4>
+
+                            <!-- Room Measurements -->
+                            <div x-show="annotationType === 'room'" class="space-y-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Length (ft)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementLength"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="12.5"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Width (ft)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementWidth"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="10.0"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Ceiling Height (ft)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementHeight"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="8.0"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Square Footage
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                                            placeholder="Auto calculated"
+                                            :value="measurementLength && measurementWidth ? (measurementLength * measurementWidth).toFixed(2) : ''"
+                                            readonly
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cabinet Run Measurements -->
+                            <div x-show="annotationType === 'cabinet_run'" class="space-y-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Total Length (inches)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementLengthInches"
+                                            step="0.125"
+                                            @input="measurementLinearFeet = measurementLengthInches ? (measurementLengthInches / 12).toFixed(2) : ''"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="120"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Linear Feet
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementLinearFeet"
+                                            step="0.01"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                                            placeholder="Auto calculated"
+                                            readonly
+                                        >
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Height (inches)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementHeightInches"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="36"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Depth (inches)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementDepthInches"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="24"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cabinet Measurements -->
+                            <div x-show="annotationType === 'cabinet'" class="space-y-3">
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Width (in)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementWidthInches"
+                                            step="0.125"
+                                            @input="measurementLinearFeet = measurementWidthInches ? (measurementWidthInches / 12).toFixed(2) : ''"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="36"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Height (in)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementHeightInches"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="30"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Depth (in)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementDepthInches"
+                                            step="0.125"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="12"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Linear Feet
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementLinearFeet"
+                                            step="0.01"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                                            placeholder="Auto calculated"
+                                            readonly
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                            Doors/Drawers
+                                        </label>
+                                        <input
+                                            type="number"
+                                            x-model="measurementDoorCount"
+                                            step="1"
+                                            min="0"
+                                            class="w-full px-2 py-1.5 text-sm border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="2"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Current Room for Annotation (Floor Plans with multiple rooms) -->
                         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                             <label class="block text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
@@ -976,7 +1169,7 @@
 
                         <!-- PROJECT TAGS SECTION -->
                         @php
-                            $project = $pdfPage?->pdfDocument?->module;
+                            $project = isset($pdfPage) ? ($pdfPage?->pdfDocument?->module) : null;
                             $allTags = \Webkul\Project\Models\Tag::orderBy('type')->orderBy('name')->get()->groupBy('type');
                             $projectTagIds = $project ? $project->tags->pluck('id')->toArray() : [];
 
@@ -1217,12 +1410,12 @@
                     </div>
                     <!-- END Tab Content -->
 
-                    <!-- Save Button (sticky bottom) -->
-                    <div class="p-4 bg-gray-100 dark:bg-gray-750 border-t border-gray-300 dark:border-gray-700">
+                    <!-- Save Button (sticky bottom with extra padding to ensure visibility) -->
+                    <div class="p-4 pb-6 bg-gray-100 dark:bg-gray-750 border-t border-gray-300 dark:border-gray-700">
                         <button
                             @click="saveAnnotations()"
                             dusk="save-annotations-button"
-                            class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                             :disabled="isSaving"
                             x-text="isSaving ? '💾 Saving...' : '💾 Save All Changes'"
                         >
