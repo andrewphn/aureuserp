@@ -61,6 +61,7 @@ class Project extends Model implements Sortable
         'partner_id',
         'use_customer_address',
         'company_id',
+        'branch_id',
         'user_id',
         'creator_id',
     ];
@@ -97,6 +98,7 @@ class Project extends Model implements Sortable
         'stage.name'   => 'Stage',
         'partner.name' => 'Customer',
         'company.name' => 'Company',
+        'branch.name'  => 'Branch',
         'user.name'    => 'Project Manager',
         'creator.name' => 'Creator',
     ];
@@ -195,6 +197,11 @@ class Project extends Model implements Sortable
         return $this->belongsTo(Company::class);
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'branch_id');
+    }
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'projects_project_tag', 'project_id', 'tag_id');
@@ -210,9 +217,21 @@ class Project extends Model implements Sortable
         return $this->hasMany(Room::class);
     }
 
+    public function cabinets(): HasMany
+    {
+        return $this->hasMany(CabinetSpecification::class);
+    }
+
     public function cabinetSpecifications(): HasMany
     {
         return $this->hasMany(CabinetSpecification::class);
+    }
+
+    public function cabinetRuns()
+    {
+        return CabinetRun::whereHas('roomLocation.room', function($query) {
+            $query->where('project_id', $this->id);
+        });
     }
 
     protected static function booted()
