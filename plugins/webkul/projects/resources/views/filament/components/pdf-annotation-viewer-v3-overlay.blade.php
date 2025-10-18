@@ -345,7 +345,8 @@
         </div>
 
         <!-- PDF Viewer (Center) with HTML Overlay -->
-        <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative">
+        <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative"
+             @wheel.prevent="/* Block wheel events on PDF container */">
             <!-- PDF Container -->
             <div id="pdf-container-{{ $viewerId }}" class="relative w-full h-full overflow-auto">
                 <!-- PDFObject.js embed goes here -->
@@ -582,10 +583,15 @@
                     iframe.style.width = '100%';
                     iframe.style.height = '100%';
                     iframe.style.border = 'none';
-                    iframe.style.overflow = 'hidden';  // Disable scrolling in iframe
                     iframe.setAttribute('type', 'application/pdf');
                     iframe.setAttribute('title', 'PDF Document');
-                    iframe.setAttribute('scrolling', 'no');  // Disable scroll bars
+
+                    // Block mouse wheel events to prevent page navigation
+                    iframe.addEventListener('wheel', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }, { passive: false });
 
                     // Clear container and add iframe
                     embedContainer.innerHTML = '';
