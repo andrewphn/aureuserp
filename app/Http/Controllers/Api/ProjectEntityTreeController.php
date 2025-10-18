@@ -1,0 +1,222 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Webkul\Project\Models\Project;
+use Webkul\Project\Models\Room;
+use Webkul\Project\Models\RoomLocation;
+use Webkul\Project\Models\CabinetRun;
+use App\Models\PdfPageAnnotation;
+
+class ProjectEntityTreeController extends Controller
+{
+    /**
+     * Get hierarchical entity tree for project with annotation counts
+     *
+     * Returns: Room → Location → Run → Cabinet hierarchy with:
+     * - Annotation counts at each level
+     * - PDF page references where entities are annotated
+     * - Entity metadata (names, IDs, types)
+     */
+    public function getEntityTree(Request $request, int $projectId): JsonResponse
+    {
+        $project = Project::findOrFail($projectId);
+
+        // Load rooms with their locations, runs, and cabinets
+        $rooms = Room::where('project_id', $projectId)
+            ->with([
+                'locations.cabinetRuns.cabinets',
+                'annotations' // PDF annotations linked to rooms
+            ])
+            ->orderBy('name')
+            ->get();
+
+        $tree = $rooms->map(function ($room) {
+            // Count annotations for this room
+            $roomAnnotationCount = PdfPageAnnotation::where('room_id', $room->id)
+                ->where('annotation_type', 'room')
+                ->count();
+
+            // Get pages where room is annotated
+            $roomPages = PdfPageAnnotation::where('room_id', $room->id)
+                ->where('annotation_type', 'room')
+                ->pluck('pdf_page_id')
+                ->unique()
+                ->toArray();
+
+            return [
+                'id' => $room->id,
+                'type' => 'room',
+                'name' => $room->name,
+                'display_name' => $room->name,
+                'room_type' => $room->room_type,
+                'annotation_count' => $roomAnnotationCount,
+                'pages' => $roomPages,
+                'children' => $room->locations->map(function ($location) use ($room) {
+                    // Count annotations for this location
+                    $locationAnnotationCount = PdfPageAnnotation::whereHas('metadata', function ($query) use ($location) {
+                        $query->where('room_location_id', $location->id);
+                    })
+                    ->where('annotation_type', 'room_location')
+                    ->count();
+
+                    // Get pages where location is annotated
+                    $locationPages = PdfPageAnnotation::whereHas('metadata', function ($query) use ($location) {
+                        $query->where('room_location_id', $location->id);
+                    })
+                    ->where('annotation_type', 'room_location')
+                    ->pluck('pdf_page_id')
+                    ->unique()
+                    ->toArray();
+
+                    return [
+                        'id' => $location->id,
+                        'type' => 'room_location',
+                        'name' => $location->name,
+                        'display_name' => $location->name,
+                        'room_id' => $room->id,
+                        'annotation_count' => $locationAnnotationCount,
+                        'pages' => $locationPages,
+                        'children' => $location->cabinetRuns->map(function ($run) use ($location) {
+                            // Count annotations for this run
+                            $runAnnotationCount = PdfPageAnnotation::where('cabinet_run_id', $run->id)
+                                ->where('annotation_type', 'cabinet_run')
+                                ->count();
+
+                            // Get pages where run is annotated
+                            $runPages = PdfPageAnnotation::where('cabinet_run_id', $run->id)
+                                ->where('annotation_type', 'cabinet_run')
+                                ->pluck('pdf_page_id')
+                                ->unique()
+                                ->toArray();
+
+                            return [
+                                'id' => $run->id,
+                                'type' => 'cabinet_run',
+                                'name' => $run->name,
+                                'display_name' => $run->name,
+                                'run_type' => $run->run_type,
+                                'room_location_id' => $location->id,
+                                'annotation_count' => $runAnnotationCount,
+                                'pages' => $runPages,
+                                'children' => $run->cabinets->map(function ($cabinet) use ($run) {
+                                    // Count annotations for this cabinet
+                                    $cabinetAnnotationCount = PdfPageAnnotation::where('cabinet_specification_id', $cabinet->id)
+                                        ->where('annotation_type', 'cabinet')
+                                        ->count();
+
+                                    // Get pages where cabinet is annotated
+                                    $cabinetPages = PdfPageAnnotation::where('cabinet_specification_id', $cabinet->id)
+                                        ->where('annotation_type', 'cabinet')
+                                        ->pluck('pdf_page_id')
+                                        ->unique()
+                                        ->toArray();
+
+                                    return [
+                                        'id' => $cabinet->id,
+                                        'type' => 'cabinet',
+                                        'name' => $cabinet->cabinet_number ?? "Cabinet {$cabinet->id}",
+                                        'display_name' => $cabinet->cabinet_number ?? "Cabinet {$cabinet->id}",
+                                        'cabinet_run_id' => $run->id,
+                                        'annotation_count' => $cabinetAnnotationCount,
+                                        'pages' => $cabinetPages,
+                                    ];
+                                })->toArray()
+                            ];
+                        })->toArray()
+                    ];
+                })->toArray()
+            ];
+        })->toArray();
+
+        return response()->json([
+            'success' => true,
+            'project_id' => $projectId,
+            'project_name' => $project->name,
+            'tree' => $tree,
+            'total_rooms' => count($tree),
+            'timestamp' => now()->toIso8601String()
+        ]);
+    }
+
+    /**
+     * Get all rooms for project (for autocomplete)
+     */
+    public function getRooms(Request $request, int $projectId): JsonResponse
+    {
+        $rooms = Room::where('project_id', $projectId)
+            ->select('id', 'name', 'room_type')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'rooms' => $rooms
+        ]);
+    }
+
+    /**
+     * Get all locations for a room (for autocomplete)
+     */
+    public function getLocationsForRoom(Request $request, int $roomId): JsonResponse
+    {
+        $locations = RoomLocation::where('room_id', $roomId)
+            ->select('id', 'name', 'location_type', 'room_id')
+            ->orderBy('sequence')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'locations' => $locations
+        ]);
+    }
+
+    /**
+     * Create a new room
+     */
+    public function createRoom(Request $request, int $projectId): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'room_type' => 'nullable|string|max:255',
+        ]);
+
+        $room = Room::create([
+            'project_id' => $projectId,
+            'name' => $validated['name'],
+            'room_type' => $validated['room_type'] ?? null,
+            'creator_id' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'room' => $room
+        ], 201);
+    }
+
+    /**
+     * Create a new location for a room
+     */
+    public function createLocationForRoom(Request $request, int $roomId): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'location_type' => 'nullable|string|max:255',
+        ]);
+
+        $location = RoomLocation::create([
+            'room_id' => $roomId,
+            'name' => $validated['name'],
+            'location_type' => $validated['location_type'] ?? 'wall',
+            'creator_id' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'location' => $location
+        ], 201);
+    }
+}

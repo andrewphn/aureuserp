@@ -60,17 +60,21 @@ export async function loadExistingAnnotations(pdfPageId) {
 
         if (!response.ok) {
             console.warn('⚠️ No existing annotations found');
-            return [];
+            return { annotations: [], lastModified: null };
         }
 
         const data = await response.json();
         console.log('✅ Loaded existing annotations:', data.annotations.length);
 
-        return data.annotations || [];
+        // Include last modified timestamp for conflict resolution
+        return {
+            annotations: data.annotations || [],
+            lastModified: data.last_modified || null  // Backend should provide this
+        };
 
     } catch (error) {
         console.error('Failed to load existing annotations:', error);
-        return [];
+        return { annotations: [], lastModified: null };
     }
 }
 
@@ -135,6 +139,42 @@ export async function loadProjectNumber(pdfPageId) {
 }
 
 /**
+ * Load project context for cover page auto-population
+ * @param {number} pdfPageId - PDF page ID
+ * @returns {Promise<Object|null>} Project context data or null
+ */
+export async function loadProjectContext(pdfPageId) {
+    try {
+        const response = await fetch(`/api/pdf/page/${pdfPageId}/project-context`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Failed to load project context');
+            return null;
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+            console.warn('⚠️ Project context API returned error:', data.error);
+            return null;
+        }
+
+        console.log('✅ Loaded project context for cover page auto-population');
+
+        return data.project_context;
+
+    } catch (error) {
+        console.error('Failed to load project context:', error);
+        return null;
+    }
+}
+
+/**
  * Load all metadata for annotation viewer
  * @param {number} pdfPageId - PDF page ID
  * @returns {Promise<Object>} Combined metadata
@@ -142,11 +182,12 @@ export async function loadProjectNumber(pdfPageId) {
 export async function loadAllMetadata(pdfPageId) {
     try {
         // Load all data in parallel
-        const [context, annotations, cabinetRuns, projectNumber] = await Promise.all([
+        const [context, annotationsData, cabinetRuns, projectNumber, projectContext] = await Promise.all([
             loadAnnotationContext(pdfPageId),
             loadExistingAnnotations(pdfPageId),
             loadCabinetRuns(pdfPageId),
-            loadProjectNumber(pdfPageId)
+            loadProjectNumber(pdfPageId),
+            loadProjectContext(pdfPageId)
         ]);
 
         return {
@@ -157,7 +198,9 @@ export async function loadAllMetadata(pdfPageId) {
             projectId: context?.project_id || null,
             projectName: context?.project_name || '',
             projectNumber: projectNumber,
-            annotations: annotations
+            annotations: annotationsData.annotations || [],
+            annotationsLastModified: annotationsData.lastModified,  // For conflict resolution
+            projectContext: projectContext
         };
 
     } catch (error) {
@@ -170,7 +213,9 @@ export async function loadAllMetadata(pdfPageId) {
             projectId: null,
             projectName: '',
             projectNumber: 'TFW-0001',
-            annotations: []
+            annotations: [],
+            annotationsLastModified: null,
+            projectContext: null
         };
     }
 }

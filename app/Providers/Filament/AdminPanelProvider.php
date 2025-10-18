@@ -118,6 +118,10 @@ class AdminPanelProvider extends PanelProvider
                     ]),
                 PluginManager::make(),
             ])
+            ->pages([
+                \App\Filament\Pages\ManageFooter::class,
+                \App\Filament\Pages\TestFooter::class,
+            ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .

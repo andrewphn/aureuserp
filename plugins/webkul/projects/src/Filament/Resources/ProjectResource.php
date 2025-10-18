@@ -53,6 +53,7 @@ use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Project\Enums\ProjectVisibility;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TagResource;
+use Webkul\Project\Filament\Resources\ProjectResource\Pages\AnnotatePdfV2;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\EditProject;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
@@ -63,6 +64,9 @@ use Webkul\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\MilestonesRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\PdfDocumentsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\TaskStagesRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomsRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetsRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRunsRelationManager;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
@@ -130,14 +134,17 @@ class ProjectResource extends Resource
                                         ->preload()
                                         ->required()
                                         ->default(fn () => \Webkul\Support\Models\Company::where('is_default', true)->value('id'))
-                                        ->reactive()
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                            // Clear branch selection when company changes
-                                            $set('branch_id', null);
+                                        ->live(onBlur: true)
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
+                                            // Branch field has its own filtering by company_id, no need to clear it here
                                             // Update project number preview when company changes
                                             static::updateProjectNumberPreview($state, $get, $set);
                                             // Trigger production time recalculation
                                             static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                            // Update footer on edit pages
+                                            if (method_exists($livewire, 'updateFooter')) {
+                                                $livewire->updateFooter();
+                                            }
                                         })
                                         ->label(__('projects::filament/resources/project.form.sections.additional.fields.company'))
                                         ->createOptionForm(fn (Schema $schema) => CompanyResource::form($schema)),
@@ -152,16 +159,21 @@ class ProjectResource extends Resource
                                                 ->pluck('name', 'id');
                                         })
                                         ->searchable()
-                                        ->reactive()
-                                        ->visible(fn (callable $get) => $get('company_id') !== null)
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                            // Update project number preview when branch changes
-                                            static::updateProjectNumberPreview($get('company_id'), $get, $set);
-                                            // Update project name when branch changes
-                                            static::updateProjectName($get, $set);
-                                            // Trigger production time recalculation using branch capacity if selected
-                                            static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                        ->dehydrated()
+                                        ->live(onBlur: true)
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
+                                            // Only update project number preview on CREATE pages
+                                            // Edit pages already have a project_number from database
+                                            if (!($livewire instanceof \Filament\Resources\Pages\EditRecord)) {
+                                                // Update project number when branch changes (uses branch acronym)
+                                                static::updateProjectNumberPreview($get('company_id'), $get, $set);
+                                            }
+                                            // Update footer on edit pages
+                                            if (method_exists($livewire, 'updateFooter')) {
+                                                $livewire->updateFooter();
+                                            }
                                         })
+                                        ->visible(fn (callable $get) => $get('company_id') !== null)
                                         ->helperText('Optional: Select a specific branch if applicable'),
                                     Select::make('partner_id')
                                         ->label(__('projects::filament/resources/project.form.sections.additional.fields.customer'))
@@ -170,7 +182,7 @@ class ProjectResource extends Resource
                                         ->preload()
                                         ->required()
                                         ->reactive()
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                             if ($state && $get('use_customer_address')) {
                                                 $partner = \Webkul\Partner\Models\Partner::with(['state', 'country'])->find($state);
                                                 if ($partner) {
@@ -187,6 +199,10 @@ class ProjectResource extends Resource
                                                     static::updateProjectName($get, $set);
                                                 }
                                             }
+                                            // Update footer on edit pages
+                                            if (method_exists($livewire, 'updateFooter')) {
+                                                $livewire->updateFooter();
+                                            }
                                         })
                                         ->createOptionForm(fn (Schema $schema) => PartnerResource::form($schema))
                                         ->editOptionForm(fn (Schema $schema) => PartnerResource::form($schema)),
@@ -201,9 +217,13 @@ class ProjectResource extends Resource
                                         ])
                                         ->required()
                                         ->reactive()
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                             // Update project name when project type changes
                                             static::updateProjectName($get, $set);
+                                            // Update footer on edit pages
+                                            if (method_exists($livewire, 'updateFooter')) {
+                                                $livewire->updateFooter();
+                                            }
                                         })
                                         ->native(false),
                                 ]),
@@ -274,10 +294,14 @@ class ProjectResource extends Resource
                                     ->disabled(fn (callable $get) => $get('use_customer_address'))
                                     ->dehydrated()
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                         // Only update when user leaves the field (onBlur)
                                         static::updateProjectNumberPreview($get('company_id'), $get, $set);
                                         static::updateProjectName($get, $set);
+                                        // Update footer on edit pages
+                                        if (method_exists($livewire, 'updateFooter')) {
+                                            $livewire->updateFooter();
+                                        }
                                     })
                                     ->columnSpanFull(),
                                 TextInput::make('project_address.street2')
@@ -331,7 +355,7 @@ class ProjectResource extends Resource
                                     ->numeric()
                                     ->step(0.01)
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                         // Calculate estimated production time and update allocated hours
                                         static::calculateEstimatedProductionTime($state, $get, $set);
 
@@ -341,6 +365,11 @@ class ProjectResource extends Resource
                                             if ($estimate) {
                                                 $set('allocated_hours', $estimate['hours']);
                                             }
+                                        }
+
+                                        // Update footer on edit pages
+                                        if (method_exists($livewire, 'updateFooter')) {
+                                            $livewire->updateFooter();
                                         }
                                     })
                                     ->helperText('Estimated total linear feet for this project')
@@ -396,9 +425,13 @@ class ProjectResource extends Resource
                                     ->native(false)
                                     ->suffixIcon('heroicon-o-calendar')
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                         // Trigger production time recalculation when desired completion date changes
                                         static::calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                        // Update footer on edit pages
+                                        if (method_exists($livewire, 'updateFooter')) {
+                                            $livewire->updateFooter();
+                                        }
                                     })
                                     ->helperText(function (callable $get) {
                                         $linearFeet = $get('estimated_linear_feet');
@@ -849,6 +882,17 @@ class ProjectResource extends Resource
                                             ->icon('heroicon-o-hashtag')
                                             ->placeholder('—'),
 
+                                        TextEntry::make('company.name')
+                                            ->label('Company')
+                                            ->icon('heroicon-o-building-office')
+                                            ->placeholder('—'),
+
+                                        TextEntry::make('branch.name')
+                                            ->label('Branch')
+                                            ->icon('heroicon-o-building-office-2')
+                                            ->placeholder('—')
+                                            ->visible(fn (Project $record) => $record->branch_id !== null),
+
                                         TextEntry::make('user.name')
                                             ->label(__('projects::filament/resources/project.infolist.sections.additional.entries.project-manager'))
                                             ->icon('heroicon-o-user')
@@ -1026,6 +1070,13 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
+            RelationGroup::make('Project Data', [
+                RoomsRelationManager::class,
+                CabinetRunsRelationManager::class,
+                CabinetsRelationManager::class,
+            ])
+                ->icon('heroicon-o-cube'),
+
             RelationGroup::make('Documents', [
                 PdfDocumentsRelationManager::class,
             ])
@@ -1115,6 +1166,12 @@ class ProjectResource extends Resource
 
     protected static function updateProjectNumberPreview(?int $companyId, callable $get, callable $set): void
     {
+        // DISABLED on edit pages to prevent circular update loops
+        // Edit pages already have project_number from database
+        if (str_contains(request()->url(), '/edit')) {
+            return;
+        }
+
         // Only generate preview if we have both company and street address
         if (!$companyId || !$get('project_address.street1')) {
             return;
@@ -1164,13 +1221,14 @@ class ProjectResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'      => ListProjects::route('/'),
-            'create'     => CreateProject::route('/create'),
-            'edit'       => EditProject::route('/{record}/edit'),
-            'view'       => ViewProject::route('/{record}'),
-            'milestones' => ManageMilestones::route('/{record}/milestones'),
-            'tasks'      => ManageTasks::route('/{record}/tasks'),
-            'pdf-review' => ReviewPdfAndPrice::route('/{record}/pdf-review'),
+            'index'         => ListProjects::route('/'),
+            'create'        => CreateProject::route('/create'),
+            'edit'          => EditProject::route('/{record}/edit'),
+            'view'          => ViewProject::route('/{record}'),
+            'milestones'    => ManageMilestones::route('/{record}/milestones'),
+            'tasks'         => ManageTasks::route('/{record}/tasks'),
+            'pdf-review'    => ReviewPdfAndPrice::route('/{record}/pdf-review'),
+            'annotate-v2'   => AnnotatePdfV2::route('/{record}/annotate-v2/{page?}'),
         ];
     }
 }

@@ -20,6 +20,18 @@ class ViewProject extends ViewRecord
 {
     protected static string $resource = ProjectResource::class;
 
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        // Set active context to notify the footer which project is being viewed
+        // NO form data is passed to prevent EntityStore sync
+        $this->dispatch('set-active-context', [
+            'entityType' => 'project',
+            'entityId' => $this->record->id,
+        ]);
+    }
+
     protected function getHeaderActions(): array
     {
         return [

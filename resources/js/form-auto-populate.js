@@ -32,6 +32,13 @@ document.addEventListener('alpine:init', () => {
  */
 async function populateFormsFromProject(projectId) {
     try {
+        // Skip auto-population on project edit pages entirely
+        // (prevents circular updates when EditProject sets itself as active context)
+        if (window.location.pathname.includes('/project/projects/') && window.location.pathname.includes('/edit')) {
+            console.log('[FormAutoPopulate] Skipped - on project edit page');
+            return;
+        }
+
         // Fetch project details from API with credentials
         const response = await fetch(`/api/projects/${projectId}`, {
             method: 'GET',
@@ -74,6 +81,13 @@ function populateLivewireForm(component, project) {
     if (!component.$wire) return;
 
     const wire = component.$wire;
+
+    // Skip if this component is already editing this specific project
+    // (prevents circular updates when EditProject page sets itself as active context)
+    if (wire.record && wire.record.id === project.id) {
+        console.log('[FormAutoPopulate] Skipped - component already editing this project');
+        return;
+    }
 
     // Common field mappings from project to form
     const fieldMappings = {

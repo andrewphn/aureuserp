@@ -1,0 +1,265 @@
+/**
+ * Annotation System V2 Styles
+ *
+ * Context-first annotation interface with tree sidebar and smart autocomplete
+ */
+
+/* Container */
+.annotation-system-v2 {
+    height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Context Bar */
+.context-bar {
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dark .context-bar {
+    background: linear-gradient(to bottom, #111827, #1f2937);
+}
+
+/* Tree Sidebar */
+.tree-sidebar {
+    min-width: 16rem;
+    max-width: 20rem;
+}
+
+.tree-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tree-sidebar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.tree-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.tree-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Tree Node */
+.tree-node {
+    position: relative;
+}
+
+.tree-node .badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+/* Autocomplete Dropdown */
+.context-bar .dropdown {
+    max-height: 16rem;
+}
+
+.context-bar .dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.context-bar .dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.context-bar .dropdown::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+/* PDF Viewer Container */
+.pdf-viewer-container {
+    position: relative;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .tree-sidebar {
+        min-width: 14rem;
+        max-width: 14rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .annotation-system-v2 {
+        flex-direction: column;
+    }
+
+    .tree-sidebar {
+        min-width: 100%;
+        max-width: 100%;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .context-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .context-bar > div {
+        width: 100%;
+    }
+}
+
+/* Dark Mode Refinements */
+.dark .tree-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .tree-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .tree-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation for Tree Nodes */
+.tree-node > div {
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.tree-node > div:active {
+    transform: scale(0.98);
+}
+
+/* Badge Pulse Animation */
+@keyframes badge-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.badge.pulse {
+    animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* Context Display */
+.context-bar .text-sm.text-gray-600 {
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+/* Input Focus States */
+.context-bar input:focus {
+    outline: none;
+    border-color: rgb(59, 130, 246);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark .context-bar input:focus {
+    border-color: rgb(96, 165, 250);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+/* Button States */
+.context-bar button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.context-bar button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.context-bar button:not(:disabled):active {
+    transform: translateY(0);
+}
+
+/* Dropdown Animation */
+.context-bar .absolute {
+    animation: dropdown-slide 0.15s ease-out;
+}
+
+@keyframes dropdown-slide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading State */
+.tree-sidebar .animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success/Error States */
+.tree-sidebar .text-red-600 {
+    font-size: 0.875rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: rgba(220, 38, 38, 0.1);
+}
+
+/* Tree Expand/Collapse Button */
+.tree-node button {
+    transition: transform 0.2s ease;
+}
+
+.tree-node button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 0.25rem;
+}
+
+/* Selected Node Highlight */
+.tree-node > div.bg-purple-100,
+.tree-node > div.bg-indigo-100,
+.tree-node > div.bg-blue-100 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+}
+
+.dark .tree-node > div.bg-purple-900,
+.dark .tree-node > div.bg-indigo-900,
+.dark .tree-node > div.bg-blue-900 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Hint Message */
+.context-bar .text-orange-600 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(234, 88, 12, 0.1);
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+/* Add Room Button */
+.tree-sidebar button[class*="border-dashed"] {
+    transition: all 0.2s ease;
+}
+
+.tree-sidebar button[class*="border-dashed"]:hover {
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateY(-1px);
+}

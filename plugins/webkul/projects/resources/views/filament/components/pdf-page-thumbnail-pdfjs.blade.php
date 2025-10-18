@@ -1,3 +1,11 @@
+@php
+    // Get the annotation system version from parent page
+    $useV2 = false;
+    if (isset($this) && method_exists($this, 'useAnnotationSystemV2')) {
+        $useV2 = $this->useAnnotationSystemV2();
+    }
+@endphp
+
 <div
     class="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900"
     x-data="pdfThumbnailPdfJs"
@@ -27,13 +35,29 @@
     </div>
     <div class="bg-gray-700 px-2 py-1 text-center flex items-center justify-between">
         <span class="text-sm font-medium text-white">Page {{ $pageNumber }}</span>
-        <button
-            @click.stop="showAnnotationModal = true"
-            class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
-            title="Annotate this page"
-        >
-            ✏️ Annotate
-        </button>
+        <div class="flex items-center gap-2">
+            @if($useV2)
+                <span class="px-2 py-0.5 text-white text-xs rounded font-semibold" style="background-color: #9333ea;">V2</span>
+            @endif
+            @if($useV2)
+                <a
+                    href="{{ \Webkul\Project\Filament\Resources\ProjectResource::getUrl('annotate-v2', ['record' => $this->record->id, 'page' => $pageNumber, 'pdf' => $pdfId ?? $pdfDocument->id ?? null]) }}"
+                    class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors inline-block"
+                    title="Annotate this page (V2 Canvas System)"
+                    target="_blank"
+                >
+                    ✏️ Annotate
+                </a>
+            @else
+                <button
+                    @click.stop="showAnnotationModal = true"
+                    class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
+                    title="Annotate this page (V1 System)"
+                >
+                    ✏️ Annotate
+                </button>
+            @endif
+        </div>
     </div>
 
     <!-- Modal for larger preview -->
@@ -415,13 +439,20 @@
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                             Page <span x-text="currentPageNum"></span>
                         </h3>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 flex-wrap">
                             <button
                                 @click="activeTab = 'metadata'; $dispatch('tab-changed', 'metadata')"
                                 :class="activeTab === 'metadata' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'"
                                 class="px-3 py-1.5 rounded text-sm font-medium transition-colors"
                             >
                                 📋 Metadata
+                            </button>
+                            <button
+                                @click="activeTab = 'tags'; $dispatch('tab-changed', 'tags')"
+                                :class="activeTab === 'tags' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'"
+                                class="px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                                🏷️ Tags
                             </button>
                             <button
                                 @click="activeTab = 'discussion'; $dispatch('tab-changed', 'discussion')"
@@ -438,6 +469,19 @@
                                 📜 History
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Fixed Save Button Header -->
+                    <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b-2 border-green-500 dark:border-green-600 p-3 shadow-md">
+                        <button
+                            @click="saveAnnotations()"
+                            dusk="save-annotations-button"
+                            class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+                            :disabled="isSaving"
+                        >
+                            <span x-text="isSaving ? '💾 Saving...' : '💾 Save All Changes'"></span>
+                            <span x-show="annotations.length > 0" class="bg-white/20 px-2 py-0.5 rounded-full text-xs" x-text="`(${annotations.length})`"></span>
+                        </button>
                     </div>
 
                     <!-- Tab Content -->
@@ -1167,166 +1211,24 @@
                         </div>
                         <!-- END ANNOTATION OPTIONS (page type conditional) -->
 
-                        <!-- PROJECT TAGS SECTION -->
-                        @php
-                            $project = isset($pdfPage) ? ($pdfPage?->pdfDocument?->module) : null;
-                            $allTags = \Webkul\Project\Models\Tag::orderBy('type')->orderBy('name')->get()->groupBy('type');
-                            $projectTagIds = $project ? $project->tags->pluck('id')->toArray() : [];
-
-                            $typeLabels = [
-                                'priority' => ['label' => 'Priority', 'icon' => '🎯'],
-                                'health' => ['label' => 'Health Status', 'icon' => '💚'],
-                                'risk' => ['label' => 'Risk Factors', 'icon' => '⚠️'],
-                                'complexity' => ['label' => 'Complexity', 'icon' => '📊'],
-                                'work_scope' => ['label' => 'Work Scope', 'icon' => '🔨'],
-                                'phase_discovery' => ['label' => 'Discovery Phase', 'icon' => '🔍'],
-                                'phase_design' => ['label' => 'Design Phase', 'icon' => '🎨'],
-                                'phase_sourcing' => ['label' => 'Sourcing Phase', 'icon' => '📦'],
-                                'phase_production' => ['label' => 'Production Phase', 'icon' => '⚙️'],
-                                'phase_delivery' => ['label' => 'Delivery Phase', 'icon' => '🚚'],
-                                'special_status' => ['label' => 'Special Status', 'icon' => '⭐'],
-                                'lifecycle' => ['label' => 'Lifecycle', 'icon' => '🔄'],
-                            ];
-                        @endphp
-
-                        @if($project && $allTags->count() > 0)
-                        <div
-                            class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-4 mt-4"
-                            x-data="{
-                                selectedTags: {{ json_encode($projectTagIds) }},
-                                projectId: {{ $project->id }},
-                                searchQuery: '',
-                                expandedSections: {},
-                                saving: false,
-
-                                toggleTag(tagId) {
-                                    if (this.selectedTags.includes(tagId)) {
-                                        this.selectedTags = this.selectedTags.filter(id => id !== tagId);
-                                    } else {
-                                        this.selectedTags.push(tagId);
-                                    }
-                                    this.saveTags();
-                                },
-
-                                toggleSection(type) {
-                                    this.expandedSections[type] = !this.expandedSections[type];
-                                },
-
-                                async saveTags() {
-                                    this.saving = true;
-                                    try {
-                                        const response = await fetch(`/api/projects/${this.projectId}/tags`, {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                                            },
-                                            body: JSON.stringify({ tag_ids: this.selectedTags })
-                                        });
-
-                                        if (!response.ok) {
-                                            throw new Error('Failed to save tags');
-                                        }
-                                    } catch (error) {
-                                        console.error('Error saving tags:', error);
-                                        alert('Failed to save tags. Please try again.');
-                                    } finally {
-                                        this.saving = false;
-                                    }
-                                }
-                            }"
-                        >
-                            <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-bold text-blue-900 dark:text-blue-300 flex items-center gap-2">
-                                    🏷️ Project Tags
-                                </h3>
-                                <div x-show="saving" class="text-xs text-blue-600 dark:text-blue-400">
-                                    Saving...
-                                </div>
-                            </div>
-
-                            <!-- Search -->
-                            <div class="mb-3">
-                                <input
-                                    type="text"
-                                    x-model="searchQuery"
-                                    placeholder="Search tags..."
-                                    class="w-full px-3 py-2 text-sm border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
-
-                            <!-- Selected Tags Display -->
-                            <div x-show="selectedTags.length > 0" class="mb-3 flex flex-wrap gap-2">
-                                @foreach($allTags as $type => $tags)
-                                    @foreach($tags as $tag)
-                                        <span
-                                            x-show="selectedTags.includes({{ $tag->id }})"
-                                            @click="toggleTag({{ $tag->id }})"
-                                            class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full cursor-pointer transition-all hover:opacity-80"
-                                            style="background-color: {{ $tag->color }}20; border: 1px solid {{ $tag->color }}; color: {{ $tag->color }};"
-                                        >
-                                            <span>{{ $tag->name }}</span>
-                                            <span>×</span>
-                                        </span>
-                                    @endforeach
-                                @endforeach
-                            </div>
-
-                            <!-- Tag Groups -->
-                            <div class="space-y-2 max-h-96 overflow-y-auto">
-                                @foreach($allTags as $type => $tags)
-                                    @php
-                                        $typeInfo = $typeLabels[$type] ?? ['label' => ucfirst(str_replace('_', ' ', $type)), 'icon' => '🏷️'];
-                                    @endphp
-                                    <div class="border border-blue-200 dark:border-blue-700 rounded-lg overflow-hidden">
-                                        <!-- Category Header -->
-                                        <button
-                                            @click="toggleSection('{{ $type }}')"
-                                            class="w-full px-3 py-2 bg-blue-100 dark:bg-blue-800/30 hover:bg-blue-150 dark:hover:bg-blue-800/50 transition-colors flex items-center justify-between text-left"
-                                        >
-                                            <span class="text-sm font-medium text-blue-900 dark:text-blue-200">
-                                                {{ $typeInfo['icon'] }} {{ $typeInfo['label'] }}
-                                            </span>
-                                            <svg
-                                                class="w-4 h-4 text-blue-600 dark:text-blue-300 transition-transform"
-                                                :class="{ 'rotate-180': expandedSections['{{ $type }}'] }"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Tags List -->
-                                        <div
-                                            x-show="expandedSections['{{ $type }}']"
-                                            x-collapse
-                                            class="bg-white dark:bg-gray-800 p-2"
-                                        >
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach($tags as $tag)
-                                                    <button
-                                                        @click="toggleTag({{ $tag->id }})"
-                                                        :class="selectedTags.includes({{ $tag->id }}) ? 'ring-2 ring-offset-1' : ''"
-                                                        class="px-3 py-1.5 text-xs rounded-full transition-all hover:scale-105"
-                                                        style="background-color: {{ $tag->color }}20; border: 1px solid {{ $tag->color }}; color: {{ $tag->color }};"
-                                                        x-show="!searchQuery || '{{ strtolower($tag->name) }}'.includes(searchQuery.toLowerCase())"
-                                                    >
-                                                        {{ $tag->name }}
-                                                    </button>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                        <!-- END PROJECT TAGS SECTION -->
-
                         </div>
                         <!-- END Metadata Tab -->
+
+                        <!-- Tags Tab (Lazy-loaded Livewire Component) -->
+                        <div x-show="activeTab === 'tags'" class="p-4" style="display: none;">
+                            @php
+                                $project = isset($pdfPage) ? ($pdfPage?->pdfDocument?->module) : null;
+                            @endphp
+
+                            @if($project)
+                                @livewire('project-tags-loader', ['projectId' => $project->id])
+                            @else
+                                <div class="text-center text-gray-500 py-8">
+                                    <p class="text-sm">Project tags will be available after saving annotations.</p>
+                                </div>
+                            @endif
+                        </div>
+                        <!-- END Tags Tab -->
 
                         <!-- Discussion Tab (Chatter) -->
                         <div x-show="activeTab === 'discussion'" class="h-full flex flex-col" style="display: none;">
@@ -1410,22 +1312,36 @@
                     </div>
                     <!-- END Tab Content -->
 
-                    <!-- Save Button (sticky bottom with extra padding to ensure visibility) -->
-                    <div class="p-4 pb-6 bg-gray-100 dark:bg-gray-750 border-t border-gray-300 dark:border-gray-700">
-                        <button
-                            @click="saveAnnotations()"
-                            dusk="save-annotations-button"
-                            class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                            :disabled="isSaving"
-                            x-text="isSaving ? '💾 Saving...' : '💾 Save All Changes'"
-                        >
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     </template>
+
+    <!-- V2 Annotation Modal -->
+    @if($useV2)
+    <template x-teleport="body">
+    <div
+        x-show="showAnnotationV2Modal"
+        x-cloak
+        @keydown.escape.window="showAnnotationV2Modal = false"
+        @close-v2-modal.window="showAnnotationV2Modal = false"
+        class="fixed inset-0 z-[9999] bg-black/90"
+        style="display: none;"
+        wire:ignore.self
+    >
+        <!-- V2 Viewer Content (Canvas-based, no Nutrient) -->
+        <div wire:ignore>
+            @include('webkul-project::filament.components.pdf-annotation-viewer-v2-canvas', [
+                'pdfPageId' => $pdfPageId ?? null,
+                'pdfUrl' => $pdfUrl,
+                'pageNumber' => $pageNumber,
+                'projectId' => $this->record->id ?? null,
+            ])
+        </div>
+    </div>
+    </template>
+    @endif
 </div>
 
 {{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}

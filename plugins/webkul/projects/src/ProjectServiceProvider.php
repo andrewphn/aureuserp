@@ -79,5 +79,8 @@ class ProjectServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'webkul-project');
+
+        // Register Livewire components
+        \Livewire\Livewire::component('annotation-editor', \Webkul\Project\Livewire\AnnotationEditor::class);
     }
 }

@@ -222,15 +222,16 @@
                     </div>
                 </template>
 
-                {{-- All Projects --}}
-                <template x-if="!loading && allProjects.length > 0 && searchQuery">
+                {{-- All Projects (shown when searching OR when no categorized projects exist) --}}
+                <template x-if="!loading && allProjects.length > 0">
                     <div class="mb-6">
                         <div class="flex items-center gap-2 mb-3">
                             <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                             </svg>
                             <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                                All Projects (<span x-text="allProjects.length"></span>)
+                                <span x-show="searchQuery">Search Results (<span x-text="allProjects.length"></span>)</span>
+                                <span x-show="!searchQuery">All Projects (<span x-text="allProjects.length"></span>)</span>
                             </h4>
                         </div>
                         <div class="space-y-2">
@@ -360,7 +361,12 @@ function projectSelector() {
 
             if (!query) {
                 // No search - show only categorized lists
-                this.filteredProjects = [];
+                // BUT if there are no categorized projects, show all projects as default
+                const hasCategorizedProjects = this.criticalProjects.length > 0 ||
+                                               this.pinnedProjects.length > 0 ||
+                                               this.recentProjects.length > 0;
+
+                this.filteredProjects = hasCategorizedProjects ? [] : this.projects;
                 return;
             }
 
@@ -394,15 +400,30 @@ function projectSelector() {
             return this.filteredProjects;
         },
 
-        selectProject(projectId) {
-            // Add to recent projects
-            this.addToRecent(projectId);
+        async selectProject(projectId) {
+            try {
+                // Fetch full project details from API
+                const response = await fetch(`/api/projects/${projectId}`);
+                if (!response.ok) {
+                    console.error('Failed to fetch project details');
+                    return;
+                }
+                const projectData = await response.json();
 
-            // Set active context
-            Alpine.store('entityStore').setActiveContext('project', projectId);
+                // Store project data in EntityStore
+                Alpine.store('entityStore').setEntity('project', projectId, projectData);
 
-            // Close modal
-            this.closeModal();
+                // Add to recent projects
+                this.addToRecent(projectId);
+
+                // Set active context (this will trigger the footer update)
+                Alpine.store('entityStore').setActiveContext('project', projectId);
+
+                // Close modal
+                this.closeModal();
+            } catch (e) {
+                console.error('Failed to select project:', e);
+            }
         },
 
         pinProject(projectId) {

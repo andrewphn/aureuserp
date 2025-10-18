@@ -175,22 +175,39 @@ export function createCanvasRenderer() {
 
         /**
          * Load PDF document and page for annotation viewer
-         * @param {Object} pdfjsLib - PDF.js library
+         * @param {Object} pdfjsLib - PDF.js library (for fallback if manager unavailable)
          * @param {string} pdfUrl - URL to PDF
          * @param {number} pageNum - Page number to load
          * @returns {Promise<Object>} { pdfDocument, pdfPage, totalPages }
          */
         async loadPdfPage(pdfjsLib, pdfUrl, pageNum) {
-            const loadingTask = pdfjsLib.getDocument(pdfUrl);
-            const pdfDocument = await loadingTask.promise;
-            const totalPages = pdfDocument.numPages;
-            const pdfPage = await pdfDocument.getPage(pageNum);
+            // Use shared PDF document manager instead of direct PDF.js calls
+            const manager = window.PDFDocumentManager?.getInstance() || window.pdfManager;
 
-            return {
-                pdfDocument,
-                pdfPage,
-                totalPages
-            };
+            if (manager) {
+                const pdfDocument = await manager.getDocument(pdfUrl);
+                const totalPages = pdfDocument.numPages;
+                const pdfPage = await pdfDocument.getPage(pageNum);
+
+                return {
+                    pdfDocument,
+                    pdfPage,
+                    totalPages
+                };
+            } else {
+                // Fallback to direct PDF.js
+                console.warn('⚠️ PDF manager not available, using fallback direct load');
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                const pdfDocument = await loadingTask.promise;
+                const totalPages = pdfDocument.numPages;
+                const pdfPage = await pdfDocument.getPage(pageNum);
+
+                return {
+                    pdfDocument,
+                    pdfPage,
+                    totalPages
+                };
+            }
         },
 
         /**

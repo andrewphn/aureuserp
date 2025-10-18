@@ -100,6 +100,14 @@ export default {
         'dark:text-gray-400',
         'hover:bg-gray-50',
         'dark:hover:bg-gray-700',
+
+        // V2 Annotation System Badge
+        'bg-purple-600',
+        'text-xs',
+        'px-2',
+        'py-0.5',
+        'rounded',
+        'font-semibold',
         
         // TCS Design Enhancement Classes
         'linear-feet-display',

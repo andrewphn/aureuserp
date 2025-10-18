@@ -59,12 +59,11 @@ class FooterFieldRegistry
                 'suffix' => ' LF'
             ],
             'estimate_hours' => [
-                'label' => 'Est. Hours',
-                'type' => 'metric',
-                'description' => 'Estimated production hours',
-                'data_key' => 'estimate.hours',
-                'icon' => 'clock',
-                'color' => 'amber'
+                'label' => 'Allocated Hours',
+                'type' => 'number',
+                'description' => 'Allocated production hours',
+                'data_key' => 'allocated_hours',
+                'suffix' => ' hrs'
             ],
             'estimate_days' => [
                 'label' => 'Est. Days',

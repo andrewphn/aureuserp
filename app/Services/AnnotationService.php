@@ -13,11 +13,9 @@ use Illuminate\Support\Collection;
 
 class AnnotationService
 {
-    protected NutrientService $nutrientService;
-
-    public function __construct(NutrientService $nutrientService)
+    public function __construct()
     {
-        $this->nutrientService = $nutrientService;
+        // No dependencies needed
     }
 
     /**
@@ -141,7 +139,32 @@ class AnnotationService
      */
     public function generateAnnotationId(): string
     {
-        return $this->nutrientService->generateAnnotationId();
+        // Generate ULID (Universally Unique Lexicographically Sortable Identifier)
+        $timestamp = (int)(microtime(true) * 1000);
+        $timestampChars = $this->encodeBase32($timestamp, 10);
+        $randomChars = $this->encodeBase32(random_int(0, PHP_INT_MAX), 16);
+
+        return strtoupper($timestampChars . $randomChars);
+    }
+
+    /**
+     * Encode number to Crockford's Base32
+     *
+     * @param int $number Number to encode
+     * @param int $length Target length
+     * @return string Base32 encoded string
+     */
+    protected function encodeBase32(int $number, int $length): string
+    {
+        $chars = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'; // Crockford's Base32
+        $encoded = '';
+
+        while ($number > 0) {
+            $encoded = $chars[$number % 32] . $encoded;
+            $number = (int)($number / 32);
+        }
+
+        return str_pad($encoded, $length, '0', STR_PAD_LEFT);
     }
 
     /**

@@ -28,21 +28,87 @@ class EditProject extends EditRecord
     {
         parent::mount($record);
 
-        // Set this project as the active context for global footer
+        // Set active context WITHOUT form data on edit pages
+        // This prevents EntityStore from syncing data back and blocking save button
         $this->dispatch('set-active-context', [
             'entityType' => 'project',
             'entityId' => $this->record->id,
-            'data' => $this->form->getState()
+            // NO 'data' parameter - prevents EntityStore circular sync that blocks save button
         ]);
+    }
+
+    /**
+     * Get formatted data for footer display
+     */
+    protected function getFooterData(): array
+    {
+        try {
+            // Use getRawState() to avoid validation issues
+            $formData = $this->form->getRawState();
+
+            return [
+                'id' => $this->record->id,
+                'project_number' => $formData['project_number'] ?? $this->record->project_number,
+                'partner_id' => $formData['partner_id'] ?? $this->record->partner_id,
+                'company_id' => $formData['company_id'] ?? $this->record->company_id,
+                'branch_id' => $formData['branch_id'] ?? $this->record->branch_id,
+                'project_type' => $formData['project_type'] ?? $this->record->project_type,
+                'estimated_linear_feet' => $formData['estimated_linear_feet'] ?? $this->record->estimated_linear_feet,
+                'allocated_hours' => $formData['allocated_hours'] ?? $this->record->allocated_hours,
+                'desired_completion_date' => $formData['desired_completion_date'] ?? $this->record->desired_completion_date,
+                'project_address' => $formData['project_address'] ?? null,
+            ];
+        } catch (\Exception $e) {
+            // Fallback to database values if form state unavailable
+            return [
+                'id' => $this->record->id,
+                'project_number' => $this->record->project_number,
+                'partner_id' => $this->record->partner_id,
+                'company_id' => $this->record->company_id,
+                'branch_id' => $this->record->branch_id,
+                'project_type' => $this->record->project_type,
+                'estimated_linear_feet' => $this->record->estimated_linear_feet,
+                'allocated_hours' => $this->record->allocated_hours,
+                'desired_completion_date' => $this->record->desired_completion_date,
+                'project_address' => null,
+            ];
+        }
+    }
+
+    /**
+     * Update footer with current form state
+     * Called when fields are updated
+     */
+    public function updateFooter(): void
+    {
+        // TEMPORARILY DISABLED to debug save button issue
+        // The form change detection might be interfering with footer updates
+        return;
+
+        try {
+            $this->dispatch('entity-updated', [
+                'entityType' => 'project',
+                'entityId' => $this->record->id,
+                'data' => $this->getFooterData(),
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail - footer update is not critical
+            \Log::debug('Footer update failed: ' . $e->getMessage());
+        }
     }
 
     public function getFooter(): ?\Illuminate\Contracts\View\View
     {
-        return view('filament.pages.project-sticky-footer', ['page' => $this]);
+        // Disabled: Using global sticky footer instead to avoid double footer
+        return null;
+        // return view('filament.pages.project-sticky-footer', ['page' => $this]);
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        // Ensure branch_id is loaded from the database
+        $data['branch_id'] = $this->record->branch_id;
+
         // Load project address from database if it exists
         if ($this->record->addresses()->count() > 0) {
             $address = $this->record->addresses()->where('is_primary', true)->first()

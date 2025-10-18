@@ -1,0 +1,180 @@
+🔍 Debugging 419 CSRF Errors...
+
+Step 1: Loading login page...
+
+→ GET http://aureuserp.test/admin/login
+✅ 200 http://aureuserp.test/admin/login
+→ GET http://aureuserp.test/css/inline-date-time-picker/inline-date-time-picker.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/njxqlus/filament-lightbox/filament-lightbox-styles.css?v=4.0.1.0
+→ GET http://aureuserp.test/css/blogs/blogs.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/chatter/chatter.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/fields/fields.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/support/support.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/table-views/table-views.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/full-calendar/full-calendar.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/website/website.css?v=4.0.20.0
+→ GET http://aureuserp.test/fonts/filament/filament/inter/index.css?v=4.0.20.0
+→ GET http://aureuserp.test/build/assets/theme-CmsFULAn.css
+→ GET http://aureuserp.test/build/assets/centralized-entity-store-C3lILEcb.js
+→ GET http://aureuserp.test/build/assets/form-auto-populate-DlRXLFKt.js
+→ GET http://aureuserp.test/images/logo-light.svg
+→ GET http://aureuserp.test/images/logo-dark.svg
+→ GET http://aureuserp.test/js/filament/actions/actions.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/notifications/notifications.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/schemas/schemas.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/support/support.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/tables/tables.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/njxqlus/filament-lightbox/filament-lightbox-scripts.js?v=4.0.1.0
+→ GET http://aureuserp.test/js/app/centralized-entity-store.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/app/form-auto-populate.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/table-views/table-view-persistence.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/filament/echo.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/filament/app.js?v=4.0.20.0
+→ GET http://aureuserp.test/livewire/livewire.min.js?id=df3a17f2
+✅ 200 http://aureuserp.test/css/inline-date-time-picker/inline-date-time-picker.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/njxqlus/filament-lightbox/filament-lightbox-styles.css?v=4.0.1.0
+✅ 200 http://aureuserp.test/css/blogs/blogs.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/chatter/chatter.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/support/support.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/fields/fields.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/table-views/table-views.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/website/website.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/full-calendar/full-calendar.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/fonts/filament/filament/inter/index.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/build/assets/theme-CmsFULAn.css
+✅ 200 http://aureuserp.test/build/assets/centralized-entity-store-C3lILEcb.js
+→ GET http://aureuserp.test/fonts/filament/filament/inter/inter-latin-wght-normal-NRMW37G5.woff2
+✅ 200 http://aureuserp.test/images/logo-light.svg
+✅ 200 http://aureuserp.test/images/logo-dark.svg
+✅ 200 http://aureuserp.test/build/assets/form-auto-populate-DlRXLFKt.js
+✅ 200 http://aureuserp.test/js/filament/actions/actions.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/notifications/notifications.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/schemas/schemas.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/support/support.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/tables/tables.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/njxqlus/filament-lightbox/filament-lightbox-scripts.js?v=4.0.1.0
+✅ 200 http://aureuserp.test/fonts/filament/filament/inter/inter-latin-wght-normal-NRMW37G5.woff2
+✅ 200 http://aureuserp.test/js/app/centralized-entity-store.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/app/form-auto-populate.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/table-views/table-view-persistence.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/filament/echo.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/filament/app.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/livewire/livewire.min.js?id=df3a17f2
+→ GET http://aureuserp.test/api/footer/preferences
+⚠️ 500 http://aureuserp.test/api/footer/preferences
+🐛 Console Error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+
+Step 2: Filling login form...
+
+Step 3: Submitting login...
+
+→ POST http://aureuserp.test/livewire/update
+✅ 200 http://aureuserp.test/livewire/update
+→ GET http://aureuserp.test/admin
+→ POST http://aureuserp.test/livewire/update
+❌ 419 http://aureuserp.test/livewire/update
+🐛 Console Error: Failed to load resource: the server responded with a status of 419 (unknown status)
+→ POST http://aureuserp.test/livewire/update
+❌ 419 http://aureuserp.test/livewire/update
+🐛 Console Error: Failed to load resource: the server responded with a status of 419 (unknown status)
+→ POST http://aureuserp.test/livewire/update
+✅ 302 http://aureuserp.test/admin
+→ GET http://aureuserp.test/admin/project
+❌ 419 http://aureuserp.test/livewire/update
+🐛 Console Error: Failed to load resource: the server responded with a status of 419 (unknown status)
+→ POST http://aureuserp.test/livewire/update
+
+Step 4: Navigating to projects...
+
+→ GET http://aureuserp.test/admin/project/projects
+❌ 419 http://aureuserp.test/livewire/update
+🐛 Console Error: Failed to load resource: the server responded with a status of 419 (unknown status)
+→ POST http://aureuserp.test/livewire/update
+❌ 419 http://aureuserp.test/livewire/update
+🐛 Console Error: Failed to load resource: the server responded with a status of 419 (unknown status)
+→ POST http://aureuserp.test/livewire/update
+✅ 200 http://aureuserp.test/admin/project/projects
+❌ 419 http://aureuserp.test/livewire/update
+🐛 Console Error: Failed to load resource: the server responded with a status of 419 (unknown status)
+→ GET http://aureuserp.test/admin/login
+→ POST http://aureuserp.test/livewire/update
+→ POST http://aureuserp.test/livewire/update
+→ GET http://aureuserp.test/css/inline-date-time-picker/inline-date-time-picker.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/inline-date-time-picker/inline-date-time-picker.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/njxqlus/filament-lightbox/filament-lightbox-styles.css?v=4.0.1.0
+✅ 200 http://aureuserp.test/css/njxqlus/filament-lightbox/filament-lightbox-styles.css?v=4.0.1.0
+→ GET http://aureuserp.test/css/blogs/blogs.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/blogs/blogs.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/chatter/chatter.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/chatter/chatter.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/fields/fields.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/fields/fields.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/support/support.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/support/support.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/table-views/table-views.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/table-views/table-views.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/full-calendar/full-calendar.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/full-calendar/full-calendar.css?v=4.0.20.0
+→ GET http://aureuserp.test/css/website/website.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/css/website/website.css?v=4.0.20.0
+→ GET http://aureuserp.test/fonts/filament/filament/inter/index.css?v=4.0.20.0
+✅ 200 http://aureuserp.test/fonts/filament/filament/inter/index.css?v=4.0.20.0
+→ GET http://aureuserp.test/build/assets/theme-CmsFULAn.css
+✅ 200 http://aureuserp.test/build/assets/theme-CmsFULAn.css
+→ GET http://aureuserp.test/build/assets/centralized-entity-store-C3lILEcb.js
+✅ 200 http://aureuserp.test/build/assets/centralized-entity-store-C3lILEcb.js
+→ GET http://aureuserp.test/build/assets/form-auto-populate-DlRXLFKt.js
+✅ 200 http://aureuserp.test/build/assets/form-auto-populate-DlRXLFKt.js
+→ GET http://aureuserp.test/images/logo-light.svg
+✅ 200 http://aureuserp.test/images/logo-light.svg
+→ GET http://aureuserp.test/images/logo-dark.svg
+✅ 200 http://aureuserp.test/images/logo-dark.svg
+→ GET http://aureuserp.test/cache/logo.png
+→ GET http://aureuserp.test/js/filament/actions/actions.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/actions/actions.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/notifications/notifications.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/notifications/notifications.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/schemas/schemas.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/schemas/schemas.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/support/support.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/support/support.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/tables/tables.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/tables/tables.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/njxqlus/filament-lightbox/filament-lightbox-scripts.js?v=4.0.1.0
+✅ 200 http://aureuserp.test/js/njxqlus/filament-lightbox/filament-lightbox-scripts.js?v=4.0.1.0
+→ GET http://aureuserp.test/js/app/centralized-entity-store.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/app/centralized-entity-store.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/app/form-auto-populate.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/app/form-auto-populate.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/table-views/table-view-persistence.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/table-views/table-view-persistence.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/filament/echo.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/filament/echo.js?v=4.0.20.0
+→ GET http://aureuserp.test/js/filament/filament/app.js?v=4.0.20.0
+✅ 200 http://aureuserp.test/js/filament/filament/app.js?v=4.0.20.0
+→ GET http://aureuserp.test/livewire/livewire.min.js?id=df3a17f2
+✅ 200 http://aureuserp.test/livewire/livewire.min.js?id=df3a17f2
+→ GET http://aureuserp.test/fonts/filament/filament/inter/inter-latin-wght-normal-NRMW37G5.woff2
+✅ 200 http://aureuserp.test/fonts/filament/filament/inter/inter-latin-wght-normal-NRMW37G5.woff2
+→ GET http://aureuserp.test/api/footer/preferences
+node:internal/process/promises:391
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+ProtocolError: Protocol error (Page.handleJavaScriptDialog): No dialog is showing
+    at /Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/chromium/crConnection.js:116:57
+    at new Promise (<anonymous>)
+    at CRSession.send (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/chromium/crConnection.js:115:12)
+    at Dialog._onHandle (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/chromium/crPage.js:696:28)
+    at Dialog.dismiss (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/dialog.js:59:16)
+    at Dialog.close (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/dialog.js:65:18)
+    at DialogManager.dialogDidOpen (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/dialog.js:85:14)
+    at FrameSession._onDialog (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/chromium/crPage.js:689:45)
+    at CRSession.<anonymous> (/Users/andrewphan/tcsadmin/aureuserp/node_modules/playwright-core/lib/server/chromium/crPage.js:352:119)
+    at CRSession.emit (node:events:519:28) {
+  type: 'error',
+  method: 'Page.handleJavaScriptDialog',
+  logs: undefined
+}
+
+Node.js v20.18.0

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FooterPreference;
+use App\Models\FooterTemplate;
 use Webkul\Security\Models\User;
 
 class FooterPreferenceService
@@ -90,7 +91,7 @@ class FooterPreferenceService
     {
         return match ($contextType) {
             'project' => [
-                'minimized_fields' => ['project_number', 'customer_name'],
+                'minimized_fields' => ['customer_name', 'project_type'],
                 'expanded_fields' => [
                     'project_number',
                     'customer_name',
@@ -149,12 +150,22 @@ class FooterPreferenceService
     }
 
     /**
-     * Get persona-based default preferences.
+     * Get persona-based default preferences from database templates.
      */
     public function getPersonaDefaults(string $persona, string $contextType): array
     {
+        // Try to load from database first
+        $template = FooterTemplate::where('slug', $persona)
+            ->where('is_active', true)
+            ->first();
+
+        if ($template) {
+            return $template->getContextConfig($contextType);
+        }
+
+        // Fallback to hardcoded defaults for backward compatibility
         $defaults = [
-            // Bryan (Owner) - High-level KPIs only, ADHD-friendly minimal view
+            // Owner - High-level KPIs only, minimal view
             'owner' => [
                 'project' => [
                     'minimized_fields' => ['project_number', 'timeline_alert'],
@@ -202,6 +213,14 @@ class FooterPreferenceService
         ];
 
         return $defaults[$persona][$contextType] ?? $this->getDefaultPreferences($contextType);
+    }
+
+    /**
+     * Get all available templates from database
+     */
+    public function getAvailableTemplates(): \Illuminate\Support\Collection
+    {
+        return FooterTemplate::active()->orderBy('name')->get();
     }
 
     /**

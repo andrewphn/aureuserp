@@ -10,26 +10,52 @@
     @active-context-changed.window="handleContextChange($event.detail)"
     @entity-updated.window="handleEntityUpdate($event.detail)"
     class="fi-section rounded-t-xl shadow-lg ring-1 ring-gray-950/10 dark:ring-white/10 transition-all duration-300 ease-in-out"
-    :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 36px)' : '0'})`"
+    :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'})`"
 >
     {{-- Toggle Button Bar - Context Aware --}}
-    <div class="flex items-center justify-between px-4 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" @click="isMinimized = !isMinimized">
-        {{-- Context Info (Left side when minimized) - Responsive --}}
-        <div class="flex items-center gap-2 md:gap-3 overflow-hidden">
+    <div class="flex items-center justify-between px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" @click="isMinimized = !isMinimized">
+        {{-- Context Info (Left side when minimized) - Fully Responsive --}}
+        <div class="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 flex-1">
             {{-- Dynamic Icon based on context type --}}
-            <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="contextConfig.iconPath"></path>
             </svg>
-            <div class="flex items-center gap-1.5 md:gap-2 overflow-hidden">
-                <span x-show="!hasActiveContext" class="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400" x-text="contextConfig.emptyLabel"></span>
-                <span x-show="hasActiveContext" class="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[120px] md:max-w-none" x-text="primaryLabel"></span>
-                <span x-show="hasActiveContext" class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400">•</span>
-                <span x-show="hasActiveContext" class="hidden sm:inline text-xs md:text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px] md:max-w-[200px]" x-text="secondaryLabel"></span>
-            </div>
+
+            {{-- No Context State --}}
+            <span x-show="!hasActiveContext" class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400" x-text="contextConfig.emptyLabel"></span>
+
+            {{-- Active Context - Responsive Layout with Smart Truncation --}}
+            <template x-if="hasActiveContext && preferencesLoaded">
+                <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                    {{-- First Field: Truncate with ellipsis --}}
+                    <div class="min-w-0 max-w-[120px] xs:max-w-[140px] sm:max-w-[180px] md:max-w-[250px] lg:max-w-[350px] xl:max-w-[450px]">
+                        <span
+                            class="block text-xs sm:text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 truncate leading-tight"
+                            x-text="getFieldValue(getFieldsForDisplay()[0])"
+                            :title="getFieldValue(getFieldsForDisplay()[0])"
+                        ></span>
+                    </div>
+
+                    {{-- Separator: Show on all screens --}}
+                    <span class="text-gray-400 dark:text-gray-500 flex-shrink-0 text-xs sm:text-sm leading-tight">•</span>
+
+                    {{-- Second Field: Truncate with ellipsis, responsive --}}
+                    <div class="min-w-0 max-w-[80px] xs:max-w-[100px] sm:max-w-[130px] md:max-w-[200px] lg:max-w-[280px] xl:max-w-[350px]">
+                        <span
+                            class="block text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 truncate leading-tight"
+                            x-text="getFieldValue(getFieldsForDisplay()[1])"
+                            :title="getFieldValue(getFieldsForDisplay()[1])"
+                        ></span>
+                    </div>
+                </div>
+            </template>
+
+            {{-- Loading state --}}
+            <span x-show="hasActiveContext && !preferencesLoaded" class="text-xs sm:text-sm text-gray-500">Loading...</span>
         </div>
 
-        {{-- Toggle Chevron (Right) --}}
-        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0" :class="{'rotate-180': !isMinimized}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {{-- Toggle Chevron (Right) - Responsive --}}
+        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ml-2 sm:ml-3" :class="{'rotate-180': !isMinimized}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
         </svg>
     </div>
@@ -58,123 +84,55 @@
             </button>
         </div>
 
-        {{-- Active Project State --}}
-        <div x-show="hasActiveProject" class="flex items-center justify-between gap-4">
-            {{-- Column 1: Project Number, Customer, Project Address, Tags --}}
-            <div class="flex flex-col gap-1.5">
-                <div class="text-base font-bold text-gray-900 dark:text-gray-100" x-text="projectNumber"></div>
-                <div class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="customerName"></div>
-                <div class="text-xs text-gray-600 dark:text-gray-400" x-text="projectAddress"></div>
-
-                {{-- Tags Button (if tags exist) --}}
-                <template x-if="projectTags.length > 0">
-                    <button
-                        type="button"
-                        @click="tagsModalOpen = true"
-                        class="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors"
-                    >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                        <span x-text="`${projectTags.length} ${projectTags.length === 1 ? 'Tag' : 'Tags'}`"></span>
-                    </button>
+        {{-- Active Context State - Dynamic Fields --}}
+        <div x-show="hasActiveContext && preferencesLoaded" class="flex items-center justify-between gap-4">
+            {{-- Dynamic Field Grid --}}
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <template x-for="fieldKey in getFieldsForDisplay()" :key="fieldKey">
+                    <div x-html="renderField(fieldKey, fieldDefinitions[contextType]?.[fieldKey])"></div>
                 </template>
             </div>
 
-            {{-- Column 2: Type, Linear Feet, and Production Estimates --}}
-            <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2 text-xs">
-                    <span class="font-medium text-gray-500 dark:text-gray-400">Type:</span>
-                    <span class="text-gray-900 dark:text-gray-100" x-text="projectType"></span>
-                </div>
-                <div class="flex items-center gap-2 text-xs">
-                    <span class="font-medium text-gray-500 dark:text-gray-400">Linear Feet:</span>
-                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="linearFeet ? linearFeet + ' LF' : '—'"></span>
-                </div>
-
-                {{-- Production Estimate Metrics --}}
-                <template x-if="estimate && linearFeet">
-                    <div class="flex items-center gap-2 pt-1">
-                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-amber-200 dark:border-amber-700">
-                            <svg class="w-3 h-3 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div class="text-xs font-bold text-amber-900 dark:text-amber-100" x-text="estimate.hours ? estimate.hours.toFixed(1) : '—'"></div>
-                            <div class="text-[10px] text-amber-600 dark:text-amber-400">hrs</div>
-                        </div>
-
-                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700">
-                            <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            <div class="text-xs font-bold text-blue-900 dark:text-blue-100" x-text="estimate.days ? estimate.days.toFixed(1) : '—'"></div>
-                            <div class="text-[10px] text-blue-600 dark:text-blue-400">days</div>
-                        </div>
-
-                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700">
-                            <svg class="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                            <div class="text-xs font-bold text-purple-900 dark:text-purple-100" x-text="estimate.weeks ? estimate.weeks.toFixed(1) : '—'"></div>
-                            <div class="text-[10px] text-purple-600 dark:text-purple-400">wks</div>
-                        </div>
-
-                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border border-teal-200 dark:border-teal-700">
-                            <svg class="w-3 h-3 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            <div class="text-xs font-bold text-teal-900 dark:text-teal-100" x-text="estimate.months ? estimate.months.toFixed(1) : '—'"></div>
-                            <div class="text-[10px] text-teal-600 dark:text-teal-400">mos</div>
-                        </div>
-                    </div>
-                </template>
-
-                {{-- Project Timeline Alert --}}
-                <template x-if="alertLevel && projectDailyRate">
-                    <div class="mt-2 p-2 rounded-md border" :class="alertStyles[alertLevel].classes">
-                        <div class="flex items-center gap-1.5 mb-1">
-                            <svg class="h-3.5 w-3.5" :class="alertStyles[alertLevel].iconClass" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="alertStyles[alertLevel].iconPath"></path>
-                            </svg>
-                            <div class="text-xs font-bold uppercase" :class="alertStyles[alertLevel].textClass" x-text="alertMessage"></div>
-                        </div>
-                        <div class="text-[10px] font-medium" :class="alertStyles[alertLevel].textClass">
-                            <span x-text="projectDailyRate.toFixed(1)"></span> LF/day
-                            (<span x-text="(ratePercentage >= 0 ? '+' : '') + ratePercentage.toFixed(0)"></span>%)
-                            • <span x-text="workingDays"></span> days
-                            • <span x-text="capacityUtilization.toFixed(0)"></span>% capacity
-                        </div>
-                    </div>
-                </template>
-            </div>
-
-            {{-- Column 3: Action Buttons --}}
-            <div class="flex items-center gap-3">
+            {{-- Action Buttons --}}
+            <div class="flex flex-col gap-2 flex-shrink-0">
                 <button
                     type="button"
                     @click="openProjectSelector()"
-                    class="fi-btn fi-btn-size-md fi-btn-color-primary inline-flex items-center justify-center gap-2 font-semibold rounded-lg px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700"
+                    class="fi-btn fi-btn-size-sm fi-btn-color-primary inline-flex items-center justify-center gap-2 font-semibold rounded-lg px-3 py-1.5 text-xs bg-primary-600 text-white hover:bg-primary-700"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"></path>
                     </svg>
-                    Switch Project
+                    Switch
                 </button>
 
-                <a
-                    :href="`/admin/project/projects/${activeProjectId}/edit`"
-                    class="fi-btn fi-btn-size-md fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-4 py-2 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                >
-                    Edit Project
-                </a>
+                <template x-if="contextType === 'project' && activeProjectId">
+                    <a
+                        :href="`/admin/project/projects/${activeProjectId}/edit`"
+                        class="fi-btn fi-btn-size-sm fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-3 py-1.5 text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                    >
+                        Edit
+                    </a>
+                </template>
 
                 <button
                     type="button"
                     @click="clearContext()"
-                    class="fi-btn fi-btn-size-md fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-4 py-2 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                    class="fi-btn fi-btn-size-sm fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-3 py-1.5 text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
-                    Clear Context
+                    Clear
                 </button>
+            </div>
+        </div>
+
+        {{-- Loading State --}}
+        <div x-show="hasActiveContext && !preferencesLoaded" class="flex items-center justify-center py-6">
+            <div class="flex items-center gap-2 text-gray-500">
+                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm">Loading preferences...</span>
             </div>
         </div>
         </div>
@@ -358,8 +316,308 @@ function contextFooterGlobal() {
             'lifecycle': 'Lifecycle',
         },
 
+        // User preferences for footer customization
+        userPreferences: {},
+        preferencesLoaded: false,
+
+        // Field definitions for dynamic rendering (MUST match actual DB columns)
+        fieldDefinitions: {
+            project: {
+                'project_number': { label: 'Project Number', type: 'text', data_key: 'project_number' },
+                'customer_name': { label: 'Customer Name', type: 'text', data_key: 'partner.name' },
+                'project_type': { label: 'Project Type', type: 'badge', data_key: 'project_type', color: 'blue' },
+                'project_address': { label: 'Address', type: 'text', data_key: 'project_address' },
+                'linear_feet': { label: 'Linear Feet', type: 'number', data_key: 'estimated_linear_feet', suffix: ' LF' },
+                'estimate_hours': { label: 'Allocated Hours', type: 'number', data_key: 'allocated_hours', suffix: ' hrs' },
+                'estimate_days': { label: 'days', type: 'metric', data_key: 'estimate.days', icon: 'calendar', color: 'blue' },
+                'estimate_weeks': { label: 'wks', type: 'metric', data_key: 'estimate.weeks', icon: 'trending', color: 'purple' },
+                'estimate_months': { label: 'mos', type: 'metric', data_key: 'estimate.months', icon: 'calendar', color: 'teal' },
+                'timeline_alert': { label: 'Timeline Alert', type: 'alert', data_key: 'alertMessage' },
+                'completion_date': { label: 'Completion Date', type: 'date', data_key: 'desired_completion_date' },
+                'tags': { label: 'Tags', type: 'tags', data_key: 'tags' },
+            },
+            sale: {
+                'order_number': { label: 'Order Number', type: 'text', data_key: 'order_number' },
+                'quote_number': { label: 'Quote Number', type: 'text', data_key: 'quote_number' },
+                'customer_name': { label: 'Customer', type: 'text', data_key: 'customer_name' },
+                'order_total': { label: 'Total', type: 'currency', data_key: 'order_total' },
+                'order_status': { label: 'Status', type: 'badge', data_key: 'order_status', color: 'blue' },
+                'payment_status': { label: 'Payment', type: 'badge', data_key: 'payment_status', color: 'green' },
+                'order_date': { label: 'Order Date', type: 'date', data_key: 'order_date' },
+                'expected_delivery': { label: 'Delivery', type: 'date', data_key: 'expected_delivery' },
+            },
+            inventory: {
+                'item_name': { label: 'Item Name', type: 'text', data_key: 'name' },
+                'sku': { label: 'SKU', type: 'text', data_key: 'sku' },
+                'quantity': { label: 'Quantity', type: 'number', data_key: 'quantity' },
+                'unit': { label: 'Unit', type: 'text', data_key: 'unit' },
+                'location': { label: 'Location', type: 'text', data_key: 'location' },
+                'reorder_level': { label: 'Reorder Level', type: 'number', data_key: 'reorder_level' },
+                'supplier': { label: 'Supplier', type: 'text', data_key: 'supplier' },
+                'unit_cost': { label: 'Unit Cost', type: 'currency', data_key: 'unit_cost' },
+            },
+            production: {
+                'job_number': { label: 'Job Number', type: 'text', data_key: 'job_number' },
+                'project_name': { label: 'Project', type: 'text', data_key: 'project_name' },
+                'customer_name': { label: 'Customer', type: 'text', data_key: 'customer_name' },
+                'production_status': { label: 'Status', type: 'badge', data_key: 'production_status', color: 'orange' },
+                'assigned_to': { label: 'Assigned To', type: 'text', data_key: 'assigned_to' },
+                'start_date': { label: 'Start Date', type: 'date', data_key: 'start_date' },
+                'due_date': { label: 'Due Date', type: 'date', data_key: 'due_date' },
+            },
+        },
+
         init() {
-            this.loadActiveContext();
+            this.loadUserPreferences().then(() => {
+                this.loadActiveContext();
+            });
+        },
+
+        /**
+         * Load user preferences for all contexts from API
+         */
+        async loadUserPreferences() {
+            try {
+                const response = await fetch('/api/footer/preferences');
+                if (response.ok) {
+                    this.userPreferences = await response.json();
+                    this.preferencesLoaded = true;
+                } else {
+                    console.warn('Failed to load footer preferences, using defaults');
+                    this.preferencesLoaded = true;
+                }
+            } catch (e) {
+                console.error('Error loading footer preferences:', e);
+                this.preferencesLoaded = true;
+            }
+        },
+
+        /**
+         * Get fields to display for current context and state (minimized/expanded)
+         */
+        getFieldsForDisplay() {
+            if (!this.contextType || !this.preferencesLoaded) {
+                return [];
+            }
+
+            const contextPrefs = this.userPreferences[this.contextType];
+
+            // Use defaults if preferences not available
+            if (!contextPrefs) {
+                const defaults = {
+                    project: {
+                        minimized: ['customer_name', 'project_type'],
+                        expanded: ['project_number', 'customer_name', 'project_type', 'linear_feet']
+                    },
+                    sale: {
+                        minimized: ['order_number', 'customer_name'],
+                        expanded: ['order_number', 'customer_name', 'order_total', 'order_status']
+                    },
+                    inventory: {
+                        minimized: ['item_name', 'quantity'],
+                        expanded: ['item_name', 'sku', 'quantity', 'location']
+                    },
+                    production: {
+                        minimized: ['job_number', 'project_name'],
+                        expanded: ['job_number', 'project_name', 'production_status', 'assigned_to']
+                    }
+                };
+
+                const contextDefaults = defaults[this.contextType];
+                return this.isMinimized ? (contextDefaults?.minimized || []) : (contextDefaults?.expanded || []);
+            }
+
+            return this.isMinimized ? contextPrefs.minimized_fields : contextPrefs.expanded_fields;
+        },
+
+        /**
+         * Get value for a field from current context data
+         * Maps field keys to actual database values
+         */
+        getFieldValue(fieldKey) {
+            const dataKeyMap = {
+                // Project fields - map to ACTUAL database columns
+                'project_number': () => this.projectData.project_number || '—',
+                'customer_name': () => this.contextData._customerName || this.projectData._customerName || '—',
+                'project_type': () => this.projectType,
+                'project_address': () => this.projectAddress,
+                'linear_feet': () => this.linearFeet ? `${this.linearFeet} LF` : '—',
+                'estimate_hours': () => this.projectData.allocated_hours ? this.projectData.allocated_hours : '—',
+                'estimate_days': () => this.estimate?.days ? this.estimate.days.toFixed(1) : '—',
+                'estimate_weeks': () => this.estimate?.weeks ? this.estimate.weeks.toFixed(1) : '—',
+                'estimate_months': () => this.estimate?.months ? this.estimate.months.toFixed(1) : '—',
+                'timeline_alert': () => this.alertMessage || null,
+                'completion_date': () => this.projectData.desired_completion_date || '—',
+                'tags': () => this.tags.length,
+
+                // Sale fields
+                'order_number': () => this.saleData.order_number || '—',
+                'quote_number': () => this.saleData.quote_number || '—',
+                'order_total': () => this.saleData.order_total || '—',
+                'order_status': () => this.saleData.order_status || '—',
+                'payment_status': () => this.saleData.payment_status || '—',
+                'order_date': () => this.saleData.order_date || '—',
+                'expected_delivery': () => this.saleData.expected_delivery || '—',
+
+                // Inventory fields
+                'item_name': () => this.inventoryData.name || '—',
+                'sku': () => this.inventoryData.sku || '—',
+                'quantity': () => this.inventoryData.quantity || '—',
+                'unit': () => this.inventoryData.unit || '—',
+                'location': () => this.inventoryData.location || '—',
+                'reorder_level': () => this.inventoryData.reorder_level || '—',
+                'supplier': () => this.inventoryData.supplier || '—',
+                'unit_cost': () => this.inventoryData.unit_cost || '—',
+
+                // Production fields
+                'job_number': () => this.productionData.job_number || '—',
+                'project_name': () => this.productionData.project_name || '—',
+                'production_status': () => this.productionData.production_status || '—',
+                'assigned_to': () => this.productionData.assigned_to || '—',
+                'start_date': () => this.productionData.start_date || '—',
+                'due_date': () => this.productionData.due_date || '—',
+            };
+
+            const getValue = dataKeyMap[fieldKey];
+            return getValue ? getValue() : '—';
+        },
+
+        /**
+         * Render a field based on its type and value
+         * Returns HTML string for the field
+         */
+        renderField(fieldKey, fieldDef) {
+            const value = this.getFieldValue(fieldKey);
+            const type = fieldDef?.type || 'text';
+            const label = fieldDef?.label || fieldKey;
+
+            switch (type) {
+                case 'text':
+                    return this.renderTextField(label, value);
+                case 'number':
+                    return this.renderNumberField(label, value, fieldDef?.suffix);
+                case 'metric':
+                    return this.renderMetricField(label, value, fieldDef?.icon, fieldDef?.color);
+                case 'badge':
+                    return this.renderBadgeField(label, value, fieldDef?.color);
+                case 'currency':
+                    return this.renderCurrencyField(label, value);
+                case 'date':
+                    return this.renderDateField(label, value);
+                case 'alert':
+                    return this.renderAlertField(value);
+                case 'tags':
+                    return this.renderTagsField(value);
+                default:
+                    return this.renderTextField(label, value);
+            }
+        },
+
+        renderTextField(label, value) {
+            return `
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">${label}:</span>
+                    <span class="text-gray-900 dark:text-gray-100">${value}</span>
+                </div>
+            `;
+        },
+
+        renderNumberField(label, value, suffix = '') {
+            return `
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">${label}:</span>
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">${value}${suffix}</span>
+                </div>
+            `;
+        },
+
+        renderMetricField(label, value, icon = 'clock', color = 'amber') {
+            const iconPaths = {
+                'clock': 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                'calendar': 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+                'trending': 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'
+            };
+
+            const colorClasses = {
+                'amber': 'from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-100 text-amber-600 dark:text-amber-400',
+                'blue': 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-blue-100 text-blue-600 dark:text-blue-400',
+                'purple': 'from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700 text-purple-900 dark:text-purple-100 text-purple-600 dark:text-purple-400',
+                'teal': 'from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border-teal-200 dark:border-teal-700 text-teal-900 dark:text-teal-100 text-teal-600 dark:text-teal-400'
+            };
+
+            const bgClass = colorClasses[color] || colorClasses['amber'];
+            const iconPath = iconPaths[icon] || iconPaths['clock'];
+
+            return `
+                <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-br ${bgClass} border">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"></path>
+                    </svg>
+                    <div class="text-xs font-bold">${value}</div>
+                    <div class="text-[10px]">${label}</div>
+                </div>
+            `;
+        },
+
+        renderBadgeField(label, value, color = 'blue') {
+            return `
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">${label}:</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-${color}-100 text-${color}-800 dark:bg-${color}-900/20 dark:text-${color}-400">
+                        ${value}
+                    </span>
+                </div>
+            `;
+        },
+
+        renderCurrencyField(label, value) {
+            const formatted = typeof value === 'number' ? `$${value.toFixed(2)}` : value;
+            return `
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">${label}:</span>
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">${formatted}</span>
+                </div>
+            `;
+        },
+
+        renderDateField(label, value) {
+            const formatted = value !== '—' ? new Date(value).toLocaleDateString() : '—';
+            return `
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-medium text-gray-500 dark:text-gray-400">${label}:</span>
+                    <span class="text-gray-900 dark:text-gray-100">${formatted}</span>
+                </div>
+            `;
+        },
+
+        renderAlertField(message) {
+            if (!message || !this.alertLevel) return '';
+
+            const style = this.alertStyles[this.alertLevel];
+            return `
+                <div class="p-2 rounded-md border ${style.classes}">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <svg class="h-3.5 w-3.5 ${style.iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${style.iconPath}"></path>
+                        </svg>
+                        <div class="text-xs font-bold uppercase ${style.textClass}">${message}</div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderTagsField(tagCount) {
+            if (!tagCount || tagCount === 0) return '';
+
+            return `
+                <button type="button" @click="tagsModalOpen = true"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    <span>${tagCount} ${tagCount === 1 ? 'Tag' : 'Tags'}</span>
+                </button>
+            `;
         },
 
         async loadActiveContext() {
@@ -374,7 +632,25 @@ function contextFooterGlobal() {
 
             this.contextType = context.entityType;
             this.contextId = context.entityId;
-            const data = Alpine.store('entityStore').getEntity(context.entityType, context.entityId);
+            let data = Alpine.store('entityStore').getEntity(context.entityType, context.entityId);
+
+            // If EntityStore doesn't have data (e.g., on edit/view pages), fetch from API
+            if (!data && this.contextConfigs[this.contextType]?.api?.fetch) {
+                try {
+                    const apiUrl = this.contextConfigs[this.contextType].api.fetch(this.contextId);
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        data = await response.json();
+                        console.log('[Footer] Fetched context data from API:', data);
+                        // Optionally cache it in EntityStore for future use
+                        Alpine.store('entityStore').updateEntity(context.entityType, context.entityId, data, true);
+                    } else {
+                        console.warn('[Footer] Failed to fetch context data from API:', response.status);
+                    }
+                } catch (e) {
+                    console.error('[Footer] Error fetching context data:', e);
+                }
+            }
 
             if (!data) {
                 this.hasActiveContext = false;

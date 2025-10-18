@@ -4,20 +4,41 @@
     'pageNumber',
 ])
 
+@php
+    // Generate unique ID for this page's Alpine instance
+    $viewerId = 'pdfViewer_' . $pdfPageId . '_' . uniqid();
+@endphp
+
 <div
-    x-data="pdfAnnotationViewer"
+    x-data="pdfAnnotationViewer_{{ $viewerId }}()"
     x-init="init({{ $pdfPageId }}, '{{ $pdfUrl }}', {{ $pageNumber }})"
     wire:ignore
     class="w-full h-full flex flex-col"
 >
     <!-- Toolbar -->
-    <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 border-b border-gray-300 dark:border-gray-600">
-        <div class="flex items-center gap-2">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 border-b border-gray-300 dark:border-gray-600 gap-3">
+        <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <!-- Annotation Mode Toggle -->
+            <button
+                @click="toggleAnnotationMode('room')"
+                :class="annotationMode === 'room' ? 'bg-purple-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-purple-500 hover:text-white transition-colors text-sm whitespace-nowrap"
+                title="Draw Room Box"
+            >
+                🏠 Room
+            </button>
+            <button
+                @click="toggleAnnotationMode('room_location')"
+                :class="annotationMode === 'room_location' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-colors text-sm whitespace-nowrap"
+                title="Draw Room Location (Wall/Island)"
+            >
+                📍 Location
+            </button>
             <button
                 @click="toggleAnnotationMode('cabinet_run')"
                 :class="annotationMode === 'cabinet_run' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-blue-500 hover:text-white transition-colors"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-blue-500 hover:text-white transition-colors text-sm whitespace-nowrap"
                 title="Draw Cabinet Run Box"
             >
                 📦 Cabinet Run
@@ -25,28 +46,27 @@
             <button
                 @click="toggleAnnotationMode('cabinet')"
                 :class="annotationMode === 'cabinet' ? 'bg-green-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-green-500 hover:text-white transition-colors"
-                title="Draw Cabinet Box (within a Run)"
-                :disabled="!selectedRunAnnotation"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-green-500 hover:text-white transition-colors text-sm whitespace-nowrap"
+                title="Draw Cabinet Box"
             >
                 🗄️ Cabinet
             </button>
-            <span x-show="annotationMode" class="text-sm text-gray-600 dark:text-gray-400">
-                Click and drag to draw a box
+            <span x-show="annotationMode" class="text-xs text-gray-600 dark:text-gray-400 ml-2 hidden sm:inline">
+                Click and drag to draw a box with measurements
             </span>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             <button
                 @click="saveAnnotations()"
-                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm whitespace-nowrap flex-1 sm:flex-initial"
             >
-                💾 Save Annotations
+                💾 Save
             </button>
             <button
                 @click="exitAnnotationMode()"
                 x-show="annotationMode"
-                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm whitespace-nowrap"
             >
                 ✖️ Cancel
             </button>
@@ -56,8 +76,8 @@
     <!-- Nutrient Container -->
     <div
         x-ref="nutrientContainer"
-        class="flex-1 bg-white dark:bg-gray-900"
-        style="min-height: 600px;"
+        class="flex-1 bg-white dark:bg-gray-900 w-full overflow-auto"
+        style="min-height: 600px; max-height: calc(100vh - 200px);"
     ></div>
 
     <!-- Annotation Linking Modal -->
@@ -102,6 +122,63 @@
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                         placeholder="e.g., Kitchen, Master Bath"
                     >
+                </div>
+
+                <!-- Measurement Fields for Room -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">📏 Room Measurements</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Length (ft)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementLength"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="12.5"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Width (ft)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementWidth"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="10.0"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Ceiling Height (ft)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementHeight"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="8.0"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Square Footage
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementSquareFootage"
+                                step="0.1"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="Auto calculated"
+                                :value="measurementLength && measurementWidth ? (measurementLength * measurementWidth).toFixed(2) : ''"
+                                readonly
+                            >
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -179,6 +256,63 @@
                         placeholder="e.g., Base Run 1, Wall Run A"
                     >
                 </div>
+
+                <!-- Measurement Fields for Cabinet Run -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">📏 Cabinet Run Measurements</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Total Length (inches)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementLengthInches"
+                                step="0.125"
+                                @input="measurementLinearFeet = measurementLengthInches ? (measurementLengthInches / 12).toFixed(2) : ''"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="120"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Linear Feet
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementLinearFeet"
+                                step="0.01"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm bg-gray-50 dark:bg-gray-900"
+                                placeholder="Auto calculated"
+                                readonly
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Height (inches)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementHeightInches"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="36 (for base) or 30 (for wall)"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Depth (inches)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementDepthInches"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="24 (for base) or 12 (for wall)"
+                            >
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Cabinet Selection (for cabinet annotations) -->
@@ -241,6 +375,78 @@
                         placeholder="e.g., Cabinet 1, Upper Corner"
                     >
                 </div>
+
+                <!-- Measurement Fields for Individual Cabinet -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">📏 Cabinet Measurements</h4>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Width (inches)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementWidthInches"
+                                step="0.125"
+                                @input="measurementLinearFeet = measurementWidthInches ? (measurementWidthInches / 12).toFixed(2) : ''"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="36"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Height (inches)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementHeightInches"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="30"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Depth (inches)
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementDepthInches"
+                                step="0.125"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="12"
+                            >
+                        </div>
+                    </div>
+                    <div class="mt-3 grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Linear Feet
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementLinearFeet"
+                                step="0.01"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm bg-gray-50 dark:bg-gray-900"
+                                placeholder="Auto calculated"
+                                readonly
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Door/Drawer Count
+                            </label>
+                            <input
+                                type="number"
+                                x-model="measurementDoorCount"
+                                step="1"
+                                min="0"
+                                class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm"
+                                placeholder="2"
+                            >
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Actions -->
@@ -262,15 +468,16 @@
     </div>
 </div>
 
-@once
-    @push('scripts')
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('pdfAnnotationViewer', () => ({
+@push('scripts')
+<script>
+    // Register unique Alpine component for this page instance
+    if (typeof Alpine !== 'undefined') {
+        Alpine.data('pdfAnnotationViewer_{{ $viewerId }}', () => ({
                 nutrientInstance: null,
                 pdfPageId: null,
                 pdfUrl: null,
                 pageNumber: null,
+                currentPageIndex: 0, // Track current PDF page (0-indexed)
                 annotationMode: null, // 'cabinet_run' or 'cabinet'
                 selectedRunAnnotation: null, // Currently selected cabinet run annotation
                 showLinkingModal: false,
@@ -298,23 +505,58 @@
                 filteredCabinetRuns: [],
                 filteredCabinets: [],
 
+                // Measurement fields
+                measurementLength: '',  // Room length in feet
+                measurementWidth: '',  // Room width in feet
+                measurementHeight: '',  // Room ceiling height in feet or cabinet height in inches
+                measurementSquareFootage: '',  // Calculated square footage
+                measurementLengthInches: '',  // Cabinet run/cabinet length in inches
+                measurementWidthInches: '',  // Cabinet width in inches
+                measurementHeightInches: '',  // Cabinet height in inches
+                measurementDepthInches: '',  // Cabinet depth in inches
+                measurementLinearFeet: '',  // Calculated linear feet from inches
+                measurementDoorCount: '',  // Number of doors/drawers
+
                 async init(pdfPageId, pdfUrl, pageNumber) {
                     this.pdfPageId = pdfPageId;
                     this.pdfUrl = pdfUrl;
                     this.pageNumber = pageNumber;
+                    this.currentPageIndex = pageNumber - 1; // PSPDFKit uses 0-indexed pages
 
                     await this.loadNutrient();
                     await this.loadAvailableCabinetRuns();
                 },
 
                 async loadNutrient() {
-                    if (this.nutrientInstance || !this.$refs.nutrientContainer) return;
+                    if (this.nutrientInstance || !this.$refs.nutrientContainer) {
+                        console.log('⏭️  Skipping Nutrient load:', {
+                            alreadyLoaded: !!this.nutrientInstance,
+                            containerExists: !!this.$refs.nutrientContainer
+                        });
+                        return;
+                    }
+
+                    console.log('🚀 Starting Nutrient PDF viewer initialization...');
+                    console.log('📊 Config:', {
+                        pdfPageId: this.pdfPageId,
+                        pdfUrl: this.pdfUrl,
+                        pageNumber: this.pageNumber
+                    });
 
                     try {
+                        // Check if PSPDFKit is loaded
+                        if (typeof PSPDFKit === 'undefined') {
+                            throw new Error('PSPDFKit library not loaded. Check if script is included in page.');
+                        }
+                        console.log('✓ PSPDFKit library loaded');
+
                         // Load existing annotations from database
+                        console.log('📡 Fetching existing annotations...');
                         const annotationsResponse = await fetch(`/api/pdf/annotations/page/${this.pdfPageId}`);
                         const instantJson = await annotationsResponse.json();
+                        console.log('✓ Loaded annotations:', instantJson);
 
+                        console.log('🎨 Initializing PDF viewer...');
                         this.nutrientInstance = await PSPDFKit.load({
                             container: this.$refs.nutrientContainer,
                             document: this.pdfUrl,
@@ -334,13 +576,49 @@
                             ],
                         });
 
+                        console.log('✅ PDF viewer loaded successfully!');
+
+                        // Listen for page changes - reset annotation mode when page changes
+                        this.nutrientInstance.addEventListener('viewState.currentPageIndex.change', (pageIndex) => {
+                            console.log(`📄 Page changed from ${this.currentPageIndex + 1} to: ${pageIndex + 1}`);
+                            this.currentPageIndex = pageIndex;
+
+                            // Exit annotation mode when switching pages so buttons reset
+                            if (this.annotationMode) {
+                                console.log('🔄 Resetting annotation mode due to page change');
+                                this.exitAnnotationMode();
+                            }
+                        });
+
                         // Listen for annotation selection
                         this.nutrientInstance.addEventListener('annotations.change', () => {
                             this.updateSelectedAnnotation();
                         });
 
                     } catch (error) {
-                        console.error('Nutrient loading error:', error);
+                        console.error('❌ Nutrient loading error:', error);
+                        console.error('Error details:', {
+                            message: error.message,
+                            stack: error.stack
+                        });
+
+                        // Show user-friendly error
+                        const container = this.$refs.nutrientContainer;
+                        container.innerHTML = `
+                            <div class="flex items-center justify-center h-full p-8">
+                                <div class="text-center max-w-md">
+                                    <div class="text-6xl mb-4">⚠️</div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">PDF Viewer Failed to Load</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 mb-4">${error.message}</p>
+                                    <button
+                                        onclick="location.reload()"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    >
+                                        Reload Page
+                                    </button>
+                                </div>
+                            </div>
+                        `;
                     }
                 },
 
@@ -383,10 +661,22 @@
                     this.currentPendingAnnotation = annotation;
                     this.currentAnnotationType = this.annotationMode;
 
+                    // Set the annotation type in the modal to match the drawing mode
+                    this.annotationType = this.annotationMode;
+
                     // Set color based on type
-                    const color = this.annotationMode === 'cabinet_run'
-                        ? new PSPDFKit.Color({ r: 255, g: 0, b: 0 })
-                        : new PSPDFKit.Color({ r: 0, g: 200, b: 0 });
+                    let color;
+                    if (this.annotationMode === 'room') {
+                        color = new PSPDFKit.Color({ r: 147, g: 51, b: 234 }); // Purple
+                    } else if (this.annotationMode === 'room_location') {
+                        color = new PSPDFKit.Color({ r: 99, g: 102, b: 241 }); // Indigo
+                    } else if (this.annotationMode === 'cabinet_run') {
+                        color = new PSPDFKit.Color({ r: 37, g: 99, b: 235 }); // Blue
+                    } else if (this.annotationMode === 'cabinet') {
+                        color = new PSPDFKit.Color({ r: 22, g: 163, b: 74 }); // Green
+                    } else {
+                        color = new PSPDFKit.Color({ r: 0, g: 0, b: 0 }); // Default black
+                    }
 
                     const updatedAnnotation = annotation
                         .set('strokeColor', color)
@@ -504,9 +794,20 @@
                         project_id: this.projectId
                     };
 
+                    // Build measurements object based on annotation type
+                    const measurements = {};
+
                     if (this.annotationType === 'room') {
                         // Room annotation - just needs name
                         context.room_name = this.currentAnnotationLabel;
+
+                        // Add room measurements
+                        if (this.measurementLength) measurements.length_ft = parseFloat(this.measurementLength);
+                        if (this.measurementWidth) measurements.width_ft = parseFloat(this.measurementWidth);
+                        if (this.measurementHeight) measurements.ceiling_height_ft = parseFloat(this.measurementHeight);
+                        if (this.measurementLength && this.measurementWidth) {
+                            measurements.square_footage = parseFloat((this.measurementLength * this.measurementWidth).toFixed(2));
+                        }
                     } else if (this.annotationType === 'room_location') {
                         // Room location - needs room_id and name
                         context.room_id = this.selectedRoomId;
@@ -516,18 +817,32 @@
                         context.room_id = this.selectedRoomId;
                         context.room_location_id = this.selectedRoomLocationId;
                         context.run_name = this.currentAnnotationLabel;
+
+                        // Add cabinet run measurements
+                        if (this.measurementLengthInches) measurements.length_inches = parseFloat(this.measurementLengthInches);
+                        if (this.measurementHeightInches) measurements.height_inches = parseFloat(this.measurementHeightInches);
+                        if (this.measurementDepthInches) measurements.depth_inches = parseFloat(this.measurementDepthInches);
+                        if (this.measurementLinearFeet) measurements.linear_feet = parseFloat(this.measurementLinearFeet);
                     } else if (this.annotationType === 'cabinet') {
                         // Cabinet - needs full hierarchy
                         context.room_id = this.selectedRoomId;
                         context.room_location_id = this.selectedRoomLocationId;
                         context.cabinet_run_id = this.selectedCabinetRunId;
                         context.cabinet_label = this.currentAnnotationLabel;
+
+                        // Add cabinet measurements
+                        if (this.measurementWidthInches) measurements.width_inches = parseFloat(this.measurementWidthInches);
+                        if (this.measurementHeightInches) measurements.height_inches = parseFloat(this.measurementHeightInches);
+                        if (this.measurementDepthInches) measurements.depth_inches = parseFloat(this.measurementDepthInches);
+                        if (this.measurementLinearFeet) measurements.linear_feet = parseFloat(this.measurementLinearFeet);
+                        if (this.measurementDoorCount) measurements.door_drawer_count = parseInt(this.measurementDoorCount);
                     }
 
                     const customData = {
                         annotation_type: this.annotationType,
                         label: this.currentAnnotationLabel,
                         context: context,
+                        measurements: measurements,  // ✅ Include measurements
                         // Legacy fields for backward compatibility
                         parent_id: this.selectedRunAnnotation?.customData?.db_id || null,
                         cabinet_run_id: this.selectedCabinetRunId || null,
@@ -537,10 +852,11 @@
                     const updated = this.currentPendingAnnotation.set('customData', customData);
                     await this.nutrientInstance.update(updated);
 
-                    console.log('✅ Annotation linked with context:', customData);
+                    console.log('✅ Annotation linked with context and measurements:', customData);
 
                     this.closeLinkingModal();
-                    this.exitAnnotationMode();
+                    // DON'T exit annotation mode - stay in drawing mode for multiple annotations
+                    // this.exitAnnotationMode();
                 },
 
                 closeLinkingModal() {
@@ -558,6 +874,18 @@
                     this.filteredRoomLocations = [];
                     this.filteredCabinetRuns = [];
                     this.filteredCabinets = [];
+
+                    // Clear all measurement fields
+                    this.measurementLength = '';
+                    this.measurementWidth = '';
+                    this.measurementHeight = '';
+                    this.measurementSquareFootage = '';
+                    this.measurementLengthInches = '';
+                    this.measurementWidthInches = '';
+                    this.measurementHeightInches = '';
+                    this.measurementDepthInches = '';
+                    this.measurementLinearFeet = '';
+                    this.measurementDoorCount = '';
                 },
 
                 async saveAnnotations() {
@@ -608,7 +936,6 @@
                     }
                 },
             }));
-        });
-    </script>
-    @endpush
-@endonce
+    }
+</script>
+@endpush
