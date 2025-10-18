@@ -565,16 +565,18 @@
                     const iframe = document.createElement('iframe');
 
                     // Build PDF URL with page parameter (PHASE 2: Use currentPage)
+                    // Lock to single page view - no scrolling to other pages allowed
                     let pdfSrc = this.pdfUrl;
                     if (this.currentPage && this.currentPage > 1) {
                         pdfSrc += `#page=${this.currentPage}`;
-                    }
-                    // Add PDF.js parameters for better display
-                    if (pdfSrc.includes('#')) {
-                        pdfSrc += '&view=FitH&pagemode=none&toolbar=0';
                     } else {
-                        pdfSrc += '#view=FitH&pagemode=none&toolbar=0';
+                        pdfSrc += `#page=1`;
                     }
+                    // Add PDF.js parameters:
+                    // - pagemode=none: No page navigation UI
+                    // - toolbar=0: Hide toolbar
+                    // - view=Fit: Fit entire page in viewport (prevents scrolling between pages)
+                    pdfSrc += '&view=Fit&pagemode=none&toolbar=0&scrollbar=1&navpanes=0';
 
                     iframe.src = pdfSrc;
                     iframe.style.width = '100%';
