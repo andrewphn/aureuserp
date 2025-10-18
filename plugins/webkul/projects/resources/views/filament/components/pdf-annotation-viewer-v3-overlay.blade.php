@@ -3,6 +3,8 @@
     'pdfUrl',
     'pageNumber',
     'projectId',
+    'totalPages' => 1,
+    'pageType' => null,
 ])
 
 @php
@@ -16,7 +18,9 @@
         pdfUrl: '{{ $pdfUrl }}',
         pageNumber: {{ $pageNumber }},
         pdfPageId: {{ $pdfPageId }},
-        projectId: {{ $projectId }}
+        projectId: {{ $projectId }},
+        totalPages: {{ $totalPages }},
+        pageType: {{ $pageType ? "'" . $pageType . "'" : 'null' }}
     })"
     x-init="init()"
     wire:ignore

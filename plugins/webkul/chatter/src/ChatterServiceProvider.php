@@ -33,8 +33,16 @@ class ChatterServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->registerCustomCss();
+        $this->registerLivewireComponents();
+    }
 
+    protected function registerLivewireComponents(): void
+    {
+        // Register Livewire component for FilamentPHP v4
         Livewire::component('chatter-panel', ChatterPanel::class);
+
+        // Also register with full namespace for v4 compatibility
+        Livewire::component('webkul.chatter.chatter-panel', ChatterPanel::class);
     }
 
     public function registerCustomCss()

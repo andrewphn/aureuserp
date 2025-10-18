@@ -28,6 +28,7 @@ export function createAnnotationComponent(pdfjsLib) {
         imageLoaded: false,
         showModal: false,
         showAnnotationModal: false,
+        showAnnotationV2Modal: false,
         error: false,
         modalImageLoaded: false,
         modalError: false,
@@ -35,6 +36,7 @@ export function createAnnotationComponent(pdfjsLib) {
         isSaving: false,
         isDrawing: false,
         loadingMetadata: false,
+        activeTab: 'metadata',  // Annotation modal tab state
 
         // PDF state
         currentPdfUrl: null,
@@ -74,6 +76,7 @@ export function createAnnotationComponent(pdfjsLib) {
         draftSaveTimer: null,
         hasUnsavedChanges: false,
         lastSavedAt: null,
+        annotationsLastModified: null,  // Database timestamp for conflict resolution
 
         // Measurement (Phase 6d: Measurement Tools)
         measurements: [],
@@ -86,6 +89,7 @@ export function createAnnotationComponent(pdfjsLib) {
         pdfPageId: null,
         projectId: null,
         projectNumber: 'TFW-0001',
+        projectContext: null,  // Stores partner, company, branch, address for cover page auto-population
         availableRooms: [],
         availableRoomLocations: [],
         availableCabinetRuns: [],
@@ -102,6 +106,59 @@ export function createAnnotationComponent(pdfjsLib) {
         selectedCabinetId: null,
         selectedRunType: 'base',
         currentRoomType: '',
+
+        // Measurement recording fields
+        measurementLength: '',  // Room length in feet
+        measurementWidth: '',  // Room width in feet
+        measurementHeight: '',  // Room ceiling height in feet or cabinet height in inches
+        measurementLengthInches: '',  // Cabinet run/cabinet length in inches
+        measurementWidthInches: '',  // Cabinet width in inches
+        measurementHeightInches: '',  // Cabinet height in inches
+        measurementDepthInches: '',  // Cabinet depth in inches
+        measurementLinearFeet: '',  // Calculated linear feet from inches
+        measurementDoorCount: '',  // Number of doors/drawers
+
+        // Page metadata
+        pageType: '',  // 'floor_plan', 'elevation', 'detail', 'cover', 'other'
+
+        // Cover page fields
+        coverCustomerId: '',
+        coverCompanyId: '',
+        coverBranchId: '',
+        coverAddressStreet1: '',
+        coverAddressStreet2: '',
+        coverAddressCity: '',
+        coverAddressStateId: '',
+        coverAddressZip: '',
+        coverAddressCountryId: '',
+
+        // Floor plan page fields
+        floorPlanFloorNumber: '',
+        floorPlanRoomsIncluded: [],  // Array of room IDs shown on this page
+        floorPlanScale: '',
+        floorPlanOrientation: '',
+        floorPlanNotes: '',
+
+        // Elevation page fields
+        elevationRoomId: null,
+        elevationRoomLocationId: null,
+        elevationViewDirection: '',
+        elevationCabinetRuns: [],  // Array of cabinet run IDs shown
+        elevationScale: '',
+        elevationShowHeights: true,
+        elevationNotes: '',
+
+        // Detail page fields
+        detailType: '',  // "Cabinet", "Molding", "Hardware", "Connection"
+        detailCabinetId: null,
+        detailNumber: '',
+        detailScale: '',
+        detailNotes: '',
+
+        // Other page fields
+        otherDescription: '',
+        otherReferenceInfo: '',
+        otherNotes: '',
 
         // Filtered dropdowns
         filteredRoomLocations: [],
@@ -132,21 +189,37 @@ export function createAnnotationComponent(pdfjsLib) {
         },
 
         // ========== INITIALIZATION ==========
+        async fallbackLoadPage(pdfUrl, pageNumber) {
+            // Fallback to direct PDF.js if manager not available (shouldn't happen)
+            console.warn('⚠️ PDF manager not available, using fallback direct load');
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            const pdf = await loadingTask.promise;
+            return await pdf.getPage(pageNumber);
+        },
+
         async loadThumbnail(pdfUrl, pageNumber, pdfPageId) {
             this.currentPdfUrl = pdfUrl;
             this.currentPageNum = pageNumber;
             this.pdfPageId = pdfPageId;
 
             try {
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
-                const page = await pdf.getPage(pageNumber);
+                // Use shared PDF document manager (prevents duplicate PDF loads)
+                // Access from window since it's exported globally in annotations.js
+                const manager = window.PDFDocumentManager?.getInstance() || window.pdfManager;
+                const page = manager ? await manager.getPage(pdfUrl, pageNumber) : await this.fallbackLoadPage(pdfUrl, pageNumber);
 
                 const viewport = page.getViewport({ scale: 1.0 });
-                const scale = 300 / viewport.width;
+
+                // Responsive thumbnail sizing based on container width
+                const canvas = this.$refs.thumbnail;
+                const container = canvas.closest('.w-full');
+                const containerWidth = container ? container.clientWidth : 300;
+
+                // Calculate scale to fill container width (with small padding for border)
+                const targetWidth = containerWidth - 16; // 16px for padding/border
+                const scale = targetWidth / viewport.width;
                 const scaledViewport = page.getViewport({ scale });
 
-                const canvas = this.$refs.thumbnail;
                 canvas.width = scaledViewport.width;
                 canvas.height = scaledViewport.height;
 
@@ -168,9 +241,9 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.modalImageLoaded = false;
                 this.modalError = false;
 
-                const loadingTask = pdfjsLib.getDocument(this.currentPdfUrl);
-                const pdf = await loadingTask.promise;
-                const page = await pdf.getPage(this.currentPageNum);
+                // Use shared PDF document manager
+                const manager = window.PDFDocumentManager?.getInstance() || window.pdfManager;
+                const page = manager ? await manager.getPage(this.currentPdfUrl, this.currentPageNum) : await this.fallbackLoadPage(this.currentPdfUrl, this.currentPageNum);
 
                 const viewport = page.getViewport({ scale: 1.0 });
                 const scale = 1400 / viewport.width;
@@ -237,6 +310,15 @@ export function createAnnotationComponent(pdfjsLib) {
                 this.projectId = metadata.projectId;
                 this.projectNumber = metadata.projectNumber;
                 this.annotations = metadata.annotations;
+                this.annotationsLastModified = metadata.annotationsLastModified;  // Store for conflict resolution
+
+                // Store project context for cover page auto-population
+                if (metadata.projectContext) {
+                    this.projectContext = metadata.projectContext;
+                }
+
+                // Also load page-specific metadata (page type, cover fields, etc.)
+                await this.loadPageMetadata();
 
                 console.log('✅ Loaded all metadata');
             } catch (error) {
@@ -705,34 +787,197 @@ export function createAnnotationComponent(pdfjsLib) {
             Object.assign(this, reset);
         },
 
-        // ========== SAVE ==========
-        async saveAnnotations() {
-            if (this.annotations.length === 0) {
-                alert('No annotations to save');
+        // ========== PAGE TYPE METADATA ==========
+        resetPageTypeFields() {
+            // Reset all page type-specific fields when changing page type
+            if (this.pageType !== 'cover') {
+                this.coverCustomerId = '';
+                this.coverCompanyId = '';
+                this.coverBranchId = '';
+                this.coverAddressStreet1 = '';
+                this.coverAddressStreet2 = '';
+                this.coverAddressCity = '';
+                this.coverAddressStateId = '';
+                this.coverAddressZip = '';
+                this.coverAddressCountryId = '';
+            }
+        },
+
+        autoPopulateCoverPageFields() {
+            // Auto-populate cover page fields from project context
+            // Only populate if fields are currently empty
+            if (!this.projectContext) {
+                console.warn('⚠️ No project context available for auto-population');
                 return;
             }
 
+            // Populate customer ID (partner)
+            if (!this.coverCustomerId && this.projectContext.partner) {
+                this.coverCustomerId = String(this.projectContext.partner.id);
+                console.log('✅ Auto-populated customer ID:', this.coverCustomerId);
+            }
+
+            // Populate company ID
+            if (!this.coverCompanyId && this.projectContext.company) {
+                this.coverCompanyId = String(this.projectContext.company.id);
+                console.log('✅ Auto-populated company ID:', this.coverCompanyId);
+            }
+
+            // Populate branch ID
+            if (!this.coverBranchId && this.projectContext.branch) {
+                this.coverBranchId = String(this.projectContext.branch.id);
+                console.log('✅ Auto-populated branch ID:', this.coverBranchId);
+            }
+
+            // Populate address fields
+            if (this.projectContext.address) {
+                if (!this.coverAddressStreet1 && this.projectContext.address.street1) {
+                    this.coverAddressStreet1 = this.projectContext.address.street1;
+                    console.log('✅ Auto-populated street1:', this.coverAddressStreet1);
+                }
+
+                if (!this.coverAddressStreet2 && this.projectContext.address.street2) {
+                    this.coverAddressStreet2 = this.projectContext.address.street2;
+                    console.log('✅ Auto-populated street2:', this.coverAddressStreet2);
+                }
+
+                if (!this.coverAddressCity && this.projectContext.address.city) {
+                    this.coverAddressCity = this.projectContext.address.city;
+                    console.log('✅ Auto-populated city:', this.coverAddressCity);
+                }
+
+                if (!this.coverAddressStateId && this.projectContext.address.state_id) {
+                    this.coverAddressStateId = String(this.projectContext.address.state_id);
+                    console.log('✅ Auto-populated state ID:', this.coverAddressStateId);
+                }
+
+                if (!this.coverAddressZip && this.projectContext.address.zip) {
+                    this.coverAddressZip = this.projectContext.address.zip;
+                    console.log('✅ Auto-populated zip:', this.coverAddressZip);
+                }
+
+                if (!this.coverAddressCountryId && this.projectContext.address.country_id) {
+                    this.coverAddressCountryId = String(this.projectContext.address.country_id);
+                    console.log('✅ Auto-populated country ID:', this.coverAddressCountryId);
+                }
+            }
+
+            console.log('✅ Cover page auto-population complete');
+        },
+
+        async loadPageMetadata() {
+            // Load existing page metadata from database
+            if (!this.pdfPageId) return;
+
+            try {
+                const response = await fetch(`/api/pdf/page/${this.pdfPageId}/metadata`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Load page type
+                    this.pageType = data.page_type || '';
+
+                    // Load cover page fields if this is a cover page
+                    if (data.page_type === 'cover' && data.cover_metadata) {
+                        this.coverCustomerId = data.cover_metadata.customer_id || '';
+                        this.coverCompanyId = data.cover_metadata.company_id || '';
+                        this.coverBranchId = data.cover_metadata.branch_id || '';
+                        this.coverAddressStreet1 = data.cover_metadata.address_street1 || '';
+                        this.coverAddressStreet2 = data.cover_metadata.address_street2 || '';
+                        this.coverAddressCity = data.cover_metadata.address_city || '';
+                        this.coverAddressStateId = data.cover_metadata.address_state_id || '';
+                        this.coverAddressZip = data.cover_metadata.address_zip || '';
+                        this.coverAddressCountryId = data.cover_metadata.address_country_id || '';
+                    }
+
+                    // Auto-populate cover page fields from project context if empty
+                    if (data.page_type === 'cover' && this.projectContext) {
+                        this.autoPopulateCoverPageFields();
+                    }
+
+                    console.log('✅ Loaded page metadata');
+                }
+            } catch (error) {
+                console.error('Failed to load page metadata:', error);
+            }
+        },
+
+        async savePageMetadata() {
+            // Save page metadata separately from annotations
+            if (!this.pdfPageId) return;
+
+            const metadata = {
+                page_type: this.pageType
+            };
+
+            // Add cover page-specific data
+            if (this.pageType === 'cover') {
+                metadata.cover_metadata = {
+                    customer_id: this.coverCustomerId,
+                    company_id: this.coverCompanyId,
+                    branch_id: this.coverBranchId,
+                    address_street1: this.coverAddressStreet1,
+                    address_street2: this.coverAddressStreet2,
+                    address_city: this.coverAddressCity,
+                    address_state_id: this.coverAddressStateId,
+                    address_zip: this.coverAddressZip,
+                    address_country_id: this.coverAddressCountryId,
+                };
+            }
+
+            try {
+                const response = await fetch(`/api/pdf/page/${this.pdfPageId}/metadata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(metadata)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save page metadata');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Failed to save page metadata:', error);
+                throw error;
+            }
+        },
+
+        // ========== SAVE ==========
+        async saveAnnotations() {
             this.isSaving = true;
 
             try {
-                const context = {
-                    selectedRoomId: this.selectedRoomId,
-                    selectedRoomLocationId: this.selectedRoomLocationId,
-                    selectedCabinetRunId: this.selectedCabinetRunId,
-                    selectedRunType: this.selectedRunType
-                };
+                // Save page metadata first (page type, cover fields, etc.)
+                await this.savePageMetadata();
 
-                const result = await saveAnnotationsWithEntities(
-                    this.pdfPageId,
-                    this.annotations,
-                    this.annotationType,
-                    context
-                );
+                // Save annotations if any exist
+                if (this.annotations.length > 0) {
+                    const context = {
+                        selectedRoomId: this.selectedRoomId,
+                        selectedRoomLocationId: this.selectedRoomLocationId,
+                        selectedCabinetRunId: this.selectedCabinetRunId,
+                        selectedRunType: this.selectedRunType
+                    };
 
-                alert(`✅ Saved ${result.count} annotations!\n✅ Created ${result.entities_created_count} entities!`);
+                    const result = await saveAnnotationsWithEntities(
+                        this.pdfPageId,
+                        this.annotations,
+                        this.annotationType,
+                        context
+                    );
+
+                    alert(`✅ Saved page metadata!\n✅ Saved ${result.count} annotations!\n✅ Created ${result.entities_created_count} entities!`);
+                } else {
+                    alert('✅ Saved page metadata!');
+                }
+
                 this.showAnnotationModal = false;
             } catch (error) {
-                alert('❌ Failed to save annotations: ' + error.message);
+                alert('❌ Failed to save: ' + error.message);
             } finally {
                 this.isSaving = false;
             }
@@ -960,14 +1205,33 @@ export function createAnnotationComponent(pdfjsLib) {
             if (!stored) return false;
 
             const draft = JSON.parse(stored);
+            const draftTime = new Date(draft.savedAt);
+            const dbTime = this.annotationsLastModified ? new Date(this.annotationsLastModified) : null;
 
-            if (confirm(`Restore unsaved annotations from ${new Date(draft.savedAt).toLocaleString()}?`)) {
+            // Auto-resolve: If database is newer, clear old draft and use database
+            if (dbTime && dbTime > draftTime) {
+                console.log(`🔄 Database annotations (${dbTime.toLocaleString()}) are newer than draft (${draftTime.toLocaleString()}). Using database.`);
+                localStorage.removeItem(`pdf_annotation_draft_${this.pdfPageId}`);
+                return false;  // Keep database annotations (already loaded)
+            }
+
+            // Draft is newer or no database timestamp - ask user
+            let message = `Restore unsaved annotations from ${draftTime.toLocaleString()}?`;
+            if (dbTime) {
+                message += `\n\n⚠️ Database has ${this.annotations.length} annotation(s) from ${dbTime.toLocaleString()}.\n\nClick OK to use LOCAL DRAFT (${draft.annotations.length} annotations)\nClick Cancel to use DATABASE (${this.annotations.length} annotations)`;
+            }
+
+            if (confirm(message)) {
+                console.log(`✅ User chose to restore draft with ${draft.annotations.length} annotations`);
                 this.annotations = draft.annotations;
                 this.lastSavedAt = draft.savedAt;
                 drawer.redrawAnnotations(this.annotations, this.$refs.annotationCanvas, this.selectedAnnotationIds);
                 return true;
             }
 
+            console.log(`✅ User chose to keep database annotations (${this.annotations.length} annotations)`);
+            // Clear old draft since user chose database
+            localStorage.removeItem(`pdf_annotation_draft_${this.pdfPageId}`);
             return false;
         },
 

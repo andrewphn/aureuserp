@@ -1,4 +1,4 @@
-<x-filament-panels::page>
+<x-filament-panels::page class="pb-32">
     <form wire:submit.prevent="createSalesOrder">
         {{ $this->form }}
 

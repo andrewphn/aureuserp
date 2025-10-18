@@ -164,12 +164,14 @@ class PdfAnnotationController extends Controller
      */
     public function getAvailableCabinetRuns(int $pdfPageId)
     {
-        $pdfPage = PdfPage::with('pdfDocument.project')->findOrFail($pdfPageId);
-        $projectId = $pdfPage->pdfDocument->project_id ?? null;
+        $pdfPage = PdfPage::with('pdfDocument.module')->findOrFail($pdfPageId);
+        $project = $pdfPage->pdfDocument->module ?? null;
 
-        if (!$projectId) {
+        if (!$project || !($project instanceof \Webkul\Project\Models\Project)) {
             return response()->json(['cabinet_runs' => []]);
         }
+
+        $projectId = $project->id;
 
         $cabinetRuns = \Webkul\Project\Models\CabinetRun::whereHas('roomLocation.room', function($query) use ($projectId) {
             $query->where('project_id', $projectId);

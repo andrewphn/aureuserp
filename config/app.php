@@ -96,6 +96,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Annotation System Version
+    |--------------------------------------------------------------------------
+    |
+    | Determines which annotation system version to use (v1 or v2).
+    | This can be overridden per-user via user settings.
+    |
+    */
+    'annotation_system_version' => env('ANNOTATION_SYSTEM_VERSION', 'v1'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

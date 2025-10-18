@@ -11,3 +11,7 @@ export { createAnnotationDrawer } from './annotation-drawer.js';
 export { createAnnotationEditor } from './annotation-editor.js';
 export { createPageNavigator } from './page-navigator.js';
 export { createAnnotationComponent } from './alpine-component-factory.js';
+
+// New context-first annotation system components
+export { projectTreeSidebarComponent } from './project-tree-sidebar.js';
+export { contextBarComponent } from './context-bar.js';

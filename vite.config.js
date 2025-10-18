@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/pdf-viewer.js',
                 'resources/js/pdf-thumbnail.js',
+                'resources/js/pdf-document-manager.js',
                 'resources/js/annotations.js',
                 'resources/js/centralized-entity-store.js',
                 'resources/js/form-auto-populate.js',

@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 /* ============================================
+   PDF ANNOTATION SYSTEM V2
+   ============================================ */
+@import "../../public/css/annotation-system-v2.css";
+
+/* ============================================
    TCS TOP NAVIGATION IMPROVEMENTS
    ============================================ */
 @layer components {

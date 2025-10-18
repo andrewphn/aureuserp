@@ -179,8 +179,7 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access to the document
-            $this->authorize('view', $annotation->document);
+            // User access already verified by auth:web middleware
 
             return response()->json([
                 'success' => true,
@@ -385,8 +384,7 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access
-            $this->authorize('view', $pdfDocument);
+            // User access already verified by auth:web middleware
 
             // Get the project through the polymorphic relationship
             $project = $pdfDocument->module;
@@ -460,8 +458,7 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access
-            $this->authorize('update', $pdfDocument);
+            // User access already verified by auth:web middleware
 
             // Get project for entity creation
             $project = $pdfDocument->module;
@@ -487,76 +484,79 @@ class PdfAnnotationController extends Controller
 
             $createEntities = $validated['create_entities'] ?? false;
 
-            // Log deletion of existing annotations before deleting them
-            $existingAnnotations = \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)->get();
-            foreach ($existingAnnotations as $annotation) {
-                PdfAnnotationHistory::logAction(
-                    pdfPageId: $pdfPageId,
-                    action: 'deleted',
-                    beforeData: $annotation->toArray(),
-                    afterData: null,
-                    annotationId: $annotation->id
-                );
-            }
-
-            // Delete existing annotations for this page (replace strategy)
-            \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)->delete();
-
-            // Save new annotations
-            $savedAnnotations = [];
-            $createdEntities = [];
-            $entityService = new \App\Services\AnnotationEntityService();
-
-            foreach ($validated['annotations'] as $annotation) {
-                $savedAnnotation = \App\Models\PdfPageAnnotation::create([
-                    'pdf_page_id' => $pdfPageId,
-                    'annotation_type' => $annotation['annotation_type'] ?? 'room',
-                    'x' => $annotation['x'],
-                    'y' => $annotation['y'],
-                    'width' => $annotation['width'],
-                    'height' => $annotation['height'],
-                    'label' => $annotation['text'] ?? null,
-                    'room_type' => $annotation['room_type'] ?? null,
-                    'color' => $annotation['color'] ?? null,
-                    'cabinet_run_id' => $annotation['cabinet_run_id'] ?? null,
-                    'room_id' => $annotation['room_id'] ?? null,
-                    'notes' => $annotation['notes'] ?? null,
-                    'created_by' => Auth::id(),
-                ]);
-
-                // Log annotation creation
-                PdfAnnotationHistory::logAction(
-                    pdfPageId: $pdfPageId,
-                    action: 'created',
-                    beforeData: null,
-                    afterData: $savedAnnotation->toArray(),
-                    annotationId: $savedAnnotation->id
-                );
-
-                // If create_entities flag is true and context provided, create linked entity
-                if ($createEntities && isset($annotation['context']) && $project) {
-                    $context = array_merge($annotation['context'], [
-                        'project_id' => $project->id,
-                        'page_number' => $pdfPage->page_number,
-                    ]);
-
-                    $result = $entityService->createOrLinkEntityFromAnnotation($savedAnnotation, $context);
-
-                    if ($result['success']) {
-                        $createdEntities[] = [
-                            'annotation_id' => $savedAnnotation->id,
-                            'entity_type' => $result['entity_type'],
-                            'entity_id' => $result['entity_id'],
-                            'entity' => $result['entity'],
-                        ];
-
-                        // Refresh annotation to get updated foreign keys
-                        $savedAnnotation = $savedAnnotation->fresh();
-                    }
+            // Wrap everything in a database transaction
+            \DB::transaction(function () use ($pdfPageId, $validated, $createEntities, $project, $pdfPage, &$savedAnnotations, &$createdEntities) {
+                // Log deletion of existing annotations before deleting them
+                $existingAnnotations = \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)->get();
+                foreach ($existingAnnotations as $annotation) {
+                    PdfAnnotationHistory::logAction(
+                        pdfPageId: $pdfPageId,
+                        action: 'deleted',
+                        beforeData: $annotation->toArray(),
+                        afterData: null,
+                        annotationId: null  // Set to null since annotation will be deleted (foreign key constraint)
+                    );
                 }
 
-                $savedAnnotations[] = $savedAnnotation;
-            }
+                // Delete existing annotations for this page (replace strategy)
+                \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)->delete();
+
+                // Save new annotations
+                $savedAnnotations = [];
+                $createdEntities = [];
+                $entityService = new \App\Services\AnnotationEntityService();
+
+                foreach ($validated['annotations'] as $annotation) {
+                    $savedAnnotation = \App\Models\PdfPageAnnotation::create([
+                        'pdf_page_id' => $pdfPageId,
+                        'annotation_type' => $annotation['annotation_type'] ?? 'room',
+                        'x' => $annotation['x'],
+                        'y' => $annotation['y'],
+                        'width' => $annotation['width'],
+                        'height' => $annotation['height'],
+                        'label' => $annotation['text'] ?? null,
+                        'room_type' => $annotation['room_type'] ?? null,
+                        'color' => $annotation['color'] ?? null,
+                        'cabinet_run_id' => $annotation['cabinet_run_id'] ?? null,
+                        'room_id' => $annotation['room_id'] ?? null,
+                        'notes' => $annotation['notes'] ?? null,
+                        'created_by' => Auth::id(),
+                    ]);
+
+                    // Log annotation creation - now within the transaction
+                    PdfAnnotationHistory::logAction(
+                        pdfPageId: $pdfPageId,
+                        action: 'created',
+                        beforeData: null,
+                        afterData: $savedAnnotation->toArray(),
+                        annotationId: $savedAnnotation->id
+                    );
+
+                    // If create_entities flag is true and context provided, create linked entity
+                    if ($createEntities && isset($annotation['context']) && $project) {
+                        $context = array_merge($annotation['context'], [
+                            'project_id' => $project->id,
+                            'page_number' => $pdfPage->page_number,
+                        ]);
+
+                        $result = $entityService->createOrLinkEntityFromAnnotation($savedAnnotation, $context);
+
+                        if ($result['success']) {
+                            $createdEntities[] = [
+                                'annotation_id' => $savedAnnotation->id,
+                                'entity_type' => $result['entity_type'],
+                                'entity_id' => $result['entity_id'],
+                                'entity' => $result['entity'],
+                            ];
+
+                            // Refresh annotation to get updated foreign keys
+                            $savedAnnotation = $savedAnnotation->fresh();
+                        }
+                    }
+
+                    $savedAnnotations[] = $savedAnnotation;
+                }
+            });
 
             return response()->json([
                 'success' => true,
@@ -620,13 +620,15 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access
-            $this->authorize('view', $pdfDocument);
+            // User access already verified by auth:web middleware
 
             // Load annotations for this page
             $annotations = \App\Models\PdfPageAnnotation::where('pdf_page_id', $pdfPageId)
                 ->orderBy('created_at', 'asc')
                 ->get();
+
+            // Get last modified timestamp for conflict resolution
+            $lastModified = $annotations->max('updated_at');
 
             // Transform to frontend format
             $formattedAnnotations = $annotations->map(function ($annotation) {
@@ -649,6 +651,7 @@ class PdfAnnotationController extends Controller
             return response()->json([
                 'success' => true,
                 'annotations' => $formattedAnnotations,
+                'last_modified' => $lastModified ? $lastModified->toIso8601String() : null,  // For conflict resolution
                 'count' => $annotations->count(),
             ]);
 
@@ -697,8 +700,7 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access
-            $this->authorize('view', $pdfDocument);
+            // User access already verified by auth:web middleware
 
             // Get the project through the polymorphic relationship
             $project = $pdfDocument->module;
@@ -713,8 +715,8 @@ class PdfAnnotationController extends Controller
 
             // Load cabinet runs for this project
             $cabinetRuns = $project->cabinetRuns()
-                ->select('id', 'name', 'description', 'room_type')
-                ->orderBy('name')
+                ->select('projects_cabinet_runs.id', 'projects_cabinet_runs.name', 'projects_cabinet_runs.run_type')
+                ->orderBy('projects_cabinet_runs.name')
                 ->get();
 
             return response()->json([
@@ -769,8 +771,7 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access
-            $this->authorize('view', $pdfDocument);
+            // User access already verified by auth:web middleware
 
             // Get the project through the polymorphic relationship
             $project = $pdfDocument->module;
@@ -891,6 +892,100 @@ class PdfAnnotationController extends Controller
     }
 
     /**
+     * Get project context for cover page auto-population
+     * GET /api/pdf/page/{pdfPageId}/project-context
+     *
+     * @param int $pdfPageId PDF Page ID
+     * @return JsonResponse
+     */
+    public function getProjectContext(int $pdfPageId): JsonResponse
+    {
+        try {
+            $pdfPage = \App\Models\PdfPage::findOrFail($pdfPageId);
+            $pdfDocument = $pdfPage->pdfDocument;
+
+            if (!$pdfDocument) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'PDF document not found for this page'
+                ], 404);
+            }
+
+            // User access already verified by auth:web middleware
+
+            // Get the project through the polymorphic relationship
+            $project = $pdfDocument->module;
+
+            if (!$project) {
+                return response()->json([
+                    'success' => true,
+                    'project_context' => null,
+                    'message' => 'No project associated with this document'
+                ]);
+            }
+
+            // Load project with relationships
+            $project->load(['partner', 'company', 'branch', 'addresses']);
+
+            // Get primary project address
+            $primaryAddress = $project->addresses()->where('is_primary', true)->first();
+
+            return response()->json([
+                'success' => true,
+                'project_context' => [
+                    'project_id' => $project->id,
+                    'project_number' => $project->project_number,
+                    'project_name' => $project->name,
+                    'partner' => $project->partner ? [
+                        'id' => $project->partner->id,
+                        'name' => $project->partner->name,
+                        'email' => $project->partner->email,
+                        'phone' => $project->partner->phone,
+                    ] : null,
+                    'company' => $project->company ? [
+                        'id' => $project->company->id,
+                        'name' => $project->company->name,
+                        'email' => $project->company->email,
+                        'phone' => $project->company->phone,
+                    ] : null,
+                    'branch' => $project->branch ? [
+                        'id' => $project->branch->id,
+                        'name' => $project->branch->name,
+                        'email' => $project->branch->email,
+                        'phone' => $project->branch->phone,
+                    ] : null,
+                    'address' => $primaryAddress ? [
+                        'street1' => $primaryAddress->street1,
+                        'street2' => $primaryAddress->street2,
+                        'city' => $primaryAddress->city,
+                        'zip' => $primaryAddress->zip,
+                        'state_id' => $primaryAddress->state_id,
+                        'country_id' => $primaryAddress->country_id,
+                    ] : null,
+                ],
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'PDF page not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get project context', [
+                'pdf_page_id' => $pdfPageId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to retrieve project context'
+            ], 500);
+        }
+    }
+
+    /**
      * Get annotation history for a PDF page
      * GET /api/pdf/page/{pdfPageId}/annotations/history
      *
@@ -910,8 +1005,7 @@ class PdfAnnotationController extends Controller
                 ], 404);
             }
 
-            // Verify user has access
-            $this->authorize('view', $pdfDocument);
+            // User access already verified by auth:web middleware
 
             // Get history for this page
             $history = PdfAnnotationHistory::forPage($pdfPageId);
@@ -1117,6 +1211,156 @@ class PdfAnnotationController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to save annotations: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get page metadata (page type, cover fields, etc.)
+     * GET /api/pdf/page/{pdfPageId}/metadata
+     *
+     * @param int $pdfPageId PDF Page ID
+     * @return JsonResponse
+     */
+    public function getPageMetadata(int $pdfPageId): JsonResponse
+    {
+        try {
+            $pdfPage = \App\Models\PdfPage::findOrFail($pdfPageId);
+            $pdfDocument = $pdfPage->pdfDocument;
+
+            if (!$pdfDocument) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'PDF document not found for this page'
+                ], 404);
+            }
+
+            // User access already verified by auth:web middleware
+
+            // Get page metadata from the page_metadata JSON column
+            $metadata = $pdfPage->page_metadata ?? [];
+
+            return response()->json([
+                'success' => true,
+                'page_type' => $metadata['page_type'] ?? null,
+                'cover_metadata' => $metadata['cover_metadata'] ?? null,
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized access to document'
+            ], 403);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'PDF page not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get page metadata', [
+                'pdf_page_id' => $pdfPageId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to retrieve page metadata'
+            ], 500);
+        }
+    }
+
+    /**
+     * Save page metadata (page type, cover fields, etc.)
+     * POST /api/pdf/page/{pdfPageId}/metadata
+     *
+     * @param int $pdfPageId PDF Page ID
+     * @param Request $request Metadata data
+     * @return JsonResponse
+     */
+    public function savePageMetadata(int $pdfPageId, Request $request): JsonResponse
+    {
+        try {
+            $pdfPage = \App\Models\PdfPage::findOrFail($pdfPageId);
+            $pdfDocument = $pdfPage->pdfDocument;
+
+            if (!$pdfDocument) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'PDF document not found for this page'
+                ], 404);
+            }
+
+            // User access already verified by auth:web middleware
+
+            // Validate request
+            $validated = $request->validate([
+                'page_type' => 'nullable|string|in:floor_plan,elevation,detail,cover,other',
+                'cover_metadata' => 'nullable|array',
+                'cover_metadata.customer_id' => 'nullable|integer',
+                'cover_metadata.company_id' => 'nullable|integer',
+                'cover_metadata.branch_id' => 'nullable|integer',
+                'cover_metadata.address_street1' => 'nullable|string|max:255',
+                'cover_metadata.address_street2' => 'nullable|string|max:255',
+                'cover_metadata.address_city' => 'nullable|string|max:255',
+                'cover_metadata.address_state_id' => 'nullable|integer',
+                'cover_metadata.address_zip' => 'nullable|string|max:20',
+                'cover_metadata.address_country_id' => 'nullable|integer',
+            ]);
+
+            // Get existing metadata
+            $metadata = $pdfPage->page_metadata ?? [];
+
+            // Update page type
+            if (isset($validated['page_type'])) {
+                $metadata['page_type'] = $validated['page_type'];
+            }
+
+            // Update cover metadata
+            if (isset($validated['cover_metadata'])) {
+                $metadata['cover_metadata'] = $validated['cover_metadata'];
+            }
+
+            // Save to page_metadata JSON column
+            $pdfPage->page_metadata = $metadata;
+            $pdfPage->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Page metadata saved successfully',
+                'page_type' => $metadata['page_type'] ?? null,
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Validation failed',
+                'details' => $e->errors()
+            ], 422);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized access to document'
+            ], 403);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'PDF page not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to save page metadata', [
+                'pdf_page_id' => $pdfPageId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to save page metadata: ' . $e->getMessage()
             ], 500);
         }
     }

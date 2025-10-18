@@ -43,14 +43,53 @@ class AnnotationEntityService
         try {
             DB::beginTransaction();
 
+            $roomName = $annotation->label ?? $annotation->room_type ?? 'Untitled Room';
+            $roomType = $annotation->room_type;
+            $projectId = $context['project_id'];
+
+            // Check if room with same name and type already exists in this project
+            $existingRoom = Room::where('project_id', $projectId)
+                ->where('name', $roomName)
+                ->where('room_type', $roomType)
+                ->first();
+
+            if ($existingRoom) {
+                // Reuse existing room instead of creating duplicate
+                Log::info('Reusing existing room', [
+                    'room_id' => $existingRoom->id,
+                    'name' => $roomName,
+                    'type' => $roomType,
+                ]);
+
+                // Link annotation to existing room
+                $annotation->update(['room_id' => $existingRoom->id]);
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'entity_type' => 'room',
+                    'entity_id' => $existingRoom->id,
+                    'entity' => $existingRoom,
+                    'reused' => true,  // Flag to indicate this was reused
+                ];
+            }
+
+            // Create new room
             $room = Room::create([
-                'project_id' => $context['project_id'],
-                'name' => $annotation->label ?? $annotation->room_type ?? 'Untitled Room',
-                'room_type' => $annotation->room_type,
+                'project_id' => $projectId,
+                'name' => $roomName,
+                'room_type' => $roomType,
                 'pdf_page_number' => $context['page_number'],
                 'pdf_room_label' => $annotation->label,
                 'notes' => $annotation->notes,
                 'creator_id' => Auth::id(),
+            ]);
+
+            Log::info('Created new room', [
+                'room_id' => $room->id,
+                'name' => $roomName,
+                'type' => $roomType,
             ]);
 
             // Link annotation to room
@@ -63,6 +102,7 @@ class AnnotationEntityService
                 'entity_type' => 'room',
                 'entity_id' => $room->id,
                 'entity' => $room,
+                'reused' => false,
             ];
 
         } catch (\Exception $e) {
@@ -98,18 +138,60 @@ class AnnotationEntityService
                 ];
             }
 
+            $locationName = $annotation->label ?? 'Untitled Location';
+            $roomId = $context['room_id'];
+
+            // Check if room location with same name already exists in this room
+            $existingLocation = RoomLocation::where('room_id', $roomId)
+                ->where('name', $locationName)
+                ->first();
+
+            if ($existingLocation) {
+                // Reuse existing location
+                Log::info('Reusing existing room location', [
+                    'location_id' => $existingLocation->id,
+                    'name' => $locationName,
+                    'room_id' => $roomId,
+                ]);
+
+                // Link annotation to existing location
+                $annotation->update([
+                    'room_id' => $roomId,
+                    'metadata' => array_merge($annotation->metadata ?? [], [
+                        'room_location_id' => $existingLocation->id,
+                    ]),
+                ]);
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'entity_type' => 'room_location',
+                    'entity_id' => $existingLocation->id,
+                    'entity' => $existingLocation,
+                    'reused' => true,
+                ];
+            }
+
+            // Create new room location
             $roomLocation = RoomLocation::create([
-                'room_id' => $context['room_id'],
-                'name' => $annotation->label ?? 'Untitled Location',
+                'room_id' => $roomId,
+                'name' => $locationName,
                 'location_type' => $context['location_type'] ?? 'wall',
                 'sequence' => $context['sequence'] ?? 0,
                 'notes' => $annotation->notes,
                 'creator_id' => Auth::id(),
             ]);
 
+            Log::info('Created new room location', [
+                'location_id' => $roomLocation->id,
+                'name' => $locationName,
+                'room_id' => $roomId,
+            ]);
+
             // Link annotation to room location
             $annotation->update([
-                'room_id' => $context['room_id'],
+                'room_id' => $roomId,
                 'metadata' => array_merge($annotation->metadata ?? [], [
                     'room_location_id' => $roomLocation->id,
                 ]),
@@ -122,6 +204,7 @@ class AnnotationEntityService
                 'entity_type' => 'room_location',
                 'entity_id' => $roomLocation->id,
                 'entity' => $roomLocation,
+                'reused' => false,
             ];
 
         } catch (\Exception $e) {
@@ -157,12 +240,53 @@ class AnnotationEntityService
                 ];
             }
 
+            $runName = $annotation->label ?? 'Untitled Run';
+            $roomLocationId = $context['room_location_id'];
+            $runType = $context['run_type'] ?? 'base';
+
+            // Check if cabinet run with same name and type already exists in this location
+            $existingRun = CabinetRun::where('room_location_id', $roomLocationId)
+                ->where('name', $runName)
+                ->where('run_type', $runType)
+                ->first();
+
+            if ($existingRun) {
+                // Reuse existing run
+                Log::info('Reusing existing cabinet run', [
+                    'run_id' => $existingRun->id,
+                    'name' => $runName,
+                    'type' => $runType,
+                    'location_id' => $roomLocationId,
+                ]);
+
+                // Link annotation to existing run
+                $annotation->update(['cabinet_run_id' => $existingRun->id]);
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'entity_type' => 'cabinet_run',
+                    'entity_id' => $existingRun->id,
+                    'entity' => $existingRun,
+                    'reused' => true,
+                ];
+            }
+
+            // Create new cabinet run
             $cabinetRun = CabinetRun::create([
-                'room_location_id' => $context['room_location_id'],
-                'name' => $annotation->label ?? 'Untitled Run',
-                'run_type' => $context['run_type'] ?? 'base',
+                'room_location_id' => $roomLocationId,
+                'name' => $runName,
+                'run_type' => $runType,
                 'notes' => $annotation->notes,
                 'creator_id' => Auth::id(),
+            ]);
+
+            Log::info('Created new cabinet run', [
+                'run_id' => $cabinetRun->id,
+                'name' => $runName,
+                'type' => $runType,
+                'location_id' => $roomLocationId,
             ]);
 
             // Link annotation to cabinet run
@@ -175,6 +299,7 @@ class AnnotationEntityService
                 'entity_type' => 'cabinet_run',
                 'entity_id' => $cabinetRun->id,
                 'entity' => $cabinetRun,
+                'reused' => false,
             ];
 
         } catch (\Exception $e) {

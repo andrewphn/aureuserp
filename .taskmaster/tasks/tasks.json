@@ -386,7 +386,7 @@
         "testStrategy": "Run migration successfully without errors. Verify new columns exist with correct data types and constraints. Test model relationships by creating sample records and accessing related data. Validate foreign key constraints work properly.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -394,9 +394,10 @@
             "description": "Create a new Laravel migration file to add required columns to projects_projects table",
             "dependencies": [],
             "details": "Use php artisan make:migration command to create migration file for adding project_type, project_type_other, and use_customer_address columns to projects_projects table. Follow Laravel naming conventions and include descriptive migration name.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-16T17:52:19.141Z"
           },
           {
             "id": 2,
@@ -448,7 +449,10 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-01T19:14:58.755Z"
+        "updatedAt": "2025-10-16T17:55:15.784Z",
+        "complexity": 4,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down into specific migration tasks: creating the migration file, adding project_type and project_type_other columns, adding use_customer_address boolean column, verifying projects_project_addresses table relationship, updating Project model fillable fields and relationships, and updating ProjectAddress model relationships. Include validation and rollback testing."
       },
       {
         "id": "12",
@@ -538,7 +542,10 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-01T19:19:20.282Z"
+        "updatedAt": "2025-10-01T19:19:20.282Z",
+        "complexity": 7,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Convert CreateProject page to wizard by: importing FilamentPHP wizard components, adding HasWizard trait, implementing getSteps() method with 5 step structure, removing existing form() method dependencies, creating step schemas with proper imports, testing wizard navigation and progress indicators, and handling form state management between steps."
       },
       {
         "id": "13",
@@ -550,7 +557,7 @@
         "dependencies": [
           "12"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -634,7 +641,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 7,
+        "expansionPrompt": "Implement Discovery step by: creating step schema with proper field ordering, integrating existing ProjectSummaryPanel Livewire component with columnSpanFull, implementing company/partner selection fields with relationships, adding project address section with conditional visibility, implementing project name and description fields with proper styling, adding auto-generated project number display, and testing real-time summary updates.",
+        "updatedAt": "2025-10-16T17:55:16.965Z"
       },
       {
         "id": "14",
@@ -646,7 +657,7 @@
         "dependencies": [
           "13"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -705,7 +716,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Implement auto-generation by: creating generateProjectNumber() method with company acronym parsing, implementing street address parsing with regex for number extraction, handling street name cleaning and formatting, implementing unique ID generation logic, adding afterCreate() hook integration, and testing various address formats and edge cases.",
+        "updatedAt": "2025-10-16T17:55:18.112Z"
       },
       {
         "id": "15",
@@ -717,7 +732,7 @@
         "dependencies": [
           "13"
         ],
-        "status": "pending",
+        "status": "cancelled",
         "subtasks": [
           {
             "id": 1,
@@ -765,7 +780,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Create Design step by: implementing date picker fields with FilamentPHP native components, adding allocated hours numeric input with proper validation, implementing tags relationship with belongsToMany functionality and create options, setting up two-column grid layout, and testing field interactions and data persistence.",
+        "updatedAt": "2025-10-16T17:56:58.008Z"
       },
       {
         "id": "16",
@@ -777,7 +796,7 @@
         "dependencies": [
           "15"
         ],
-        "status": "pending",
+        "status": "cancelled",
         "subtasks": [
           {
             "id": 1,
@@ -825,7 +844,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Implement Sourcing step by: creating company selection field with relationship and create option, integrating HasCustomFields::mergeCustomFormFields() with sourcing context, implementing proper section wrapping and layout, testing relationship functionality and custom field rendering, and validating data persistence across wizard steps.",
+        "updatedAt": "2025-10-16T17:56:59.068Z"
       },
       {
         "id": "17",
@@ -837,7 +860,7 @@
         "dependencies": [
           "16"
         ],
-        "status": "pending",
+        "status": "cancelled",
         "subtasks": [
           {
             "id": 1,
@@ -931,7 +954,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Create Production step by: implementing Task Management section with allow_milestones toggle, adding conditional visibility based on TaskSettings::enable_milestones, integrating custom fields with production context, implementing proper fieldset/section wrapping, and testing toggle functionality and conditional logic.",
+        "updatedAt": "2025-10-16T17:57:00.403Z"
       },
       {
         "id": "18",
@@ -943,7 +970,7 @@
         "dependencies": [
           "17"
         ],
-        "status": "pending",
+        "status": "cancelled",
         "subtasks": [
           {
             "id": 1,
@@ -991,7 +1018,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Implement Delivery step by: creating Settings section with visibility radio field and three options, implementing Time Management section with allow_timesheets toggle, adding conditional visibility based on TimeSettings::enable_timesheets, setting up proper section grouping and radio layouts, and testing field interactions and data persistence.",
+        "updatedAt": "2025-10-16T17:57:01.661Z"
       },
       {
         "id": "19",
@@ -1003,7 +1034,7 @@
         "dependencies": [
           "14"
         ],
-        "status": "pending",
+        "status": "cancelled",
         "subtasks": [
           {
             "id": 1,
@@ -1075,7 +1106,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Enhance ProjectSummaryPanel by: updating component to handle new wizard fields (project_type, company_id, partner_id), implementing Alpine.js watchers for real-time updates, adding formatters for friendly value display, handling project number placeholder during creation, implementing Livewire component integration with columnSpanFull positioning, and testing reactive updates without server requests.",
+        "updatedAt": "2025-10-16T17:57:02.757Z"
       },
       {
         "id": "20",
@@ -1087,7 +1122,7 @@
         "dependencies": [
           "19"
         ],
-        "status": "pending",
+        "status": "cancelled",
         "subtasks": [
           {
             "id": 1,
@@ -1159,7 +1194,11 @@
             "testStrategy": "",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Implement address management by: creating use_customer_address toggle with default true value, implementing conditional project address fields with visible() callbacks, updating mutateFormDataBeforeCreate() for address logic handling, integrating address data into Live Summary Panel, updating project number generation to use address data, and implementing proper grid layout for address fields.",
+        "updatedAt": "2025-10-16T17:57:03.888Z"
       },
       {
         "id": "21",
@@ -1302,9 +1341,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-04T00:52:47.171Z",
+      "lastModified": "2025-10-16T17:57:03.889Z",
       "taskCount": 30,
-      "completedCount": 18,
+      "completedCount": 21,
       "tags": [
         "master"
       ]

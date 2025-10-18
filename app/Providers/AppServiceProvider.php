@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\AnnotationService;
+use App\Services\FooterFieldRegistry;
+use App\Services\FooterPreferenceService;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -16,7 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register footer customizer services as singletons
+        $this->app->singleton(FooterFieldRegistry::class);
+        $this->app->singleton(FooterPreferenceService::class);
+
+        // Register annotation service as singleton
+        $this->app->singleton(AnnotationService::class);
     }
 
     /**

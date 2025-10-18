@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V3 Coordinate System Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button.secondary {
+            background: #6b7280;
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .zoom-display {
+            font-weight: 600;
+            min-width: 60px;
+        }
+
+        .viewer-container {
+            position: relative;
+            border: 2px solid #e5e7eb;
+            border-radius: 4px;
+            background: #ffffff;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        #pdf-container {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            overflow: auto;
+        }
+
+        #pdf-embed {
+            width: 100%;
+            height: 100%;
+        }
+
+        .annotation-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .annotation-marker {
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+            background: rgba(59, 130, 246, 0.3);
+            border: 2px solid #3b82f6;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .annotation-marker:hover {
+            background: rgba(59, 130, 246, 0.5);
+            border-color: #2563eb;
+        }
+
+        .annotation-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            background: #1f2937;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 10px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-panel {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-timestamp {
+            color: #9ca3af;
+        }
+
+        .log-success {
+            color: #10b981;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 V3 PDF Annotation System - Coordinate Test</h1>
+
+        <div class="description">
+            <strong>Test Objective:</strong> Validate accurate overlay positioning using PDFObject.js + HTML overlays.
+            <br>
+            <strong>Instructions:</strong> Load a PDF, click anywhere to create annotation markers, test zoom/pan, verify coordinates stay accurate.
+        </div>
+
+        <div class="controls">
+            <input type="file" id="pdf-upload" accept="application/pdf">
+            <button onclick="clearAnnotations()" class="secondary">Clear Annotations</button>
+            <div class="zoom-controls">
+                <button onclick="zoomOut()">Zoom Out</button>
+                <span class="zoom-display" id="zoom-display">100%</span>
+                <button onclick="zoomIn()">Zoom In</button>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="info-label">PDF Page Dimensions</div>
+                    <div class="info-value" id="page-dimensions">Not loaded</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Container Dimensions</div>
+                    <div class="info-value" id="container-dimensions">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Current Zoom</div>
+                    <div class="info-value" id="current-zoom">100%</div>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="info-label">Last Click (Screen)</div>
+                    <div class="info-value" id="last-screen-coords">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Last Click (PDF)</div>
+                    <div class="info-value" id="last-pdf-coords">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Annotations Count</div>
+                    <div class="info-value" id="anno-count">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="viewer-container">
+            <div id="pdf-container">
+                <div id="pdf-embed"></div>
+                <div class="annotation-overlay" id="annotation-overlay"></div>
+            </div>
+        </div>
+
+        <h3>Event Log</h3>
+        <div class="log-panel" id="log-panel">
+            <div class="log-entry">
+                <span class="log-timestamp">Ready</span> - Upload a PDF to begin testing
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="./node_modules/pdfobject/pdfobject.min.js"></script>
+    <script>
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // State
+        let pdfUrl = null;
+        let pageDimensions = null;
+        let annotations = [];
+        let currentZoom = 1.0;
+
+        // Logging
+        function log(message, type = 'info') {
+            const logPanel = document.getElementById('log-panel');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+
+            let colorClass = '';
+            if (type === 'success') colorClass = 'log-success';
+            if (type === 'error') colorClass = 'log-error';
+
+            entry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> <span class="${colorClass}">${message}</span>`;
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // PDF Upload Handler
+        document.getElementById('pdf-upload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            log(`Loading PDF: ${file.name}...`);
+
+            // Create object URL
+            pdfUrl = URL.createObjectURL(file);
+
+            try {
+                // Step 1: Extract page dimensions using PDF.js (metadata only)
+                log('Extracting page dimensions using PDF.js...');
+                await extractPageDimensions(pdfUrl);
+
+                // Step 2: Display PDF using PDFObject.js
+                log('Displaying PDF using PDFObject.js...');
+                displayPdfWithPDFObject(pdfUrl);
+
+                log('PDF loaded successfully!', 'success');
+            } catch (error) {
+                log(`Error loading PDF: ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+
+        // Extract page dimensions using PDF.js (metadata only - NO RENDERING)
+        async function extractPageDimensions(url) {
+            const loadingTask = pdfjsLib.getDocument(url);
+            const pdf = await loadingTask.promise;
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 1.0 });
+
+            pageDimensions = {
+                width: viewport.width,
+                height: viewport.height
+            };
+
+            document.getElementById('page-dimensions').textContent =
+                `${Math.round(pageDimensions.width)} × ${Math.round(pageDimensions.height)} pts`;
+
+            log(`✓ Page dimensions: ${Math.round(pageDimensions.width)} × ${Math.round(pageDimensions.height)} pts`, 'success');
+
+            // Clean up to avoid memory leaks
+            await pdf.destroy();
+        }
+
+        // Display PDF using PDFObject.js
+        function displayPdfWithPDFObject(url) {
+            const success = PDFObject.embed(url, "#pdf-embed", {
+                height: "100%",
+                pdfOpenParams: {
+                    view: "FitH",
+                    pagemode: "none",
+                    toolbar: 0
+                }
+            });
+
+            if (success) {
+                log('✓ PDFObject.js embed successful', 'success');
+                setupClickHandler();
+            } else {
+                log('✗ PDFObject.js embed failed - browser may not support inline PDFs', 'error');
+            }
+        }
+
+        // Setup click handler for annotation creation
+        function setupClickHandler() {
+            const overlay = document.getElementById('annotation-overlay');
+
+            overlay.addEventListener('click', (e) => {
+                if (!pageDimensions) {
+                    log('Cannot create annotation - page dimensions not available', 'error');
+                    return;
+                }
+
+                // Get click coordinates relative to overlay
+                const rect = overlay.getBoundingClientRect();
+                const screenX = e.clientX - rect.left;
+                const screenY = e.clientY - rect.top;
+
+                // Convert to PDF coordinates
+                const pdfCoords = screenToPdf(screenX, screenY, rect);
+
+                // Update info display
+                document.getElementById('last-screen-coords').textContent =
+                    `(${Math.round(screenX)}, ${Math.round(screenY)})`;
+                document.getElementById('last-pdf-coords').textContent =
+                    `(${Math.round(pdfCoords.x)}, ${Math.round(pdfCoords.y)})`;
+
+                // Create annotation
+                createAnnotation(pdfCoords, screenX, screenY);
+
+                log(`Annotation created at PDF(${Math.round(pdfCoords.x)}, ${Math.round(pdfCoords.y)})`, 'success');
+            });
+
+            // Update container dimensions display
+            const updateDimensions = () => {
+                const container = document.getElementById('pdf-container');
+                const rect = container.getBoundingClientRect();
+                document.getElementById('container-dimensions').textContent =
+                    `${Math.round(rect.width)} × ${Math.round(rect.height)} px`;
+            };
+
+            updateDimensions();
+            window.addEventListener('resize', updateDimensions);
+        }
+
+        // Coordinate transformation: Screen → PDF
+        function screenToPdf(screenX, screenY, containerRect) {
+            if (!pageDimensions) return { x: 0, y: 0 };
+
+            // Normalize to 0-1 range
+            const normalizedX = screenX / containerRect.width;
+            const normalizedY = screenY / containerRect.height;
+
+            // Convert to PDF coordinates (note: PDF y-axis is from bottom)
+            const pdfX = normalizedX * pageDimensions.width;
+            const pdfY = pageDimensions.height - (normalizedY * pageDimensions.height);
+
+            return {
+                x: pdfX,
+                y: pdfY,
+                normalized: { x: normalizedX, y: normalizedY }
+            };
+        }
+
+        // Coordinate transformation: PDF → Screen
+        function pdfToScreen(pdfX, pdfY, containerRect) {
+            if (!pageDimensions) return { x: 0, y: 0 };
+
+            // Normalize PDF coordinates
+            const normalizedX = pdfX / pageDimensions.width;
+            const normalizedY = (pageDimensions.height - pdfY) / pageDimensions.height;
+
+            // Convert to screen coordinates
+            const screenX = normalizedX * containerRect.width;
+            const screenY = normalizedY * containerRect.height;
+
+            return { x: screenX, y: screenY };
+        }
+
+        // Create annotation marker
+        function createAnnotation(pdfCoords, screenX, screenY) {
+            const annotation = {
+                id: Date.now(),
+                pdfX: pdfCoords.x,
+                pdfY: pdfCoords.y,
+                normalized: pdfCoords.normalized,
+                createdAt: new Date()
+            };
+
+            annotations.push(annotation);
+            renderAnnotation(annotation, screenX, screenY);
+
+            document.getElementById('anno-count').textContent = annotations.length;
+        }
+
+        // Render annotation marker on overlay
+        function renderAnnotation(annotation, screenX, screenY) {
+            const overlay = document.getElementById('annotation-overlay');
+            const marker = document.createElement('div');
+            marker.className = 'annotation-marker';
+            marker.dataset.id = annotation.id;
+
+            const size = 40;
+            marker.style.left = (screenX - size/2) + 'px';
+            marker.style.top = (screenY - size/2) + 'px';
+            marker.style.width = size + 'px';
+            marker.style.height = size + 'px';
+
+            const label = document.createElement('div');
+            label.className = 'annotation-label';
+            label.textContent = `#${annotations.length}`;
+            marker.appendChild(label);
+
+            overlay.appendChild(marker);
+        }
+
+        // Clear all annotations
+        function clearAnnotations() {
+            annotations = [];
+            const overlay = document.getElementById('annotation-overlay');
+            overlay.innerHTML = '';
+            document.getElementById('anno-count').textContent = '0';
+            log('All annotations cleared', 'success');
+        }
+
+        // Zoom controls
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.25, 3.0);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.25, 0.5);
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const container = document.getElementById('pdf-container');
+            const embed = document.getElementById('pdf-embed');
+
+            embed.style.transform = `scale(${currentZoom})`;
+            embed.style.transformOrigin = 'top left';
+
+            const zoomPercent = Math.round(currentZoom * 100);
+            document.getElementById('zoom-display').textContent = zoomPercent + '%';
+            document.getElementById('current-zoom').textContent = zoomPercent + '%';
+
+            log(`Zoom changed to ${zoomPercent}%`);
+
+            // Re-render annotations at new zoom level
+            reRenderAnnotations();
+        }
+
+        // Re-render all annotations (needed after zoom/resize)
+        function reRenderAnnotations() {
+            const overlay = document.getElementById('annotation-overlay');
+            const rect = overlay.getBoundingClientRect();
+
+            // Clear existing markers
+            overlay.innerHTML = '';
+
+            // Re-render each annotation
+            annotations.forEach((anno, index) => {
+                const screenCoords = pdfToScreen(anno.pdfX, anno.pdfY, rect);
+                renderAnnotation(anno, screenCoords.x, screenCoords.y);
+            });
+
+            if (annotations.length > 0) {
+                log(`Re-rendered ${annotations.length} annotations at zoom ${Math.round(currentZoom * 100)}%`);
+            }
+        }
+
+        // Re-render on window resize
+        window.addEventListener('resize', () => {
+            if (annotations.length > 0) {
+                reRenderAnnotations();
+            }
+        });
+    </script>
+</body>
+</html>
