@@ -582,8 +582,10 @@
                     iframe.style.width = '100%';
                     iframe.style.height = '100%';
                     iframe.style.border = 'none';
+                    iframe.style.overflow = 'hidden';  // Disable scrolling in iframe
                     iframe.setAttribute('type', 'application/pdf');
                     iframe.setAttribute('title', 'PDF Document');
+                    iframe.setAttribute('scrolling', 'no');  // Disable scroll bars
 
                     // Clear container and add iframe
                     embedContainer.innerHTML = '';
