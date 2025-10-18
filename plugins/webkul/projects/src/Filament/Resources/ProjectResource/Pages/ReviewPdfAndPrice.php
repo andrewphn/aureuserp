@@ -151,9 +151,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->dehydrated()
                                                 ->prefix('Page'),
 
-                                            // Page type field temporarily disabled - pdf_pages table doesn't have page_type column
-                                            // TODO: Add page_type column to pdf_pages migration if needed
-                                            /* Select::make('page_type')
+                                            Select::make('page_type')
                                                 ->label('Page Type')
                                                 ->options([
                                                     'cover_page' => 'Cover Page',
@@ -174,7 +172,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                 ->getOptionLabelUsing(fn ($value): string => ucwords(str_replace('_', ' ', $value)))
                                                 ->placeholder('Select or type to create new')
                                                 ->helperText('Type to create a custom page type')
-                                                ->live(), */
+                                                ->live(),
 
                                             \Filament\Schemas\Components\Section::make('Cover Page Information')
                                                 ->description('Edit the information that will appear on the cover page')
@@ -187,22 +185,50 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                 ->placeholder('Customer name')
                                                                 ->columnSpanFull(),
 
-                                                            TextInput::make('cover_customer_address')
-                                                                ->label('Customer Address')
-                                                                ->default(function () {
-                                                                    $partner = $this->record->partner;
-                                                                    if (!$partner) return '';
-                                                                    $address = collect([
-                                                                        $partner->street1,
-                                                                        $partner->street2,
-                                                                        $partner->city,
-                                                                        $partner->state?->name,
-                                                                        $partner->zip,
-                                                                    ])->filter()->implode(', ');
-                                                                    return $address;
-                                                                })
-                                                                ->placeholder('Customer address')
+                                                            TextInput::make('cover_customer_address.street1')
+                                                                ->label('Street Address')
+                                                                ->default(fn () => $this->record->partner->street1 ?? '')
+                                                                ->placeholder('Street address')
                                                                 ->columnSpanFull(),
+
+                                                            TextInput::make('cover_customer_address.street2')
+                                                                ->label('Street Address Line 2')
+                                                                ->default(fn () => $this->record->partner->street2 ?? '')
+                                                                ->placeholder('Apt, suite, etc.')
+                                                                ->columnSpanFull(),
+
+                                                            TextInput::make('cover_customer_address.city')
+                                                                ->label('City')
+                                                                ->default(fn () => $this->record->partner->city ?? '')
+                                                                ->placeholder('City'),
+
+                                                            Select::make('cover_customer_address.country_id')
+                                                                ->label('Country')
+                                                                ->options(\Webkul\Support\Models\Country::pluck('name', 'id'))
+                                                                ->default(fn () => $this->record->partner->country_id ?? 1)
+                                                                ->searchable()
+                                                                ->preload()
+                                                                ->live()
+                                                                ->afterStateUpdated(fn (callable $set) => $set('cover_customer_address.state_id', null)),
+
+                                                            Select::make('cover_customer_address.state_id')
+                                                                ->label('State')
+                                                                ->options(function (callable $get) {
+                                                                    $countryId = $get('cover_customer_address.country_id');
+                                                                    if (!$countryId) {
+                                                                        return [];
+                                                                    }
+                                                                    return \Webkul\Support\Models\State::where('country_id', $countryId)
+                                                                        ->pluck('name', 'id');
+                                                                })
+                                                                ->default(fn () => $this->record->partner->state_id ?? null)
+                                                                ->searchable()
+                                                                ->preload(),
+
+                                                            TextInput::make('cover_customer_address.zip')
+                                                                ->label('Zip Code')
+                                                                ->default(fn () => $this->record->partner->zip ?? '')
+                                                                ->placeholder('Zip code'),
 
                                                             TextInput::make('cover_customer_phone')
                                                                 ->label('Phone')
@@ -261,8 +287,6 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                         ->columns(2),
                                                 ])
                                                 ->collapsed()
-                                                // Temporarily always hidden - page_type field disabled
-                                                ->hidden()
                                                 ->columnSpanFull(),
 
                                             Repeater::make('rooms')
@@ -288,7 +312,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                             'hallway' => 'Hallway',
                                                             'other' => 'Other',
                                                         ])
-                                                        ->searchable()
+                                                        ->native(false)
                                                         ->placeholder('Select room type')
                                                         ->live()
                                                         ->afterStateUpdated(function ($state, $set, $get) {
@@ -325,7 +349,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                 ])
                                                                 ->toArray();
                                                         })
-                                                        ->searchable()
+                                                        ->native(false)
                                                         ->placeholder('Optional: Link to existing project room')
                                                         ->helperText('Leave blank to create new room later'),
                                                 ])
@@ -422,7 +446,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                     Select::make('product_id')
                                         ->label('Product')
                                         ->relationship('product', 'name')
-                                        ->searchable()
+                                        ->native(false)
                                         ->required(),
 
                                     TextInput::make('quantity')
@@ -728,5 +752,33 @@ class ReviewPdfAndPrice extends Page implements HasForms
         }
 
         return $this->pdfPageIdCache[$pageNumber];
+    }
+
+    /**
+     * Determine which annotation system version to use
+     *
+     * @return string 'v1' or 'v2'
+     */
+    public function annotationSystemVersion(): string
+    {
+        // Check user preference (can be set via settings)
+        $userPreference = auth()->user()->settings['annotation_system_version'] ?? null;
+
+        if ($userPreference) {
+            return $userPreference;
+        }
+
+        // Check environment variable for global default
+        return config('app.annotation_system_version', 'v1');
+    }
+
+    /**
+     * Check if V2 annotation system should be used
+     *
+     * @return bool
+     */
+    public function useAnnotationSystemV2(): bool
+    {
+        return $this->annotationSystemVersion() === 'v2';
     }
 }
