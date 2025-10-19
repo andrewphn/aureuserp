@@ -532,6 +532,38 @@ class PdfAnnotationController extends Controller
                         annotationId: $savedAnnotation->id
                     );
 
+                    // Sync annotation notes to related entity's notes field
+                    if (!empty($annotation['notes'])) {
+                        $notes = $annotation['notes'];
+
+                        // Update Room notes if room_id is present
+                        if (!empty($savedAnnotation->room_id)) {
+                            $room = \Webkul\Project\Models\Room::find($savedAnnotation->room_id);
+                            if ($room) {
+                                $room->notes = $notes;
+                                $room->save();
+                            }
+                        }
+
+                        // Update CabinetRun notes if cabinet_run_id is present
+                        if (!empty($savedAnnotation->cabinet_run_id)) {
+                            $cabinetRun = \Webkul\Project\Models\CabinetRun::find($savedAnnotation->cabinet_run_id);
+                            if ($cabinetRun) {
+                                $cabinetRun->notes = $notes;
+                                $cabinetRun->save();
+                            }
+                        }
+
+                        // Update CabinetSpecification notes if cabinet_specification_id is present
+                        if (!empty($savedAnnotation->cabinet_specification_id)) {
+                            $cabinet = \Webkul\Project\Models\CabinetSpecification::find($savedAnnotation->cabinet_specification_id);
+                            if ($cabinet) {
+                                $cabinet->notes = $notes;
+                                $cabinet->save();
+                            }
+                        }
+                    }
+
                     // If create_entities flag is true and context provided, create linked entity
                     if ($createEntities && isset($annotation['context']) && $project) {
                         $context = array_merge($annotation['context'], [
@@ -596,6 +628,56 @@ class PdfAnnotationController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to save annotations: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a single page annotation
+     * DELETE /api/pdf/page/annotations/{annotationId}
+     *
+     * @param int $annotationId Annotation ID
+     * @return JsonResponse
+     */
+    public function deletePageAnnotation(int $annotationId): JsonResponse
+    {
+        try {
+            $annotation = \App\Models\PdfPageAnnotation::findOrFail($annotationId);
+            $pdfPageId = $annotation->pdf_page_id;
+
+            // Log deletion before deleting
+            PdfAnnotationHistory::logAction(
+                pdfPageId: $pdfPageId,
+                action: 'deleted',
+                beforeData: $annotation->toArray(),
+                afterData: null,
+                annotationId: null  // Set to null since annotation will be deleted
+            );
+
+            // Delete the annotation
+            $annotation->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Annotation deleted successfully',
+                'annotation_id' => $annotationId,
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Annotation not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to delete page annotation', [
+                'annotation_id' => $annotationId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete annotation: ' . $e->getMessage()
             ], 500);
         }
     }

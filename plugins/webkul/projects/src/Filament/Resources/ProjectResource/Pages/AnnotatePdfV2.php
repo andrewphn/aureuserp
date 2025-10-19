@@ -29,6 +29,7 @@ class AnnotatePdfV2 extends Page
     public $pdfDocument;
     public int $totalPages = 1;
     public ?string $pageType = null;
+    public array $pageMap = [];
 
     #[Url]
     public $pdf;
@@ -74,6 +75,12 @@ class AnnotatePdfV2 extends Page
 
         // Get page type if page exists
         $this->pageType = $this->pdfPage?->page_type;
+
+        // Build a map of page_number => pdfPageId for all pages
+        $this->pageMap = PdfPage::where('document_id', $this->pdfDocument->id)
+            ->orderBy('page_number')
+            ->pluck('id', 'page_number')
+            ->toArray();
 
         // Get the PDF URL
         $this->pdfUrl = Storage::disk('public')->url($this->pdfDocument->file_path);

@@ -5,6 +5,7 @@
     'projectId',
     'totalPages' => 1,
     'pageType' => null,
+    'pageMap' => [],
 ])
 
 @php
@@ -20,32 +21,35 @@
         pdfPageId: {{ $pdfPageId }},
         projectId: {{ $projectId }},
         totalPages: {{ $totalPages }},
-        pageType: {{ $pageType ? "'" . $pageType . "'" : 'null' }}
+        pageType: {{ $pageType ? "'" . $pageType . "'" : 'null' }},
+        pageMap: {{ json_encode($pageMap) }}
     })"
     x-init="init()"
     wire:ignore
     class="w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900"
 >
     <!-- Context Bar (Top - Sticky) -->
-    <div class="context-bar sticky top-0 z-50 bg-blue-800 border-b border-blue-700 p-4">
+    <div class="context-bar sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 shadow-md">
         <div class="flex items-center gap-4 flex-wrap">
             <!-- V3 Header Title -->
             <div class="flex items-center gap-2">
-                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                    ✨ V3 Annotation System - <span x-text="`Page ${currentPage}`">Page {{ $pageNumber }}</span>
-                    <span class="px-2 py-1 text-xs rounded font-semibold bg-blue-600">Page-by-Page</span>
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <x-filament::icon icon="heroicon-o-document-text" class="h-5 w-5" style="color: var(--primary-600);" />
+                    PDF Annotations
+                    <span class="text-gray-600 dark:text-gray-400" x-text="`Page ${currentPage}`">Page {{ $pageNumber }}</span>
+                    <span class="px-2 py-1 text-xs rounded-md font-semibold" style="background-color: var(--primary-50); color: var(--primary-700);">Page-by-Page</span>
                 </h2>
             </div>
 
             <!-- Project Context Display -->
-            <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-blue-200">📍 Context:</span>
-                <span class="text-sm text-blue-100" x-text="getContextLabel()"></span>
+            <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                <x-filament::icon icon="heroicon-o-map-pin" class="h-4 w-4" style="color: var(--warning-600);" />
+                <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="getContextLabel()"></span>
             </div>
 
             <!-- Room Autocomplete -->
             <div class="relative flex-1 max-w-xs">
-                <label class="block text-xs font-medium text-blue-200 mb-1">Room</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Room</label>
                 <input
                     type="text"
                     x-model="roomSearchQuery"
@@ -53,7 +57,7 @@
                     @focus="showRoomDropdown = true"
                     @click.away="showRoomDropdown = false"
                     placeholder="Type to search or create..."
-                    class="w-full px-3 py-2 rounded-lg border border-blue-600 bg-blue-900 text-white text-sm"
+                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ring-primary-600"
                 />
 
                 <!-- Room Suggestions Dropdown -->
@@ -78,7 +82,7 @@
 
             <!-- Location Autocomplete -->
             <div class="relative flex-1 max-w-xs">
-                <label class="block text-xs font-medium text-blue-200 mb-1">Location</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                 <input
                     type="text"
                     x-model="locationSearchQuery"
@@ -87,7 +91,7 @@
                     @click.away="showLocationDropdown = false"
                     :disabled="!activeRoomId"
                     placeholder="Select room first..."
-                    class="w-full px-3 py-2 rounded-lg border border-blue-600 bg-blue-900 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ring-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
 
                 <!-- Location Suggestions Dropdown -->
@@ -111,51 +115,57 @@
             </div>
 
             <!-- Zoom Controls -->
-            <div class="flex items-center gap-2 border-r border-blue-600 pr-4">
+            <div class="flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 pr-4">
                 <button
                     @click="zoomOut()"
                     :disabled="zoomLevel <= zoomMin"
-                    class="px-3 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Zoom Out (25%)"
+                    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Zoom Out (min: 100% fit to frame)"
                 >
-                    🔍−
+                    <x-filament::icon icon="heroicon-o-magnifying-glass-minus" class="h-4 w-4" />
                 </button>
-                <span class="text-sm text-blue-100 font-medium min-w-[4rem] text-center" x-text="`${getZoomPercentage()}%`"></span>
+                <span class="text-sm text-gray-700 dark:text-white font-semibold min-w-[4rem] text-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg" x-text="`${getZoomPercentage()}%`"></span>
                 <button
                     @click="zoomIn()"
                     :disabled="zoomLevel >= zoomMax"
-                    class="px-3 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Zoom In (25%)"
+                    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Zoom In (max: 300%)"
                 >
-                    🔍+
+                    <x-filament::icon icon="heroicon-o-magnifying-glass-plus" class="h-4 w-4" />
                 </button>
                 <button
                     @click="resetZoom()"
-                    class="px-3 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition-colors text-sm"
-                    title="Reset Zoom (100%)"
+                    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    title="Reset Zoom (100% - fit to frame)"
                 >
-                    ⟲
+                    <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4" />
                 </button>
             </div>
 
             <!-- Pagination Controls (NEW - Phase 2) -->
-            <div class="flex items-center gap-2 border-r border-blue-600 pr-4">
+            <div class="flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 pr-4">
                 <button
                     @click="previousPage()"
                     :disabled="currentPage <= 1"
-                    class="px-3 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-3 py-2 rounded-lg text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style="background-color: var(--primary-600);"
+                    onmouseover="this.style.backgroundColor='var(--primary-700)'"
+                    onmouseout="this.style.backgroundColor='var(--primary-600)'"
                     title="Previous Page"
                 >
-                    ← Prev
+                    <x-filament::icon icon="heroicon-o-chevron-left" class="h-4 w-4" />
                 </button>
-                <span class="text-sm text-blue-100 font-medium min-w-[5rem] text-center" x-text="`Page ${currentPage} of ${totalPages}`"></span>
+                <span class="text-sm text-gray-700 dark:text-white font-semibold min-w-[8rem] text-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg" x-text="`Page ${currentPage} of ${totalPages}`"></span>
                 <button
                     @click="nextPage()"
                     :disabled="currentPage >= totalPages"
-                    class="px-3 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-3 py-2 rounded-lg text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style="background-color: var(--primary-600);"
+                    onmouseover="this.style.backgroundColor='var(--primary-700)'"
+                    onmouseout="this.style.backgroundColor='var(--primary-600)'"
                     title="Next Page"
                 >
-                    Next →
+                    <x-filament::icon icon="heroicon-o-chevron-right" class="h-4 w-4" />
                 </button>
             </div>
 
@@ -164,86 +174,124 @@
                 <!-- Draw Location (only requires Room) -->
                 <button
                     @click="setDrawMode('location')"
-                    :class="drawMode === 'location' ? 'bg-purple-600 text-white ring-2 ring-purple-400' : 'bg-blue-700 text-blue-200'"
+                    :class="drawMode === 'location' ? 'ring-2 shadow-lg' : ''"
+                    :style="drawMode === 'location' ? 'background-color: var(--info-600); color: white; border-color: var(--info-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDrawLocation()"
-                    class="px-4 py-2 rounded-lg hover:bg-purple-500 hover:text-white transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border dark:bg-gray-700 dark:text-white"
                     title="Draw Location (Room required)"
                 >
-                    📍 Draw Location
+                    <x-filament::icon icon="heroicon-o-map-pin" class="h-4 w-4" />
+                    Location
                 </button>
 
                 <!-- Draw Cabinet Run (requires Room + Location) -->
                 <button
                     @click="setDrawMode('cabinet_run')"
-                    :class="drawMode === 'cabinet_run' ? 'bg-blue-600 text-white ring-2 ring-blue-400' : 'bg-blue-700 text-blue-200'"
+                    :class="drawMode === 'cabinet_run' ? 'ring-2 shadow-lg' : ''"
+                    :style="drawMode === 'cabinet_run' ? 'background-color: var(--primary-600); color: white; border-color: var(--primary-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDraw()"
-                    class="px-4 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border dark:bg-gray-700 dark:text-white"
                     title="Draw Cabinet Run (Room + Location required)"
                 >
-                    📦 Draw Run
+                    <x-filament::icon icon="heroicon-o-rectangle-group" class="h-4 w-4" />
+                    Cabinet Run
                 </button>
 
                 <!-- Draw Cabinet (requires Room + Location) -->
                 <button
                     @click="setDrawMode('cabinet')"
-                    :class="drawMode === 'cabinet' ? 'bg-green-600 text-white ring-2 ring-green-400' : 'bg-blue-700 text-blue-200'"
+                    :class="drawMode === 'cabinet' ? 'ring-2 shadow-lg' : ''"
+                    :style="drawMode === 'cabinet' ? 'background-color: var(--success-600); color: white; border-color: var(--success-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDraw()"
-                    class="px-4 py-2 rounded-lg hover:bg-green-500 hover:text-white transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border dark:bg-gray-700 dark:text-white"
                     title="Draw Cabinet (Room + Location required)"
                 >
-                    🗄️ Draw Cabinet
+                    <x-filament::icon icon="heroicon-o-cube" class="h-4 w-4" />
+                    Cabinet
                 </button>
 
                 <button
                     @click="clearContext()"
-                    class="px-4 py-2 rounded-lg bg-blue-700 text-blue-200 hover:bg-blue-600 transition-colors text-sm"
+                    class="px-3 py-2 rounded-lg text-white hover:opacity-90 transition-all text-sm font-semibold flex items-center gap-2"
+                    style="background-color: var(--danger-600);"
                     title="Clear Context"
                 >
-                    ✖️ Clear
+                    <x-filament::icon icon="heroicon-o-x-mark" class="h-4 w-4" />
+                    Clear
                 </button>
 
                 <button
                     @click="saveAnnotations()"
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                    class="px-3 py-2 rounded-lg text-white hover:opacity-90 transition-all text-sm font-semibold shadow-md flex items-center gap-2"
+                    style="background-color: var(--success-600);"
                     title="Save All Annotations"
                 >
-                    💾 Save
+                    <x-filament::icon icon="heroicon-o-check-circle" class="h-4 w-4" />
+                    Save
                 </button>
 
                 <button
                     @click="$dispatch('close-v3-modal')"
-                    class="px-4 py-2 bg-blue-700 text-white rounded-full hover:bg-blue-600 transition-colors"
+                    class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-semibold flex items-center gap-2"
                     title="Close Viewer"
                 >
-                    ✕
+                    <x-filament::icon icon="heroicon-o-x-circle" class="h-4 w-4" />
                 </button>
             </div>
         </div>
 
         <!-- Context Hint -->
-        <div x-show="!canDrawLocation()" class="mt-2 text-xs text-orange-400">
-            ℹ️ Select a Room to draw Locations, or Room + Location to draw Cabinet Runs/Cabinets
+        <div x-show="!canDrawLocation()" class="mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border" style="background-color: var(--warning-50); border-color: var(--warning-200); color: var(--warning-700);">
+            <x-filament::icon icon="heroicon-o-information-circle" class="h-4 w-4" />
+            <span>Select a Room to draw Locations, or Room + Location to draw Cabinet Runs/Cabinets</span>
         </div>
 
         <!-- PDF Loading Status -->
-        <div x-show="!pdfReady" class="mt-2 text-xs text-yellow-400">
-            ⏳ Loading PDF dimensions...
+        <div x-show="!pdfReady" class="mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border" style="background-color: var(--info-50); border-color: var(--info-200); color: var(--info-700);">
+            <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4 animate-spin" />
+            <span>Loading PDF dimensions...</span>
         </div>
     </div>
 
     <!-- Main Content Area -->
     <div class="flex flex-1 overflow-hidden">
         <!-- Left Sidebar (Project Tree) -->
-        <div class="tree-sidebar w-64 border-r border-gray-300 dark:border-gray-600 overflow-y-auto bg-gray-50 dark:bg-gray-800 p-4">
-            <div class="mb-4 flex items-center justify-between">
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Project Structure</h3>
-                <button
-                    @click="refreshTree()"
-                    class="text-xs text-blue-600 hover:text-blue-700"
-                    title="Refresh tree"
-                >
-                    🔄
-                </button>
+        <div class="tree-sidebar w-64 border-r border-gray-200 dark:border-gray-700 overflow-y-auto bg-white dark:bg-gray-800 p-4">
+            <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Project Structure</h3>
+
+                <div class="flex items-center gap-1">
+                    <!-- View Mode Toggle - Compact -->
+                    <div class="flex gap-0.5 p-0.5 bg-gray-100 dark:bg-gray-700 rounded">
+                        <button
+                            @click="treeViewMode = 'room'"
+                            :class="treeViewMode === 'room' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''"
+                            class="p-1 rounded transition-all"
+                            :style="treeViewMode === 'room' ? 'color: var(--primary-600);' : 'color: var(--gray-500);'"
+                            title="Group by Room"
+                        >
+                            <x-filament::icon icon="heroicon-o-home" class="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                            @click="treeViewMode = 'page'"
+                            :class="treeViewMode === 'page' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''"
+                            class="p-1 rounded transition-all"
+                            :style="treeViewMode === 'page' ? 'color: var(--primary-600);' : 'color: var(--gray-500);'"
+                            title="Group by Page"
+                        >
+                            <x-filament::icon icon="heroicon-o-document-text" class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+
+                    <button
+                        @click="refreshTree()"
+                        class="p-1 hover:opacity-80 transition-opacity"
+                        style="color: var(--primary-600);"
+                        title="Refresh tree"
+                    >
+                        <x-filament::icon icon="heroicon-o-arrow-path" class="h-3.5 w-3.5" />
+                    </button>
+                </div>
             </div>
 
             <!-- Loading State -->
@@ -256,13 +304,14 @@
                 <span class="text-sm text-red-600" x-text="error"></span>
             </div>
 
-            <!-- Tree Content -->
-            <div x-show="!loading && !error && tree">
+            <!-- Tree Content - Room View -->
+            <div x-show="!loading && !error && tree && treeViewMode === 'room'">
                 <template x-for="room in tree" :key="room.id">
                     <div class="tree-node mb-2">
                         <!-- Room Level -->
                         <div
                             @click="selectNode(room.id, 'room', room.name)"
+                            @contextmenu.prevent.stop="showContextMenu($event, room.id, 'room', room.name)"
                             :class="selectedNodeId === room.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
                         >
@@ -289,6 +338,7 @@
                                     <!-- Location Level -->
                                     <div
                                         @click="selectNode(location.id, 'room_location', location.name, room.id)"
+                                        @contextmenu.prevent.stop="showContextMenu($event, location.id, 'room_location', location.name, room.id)"
                                         :class="selectedNodeId === location.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
                                     >
@@ -314,6 +364,8 @@
                                             <div class="tree-node mb-1">
                                                 <!-- Cabinet Run Level -->
                                                 <div
+                                                    @click="selectNode(run.id, 'cabinet_run', run.name, room.id, location.id)"
+                                                    @contextmenu.prevent.stop="showContextMenu($event, run.id, 'cabinet_run', run.name, room.id, location.id)"
                                                     :class="selectedNodeId === run.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                 >
@@ -342,6 +394,78 @@
                     + Add Room
                 </button>
             </div>
+
+            <!-- Tree Content - Page View -->
+            <div x-show="!loading && !error && treeViewMode === 'page'">
+                <template x-for="page in getPageGroupedAnnotations()" :key="page.pageNumber">
+                    <div class="tree-node mb-2">
+                        <!-- Page Level -->
+                        <div
+                            @click="goToPage(page.pageNumber)"
+                            :class="currentPage === page.pageNumber ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                            class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
+                        >
+                            <button
+                                @click.stop="toggleNode('page_' + page.pageNumber)"
+                                class="w-4 h-4 flex items-center justify-center"
+                            >
+                                <span x-show="isExpanded('page_' + page.pageNumber)">▼</span>
+                                <span x-show="!isExpanded('page_' + page.pageNumber)">▶</span>
+                            </button>
+                            <span class="text-lg">📄</span>
+                            <span class="text-sm font-medium flex-1" x-text="`Page ${page.pageNumber}`"></span>
+                            <span
+                                x-show="page.annotations.length > 0"
+                                class="badge bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs"
+                                x-text="page.annotations.length"
+                            ></span>
+                        </div>
+
+                        <!-- Annotations on this page -->
+                        <div x-show="isExpanded('page_' + page.pageNumber)" class="ml-6 mt-1">
+                            <template x-for="anno in page.annotations" :key="anno.id">
+                                <div class="tree-node mb-1">
+                                    <div
+                                        @click="selectAnnotation(anno)"
+                                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                                    >
+                                        <span x-text="anno.type === 'location' ? '📍' : anno.type === 'cabinet_run' ? '📦' : '🗄️'"></span>
+                                        <span class="flex-1" x-text="anno.label"></span>
+                                        <span class="text-xs text-gray-500" x-text="anno.roomName || 'No room'"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <div x-show="!annotations || annotations.length === 0" class="text-center py-8 text-sm text-gray-500">
+                    No annotations yet
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Menu Overlay (Global) -->
+        <div
+            x-show="contextMenu.show"
+            @click.away="contextMenu.show = false"
+            :style="`position: fixed; top: ${contextMenu.y}px; left: ${contextMenu.x}px; z-index: 9999;`"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[180px]"
+        >
+            <button
+                @click="deleteTreeNode()"
+                class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm"
+                style="color: var(--danger-600);"
+            >
+                <x-filament::icon icon="heroicon-o-trash" class="h-4 w-4" />
+                <span>Delete <span x-text="contextMenu.nodeType === 'room' ? 'Room' : contextMenu.nodeType === 'room_location' ? 'Location' : 'Cabinet Run'"></span></span>
+            </button>
         </div>
 
         <!-- PDF Viewer (Center) with HTML Overlay -->
@@ -366,6 +490,7 @@
                     <template x-for="anno in annotations" :key="anno.id">
                         <div
                             x-show="isAnnotationVisible(anno)"
+                            x-data="{ showMenu: false }"
                             :style="`
                                 position: absolute;
                                 transform: translate(${anno.screenX}px, ${anno.screenY}px);
@@ -379,13 +504,48 @@
                                 transition: all 0.2s;
                                 will-change: transform;
                             `"
-                            @mouseenter="$el.style.background = anno.color + '66'"
-                            @mouseleave="$el.style.background = anno.color + '33'"
-                            @click="selectAnnotation(anno)"
-                            class="annotation-marker"
+                            @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
+                            @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
+                            class="annotation-marker group"
                         >
-                            <div class="annotation-label absolute -top-6 left-0 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                                <span x-text="anno.label"></span>
+                            <!-- Annotation Label -->
+                            <div class="annotation-label absolute -top-10 left-0 bg-white dark:bg-gray-900 px-3 py-2 rounded-lg text-base font-bold whitespace-nowrap shadow-xl border-2" style="color: var(--gray-900); border-color: var(--primary-400);">
+                                <span x-text="anno.label" class="dark:text-white"></span>
+                            </div>
+
+                            <!-- Hover Action Menu -->
+                            <div
+                                x-show="showMenu"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute -top-10 -right-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 flex gap-1 p-1"
+                                @click.stop
+                            >
+                                <!-- Edit Button -->
+                                <button
+                                    @click="editAnnotation(anno)"
+                                    class="px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1 text-sm font-medium"
+                                    style="color: var(--primary-600);"
+                                    title="Edit annotation"
+                                >
+                                    <x-filament::icon icon="heroicon-o-pencil" class="h-4 w-4" />
+                                    <span>Edit</span>
+                                </button>
+
+                                <!-- Delete Button -->
+                                <button
+                                    @click="deleteAnnotation(anno)"
+                                    class="px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1 text-sm font-medium"
+                                    style="color: var(--danger-600);"
+                                    title="Delete annotation"
+                                >
+                                    <x-filament::icon icon="heroicon-o-trash" class="h-4 w-4" />
+                                    <span>Delete</span>
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -436,6 +596,7 @@
                 pdfPageId: config.pdfPageId,
                 projectId: config.projectId,
                 totalPages: config.totalPages || 1,  // NEW: Total pages in PDF
+                pageMap: config.pageMap || {},  // NEW: Map of page_number => pdfPageId
 
                 // Pagination State (NEW - Phase 2)
                 currentPage: config.pageNumber || 1,  // Current page being viewed
@@ -444,8 +605,9 @@
                 // PDF State
                 pdfReady: false,
                 pageDimensions: null,
-                zoomLevel: 1.0,  // Current zoom level (1.0 = 100%)
-                zoomMin: 0.25,   // Minimum zoom (25%)
+                canvasScale: 1.0,    // Canvas scale factor (PDF → Screen)
+                zoomLevel: 1.0,  // Current zoom level (1.0 = 100% = fit to window)
+                zoomMin: 1.0,    // Minimum zoom (100% = fit to frame, no smaller)
                 zoomMax: 3.0,    // Maximum zoom (300%)
 
                 // Context State
@@ -461,6 +623,19 @@
                 selectedNodeId: null,
                 loading: false,
                 error: null,
+                treeViewMode: 'room', // 'room' or 'page'
+                treeSidebarState: 'full', // 'full', 'mini', 'hidden'
+
+                // Context Menu State
+                contextMenu: {
+                    show: false,
+                    x: 0,
+                    y: 0,
+                    nodeId: null,
+                    nodeType: null,
+                    nodeName: '',
+                    parentRoomId: null
+                },
 
                 // Autocomplete State
                 roomSearchQuery: '',
@@ -517,9 +692,30 @@
                                     label: updatedAnnotation.label,
                                     notes: updatedAnnotation.notes,
                                     measurementWidth: updatedAnnotation.measurementWidth,
-                                    measurementHeight: updatedAnnotation.measurementHeight
+                                    measurementHeight: updatedAnnotation.measurementHeight,
+                                    roomId: updatedAnnotation.roomId,
+                                    roomName: updatedAnnotation.roomName,
+                                    locationId: updatedAnnotation.locationId,
+                                    locationName: updatedAnnotation.locationName,
+                                    cabinetRunId: updatedAnnotation.cabinetRunId
                                 };
                                 console.log('✓ Annotation updated from Livewire:', updatedAnnotation);
+                                // Re-render annotations to show updated data
+                                this.renderAnnotations();
+                            }
+                        });
+
+                        // Listen for annotation deletion from Livewire
+                        window.addEventListener('annotation-deleted', (event) => {
+                            const annotationId = event.detail.annotationId;
+                            const index = this.annotations.findIndex(a => a.id === annotationId);
+                            if (index !== -1) {
+                                // Remove annotation from array
+                                this.annotations.splice(index, 1);
+                                console.log('✓ Annotation deleted via Livewire:', annotationId);
+                                // Re-render happens automatically via Alpine reactivity
+                                // Refresh tree to update counts
+                                this.refreshTree();
                             }
                         });
 
@@ -569,13 +765,15 @@
                         // Get the specific page
                         const page = await pdf.getPage(this.currentPage);
 
-                        // Calculate viewport to fit container
+                        // Get unscaled viewport for dimension reference
+                        const unscaledViewport = page.getViewport({ scale: 1.0 });
+
+                        // Calculate scale to fit container width
                         const containerWidth = embedContainer.clientWidth;
-                        const viewport = page.getViewport({ scale: 1.0 });
-                        const scale = containerWidth / viewport.width;
+                        const scale = containerWidth / unscaledViewport.width;
                         const scaledViewport = page.getViewport({ scale });
 
-                        // Create canvas
+                        // Create canvas with scaled dimensions
                         const canvas = document.createElement('canvas');
                         const context = canvas.getContext('2d');
                         canvas.width = scaledViewport.width;
@@ -596,8 +794,12 @@
                         embedContainer.innerHTML = '';
                         embedContainer.appendChild(canvas);
 
+                        // Store canvas scale factor for coordinate transformations
+                        this.canvasScale = scale;
+
                         console.log('✓ PDF page rendered to canvas');
                         console.log(`✓ Canvas dimensions: ${canvas.width} × ${canvas.height}`);
+                        console.log(`✓ Canvas scale factor: ${scale.toFixed(3)}`);
 
                         this.pdfReady = true;
 
@@ -644,19 +846,25 @@
                     console.log('✓ Page observer initialized');
                 },
 
-                // Get overlay rect with caching (performance optimization)
-                getOverlayRect() {
+                // Get canvas rect for coordinate transformations
+                getCanvasRect() {
                     const now = Date.now();
                     if (this._overlayRect && (now - this._lastRectUpdate) < this._rectCacheMs) {
                         return this._overlayRect;
                     }
 
-                    const overlay = this.$refs.annotationOverlay;
-                    if (!overlay) return null;
+                    // Get the canvas element (not the overlay)
+                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
+                    if (!canvas) return null;
 
-                    this._overlayRect = overlay.getBoundingClientRect();
+                    this._overlayRect = canvas.getBoundingClientRect();
                     this._lastRectUpdate = now;
                     return this._overlayRect;
+                },
+
+                // Deprecated: Use getCanvasRect() instead
+                getOverlayRect() {
+                    return this.getCanvasRect();
                 },
 
                 // Coordinate transformation: Screen → PDF
@@ -681,26 +889,22 @@
                     };
                 },
 
-                // Coordinate transformation: PDF → Screen
+                // Coordinate transformation: PDF → Screen (Canvas)
                 pdfToScreen(pdfX, pdfY, width = 0, height = 0) {
                     if (!this.pageDimensions) return { x: 0, y: 0, width: 0, height: 0 };
 
-                    const rect = this.getOverlayRect();
-                    if (!rect) return { x: 0, y: 0, width: 0, height: 0 };
+                    const canvasRect = this.getCanvasRect();
+                    if (!canvasRect) return { x: 0, y: 0, width: 0, height: 0 };
 
-                    // Normalize PDF coordinates
+                    // Normalize PDF coordinates to 0-1 range
                     const normalizedX = pdfX / this.pageDimensions.width;
                     const normalizedY = (this.pageDimensions.height - pdfY) / this.pageDimensions.height;
 
-                    // Convert to screen coordinates
-                    let screenX = normalizedX * rect.width;
-                    let screenY = normalizedY * rect.height;
-                    const screenWidth = (width / this.pageDimensions.width) * rect.width;
-                    const screenHeight = (height / this.pageDimensions.height) * rect.height;
-
-                    // Account for PDF iframe scroll offset
-                    screenX -= this.scrollX;
-                    screenY -= this.scrollY;
+                    // Apply canvas scale to get screen coordinates
+                    const screenX = normalizedX * canvasRect.width;
+                    const screenY = normalizedY * canvasRect.height;
+                    const screenWidth = (width / this.pageDimensions.width) * canvasRect.width;
+                    const screenHeight = (height / this.pageDimensions.height) * canvasRect.height;
 
                     return {
                         x: screenX,
@@ -809,7 +1013,9 @@
                         locationName: this.activeLocationName,
                         label: this.generateAnnotationLabel(),
                         color: this.getDrawColor(),
-                        createdAt: new Date()
+                        createdAt: new Date(),
+                        pdfPageId: this.pdfPageId,  // Add pdfPageId for context loading
+                        projectId: this.projectId    // Add projectId for form loading
                     };
 
                     this.annotations.push(annotation);
@@ -852,7 +1058,10 @@
 
                 // Load existing annotations
                 async loadAnnotations() {
-                    console.log('📥 Loading annotations...');
+                    console.log(`📥 Loading annotations for page ${this.currentPage} (pdfPageId: ${this.pdfPageId})...`);
+
+                    // PHASE 5: Clear existing annotations before loading new ones
+                    this.annotations = [];
 
                     try {
                         const response = await fetch(`/api/pdf/page/${this.pdfPageId}/annotations`);
@@ -1016,7 +1225,7 @@
                     return this.expandedNodes.includes(nodeId);
                 },
 
-                selectNode(nodeId, type, name, parentRoomId = null) {
+                selectNode(nodeId, type, name, parentRoomId = null, parentLocationId = null) {
                     this.selectedNodeId = nodeId;
 
                     if (type === 'room') {
@@ -1031,6 +1240,84 @@
                         this.activeLocationId = nodeId;
                         this.activeLocationName = name;
                         this.locationSearchQuery = name;
+                    } else if (type === 'cabinet_run') {
+                        this.activeRoomId = parentRoomId;
+                        this.activeLocationId = parentLocationId;
+                        // Cabinet runs don't set active context, just selected
+                    }
+                },
+
+                // Show context menu on right-click
+                showContextMenu(event, nodeId, nodeType, nodeName, parentRoomId = null, parentLocationId = null) {
+                    console.log('🖱️ Right-click detected!', { nodeId, nodeType, nodeName });
+
+                    this.contextMenu = {
+                        show: true,
+                        x: event.clientX,
+                        y: event.clientY,
+                        nodeId: nodeId,
+                        nodeType: nodeType,
+                        nodeName: nodeName,
+                        parentRoomId: parentRoomId,
+                        parentLocationId: parentLocationId
+                    };
+
+                    console.log('✓ Context menu state updated:', this.contextMenu);
+                },
+
+                // Delete tree node (Room, Location, or Cabinet Run)
+                async deleteTreeNode() {
+                    const { nodeId, nodeType, nodeName } = this.contextMenu;
+
+                    if (!confirm(`Are you sure you want to delete "${nodeName}"? This will also delete all associated annotations and data.`)) {
+                        this.contextMenu.show = false;
+                        return;
+                    }
+
+                    console.log(`🗑️ Deleting ${nodeType}:`, nodeId);
+
+                    try {
+                        let endpoint = '';
+
+                        if (nodeType === 'room') {
+                            endpoint = `/api/project/room/${nodeId}`;
+                        } else if (nodeType === 'room_location') {
+                            endpoint = `/api/project/location/${nodeId}`;
+                        } else if (nodeType === 'cabinet_run') {
+                            endpoint = `/api/project/cabinet-run/${nodeId}`;
+                        }
+
+                        const response = await fetch(endpoint, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            console.log(`✓ ${nodeType} deleted successfully`);
+
+                            // Close context menu
+                            this.contextMenu.show = false;
+
+                            // Refresh tree to show updated structure
+                            await this.refreshTree();
+
+                            // Clear active context if deleted node was selected
+                            if (this.selectedNodeId === nodeId) {
+                                this.clearContext();
+                                this.selectedNodeId = null;
+                            }
+                        } else {
+                            throw new Error(data.error || `Failed to delete ${nodeType}`);
+                        }
+                    } catch (error) {
+                        console.error(`Failed to delete ${nodeType}:`, error);
+                        alert(`Error deleting ${nodeType}: ${error.message}`);
+                        this.contextMenu.show = false;
                     }
                 },
 
@@ -1070,6 +1357,62 @@
                     Livewire.dispatch('edit-annotation', { annotation: anno });
                 },
 
+                // Edit annotation (NEW - Full CRUD)
+                editAnnotation(anno) {
+                    console.log('✏️ Editing annotation:', anno);
+                    // Add pdfPageId and projectId to annotation for Livewire context loading
+                    const annotationWithContext = {
+                        ...anno,
+                        pdfPageId: this.pdfPageId,
+                        projectId: this.projectId
+                    };
+                    // Dispatch to Livewire component for editing
+                    Livewire.dispatch('edit-annotation', { annotation: annotationWithContext });
+                },
+
+                // Delete annotation (NEW - Full CRUD)
+                async deleteAnnotation(anno) {
+                    if (!confirm(`Delete "${anno.label}"?`)) {
+                        return;
+                    }
+
+                    console.log('🗑️ Deleting annotation:', anno);
+
+                    // If it's a temporary annotation (not saved yet), just remove from array
+                    if (anno.id.toString().startsWith('temp_')) {
+                        this.annotations = this.annotations.filter(a => a.id !== anno.id);
+                        console.log('✓ Temporary annotation removed from local state');
+                        return;
+                    }
+
+                    // Otherwise, delete from server
+                    try {
+                        const response = await fetch(`/api/pdf/page/annotations/${anno.id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Remove from local state
+                            this.annotations = this.annotations.filter(a => a.id !== anno.id);
+                            console.log('✓ Annotation deleted successfully');
+
+                            // Refresh tree to update counts
+                            await this.refreshTree();
+                        } else {
+                            throw new Error(data.error || 'Failed to delete annotation');
+                        }
+                    } catch (error) {
+                        console.error('Failed to delete annotation:', error);
+                        alert(`Error deleting annotation: ${error.message}`);
+                    }
+                },
+
                 // Zoom methods
                 zoomIn() {
                     const newZoom = Math.min(this.zoomLevel + 0.25, this.zoomMax);
@@ -1091,11 +1434,20 @@
                     // Invalidate overlay rect cache
                     this._overlayRect = null;
 
-                    // Apply CSS transform to PDF container
+                    // Apply responsive CSS transform to PDF canvas
+                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
                     const pdfEmbed = this.$refs.pdfEmbed;
-                    if (pdfEmbed) {
-                        pdfEmbed.style.transform = `scale(${level})`;
-                        pdfEmbed.style.transformOrigin = 'top left';
+
+                    if (canvas && pdfEmbed) {
+                        // Apply zoom transform to canvas
+                        canvas.style.transform = `scale(${level})`;
+                        canvas.style.transformOrigin = 'top left';
+
+                        // Update container size to accommodate scaled canvas
+                        const scaledWidth = canvas.width * level;
+                        const scaledHeight = canvas.height * level;
+                        pdfEmbed.style.minWidth = `${scaledWidth}px`;
+                        pdfEmbed.style.minHeight = `${scaledHeight}px`;
                     }
 
                     // Re-render annotations at new zoom level
@@ -1134,7 +1486,8 @@
                 async nextPage() {
                     if (this.currentPage < this.totalPages) {
                         this.currentPage++;
-                        console.log(`📄 Navigating to page ${this.currentPage}`);
+                        this.updatePdfPageId();
+                        console.log(`📄 Navigating to page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
                         await this.displayPdf();
                         await this.loadAnnotations();
                     }
@@ -1143,7 +1496,8 @@
                 async previousPage() {
                     if (this.currentPage > 1) {
                         this.currentPage--;
-                        console.log(`📄 Navigating to page ${this.currentPage}`);
+                        this.updatePdfPageId();
+                        console.log(`📄 Navigating to page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
                         await this.displayPdf();
                         await this.loadAnnotations();
                     }
@@ -1152,10 +1506,52 @@
                 async goToPage(pageNum) {
                     if (pageNum >= 1 && pageNum <= this.totalPages) {
                         this.currentPage = pageNum;
-                        console.log(`📄 Navigating to page ${this.currentPage}`);
+                        this.updatePdfPageId();
+                        console.log(`📄 Navigating to page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
                         await this.displayPdf();
                         await this.loadAnnotations();
                     }
+                },
+
+                // Update pdfPageId based on currentPage using pageMap (NEW - Phase 5)
+                updatePdfPageId() {
+                    const newPdfPageId = this.pageMap[this.currentPage];
+                    if (newPdfPageId) {
+                        this.pdfPageId = newPdfPageId;
+                        console.log(`✓ Updated pdfPageId to ${this.pdfPageId} for page ${this.currentPage}`);
+                    } else {
+                        console.warn(`⚠️ No pdfPageId found for page ${this.currentPage} in pageMap`);
+                    }
+                },
+
+                // Group annotations by page number for page view
+                getPageGroupedAnnotations() {
+                    // Get all unique page numbers from annotations and pageMap
+                    const pages = new Map();
+
+                    // Initialize pages from pageMap (all available pages)
+                    Object.keys(this.pageMap).forEach(pageNum => {
+                        pages.set(parseInt(pageNum), {
+                            pageNumber: parseInt(pageNum),
+                            annotations: []
+                        });
+                    });
+
+                    // Add annotations to their respective pages
+                    this.annotations.forEach(anno => {
+                        const pageNum = this.currentPage; // All current annotations are on current page
+                        if (pages.has(pageNum)) {
+                            pages.get(pageNum).annotations.push(anno);
+                        } else {
+                            pages.set(pageNum, {
+                                pageNumber: pageNum,
+                                annotations: [anno]
+                            });
+                        }
+                    });
+
+                    // Convert to array and sort by page number
+                    return Array.from(pages.values()).sort((a, b) => a.pageNumber - b.pageNumber);
                 },
 
                 // Check if annotation is visible within viewport (culling optimization)
