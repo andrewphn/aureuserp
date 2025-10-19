@@ -4,7 +4,10 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use App\Models\PdfDocument;
 use App\Models\PdfPage;
@@ -12,9 +15,10 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Url;
 
-class AnnotatePdfV2 extends Page
+class AnnotatePdfV2 extends Page implements HasForms
 {
     use InteractsWithRecord;
+    use InteractsWithForms;
 
     protected static string $resource = ProjectResource::class;
 
@@ -109,5 +113,25 @@ class AnnotatePdfV2 extends Page
                 ->icon('heroicon-o-arrow-left')
                 ->url(fn () => ProjectResource::getUrl('pdf-review', ['record' => $this->record->id])),
         ];
+    }
+
+    public function getFooterWidgetsColumns(): int | array
+    {
+        return 1;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(parent::getViewData(), [
+            'loadAnnotationScripts' => true,
+        ]);
+    }
+
+    /**
+     * Define a minimal form schema to trigger Filament asset loading
+     */
+    public function form(Schema $form): Schema
+    {
+        return $form->schema([]);
     }
 }
