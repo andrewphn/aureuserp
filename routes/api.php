@@ -40,6 +40,7 @@ Route::middleware(['web', 'auth:web', 'throttle:120,1'])->prefix('pdf')->name('a
     // Page-level annotation operations
     Route::post('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'savePageAnnotations'])->middleware('throttle:60,1')->name('page.annotations.save');
     Route::get('/page/{pdfPageId}/annotations', [PdfAnnotationController::class, 'loadPageAnnotations'])->name('page.annotations.load');
+    Route::delete('/page/annotations/{annotationId}', [PdfAnnotationController::class, 'deletePageAnnotation'])->middleware('throttle:30,1')->name('page.annotations.delete');
     Route::get('/page/{pdfPageId}/annotations/history', [PdfAnnotationController::class, 'getAnnotationHistory'])->name('page.annotations.history');
 
     // Page metadata operations (page type, cover fields, etc.)
@@ -142,6 +143,19 @@ Route::middleware(['web', 'auth:web'])->prefix('project')->name('api.project.')-
     Route::post('/room/{roomId}/locations', [App\Http\Controllers\Api\ProjectEntityTreeController::class, 'createLocationForRoom'])
         ->middleware('throttle:60,1')
         ->name('room.locations.create');
+
+    // Delete entity routes
+    Route::delete('/room/{roomId}', [App\Http\Controllers\Api\ProjectEntityTreeController::class, 'deleteRoom'])
+        ->middleware('throttle:30,1')
+        ->name('room.delete');
+
+    Route::delete('/location/{locationId}', [App\Http\Controllers\Api\ProjectEntityTreeController::class, 'deleteLocation'])
+        ->middleware('throttle:30,1')
+        ->name('location.delete');
+
+    Route::delete('/cabinet-run/{cabinetRunId}', [App\Http\Controllers\Api\ProjectEntityTreeController::class, 'deleteCabinetRun'])
+        ->middleware('throttle:30,1')
+        ->name('cabinet-run.delete');
 });
 
 // Global Footer API Routes

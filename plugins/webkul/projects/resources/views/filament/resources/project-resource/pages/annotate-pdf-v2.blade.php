@@ -9,6 +9,7 @@
                 'projectId' => $projectId,
                 'totalPages' => $totalPages,
                 'pageType' => $pageType,
+                'pageMap' => $pageMap,
             ])
         @else
             <div class="flex items-center justify-center h-full">

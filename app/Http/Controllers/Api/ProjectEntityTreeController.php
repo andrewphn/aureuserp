@@ -219,4 +219,115 @@ class ProjectEntityTreeController extends Controller
             'location' => $location
         ], 201);
     }
+
+    /**
+     * Delete a room and all associated data
+     */
+    public function deleteRoom(int $roomId): JsonResponse
+    {
+        try {
+            $room = Room::findOrFail($roomId);
+
+            // Delete all associated annotations
+            PdfPageAnnotation::where('room_id', $roomId)->delete();
+
+            // Delete room (cascade will handle locations, cabinet runs, etc.)
+            $room->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Room deleted successfully'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Room not found'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete room', [
+                'room_id' => $roomId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete room: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a location and all associated data
+     */
+    public function deleteLocation(int $locationId): JsonResponse
+    {
+        try {
+            $location = RoomLocation::findOrFail($locationId);
+
+            // Delete all associated annotations
+            PdfPageAnnotation::where('cabinet_run_id', $locationId)->delete();
+
+            // Delete location (cascade will handle cabinet runs, etc.)
+            $location->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Location deleted successfully'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Location not found'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete location', [
+                'location_id' => $locationId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete location: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a cabinet run and all associated data
+     */
+    public function deleteCabinetRun(int $cabinetRunId): JsonResponse
+    {
+        try {
+            $cabinetRun = CabinetRun::findOrFail($cabinetRunId);
+
+            // Delete all associated annotations
+            // Note: cabinet_run_id is stored in the cabinet_run_id column
+            PdfPageAnnotation::where('cabinet_run_id', $cabinetRunId)
+                ->where('annotation_type', 'cabinet_run')
+                ->delete();
+
+            // Delete cabinet run (cascade will handle cabinets, etc.)
+            $cabinetRun->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cabinet run deleted successfully'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Cabinet run not found'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete cabinet run', [
+                'cabinet_run_id' => $cabinetRunId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete cabinet run: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
