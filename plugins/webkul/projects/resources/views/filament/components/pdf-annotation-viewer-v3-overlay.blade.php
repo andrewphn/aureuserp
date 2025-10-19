@@ -345,8 +345,7 @@
         </div>
 
         <!-- PDF Viewer (Center) with HTML Overlay -->
-        <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative"
-             @wheel.prevent="/* Block wheel events on PDF container */">
+        <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative">
             <!-- PDF Container -->
             <div id="pdf-container-{{ $viewerId }}" class="relative w-full h-full overflow-auto">
                 <!-- PDFObject.js embed goes here -->
@@ -554,104 +553,66 @@
                     await pdf.destroy();
                 },
 
-                // Display PDF using direct iframe embedding (bypassing PDFObject.js bug)
+                // Display PDF using canvas rendering (PDF.js) - True page isolation
                 async displayPdf() {
-                    console.log('📄 Displaying PDF with direct iframe embedding...');
+                    console.log('📄 Rendering PDF page to canvas (scroll-proof)...');
                     console.log('🔍 PDF URL:', this.pdfUrl);
-                    console.log('🔍 Current Page:', this.currentPage);  // PHASE 2: Use currentPage
+                    console.log('🔍 Current Page:', this.currentPage);
 
                     const embedContainer = this.$refs.pdfEmbed;
 
-                    // Create iframe directly with PDF URL
-                    const iframe = document.createElement('iframe');
-
-                    // Build PDF URL with page parameter (PHASE 2: Use currentPage)
-                    // Lock to single page view - no scrolling to other pages allowed
-                    let pdfSrc = this.pdfUrl;
-                    if (this.currentPage && this.currentPage > 1) {
-                        pdfSrc += `#page=${this.currentPage}`;
-                    } else {
-                        pdfSrc += `#page=1`;
-                    }
-                    // Add PDF.js parameters:
-                    // - pagemode=none: No page navigation UI
-                    // - toolbar=0: Hide toolbar
-                    // - view=Fit: Fit entire page in viewport (prevents scrolling between pages)
-                    pdfSrc += '&view=Fit&pagemode=none&toolbar=0&scrollbar=1&navpanes=0';
-
-                    iframe.src = pdfSrc;
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    iframe.setAttribute('type', 'application/pdf');
-                    iframe.setAttribute('title', 'PDF Document');
-
-                    // Block mouse wheel events to prevent page navigation
-                    iframe.addEventListener('wheel', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }, { passive: false });
-
-                    // Clear container and add iframe
-                    embedContainer.innerHTML = '';
-                    embedContainer.appendChild(iframe);
-
-                    console.log('✓ PDF iframe created with src:', pdfSrc);
-
-                    // Wait for iframe to load
-                    await new Promise((resolve) => {
-                        iframe.onload = () => {
-                            console.log('✓ PDF iframe loaded successfully');
-                            resolve();
-                        };
-                        // Fallback timeout in case onload doesn't fire
-                        setTimeout(resolve, 2000);
-                    });
-
-                    this.pdfReady = true;
-                    console.log(`✓ PDF page ${this.currentPage} displayed successfully`);
-
-                    // Attach scroll listener to PDF iframe (will be removed in Phase 4)
-                    await this.attachPdfScrollListener();
-                },
-
-                // Attach scroll listener to PDF iframe for scroll tracking
-                async attachPdfScrollListener() {
-                    // Wait for iframe to be fully loaded
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-
-                    const iframe = this.$refs.pdfEmbed.querySelector('iframe');
-                    if (!iframe) {
-                        console.warn('⚠️ PDF iframe not found, scroll tracking disabled');
-                        return;
-                    }
-
-                    this.pdfIframe = iframe;
-                    console.log('✓ PDF iframe found, attaching scroll listener');
-
-                    // Try to access iframe content (may be blocked by same-origin policy)
                     try {
-                        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+                        // Load PDF document
+                        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+                        const pdf = await loadingTask.promise;
 
-                        // Listen for scroll events inside the iframe
-                        iframeDocument.addEventListener('scroll', () => {
-                            const scrollTop = iframeDocument.documentElement.scrollTop || iframeDocument.body.scrollTop;
-                            const scrollLeft = iframeDocument.documentElement.scrollLeft || iframeDocument.body.scrollLeft;
+                        // Get the specific page
+                        const page = await pdf.getPage(this.currentPage);
 
-                            this.scrollX = scrollLeft;
-                            this.scrollY = scrollTop;
+                        // Calculate viewport to fit container
+                        const containerWidth = embedContainer.clientWidth;
+                        const viewport = page.getViewport({ scale: 1.0 });
+                        const scale = containerWidth / viewport.width;
+                        const scaledViewport = page.getViewport({ scale });
 
-                            // Update annotation positions based on scroll
-                            this.updateAnnotationPositions();
-                        });
+                        // Create canvas
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = scaledViewport.width;
+                        canvas.height = scaledViewport.height;
+                        canvas.style.width = '100%';
+                        canvas.style.height = 'auto';
+                        canvas.style.display = 'block';
 
-                        console.log('✓ PDF scroll listener attached');
-                    } catch (e) {
-                        console.warn('⚠️ Cannot access PDF iframe content (CORS)', e.message);
-                        console.log('   Annotations may not track scroll correctly');
+                        // Render PDF page to canvas
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: scaledViewport
+                        };
+
+                        await page.render(renderContext).promise;
+
+                        // Clear container and add canvas
+                        embedContainer.innerHTML = '';
+                        embedContainer.appendChild(canvas);
+
+                        console.log('✓ PDF page rendered to canvas');
+                        console.log(`✓ Canvas dimensions: ${canvas.width} × ${canvas.height}`);
+
+                        this.pdfReady = true;
+
+                        // Clean up PDF document
+                        await pdf.destroy();
+
+                        console.log(`✓ PDF page ${this.currentPage} displayed successfully`);
+                    } catch (error) {
+                        console.error('❌ Failed to render PDF:', error);
+                        throw error;
                     }
                 },
+
+                // REMOVED: attachPdfScrollListener() - No longer needed with canvas rendering
+                // Canvas pages are static images, no internal scrolling possible
 
                 // Initialize IntersectionObserver for page visibility tracking
                 initPageObserver() {
