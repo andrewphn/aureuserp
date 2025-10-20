@@ -1,8 +1,4 @@
 <x-filament-panels::page>
-    <x-slot name="footer">
-        {{ $this->form }}
-    </x-slot>
-
     {{-- Full-screen V3 HTML Overlay PDF Annotation Viewer --}}
     <div class="w-full" style="height: calc(100vh - 120px);">
         @if($pdfUrl)
@@ -28,4 +24,9 @@
             </div>
         @endif
     </div>
+
+    {{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}
+    @once
+        @vite('resources/js/annotations.js')
+    @endonce
 </x-filament-panels::page>

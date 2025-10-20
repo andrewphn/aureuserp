@@ -322,6 +322,12 @@ document.addEventListener('alpine:init', () => {
 });
 
 document.addEventListener('livewire:init', () => {
+    // Check if Livewire is actually available
+    if (typeof Livewire === 'undefined') {
+        console.warn('[EntityStore] Livewire not available, skipping Livewire integration');
+        return;
+    }
+
     // Track if we're currently syncing to prevent circular updates
     let isSyncing = false;
 
@@ -566,6 +572,12 @@ document.addEventListener('livewire:init', () => {
  */
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
+        // Check if Livewire is available
+        if (typeof Livewire === 'undefined' || typeof Alpine === 'undefined') {
+            console.debug('[EntityStore] Livewire or Alpine not available, skipping auto-restore');
+            return;
+        }
+
         // Skip auto-restore on edit pages entirely
         // Edit pages load their data from the database on mount
         const isEditPage = window.location.pathname.includes('/edit');
