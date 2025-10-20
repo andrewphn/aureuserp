@@ -142,7 +142,7 @@
                 </button>
             </div>
 
-            <!-- Pagination Controls (NEW - Phase 2) -->
+            <!-- Pagination Controls with Page Type Selector (Phase 2 + Phase 3.1) -->
             <div class="flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 pr-4">
                 <button
                     @click="previousPage()"
@@ -155,7 +155,48 @@
                 >
                     <x-filament::icon icon="heroicon-o-chevron-left" class="h-4 w-4" />
                 </button>
-                <span class="text-sm text-gray-700 dark:text-white font-semibold min-w-[8rem] text-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg" x-text="`Page ${currentPage} of ${totalPages}`"></span>
+
+                <!-- Page number and type selector stacked vertically -->
+                <div class="flex flex-col gap-1.5 min-w-[8rem]">
+                    <span class="text-sm text-gray-700 dark:text-white font-semibold text-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg" x-text="`Page ${currentPage} of ${totalPages}`"></span>
+
+                    <!-- Page Type Selector - UNDER page number -->
+                    <div class="relative">
+                        <select
+                            x-model="pageType"
+                            @change="savePageType()"
+                            class="w-full h-9 pl-3 pr-8 text-xs rounded-lg border-2 font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-600"
+                            :class="{
+                                'border-blue-300 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 dark:border-blue-600': pageType === 'cover',
+                                'border-green-300 bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-100 dark:border-green-600': pageType === 'floor_plan',
+                                'border-purple-300 bg-purple-50 text-purple-900 dark:bg-purple-900/20 dark:text-purple-100 dark:border-purple-600': pageType === 'elevation',
+                                'border-orange-300 bg-orange-50 text-orange-900 dark:bg-orange-900/20 dark:text-orange-100 dark:border-orange-600': pageType === 'detail',
+                                'border-gray-300 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600': pageType === 'other',
+                                'border-gray-300 bg-white text-gray-500 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600': !pageType
+                            }"
+                            title="Set page type for current page"
+                        >
+                            <option value="">Type...</option>
+                            <option value="cover">📋 Cover</option>
+                            <option value="floor_plan">🏗️ Floor</option>
+                            <option value="elevation">📐 Elev</option>
+                            <option value="detail">🔍 Detail</option>
+                            <option value="other">📄 Other</option>
+                        </select>
+
+                        <!-- Page Type Badge (compact version) -->
+                        <div x-show="pageType" class="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-bold rounded-full shadow-sm pointer-events-none" :class="{
+                            'bg-blue-500 text-white': pageType === 'cover',
+                            'bg-green-500 text-white': pageType === 'floor_plan',
+                            'bg-purple-500 text-white': pageType === 'elevation',
+                            'bg-orange-500 text-white': pageType === 'detail',
+                            'bg-gray-500 text-white': pageType === 'other'
+                        }">
+                            <span x-text="pageType === 'cover' ? 'C' : pageType === 'floor_plan' ? 'F' : pageType === 'elevation' ? 'E' : pageType === 'detail' ? 'D' : 'O'"></span>
+                        </div>
+                    </div>
+                </div>
+
                 <button
                     @click="nextPage()"
                     :disabled="currentPage >= totalPages"
@@ -169,19 +210,18 @@
                 </button>
             </div>
 
-            <!-- Draw Mode Buttons -->
+            <!-- Draw Mode Buttons (Icon-Only) -->
             <div class="flex items-center gap-2">
-                <!-- Draw Location (only requires Room) -->
+                <!-- Draw Room Location (only requires Room) -->
                 <button
                     @click="setDrawMode('location')"
                     :class="drawMode === 'location' ? 'ring-2 shadow-lg' : ''"
                     :style="drawMode === 'location' ? 'background-color: var(--info-600); color: white; border-color: var(--info-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDrawLocation()"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border dark:bg-gray-700 dark:text-white"
-                    title="Draw Location (Room required)"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
+                    title="Draw Room Location (Room required)"
                 >
-                    <x-filament::icon icon="heroicon-o-map-pin" class="h-4 w-4" />
-                    Location
+                    <x-filament::icon icon="heroicon-o-squares-2x2" class="h-5 w-5" />
                 </button>
 
                 <!-- Draw Cabinet Run (requires Room + Location) -->
@@ -190,11 +230,10 @@
                     :class="drawMode === 'cabinet_run' ? 'ring-2 shadow-lg' : ''"
                     :style="drawMode === 'cabinet_run' ? 'background-color: var(--primary-600); color: white; border-color: var(--primary-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDraw()"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
                     title="Draw Cabinet Run (Room + Location required)"
                 >
-                    <x-filament::icon icon="heroicon-o-rectangle-group" class="h-4 w-4" />
-                    Cabinet Run
+                    <x-filament::icon icon="heroicon-o-rectangle-group" class="h-5 w-5" />
                 </button>
 
                 <!-- Draw Cabinet (requires Room + Location) -->
@@ -203,11 +242,10 @@
                     :class="drawMode === 'cabinet' ? 'ring-2 shadow-lg' : ''"
                     :style="drawMode === 'cabinet' ? 'background-color: var(--success-600); color: white; border-color: var(--success-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDraw()"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
                     title="Draw Cabinet (Room + Location required)"
                 >
-                    <x-filament::icon icon="heroicon-o-cube" class="h-4 w-4" />
-                    Cabinet
+                    <x-filament::icon icon="heroicon-o-cube" class="h-5 w-5" />
                 </button>
 
                 <button
@@ -250,6 +288,49 @@
         <div x-show="!pdfReady" class="mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border" style="background-color: var(--info-50); border-color: var(--info-200); color: var(--info-700);">
             <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4 animate-spin" />
             <span>Loading PDF dimensions...</span>
+        </div>
+    </div>
+
+    <!-- Isolation Mode Breadcrumb (NEW - Illustrator-style) -->
+    <div x-show="isolationMode" x-transition class="isolation-breadcrumb bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 border-b-4 border-primary-500 px-6 py-4 shadow-lg">
+        <div class="flex items-center gap-4">
+            <!-- Lock Icon + Label -->
+            <div class="flex items-center gap-2">
+                <x-filament::icon icon="heroicon-o-lock-closed" class="h-5 w-5 text-primary-700 dark:text-primary-300" />
+                <span class="text-sm font-bold text-primary-900 dark:text-primary-100 uppercase tracking-wide">
+                    Isolation Mode
+                </span>
+            </div>
+
+            <!-- Breadcrumb Path -->
+            <div class="flex items-center gap-2 text-sm font-semibold text-primary-800 dark:text-primary-200">
+                <!-- Room Level -->
+                <span class="flex items-center gap-1.5">
+                    <span class="text-lg">🏠</span>
+                    <span x-text="isolatedRoomName"></span>
+                </span>
+
+                <!-- Location Level (if in location isolation) -->
+                <template x-if="isolationLevel === 'location'">
+                    <div class="flex items-center gap-2">
+                        <x-filament::icon icon="heroicon-o-chevron-right" class="h-4 w-4 text-primary-600" />
+                        <span class="flex items-center gap-1.5">
+                            <span class="text-lg">📍</span>
+                            <span x-text="isolatedLocationName"></span>
+                        </span>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Exit Button -->
+            <button
+                @click="exitIsolationMode()"
+                class="ml-auto px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold shadow-md transition-all flex items-center gap-2"
+                title="Exit Isolation Mode (Esc)"
+            >
+                <x-filament::icon icon="heroicon-o-arrow-left" class="h-4 w-4" />
+                <span>Exit Isolation</span>
+            </button>
         </div>
     </div>
 
@@ -475,6 +556,20 @@
                 <!-- PDFObject.js embed goes here -->
                 <div x-ref="pdfEmbed" class="w-full h-full min-h-full"></div>
 
+                <!-- Isolation Mode Dimming Overlay (NEW - Filament-style backdrop) -->
+                <div
+                    x-show="isolationMode"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="absolute inset-0 bg-gray-900/60 dark:bg-black/70 backdrop-blur-sm pointer-events-none"
+                    style="z-index: 5;"
+                >
+                </div>
+
                 <!-- Annotation Overlay (HTML Elements) -->
                 <div
                     x-ref="annotationOverlay"
@@ -504,6 +599,8 @@
                                 transition: all 0.2s;
                                 will-change: transform;
                             `"
+                            @click="selectAnnotationContext(anno)"
+                            @dblclick.stop="enterIsolationMode(anno)"
                             @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
                             @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
                             class="annotation-marker group"
@@ -617,6 +714,14 @@
                 activeLocationName: '',
                 drawMode: null, // 'cabinet_run' or 'cabinet'
 
+                // Isolation Mode State (NEW - Illustrator-style layer isolation)
+                isolationMode: false,           // Whether we're in isolation mode
+                isolationLevel: null,           // 'room' or 'location'
+                isolatedRoomId: null,          // Room being isolated
+                isolatedRoomName: '',          // Name of isolated room
+                isolatedLocationId: null,      // Location being isolated (if in location isolation)
+                isolatedLocationName: '',      // Name of isolated location
+
                 // Tree State
                 tree: [],
                 expandedNodes: [],
@@ -721,6 +826,14 @@
 
                         // Step 6: Initialize page observer for multi-page support
                         this.initPageObserver();
+
+                        // Step 7: Setup keyboard shortcuts
+                        window.addEventListener('keydown', (e) => {
+                            // Escape key exits isolation mode
+                            if (e.key === 'Escape' && this.isolationMode) {
+                                this.exitIsolationMode();
+                            }
+                        });
 
                         console.log('✅ V3 system ready!');
                     } catch (error) {
@@ -1162,14 +1275,22 @@
                     return '#10b981'; // Green (cabinet)
                 },
 
-                // Context methods
+                // Context methods (Updated for isolation mode)
                 canDrawLocation() {
-                    // Location drawing only requires Room + PDF ready
+                    // In room isolation mode: always enabled
+                    if (this.isolationMode && this.isolationLevel === 'room') {
+                        return this.pdfReady;
+                    }
+                    // Normal mode: requires room selection + PDF ready
                     return this.activeRoomId && this.pdfReady;
                 },
 
                 canDraw() {
-                    // Cabinet Run and Cabinet drawing require Room + Location + PDF ready
+                    // In location isolation mode: always enabled
+                    if (this.isolationMode && this.isolationLevel === 'location') {
+                        return this.pdfReady;
+                    }
+                    // Normal mode: requires room + location selection + PDF ready
                     return this.activeRoomId && this.activeLocationId && this.pdfReady;
                 },
 
@@ -1355,6 +1476,166 @@
                     console.log('Selected annotation:', anno);
                     // Dispatch to Livewire component for editing
                     Livewire.dispatch('edit-annotation', { annotation: anno });
+                },
+
+                // NEW: Select annotation context for hierarchical tool enabling
+                selectAnnotationContext(anno) {
+                    console.log('🎯 Selecting annotation context:', anno.type, anno.label);
+
+                    // Hierarchical context enabling based on annotation type
+                    if (anno.type === 'location') {
+                        // Clicking a location annotation:
+                        // - Sets room context (from the location's parent)
+                        // - Sets location context
+                        // - Enables: Draw Cabinet Run, Draw Cabinet
+                        this.activeRoomId = anno.roomId;
+                        this.activeRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
+                        this.activeLocationId = anno.id;
+                        this.activeLocationName = anno.label;
+
+                        // Update search fields
+                        this.roomSearchQuery = this.activeRoomName;
+                        this.locationSearchQuery = anno.label;
+
+                        console.log(`✓ Location context set: Room "${this.activeRoomName}" → Location "${anno.label}"`);
+                        console.log('✓ Enabled tools: Draw Cabinet Run, Draw Cabinet');
+                    }
+                    else if (anno.type === 'cabinet_run') {
+                        // Clicking a cabinet run annotation:
+                        // - Sets room context (from the cabinet run's parent hierarchy)
+                        // - Sets location context (parent location)
+                        // - Enables: Draw Cabinet (inside this run)
+                        this.activeRoomId = anno.roomId;
+                        this.activeRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
+                        this.activeLocationId = anno.locationId;
+                        this.activeLocationName = anno.locationName || this.getLocationNameById(anno.locationId);
+
+                        // Update search fields
+                        this.roomSearchQuery = this.activeRoomName;
+                        this.locationSearchQuery = this.activeLocationName;
+
+                        console.log(`✓ Cabinet Run context set: Room "${this.activeRoomName}" → Location "${this.activeLocationName}" → Run "${anno.label}"`);
+                        console.log('✓ Enabled tools: Draw Cabinet');
+                    }
+                    else if (anno.type === 'cabinet') {
+                        // Clicking a cabinet annotation:
+                        // - Sets full hierarchy context
+                        // - Enables: Draw Cabinet (sibling cabinets)
+                        this.activeRoomId = anno.roomId;
+                        this.activeRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
+                        this.activeLocationId = anno.locationId;
+                        this.activeLocationName = anno.locationName || this.getLocationNameById(anno.locationId);
+
+                        // Update search fields
+                        this.roomSearchQuery = this.activeRoomName;
+                        this.locationSearchQuery = this.activeLocationName;
+
+                        console.log(`✓ Cabinet context set: Room "${this.activeRoomName}" → Location "${this.activeLocationName}" → Cabinet "${anno.label}"`);
+                        console.log('✓ Enabled tools: Draw Cabinet (sibling)');
+                    }
+
+                    // Visual feedback: Select the corresponding tree node
+                    this.selectedNodeId = anno.id;
+                },
+
+                // Helper: Get room name by ID from tree
+                getRoomNameById(roomId) {
+                    if (!this.tree || !roomId) return '';
+                    const room = this.tree.find(r => r.id === roomId);
+                    return room ? room.name : '';
+                },
+
+                // Helper: Get location name by ID from tree
+                getLocationNameById(locationId) {
+                    if (!this.tree || !locationId) return '';
+                    for (const room of this.tree) {
+                        const location = room.children?.find(l => l.id === locationId);
+                        if (location) return location.name;
+                    }
+                    return '';
+                },
+
+                // NEW: Enter Isolation Mode (Illustrator-style layer isolation)
+                enterIsolationMode(anno) {
+                    console.log('🔒 Entering isolation mode for:', anno.type, anno.label);
+
+                    if (anno.type === 'location') {
+                        // Isolate at location level
+                        this.isolationMode = true;
+                        this.isolationLevel = 'location';
+                        this.isolatedRoomId = anno.roomId;
+                        this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
+                        this.isolatedLocationId = anno.id;
+                        this.isolatedLocationName = anno.label;
+
+                        // Set active context
+                        this.activeRoomId = anno.roomId;
+                        this.activeRoomName = this.isolatedRoomName;
+                        this.activeLocationId = anno.id;
+                        this.activeLocationName = anno.label;
+
+                        // Update search fields
+                        this.roomSearchQuery = this.isolatedRoomName;
+                        this.locationSearchQuery = anno.label;
+
+                        console.log(`✓ Location isolation: 🏠 ${this.isolatedRoomName} → 📍 ${anno.label}`);
+                    } else {
+                        // For any other type, treat as room isolation
+                        // This handles clicking on room annotations directly
+                        const roomId = anno.type === 'room' ? anno.id : anno.roomId;
+                        const roomName = anno.type === 'room' ? anno.label : (anno.roomName || this.getRoomNameById(anno.roomId));
+
+                        this.isolationMode = true;
+                        this.isolationLevel = 'room';
+                        this.isolatedRoomId = roomId;
+                        this.isolatedRoomName = roomName;
+                        this.isolatedLocationId = null;
+                        this.isolatedLocationName = '';
+
+                        // Set active context
+                        this.activeRoomId = roomId;
+                        this.activeRoomName = roomName;
+                        this.activeLocationId = null;
+                        this.activeLocationName = '';
+                        this.locationSearchQuery = '';
+
+                        // Update search field
+                        this.roomSearchQuery = roomName;
+
+                        console.log(`✓ Room isolation: 🏠 ${roomName}`);
+                    }
+
+                    // Expand the isolated node in tree
+                    if (!this.expandedNodes.includes(this.isolatedRoomId)) {
+                        this.expandedNodes.push(this.isolatedRoomId);
+                    }
+                    if (this.isolatedLocationId && !this.expandedNodes.includes(this.isolatedLocationId)) {
+                        this.expandedNodes.push(this.isolatedLocationId);
+                    }
+
+                    // Select the isolated node
+                    this.selectedNodeId = this.isolationLevel === 'location' ? this.isolatedLocationId : this.isolatedRoomId;
+                },
+
+                // NEW: Exit Isolation Mode
+                exitIsolationMode() {
+                    console.log('🔓 Exiting isolation mode');
+
+                    // Clear isolation state
+                    this.isolationMode = false;
+                    this.isolationLevel = null;
+                    this.isolatedRoomId = null;
+                    this.isolatedRoomName = '';
+                    this.isolatedLocationId = null;
+                    this.isolatedLocationName = '';
+
+                    // Clear active context
+                    this.clearContext();
+
+                    // Deselect node
+                    this.selectedNodeId = null;
+
+                    console.log('✓ Returned to normal view');
                 },
 
                 // Edit annotation (NEW - Full CRUD)
@@ -1554,8 +1835,34 @@
                     return Array.from(pages.values()).sort((a, b) => a.pageNumber - b.pageNumber);
                 },
 
-                // Check if annotation is visible within viewport (culling optimization)
+                // Check if annotation is visible (viewport culling + isolation mode filtering)
                 isAnnotationVisible(anno) {
+                    // ISOLATION MODE FILTERING (NEW)
+                    if (this.isolationMode) {
+                        if (this.isolationLevel === 'room') {
+                            // Room isolation: show only locations, cabinet runs, and cabinets in this room
+                            if (anno.type === 'location' && anno.roomId === this.isolatedRoomId) {
+                                // Pass through to viewport check
+                            } else if (anno.type === 'cabinet_run' && anno.roomId === this.isolatedRoomId) {
+                                // Pass through to viewport check
+                            } else if (anno.type === 'cabinet' && anno.roomId === this.isolatedRoomId) {
+                                // Pass through to viewport check
+                            } else {
+                                return false; // Hide all other annotations
+                            }
+                        } else if (this.isolationLevel === 'location') {
+                            // Location isolation: show only cabinet runs and cabinets in this location
+                            if (anno.type === 'cabinet_run' && anno.locationId === this.isolatedLocationId) {
+                                // Pass through to viewport check
+                            } else if (anno.type === 'cabinet' && anno.locationId === this.isolatedLocationId) {
+                                // Pass through to viewport check
+                            } else {
+                                return false; // Hide all other annotations
+                            }
+                        }
+                    }
+
+                    // VIEWPORT CULLING (existing logic)
                     const rect = this.getOverlayRect();
                     if (!rect) return true; // Show by default if can't determine
 
