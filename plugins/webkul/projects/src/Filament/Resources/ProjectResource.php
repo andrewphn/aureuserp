@@ -53,6 +53,7 @@ use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Project\Enums\ProjectVisibility;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TagResource;
+use Webkul\Project\Filament\Resources\ProjectResource\Pages\AnnotatePdf;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\AnnotatePdfV2;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
 use Webkul\Project\Filament\Resources\ProjectResource\Pages\EditProject;
@@ -1228,6 +1229,7 @@ class ProjectResource extends Resource
             'milestones'    => ManageMilestones::route('/{record}/milestones'),
             'tasks'         => ManageTasks::route('/{record}/tasks'),
             'pdf-review'    => ReviewPdfAndPrice::route('/{record}/pdf-review'),
+            'annotate'      => AnnotatePdf::route('/{record}/annotate/{page?}'),
             'annotate-v2'   => AnnotatePdfV2::route('/{record}/annotate-v2/{page?}'),
         ];
     }
