@@ -22,7 +22,7 @@ class AnnotatePdfV2 extends Page implements HasForms
 
     protected static string $resource = ProjectResource::class;
 
-    protected string $view = 'webkul-project::filament.resources.project-resource.pages.annotate-pdf-v2';
+    protected string $view = 'webkul-project::filament.pages.annotate-pdf-v2';
 
     protected static bool $shouldRegisterNavigation = false;
 

@@ -124,13 +124,18 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .
-                                 \Illuminate\Support\Facades\Blade::render('@vite("resources/js/form-auto-populate.js")')
+                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/form-auto-populate.js")')
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn (): string => view('filament.components.project-sticky-footer-global')->render() .
-                                 view('filament.components.project-selector-modal')->render()
+                function (): string {
+                    $content = \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .
+                               \Illuminate\Support\Facades\Blade::render('@vite("resources/js/annotations.js")') .
+                               view('filament.components.project-sticky-footer-global')->render() .
+                               view('filament.components.project-selector-modal')->render();
+
+                    return $content;
+                }
             )
             ->middleware([
                 EncryptCookies::class,
