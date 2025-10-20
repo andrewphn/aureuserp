@@ -19,18 +19,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// PDF Annotation API Routes
+// PDF Page Annotation API Routes (Unified System)
+// All routes work with pdf_page_annotations table
 Route::middleware(['web', 'auth:web', 'throttle:120,1'])->prefix('pdf')->name('api.pdf.')->group(function () {
-    // Document-level annotation operations
-    Route::get('/{documentId}/annotations', [PdfAnnotationController::class, 'index'])->name('annotations.index');
-    Route::post('/{documentId}/annotations', [PdfAnnotationController::class, 'store'])->middleware('throttle:60,1')->name('annotations.store');
-    Route::get('/{documentId}/annotations/count', [PdfAnnotationController::class, 'count'])->name('annotations.count');
-
-    // Individual annotation operations
-    Route::get('/annotations/{annotationId}', [PdfAnnotationController::class, 'show'])->name('annotations.show');
-    Route::put('/annotations/{annotationId}', [PdfAnnotationController::class, 'update'])->middleware('throttle:60,1')->name('annotations.update');
-    Route::delete('/annotations/{annotationId}', [PdfAnnotationController::class, 'destroy'])->middleware('throttle:30,1')->name('annotations.destroy');
-
     // Page-level metadata operations
     Route::get('/page/{pdfPageId}/project-number', [PdfAnnotationController::class, 'getProjectNumber'])->name('page.project-number');
     Route::get('/annotations/page/{pdfPageId}/cabinet-runs', [PdfAnnotationController::class, 'getCabinetRuns'])->name('page.cabinet-runs');
@@ -46,6 +37,9 @@ Route::middleware(['web', 'auth:web', 'throttle:120,1'])->prefix('pdf')->name('a
     // Page metadata operations (page type, cover fields, etc.)
     Route::get('/page/{pdfPageId}/metadata', [PdfAnnotationController::class, 'getPageMetadata'])->name('page.metadata.get');
     Route::post('/page/{pdfPageId}/metadata', [PdfAnnotationController::class, 'savePageMetadata'])->middleware('throttle:60,1')->name('page.metadata.save');
+
+    // Page type operations (NEW - Phase 3.1)
+    Route::post('/page/{pdfPageId}/page-type', [PdfAnnotationController::class, 'savePageType'])->middleware('throttle:60,1')->name('page.page-type.save');
 });
 
 // Project API Routes
@@ -72,25 +66,54 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             }
         ])->findOrFail($projectId);
 
+        // Get annotation counts for all entities in this project
+        // Room annotations: WHERE room_id = room.id AND deleted_at IS NULL (exclude soft-deleted)
+        $roomAnnotationCounts = \DB::table('pdf_page_annotations')
+            ->select('room_id', \DB::raw('COUNT(*) as count'))
+            ->whereNotNull('room_id')
+            ->whereNull('deleted_at')
+            ->groupBy('room_id')
+            ->pluck('count', 'room_id');
+
+        // Cabinet run annotations: WHERE cabinet_run_id = run.id AND deleted_at IS NULL (exclude soft-deleted)
+        $runAnnotationCounts = \DB::table('pdf_page_annotations')
+            ->select('cabinet_run_id', \DB::raw('COUNT(*) as count'))
+            ->whereNotNull('cabinet_run_id')
+            ->whereNull('deleted_at')
+            ->groupBy('cabinet_run_id')
+            ->pluck('count', 'cabinet_run_id');
+
+        // Location annotations: Count by inferring from room annotations with parent_annotation_id
+        // For now, we'll count location-type annotations per room location by checking hierarchy
+        $locationAnnotationCounts = \DB::table('pdf_page_annotations as child')
+            ->join('pdf_page_annotations as parent', 'child.parent_annotation_id', '=', 'parent.id')
+            ->join('projects_room_locations', 'parent.room_id', '=', 'projects_room_locations.room_id')
+            ->select('projects_room_locations.id as location_id', \DB::raw('COUNT(child.id) as count'))
+            ->where('child.annotation_type', 'location')
+            ->whereNull('child.deleted_at')
+            ->whereNull('parent.deleted_at')
+            ->groupBy('projects_room_locations.id')
+            ->pluck('count', 'location_id');
+
         // Transform to tree structure expected by V3 component
-        $tree = $project->rooms->map(function ($room) {
+        $tree = $project->rooms->map(function ($room) use ($roomAnnotationCounts, $locationAnnotationCounts, $runAnnotationCounts) {
             return [
                 'id' => $room->id,
                 'name' => $room->name,
                 'type' => 'room',
-                'annotation_count' => 0, // TODO: Count annotations for this room
-                'children' => $room->locations->map(function ($location) {
+                'annotation_count' => $roomAnnotationCounts->get($room->id, 0),
+                'children' => $room->locations->map(function ($location) use ($locationAnnotationCounts, $runAnnotationCounts) {
                     return [
                         'id' => $location->id,
                         'name' => $location->name,
                         'type' => 'room_location',
-                        'annotation_count' => 0, // TODO: Count annotations for this location
-                        'children' => $location->cabinetRuns->map(function ($run) {
+                        'annotation_count' => $locationAnnotationCounts->get($location->id, 0),
+                        'children' => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts) {
                             return [
                                 'id' => $run->id,
                                 'name' => $run->name ?: "Run {$run->id}",
                                 'type' => 'cabinet_run',
-                                'annotation_count' => 0, // TODO: Count annotations for this run
+                                'annotation_count' => $runAnnotationCounts->get($run->id, 0),
                             ];
                         })->values()
                     ];
