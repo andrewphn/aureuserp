@@ -196,7 +196,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ->icon('heroicon-o-check')
             ->color('primary')
             ->size('md')
-            ->submit('save'); // Use submit() instead of action() for proper form handling
+            ->action(fn () => $this->save()); // Directly call the save method
     }
 
     public function save(): void
@@ -209,21 +209,29 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
             // If it's a temporary annotation (not saved yet), CREATE it in database
             if (is_string($annotationId) && str_starts_with($annotationId, 'temp_')) {
+                // Get PDF page to calculate normalized dimensions
+                $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
+                $pageWidth = $pdfPage?->page_width ?? 2592;  // Default PDF page width
+                $pageHeight = $pdfPage?->page_height ?? 1728; // Default PDF page height
+
+                // Calculate normalized width and height from PDF dimensions
+                $normalizedWidth = ($this->originalAnnotation['pdfWidth'] ?? 0) / $pageWidth;
+                $normalizedHeight = ($this->originalAnnotation['pdfHeight'] ?? 0) / $pageHeight;
+
                 // Create new annotation in database
                 $annotation = \App\Models\PdfPageAnnotation::create([
-                    'pdf_page_id'    => $this->originalAnnotation['pdfPageId'],
-                    'type'           => $this->originalAnnotation['type'],
-                    'label'          => $data['label'],
-                    'notes'          => $data['notes'] ?? '',
-                    'room_id'        => $data['room_id'] ?? null,
-                    'cabinet_run_id' => $data['location_id'] ?? null, // location_id maps to cabinet_run_id
-                    'normalized_x'   => $this->originalAnnotation['normalizedX'],
-                    'normalized_y'   => $this->originalAnnotation['normalizedY'],
-                    'pdf_x'          => $this->originalAnnotation['pdfX'],
-                    'pdf_y'          => $this->originalAnnotation['pdfY'],
-                    'pdf_width'      => $this->originalAnnotation['pdfWidth'],
-                    'pdf_height'     => $this->originalAnnotation['pdfHeight'],
-                    'color'          => $this->originalAnnotation['color'],
+                    'pdf_page_id'      => $this->originalAnnotation['pdfPageId'],
+                    'annotation_type'  => $this->originalAnnotation['type'] ?? 'room',
+                    'label'            => $data['label'],
+                    'notes'            => $data['notes'] ?? '',
+                    'room_id'          => $data['room_id'] ?? null,
+                    'room_location_id' => $data['location_id'] ?? null,
+                    'cabinet_run_id'   => $data['cabinet_run_id'] ?? null,
+                    'x'                => $this->originalAnnotation['normalizedX'] ?? 0,
+                    'y'                => $this->originalAnnotation['normalizedY'] ?? 0,
+                    'width'            => $normalizedWidth,
+                    'height'           => $normalizedHeight,
+                    'color'            => $this->originalAnnotation['color'] ?? '#f59e0b',
                 ]);
 
                 // Log creation
@@ -281,15 +289,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
             // Update annotation in database
             $updateData = [
-                'label'   => $data['label'],
-                'notes'   => $data['notes'] ?? '',
-                'room_id' => $data['room_id'] ?? null,
+                'label'            => $data['label'],
+                'notes'            => $data['notes'] ?? '',
+                'room_id'          => $data['room_id'] ?? null,
+                'room_location_id' => $data['location_id'] ?? null,
+                'cabinet_run_id'   => $data['cabinet_run_id'] ?? null,
             ];
-
-            // Only add cabinet_run_id if location_id exists in form data
-            if (isset($data['location_id'])) {
-                $updateData['cabinet_run_id'] = $data['location_id'];
-            }
 
             $annotation->update($updateData);
 
@@ -494,5 +499,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $this->showModal = false;
         $this->reset(['data', 'annotationType', 'projectId', 'originalAnnotation']);
+
+        // Notify Alpine component that modal is closed
+        $this->dispatch('annotation-editor-closed');
     }
 }

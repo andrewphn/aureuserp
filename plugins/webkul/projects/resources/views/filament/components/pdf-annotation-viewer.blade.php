@@ -635,7 +635,7 @@
                     @mousemove="updateDrawing($event)"
                     @mouseup="finishDrawing($event)"
                     @mouseleave="cancelDrawing($event)"
-                    :class="drawMode ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'"
+                    :class="(drawMode && !editorModalOpen) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'"
                     class="annotation-overlay absolute top-0 left-0"
                     style="z-index: 10; will-change: width, height;"
                 >
@@ -770,6 +770,7 @@
                 activeLocationId: null,
                 activeLocationName: '',
                 drawMode: null, // 'cabinet_run' or 'cabinet'
+                editorModalOpen: false, // Track if annotation editor modal is open
 
                 // Isolation Mode State (NEW - Illustrator-style layer isolation)
                 isolationMode: false,           // Whether we're in isolation mode
@@ -894,6 +895,8 @@
                             } else {
                                 console.warn('⚠️ Could not find annotation to update:', updatedAnnotation.id);
                             }
+                            // Editor modal closed after save
+                            this.editorModalOpen = false;
                         });
 
                         // Listen for annotation deletion from Livewire
@@ -911,6 +914,20 @@
                                     console.log('🌳 Tree refreshed after annotation deletion');
                                 }, 300);
                             }
+                            // Editor modal closed
+                            this.editorModalOpen = false;
+                        });
+
+                        // Listen for when annotation editor modal opens
+                        Livewire.on('edit-annotation', () => {
+                            this.editorModalOpen = true;
+                            console.log('📝 Editor modal opened - disabling overlay pointer events');
+                        });
+
+                        // Listen for when annotation editor modal is closed (cancel/X button)
+                        Livewire.on('annotation-editor-closed', () => {
+                            this.editorModalOpen = false;
+                            console.log('📝 Editor modal closed - re-enabling overlay pointer events');
                         });
 
                         // Step 6: Initialize page observer for multi-page support
