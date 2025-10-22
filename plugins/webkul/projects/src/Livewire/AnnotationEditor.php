@@ -2,25 +2,25 @@
 
 namespace Webkul\Project\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
-use Webkul\Project\Models\CabinetRun;
 
-class AnnotationEditor extends Component implements HasForms, HasActions
+class AnnotationEditor extends Component implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
+    use InteractsWithForms;
 
     public bool $showModal = false;
 
@@ -29,6 +29,7 @@ class AnnotationEditor extends Component implements HasForms, HasActions
 
     // Context data for display
     public ?string $annotationType = null;
+
     public ?int $projectId = null;
 
     // Store original annotation for updates
@@ -42,143 +43,149 @@ class AnnotationEditor extends Component implements HasForms, HasActions
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-                TextInput::make('label')
-                    ->label('Label')
-                    ->required()
-                    ->maxLength(255),
+            TextInput::make('label')
+                ->label('Label')
+                ->required()
+                ->maxLength(255),
 
-                Select::make('room_id')
-                    ->label('Room')
-                    ->options(function () {
-                        if (!$this->projectId) {
-                            return [];
-                        }
-                        return Room::where('project_id', $this->projectId)
-                            ->pluck('name', 'id')
-                            ->toArray();
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->helperText(fn () => $this->annotationType === 'room' ? 'Create a new room or select existing' : null)
-                    ->createOptionForm([
-                        TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Select::make('room_type')
-                            ->options([
-                                'kitchen' => 'Kitchen',
-                                'bathroom' => 'Bathroom',
-                                'bedroom' => 'Bedroom',
-                                'living_room' => 'Living Room',
-                                'dining_room' => 'Dining Room',
-                                'office' => 'Office',
-                                'other' => 'Other',
-                            ]),
-                    ])
-                    ->createOptionUsing(function (array $data): int {
-                        $room = Room::create([
-                            'project_id' => $this->projectId,
-                            'name' => $data['name'],
-                            'room_type' => $data['room_type'] ?? null,
-                        ]);
-                        return $room->id;
-                    })
-                    ->live()
-                    ->afterStateUpdated(fn (callable $set) => $set('location_id', null)),
+            Select::make('room_id')
+                ->label('Room')
+                ->options(function () {
+                    if (! $this->projectId) {
+                        return [];
+                    }
 
-                Select::make('location_id')
-                    ->label('Location')
-                    ->options(function (callable $get) {
-                        $roomId = $get('room_id');
-                        if (!$roomId) {
-                            return [];
-                        }
-                        return RoomLocation::where('room_id', $roomId)
-                            ->pluck('name', 'id')
-                            ->toArray();
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run']))
-                    ->createOptionForm([
-                        TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Select::make('location_type')
-                            ->options([
-                                'wall' => 'Wall',
-                                'island' => 'Island',
-                                'peninsula' => 'Peninsula',
-                                'corner' => 'Corner',
-                                'other' => 'Other',
-                            ]),
-                    ])
-                    ->createOptionUsing(function (array $data, callable $get): int {
-                        $location = RoomLocation::create([
-                            'room_id' => $get('room_id'),
-                            'name' => $data['name'],
-                            'location_type' => $data['location_type'] ?? null,
-                        ]);
-                        return $location->id;
-                    })
-                    ->disabled(fn (callable $get) => ! $get('room_id'))
-                    ->live()
-                    ->afterStateUpdated(fn (callable $set) => $set('cabinet_run_id', null)),
+                    return Room::where('project_id', $this->projectId)
+                        ->pluck('name', 'id')
+                        ->toArray();
+                })
+                ->searchable()
+                ->preload()
+                ->required()
+                ->helperText(fn () => $this->annotationType === 'room' ? 'Create a new room or select existing' : null)
+                ->createOptionForm([
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Select::make('room_type')
+                        ->options([
+                            'kitchen'     => 'Kitchen',
+                            'bathroom'    => 'Bathroom',
+                            'bedroom'     => 'Bedroom',
+                            'living_room' => 'Living Room',
+                            'dining_room' => 'Dining Room',
+                            'office'      => 'Office',
+                            'other'       => 'Other',
+                        ]),
+                ])
+                ->createOptionUsing(function (array $data): int {
+                    $room = Room::create([
+                        'project_id' => $this->projectId,
+                        'name'       => $data['name'],
+                        'room_type'  => $data['room_type'] ?? null,
+                    ]);
 
-                Select::make('cabinet_run_id')
-                    ->label('Cabinet Run')
-                    ->options(function (callable $get) {
-                        $locationId = $get('location_id');
-                        if (!$locationId) {
-                            return [];
-                        }
-                        return CabinetRun::where('room_location_id', $locationId)
-                            ->pluck('name', 'id')
-                            ->toArray();
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->visible(fn () => $this->annotationType === 'cabinet_run')
-                    ->createOptionForm([
-                        TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Select::make('run_type')
-                            ->options([
-                                'base' => 'Base Cabinets',
-                                'wall' => 'Wall Cabinets',
-                                'tall' => 'Tall Cabinets',
-                                'mixed' => 'Mixed',
-                            ]),
-                    ])
-                    ->createOptionUsing(function (array $data, callable $get): int {
-                        $run = CabinetRun::create([
-                            'room_location_id' => $get('location_id'),
-                            'name' => $data['name'],
-                            'run_type' => $data['run_type'] ?? null,
-                        ]);
-                        return $run->id;
-                    })
-                    ->disabled(fn (callable $get) => ! $get('location_id')),
+                    return $room->id;
+                })
+                ->live()
+                ->afterStateUpdated(fn (callable $set) => $set('location_id', null)),
 
-                Textarea::make('notes')
-                    ->label('Notes / Comments')
-                    ->rows(4)
-                    ->columnSpanFull(),
+            Select::make('location_id')
+                ->label('Location')
+                ->options(function (callable $get) {
+                    $roomId = $get('room_id');
+                    if (! $roomId) {
+                        return [];
+                    }
 
-                TextInput::make('measurement_width')
-                    ->label('Width (in)')
-                    ->numeric()
-                    ->step(0.125)
-                    ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+                    return RoomLocation::where('room_id', $roomId)
+                        ->pluck('name', 'id')
+                        ->toArray();
+                })
+                ->searchable()
+                ->preload()
+                ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run']))
+                ->createOptionForm([
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Select::make('location_type')
+                        ->options([
+                            'wall'      => 'Wall',
+                            'island'    => 'Island',
+                            'peninsula' => 'Peninsula',
+                            'corner'    => 'Corner',
+                            'other'     => 'Other',
+                        ]),
+                ])
+                ->createOptionUsing(function (array $data, callable $get): int {
+                    $location = RoomLocation::create([
+                        'room_id'       => $get('room_id'),
+                        'name'          => $data['name'],
+                        'location_type' => $data['location_type'] ?? null,
+                    ]);
 
-                TextInput::make('measurement_height')
-                    ->label('Height (in)')
-                    ->numeric()
-                    ->step(0.125)
-                    ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
-            ])
+                    return $location->id;
+                })
+                ->disabled(fn (callable $get) => ! $get('room_id'))
+                ->live()
+                ->afterStateUpdated(fn (callable $set) => $set('cabinet_run_id', null)),
+
+            Select::make('cabinet_run_id')
+                ->label('Cabinet Run')
+                ->options(function (callable $get) {
+                    $locationId = $get('location_id');
+                    if (! $locationId) {
+                        return [];
+                    }
+
+                    return CabinetRun::where('room_location_id', $locationId)
+                        ->pluck('name', 'id')
+                        ->toArray();
+                })
+                ->searchable()
+                ->preload()
+                ->visible(fn () => $this->annotationType === 'cabinet_run')
+                ->createOptionForm([
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Select::make('run_type')
+                        ->options([
+                            'base'  => 'Base Cabinets',
+                            'wall'  => 'Wall Cabinets',
+                            'tall'  => 'Tall Cabinets',
+                            'mixed' => 'Mixed',
+                        ]),
+                ])
+                ->createOptionUsing(function (array $data, callable $get): int {
+                    $run = CabinetRun::create([
+                        'room_location_id' => $get('location_id'),
+                        'name'             => $data['name'],
+                        'run_type'         => $data['run_type'] ?? null,
+                    ]);
+
+                    return $run->id;
+                })
+                ->disabled(fn (callable $get) => ! $get('location_id')),
+
+            Textarea::make('notes')
+                ->label('Notes / Comments')
+                ->rows(4)
+                ->columnSpanFull(),
+
+            TextInput::make('measurement_width')
+                ->label('Width (in)')
+                ->numeric()
+                ->step(0.125)
+                ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+
+            TextInput::make('measurement_height')
+                ->label('Height (in)')
+                ->numeric()
+                ->step(0.125)
+                ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+        ])
             ->statePath('data');
     }
 
@@ -189,167 +196,170 @@ class AnnotationEditor extends Component implements HasForms, HasActions
             ->icon('heroicon-o-check')
             ->color('primary')
             ->size('md')
-            ->requiresConfirmation(false)
-            ->action(function () {
-                try {
-                    // Get validated form state using proper Filament API
-                    $data = $this->form->getState();
+            ->submit('save'); // Use submit() instead of action() for proper form handling
+    }
 
-                    $annotationId = $this->originalAnnotation['id'];
+    public function save(): void
+    {
+        try {
+            // Get validated form state using proper Filament API
+            $data = $this->form->getState();
 
-                    // If it's a temporary annotation (not saved yet), CREATE it in database
-                    if (is_string($annotationId) && str_starts_with($annotationId, 'temp_')) {
-                        // Create new annotation in database
-                        $annotation = \App\Models\PdfPageAnnotation::create([
-                            'pdf_page_id' => $this->originalAnnotation['pdfPageId'],
-                            'type' => $this->originalAnnotation['type'],
-                            'label' => $data['label'],
-                            'notes' => $data['notes'] ?? '',
-                            'room_id' => $data['room_id'] ?? null,
-                            'cabinet_run_id' => $data['location_id'] ?? null, // location_id maps to cabinet_run_id
-                            'normalized_x' => $this->originalAnnotation['normalizedX'],
-                            'normalized_y' => $this->originalAnnotation['normalizedY'],
-                            'pdf_x' => $this->originalAnnotation['pdfX'],
-                            'pdf_y' => $this->originalAnnotation['pdfY'],
-                            'pdf_width' => $this->originalAnnotation['pdfWidth'],
-                            'pdf_height' => $this->originalAnnotation['pdfHeight'],
-                            'color' => $this->originalAnnotation['color'],
-                        ]);
+            $annotationId = $this->originalAnnotation['id'];
 
-                        // Log creation
-                        \App\Models\PdfAnnotationHistory::logAction(
-                            pdfPageId: $annotation->pdf_page_id,
-                            action: 'created',
-                            beforeData: null,
-                            afterData: $annotation->toArray(),
-                            annotationId: $annotation->id
-                        );
+            // If it's a temporary annotation (not saved yet), CREATE it in database
+            if (is_string($annotationId) && str_starts_with($annotationId, 'temp_')) {
+                // Create new annotation in database
+                $annotation = \App\Models\PdfPageAnnotation::create([
+                    'pdf_page_id'    => $this->originalAnnotation['pdfPageId'],
+                    'type'           => $this->originalAnnotation['type'],
+                    'label'          => $data['label'],
+                    'notes'          => $data['notes'] ?? '',
+                    'room_id'        => $data['room_id'] ?? null,
+                    'cabinet_run_id' => $data['location_id'] ?? null, // location_id maps to cabinet_run_id
+                    'normalized_x'   => $this->originalAnnotation['normalizedX'],
+                    'normalized_y'   => $this->originalAnnotation['normalizedY'],
+                    'pdf_x'          => $this->originalAnnotation['pdfX'],
+                    'pdf_y'          => $this->originalAnnotation['pdfY'],
+                    'pdf_width'      => $this->originalAnnotation['pdfWidth'],
+                    'pdf_height'     => $this->originalAnnotation['pdfHeight'],
+                    'color'          => $this->originalAnnotation['color'],
+                ]);
 
-                        // Build updated annotation with real database ID
-                        $updatedAnnotation = array_merge($this->originalAnnotation, [
-                            'id' => $annotation->id, // Replace temp ID with real ID
-                            'label' => $data['label'],
-                            'notes' => $data['notes'] ?? '',
-                            'measurementWidth' => $data['measurement_width'] ?? null,
-                            'measurementHeight' => $data['measurement_height'] ?? null,
-                            'roomId' => $data['room_id'] ?? null,
-                            'locationId' => $data['location_id'] ?? null,
-                            'cabinetRunId' => isset($data['cabinet_run_id']) ? $data['cabinet_run_id'] : null,
-                        ]);
+                // Log creation
+                \App\Models\PdfAnnotationHistory::logAction(
+                    pdfPageId: $annotation->pdf_page_id,
+                    action: 'created',
+                    beforeData: null,
+                    afterData: $annotation->toArray(),
+                    annotationId: $annotation->id
+                );
 
-                        // Update display names
-                        if (isset($data['room_id']) && $data['room_id']) {
-                            $room = Room::find($data['room_id']);
-                            $updatedAnnotation['roomName'] = $room?->name;
-                        }
+                // Build updated annotation with real database ID
+                $updatedAnnotation = array_merge($this->originalAnnotation, [
+                    'id'                => $annotation->id, // Replace temp ID with real ID
+                    'label'             => $data['label'],
+                    'notes'             => $data['notes'] ?? '',
+                    'measurementWidth'  => $data['measurement_width'] ?? null,
+                    'measurementHeight' => $data['measurement_height'] ?? null,
+                    'roomId'            => $data['room_id'] ?? null,
+                    'locationId'        => $data['location_id'] ?? null,
+                    'cabinetRunId'      => isset($data['cabinet_run_id']) ? $data['cabinet_run_id'] : null,
+                ]);
 
-                        if (isset($data['location_id']) && $data['location_id']) {
-                            $location = RoomLocation::find($data['location_id']);
-                            $updatedAnnotation['locationName'] = $location?->name;
-                        }
-
-                        // Dispatch event back to Alpine.js with new database ID
-                        $this->dispatch('annotation-updated', annotation: $updatedAnnotation);
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('Annotation Saved')
-                            ->body('The annotation has been saved to the database.')
-                            ->success()
-                            ->send();
-
-                        $this->close();
-                        return;
-                    }
-
-                    // Otherwise, update in database
-                    $annotation = \App\Models\PdfPageAnnotation::findOrFail($annotationId);
-                    $pdfPageId = $annotation->pdf_page_id;
-
-                    // Log before update
-                    $beforeData = $annotation->toArray();
-
-                    // Update annotation in database
-                    $updateData = [
-                        'label' => $data['label'],
-                        'notes' => $data['notes'] ?? '',
-                        'room_id' => $data['room_id'] ?? null,
-                    ];
-
-                    // Only add cabinet_run_id if location_id exists in form data
-                    if (isset($data['location_id'])) {
-                        $updateData['cabinet_run_id'] = $data['location_id'];
-                    }
-
-                    $annotation->update($updateData);
-
-                    // Log after update
-                    \App\Models\PdfAnnotationHistory::logAction(
-                        pdfPageId: $pdfPageId,
-                        action: 'updated',
-                        beforeData: $beforeData,
-                        afterData: $annotation->fresh()->toArray(),
-                        annotationId: $annotation->id
-                    );
-
-                    // Build updated annotation for Alpine.js
-                    $updatedAnnotation = array_merge($this->originalAnnotation, [
-                        'label' => $data['label'],
-                        'notes' => $data['notes'] ?? '',
-                        'measurementWidth' => $data['measurement_width'] ?? null,
-                        'measurementHeight' => $data['measurement_height'] ?? null,
-                        'roomId' => $data['room_id'] ?? null,
-                        'locationId' => isset($data['location_id']) ? $data['location_id'] : null,
-                        'cabinetRunId' => isset($data['cabinet_run_id']) ? $data['cabinet_run_id'] : null,
-                    ]);
-
-                    // Update display names
-                    if (isset($data['room_id']) && $data['room_id']) {
-                        $room = Room::find($data['room_id']);
-                        $updatedAnnotation['roomName'] = $room?->name;
-                    }
-
-                    if (isset($data['location_id']) && $data['location_id']) {
-                        $location = RoomLocation::find($data['location_id']);
-                        $updatedAnnotation['locationName'] = $location?->name;
-                    }
-
-                    // Dispatch event back to Alpine.js to update UI
-                    $this->dispatch('annotation-updated', annotation: $updatedAnnotation);
-
-                    // Show success notification
-                    \Filament\Notifications\Notification::make()
-                        ->title('Annotation Updated')
-                        ->body('The annotation has been saved to the database.')
-                        ->success()
-                        ->send();
-
-                    // Close modal
-                    $this->close();
-
-                } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-                    \Filament\Notifications\Notification::make()
-                        ->title('Save Failed')
-                        ->body('Annotation not found in database.')
-                        ->danger()
-                        ->send();
-
-                    \Log::error('Annotation not found for update', [
-                        'annotation_id' => $annotationId ?? 'unknown'
-                    ]);
-                } catch (\Exception $e) {
-                    \Filament\Notifications\Notification::make()
-                        ->title('Save Failed')
-                        ->body('Error saving annotation: ' . $e->getMessage())
-                        ->danger()
-                        ->send();
-
-                    \Log::error('Annotation update failed', [
-                        'annotation_id' => $annotationId ?? 'unknown',
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
+                // Update display names
+                if (isset($data['room_id']) && $data['room_id']) {
+                    $room = Room::find($data['room_id']);
+                    $updatedAnnotation['roomName'] = $room?->name;
                 }
-            });
+
+                if (isset($data['location_id']) && $data['location_id']) {
+                    $location = RoomLocation::find($data['location_id']);
+                    $updatedAnnotation['locationName'] = $location?->name;
+                }
+
+                // Dispatch event back to Alpine.js with new database ID
+                $this->dispatch('annotation-updated', annotation: $updatedAnnotation);
+
+                \Filament\Notifications\Notification::make()
+                    ->title('Annotation Saved')
+                    ->body('The annotation has been saved to the database.')
+                    ->success()
+                    ->send();
+
+                $this->close();
+
+                return;
+            }
+
+            // Otherwise, update in database
+            $annotation = \App\Models\PdfPageAnnotation::findOrFail($annotationId);
+            $pdfPageId = $annotation->pdf_page_id;
+
+            // Log before update
+            $beforeData = $annotation->toArray();
+
+            // Update annotation in database
+            $updateData = [
+                'label'   => $data['label'],
+                'notes'   => $data['notes'] ?? '',
+                'room_id' => $data['room_id'] ?? null,
+            ];
+
+            // Only add cabinet_run_id if location_id exists in form data
+            if (isset($data['location_id'])) {
+                $updateData['cabinet_run_id'] = $data['location_id'];
+            }
+
+            $annotation->update($updateData);
+
+            // Log after update
+            \App\Models\PdfAnnotationHistory::logAction(
+                pdfPageId: $pdfPageId,
+                action: 'updated',
+                beforeData: $beforeData,
+                afterData: $annotation->fresh()->toArray(),
+                annotationId: $annotation->id
+            );
+
+            // Build updated annotation for Alpine.js
+            $updatedAnnotation = array_merge($this->originalAnnotation, [
+                'label'             => $data['label'],
+                'notes'             => $data['notes'] ?? '',
+                'measurementWidth'  => $data['measurement_width'] ?? null,
+                'measurementHeight' => $data['measurement_height'] ?? null,
+                'roomId'            => $data['room_id'] ?? null,
+                'locationId'        => isset($data['location_id']) ? $data['location_id'] : null,
+                'cabinetRunId'      => isset($data['cabinet_run_id']) ? $data['cabinet_run_id'] : null,
+            ]);
+
+            // Update display names
+            if (isset($data['room_id']) && $data['room_id']) {
+                $room = Room::find($data['room_id']);
+                $updatedAnnotation['roomName'] = $room?->name;
+            }
+
+            if (isset($data['location_id']) && $data['location_id']) {
+                $location = RoomLocation::find($data['location_id']);
+                $updatedAnnotation['locationName'] = $location?->name;
+            }
+
+            // Dispatch event back to Alpine.js to update UI
+            $this->dispatch('annotation-updated', annotation: $updatedAnnotation);
+
+            // Show success notification
+            \Filament\Notifications\Notification::make()
+                ->title('Annotation Updated')
+                ->body('The annotation has been saved to the database.')
+                ->success()
+                ->send();
+
+            // Close modal
+            $this->close();
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Filament\Notifications\Notification::make()
+                ->title('Save Failed')
+                ->body('Annotation not found in database.')
+                ->danger()
+                ->send();
+
+            \Log::error('Annotation not found for update', [
+                'annotation_id' => $annotationId ?? 'unknown',
+            ]);
+        } catch (\Exception $e) {
+            \Filament\Notifications\Notification::make()
+                ->title('Save Failed')
+                ->body('Error saving annotation: '.$e->getMessage())
+                ->danger()
+                ->send();
+
+            \Log::error('Annotation update failed', [
+                'annotation_id' => $annotationId ?? 'unknown',
+                'error'         => $e->getMessage(),
+                'trace'         => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     public function cancelAction(): Action
@@ -387,6 +397,7 @@ class AnnotationEditor extends Component implements HasForms, HasActions
                         ->send();
 
                     $this->close();
+
                     return;
                 }
 
@@ -426,18 +437,18 @@ class AnnotationEditor extends Component implements HasForms, HasActions
                         ->send();
 
                     \Log::error('Annotation not found for deletion', [
-                        'annotation_id' => $annotationId
+                        'annotation_id' => $annotationId,
                     ]);
                 } catch (\Exception $e) {
                     \Filament\Notifications\Notification::make()
                         ->title('Delete Failed')
-                        ->body('Error deleting annotation: ' . $e->getMessage())
+                        ->body('Error deleting annotation: '.$e->getMessage())
                         ->danger()
                         ->send();
 
                     \Log::error('Annotation deletion failed', [
                         'annotation_id' => $annotationId,
-                        'error' => $e->getMessage()
+                        'error'         => $e->getMessage(),
                     ]);
                 }
 
@@ -462,12 +473,12 @@ class AnnotationEditor extends Component implements HasForms, HasActions
 
         // Fill form with annotation data using Filament Forms API
         $this->form->fill([
-            'label' => $annotation['label'] ?? '',
-            'notes' => $annotation['notes'] ?? '',
-            'room_id' => $annotation['roomId'] ?? null,
-            'location_id' => $annotation['locationId'] ?? null,
-            'cabinet_run_id' => $annotation['cabinetRunId'] ?? null,
-            'measurement_width' => $annotation['measurementWidth'] ?? null,
+            'label'              => $annotation['label'] ?? '',
+            'notes'              => $annotation['notes'] ?? '',
+            'room_id'            => $annotation['roomId'] ?? null,
+            'location_id'        => $annotation['locationId'] ?? null,
+            'cabinet_run_id'     => $annotation['cabinetRunId'] ?? null,
+            'measurement_width'  => $annotation['measurementWidth'] ?? null,
             'measurement_height' => $annotation['measurementHeight'] ?? null,
         ]);
 
