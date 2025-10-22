@@ -189,9 +189,10 @@ class AnnotationEditor extends Component implements HasForms, HasActions
             ->icon('heroicon-o-check')
             ->color('primary')
             ->size('md')
+            ->requiresConfirmation(false)
             ->action(function () {
                 try {
-                    // Get validated form state using Filament Forms API
+                    // Get validated form state using proper Filament API
                     $data = $this->form->getState();
 
                     $annotationId = $this->originalAnnotation['id'];

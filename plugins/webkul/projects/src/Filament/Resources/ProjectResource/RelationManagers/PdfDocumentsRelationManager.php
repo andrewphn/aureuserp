@@ -179,6 +179,9 @@ class PdfDocumentsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->after(function ($record) {
+                        // Create PdfPage records for each page in the PDF
+                        $this->createPdfPages($record);
+
                         // Redirect to Review & Price wizard after upload
                         return redirect()->route('filament.admin.resources.project.projects.pdf-review', [
                             'record' => $this->getOwnerRecord()->id,
@@ -357,6 +360,52 @@ class PdfDocumentsRelationManager extends RelationManager
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
+    }
+
+    /**
+     * Create PdfPage records for each page in the uploaded PDF
+     */
+    protected function createPdfPages(PdfDocument $pdfDocument): void
+    {
+        try {
+            $fullPath = Storage::disk('public')->path($pdfDocument->file_path);
+
+            if (!file_exists($fullPath)) {
+                \Log::warning("PDF file not found at: {$fullPath}");
+                return;
+            }
+
+            // Parse PDF to get actual page count
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf = $parser->parseFile($fullPath);
+            $pages = $pdf->getPages();
+            $actualPageCount = count($pages);
+
+            // Update page_count if it's incorrect
+            if ($pdfDocument->page_count !== $actualPageCount) {
+                $pdfDocument->update(['page_count' => $actualPageCount]);
+            }
+
+            // Create PdfPage record for each page
+            for ($pageNumber = 1; $pageNumber <= $actualPageCount; $pageNumber++) {
+                PdfPage::create([
+                    'document_id' => $pdfDocument->id,
+                    'page_number' => $pageNumber,
+                    'page_type' => null, // Will be set later during review
+                ]);
+            }
+
+            \Log::info("Created {$actualPageCount} PdfPage records for document {$pdfDocument->id}");
+
+        } catch (\Exception $e) {
+            \Log::error("Error creating PdfPage records: " . $e->getMessage());
+
+            Notification::make()
+                ->title('Warning: Page Processing Issue')
+                ->body('The PDF was uploaded successfully, but there was an issue processing individual pages. Please contact support if you encounter problems.')
+                ->warning()
+                ->send();
+        }
     }
 
     /**

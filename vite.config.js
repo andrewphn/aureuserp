@@ -10,9 +10,8 @@ export default defineConfig({
                 'resources/js/pdf-viewer.js',
                 'resources/js/pdf-thumbnail.js',
                 'resources/js/pdf-document-manager.js',
-                'resources/js/annotations.js',
-                'resources/js/centralized-entity-store.js',
-                'resources/js/form-auto-populate.js',
+                'resources/js/annotations.js', // PDF annotation system - loaded separately by PDF pages
+                // Note: centralized-entity-store.js and form-auto-populate.js are imported in app.js
                 'resources/css/filament/admin/theme.css',
             ],
             refresh: true,

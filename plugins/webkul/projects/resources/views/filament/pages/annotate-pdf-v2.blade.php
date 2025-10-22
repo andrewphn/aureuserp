@@ -2,7 +2,7 @@
     {{-- Full-screen V3 HTML Overlay PDF Annotation Viewer --}}
     <div class="w-full" style="height: calc(100vh - 120px);">
         @if($pdfUrl)
-            @include('webkul-project::filament.components.pdf-annotation-viewer-v3-overlay', [
+            @include('webkul-project::filament.components.pdf-annotation-viewer', [
                 'pdfPageId' => $pdfPage?->id,
                 'pdfUrl' => $pdfUrl,
                 'pageNumber' => $pageNumber,
@@ -25,8 +25,31 @@
         @endif
     </div>
 
+    {{-- Load entity store and core app functionality --}}
+    @once
+        @vite('resources/js/app.js')
+    @endonce
+
     {{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}
     @once
         @vite('resources/js/annotations.js')
     @endonce
+
+    {{-- Set active project context for global footer --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            // Wait for entity store to be ready
+            const setProjectContext = () => {
+                if (window.Alpine && Alpine.store('entityStore')) {
+                    const entityStore = Alpine.store('entityStore');
+                    entityStore.setActiveContext('project', {{ $projectId }}, null, true);
+                    console.log('[AnnotatePdfV2] Set active project context:', {{ $projectId }});
+                } else {
+                    // Retry if store not ready yet
+                    setTimeout(setProjectContext, 100);
+                }
+            };
+            setProjectContext();
+        });
+    </script>
 </x-filament-panels::page>
