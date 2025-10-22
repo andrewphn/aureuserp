@@ -7,6 +7,12 @@ import './livewire-component-loader.js';
 import './components/advanced-file-upload.js';
 import './components/filament-form-components.js';
 
+// Import Entity Store and Form Auto-populate (loaded once, prevents double-loading)
+import './centralized-entity-store.js';
+import './form-auto-populate.js';
+
+// Note: annotations.js is loaded separately via @vite() on PDF pages to prevent double-loading
+
 // Ensure components are immediately available globally before Alpine starts
 import { reregisterComponents } from './livewire-component-loader.js';
 reregisterComponents();

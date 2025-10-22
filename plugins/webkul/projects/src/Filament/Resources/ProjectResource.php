@@ -182,7 +182,7 @@ class ProjectResource extends Resource
                                         ->searchable()
                                         ->preload()
                                         ->required()
-                                        ->reactive()
+                                        ->live(onBlur: true)
                                         ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                             if ($state && $get('use_customer_address')) {
                                                 $partner = \Webkul\Partner\Models\Partner::with(['state', 'country'])->find($state);
@@ -217,7 +217,7 @@ class ProjectResource extends Resource
                                             'other' => 'Other',
                                         ])
                                         ->required()
-                                        ->reactive()
+                                        ->live(onBlur: true)
                                         ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                             // Update project name when project type changes
                                             static::updateProjectName($get, $set);
@@ -838,6 +838,85 @@ class ProjectResource extends Resource
                 ])
                     ->link()
                     ->hiddenLabel(),
+            ])
+            ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make()
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title('Projects deleted')
+                                ->body('The selected projects have been deleted successfully.'),
+                        ),
+                    \Filament\Actions\BulkAction::make('change_stage')
+                        ->label('Change Stage')
+                        ->icon('heroicon-o-flag')
+                        ->form([
+                            Select::make('stage_id')
+                                ->label('Stage')
+                                ->options(fn () => ProjectStage::orderBy('sort')->get()->pluck('name', 'id'))
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            foreach ($records as $record) {
+                                $record->update(['stage_id' => $data['stage_id']]);
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title('Stage updated')
+                                ->body('The stage has been updated for ' . $records->count() . ' projects.')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    \Filament\Actions\BulkAction::make('assign_manager')
+                        ->label('Assign Project Manager')
+                        ->icon('heroicon-o-user')
+                        ->form([
+                            Select::make('user_id')
+                                ->label('Project Manager')
+                                ->relationship('user', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            foreach ($records as $record) {
+                                $record->update(['user_id' => $data['user_id']]);
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title('Project manager assigned')
+                                ->body('Project manager has been assigned to ' . $records->count() . ' projects.')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    \Filament\Actions\BulkAction::make('add_tags')
+                        ->label('Add Tags')
+                        ->icon('heroicon-o-tag')
+                        ->form([
+                            Select::make('tags')
+                                ->label('Tags to Add')
+                                ->relationship('tags', 'name')
+                                ->multiple()
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            foreach ($records as $record) {
+                                $record->tags()->syncWithoutDetaching($data['tags']);
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title('Tags added')
+                                ->body('Tags have been added to ' . $records->count() . ' projects.')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                ]),
             ])
             ->recordUrl(fn (Project $record): string => static::getUrl('view', ['record' => $record]))
             ->contentGrid([

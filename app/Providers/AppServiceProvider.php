@@ -32,7 +32,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerJavaScriptAssets();
+        // Scripts are now bundled via Vite in app.js - no need for separate registration
+        // $this->registerJavaScriptAssets();
         $this->configureRateLimiting();
     }
 
@@ -49,12 +50,18 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Register global JavaScript assets
+     *
+     * DISABLED: These scripts are now bundled in app.js via Vite
+     * to prevent double-loading and reduce console noise
      */
     protected function registerJavaScriptAssets(): void
     {
-        FilamentAsset::register([
-            Js::make('centralized-entity-store', __DIR__ . '/../../resources/js/centralized-entity-store.js'),
-            Js::make('form-auto-populate', __DIR__ . '/../../resources/js/form-auto-populate.js'),
-        ], 'app');
+        // Scripts are imported in resources/js/app.js
+        // No need for separate FilamentAsset registration
+
+        // FilamentAsset::register([
+        //     Js::make('centralized-entity-store', __DIR__ . '/../../resources/js/centralized-entity-store.js'),
+        //     Js::make('form-auto-populate', __DIR__ . '/../../resources/js/form-auto-populate.js'),
+        // ], 'app');
     }
 }

@@ -10,7 +10,7 @@
     @active-context-changed.window="handleContextChange($event.detail)"
     @entity-updated.window="handleEntityUpdate($event.detail)"
     class="fi-section rounded-t-xl shadow-lg ring-1 ring-gray-950/10 dark:ring-white/10 transition-all duration-300 ease-in-out"
-    :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'})`"
+    :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'})`"
 >
     {{-- Toggle Button Bar - Context Aware --}}
     <div class="flex items-center justify-between px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" @click="isMinimized = !isMinimized">
@@ -94,7 +94,43 @@
             </div>
 
             {{-- Action Buttons --}}
-            <div class="flex flex-col gap-2 flex-shrink-0">
+            <div class="flex flex-row gap-2 flex-shrink-0 items-center">
+                {{-- Context-aware Save button - shown on edit pages --}}
+                <button
+                    type="button"
+                    @click="saveCurrentForm()"
+                    x-show="isOnEditPage()"
+                    x-data="{ formDisabled: false }"
+                    x-init="$nextTick(() => {
+                        const checkDisabled = () => {
+                            const allButtons = document.querySelectorAll('button');
+                            for (const btn of allButtons) {
+                                const text = btn.textContent.trim();
+                                const isSubmit = btn.type === 'submit';
+                                if (isSubmit && (text === 'Save' || text === 'Save changes') && !btn.closest('[x-data*=contextFooterGlobal]')) {
+                                    formDisabled = btn.disabled;
+                                    return;
+                                }
+                            }
+                            formDisabled = false;
+                        };
+                        checkDisabled();
+                        setInterval(checkDisabled, 500);
+                    })"
+                    :disabled="formDisabled"
+                    :class="{
+                        'opacity-50 cursor-not-allowed': formDisabled,
+                        'hover:bg-green-600': !formDisabled
+                    }"
+                    class="fi-btn fi-btn-size-sm fi-btn-color-success inline-flex items-center justify-center gap-2 font-semibold rounded-lg px-3 py-1.5 text-xs bg-green-500 text-white transition-all"
+                    style="background-color: rgb(34, 197, 94); color: white;"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Save
+                </button>
+
                 <button
                     type="button"
                     @click="openProjectSelector()"
@@ -106,14 +142,13 @@
                     Switch
                 </button>
 
-                <template x-if="contextType === 'project' && activeProjectId">
-                    <a
-                        :href="`/admin/project/projects/${activeProjectId}/edit`"
-                        class="fi-btn fi-btn-size-sm fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-3 py-1.5 text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                    >
-                        Edit
-                    </a>
-                </template>
+                <a
+                    :href="`/admin/project/projects/${activeProjectId}/edit`"
+                    x-show="contextType === 'project' && activeProjectId && !isOnEditPage()"
+                    class="fi-btn fi-btn-size-sm fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-3 py-1.5 text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                    Edit
+                </a>
 
                 <button
                     type="button"
@@ -368,9 +403,21 @@ function contextFooterGlobal() {
         },
 
         init() {
-            this.loadUserPreferences().then(() => {
-                this.loadActiveContext();
-            });
+            // Wait for Alpine and entityStore to be fully initialized
+            const waitForEntityStore = () => {
+                const entityStore = Alpine.store('entityStore');
+                if (entityStore) {
+                    this.loadUserPreferences().then(() => {
+                        this.loadActiveContext();
+                    });
+                } else {
+                    // EntityStore not ready, retry after a short delay
+                    setTimeout(waitForEntityStore, 100);
+                }
+            };
+
+            // Start checking for entityStore
+            waitForEntityStore();
         },
 
         /**
@@ -621,7 +668,15 @@ function contextFooterGlobal() {
         },
 
         async loadActiveContext() {
-            const context = Alpine.store('entityStore').getActiveContext();
+            // Check if entityStore exists before accessing it
+            const entityStore = Alpine.store('entityStore');
+            if (!entityStore) {
+                console.warn('[Footer] EntityStore not initialized yet');
+                this.hasActiveContext = false;
+                return;
+            }
+
+            const context = entityStore.getActiveContext();
 
             if (!context || !context.entityType) {
                 this.hasActiveContext = false;
@@ -632,7 +687,7 @@ function contextFooterGlobal() {
 
             this.contextType = context.entityType;
             this.contextId = context.entityId;
-            let data = Alpine.store('entityStore').getEntity(context.entityType, context.entityId);
+            let data = entityStore.getEntity(context.entityType, context.entityId);
 
             // If EntityStore doesn't have data (e.g., on edit/view pages), fetch from API
             if (!data && this.contextConfigs[this.contextType]?.api?.fetch) {
@@ -643,7 +698,7 @@ function contextFooterGlobal() {
                         data = await response.json();
                         console.log('[Footer] Fetched context data from API:', data);
                         // Optionally cache it in EntityStore for future use
-                        Alpine.store('entityStore').updateEntity(context.entityType, context.entityId, data, true);
+                        entityStore.updateEntity(context.entityType, context.entityId, data, true);
                     } else {
                         console.warn('[Footer] Failed to fetch context data from API:', response.status);
                     }
@@ -885,9 +940,15 @@ function contextFooterGlobal() {
         },
 
         clearContext() {
+            const entityStore = Alpine.store('entityStore');
+            if (!entityStore) {
+                console.warn('[Footer] EntityStore not available');
+                return;
+            }
+
             const contextName = this.contextConfig.name || 'context';
             if (confirm(`Clear active ${contextName.toLowerCase()}?`)) {
-                Alpine.store('entityStore').clearActiveContext();
+                entityStore.clearActiveContext();
                 this.hasActiveContext = false;
                 this.contextType = null;
                 this.contextId = null;
@@ -897,6 +958,93 @@ function contextFooterGlobal() {
         openProjectSelector() {
             // Dispatch event to open project selector modal
             window.dispatchEvent(new CustomEvent('open-project-selector'));
+        },
+
+        /**
+         * Check if currently on an edit page
+         */
+        isOnEditPage() {
+            return window.location.pathname.includes('/edit');
+        },
+
+        /**
+         * Check if Filament's save button is disabled
+         */
+        isSaveButtonDisabled() {
+            // Find Filament's save button (not our custom footer button)
+            const allButtons = document.querySelectorAll('button');
+            for (const btn of allButtons) {
+                const text = btn.textContent.trim();
+                const isSubmit = btn.type === 'submit';
+
+                // Check if it's Filament's save button (but not our custom one in footer)
+                if (isSubmit && (text === 'Save' || text === 'Save changes') && !btn.closest('[x-data*="contextFooterGlobal"]')) {
+                    return btn.disabled;
+                }
+            }
+
+            // If we can't find Filament's button, default to false (enabled)
+            return false;
+        },
+
+        /**
+         * Save the current Filament form
+         */
+        saveCurrentForm() {
+            console.log('[Footer] saveCurrentForm() called');
+
+            // Try to find the Filament save button using multiple strategies
+            let saveButton = null;
+
+            // Strategy 1: Find button with text "Save" or "Save changes" (Filament's default)
+            const allButtons = document.querySelectorAll('button');
+            for (const btn of allButtons) {
+                const text = btn.textContent.trim();
+                const isSubmit = btn.type === 'submit';
+                // Check if it's a save button (but not our custom one in footer)
+                if (isSubmit && (text === 'Save' || text === 'Save changes') && !btn.closest('[x-data*="contextFooterGlobal"]')) {
+                    saveButton = btn;
+                    console.log('[Footer] Found save button by text:', text);
+                    break;
+                }
+            }
+
+            // Strategy 2: Find button with wire:click containing 'save'
+            if (!saveButton) {
+                const buttons = document.querySelectorAll('button[type="submit"]');
+                for (const btn of buttons) {
+                    const wireClick = btn.getAttribute('wire:click');
+                    if (wireClick && wireClick.toLowerCase().includes('save') && !btn.closest('[x-data*="contextFooterGlobal"]')) {
+                        saveButton = btn;
+                        console.log('[Footer] Found save button via wire:click');
+                        break;
+                    }
+                }
+            }
+
+            // Strategy 3: Find button in Filament form actions
+            if (!saveButton) {
+                saveButton = document.querySelector('.fi-form-actions button[type="submit"], .fi-fo-actions button[type="submit"]');
+                if (saveButton) {
+                    console.log('[Footer] Found save button in Filament form actions');
+                }
+            }
+
+            // Strategy 4: Find any submit button in sticky footer (Filament's sticky actions)
+            if (!saveButton) {
+                const stickyButton = document.querySelector('.fi-sticky button[type="submit"]');
+                if (stickyButton && !stickyButton.closest('[x-data*="contextFooterGlobal"]')) {
+                    saveButton = stickyButton;
+                    console.log('[Footer] Found save button in fi-sticky');
+                }
+            }
+
+            if (saveButton) {
+                console.log('[Footer] Triggering save button click');
+                saveButton.click();
+            } else {
+                console.error('[Footer] Cannot find Filament save button - tried all strategies');
+            }
         }
     };
 }

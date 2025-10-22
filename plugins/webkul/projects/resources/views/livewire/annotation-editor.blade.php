@@ -3,13 +3,14 @@
     @if($showModal)
     {{-- Backdrop with Filament styling --}}
     <div
-        class="fixed inset-0 z-50 flex items-center justify-end"
+        class="fixed inset-0 z-30 flex items-center justify-end"
         style="background-color: rgba(0, 0, 0, 0.3);"
         wire:click="cancel"
     >
         {{-- Slideover Panel - Filament native styling --}}
         <div
             class="bg-white dark:bg-gray-900 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-gray-200 dark:border-gray-700"
+            style="position: relative; z-index: 35;"
             @click.stop
             x-data
             x-transition:enter="transition ease-out duration-300"
@@ -42,7 +43,12 @@
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
                     <div class="text-sm font-semibold px-3 py-2 rounded-lg border" style="background-color: var(--gray-50); border-color: var(--gray-200); color: var(--gray-700);">
-                        @if($annotationType === 'location')
+                        @if($annotationType === 'room')
+                            <div class="flex items-center gap-2">
+                                <x-filament::icon icon="heroicon-o-home" class="h-4 w-4" style="color: var(--warning-600);" />
+                                Room Boundary
+                            </div>
+                        @elseif($annotationType === 'location')
                             <div class="flex items-center gap-2">
                                 <x-filament::icon icon="heroicon-o-map-pin" class="h-4 w-4" style="color: var(--info-600);" />
                                 Location
@@ -71,12 +77,12 @@
                     <div class="flex justify-between items-center gap-3">
                         {{-- Delete on the left --}}
                         <div>
-                            {{ ($this->deleteAction)(['size' => 'md']) }}
+                            {{ $this->deleteAction }}
                         </div>
                         {{-- Cancel and Save on the right --}}
                         <div class="flex gap-3">
-                            {{ ($this->cancelAction)(['size' => 'md']) }}
-                            {{ ($this->saveAction)(['size' => 'md']) }}
+                            {{ $this->cancelAction }}
+                            {{ $this->saveAction }}
                         </div>
                     </div>
                 </div>
@@ -84,4 +90,9 @@
         </div>
     </div>
     @endif
+
+    {{-- Filament Actions Modals - Required for createOptionForm modals --}}
+    <div style="position: relative; z-index: 70;">
+        <x-filament-actions::modals />
+    </div>
 </div>

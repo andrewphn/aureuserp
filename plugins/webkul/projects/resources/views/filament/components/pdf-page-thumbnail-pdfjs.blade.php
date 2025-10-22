@@ -1344,7 +1344,7 @@
     @endif
 </div>
 
-{{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}
+{{-- Load annotation system via Vite (separate entry point for PDF pages) --}}
 @once
     @vite('resources/js/annotations.js')
 @endonce

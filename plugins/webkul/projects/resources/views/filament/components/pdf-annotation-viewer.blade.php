@@ -18,7 +18,7 @@
     x-data="annotationSystemV3({
         pdfUrl: '{{ $pdfUrl }}',
         pageNumber: {{ $pageNumber }},
-        pdfPageId: {{ $pdfPageId }},
+        pdfPageId: {{ $pdfPageId ?? 'null' }},
         projectId: {{ $projectId }},
         totalPages: {{ $totalPages }},
         pageType: {{ $pageType ? "'" . $pageType . "'" : 'null' }},
@@ -29,7 +29,7 @@
     class="w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900"
 >
     <!-- Context Bar (Top - Sticky) -->
-    <div class="context-bar sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 shadow-md">
+    <div class="context-bar sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 shadow-md">
         <div class="flex items-center gap-4 flex-wrap">
             <!-- V3 Header Title -->
             <div class="flex items-center gap-2">
@@ -63,7 +63,7 @@
                 <!-- Room Suggestions Dropdown -->
                 <div
                     x-show="showRoomDropdown && roomSuggestions.length > 0"
-                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto"
+                    class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto"
                 >
                     <template x-for="room in roomSuggestions" :key="room.id">
                         <div
@@ -97,7 +97,7 @@
                 <!-- Location Suggestions Dropdown -->
                 <div
                     x-show="showLocationDropdown && locationSuggestions.length > 0"
-                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto"
+                    class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto"
                 >
                     <template x-for="location in locationSuggestions" :key="location.id">
                         <div
@@ -212,6 +212,17 @@
 
             <!-- Draw Mode Buttons (Icon-Only) -->
             <div class="flex items-center gap-2">
+                <!-- Draw Room Boundary (no pre-selection required) -->
+                <button
+                    @click="setDrawMode('room')"
+                    :class="drawMode === 'room' ? 'ring-2 shadow-lg' : ''"
+                    :style="drawMode === 'room' ? 'background-color: var(--warning-600); color: white; border-color: var(--warning-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
+                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all flex items-center justify-center border dark:bg-gray-700 dark:text-white"
+                    title="Draw Room Boundary - Create new room"
+                >
+                    <x-filament::icon icon="heroicon-o-home" class="h-5 w-5" />
+                </button>
+
                 <!-- Draw Room Location (only requires Room) -->
                 <button
                     @click="setDrawMode('location')"
@@ -292,7 +303,7 @@
     </div>
 
     <!-- Isolation Mode Breadcrumb (NEW - Illustrator-style) -->
-    <div x-show="isolationMode" x-transition class="isolation-breadcrumb bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 border-b-4 border-primary-500 px-6 py-4 shadow-lg">
+    <div x-show="isolationMode" x-transition class="isolation-breadcrumb bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 border-b-4 border-primary-500 px-6 py-4 shadow-lg" style="position: relative; z-index: 15;">
         <div class="flex items-center gap-4">
             <!-- Lock Icon + Label -->
             <div class="flex items-center gap-2">
@@ -469,7 +480,7 @@
 
                 <!-- Add Room Button -->
                 <button
-                    @click="roomSearchQuery = ''; showRoomDropdown = true"
+                    @click="roomSearchQuery = ''; showRoomDropdown = true; $nextTick(() => $el.nextElementSibling.querySelector('input')?.focus())"
                     class="w-full mt-4 px-3 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                 >
                     + Add Room
@@ -556,18 +567,65 @@
                 <!-- PDFObject.js embed goes here -->
                 <div x-ref="pdfEmbed" class="w-full h-full min-h-full"></div>
 
-                <!-- Isolation Mode Dimming Overlay (NEW - Filament-style backdrop) -->
+                <!-- Isolation Mode Blur - Positioned exactly like annotation overlay -->
                 <div
                     x-show="isolationMode"
+                    x-cloak
+                    x-ref="isolationBlur"
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0"
                     x-transition:enter-end="opacity-100"
                     x-transition:leave="transition ease-in duration-200"
                     x-transition:leave-start="opacity-100"
                     x-transition:leave-end="opacity-0"
-                    class="absolute inset-0 bg-gray-900/60 dark:bg-black/70 backdrop-blur-sm pointer-events-none"
-                    style="z-index: 5;"
+                    class="absolute top-0 left-0 pointer-events-none"
+                    style="z-index: 1; display: none;"
+                    :style="`width: ${overlayWidth}; height: ${overlayHeight}; display: ${isolationMode ? 'block' : 'none'};`"
                 >
+                    <!-- SVG for blur with proper masking -->
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- Blur filter for background -->
+                            <filter id="blur">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+                            </filter>
+
+                            <!-- Feather filter for soft mask edges -->
+                            <filter id="feather">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="15"/>
+                            </filter>
+
+                            <!-- Mask: white = show blur, black = hide blur -->
+                            <mask id="blurMask">
+                                <!-- White everywhere = show blur everywhere -->
+                                <rect x="0" y="0" width="100%" height="100%" fill="white"/>
+
+                                <!-- Black rectangle at selected annotation = hide blur there (with soft edges) -->
+                                <!-- Add padding to compensate for feather filter eating into the edges -->
+                                <rect
+                                    x-show="selectedNodeId && annotations.find(a => a.id === selectedNodeId)"
+                                    :x="(annotations.find(a => a.id === selectedNodeId)?.screenX || 0) - 15"
+                                    :y="(annotations.find(a => a.id === selectedNodeId)?.screenY || 0) - 15"
+                                    :width="(annotations.find(a => a.id === selectedNodeId)?.screenWidth || 0) + 30"
+                                    :height="(annotations.find(a => a.id === selectedNodeId)?.screenHeight || 0) + 30"
+                                    fill="black"
+                                    rx="8"
+                                    filter="url(#feather)"
+                                />
+                            </mask>
+                        </defs>
+
+                        <!-- Dark overlay with blur, masked to exclude annotation -->
+                        <rect
+                            x="0"
+                            y="0"
+                            width="100%"
+                            height="100%"
+                            fill="rgba(0, 0, 0, 0.65)"
+                            filter="url(#blur)"
+                            mask="url(#blurMask)"
+                        />
+                    </svg>
                 </div>
 
                 <!-- Annotation Overlay (HTML Elements) -->
@@ -578,13 +636,12 @@
                     @mouseup="finishDrawing($event)"
                     @mouseleave="cancelDrawing($event)"
                     :class="drawMode ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'"
-                    :style="`z-index: 10; transform: scale(${zoomLevel}); transform-origin: top left;`"
-                    class="annotation-overlay absolute top-0 left-0 w-full h-full"
+                    class="annotation-overlay absolute top-0 left-0"
+                    style="z-index: 10; will-change: width, height;"
                 >
                     <!-- Existing Annotations -->
-                    <template x-for="anno in annotations" :key="anno.id">
+                    <template x-for="anno in annotations.filter(a => !hiddenAnnotations.includes(a.id))" :key="anno.id">
                         <div
-                            x-show="isAnnotationVisible(anno)"
                             x-data="{ showMenu: false }"
                             :style="`
                                 position: absolute;
@@ -600,7 +657,7 @@
                                 will-change: transform;
                             `"
                             @click="selectAnnotationContext(anno)"
-                            @dblclick.stop="enterIsolationMode(anno)"
+                            @dblclick.prevent.stop="enterIsolationMode(anno)"
                             @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
                             @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
                             class="annotation-marker group"
@@ -619,7 +676,7 @@
                                 x-transition:leave="transition ease-in duration-150"
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-95"
-                                class="absolute -top-10 -right-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 flex gap-1 p-1"
+                                class="absolute -top-10 -right-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 flex gap-1 p-1"
                                 @click.stop
                             >
                                 <!-- Edit Button -->
@@ -721,6 +778,9 @@
                 isolatedRoomName: '',          // Name of isolated room
                 isolatedLocationId: null,      // Location being isolated (if in location isolation)
                 isolatedLocationName: '',      // Name of isolated location
+                overlayWidth: '100%',          // Overlay width for blur layer sync
+                overlayHeight: '100%',         // Overlay height for blur layer sync
+                hiddenAnnotations: [],         // Array of annotation IDs to hide (for Alpine reactivity)
 
                 // Tree State
                 tree: [],
@@ -788,12 +848,29 @@
                         await this.loadAnnotations();
 
                         // Step 5: Listen for annotation updates from Livewire
-                        window.addEventListener('annotation-updated', (event) => {
-                            const updatedAnnotation = event.detail.annotation;
-                            const index = this.annotations.findIndex(a => a.id === updatedAnnotation.id);
+                        Livewire.on('annotation-updated', async (event) => {
+                            const updatedAnnotation = event.annotation;
+
+                            // For newly created annotations, the ID changed from temp_XXX to real database ID
+                            // We need to find by either the new ID OR by checking if this was a temp annotation
+                            let index = this.annotations.findIndex(a => a.id === updatedAnnotation.id);
+
+                            // If not found by new ID, check if there's a temp annotation that needs ID replacement
+                            if (index === -1) {
+                                // Look for temp annotations that match the position (for newly created ones)
+                                index = this.annotations.findIndex(a =>
+                                    typeof a.id === 'string' &&
+                                    a.id.startsWith('temp_') &&
+                                    a.pdfX === updatedAnnotation.pdfX &&
+                                    a.pdfY === updatedAnnotation.pdfY
+                                );
+                            }
+
                             if (index !== -1) {
+                                // Replace the annotation (including ID for temp → real conversion)
                                 this.annotations[index] = {
                                     ...this.annotations[index],
+                                    id: updatedAnnotation.id, // Update ID (temp → real)
                                     label: updatedAnnotation.label,
                                     notes: updatedAnnotation.notes,
                                     measurementWidth: updatedAnnotation.measurementWidth,
@@ -805,22 +882,34 @@
                                     cabinetRunId: updatedAnnotation.cabinetRunId
                                 };
                                 console.log('✓ Annotation updated from Livewire:', updatedAnnotation);
+
                                 // Re-render annotations to show updated data
                                 this.renderAnnotations();
+
+                                // Refresh tree to show new annotation (with small delay to ensure DB write completes)
+                                setTimeout(() => {
+                                    this.refreshTree();
+                                    console.log('🌳 Tree refreshed after annotation save');
+                                }, 300);
+                            } else {
+                                console.warn('⚠️ Could not find annotation to update:', updatedAnnotation.id);
                             }
                         });
 
                         // Listen for annotation deletion from Livewire
-                        window.addEventListener('annotation-deleted', (event) => {
-                            const annotationId = event.detail.annotationId;
+                        Livewire.on('annotation-deleted', async (event) => {
+                            const annotationId = event.annotationId;
                             const index = this.annotations.findIndex(a => a.id === annotationId);
                             if (index !== -1) {
                                 // Remove annotation from array
                                 this.annotations.splice(index, 1);
                                 console.log('✓ Annotation deleted via Livewire:', annotationId);
                                 // Re-render happens automatically via Alpine reactivity
-                                // Refresh tree to update counts
-                                this.refreshTree();
+                                // Refresh tree to update counts (with small delay to ensure DB write completes)
+                                setTimeout(() => {
+                                    this.refreshTree();
+                                    console.log('🌳 Tree refreshed after annotation deletion');
+                                }, 300);
                             }
                         });
 
@@ -834,6 +923,40 @@
                                 this.exitIsolationMode();
                             }
                         });
+
+                        // Step 8: Setup ResizeObserver to keep overlay locked to canvas (browser zoom safe)
+                        const syncOverlayToCanvas = () => {
+                            const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
+                            const overlay = this.$refs.annotationOverlay;
+                            if (canvas && overlay) {
+                                const canvasRect = canvas.getBoundingClientRect();
+                                const width = `${canvasRect.width}px`;
+                                const height = `${canvasRect.height}px`;
+
+                                overlay.style.width = width;
+                                overlay.style.height = height;
+
+                                // Sync blur layer dimensions (reactive)
+                                this.overlayWidth = width;
+                                this.overlayHeight = height;
+
+                                // Update annotation positions when size changes
+                                this.updateAnnotationPositions();
+
+                                console.log(`🔄 Overlay synced to canvas: ${canvasRect.width} × ${canvasRect.height}`);
+                            }
+                        };
+
+                        // Observe canvas size changes (handles browser zoom)
+                        const resizeObserver = new ResizeObserver(() => {
+                            syncOverlayToCanvas();
+                        });
+
+                        // Start observing the PDF embed container
+                        const embedContainer = this.$refs.pdfEmbed;
+                        if (embedContainer) {
+                            resizeObserver.observe(embedContainer);
+                        }
 
                         console.log('✅ V3 system ready!');
                     } catch (error) {
@@ -867,6 +990,7 @@
                     console.log('📄 Rendering PDF page to canvas (scroll-proof)...');
                     console.log('🔍 PDF URL:', this.pdfUrl);
                     console.log('🔍 Current Page:', this.currentPage);
+                    console.log('🔍 Zoom Level:', this.zoomLevel);
 
                     const embedContainer = this.$refs.pdfEmbed;
 
@@ -881,9 +1005,10 @@
                         // Get unscaled viewport for dimension reference
                         const unscaledViewport = page.getViewport({ scale: 1.0 });
 
-                        // Calculate scale to fit container width
+                        // Calculate base scale to fit container width, then apply zoom
                         const containerWidth = embedContainer.clientWidth;
-                        const scale = containerWidth / unscaledViewport.width;
+                        const baseScale = containerWidth / unscaledViewport.width;
+                        const scale = baseScale * this.zoomLevel; // Apply zoom multiplier
                         const scaledViewport = page.getViewport({ scale });
 
                         // Create canvas with scaled dimensions
@@ -891,8 +1016,16 @@
                         const context = canvas.getContext('2d');
                         canvas.width = scaledViewport.width;
                         canvas.height = scaledViewport.height;
-                        canvas.style.width = '100%';
-                        canvas.style.height = 'auto';
+
+                        // At 100% zoom, fit to container width
+                        // At higher zoom, allow overflow for scrolling
+                        if (this.zoomLevel === 1.0) {
+                            canvas.style.width = '100%';
+                            canvas.style.height = 'auto';
+                        } else {
+                            canvas.style.width = `${scaledViewport.width}px`;
+                            canvas.style.height = `${scaledViewport.height}px`;
+                        }
                         canvas.style.display = 'block';
 
                         // Render PDF page to canvas
@@ -906,6 +1039,24 @@
                         // Clear container and add canvas
                         embedContainer.innerHTML = '';
                         embedContainer.appendChild(canvas);
+
+                        // LOCK overlay to canvas dimensions (browser zoom safe)
+                        await this.$nextTick();
+                        const overlay = this.$refs.annotationOverlay;
+                        if (overlay) {
+                            const canvasRect = canvas.getBoundingClientRect();
+                            const width = `${canvasRect.width}px`;
+                            const height = `${canvasRect.height}px`;
+
+                            overlay.style.width = width;
+                            overlay.style.height = height;
+
+                            // Sync blur layer dimensions (reactive)
+                            this.overlayWidth = width;
+                            this.overlayHeight = height;
+
+                            console.log(`🔒 Overlay locked to canvas: ${canvasRect.width} × ${canvasRect.height}`);
+                        }
 
                         // Store canvas scale factor for coordinate transformations
                         this.canvasScale = scale;
@@ -1030,9 +1181,11 @@
                 // Start drawing rectangle on mousedown
                 startDrawing(event) {
                     // Check if we can draw based on mode
-                    const canProceed = this.drawMode === 'location'
-                        ? this.canDrawLocation()
-                        : this.canDraw();
+                    const canProceed = this.drawMode === 'room'
+                        ? true  // Room boundary can be drawn anytime - room created in form
+                        : this.drawMode === 'location'
+                            ? this.canDrawLocation()
+                            : this.canDraw();
 
                     if (!canProceed || !this.drawMode) return;
 
@@ -1140,7 +1293,10 @@
 
                 // Generate auto-incrementing label
                 generateAnnotationLabel() {
-                    if (this.drawMode === 'location') {
+                    if (this.drawMode === 'room') {
+                        // For room boundaries, use the room name
+                        return this.activeRoomName || 'Room';
+                    } else if (this.drawMode === 'location') {
                         // For locations, count within the room
                         const count = this.annotations.filter(a =>
                             a.type === 'location' &&
@@ -1164,6 +1320,7 @@
 
                 // Get color for current draw mode
                 getDrawColor() {
+                    if (this.drawMode === 'room') return '#f59e0b'; // Amber/Orange (room boundary)
                     if (this.drawMode === 'location') return '#9333ea'; // Purple
                     if (this.drawMode === 'cabinet_run') return '#3b82f6'; // Blue
                     return '#10b981'; // Green (cabinet)
@@ -1208,7 +1365,9 @@
                                     locationId: anno.cabinet_run_id,  // Map cabinet_run_id to locationId
                                     label: anno.text || 'Annotation',
                                     color: anno.color || this.getColorForType(anno.annotation_type),
-                                    notes: anno.notes
+                                    notes: anno.notes,
+                                    pdfPageId: this.pdfPageId,  // Add pdfPageId for context
+                                    projectId: this.projectId   // Add projectId for form loading
                                 };
                             });
 
@@ -1270,6 +1429,7 @@
 
                 // Get color for annotation type (for loaded annotations)
                 getColorForType(type) {
+                    if (type === 'room') return '#f59e0b'; // Amber/Orange (room boundary)
                     if (type === 'location') return '#9333ea'; // Purple
                     if (type === 'cabinet_run') return '#3b82f6'; // Blue
                     return '#10b981'; // Green (cabinet)
@@ -1444,17 +1604,87 @@
 
                 // Autocomplete methods
                 searchRooms(query) {
-                    // TODO: Implement fuzzy search
-                    this.roomSuggestions = [
-                        { id: 'new_' + Date.now(), name: query, isNew: true }
-                    ];
+                    console.log('🔍 Searching rooms with query:', query);
+
+                    // Get existing rooms from tree
+                    const existingRooms = this.tree ? this.tree.map(room => ({
+                        id: room.id,
+                        name: room.name,
+                        isNew: false
+                    })) : [];
+
+                    if (!query || query.trim() === '') {
+                        // Empty query: show all existing rooms
+                        this.roomSuggestions = existingRooms;
+                        console.log(`✓ Showing ${existingRooms.length} existing rooms`);
+                    } else {
+                        // Filter existing rooms by query (case-insensitive)
+                        const lowerQuery = query.toLowerCase();
+                        const matchingRooms = existingRooms.filter(room =>
+                            room.name.toLowerCase().includes(lowerQuery)
+                        );
+
+                        // Add "Create new" option at the top
+                        this.roomSuggestions = [
+                            { id: 'new_' + Date.now(), name: query, isNew: true },
+                            ...matchingRooms
+                        ];
+
+                        console.log(`✓ Found ${matchingRooms.length} matching rooms, showing "Create ${query}" option`);
+                    }
                 },
 
-                selectRoom(room) {
-                    this.activeRoomId = room.id;
-                    this.activeRoomName = room.name;
-                    this.roomSearchQuery = room.name;
-                    this.showRoomDropdown = false;
+                async selectRoom(room) {
+                    console.log('🏠 Selecting room:', room);
+
+                    // If this is a new room, create it via API first
+                    if (room.isNew) {
+                        console.log('📝 Creating new room:', room.name);
+
+                        try {
+                            const response = await fetch(`/api/project/${this.projectId}/rooms`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                                },
+                                body: JSON.stringify({
+                                    name: room.name,
+                                    room_type: null // Can be enhanced later with room type selection
+                                })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success && data.room) {
+                                console.log('✓ Room created successfully:', data.room);
+
+                                // Set active context with the real room ID from database
+                                this.activeRoomId = data.room.id;
+                                this.activeRoomName = data.room.name;
+                                this.roomSearchQuery = data.room.name;
+                                this.showRoomDropdown = false;
+
+                                // Refresh tree to show the new room
+                                await this.refreshTree();
+
+                                console.log('✓ Room added to project tree');
+                            } else {
+                                throw new Error(data.error || 'Failed to create room');
+                            }
+                        } catch (error) {
+                            console.error('❌ Failed to create room:', error);
+                            alert(`Error creating room: ${error.message}`);
+                            this.showRoomDropdown = false;
+                        }
+                    } else {
+                        // Existing room, just set the context
+                        this.activeRoomId = room.id;
+                        this.activeRoomName = room.name;
+                        this.roomSearchQuery = room.name;
+                        this.showRoomDropdown = false;
+                        console.log('✓ Selected existing room:', room.name);
+                    }
                 },
 
                 searchLocations(query) {
@@ -1556,7 +1786,7 @@
                 },
 
                 // NEW: Enter Isolation Mode (Illustrator-style layer isolation)
-                enterIsolationMode(anno) {
+                async enterIsolationMode(anno) {
                     console.log('🔒 Entering isolation mode for:', anno.type, anno.label);
 
                     if (anno.type === 'location') {
@@ -1615,10 +1845,39 @@
 
                     // Select the isolated node
                     this.selectedNodeId = this.isolationLevel === 'location' ? this.isolatedLocationId : this.isolatedRoomId;
+
+                    // Clear previous hidden annotations
+                    this.hiddenAnnotations = [];
+
+                    // Populate hidden annotations based on isolation mode
+                    this.annotations.forEach(a => {
+                        // Hide the selected annotation (the one being isolated)
+                        if (a.id === this.selectedNodeId) {
+                            console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label})`);
+                            this.hiddenAnnotations.push(a.id);
+                        } else if (this.isolationLevel === 'room') {
+                            // Hide annotations NOT in this room
+                            if (a.roomId !== this.isolatedRoomId) {
+                                console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label}) - not in room ${this.isolatedRoomId}`);
+                                this.hiddenAnnotations.push(a.id);
+                            }
+                        } else if (this.isolationLevel === 'location') {
+                            // Hide annotations NOT in this location
+                            if (a.locationId !== this.isolatedLocationId) {
+                                console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label}) - not in location ${this.isolatedLocationId}`);
+                                this.hiddenAnnotations.push(a.id);
+                            }
+                        }
+                    });
+
+                    console.log(`👁️ [ENTER ISOLATION] Hidden annotations: [${this.hiddenAnnotations.join(', ')}]`);
+
+                    // Zoom to fit annotation box on screen (double-click behavior)
+                    await this.zoomToFitAnnotation(anno);
                 },
 
                 // NEW: Exit Isolation Mode
-                exitIsolationMode() {
+                async exitIsolationMode() {
                     console.log('🔓 Exiting isolation mode');
 
                     // Clear isolation state
@@ -1635,7 +1894,14 @@
                     // Deselect node
                     this.selectedNodeId = null;
 
-                    console.log('✓ Returned to normal view');
+                    // Clear hidden annotations array (show all annotations)
+                    console.log(`👁️ [EXIT ISOLATION] Clearing hidden annotations (was: [${this.hiddenAnnotations.join(', ')}])`);
+                    this.hiddenAnnotations = [];
+
+                    // Reset zoom to fit full page (100%)
+                    await this.resetZoom();
+
+                    console.log('✓ Returned to normal view with reset zoom');
                 },
 
                 // Edit annotation (NEW - Full CRUD)
@@ -1709,27 +1975,21 @@
                     this.setZoom(1.0);
                 },
 
-                setZoom(level) {
+                async setZoom(level) {
                     this.zoomLevel = level;
 
                     // Invalidate overlay rect cache
                     this._overlayRect = null;
 
-                    // Apply responsive CSS transform to PDF canvas
-                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
-                    const pdfEmbed = this.$refs.pdfEmbed;
+                    // Re-render PDF at new zoom level for high-res display
+                    await this.displayPdf();
 
-                    if (canvas && pdfEmbed) {
-                        // Apply zoom transform to canvas
-                        canvas.style.transform = `scale(${level})`;
-                        canvas.style.transformOrigin = 'top left';
+                    // Wait for DOM to update with new canvas size
+                    await this.$nextTick();
+                    await new Promise(resolve => setTimeout(resolve, 100));
 
-                        // Update container size to accommodate scaled canvas
-                        const scaledWidth = canvas.width * level;
-                        const scaledHeight = canvas.height * level;
-                        pdfEmbed.style.minWidth = `${scaledWidth}px`;
-                        pdfEmbed.style.minHeight = `${scaledHeight}px`;
-                    }
+                    // Invalidate cache again to force fresh rect
+                    this._overlayRect = null;
 
                     // Re-render annotations at new zoom level
                     this.updateAnnotationPositions();
@@ -1741,7 +2001,8 @@
                 updateAnnotationPositions() {
                     if (!this.pageDimensions) return;
 
-                    this.annotations = this.annotations.map(anno => {
+                    // Mutate annotations in-place to preserve Alpine reactivity
+                    this.annotations.forEach(anno => {
                         const screenPos = this.pdfToScreen(
                             anno.pdfX,
                             anno.pdfY,
@@ -1749,18 +2010,74 @@
                             anno.pdfHeight
                         );
 
-                        return {
-                            ...anno,
-                            screenX: screenPos.x,
-                            screenY: screenPos.y,
-                            screenWidth: screenPos.width,
-                            screenHeight: screenPos.height
-                        };
+                        anno.screenX = screenPos.x;
+                        anno.screenY = screenPos.y;
+                        anno.screenWidth = screenPos.width;
+                        anno.screenHeight = screenPos.height;
                     });
                 },
 
                 getZoomPercentage() {
                     return Math.round(this.zoomLevel * 100);
+                },
+
+                // Zoom to fit annotation box on screen
+                async zoomToFitAnnotation(anno) {
+                    console.log('🔍 Zooming to fit annotation:', anno.label);
+
+                    // Get container dimensions
+                    const container = this.$refs.annotationOverlay;
+                    if (!container) {
+                        console.warn('⚠️ Container not found for zoom calculation');
+                        return;
+                    }
+
+                    const containerRect = container.getBoundingClientRect();
+                    const containerWidth = containerRect.width;
+                    const containerHeight = containerRect.height;
+
+                    // Add padding around annotation (20% margin)
+                    const paddingFactor = 0.8; // 80% of container = 20% padding total
+
+                    // Calculate required zoom to fit annotation width and height
+                    const zoomX = (containerWidth * paddingFactor) / anno.screenWidth;
+                    const zoomY = (containerHeight * paddingFactor) / anno.screenHeight;
+
+                    // Use the smaller zoom to ensure both dimensions fit
+                    let targetZoom = Math.min(zoomX, zoomY);
+
+                    // Clamp to zoom limits
+                    targetZoom = Math.max(this.zoomMin, Math.min(targetZoom, this.zoomMax));
+
+                    // Apply the zoom
+                    await this.setZoom(targetZoom);
+
+                    // After zoom, scroll annotation to center of viewport
+                    await this.$nextTick();
+
+                    // Calculate annotation center in screen coordinates at new zoom
+                    const annoScreenPos = this.pdfToScreen(
+                        anno.pdfX + anno.pdfWidth / 2,
+                        anno.pdfY - anno.pdfHeight / 2, // PDF Y is inverted
+                        0,
+                        0
+                    );
+
+                    // Get the canvas element
+                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
+                    if (canvas) {
+                        // Calculate scroll position to center the annotation
+                        const canvasRect = canvas.getBoundingClientRect();
+                        const scrollContainer = container.parentElement;
+
+                        if (scrollContainer) {
+                            // Center the annotation in viewport
+                            scrollContainer.scrollLeft = annoScreenPos.x - containerWidth / 2;
+                            scrollContainer.scrollTop = annoScreenPos.y - containerHeight / 2;
+                        }
+                    }
+
+                    console.log(`✓ Zoomed to ${Math.round(targetZoom * 100)}% and centered annotation`);
                 },
 
                 // Pagination methods (NEW - Phase 2)
@@ -1839,6 +2156,11 @@
                 isAnnotationVisible(anno) {
                     // ISOLATION MODE FILTERING (NEW)
                     if (this.isolationMode) {
+                        // ALWAYS hide the selected annotation (the one being isolated)
+                        if (anno.id === this.selectedNodeId) {
+                            return false;
+                        }
+
                         if (this.isolationLevel === 'room') {
                             // Room isolation: show only locations, cabinet runs, and cabinets in this room
                             if (anno.type === 'location' && anno.roomId === this.isolatedRoomId) {

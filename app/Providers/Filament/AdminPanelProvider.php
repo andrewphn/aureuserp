@@ -123,15 +123,14 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Pages\TestFooter::class,
             ])
             ->renderHook(
-                PanelsRenderHook::HEAD_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/form-auto-populate.js")')
+                PanelsRenderHook::SCRIPTS_BEFORE,
+                fn (): string => view('filament.scripts.global-app-js')->render()
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 function (): string {
-                    $content = \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .
-                               \Illuminate\Support\Facades\Blade::render('@vite("resources/js/annotations.js")') .
-                               view('filament.components.project-sticky-footer-global')->render() .
+                    // Load global footer and modal components
+                    $content = view('filament.components.project-sticky-footer-global')->render() .
                                view('filament.components.project-selector-modal')->render();
 
                     return $content;

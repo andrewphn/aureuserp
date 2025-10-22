@@ -56,8 +56,10 @@ document.addEventListener('alpine:init', () => {
                     }
                 }
 
-                console.log(`[EntityStore] Retrieved ${entityType}:`, filteredData);
-                console.trace('[EntityStore] getEntity called from:');
+                // Only log in development (reduces console noise in production)
+                if (import.meta.env.DEV) {
+                    console.log(`[EntityStore] Retrieved ${entityType}:`, filteredData);
+                }
                 return filteredData;
             } catch (e) {
                 console.error('[EntityStore] Failed to retrieve:', e);
@@ -109,7 +111,10 @@ document.addEventListener('alpine:init', () => {
                     entityId: entityId
                 }));
 
-                console.log(`[EntityStore] Updated ${entityType}:`, merged);
+                // Only log in development
+                if (import.meta.env.DEV) {
+                    console.log(`[EntityStore] Updated ${entityType}:`, merged);
+                }
 
                 // Only dispatch event if not silent (prevents circular syncs from Livewire auto-sync)
                 if (!silent) {
@@ -333,7 +338,7 @@ document.addEventListener('livewire:init', () => {
 
     // Track last sync timestamp per component to debounce
     const lastSyncTime = new Map();
-    const SYNC_DEBOUNCE_MS = 100;
+    const SYNC_DEBOUNCE_MS = 250; // Increased from 100ms to reduce rapid-fire syncs
 
     /**
      * Fields that should NOT be sent in Livewire requests
@@ -428,16 +433,23 @@ document.addEventListener('livewire:init', () => {
         // Skip auto-syncing on edit pages entirely (they manage their own state)
         const isEditPage = window.location.pathname.includes('/edit');
 
-        console.debug('[EntityStore Commit] Pathname:', window.location.pathname, 'isEditPage:', isEditPage, 'isSyncing:', isSyncing);
+        // Only log in development mode
+        if (import.meta.env.DEV) {
+            console.debug('[EntityStore Commit] Pathname:', window.location.pathname, 'isEditPage:', isEditPage, 'isSyncing:', isSyncing);
+        }
 
         if (isEditPage) {
-            console.debug('[EntityStore Commit] Skipped - on edit page');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore Commit] Skipped - on edit page');
+            }
             return;
         }
 
         // Skip if we're currently syncing (prevent circular updates)
         if (isSyncing) {
-            console.debug('[EntityStore Commit] Skipped - currently syncing');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore Commit] Skipped - currently syncing');
+            }
             return;
         }
 
@@ -445,7 +457,9 @@ document.addEventListener('livewire:init', () => {
         const entityType = component.name?.split('\\').pop()?.replace(/Create|Edit|Resource/g, '').toLowerCase();
 
         if (!entityType) {
-            console.debug('[EntityStore Commit] Skipped - no entity type detected');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore Commit] Skipped - no entity type detected');
+            }
             return;
         }
 
@@ -453,13 +467,13 @@ document.addEventListener('livewire:init', () => {
         const entityId = component.$wire?.record?.id || null;
         const componentKey = `${entityType}_${entityId || 'new'}`;
 
-        console.debug('[EntityStore Commit] Component:', component.name, 'Entity:', entityType, 'ID:', entityId);
-
         // Debounce: skip if we synced recently for this component
         const now = Date.now();
         const lastSync = lastSyncTime.get(componentKey);
         if (lastSync && (now - lastSync) < SYNC_DEBOUNCE_MS) {
-            console.debug('[EntityStore Commit] Skipped - debounced (last sync:', (now - lastSync), 'ms ago)');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore Commit] Skipped - debounced (last sync:', (now - lastSync), 'ms ago)');
+            }
             return;
         }
 
@@ -473,15 +487,13 @@ document.addEventListener('livewire:init', () => {
             }
         }
 
-        console.debug('[EntityStore Commit] Filtered', Object.keys(filteredData).length, 'fields from', Object.keys(formData).length, 'total fields');
-
         if (Object.keys(filteredData).length > 0) {
             lastSyncTime.set(componentKey, now);
-            console.log('[EntityStore Commit] Syncing', Object.keys(filteredData).length, 'fields for', entityType, entityId);
+            if (import.meta.env.DEV) {
+                console.log('[EntityStore Commit] Syncing', Object.keys(filteredData).length, 'fields for', entityType, entityId);
+            }
             // Use silent=true to prevent triggering entity-updated event (breaks circular sync)
             Alpine.store('entityStore').updateEntity(entityType, entityId, filteredData, true);
-        } else {
-            console.debug('[EntityStore Commit] Skipped - no fields to sync');
         }
     });
 
@@ -494,7 +506,9 @@ document.addEventListener('livewire:init', () => {
         // Edit pages should manage their own state directly
         const isEditPage = window.location.pathname.includes('/edit');
         if (isEditPage) {
-            console.debug('[EntityStore] Skipped sync - on edit page');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore] Skipped sync - on edit page');
+            }
             return;
         }
 
@@ -515,7 +529,9 @@ document.addEventListener('livewire:init', () => {
                     Object.keys(data).forEach(key => {
                         // Skip blacklisted fields
                         if (ENTITYSTORE_SYNC_BLACKLIST.includes(key)) {
-                            console.debug(`[EntityStore] Skipped blacklisted field: ${key}`);
+                            if (import.meta.env.DEV) {
+                                console.debug(`[EntityStore] Skipped blacklisted field: ${key}`);
+                            }
                             return;
                         }
 
@@ -532,11 +548,13 @@ document.addEventListener('livewire:init', () => {
                             }
                         } catch (e) {
                             // Property doesn't exist, skip silently
-                            console.debug(`[EntityStore] Skipped syncing ${key} (not found in component)`);
+                            if (import.meta.env.DEV) {
+                                console.debug(`[EntityStore] Skipped syncing ${key} (not found in component)`);
+                            }
                         }
                     });
 
-                    if (syncedCount > 0) {
+                    if (syncedCount > 0 && import.meta.env.DEV) {
                         console.log(`[EntityStore] Synced ${syncedCount} ${entityType} field(s) to Livewire component`);
                     }
                 }
@@ -574,7 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         // Check if Livewire is available
         if (typeof Livewire === 'undefined' || typeof Alpine === 'undefined') {
-            console.debug('[EntityStore] Livewire or Alpine not available, skipping auto-restore');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore] Livewire or Alpine not available, skipping auto-restore');
+            }
             return;
         }
 
@@ -582,7 +602,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Edit pages load their data from the database on mount
         const isEditPage = window.location.pathname.includes('/edit');
         if (isEditPage) {
-            console.debug('[EntityStore] Skipped auto-restore - on edit page');
+            if (import.meta.env.DEV) {
+                console.debug('[EntityStore] Skipped auto-restore - on edit page');
+            }
             return;
         }
 
@@ -617,7 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     Object.keys(stored).forEach(key => {
                         // Skip blacklisted fields
                         if (RESTORE_BLACKLIST.includes(key)) {
-                            console.debug(`[EntityStore] Skipped blacklisted field during restore: ${key}`);
+                            if (import.meta.env.DEV) {
+                                console.debug(`[EntityStore] Skipped blacklisted field during restore: ${key}`);
+                            }
                             return;
                         }
 
@@ -634,11 +658,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         } catch (e) {
                             // Property doesn't exist, skip silently
-                            console.debug(`[EntityStore] Skipped ${key} during restore (not found in component)`);
+                            if (import.meta.env.DEV) {
+                                console.debug(`[EntityStore] Skipped ${key} during restore (not found in component)`);
+                            }
                         }
                     });
 
-                    if (restoredCount > 0) {
+                    if (restoredCount > 0 && import.meta.env.DEV) {
                         console.log(`[EntityStore] Restored ${restoredCount} ${entityType} field(s) from session`);
                     }
                 }
