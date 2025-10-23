@@ -644,6 +644,20 @@
                 <!-- PDFObject.js embed goes here -->
                 <div x-ref="pdfEmbed" class="w-full h-full min-h-full"></div>
 
+                <!-- Current View Badge - Fixed Position Top-Left -->
+                <div class="absolute top-4 left-4 z-50 pointer-events-none">
+                    <div
+                        class="px-4 py-2 rounded-lg shadow-lg text-white font-bold text-sm flex items-center gap-2"
+                        :style="{ backgroundColor: getCurrentViewColor() }"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span x-text="getCurrentViewLabel()"></span>
+                    </div>
+                </div>
+
                 <!-- Isolation Mode Blur - Positioned exactly like annotation overlay -->
                 <div
                     x-show="isolationMode"
@@ -1766,6 +1780,37 @@
                  */
                 getEntityReferences(annotationId) {
                     return this.annotationReferences[annotationId] || [];
+                },
+
+                /**
+                 * Get human-readable label for current view
+                 * @returns {string}
+                 */
+                getCurrentViewLabel() {
+                    if (this.activeViewType === 'plan') {
+                        return 'Plan View';
+                    } else if (this.activeViewType === 'elevation') {
+                        const orientation = this.activeOrientation ? ` - ${this.activeOrientation.charAt(0).toUpperCase() + this.activeOrientation.slice(1)}` : '';
+                        return `Elevation View${orientation}`;
+                    } else if (this.activeViewType === 'section') {
+                        const orientation = this.activeOrientation ? ` - ${this.activeOrientation}` : '';
+                        return `Section View${orientation}`;
+                    } else if (this.activeViewType === 'detail') {
+                        return 'Detail View';
+                    }
+                    return 'Unknown View';
+                },
+
+                /**
+                 * Get color for current view type badge
+                 * @returns {string}
+                 */
+                getCurrentViewColor() {
+                    if (this.activeViewType === 'plan') return 'var(--primary-600)';
+                    if (this.activeViewType === 'elevation') return 'var(--warning-600)';
+                    if (this.activeViewType === 'section') return 'var(--info-600)';
+                    if (this.activeViewType === 'detail') return 'var(--success-600)';
+                    return 'var(--gray-600)';
                 },
 
                 // === END VIEW TYPE MANAGEMENT ===
