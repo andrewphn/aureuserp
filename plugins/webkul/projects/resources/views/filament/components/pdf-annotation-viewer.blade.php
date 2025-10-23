@@ -938,6 +938,8 @@
                 isolatedLocationName: '',      // Name of isolated location
                 isolatedCabinetRunId: null,    // Cabinet run being isolated (if in cabinet run isolation)
                 isolatedCabinetRunName: '',    // Name of isolated cabinet run
+                isolationViewType: null,       // View type when isolation mode was entered
+                isolationOrientation: null,    // View orientation when isolation mode was entered
                 overlayWidth: '100%',          // Overlay width for blur layer sync
                 overlayHeight: '100%',         // Overlay height for blur layer sync
                 hiddenAnnotations: [],         // Array of annotation IDs to hide (for Alpine reactivity)
@@ -2306,6 +2308,13 @@
                 isAnnotationVisibleInIsolation(anno) {
                     if (!this.isolationMode) return true;
 
+                    // FIRST: Check view type compatibility (respects current active view, not isolation view)
+                    // This allows users to switch views while in isolation mode
+                    if (!this.isAnnotationVisibleInView(anno)) {
+                        return false;
+                    }
+
+                    // THEN: Check hierarchy visibility
                     if (this.isolationLevel === 'room') {
                         // Show the isolated room itself
                         if (anno.id === this.isolatedRoomId) return true;
@@ -2370,6 +2379,11 @@
                 // NEW: Enter Isolation Mode (Illustrator-style layer isolation)
                 async enterIsolationMode(anno) {
                     console.log('🔒 Entering isolation mode for:', anno.type, anno.label);
+
+                    // Store current view context for isolation mode
+                    this.isolationViewType = this.activeViewType;
+                    this.isolationOrientation = this.activeOrientation;
+                    console.log(`📐 Isolation view context: ${this.isolationViewType}${this.isolationOrientation ? ` (${this.isolationOrientation})` : ''}`);
 
                     if (anno.type === 'cabinet_run') {
                         // Isolate at cabinet run level
@@ -2493,6 +2507,8 @@
                     this.isolatedLocationName = '';
                     this.isolatedCabinetRunId = null;
                     this.isolatedCabinetRunName = '';
+                    this.isolationViewType = null;
+                    this.isolationOrientation = null;
 
                     // Clear active context
                     this.clearContext();
