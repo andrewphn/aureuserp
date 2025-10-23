@@ -237,6 +237,70 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->step(0.125)
                 ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
 
+            // View Type Section
+            Section::make('View Type')
+                ->description('Specify what type of view this annotation represents (Plan, Elevation, Section, or Detail)')
+                ->collapsible()
+                ->schema([
+                    Select::make('view_type')
+                        ->label('View Type')
+                        ->options([
+                            'plan' => 'Plan View (Top-Down)',
+                            'elevation' => 'Elevation View (Front/Side)',
+                            'section' => 'Section View (Cut-Through)',
+                            'detail' => 'Detail View (Zoom/Closeup)',
+                        ])
+                        ->default('plan')
+                        ->required()
+                        ->live()
+                        ->helperText('Select the type of view this annotation represents')
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            // Reset orientation when view type changes
+                            if ($state === 'plan' || $state === 'detail') {
+                                $set('view_orientation', null);
+                            } elseif ($state === 'elevation' && !$this->data['view_orientation']) {
+                                $set('view_orientation', 'front');
+                            } elseif ($state === 'section' && !$this->data['view_orientation']) {
+                                $set('view_orientation', 'A-A');
+                            }
+                        }),
+
+                    Select::make('view_orientation')
+                        ->label('Orientation')
+                        ->options(function (callable $get) {
+                            $viewType = $get('view_type');
+
+                            return match ($viewType) {
+                                'elevation' => [
+                                    'front' => 'Front',
+                                    'back' => 'Back',
+                                    'left' => 'Left',
+                                    'right' => 'Right',
+                                ],
+                                'section' => [
+                                    'A-A' => 'A-A',
+                                    'B-B' => 'B-B',
+                                    'C-C' => 'C-C',
+                                    'D-D' => 'D-D',
+                                ],
+                                default => [],
+                            };
+                        })
+                        ->visible(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section']))
+                        ->required(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section']))
+                        ->helperText(function (callable $get) {
+                            $viewType = $get('view_type');
+                            if ($viewType === 'elevation') {
+                                return 'Select which side/face this elevation shows';
+                            } elseif ($viewType === 'section') {
+                                return 'Select which section cut line this represents';
+                            }
+                            return '';
+                        })
+                        ->live(),
+                ])
+                ->columnSpanFull(),
+
             // Multi-Parent Entity References Section
             Section::make('Entity References')
                 ->description('Associate this annotation with multiple entities (rooms, locations, runs, cabinets)')
@@ -357,14 +421,15 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     'room_id'          => $data['room_id'] ?? null,
                     'room_location_id' => $data['location_id'] ?? null,
                     'cabinet_run_id'   => $data['cabinet_run_id'] ?? null,
+                    'cabinet_specification_id' => $data['cabinet_specification_id'] ?? null,
                     'x'                => $this->originalAnnotation['normalizedX'] ?? 0,
                     'y'                => $normalizedY,
                     'width'            => $normalizedWidth,
                     'height'           => $normalizedHeight,
                     'color'            => $this->originalAnnotation['color'] ?? '#f59e0b',
-                    // View types and position detection
-                    'view_type'        => $this->originalAnnotation['viewType'] ?? 'plan',
-                    'view_orientation' => $this->originalAnnotation['viewOrientation'] ?? null,
+                    // View types and position detection (from FORM DATA)
+                    'view_type'        => $data['view_type'] ?? 'plan',
+                    'view_orientation' => $data['view_orientation'] ?? null,
                     'view_scale'       => $this->originalAnnotation['viewScale'] ?? null,
                     'inferred_position' => $positionData['inferred_position'],
                     'vertical_zone'    => $positionData['vertical_zone'],
@@ -436,6 +501,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 'room_id'          => $data['room_id'] ?? null,
                 'room_location_id' => $data['location_id'] ?? null,
                 'cabinet_run_id'   => $data['cabinet_run_id'] ?? null,
+                'cabinet_specification_id' => $data['cabinet_specification_id'] ?? null,
+                'view_type'        => $data['view_type'] ?? 'plan',
+                'view_orientation' => $data['view_orientation'] ?? null,
             ];
 
             $annotation->update($updateData);
