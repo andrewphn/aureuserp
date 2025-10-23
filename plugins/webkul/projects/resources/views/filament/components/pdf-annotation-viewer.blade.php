@@ -258,7 +258,84 @@
                 >
                     <x-filament::icon icon="heroicon-o-cube" class="h-5 w-5" />
                 </button>
+            </div>
 
+            <!-- View Type Toggle (Plan, Elevation, Section, Detail) -->
+            <div class="flex items-center gap-2 border-l pl-3 dark:border-gray-600">
+                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">View:</span>
+
+                <!-- Plan View -->
+                <button
+                    @click="setViewType('plan')"
+                    :class="activeViewType === 'plan' ? 'ring-2 shadow-md' : ''"
+                    :style="activeViewType === 'plan' ? 'background-color: var(--primary-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
+                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    title="Plan View (Top-Down)"
+                >
+                    Plan
+                </button>
+
+                <!-- Elevation View -->
+                <button
+                    @click="setViewType('elevation', 'front')"
+                    :class="activeViewType === 'elevation' ? 'ring-2 shadow-md' : ''"
+                    :style="activeViewType === 'elevation' ? 'background-color: var(--warning-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
+                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    title="Elevation View (Side)"
+                >
+                    Elevation
+                </button>
+
+                <!-- Section View -->
+                <button
+                    @click="setViewType('section', 'A-A')"
+                    :class="activeViewType === 'section' ? 'ring-2 shadow-md' : ''"
+                    :style="activeViewType === 'section' ? 'background-color: var(--info-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
+                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    title="Section View (Cut-Through)"
+                >
+                    Section
+                </button>
+
+                <!-- Detail View -->
+                <button
+                    @click="setViewType('detail')"
+                    :class="activeViewType === 'detail' ? 'ring-2 shadow-md' : ''"
+                    :style="activeViewType === 'detail' ? 'background-color: var(--success-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
+                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    title="Detail View (Zoomed)"
+                >
+                    Detail
+                </button>
+
+                <!-- Orientation Selector (for Elevation/Section) -->
+                <template x-if="activeViewType === 'elevation' || activeViewType === 'section'">
+                    <select
+                        x-model="activeOrientation"
+                        @change="setOrientation(activeOrientation)"
+                        class="px-2 py-1 rounded text-xs border dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    >
+                        <template x-if="activeViewType === 'elevation'">
+                            <optgroup label="Elevation">
+                                <option value="front">Front</option>
+                                <option value="back">Back</option>
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                            </optgroup>
+                        </template>
+                        <template x-if="activeViewType === 'section'">
+                            <optgroup label="Section">
+                                <option value="A-A">A-A</option>
+                                <option value="B-B">B-B</option>
+                                <option value="C-C">C-C</option>
+                            </optgroup>
+                        </template>
+                    </select>
+                </template>
+            </div>
+
+            <!-- Draw Mode Actions -->
+            <div class="flex items-center gap-2 border-l pl-3 dark:border-gray-600">
                 <button
                     @click="clearContext()"
                     class="px-3 py-2 rounded-lg text-white hover:opacity-90 transition-all text-sm font-semibold flex items-center gap-2"
@@ -600,18 +677,9 @@
                                 <!-- White everywhere = show blur everywhere -->
                                 <rect x="0" y="0" width="100%" height="100%" fill="white"/>
 
-                                <!-- Black rectangle at selected annotation = hide blur there (with soft edges) -->
-                                <!-- Add padding to compensate for feather filter eating into the edges -->
-                                <rect
-                                    x-show="selectedNodeId && annotations.find(a => a.id === selectedNodeId)"
-                                    :x="(annotations.find(a => a.id === selectedNodeId)?.screenX || 0) - 15"
-                                    :y="(annotations.find(a => a.id === selectedNodeId)?.screenY || 0) - 15"
-                                    :width="(annotations.find(a => a.id === selectedNodeId)?.screenWidth || 0) + 30"
-                                    :height="(annotations.find(a => a.id === selectedNodeId)?.screenHeight || 0) + 30"
-                                    fill="black"
-                                    rx="8"
-                                    filter="url(#feather)"
-                                />
+                                <!-- Black rectangle at selected annotation and its visible children = hide blur there -->
+                                <!-- This excludes the focused area from the darkening blur in isolation mode -->
+                                <g id="maskRects"></g>
                             </mask>
                         </defs>
 
@@ -632,40 +700,128 @@
                 <div
                     x-ref="annotationOverlay"
                     @mousedown="startDrawing($event)"
-                    @mousemove="updateDrawing($event)"
-                    @mouseup="finishDrawing($event)"
-                    @mouseleave="cancelDrawing($event)"
+                    @mousemove="if (isResizing) handleResize($event); else if (isMoving) handleMove($event); else updateDrawing($event);"
+                    @mouseup="if (isResizing || isMoving) finishResizeOrMove($event); else finishDrawing($event);"
+                    @mouseleave="if (isResizing || isMoving) finishResizeOrMove($event); else cancelDrawing($event);"
                     :class="(drawMode && !editorModalOpen) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'"
                     class="annotation-overlay absolute top-0 left-0"
                     style="z-index: 10; will-change: width, height;"
                 >
                     <!-- Existing Annotations -->
-                    <template x-for="anno in annotations.filter(a => !hiddenAnnotations.includes(a.id))" :key="anno.id">
-                        <div
-                            x-data="{ showMenu: false }"
-                            :style="`
-                                position: absolute;
-                                transform: translate(${anno.screenX}px, ${anno.screenY}px);
-                                width: ${anno.screenWidth}px;
-                                height: ${anno.screenHeight}px;
-                                border: 2px solid ${anno.color};
-                                background: ${anno.color}33;
-                                border-radius: 4px;
-                                pointer-events: auto;
-                                cursor: pointer;
-                                transition: all 0.2s;
-                                will-change: transform;
-                            `"
-                            @click="selectAnnotationContext(anno)"
-                            @dblclick.prevent.stop="enterIsolationMode(anno)"
-                            @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
-                            @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
-                            class="annotation-marker group"
-                        >
+                    <template x-for="anno in annotations.filter(a => !hiddenAnnotations.includes(a.id) && isAnnotationVisibleInView(a))" :key="anno.id">
+                        <!-- Wrapper div to hide frame of isolated object itself (you "jumped into it") -->
+                        <div x-show="!isolationMode || (isolationLevel === 'room' && anno.id !== isolatedRoomId) || (isolationLevel === 'location' && anno.id !== isolatedLocationId) || (isolationLevel === 'cabinet_run' && anno.id !== isolatedCabinetRunId)">
+                            <div
+                                x-data="{ showMenu: false }"
+                                :style="`
+                                    position: absolute;
+                                    transform: translate(${anno.screenX}px, ${anno.screenY}px);
+                                    width: ${anno.screenWidth}px;
+                                    height: ${anno.screenHeight}px;
+                                    border: 2px solid ${anno.color};
+                                    background: ${anno.color}33;
+                                    border-radius: 4px;
+                                    pointer-events: auto;
+                                    cursor: ${isMoving && activeAnnotationId === anno.id ? 'grabbing' : 'grab'};
+                                    transition: all 0.2s;
+                                    will-change: transform;
+                                `"
+                                @click="selectAnnotationContext(anno)"
+                                @dblclick.prevent.stop="enterIsolationMode(anno)"
+                                @mousedown.prevent="startMove($event, anno)"
+                                @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
+                                @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
+                                class="annotation-marker group"
+                            >
                             <!-- Annotation Label -->
                             <div class="annotation-label absolute -top-10 left-0 bg-white dark:bg-gray-900 px-3 py-2 rounded-lg text-base font-bold whitespace-nowrap shadow-xl border-2" style="color: var(--gray-900); border-color: var(--primary-400);">
                                 <span x-text="anno.label" class="dark:text-white"></span>
                             </div>
+
+                            <!-- Corner Resize Handles -->
+                            <!-- Top-Left Corner -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'nw')"
+                                :style="`
+                                    position: absolute;
+                                    top: -4px;
+                                    left: -4px;
+                                    width: 12px;
+                                    height: 12px;
+                                    background: ${anno.color};
+                                    border: 2px solid white;
+                                    border-radius: 50%;
+                                    cursor: nw-resize;
+                                    pointer-events: auto;
+                                    z-index: 10;
+                                    opacity: ${showMenu ? 1 : 0};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle"
+                            ></div>
+
+                            <!-- Top-Right Corner -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'ne')"
+                                :style="`
+                                    position: absolute;
+                                    top: -4px;
+                                    right: -4px;
+                                    width: 12px;
+                                    height: 12px;
+                                    background: ${anno.color};
+                                    border: 2px solid white;
+                                    border-radius: 50%;
+                                    cursor: ne-resize;
+                                    pointer-events: auto;
+                                    z-index: 10;
+                                    opacity: ${showMenu ? 1 : 0};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle"
+                            ></div>
+
+                            <!-- Bottom-Left Corner -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'sw')"
+                                :style="`
+                                    position: absolute;
+                                    bottom: -4px;
+                                    left: -4px;
+                                    width: 12px;
+                                    height: 12px;
+                                    background: ${anno.color};
+                                    border: 2px solid white;
+                                    border-radius: 50%;
+                                    cursor: sw-resize;
+                                    pointer-events: auto;
+                                    z-index: 10;
+                                    opacity: ${showMenu ? 1 : 0};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle"
+                            ></div>
+
+                            <!-- Bottom-Right Corner -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'se')"
+                                :style="`
+                                    position: absolute;
+                                    bottom: -4px;
+                                    right: -4px;
+                                    width: 12px;
+                                    height: 12px;
+                                    background: ${anno.color};
+                                    border: 2px solid white;
+                                    border-radius: 50%;
+                                    cursor: se-resize;
+                                    pointer-events: auto;
+                                    z-index: 10;
+                                    opacity: ${showMenu ? 1 : 0};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle"
+                            ></div>
 
                             <!-- Hover Action Menu -->
                             <div
@@ -702,6 +858,7 @@
                                 </button>
                             </div>
                         </div>
+                        </div><!-- End wrapper div for hiding frames in isolation mode -->
                     </template>
 
                     <!-- Drawing Preview (Current Rectangle Being Drawn) -->
@@ -774,11 +931,13 @@
 
                 // Isolation Mode State (NEW - Illustrator-style layer isolation)
                 isolationMode: false,           // Whether we're in isolation mode
-                isolationLevel: null,           // 'room' or 'location'
+                isolationLevel: null,           // 'room', 'location', or 'cabinet_run'
                 isolatedRoomId: null,          // Room being isolated
                 isolatedRoomName: '',          // Name of isolated room
                 isolatedLocationId: null,      // Location being isolated (if in location isolation)
                 isolatedLocationName: '',      // Name of isolated location
+                isolatedCabinetRunId: null,    // Cabinet run being isolated (if in cabinet run isolation)
+                isolatedCabinetRunName: '',    // Name of isolated cabinet run
                 overlayWidth: '100%',          // Overlay width for blur layer sync
                 overlayHeight: '100%',         // Overlay height for blur layer sync
                 hiddenAnnotations: [],         // Array of annotation IDs to hide (for Alpine reactivity)
@@ -816,6 +975,27 @@
                 isDrawing: false,
                 drawStart: null,
                 drawPreview: null,
+
+                // Resize and Move State
+                isResizing: false,
+                isMoving: false,
+                resizeHandle: null, // 'nw', 'ne', 'sw', 'se'
+                moveStart: null, // { x, y, annoStartX, annoStartY }
+                resizeStart: null, // { x, y, annoStartX, annoStartY, annoStartWidth, annoStartHeight }
+                activeAnnotationId: null, // Which annotation is being resized/moved
+
+                // View Type State (Plan, Elevation, Section, Detail)
+                activeViewType: 'plan', // 'plan', 'elevation', 'section', 'detail'
+                activeOrientation: null, // 'front', 'back', 'left', 'right', 'A-A', etc.
+                availableOrientations: {
+                    elevation: ['front', 'back', 'left', 'right'],
+                    section: ['A-A', 'B-B', 'C-C'],
+                    detail: [] // Details use numeric scale instead
+                },
+                viewScale: 1.0, // Scale factor for detail views (2.0 = 2x zoom)
+
+                // Multi-Parent Entity References
+                annotationReferences: {}, // Map<annotationId, Array<{type, id, referenceType}>>
 
                 // Page Observer State (for multi-page PDFs)
                 pageObserver: null,
@@ -1267,6 +1447,326 @@
                     this.drawStart = null;
                     this.drawPreview = null;
                 },
+
+                // === RESIZE AND MOVE HANDLERS ===
+
+                // Start resizing annotation from corner handle
+                startResize(event, anno, handle) {
+                    console.log(`📐 Starting resize for annotation ${anno.id} from ${handle} corner`);
+
+                    this.isResizing = true;
+                    this.resizeHandle = handle;
+                    this.activeAnnotationId = anno.id;
+
+                    const overlay = this.$refs.annotationOverlay;
+                    const rect = overlay.getBoundingClientRect();
+
+                    this.resizeStart = {
+                        x: event.clientX - rect.left,
+                        y: event.clientY - rect.top,
+                        annoStartX: anno.screenX,
+                        annoStartY: anno.screenY,
+                        annoStartWidth: anno.screenWidth,
+                        annoStartHeight: anno.screenHeight
+                    };
+                },
+
+                // Start moving annotation
+                startMove(event, anno) {
+                    // Don't start move if clicking on edit/delete buttons or other UI elements
+                    if (event.target.closest('.resize-handle') ||
+                        event.target.closest('button') ||
+                        event.target.closest('.annotation-label')) {
+                        return;
+                    }
+
+                    console.log(`✋ Starting move for annotation ${anno.id}`);
+
+                    this.isMoving = true;
+                    this.activeAnnotationId = anno.id;
+
+                    const overlay = this.$refs.annotationOverlay;
+                    const rect = overlay.getBoundingClientRect();
+
+                    this.moveStart = {
+                        x: event.clientX - rect.left,
+                        y: event.clientY - rect.top,
+                        annoStartX: anno.screenX,
+                        annoStartY: anno.screenY
+                    };
+                },
+
+                // Handle resize during mouse move
+                handleResize(event) {
+                    if (!this.isResizing || !this.resizeStart || !this.activeAnnotationId) return;
+
+                    const overlay = this.$refs.annotationOverlay;
+                    const rect = overlay.getBoundingClientRect();
+                    const currentX = event.clientX - rect.left;
+                    const currentY = event.clientY - rect.top;
+
+                    const deltaX = currentX - this.resizeStart.x;
+                    const deltaY = currentY - this.resizeStart.y;
+
+                    // Find the annotation being resized
+                    const anno = this.annotations.find(a => a.id === this.activeAnnotationId);
+                    if (!anno) return;
+
+                    // Calculate new dimensions based on which corner is being dragged
+                    let newX = anno.screenX;
+                    let newY = anno.screenY;
+                    let newWidth = anno.screenWidth;
+                    let newHeight = anno.screenHeight;
+
+                    switch (this.resizeHandle) {
+                        case 'nw': // Top-left corner
+                            newX = this.resizeStart.annoStartX + deltaX;
+                            newY = this.resizeStart.annoStartY + deltaY;
+                            newWidth = this.resizeStart.annoStartWidth - deltaX;
+                            newHeight = this.resizeStart.annoStartHeight - deltaY;
+                            break;
+                        case 'ne': // Top-right corner
+                            newY = this.resizeStart.annoStartY + deltaY;
+                            newWidth = this.resizeStart.annoStartWidth + deltaX;
+                            newHeight = this.resizeStart.annoStartHeight - deltaY;
+                            break;
+                        case 'sw': // Bottom-left corner
+                            newX = this.resizeStart.annoStartX + deltaX;
+                            newWidth = this.resizeStart.annoStartWidth - deltaX;
+                            newHeight = this.resizeStart.annoStartHeight + deltaY;
+                            break;
+                        case 'se': // Bottom-right corner
+                            newWidth = this.resizeStart.annoStartWidth + deltaX;
+                            newHeight = this.resizeStart.annoStartHeight + deltaY;
+                            break;
+                    }
+
+                    // Enforce minimum size (20px)
+                    if (newWidth < 20 || newHeight < 20) return;
+
+                    // Update annotation dimensions in place (reactive)
+                    anno.screenX = newX;
+                    anno.screenY = newY;
+                    anno.screenWidth = newWidth;
+                    anno.screenHeight = newHeight;
+                },
+
+                // Handle move during mouse move
+                handleMove(event) {
+                    if (!this.isMoving || !this.moveStart || !this.activeAnnotationId) return;
+
+                    const overlay = this.$refs.annotationOverlay;
+                    const rect = overlay.getBoundingClientRect();
+                    const currentX = event.clientX - rect.left;
+                    const currentY = event.clientY - rect.top;
+
+                    const deltaX = currentX - this.moveStart.x;
+                    const deltaY = currentY - this.moveStart.y;
+
+                    // Find the annotation being moved
+                    const anno = this.annotations.find(a => a.id === this.activeAnnotationId);
+                    if (!anno) return;
+
+                    // Update annotation position in place (reactive)
+                    anno.screenX = this.moveStart.annoStartX + deltaX;
+                    anno.screenY = this.moveStart.annoStartY + deltaY;
+
+                    // Keep within bounds
+                    const overlayWidth = rect.width;
+                    const overlayHeight = rect.height;
+
+                    if (anno.screenX < 0) anno.screenX = 0;
+                    if (anno.screenY < 0) anno.screenY = 0;
+                    if (anno.screenX + anno.screenWidth > overlayWidth) {
+                        anno.screenX = overlayWidth - anno.screenWidth;
+                    }
+                    if (anno.screenY + anno.screenHeight > overlayHeight) {
+                        anno.screenY = overlayHeight - anno.screenHeight;
+                    }
+                },
+
+                // Finish resize or move and save to database
+                finishResizeOrMove(event) {
+                    if (!this.isResizing && !this.isMoving) return;
+
+                    const operationType = this.isResizing ? 'resize' : 'move';
+                    console.log(`✓ Finished ${operationType} for annotation ${this.activeAnnotationId}`);
+
+                    // Find the annotation that was modified
+                    const anno = this.annotations.find(a => a.id === this.activeAnnotationId);
+                    if (!anno) {
+                        this.resetResizeMove();
+                        return;
+                    }
+
+                    // Convert screen coordinates back to PDF coordinates
+                    const pdfTopLeft = this.screenToPdf(anno.screenX, anno.screenY);
+                    const pdfBottomRight = this.screenToPdf(
+                        anno.screenX + anno.screenWidth,
+                        anno.screenY + anno.screenHeight
+                    );
+
+                    // Update PDF coordinates
+                    anno.pdfX = pdfTopLeft.x;
+                    anno.pdfY = pdfTopLeft.y;
+                    anno.pdfWidth = Math.abs(pdfBottomRight.x - pdfTopLeft.x);
+                    anno.pdfHeight = Math.abs(pdfTopLeft.y - pdfBottomRight.y);
+                    anno.normalizedX = pdfTopLeft.normalized.x;
+                    anno.normalizedY = pdfTopLeft.normalized.y;
+
+                    // Save to database via Livewire
+                    console.log(`💾 Saving ${operationType} changes to database...`);
+                    Livewire.dispatch('update-annotation-position', {
+                        annotationId: anno.id,
+                        pdfX: anno.pdfX,
+                        pdfY: anno.pdfY,
+                        pdfWidth: anno.pdfWidth,
+                        pdfHeight: anno.pdfHeight,
+                        normalizedX: anno.normalizedX,
+                        normalizedY: anno.normalizedY
+                    });
+
+                    // Reset state
+                    this.resetResizeMove();
+                },
+
+                // Reset resize/move state
+                resetResizeMove() {
+                    this.isResizing = false;
+                    this.isMoving = false;
+                    this.resizeHandle = null;
+                    this.resizeStart = null;
+                    this.moveStart = null;
+                    this.activeAnnotationId = null;
+                },
+
+                // === END RESIZE AND MOVE HANDLERS ===
+
+                // === VIEW TYPE MANAGEMENT ===
+
+                /**
+                 * Set the active view type (plan, elevation, section, detail)
+                 * @param {string} viewType - 'plan', 'elevation', 'section', 'detail'
+                 * @param {string|null} orientation - Optional orientation for elevation/section
+                 */
+                setViewType(viewType, orientation = null) {
+                    console.log(`📐 Switching to ${viewType} view${orientation ? ' (' + orientation + ')' : ''}`);
+
+                    this.activeViewType = viewType;
+                    this.activeOrientation = orientation;
+
+                    // Reset orientation if switching to plan view
+                    if (viewType === 'plan') {
+                        this.activeOrientation = null;
+                    }
+
+                    // Filter annotations based on new view
+                    this.updateAnnotationVisibility();
+
+                    // Update UI to reflect new view
+                    console.log(`✓ View switched to ${viewType}${orientation ? ' - ' + orientation : ''}`);
+                },
+
+                /**
+                 * Set orientation for elevation or section views
+                 * @param {string} orientation - 'front', 'back', 'left', 'right', 'A-A', etc.
+                 */
+                setOrientation(orientation) {
+                    console.log(`🧭 Setting orientation to ${orientation}`);
+                    this.activeOrientation = orientation;
+                    this.updateAnnotationVisibility();
+                },
+
+                /**
+                 * Check if annotation should be visible in current view
+                 * @param {object} anno - Annotation object
+                 * @returns {boolean}
+                 */
+                isAnnotationVisibleInView(anno) {
+                    // If no view type specified on annotation, assume it's visible in plan view
+                    const annoViewType = anno.viewType || 'plan';
+
+                    // If we're in plan view, show all plan annotations
+                    if (this.activeViewType === 'plan') {
+                        return annoViewType === 'plan';
+                    }
+
+                    // If we're in elevation/section/detail view, show matching annotations
+                    if (this.activeViewType === annoViewType) {
+                        // If orientation is set, check if it matches
+                        if (this.activeOrientation && anno.viewOrientation) {
+                            return anno.viewOrientation === this.activeOrientation;
+                        }
+                        // If no orientation filter, show all annotations of this view type
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                /**
+                 * Update visibility of all annotations based on current view
+                 */
+                updateAnnotationVisibility() {
+                    // This will be used in the rendering loop to filter visible annotations
+                    // The actual filtering happens in the x-for template
+                    console.log(`🔍 Updating annotation visibility for ${this.activeViewType} view`);
+                },
+
+                /**
+                 * Add entity reference to an annotation
+                 * @param {number} annotationId
+                 * @param {string} entityType - 'room', 'location', 'cabinet_run', 'cabinet'
+                 * @param {number} entityId
+                 * @param {string} referenceType - 'primary', 'secondary', 'context'
+                 */
+                addEntityReference(annotationId, entityType, entityId, referenceType = 'primary') {
+                    if (!this.annotationReferences[annotationId]) {
+                        this.annotationReferences[annotationId] = [];
+                    }
+
+                    // Check if reference already exists
+                    const exists = this.annotationReferences[annotationId].some(
+                        ref => ref.entity_type === entityType && ref.entity_id === entityId
+                    );
+
+                    if (!exists) {
+                        this.annotationReferences[annotationId].push({
+                            entity_type: entityType,
+                            entity_id: entityId,
+                            reference_type: referenceType
+                        });
+
+                        console.log(`✓ Added ${referenceType} reference: ${entityType} #${entityId} to annotation #${annotationId}`);
+                    }
+                },
+
+                /**
+                 * Remove entity reference from an annotation
+                 * @param {number} annotationId
+                 * @param {string} entityType
+                 * @param {number} entityId
+                 */
+                removeEntityReference(annotationId, entityType, entityId) {
+                    if (this.annotationReferences[annotationId]) {
+                        this.annotationReferences[annotationId] = this.annotationReferences[annotationId].filter(
+                            ref => !(ref.entity_type === entityType && ref.entity_id === entityId)
+                        );
+
+                        console.log(`✓ Removed reference: ${entityType} #${entityId} from annotation #${annotationId}`);
+                    }
+                },
+
+                /**
+                 * Get all entity references for an annotation
+                 * @param {number} annotationId
+                 * @returns {array}
+                 */
+                getEntityReferences(annotationId) {
+                    return this.annotationReferences[annotationId] || [];
+                },
+
+                // === END VIEW TYPE MANAGEMENT ===
 
                 // Create annotation from drawn rectangle
                 createAnnotation(screenRect) {
@@ -1802,11 +2302,98 @@
                     return '';
                 },
 
+                // Helper: Check if annotation should be visible in current isolation mode
+                isAnnotationVisibleInIsolation(anno) {
+                    if (!this.isolationMode) return true;
+
+                    if (this.isolationLevel === 'room') {
+                        // Show the isolated room itself
+                        if (anno.id === this.isolatedRoomId) return true;
+
+                        // Show direct children (locations in this room)
+                        if (anno.type === 'location' && anno.roomId === this.isolatedRoomId) return true;
+
+                        // Show cabinet runs that belong to locations in this room
+                        if (anno.type === 'cabinet_run') {
+                            // Check if this run's parent location is in the isolated room
+                            const parentLocation = this.annotations.find(a => a.id === anno.locationId);
+                            if (parentLocation && parentLocation.roomId === this.isolatedRoomId) return true;
+                        }
+
+                        // Show cabinets that belong to runs in this room
+                        if (anno.type === 'cabinet') {
+                            // Check if this cabinet's parent run's parent location is in the isolated room
+                            const parentRun = this.annotations.find(a => a.id === anno.cabinetRunId);
+                            if (parentRun) {
+                                const parentLocation = this.annotations.find(a => a.id === parentRun.locationId);
+                                if (parentLocation && parentLocation.roomId === this.isolatedRoomId) return true;
+                            }
+                        }
+
+                        return false;
+                    } else if (this.isolationLevel === 'location') {
+                        // Show parent room
+                        if (anno.id === this.isolatedRoomId) return true;
+
+                        // Show the isolated location itself
+                        if (anno.id === this.isolatedLocationId) return true;
+
+                        // Show direct children (cabinet runs in this location)
+                        if (anno.type === 'cabinet_run' && anno.locationId === this.isolatedLocationId) return true;
+
+                        // Show cabinets that belong to runs in this location
+                        if (anno.type === 'cabinet') {
+                            const parentRun = this.annotations.find(a => a.id === anno.cabinetRunId);
+                            if (parentRun && parentRun.locationId === this.isolatedLocationId) return true;
+                        }
+
+                        return false;
+                    } else if (this.isolationLevel === 'cabinet_run') {
+                        // Show parent location
+                        if (anno.id === this.isolatedLocationId) return true;
+
+                        // Show parent room
+                        if (anno.id === this.isolatedRoomId) return true;
+
+                        // Show the isolated cabinet run itself
+                        if (anno.id === this.isolatedCabinetRunId) return true;
+
+                        // Show direct children (cabinets in this run)
+                        if (anno.type === 'cabinet' && anno.cabinetRunId === this.isolatedCabinetRunId) return true;
+
+                        return false;
+                    }
+
+                    return true;
+                },
+
                 // NEW: Enter Isolation Mode (Illustrator-style layer isolation)
                 async enterIsolationMode(anno) {
                     console.log('🔒 Entering isolation mode for:', anno.type, anno.label);
 
-                    if (anno.type === 'location') {
+                    if (anno.type === 'cabinet_run') {
+                        // Isolate at cabinet run level
+                        this.isolationMode = true;
+                        this.isolationLevel = 'cabinet_run';
+                        this.isolatedRoomId = anno.roomId;
+                        this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
+                        this.isolatedLocationId = anno.locationId;
+                        this.isolatedLocationName = anno.locationName || this.getLocationNameById(anno.locationId);
+                        this.isolatedCabinetRunId = anno.id;
+                        this.isolatedCabinetRunName = anno.label;
+
+                        // Set active context
+                        this.activeRoomId = anno.roomId;
+                        this.activeRoomName = this.isolatedRoomName;
+                        this.activeLocationId = anno.locationId;
+                        this.activeLocationName = this.isolatedLocationName;
+
+                        // Update search fields
+                        this.roomSearchQuery = this.isolatedRoomName;
+                        this.locationSearchQuery = this.isolatedLocationName;
+
+                        console.log(`✓ Cabinet Run isolation: 🏠 ${this.isolatedRoomName} → 📍 ${this.isolatedLocationName} → 🗄️ ${anno.label}`);
+                    } else if (anno.type === 'location') {
                         // Isolate at location level
                         this.isolationMode = true;
                         this.isolationLevel = 'location';
@@ -1814,6 +2401,8 @@
                         this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
                         this.isolatedLocationId = anno.id;
                         this.isolatedLocationName = anno.label;
+                        this.isolatedCabinetRunId = null;
+                        this.isolatedCabinetRunName = '';
 
                         // Set active context
                         this.activeRoomId = anno.roomId;
@@ -1829,7 +2418,8 @@
                     } else {
                         // For any other type, treat as room isolation
                         // This handles clicking on room annotations directly
-                        const roomId = anno.type === 'room' ? anno.id : anno.roomId;
+                        // Always use anno.roomId since room annotations are boundaries that belong to a room
+                        const roomId = anno.roomId;
                         const roomName = anno.type === 'room' ? anno.label : (anno.roomName || this.getRoomNameById(anno.roomId));
 
                         this.isolationMode = true;
@@ -1838,6 +2428,8 @@
                         this.isolatedRoomName = roomName;
                         this.isolatedLocationId = null;
                         this.isolatedLocationName = '';
+                        this.isolatedCabinetRunId = null;
+                        this.isolatedCabinetRunName = '';
 
                         // Set active context
                         this.activeRoomId = roomId;
@@ -1859,31 +2451,23 @@
                     if (this.isolatedLocationId && !this.expandedNodes.includes(this.isolatedLocationId)) {
                         this.expandedNodes.push(this.isolatedLocationId);
                     }
+                    if (this.isolatedCabinetRunId && !this.expandedNodes.includes(this.isolatedCabinetRunId)) {
+                        this.expandedNodes.push(this.isolatedCabinetRunId);
+                    }
 
                     // Select the isolated node
-                    this.selectedNodeId = this.isolationLevel === 'location' ? this.isolatedLocationId : this.isolatedRoomId;
+                    this.selectedNodeId = this.isolationLevel === 'cabinet_run' ? this.isolatedCabinetRunId :
+                                          this.isolationLevel === 'location' ? this.isolatedLocationId :
+                                          this.isolatedRoomId;
 
                     // Clear previous hidden annotations
                     this.hiddenAnnotations = [];
 
-                    // Populate hidden annotations based on isolation mode
+                    // Populate hidden annotations based on isolation mode using helper function
                     this.annotations.forEach(a => {
-                        // Hide the selected annotation (the one being isolated)
-                        if (a.id === this.selectedNodeId) {
-                            console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label})`);
+                        if (!this.isAnnotationVisibleInIsolation(a)) {
+                            console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label} - type: ${a.type})`);
                             this.hiddenAnnotations.push(a.id);
-                        } else if (this.isolationLevel === 'room') {
-                            // Hide annotations NOT in this room
-                            if (a.roomId !== this.isolatedRoomId) {
-                                console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label}) - not in room ${this.isolatedRoomId}`);
-                                this.hiddenAnnotations.push(a.id);
-                            }
-                        } else if (this.isolationLevel === 'location') {
-                            // Hide annotations NOT in this location
-                            if (a.locationId !== this.isolatedLocationId) {
-                                console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label}) - not in location ${this.isolatedLocationId}`);
-                                this.hiddenAnnotations.push(a.id);
-                            }
                         }
                     });
 
@@ -1891,6 +2475,9 @@
 
                     // Zoom to fit annotation box on screen (double-click behavior)
                     await this.zoomToFitAnnotation(anno);
+
+                    // Update the isolation mask to show visible annotations clearly
+                    this.updateIsolationMask();
                 },
 
                 // NEW: Exit Isolation Mode
@@ -1904,6 +2491,8 @@
                     this.isolatedRoomName = '';
                     this.isolatedLocationId = null;
                     this.isolatedLocationName = '';
+                    this.isolatedCabinetRunId = null;
+                    this.isolatedCabinetRunName = '';
 
                     // Clear active context
                     this.clearContext();
@@ -1919,6 +2508,36 @@
                     await this.resetZoom();
 
                     console.log('✓ Returned to normal view with reset zoom');
+
+                    // Update the isolation mask after exiting
+                    this.updateIsolationMask();
+                },
+
+                // Update the SVG mask to exclude visible annotations from darkening blur
+                updateIsolationMask() {
+                    const maskRects = document.getElementById('maskRects');
+                    if (!maskRects) return;
+
+                    // Clear existing rects
+                    maskRects.innerHTML = '';
+
+                    // Get all visible annotations (not in hiddenAnnotations array)
+                    const visibleAnnotations = this.annotations.filter(a => !this.hiddenAnnotations.includes(a.id));
+
+                    // Create a black rect for each visible annotation
+                    visibleAnnotations.forEach(anno => {
+                        if (anno.screenX !== undefined && anno.screenWidth > 0 && anno.screenHeight > 0) {
+                            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            rect.setAttribute('x', (anno.screenX || 0) - 15);
+                            rect.setAttribute('y', (anno.screenY || 0) - 15);
+                            rect.setAttribute('width', (anno.screenWidth || 0) + 30);
+                            rect.setAttribute('height', (anno.screenHeight || 0) + 30);
+                            rect.setAttribute('fill', 'black');
+                            rect.setAttribute('rx', '8');
+                            rect.setAttribute('filter', 'url(#feather)');
+                            maskRects.appendChild(rect);
+                        }
+                    });
                 },
 
                 // Edit annotation (NEW - Full CRUD)
@@ -2010,6 +2629,11 @@
 
                     // Re-render annotations at new zoom level
                     this.updateAnnotationPositions();
+
+                    // Update isolation mask if in isolation mode
+                    if (this.isolationMode) {
+                        this.updateIsolationMask();
+                    }
 
                     console.log(`🔍 Zoom set to ${Math.round(level * 100)}%`);
                 },
