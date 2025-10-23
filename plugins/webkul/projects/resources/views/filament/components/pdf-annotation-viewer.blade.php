@@ -742,7 +742,7 @@
                                 `"
                                 @click="selectAnnotationContext(anno)"
                                 @dblclick.prevent.stop="enterIsolationMode(anno)"
-                                @mousedown.prevent="startMove($event, anno)"
+                                @mousedown="startMove($event, anno)"
                                 @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
                                 @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
                                 class="annotation-marker group"
@@ -1171,6 +1171,27 @@
                             resizeObserver.observe(embedContainer);
                         }
 
+                        // Step 9: Setup scroll listener to update isolation mask when panning
+                        const pdfContainer = document.getElementById('pdf-container-{{ $viewerId }}');
+                        if (pdfContainer) {
+                            // Use requestAnimationFrame to throttle scroll updates
+                            let scrollTicking = false;
+                            pdfContainer.addEventListener('scroll', () => {
+                                if (!scrollTicking && this.isolationMode) {
+                                    window.requestAnimationFrame(() => {
+                                        // Clear rect cache to force fresh getBoundingClientRect
+                                        this._lastRectUpdate = 0;
+                                        // Recalculate annotation positions with fresh canvas rect
+                                        this.updateAnnotationPositions();
+                                        // Redraw isolation mask with new positions
+                                        this.updateIsolationMask();
+                                        scrollTicking = false;
+                                    });
+                                    scrollTicking = true;
+                                }
+                            });
+                        }
+
                         console.log('✅ V3 system ready!');
                     } catch (error) {
                         console.error('❌ Initialization error:', error);
@@ -1495,6 +1516,9 @@
                         event.target.closest('.annotation-label')) {
                         return;
                     }
+
+                    // Prevent default to avoid text selection while dragging
+                    event.preventDefault();
 
                     console.log(`✋ Starting move for annotation ${anno.id}`);
 
@@ -1952,8 +1976,8 @@
                             annotation_type: anno.type,
                             x: anno.normalizedX,
                             y: anno.normalizedY,
-                            width: anno.normalizedX ? (anno.pdfWidth / this.pageDimensions.width) : 0,
-                            height: anno.normalizedY ? (anno.pdfHeight / this.pageDimensions.height) : 0,
+                            width: anno.pdfWidth / this.pageDimensions.width,
+                            height: anno.pdfHeight / this.pageDimensions.height,
                             text: anno.label,
                             color: anno.color,
                             room_id: anno.roomId,
@@ -2477,8 +2501,9 @@
                     } else {
                         // For any other type, treat as room isolation
                         // This handles clicking on room annotations directly
-                        // Always use anno.roomId since room annotations are boundaries that belong to a room
-                        const roomId = anno.roomId;
+                        // For room-type annotations, use the annotation's own ID as the roomId
+                        // For other types, use their roomId property
+                        const roomId = anno.type === 'room' ? anno.id : anno.roomId;
                         const roomName = anno.type === 'room' ? anno.label : (anno.roomName || this.getRoomNameById(anno.roomId));
 
                         this.isolationMode = true;
