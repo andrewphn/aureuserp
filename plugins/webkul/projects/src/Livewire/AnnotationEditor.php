@@ -218,6 +218,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 $normalizedWidth = ($this->originalAnnotation['pdfWidth'] ?? 0) / $pageWidth;
                 $normalizedHeight = ($this->originalAnnotation['pdfHeight'] ?? 0) / $pageHeight;
 
+                // Auto-detect position from Y coordinate
+                $normalizedY = $this->originalAnnotation['normalizedY'] ?? 0;
+                $positionData = $this->inferPositionFromCoordinates($normalizedY, $normalizedHeight);
+
                 // Create new annotation in database
                 $annotation = \App\Models\PdfPageAnnotation::create([
                     'pdf_page_id'      => $this->originalAnnotation['pdfPageId'],
@@ -228,10 +232,16 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     'room_location_id' => $data['location_id'] ?? null,
                     'cabinet_run_id'   => $data['cabinet_run_id'] ?? null,
                     'x'                => $this->originalAnnotation['normalizedX'] ?? 0,
-                    'y'                => $this->originalAnnotation['normalizedY'] ?? 0,
+                    'y'                => $normalizedY,
                     'width'            => $normalizedWidth,
                     'height'           => $normalizedHeight,
                     'color'            => $this->originalAnnotation['color'] ?? '#f59e0b',
+                    // View types and position detection
+                    'view_type'        => $this->originalAnnotation['viewType'] ?? 'plan',
+                    'view_orientation' => $this->originalAnnotation['viewOrientation'] ?? null,
+                    'view_scale'       => $this->originalAnnotation['viewScale'] ?? null,
+                    'inferred_position' => $positionData['inferred_position'],
+                    'vertical_zone'    => $positionData['vertical_zone'],
                 ]);
 
                 // Log creation
@@ -242,6 +252,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     afterData: $annotation->toArray(),
                     annotationId: $annotation->id
                 );
+
+                // Handle entity references if provided from frontend
+                if (isset($this->originalAnnotation['entityReferences']) && is_array($this->originalAnnotation['entityReferences'])) {
+                    $annotation->syncEntityReferences($this->originalAnnotation['entityReferences']);
+                }
 
                 // Build updated annotation with real database ID
                 $updatedAnnotation = array_merge($this->originalAnnotation, [
@@ -490,9 +505,130 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         $this->showModal = true;
     }
 
+    #[On('update-annotation-position')]
+    public function handleUpdateAnnotationPosition(
+        int $annotationId,
+        float $pdfX,
+        float $pdfY,
+        float $pdfWidth,
+        float $pdfHeight,
+        float $normalizedX,
+        float $normalizedY
+    ): void {
+        try {
+            // Find the annotation
+            $annotation = \App\Models\PdfPageAnnotation::findOrFail($annotationId);
+            $pdfPageId = $annotation->pdf_page_id;
+
+            // Get PDF page dimensions for normalized width/height calculation
+            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
+            $pageWidth = $pdfPage?->page_width ?? 2592;  // Default PDF page width
+            $pageHeight = $pdfPage?->page_height ?? 1728; // Default PDF page height
+
+            // Calculate normalized dimensions
+            $normalizedWidth = $pdfWidth / $pageWidth;
+            $normalizedHeight = $pdfHeight / $pageHeight;
+
+            // Auto-detect position from new Y coordinate
+            $positionData = $this->inferPositionFromCoordinates($normalizedY, $normalizedHeight);
+
+            // Log before update
+            $beforeData = $annotation->toArray();
+
+            // Update position and dimensions in database
+            $annotation->update([
+                'x'                 => $normalizedX,
+                'y'                 => $normalizedY,
+                'width'             => $normalizedWidth,
+                'height'            => $normalizedHeight,
+                'inferred_position' => $positionData['inferred_position'],
+                'vertical_zone'     => $positionData['vertical_zone'],
+            ]);
+
+            // Log after update
+            \App\Models\PdfAnnotationHistory::logAction(
+                pdfPageId: $pdfPageId,
+                action: 'position_updated',
+                beforeData: $beforeData,
+                afterData: $annotation->fresh()->toArray(),
+                annotationId: $annotation->id
+            );
+
+            \Log::info('Annotation position updated', [
+                'annotation_id' => $annotationId,
+                'x'             => $normalizedX,
+                'y'             => $normalizedY,
+                'width'         => $normalizedWidth,
+                'height'        => $normalizedHeight,
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error('Annotation not found for position update', [
+                'annotation_id' => $annotationId,
+            ]);
+
+            \Filament\Notifications\Notification::make()
+                ->title('Update Failed')
+                ->body('Annotation not found in database.')
+                ->danger()
+                ->send();
+        } catch (\Exception $e) {
+            \Log::error('Annotation position update failed', [
+                'annotation_id' => $annotationId,
+                'error'         => $e->getMessage(),
+                'trace'         => $e->getTraceAsString(),
+            ]);
+
+            \Filament\Notifications\Notification::make()
+                ->title('Update Failed')
+                ->body('Error updating annotation position: '.$e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
     public function cancel(): void
     {
         $this->close();
+    }
+
+    /**
+     * Auto-detect cabinet position from Y coordinate on page
+     *
+     * @param float $normalizedY Y coordinate (normalized 0-1)
+     * @param float $normalizedHeight Height (normalized 0-1)
+     * @return array ['inferred_position' => string, 'vertical_zone' => string]
+     */
+    private function inferPositionFromCoordinates(float $normalizedY, float $normalizedHeight): array
+    {
+        // Convert normalized Y to percentage (flip Y axis for typical drawing orientation)
+        $yPercent = (1 - $normalizedY) * 100;
+
+        // Determine vertical zone based on Y position
+        // Note: In PDF coordinates, Y=0 is at bottom, so we flip to get standard top=0 orientation
+        if ($yPercent < 30) {
+            $zone = 'upper';
+            $position = 'wall_cabinet';
+        } elseif ($yPercent > 70) {
+            $zone = 'lower';
+            $position = 'base_cabinet';
+        } else {
+            $zone = 'middle';
+
+            // Check height to determine if it's a tall cabinet or standard base
+            $heightPercent = $normalizedHeight * 100;
+
+            if ($heightPercent > 40) {
+                $position = 'tall_cabinet';
+            } else {
+                $position = 'base_cabinet';
+            }
+        }
+
+        return [
+            'inferred_position' => $position,
+            'vertical_zone'     => $zone,
+        ];
     }
 
     private function close(): void
