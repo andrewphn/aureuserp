@@ -147,44 +147,33 @@ Filtering Logic:
 - Add/remove references dynamically
 - Collapsed by default when no references exist
 
-### 2. Isolation Mode View Context (Not Started)
+### 2. Isolation Mode View Context ✅ COMPLETED
 
 **Goal**: Update isolation mode to respect current view type
 
-**Current Behavior**: Isolation mode works only with plan view
+**Implementation Completed** (2025-10-23):
 
-**Desired Behavior**:
-- When in elevation view, isolating a cabinet run shows elevation-specific annotations
-- When in section view, isolating shows section cut annotations
-- Parent context maintained across view types
+**Added View Context Tracking**:
+- `isolationViewType` state variable stores view type when entering isolation
+- `isolationOrientation` state variable stores orientation when entering isolation
+- Both variables cleared when exiting isolation mode
 
-**Implementation**:
-```javascript
-// Update enterIsolationMode() method
-enterIsolationMode(anno) {
-    // ... existing code ...
+**Updated Visibility Logic**:
+- `isAnnotationVisibleInIsolation()` now checks view compatibility FIRST
+- Calls `isAnnotationVisibleInView()` before checking hierarchy
+- Returns false if annotation doesn't match current active view type
+- Then checks hierarchy visibility (room/location/cabinet_run levels)
 
-    // Store current view context
-    this.isolationViewType = this.activeViewType;
-    this.isolationOrientation = this.activeOrientation;
+**Behavior**:
+- Users can switch between views while in isolation mode
+- Respects CURRENT active view, not the view when isolation was entered
+- Allows exploring different perspectives of the same isolated entity
+- Example: Isolate a cabinet run in plan view, then switch to elevation view to see only elevation annotations within that run
 
-    // Filter by both hierarchy AND view type
-    // ...
-}
-
-// Update isAnnotationVisibleInIsolation() method
-isAnnotationVisibleInIsolation(anno) {
-    if (!this.isolationMode) return true;
-
-    // Check hierarchy visibility
-    const hierarchyVisible = this.checkHierarchyVisibility(anno);
-
-    // Check view type compatibility
-    const viewVisible = this.isAnnotationVisibleInView(anno);
-
-    return hierarchyVisible && viewVisible;
-}
-```
+**Benefits**:
+- More flexible workflow for users
+- Can examine isolated entities from multiple perspectives
+- View switching and isolation work seamlessly together
 
 ### 3. Testing (Not Started)
 
@@ -379,10 +368,10 @@ this.setViewType('plan');
 
 ---
 
-**Implementation Status**: ✅ 9 of 11 tasks complete (82%)
+**Implementation Status**: ✅ 10 of 11 tasks complete (91%)
 
-**Production Ready**: Backend infrastructure complete, frontend core complete, multi-parent reference picker complete, isolation mode updates needed
+**Production Ready**: Backend infrastructure complete, frontend core complete, multi-parent reference picker complete, isolation mode view context complete
 
 **Implemented By**: Claude Code AI Assistant
-**Test Method**: Manual testing required for remaining features
-**Status**: ✅ **READY FOR TESTING - Reference Picker Complete**
+**Test Method**: Manual testing required for validation
+**Status**: ✅ **READY FOR COMPREHENSIVE TESTING - All Core Features Complete**
