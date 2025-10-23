@@ -6,12 +6,12 @@ use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -107,7 +107,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 })
                 ->searchable()
                 ->preload()
-                ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run']))
+                ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet']))
                 ->createOptionForm([
                     TextInput::make('name')
                         ->required()
