@@ -148,7 +148,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 })
                 ->searchable()
                 ->preload()
-                ->visible(fn () => $this->annotationType === 'cabinet_run')
+                ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet']))
                 ->createOptionForm([
                     TextInput::make('name')
                         ->required()
@@ -171,6 +171,54 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     return $run->id;
                 })
                 ->disabled(fn (callable $get) => ! $get('location_id')),
+
+            // Cabinet Specification Selection (for cabinet annotations)
+            Select::make('cabinet_specification_id')
+                ->label('Cabinet Specification')
+                ->options(function (callable $get) {
+                    $cabinetRunId = $get('cabinet_run_id');
+
+                    if (!$cabinetRunId) {
+                        return [];
+                    }
+
+                    return \Webkul\Project\Models\CabinetSpecification::where('cabinet_run_id', $cabinetRunId)
+                        ->orderBy('position')
+                        ->get()
+                        ->mapWithKeys(function ($cabinet) {
+                            // Create a descriptive label with position and dimensions
+                            $label = $cabinet->name;
+                            if ($cabinet->width || $cabinet->height) {
+                                $label .= sprintf(' (%s"W × %s"H)',
+                                    $cabinet->width ?? '?',
+                                    $cabinet->height ?? '?'
+                                );
+                            }
+                            return [$cabinet->id => $label];
+                        })
+                        ->toArray();
+                })
+                ->searchable()
+                ->preload()
+                ->required(fn () => $this->annotationType === 'cabinet')
+                ->disabled(fn (callable $get) => !$get('cabinet_run_id'))
+                ->visible(fn () => $this->annotationType === 'cabinet')
+                ->helperText('Select the specific cabinet this annotation refers to')
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set) {
+                    // Auto-populate dimensions from cabinet spec if available
+                    if ($state) {
+                        $cabinet = \Webkul\Project\Models\CabinetSpecification::find($state);
+                        if ($cabinet) {
+                            if ($cabinet->width) {
+                                $set('measurement_width', $cabinet->width);
+                            }
+                            if ($cabinet->height) {
+                                $set('measurement_height', $cabinet->height);
+                            }
+                        }
+                    }
+                }),
 
             Textarea::make('notes')
                 ->label('Notes / Comments')
