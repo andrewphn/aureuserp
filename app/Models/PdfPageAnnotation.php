@@ -40,6 +40,12 @@ class PdfPageAnnotation extends Model
         'metadata',
         'created_by',
         'creator_id',
+        // View types and multi-parent support
+        'view_type',
+        'view_orientation',
+        'view_scale',
+        'inferred_position',
+        'vertical_zone',
     ];
 
     protected $casts = [
@@ -50,6 +56,7 @@ class PdfPageAnnotation extends Model
         'visual_properties' => 'array',
         'nutrient_data' => 'array',
         'metadata' => 'array',
+        'view_scale' => 'decimal:4',
     ];
 
     /**
@@ -102,6 +109,11 @@ class PdfPageAnnotation extends Model
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    public function entityReferences(): HasMany
+    {
+        return $this->hasMany(AnnotationEntityReference::class, 'annotation_id');
+    }
+
     /**
      * Scopes
      */
@@ -132,6 +144,90 @@ class PdfPageAnnotation extends Model
     public function isTopLevel(): bool
     {
         return $this->parent_annotation_id === null;
+    }
+
+    /**
+     * Check if this annotation is a plan view
+     */
+    public function isPlanView(): bool
+    {
+        return $this->view_type === 'plan';
+    }
+
+    /**
+     * Check if this annotation is an elevation view
+     */
+    public function isElevationView(): bool
+    {
+        return $this->view_type === 'elevation';
+    }
+
+    /**
+     * Check if this annotation is a section view
+     */
+    public function isSectionView(): bool
+    {
+        return $this->view_type === 'section';
+    }
+
+    /**
+     * Check if this annotation is a detail view
+     */
+    public function isDetailView(): bool
+    {
+        return $this->view_type === 'detail';
+    }
+
+    /**
+     * Add an entity reference to this annotation
+     *
+     * @param string $entityType 'room', 'location', 'cabinet_run', 'cabinet'
+     * @param int $entityId
+     * @param string $referenceType 'primary', 'secondary', 'context'
+     * @return AnnotationEntityReference
+     */
+    public function addEntityReference(string $entityType, int $entityId, string $referenceType = 'primary')
+    {
+        return $this->entityReferences()->create([
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'reference_type' => $referenceType,
+        ]);
+    }
+
+    /**
+     * Get all primary entity references
+     */
+    public function getPrimaryReferences()
+    {
+        return $this->entityReferences()->where('reference_type', 'primary')->get();
+    }
+
+    /**
+     * Get all secondary entity references
+     */
+    public function getSecondaryReferences()
+    {
+        return $this->entityReferences()->where('reference_type', 'secondary')->get();
+    }
+
+    /**
+     * Get all context entity references
+     */
+    public function getContextReferences()
+    {
+        return $this->entityReferences()->where('reference_type', 'context')->get();
+    }
+
+    /**
+     * Sync entity references (replaces all existing)
+     *
+     * @param array $references Array of ['entity_type' => string, 'entity_id' => int, 'reference_type' => string]
+     * @return void
+     */
+    public function syncEntityReferences(array $references): void
+    {
+        AnnotationEntityReference::syncForAnnotation($this->id, $references);
     }
 
     /**
