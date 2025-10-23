@@ -5,6 +5,8 @@ namespace Webkul\Project\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -14,6 +16,7 @@ use Filament\Schemas\Schema;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Webkul\Project\Models\CabinetRun;
+use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 
@@ -185,6 +188,81 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->numeric()
                 ->step(0.125)
                 ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+
+            // Multi-Parent Entity References Section
+            Section::make('Entity References')
+                ->description('Associate this annotation with multiple entities (rooms, locations, runs, cabinets)')
+                ->collapsible()
+                ->collapsed(fn () => empty($this->data['entity_references'] ?? []))
+                ->schema([
+                    Repeater::make('entity_references')
+                        ->label('')
+                        ->schema([
+                            Select::make('entity_type')
+                                ->label('Entity Type')
+                                ->options([
+                                    'room' => 'Room',
+                                    'location' => 'Location',
+                                    'cabinet_run' => 'Cabinet Run',
+                                    'cabinet' => 'Cabinet',
+                                ])
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(fn (callable $set) => $set('entity_id', null)),
+
+                            Select::make('entity_id')
+                                ->label('Entity')
+                                ->options(function (callable $get) {
+                                    $entityType = $get('entity_type');
+                                    if (!$entityType || !$this->projectId) {
+                                        return [];
+                                    }
+
+                                    return match ($entityType) {
+                                        'room' => Room::where('project_id', $this->projectId)
+                                            ->pluck('name', 'id')
+                                            ->toArray(),
+                                        'location' => RoomLocation::whereHas('room', fn ($q) => $q->where('project_id', $this->projectId))
+                                            ->pluck('name', 'id')
+                                            ->toArray(),
+                                        'cabinet_run' => CabinetRun::whereHas('location.room', fn ($q) => $q->where('project_id', $this->projectId))
+                                            ->pluck('name', 'id')
+                                            ->toArray(),
+                                        'cabinet' => CabinetSpecification::whereHas('project', fn ($q) => $q->where('id', $this->projectId))
+                                            ->pluck('name', 'id')
+                                            ->toArray(),
+                                        default => [],
+                                    };
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->disabled(fn (callable $get) => !$get('entity_type')),
+
+                            Select::make('reference_type')
+                                ->label('Reference Type')
+                                ->options([
+                                    'primary' => 'Primary Entity',
+                                    'secondary' => 'Related Entity',
+                                    'context' => 'Context Information',
+                                ])
+                                ->default('primary')
+                                ->required()
+                                ->helperText(fn (callable $get) => match ($get('reference_type')) {
+                                    'primary' => 'Main entity this annotation belongs to',
+                                    'secondary' => 'Related entities providing additional context',
+                                    'context' => 'Background information for reference only',
+                                    default => null,
+                                }),
+                        ])
+                        ->columns(3)
+                        ->defaultItems(0)
+                        ->addActionLabel('Add Entity Reference')
+                        ->reorderable(false)
+                        ->columnSpanFull(),
+                ])
+                ->visible(fn () => in_array($this->annotationType, ['elevation', 'section', 'detail']) ||
+                    $this->annotationType === 'cabinet'), // Show for views and cabinet annotations
         ])
             ->statePath('data');
     }
@@ -253,9 +331,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     annotationId: $annotation->id
                 );
 
-                // Handle entity references if provided from frontend
-                if (isset($this->originalAnnotation['entityReferences']) && is_array($this->originalAnnotation['entityReferences'])) {
-                    $annotation->syncEntityReferences($this->originalAnnotation['entityReferences']);
+                // Handle entity references from form data (takes precedence) or frontend
+                $entityReferences = $data['entity_references'] ?? $this->originalAnnotation['entityReferences'] ?? [];
+                if (!empty($entityReferences) && is_array($entityReferences)) {
+                    $annotation->syncEntityReferences($entityReferences);
                 }
 
                 // Build updated annotation with real database ID
@@ -312,6 +391,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ];
 
             $annotation->update($updateData);
+
+            // Handle entity references from form data
+            if (isset($data['entity_references']) && is_array($data['entity_references'])) {
+                $annotation->syncEntityReferences($data['entity_references']);
+            }
 
             // Log after update
             \App\Models\PdfAnnotationHistory::logAction(
@@ -491,6 +575,23 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         $this->annotationType = $annotation['type'] ?? null;
         $this->projectId = $annotation['projectId'] ?? null;
 
+        // Load entity references from database if this is an existing annotation
+        $entityReferences = [];
+        $annotationId = $annotation['id'] ?? null;
+        if ($annotationId && is_numeric($annotationId)) {
+            $dbAnnotation = \App\Models\PdfPageAnnotation::find($annotationId);
+            if ($dbAnnotation) {
+                $entityReferences = $dbAnnotation->entityReferences()
+                    ->get()
+                    ->map(fn ($ref) => [
+                        'entity_type' => $ref->entity_type,
+                        'entity_id' => $ref->entity_id,
+                        'reference_type' => $ref->reference_type,
+                    ])
+                    ->toArray();
+            }
+        }
+
         // Fill form with annotation data using Filament Forms API
         $this->form->fill([
             'label'              => $annotation['label'] ?? '',
@@ -500,6 +601,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             'cabinet_run_id'     => $annotation['cabinetRunId'] ?? null,
             'measurement_width'  => $annotation['measurementWidth'] ?? null,
             'measurement_height' => $annotation['measurementHeight'] ?? null,
+            'entity_references'  => $entityReferences,
         ]);
 
         $this->showModal = true;
