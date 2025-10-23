@@ -3,14 +3,14 @@
     @if($showModal)
     {{-- Backdrop with Filament styling --}}
     <div
-        class="fixed inset-0 z-30 flex items-center justify-end"
+        class="fixed inset-0 z-50 flex items-center justify-end"
         style="background-color: rgba(0, 0, 0, 0.3);"
         wire:click="cancel"
     >
         {{-- Slideover Panel - Filament native styling --}}
         <div
             class="bg-white dark:bg-gray-900 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-gray-200 dark:border-gray-700"
-            style="position: relative; z-index: 35;"
+            style="position: relative; z-index: 55;"
             @click.stop
             x-data
             x-transition:enter="transition ease-out duration-300"
