@@ -3,7 +3,7 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use Filament\Forms\Components\Get;
-use Filament\Forms\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Set;
 use Filament\Forms\Components\Textarea;

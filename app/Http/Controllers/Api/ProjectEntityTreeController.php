@@ -228,8 +228,19 @@ class ProjectEntityTreeController extends Controller
         try {
             $room = Room::findOrFail($roomId);
 
-            // Delete all associated annotations
-            PdfPageAnnotation::where('room_id', $roomId)->delete();
+            // Get all descendant entity IDs before deletion
+            $locationIds = RoomLocation::where('room_id', $roomId)->pluck('id');
+            $cabinetRunIds = CabinetRun::whereIn('room_location_id', $locationIds)->pluck('id');
+            $cabinetIds = \Webkul\Project\Models\CabinetSpecification::whereIn('cabinet_run_id', $cabinetRunIds)->pluck('id');
+
+            // Delete ALL annotations in the hierarchy
+            // This is necessary because annotations use onDelete('set null') not cascade
+            PdfPageAnnotation::where(function($query) use ($roomId, $locationIds, $cabinetRunIds, $cabinetIds) {
+                $query->where('room_id', $roomId)
+                    ->orWhereIn('room_location_id', $locationIds)
+                    ->orWhereIn('cabinet_run_id', $cabinetRunIds)
+                    ->orWhereIn('cabinet_specification_id', $cabinetIds);
+            })->delete();
 
             // Delete room (cascade will handle locations, cabinet runs, etc.)
             $room->delete();
@@ -264,8 +275,17 @@ class ProjectEntityTreeController extends Controller
         try {
             $location = RoomLocation::findOrFail($locationId);
 
-            // Delete all associated annotations
-            PdfPageAnnotation::where('cabinet_run_id', $locationId)->delete();
+            // Get all descendant entity IDs before deletion
+            $cabinetRunIds = CabinetRun::where('room_location_id', $locationId)->pluck('id');
+            $cabinetIds = \Webkul\Project\Models\CabinetSpecification::whereIn('cabinet_run_id', $cabinetRunIds)->pluck('id');
+
+            // Delete ALL annotations in the hierarchy
+            // This is necessary because annotations use onDelete('set null') not cascade
+            PdfPageAnnotation::where(function($query) use ($locationId, $cabinetRunIds, $cabinetIds) {
+                $query->where('room_location_id', $locationId)
+                    ->orWhereIn('cabinet_run_id', $cabinetRunIds)
+                    ->orWhereIn('cabinet_specification_id', $cabinetIds);
+            })->delete();
 
             // Delete location (cascade will handle cabinet runs, etc.)
             $location->delete();
@@ -300,11 +320,15 @@ class ProjectEntityTreeController extends Controller
         try {
             $cabinetRun = CabinetRun::findOrFail($cabinetRunId);
 
-            // Delete all associated annotations
-            // Note: cabinet_run_id is stored in the cabinet_run_id column
-            PdfPageAnnotation::where('cabinet_run_id', $cabinetRunId)
-                ->where('annotation_type', 'cabinet_run')
-                ->delete();
+            // Get all descendant entity IDs before deletion
+            $cabinetIds = \Webkul\Project\Models\CabinetSpecification::where('cabinet_run_id', $cabinetRunId)->pluck('id');
+
+            // Delete ALL annotations in the hierarchy
+            // This is necessary because annotations use onDelete('set null') not cascade
+            PdfPageAnnotation::where(function($query) use ($cabinetRunId, $cabinetIds) {
+                $query->where('cabinet_run_id', $cabinetRunId)
+                    ->orWhereIn('cabinet_specification_id', $cabinetIds);
+            })->delete();
 
             // Delete cabinet run (cascade will handle cabinets, etc.)
             $cabinetRun->delete();

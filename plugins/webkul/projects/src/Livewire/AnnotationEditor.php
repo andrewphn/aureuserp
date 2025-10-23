@@ -91,7 +91,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     return $room->id;
                 })
                 ->live()
-                ->afterStateUpdated(fn (callable $set) => $set('location_id', null)),
+                ->afterStateUpdated(fn (callable $set) => $set('location_id', null))
+                ->visible(fn () => in_array($this->annotationType, ['room', 'location'])),
 
             Select::make('location_id')
                 ->label('Location')
