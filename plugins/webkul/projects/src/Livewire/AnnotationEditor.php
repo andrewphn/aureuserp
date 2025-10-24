@@ -8,6 +8,8 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -48,11 +50,16 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            // Hierarchy breadcrumb display
-            Placeholder::make('hierarchy_path')
-                ->label('Hierarchy')
-                ->content(fn () => $this->getHierarchyPathHtml())
-                ->visible(fn () => !empty($this->originalAnnotation['id'])),
+            Tabs::make('annotation_tabs')
+                ->tabs([
+                    Tab::make('Annotation')
+                        ->icon('heroicon-o-pencil')
+                        ->schema([
+                            // Hierarchy breadcrumb display
+                            Placeholder::make('hierarchy_path')
+                                ->label('Hierarchy')
+                                ->content(fn () => $this->getHierarchyPathHtml())
+                                ->visible(fn () => !empty($this->originalAnnotation['id'])),
 
             // Parent annotation selector
             Select::make('parent_annotation_id')
@@ -570,9 +577,112 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->live(),
                 ])
                 ->columnSpanFull(),
+                        ]),  // Close Annotation Tab schema
 
-        ])
+                    Tab::make('Entity Details')
+                        ->icon('heroicon-o-cube')
+                        ->schema(fn () => $this->getEntityTabSchema())
+                        ->visible(fn () => $this->hasLinkedEntity()),
+                ]),  // Close tabs()
+        ])  // Close components()
             ->statePath('data');
+    }
+
+    /**
+     * Check if the annotation has a linked entity
+     */
+    protected function hasLinkedEntity(): bool
+    {
+        $data = $this->form->getState();
+
+        return !empty($data['room_id'])
+            || !empty($data['room_location_id'])
+            || !empty($data['cabinet_run_id'])
+            || !empty($data['cabinet_specification_id']);
+    }
+
+    /**
+     * Get the entity tab schema based on which entity is linked
+     */
+    protected function getEntityTabSchema(): array
+    {
+        $data = $this->form->getState();
+
+        // Determine which entity type is linked
+        if (!empty($data['cabinet_specification_id'])) {
+            return $this->getCabinetSchema($data['cabinet_specification_id']);
+        }
+
+        if (!empty($data['cabinet_run_id'])) {
+            return $this->getCabinetRunSchema($data['cabinet_run_id']);
+        }
+
+        if (!empty($data['room_location_id'])) {
+            return $this->getLocationSchema($data['room_location_id']);
+        }
+
+        if (!empty($data['room_id'])) {
+            return $this->getRoomSchema($data['room_id']);
+        }
+
+        // Fallback: No entity linked
+        return [
+            Placeholder::make('no_entity')
+                ->label('No Entity Linked')
+                ->content('Link an entity to edit its details here.')
+        ];
+    }
+
+    /**
+     * Get Room entity form schema
+     */
+    protected function getRoomSchema(int $roomId): array
+    {
+        // Placeholder for Room schema - to be implemented
+        return [
+            Placeholder::make('room_placeholder')
+                ->label('Room Entity')
+                ->content('Room editing form will be implemented here. Room ID: ' . $roomId)
+        ];
+    }
+
+    /**
+     * Get Location entity form schema
+     */
+    protected function getLocationSchema(int $locationId): array
+    {
+        // Placeholder for Location schema - to be implemented
+        return [
+            Placeholder::make('location_placeholder')
+                ->label('Location Entity')
+                ->content('Location editing form will be implemented here. Location ID: ' . $locationId)
+        ];
+    }
+
+    /**
+     * Get Cabinet Run entity form schema
+     */
+    protected function getCabinetRunSchema(int $runId): array
+    {
+        // Placeholder for Cabinet Run schema - to be implemented
+        return [
+            Placeholder::make('run_placeholder')
+                ->label('Cabinet Run Entity')
+                ->content('Cabinet Run editing form will be implemented here. Run ID: ' . $runId)
+        ];
+    }
+
+    /**
+     * Get Cabinet Specification entity form schema
+     */
+    protected function getCabinetSchema(int $cabinetId): array
+    {
+        // Placeholder for Cabinet schema - to be implemented
+        return [
+            Placeholder::make('cabinet_placeholder')
+                ->label('Cabinet Entity')
+                ->content('Cabinet editing form will be implemented here. Cabinet ID: ' . $cabinetId)
+        ];
     }
 
     public function saveAction(): Action
