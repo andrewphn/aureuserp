@@ -110,7 +110,16 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             TextInput::make('label')
                 ->label('Label')
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->live(onBlur: true),
+
+            // Entity detection status - shows if annotation will create new or link to existing entity
+            Placeholder::make('entity_detection_status')
+                ->label('Entity Status')
+                ->content(function (callable $get) {
+                    return $this->getEntityDetectionStatus($get);
+                })
+                ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run'])),
 
             Select::make('room_id')
                 ->label('Room')
@@ -1550,6 +1559,183 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
 
         return $result;
+    }
+
+    /**
+     * Auto-link form field to existing entity
+     * Called when user clicks "Auto-Link to Existing" button
+     *
+     * @param string $fieldName Field name to populate (room_location_id or cabinet_run_id)
+     * @param int $entityId Entity ID to link to
+     */
+    public function linkToExistingEntity(string $fieldName, int $entityId): void
+    {
+        // Set the field value in the form
+        $this->form->fill([
+            $fieldName => $entityId,
+        ]);
+
+        // Show success notification
+        \Filament\Notifications\Notification::make()
+            ->title('Linked to existing entity')
+            ->body('The annotation has been linked to the existing entity.')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Get entity detection status to display in form
+     * Shows whether annotation will create new entity or link to existing one
+     *
+     * @param callable $get Form data getter
+     * @return \Illuminate\Support\HtmlString
+     */
+    protected function getEntityDetectionStatus(callable $get): \Illuminate\Support\HtmlString
+    {
+        $label = $get('label');
+        $parentAnnotationId = $get('parent_annotation_id');
+
+        if (empty($label)) {
+            return new \Illuminate\Support\HtmlString(
+                '<span class="text-gray-500 dark:text-gray-400">Enter a label to check entity status</span>'
+            );
+        }
+
+        // For locations: check if RoomLocation exists with same name + room_id
+        if ($this->annotationType === 'location') {
+            $roomId = $this->getRoomIdFromParent($parentAnnotationId);
+
+            if (!$roomId) {
+                return new \Illuminate\Support\HtmlString(
+                    '<span class="text-gray-500 dark:text-gray-400">Select a parent room first</span>'
+                );
+            }
+
+            $existingLocation = \Webkul\Project\Models\RoomLocation::where('room_id', $roomId)
+                ->where('name', $label)
+                ->first();
+
+            if ($existingLocation) {
+                // Find which pages have annotations using this location
+                $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
+                $pdfDocumentId = $pdfPage?->document_id;
+
+                $annotationsWithLocation = \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfDocumentId) {
+                        $query->where('document_id', $pdfDocumentId);
+                    })
+                    ->where('room_location_id', $existingLocation->id)
+                    ->with('pdfPage')
+                    ->get();
+
+                $pages = $annotationsWithLocation->pluck('pdfPage.page_number')->unique()->sort()->values()->toArray();
+                $pagesStr = implode(', ', $pages);
+
+                return new \Illuminate\Support\HtmlString(
+                    '<div class="flex flex-col gap-2">' .
+                    '<div class="flex items-center gap-2">' .
+                    '<svg class="w-5 h-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
+                    '</svg>' .
+                    '<span class="text-success-600 dark:text-success-400">' .
+                    'Will link to existing: <strong>' . e($existingLocation->name) . '</strong>' .
+                    (!empty($pages) ? ' (Pages: ' . $pagesStr . ')' : '') .
+                    '</span>' .
+                    '</div>' .
+                    '<button ' .
+                    'type="button" ' .
+                    'wire:click="linkToExistingEntity(\'room_location_id\', ' . $existingLocation->id . ')" ' .
+                    'class="fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-color-custom fi-btn-color-primary fi-size-sm fi-btn-size-sm gap-1 px-3 py-2 text-sm inline-grid shadow-sm bg-custom-600 text-white hover:bg-custom-500 focus-visible:ring-custom-500/50 dark:bg-custom-500 dark:hover:bg-custom-400 dark:focus-visible:ring-custom-400/50 fi-ac-btn-action" ' .
+                    'style="--c-400:var(--primary-400);--c-500:var(--primary-500);--c-600:var(--primary-600);">' .
+                    '<svg class="fi-btn-icon transition duration-75 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">' .
+                    '<path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z"/>' .
+                    '<path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z"/>' .
+                    '</svg>' .
+                    '<span class="fi-btn-label">Auto-Link to Existing</span>' .
+                    '</button>' .
+                    '</div>'
+                );
+            } else {
+                return new \Illuminate\Support\HtmlString(
+                    '<div class="flex items-center gap-2">' .
+                    '<svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
+                    '</svg>' .
+                    '<span class="text-primary-600 dark:text-primary-400">' .
+                    'Will create new location: <strong>' . e($label) . '</strong>' .
+                    '</span>' .
+                    '</div>'
+                );
+            }
+        }
+
+        // For cabinet_runs: check if CabinetRun exists with same name + room_location_id
+        if ($this->annotationType === 'cabinet_run') {
+            $roomLocationId = $this->getRoomLocationIdFromParent($parentAnnotationId);
+
+            if (!$roomLocationId) {
+                return new \Illuminate\Support\HtmlString(
+                    '<span class="text-gray-500 dark:text-gray-400">Select a parent location first</span>'
+                );
+            }
+
+            $existingCabinetRun = \Webkul\Project\Models\CabinetRun::where('room_location_id', $roomLocationId)
+                ->where('name', $label)
+                ->first();
+
+            if ($existingCabinetRun) {
+                // Find which pages have annotations using this cabinet run
+                $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
+                $pdfDocumentId = $pdfPage?->document_id;
+
+                $annotationsWithCabinetRun = \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfDocumentId) {
+                        $query->where('document_id', $pdfDocumentId);
+                    })
+                    ->where('cabinet_run_id', $existingCabinetRun->id)
+                    ->with('pdfPage')
+                    ->get();
+
+                $pages = $annotationsWithCabinetRun->pluck('pdfPage.page_number')->unique()->sort()->values()->toArray();
+                $pagesStr = implode(', ', $pages);
+
+                return new \Illuminate\Support\HtmlString(
+                    '<div class="flex flex-col gap-2">' .
+                    '<div class="flex items-center gap-2">' .
+                    '<svg class="w-5 h-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
+                    '</svg>' .
+                    '<span class="text-success-600 dark:text-success-400">' .
+                    'Will link to existing: <strong>' . e($existingCabinetRun->name) . '</strong>' .
+                    (!empty($pages) ? ' (Pages: ' . $pagesStr . ')' : '') .
+                    '</span>' .
+                    '</div>' .
+                    '<button ' .
+                    'type="button" ' .
+                    'wire:click="linkToExistingEntity(\'cabinet_run_id\', ' . $existingCabinetRun->id . ')" ' .
+                    'class="fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-color-custom fi-btn-color-primary fi-size-sm fi-btn-size-sm gap-1 px-3 py-2 text-sm inline-grid shadow-sm bg-custom-600 text-white hover:bg-custom-500 focus-visible:ring-custom-500/50 dark:bg-custom-500 dark:hover:bg-custom-400 dark:focus-visible:ring-custom-400/50 fi-ac-btn-action" ' .
+                    'style="--c-400:var(--primary-400);--c-500:var(--primary-500);--c-600:var(--primary-600);">' .
+                    '<svg class="fi-btn-icon transition duration-75 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">' .
+                    '<path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z"/>' .
+                    '<path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z"/>' .
+                    '</svg>' .
+                    '<span class="fi-btn-label">Auto-Link to Existing</span>' .
+                    '</button>' .
+                    '</div>'
+                );
+            } else {
+                return new \Illuminate\Support\HtmlString(
+                    '<div class="flex items-center gap-2">' .
+                    '<svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
+                    '</svg>' .
+                    '<span class="text-primary-600 dark:text-primary-400">' .
+                    'Will create new cabinet run: <strong>' . e($label) . '</strong>' .
+                    '</span>' .
+                    '</div>'
+                );
+            }
+        }
+
+        return new \Illuminate\Support\HtmlString('');
     }
 
     private function close(): void
