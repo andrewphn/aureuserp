@@ -480,8 +480,9 @@
                         <!-- Room Level -->
                         <div
                             @click="selectNode(room.id, 'room', room.name)"
+                            @dblclick.prevent.stop="enterIsolationMode({ type: 'room', id: room.id, label: room.name })"
                             @contextmenu.prevent.stop="showContextMenu($event, room.id, 'room', room.name)"
-                            :class="selectedNodeId === room.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                            :class="selectedPath.includes(room.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
                         >
                             <button
@@ -501,14 +502,15 @@
                         </div>
 
                         <!-- Locations (Children) -->
-                        <div x-show="isExpanded(room.id)" class="ml-6 mt-1">
+                        <div x-show="isExpanded(room.id)" class="tree-hierarchy-indent">
                             <template x-for="location in room.children" :key="location.id">
                                 <div class="tree-node mb-1">
                                     <!-- Location Level -->
                                     <div
                                         @click="selectNode(location.id, 'room_location', location.name, room.id)"
+                                        @dblclick.prevent.stop="enterIsolationMode({ type: 'location', id: location.id, label: location.name, roomId: room.id, roomName: room.name })"
                                         @contextmenu.prevent.stop="showContextMenu($event, location.id, 'room_location', location.name, room.id)"
-                                        :class="selectedNodeId === location.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                        :class="selectedPath.includes(location.id) ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
                                     >
                                         <button
@@ -528,14 +530,15 @@
                                     </div>
 
                                     <!-- Cabinet Runs (Children) -->
-                                    <div x-show="isExpanded(location.id)" class="ml-6 mt-1">
+                                    <div x-show="isExpanded(location.id)" class="tree-hierarchy-indent">
                                         <template x-for="run in location.children" :key="run.id">
                                             <div class="tree-node mb-1">
                                                 <!-- Cabinet Run Level -->
                                                 <div
                                                     @click="selectNode(run.id, 'cabinet_run', run.name, room.id, location.id)"
+                                                    @dblclick.prevent.stop="enterIsolationMode({ type: 'cabinet_run', id: run.id, label: run.name, locationId: location.id, locationName: location.name, roomId: room.id, roomName: room.name })"
                                                     @contextmenu.prevent.stop="showContextMenu($event, run.id, 'cabinet_run', run.name, room.id, location.id)"
-                                                    :class="selectedNodeId === run.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                                    :class="selectedPath.includes(run.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                 >
                                                     <span class="text-base">📦</span>
@@ -590,17 +593,127 @@
                             ></span>
                         </div>
 
-                        <!-- Annotations on this page -->
-                        <div x-show="isExpanded('page_' + page.pageNumber)" class="ml-6 mt-1">
+                        <!-- Annotations on this page (hierarchical) -->
+                        <div x-show="isExpanded('page_' + page.pageNumber)" class="tree-hierarchy-indent">
                             <template x-for="anno in page.annotations" :key="anno.id">
                                 <div class="tree-node mb-1">
+                                    <!-- Root Annotation (Room or orphan) -->
                                     <div
                                         @click="selectAnnotation(anno)"
-                                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                                        @dblclick.prevent.stop="anno.type === 'room' && enterIsolationMode({ type: 'room', id: anno.roomId, label: anno.label })"
+                                        :class="selectedAnnotation?.id === anno.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                     >
-                                        <span x-text="anno.type === 'location' ? '📍' : anno.type === 'cabinet_run' ? '📦' : '🗄️'"></span>
+                                        <!-- Expand/collapse button if has children -->
+                                        <button
+                                            x-show="anno.children && anno.children.length > 0"
+                                            @click.stop="toggleNode('anno_' + anno.id)"
+                                            class="w-4 h-4 flex items-center justify-center"
+                                        >
+                                            <span x-show="isExpanded('anno_' + anno.id)">▼</span>
+                                            <span x-show="!isExpanded('anno_' + anno.id)">▶</span>
+                                        </button>
+                                        <span class="w-4" x-show="!anno.children || anno.children.length === 0"></span>
+
+                                        <span x-text="anno.type === 'room' ? '🏠' : anno.type === 'location' ? '📍' : anno.type === 'cabinet_run' ? '📦' : '🗄️'"></span>
                                         <span class="flex-1" x-text="anno.label"></span>
-                                        <span class="text-xs text-gray-500" x-text="anno.roomName || 'No room'"></span>
+
+                                        <!-- Children count badge -->
+                                        <span
+                                            x-show="anno.children && anno.children.length > 0"
+                                            class="badge bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs"
+                                            x-text="anno.children.length"
+                                        ></span>
+                                    </div>
+
+                                    <!-- Location Children (Level 2) -->
+                                    <div x-show="isExpanded('anno_' + anno.id)" class="tree-hierarchy-indent">
+                                        <template x-for="location in anno.children" :key="location.id">
+                                            <div class="tree-node mb-1">
+                                                <!-- Location Level -->
+                                                <div
+                                                    @click="selectAnnotation(location)"
+                                                    @dblclick.prevent.stop="location.type === 'location' && enterIsolationMode({ type: 'location', id: location.roomLocationId, label: location.label, roomId: anno.roomId, roomName: anno.label })"
+                                                    :class="selectedAnnotation?.id === location.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                                    class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
+                                                >
+                                                    <!-- Expand/collapse button if has children -->
+                                                    <button
+                                                        x-show="location.children && location.children.length > 0"
+                                                        @click.stop="toggleNode('anno_' + location.id)"
+                                                        class="w-4 h-4 flex items-center justify-center"
+                                                    >
+                                                        <span x-show="isExpanded('anno_' + location.id)">▼</span>
+                                                        <span x-show="!isExpanded('anno_' + location.id)">▶</span>
+                                                    </button>
+                                                    <span class="w-4" x-show="!location.children || location.children.length === 0"></span>
+
+                                                    <span>📍</span>
+                                                    <span class="flex-1" x-text="location.label"></span>
+
+                                                    <!-- Children count badge -->
+                                                    <span
+                                                        x-show="location.children && location.children.length > 0"
+                                                        class="badge bg-indigo-600 text-white px-2 py-0.5 rounded-full text-xs"
+                                                        x-text="location.children.length"
+                                                    ></span>
+                                                </div>
+
+                                                <!-- Cabinet Run Children (Level 3) -->
+                                                <div x-show="isExpanded('anno_' + location.id)" class="tree-hierarchy-indent">
+                                                    <template x-for="run in location.children" :key="run.id">
+                                                        <div class="tree-node mb-1">
+                                                            <!-- Cabinet Run Level -->
+                                                            <div
+                                                                @click="selectAnnotation(run)"
+                                                                @dblclick.prevent.stop="run.type === 'cabinet_run' && enterIsolationMode({ type: 'cabinet_run', id: run.cabinetRunId, label: run.label, locationId: location.roomLocationId, locationName: location.label, roomId: anno.roomId, roomName: anno.label })"
+                                                                :class="selectedAnnotation?.id === run.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                                                class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
+                                                            >
+                                                                <!-- Expand/collapse button if has children -->
+                                                                <button
+                                                                    x-show="run.children && run.children.length > 0"
+                                                                    @click.stop="toggleNode('anno_' + run.id)"
+                                                                    class="w-4 h-4 flex items-center justify-center"
+                                                                >
+                                                                    <span x-show="isExpanded('anno_' + run.id)">▼</span>
+                                                                    <span x-show="!isExpanded('anno_' + run.id)">▶</span>
+                                                                </button>
+                                                                <span class="w-4" x-show="!run.children || run.children.length === 0"></span>
+
+                                                                <span>📦</span>
+                                                                <span class="flex-1" x-text="run.label"></span>
+
+                                                                <!-- Children count badge -->
+                                                                <span
+                                                                    x-show="run.children && run.children.length > 0"
+                                                                    class="badge bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs"
+                                                                    x-text="run.children.length"
+                                                                ></span>
+                                                            </div>
+
+                                                            <!-- Cabinet Children (Level 4) -->
+                                                            <div x-show="isExpanded('anno_' + run.id)" class="tree-hierarchy-indent">
+                                                                <template x-for="cabinet in run.children" :key="cabinet.id">
+                                                                    <div class="tree-node mb-1">
+                                                                        <!-- Cabinet Level (Leaf) -->
+                                                                        <div
+                                                                            @click="selectAnnotation(cabinet)"
+                                                                            :class="selectedAnnotation?.id === cabinet.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                                                            class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
+                                                                        >
+                                                                            <span class="w-4"></span>
+                                                                            <span>🗄️</span>
+                                                                            <span class="flex-1" x-text="cabinet.label"></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </template>
@@ -962,6 +1075,8 @@
                 tree: [],
                 expandedNodes: [],
                 selectedNodeId: null,
+                selectedPath: [], // Array of all ancestor IDs in the hierarchical path
+                selectedAnnotation: null, // Currently selected annotation for highlighting
                 loading: false,
                 error: null,
                 treeViewMode: 'room', // 'room' or 'page'
@@ -1070,6 +1185,7 @@
                                     id: updatedAnnotation.id, // Update ID (temp → real)
                                     label: updatedAnnotation.label,
                                     notes: updatedAnnotation.notes,
+                                    parentId: updatedAnnotation.parentId,  // Update parent ID for hierarchy changes
                                     measurementWidth: updatedAnnotation.measurementWidth,
                                     measurementHeight: updatedAnnotation.measurementHeight,
                                     roomId: updatedAnnotation.roomId,
@@ -1078,7 +1194,7 @@
                                     locationName: updatedAnnotation.locationName,
                                     cabinetRunId: updatedAnnotation.cabinetRunId
                                 };
-                                console.log('✓ Annotation updated from Livewire:', updatedAnnotation);
+                                console.log('✓ Annotation updated from Livewire (including parentId):', updatedAnnotation);
 
                                 // Re-render annotations to show updated data
                                 this.renderAnnotations();
@@ -1124,6 +1240,12 @@
                         Livewire.on('annotation-editor-closed', () => {
                             this.editorModalOpen = false;
                             console.log('📝 Editor modal closed - re-enabling overlay pointer events');
+                        });
+
+                        // Listen for refresh-project-tree event from Livewire
+                        Livewire.on('refresh-project-tree', () => {
+                            console.log('🌳 Refreshing project tree from Livewire event');
+                            this.refreshTree();
                         });
 
                         // Step 6: Initialize page observer for multi-page support
@@ -1848,6 +1970,32 @@
                         screenRect.y + screenRect.height
                     );
 
+                    // Determine parent annotation ID
+                    let parentAnnotationId = null;
+
+                    if (this.isolationMode) {
+                        // Isolation mode: use isolated entity annotation as parent
+                        parentAnnotationId = this.isolationLevel === 'room' ? this.isolatedRoomId :
+                                           this.isolationLevel === 'location' ? this.isolatedLocationId :
+                                           this.isolationLevel === 'cabinet_run' ? this.isolatedCabinetRunId :
+                                           null;
+                        console.log(`🎯 [createAnnotation] Isolation mode - parentId: ${parentAnnotationId}`);
+                    } else {
+                        // Normal mode: find parent annotation on current page based on selected entity
+                        // When drawing a location, find the room annotation
+                        if (this.drawMode === 'location' && this.activeRoomId) {
+                            const roomAnno = this.findAnnotationByEntity('room', this.activeRoomId);
+                            parentAnnotationId = roomAnno?.id || null;
+                            console.log(`🎯 [createAnnotation] Normal mode - drawing location under room ${this.activeRoomId}, found parent: ${parentAnnotationId}`);
+                        }
+                        // When drawing a cabinet run or cabinet, find the location annotation
+                        else if ((this.drawMode === 'cabinet_run' || this.drawMode === 'cabinet') && this.activeLocationId) {
+                            const locationAnno = this.findAnnotationByEntity('room_location', this.activeLocationId);
+                            parentAnnotationId = locationAnno?.id || null;
+                            console.log(`🎯 [createAnnotation] Normal mode - drawing ${this.drawMode} under location ${this.activeLocationId}, found parent: ${parentAnnotationId}`);
+                        }
+                    }
+
                     const annotation = {
                         id: 'temp_' + Date.now(),
                         type: this.drawMode,
@@ -1863,13 +2011,16 @@
                         screenHeight: screenRect.height,
                         roomId: this.activeRoomId,
                         roomName: this.activeRoomName,
-                        locationId: this.activeLocationId,
+                        roomLocationId: this.drawMode === 'location' ? this.activeLocationId : null,  // For location annotations
+                        cabinetRunId: this.drawMode === 'cabinet_run' ? this.activeLocationId : null,  // For cabinet run annotations (activeLocationId holds run ID in this context)
                         locationName: this.activeLocationName,
+                        viewType: 'plan',  // Default to plan view (can be changed in UI later)
                         label: this.generateAnnotationLabel(),
                         color: this.getDrawColor(),
                         createdAt: new Date(),
                         pdfPageId: this.pdfPageId,  // Add pdfPageId for context loading
-                        projectId: this.projectId    // Add projectId for form loading
+                        projectId: this.projectId,   // Add projectId for form loading
+                        parentId: parentAnnotationId  // Set parent in both isolation and normal mode
                     };
 
                     this.annotations.push(annotation);
@@ -1939,6 +2090,7 @@
                                 return {
                                     id: anno.id,
                                     type: anno.annotation_type,
+                                    parentId: anno.parent_annotation_id,  // Parent annotation ID for hierarchy
                                     pdfX: anno.x * this.pageDimensions.width,
                                     pdfY: (1 - anno.y) * this.pageDimensions.height,
                                     pdfWidth: anno.width * this.pageDimensions.width,
@@ -1950,7 +2102,10 @@
                                     screenWidth: screenPos.width,
                                     screenHeight: screenPos.height,
                                     roomId: anno.room_id,
-                                    locationId: anno.cabinet_run_id,  // Map cabinet_run_id to locationId
+                                    roomLocationId: anno.room_location_id,  // For location annotations
+                                    cabinetRunId: anno.cabinet_run_id,  // For cabinet run annotations
+                                    cabinetSpecId: anno.cabinet_specification_id,  // For cabinet annotations
+                                    viewType: anno.view_type,  // Load view type (plan, elevation, section, detail)
                                     label: anno.text || 'Annotation',
                                     color: anno.color || this.getColorForType(anno.annotation_type),
                                     notes: anno.notes,
@@ -1974,14 +2129,18 @@
                         // Transform annotations to API format
                         const annotationsData = this.annotations.map(anno => ({
                             annotation_type: anno.type,
+                            parent_annotation_id: anno.parentId || null,  // CRITICAL: Save parent relationship for hierarchy
                             x: anno.normalizedX,
                             y: anno.normalizedY,
                             width: anno.pdfWidth / this.pageDimensions.width,
                             height: anno.pdfHeight / this.pageDimensions.height,
                             text: anno.label,
                             color: anno.color,
-                            room_id: anno.roomId,
-                            cabinet_run_id: anno.locationId,  // Map locationId to cabinet_run_id
+                            room_id: anno.roomId || null,
+                            room_location_id: anno.roomLocationId || null,  // For location annotations
+                            cabinet_run_id: anno.cabinetRunId || null,  // For cabinet run annotations
+                            cabinet_specification_id: anno.cabinetSpecId || null,  // For cabinet annotations
+                            view_type: anno.viewType || 'plan',  // Save view type (plan, elevation, section, detail)
                             notes: anno.notes || null,
                             room_type: anno.type,  // Use type as room_type for compatibility
                         }));
@@ -2043,7 +2202,57 @@
                 },
 
                 setDrawMode(mode) {
-                    this.drawMode = this.drawMode === mode ? null : mode;
+                    // If turning OFF draw mode, just disable it
+                    if (this.drawMode === mode) {
+                        this.drawMode = null;
+                        return;
+                    }
+
+                    // If turning ON draw mode, check for duplicates first
+                    const existingAnnotation = this.checkForDuplicateEntity(mode);
+
+                    if (existingAnnotation) {
+                        // Duplicate found! Show notification and highlight existing
+                        const entityName = existingAnnotation.label || 'This entity';
+
+                        // Show notification
+                        new FilamentNotification()
+                            .title('Annotation Already Exists')
+                            .warning()
+                            .body(`${entityName} already has an annotation on this page. Highlighting it now.`)
+                            .send();
+
+                        // Highlight existing annotation with pulse effect
+                        this.highlightAnnotation(existingAnnotation);
+
+                        // Don't enter draw mode
+                        return;
+                    }
+
+                    // No duplicate found - proceed with normal draw mode
+                    this.drawMode = mode;
+                },
+
+                // Helper: Highlight an annotation temporarily
+                highlightAnnotation(annotation) {
+                    // Add temporary highlight state
+                    const originalColor = annotation.color;
+                    annotation.color = '#ff0000'; // Red highlight
+
+                    // Force re-render
+                    this.renderAnnotations();
+
+                    // Pan to annotation
+                    const centerX = annotation.screenX + annotation.screenWidth / 2;
+                    const centerY = annotation.screenY + annotation.screenHeight / 2;
+
+                    // Restore original color after 2 seconds
+                    setTimeout(() => {
+                        annotation.color = originalColor;
+                        this.renderAnnotations();
+                    }, 2000);
+
+                    console.log(`🎯 Highlighted annotation: ${annotation.label}`);
                 },
 
                 clearContext() {
@@ -2094,10 +2303,15 @@
                     return this.expandedNodes.includes(nodeId);
                 },
 
-                selectNode(nodeId, type, name, parentRoomId = null, parentLocationId = null) {
+                selectNode(nodeId, type, name, parentRoomId = null, parentLocationId = null, parentCabinetRunId = null) {
                     this.selectedNodeId = nodeId;
 
+                    // Build the full hierarchical path from root to clicked node
+                    const path = [];
+
                     if (type === 'room') {
+                        // Room is the root - path contains only the room
+                        path.push(nodeId);
                         this.activeRoomId = nodeId;
                         this.activeRoomName = name;
                         this.roomSearchQuery = name;
@@ -2105,15 +2319,34 @@
                         this.activeLocationName = '';
                         this.locationSearchQuery = '';
                     } else if (type === 'room_location') {
+                        // Location - path includes room and location
+                        if (parentRoomId) path.push(parentRoomId);
+                        path.push(nodeId);
                         this.activeRoomId = parentRoomId;
                         this.activeLocationId = nodeId;
                         this.activeLocationName = name;
                         this.locationSearchQuery = name;
                     } else if (type === 'cabinet_run') {
+                        // Cabinet run - path includes room, location, and cabinet run
+                        if (parentRoomId) path.push(parentRoomId);
+                        if (parentLocationId) path.push(parentLocationId);
+                        path.push(nodeId);
                         this.activeRoomId = parentRoomId;
                         this.activeLocationId = parentLocationId;
-                        // Cabinet runs don't set active context, just selected
+                    } else if (type === 'cabinet') {
+                        // Cabinet - path includes room, location, cabinet run, and cabinet
+                        if (parentRoomId) path.push(parentRoomId);
+                        if (parentLocationId) path.push(parentLocationId);
+                        if (parentCabinetRunId) path.push(parentCabinetRunId);
+                        path.push(nodeId);
+                        this.activeRoomId = parentRoomId;
+                        this.activeLocationId = parentLocationId;
                     }
+
+                    // Store the complete hierarchical path
+                    this.selectedPath = path;
+
+                    console.log('🌳 Selected node:', { nodeId, type, name, path });
                 },
 
                 // Show context menu on right-click
@@ -2373,72 +2606,152 @@
                     return '';
                 },
 
+                // Helper: Find annotation by entity ID on current page
+                findAnnotationByEntity(entityType, entityId) {
+                    if (!entityId || !this.annotations) return null;
+
+                    console.log(`🔍 [findAnnotationByEntity] Looking for ${entityType} with ID ${entityId}`);
+
+                    // Search through all annotations on this page
+                    for (const anno of this.annotations) {
+                        // Match based on entity type
+                        if (entityType === 'room' && anno.roomId === entityId && anno.type === 'room') {
+                            console.log(`✅ Found room annotation:`, anno);
+                            return anno;
+                        } else if (entityType === 'room_location' && anno.roomLocationId === entityId && anno.type === 'location') {
+                            console.log(`✅ Found location annotation:`, anno);
+                            return anno;
+                        } else if (entityType === 'cabinet_run' && anno.cabinetRunId === entityId && anno.type === 'cabinet_run') {
+                            console.log(`✅ Found cabinet run annotation:`, anno);
+                            return anno;
+                        }
+                    }
+
+                    console.log(`❌ No annotation found for ${entityType} with ID ${entityId}`);
+                    return null;
+                },
+
+                // Helper: Check if entity already has annotation on current page
+                // Returns existing annotation if duplicate found, null if safe to draw
+                checkForDuplicateEntity(drawMode) {
+                    if (!this.annotations) return null;
+
+                    console.log(`🔍 [checkForDuplicateEntity] Checking for duplicates - mode: ${drawMode}`);
+
+                    // Determine entity type and ID based on draw mode
+                    let entityType = null;
+                    let entityId = null;
+                    let annotationType = null;
+
+                    if (drawMode === 'room') {
+                        entityType = 'room';
+                        entityId = this.activeRoomId;
+                        annotationType = 'room';
+                    } else if (drawMode === 'location') {
+                        entityType = 'room_location';
+                        entityId = this.activeLocationId;
+                        annotationType = 'location';
+                    } else if (drawMode === 'cabinet_run') {
+                        entityType = 'cabinet_run';
+                        entityId = this.activeLocationId; // For cabinet runs, activeLocationId holds the run ID
+                        annotationType = 'cabinet_run';
+                    } else if (drawMode === 'cabinet') {
+                        // For cabinets, we check cabinet_specification_id (not implemented yet)
+                        // For now, allow multiple cabinets
+                        return null;
+                    }
+
+                    // If no entity selected (creating new), allow drawing
+                    if (!entityId) {
+                        console.log(`✅ No entity selected - allowing new entity creation`);
+                        return null;
+                    }
+
+                    // Search for existing annotation with this entity
+                    const existing = this.findAnnotationByEntity(entityType, entityId);
+
+                    if (existing) {
+                        console.log(`⚠️  Duplicate found! Entity ${entityId} already has annotation:`, existing);
+                        return existing;
+                    }
+
+                    console.log(`✅ No duplicate found - safe to draw`);
+                    return null;
+                },
+
                 // Helper: Check if annotation should be visible in current isolation mode
+                // Helper: Check if annotation is descendant of parent ID
+                isDescendantOf(anno, parentId) {
+                    console.log(`🔍 [isDescendantOf] Checking if ${anno?.id} (${anno?.label}) is descendant of ${parentId}`);
+                    console.log(`   anno.parentId: ${anno?.parentId}, anno.type: ${anno?.type}`);
+
+                    if (!anno || !parentId) {
+                        console.log(`   ❌ Missing anno or parentId`);
+                        return false;
+                    }
+
+                    // Direct child
+                    if (anno.parentId === parentId) {
+                        console.log(`   ✅ Direct child! parentId matches`);
+                        return true;
+                    }
+
+                    // Recursive check through parent chain
+                    if (anno.parentId) {
+                        const parent = this.annotations.find(a => a.id === anno.parentId);
+                        console.log(`   ⬆️ Has parent ID ${anno.parentId}, checking parent recursively...`);
+                        return this.isDescendantOf(parent, parentId);
+                    }
+
+                    console.log(`   ❌ No parent ID, not a descendant`);
+                    return false;
+                },
+
                 isAnnotationVisibleInIsolation(anno) {
                     if (!this.isolationMode) return true;
+
+                    console.log(`👁️ [isAnnotationVisibleInIsolation] Checking ${anno.id} (${anno.label}) - type: ${anno.type}`);
 
                     // FIRST: Check view type compatibility (respects current active view, not isolation view)
                     // This allows users to switch views while in isolation mode
                     if (!this.isAnnotationVisibleInView(anno)) {
+                        console.log(`   ❌ Not visible in current view`);
                         return false;
                     }
 
-                    // THEN: Check hierarchy visibility
+                    // THEN: Check hierarchy visibility using parent-child relationships
                     if (this.isolationLevel === 'room') {
+                        console.log(`   🏠 Room isolation mode, isolated room: ${this.isolatedRoomId}`);
+
                         // Show the isolated room itself
-                        if (anno.id === this.isolatedRoomId) return true;
-
-                        // Show direct children (locations in this room)
-                        if (anno.type === 'location' && anno.roomId === this.isolatedRoomId) return true;
-
-                        // Show cabinet runs that belong to locations in this room
-                        if (anno.type === 'cabinet_run') {
-                            // Check if this run's parent location is in the isolated room
-                            const parentLocation = this.annotations.find(a => a.id === anno.locationId);
-                            if (parentLocation && parentLocation.roomId === this.isolatedRoomId) return true;
+                        if (anno.id === this.isolatedRoomId) {
+                            console.log(`   ✅ This IS the isolated room`);
+                            return true;
                         }
 
-                        // Show cabinets that belong to runs in this room
-                        if (anno.type === 'cabinet') {
-                            // Check if this cabinet's parent run's parent location is in the isolated room
-                            const parentRun = this.annotations.find(a => a.id === anno.cabinetRunId);
-                            if (parentRun) {
-                                const parentLocation = this.annotations.find(a => a.id === parentRun.locationId);
-                                if (parentLocation && parentLocation.roomId === this.isolatedRoomId) return true;
-                            }
-                        }
+                        // Show all descendants of the isolated room
+                        const isDescendant = this.isDescendantOf(anno, this.isolatedRoomId);
+                        console.log(`   ${isDescendant ? '✅' : '❌'} Is descendant: ${isDescendant}`);
+                        return isDescendant;
 
-                        return false;
                     } else if (this.isolationLevel === 'location') {
-                        // Show parent room
-                        if (anno.id === this.isolatedRoomId) return true;
-
                         // Show the isolated location itself
                         if (anno.id === this.isolatedLocationId) return true;
 
-                        // Show direct children (cabinet runs in this location)
-                        if (anno.type === 'cabinet_run' && anno.locationId === this.isolatedLocationId) return true;
+                        // Show all descendants of the isolated location (cabinet runs and cabinets only, not parent room)
+                        if (this.isDescendantOf(anno, this.isolatedLocationId)) return true;
 
-                        // Show cabinets that belong to runs in this location
-                        if (anno.type === 'cabinet') {
-                            const parentRun = this.annotations.find(a => a.id === anno.cabinetRunId);
-                            if (parentRun && parentRun.locationId === this.isolatedLocationId) return true;
-                        }
-
+                        // Do NOT show parent layers (room) - isolation mode should focus only on this location and its children
                         return false;
+
                     } else if (this.isolationLevel === 'cabinet_run') {
-                        // Show parent location
-                        if (anno.id === this.isolatedLocationId) return true;
-
-                        // Show parent room
-                        if (anno.id === this.isolatedRoomId) return true;
-
                         // Show the isolated cabinet run itself
                         if (anno.id === this.isolatedCabinetRunId) return true;
 
-                        // Show direct children (cabinets in this run)
-                        if (anno.type === 'cabinet' && anno.cabinetRunId === this.isolatedCabinetRunId) return true;
+                        // Show all descendants of the isolated cabinet run (cabinets only, not parent layers)
+                        if (this.isDescendantOf(anno, this.isolatedCabinetRunId)) return true;
 
+                        // Do NOT show parent layers (room/location) - isolation mode should focus only on this run and its children
                         return false;
                     }
 
@@ -2849,6 +3162,29 @@
                     }
                 },
 
+                // Helper: Build hierarchical tree from flat annotations using parentId
+                buildAnnotationTree(annotations) {
+                    // Create a map for quick lookup
+                    const annoMap = new Map();
+                    annotations.forEach(anno => {
+                        annoMap.set(anno.id, { ...anno, children: [] });
+                    });
+
+                    // Build the tree by connecting children to parents
+                    const rootNodes = [];
+                    annoMap.forEach(anno => {
+                        if (anno.parentId && annoMap.has(anno.parentId)) {
+                            // This annotation has a parent - add it as a child
+                            annoMap.get(anno.parentId).children.push(anno);
+                        } else {
+                            // This is a root node (no parent or parent not in this page)
+                            rootNodes.push(anno);
+                        }
+                    });
+
+                    return rootNodes;
+                },
+
                 // Group annotations by page number for page view
                 getPageGroupedAnnotations() {
                     // Get all unique page numbers from annotations and pageMap
@@ -2873,6 +3209,11 @@
                                 annotations: [anno]
                             });
                         }
+                    });
+
+                    // Build hierarchical tree for each page
+                    pages.forEach((page, pageNum) => {
+                        page.annotations = this.buildAnnotationTree(page.annotations);
                     });
 
                     // Convert to array and sort by page number
