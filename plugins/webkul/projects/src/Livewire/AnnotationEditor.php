@@ -638,12 +638,200 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      */
     protected function getRoomSchema(int $roomId): array
     {
-        // Placeholder for Room schema - to be implemented
+        // Load room data
+        $room = Room::find($roomId);
+
+        if (!$room) {
+            return [
+                Placeholder::make('room_not_found')
+                    ->label('Error')
+                    ->content('Room not found (ID: ' . $roomId . ')')
+            ];
+        }
+
         return [
-            Placeholder::make('room_placeholder')
-                ->label('Room Entity')
-                ->content('Room editing form will be implemented here. Room ID: ' . $roomId)
+            // Core Room Fields
+            Section::make('Room Information')
+                ->description('Edit room details - changes save automatically')
+                ->schema([
+                    TextInput::make('room_name')
+                        ->label('Room Name')
+                        ->default($room->name)
+                        ->required()
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['name' => $state]);
+                        })
+                        ->live(onBlur: true),
+
+                    Select::make('room_type')
+                        ->label('Room Type')
+                        ->options([
+                            'kitchen' => 'Kitchen',
+                            'bathroom' => 'Bathroom',
+                            'bedroom' => 'Bedroom',
+                            'living_room' => 'Living Room',
+                            'dining_room' => 'Dining Room',
+                            'office' => 'Office',
+                            'laundry' => 'Laundry',
+                            'garage' => 'Garage',
+                            'other' => 'Other',
+                        ])
+                        ->default($room->room_type)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['room_type' => $state]);
+                        })
+                        ->live(onBlur: true),
+
+                    TextInput::make('floor_number')
+                        ->label('Floor Number')
+                        ->numeric()
+                        ->default($room->floor_number)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['floor_number' => $state]);
+                        })
+                        ->live(onBlur: true),
+
+                    Textarea::make('room_notes')
+                        ->label('Notes')
+                        ->default($room->notes)
+                        ->rows(3)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['notes' => $state]);
+                        })
+                        ->live(onBlur: true),
+                ])
+                ->columns(2),
+
+            // PDF Reference Fields
+            Section::make('PDF References')
+                ->description('Information extracted from PDF pages')
+                ->schema([
+                    TextInput::make('pdf_page_number')
+                        ->label('PDF Page Number')
+                        ->numeric()
+                        ->default($room->pdf_page_number)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['pdf_page_number' => $state]);
+                        })
+                        ->live(onBlur: true),
+
+                    TextInput::make('pdf_room_label')
+                        ->label('PDF Room Label')
+                        ->default($room->pdf_room_label)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['pdf_room_label' => $state]);
+                        })
+                        ->live(onBlur: true),
+
+                    TextInput::make('pdf_detail_number')
+                        ->label('PDF Detail Number')
+                        ->default($room->pdf_detail_number)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['pdf_detail_number' => $state]);
+                        })
+                        ->live(onBlur: true),
+
+                    Textarea::make('pdf_notes')
+                        ->label('PDF Notes')
+                        ->default($room->pdf_notes)
+                        ->rows(2)
+                        ->afterStateUpdated(function ($state) use ($roomId) {
+                            Room::where('id', $roomId)->update(['pdf_notes' => $state]);
+                        })
+                        ->live(onBlur: true),
+                ])
+                ->columns(2)
+                ->collapsible()
+                ->collapsed(),
+
+            // Cross-Page Information
+            Section::make('Cross-Page Information')
+                ->description('View where this room appears across different PDF pages')
+                ->schema([
+                    Placeholder::make('cross_page_info')
+                        ->label('')
+                        ->content(fn () => $this->getRoomCrossPageInfo($roomId))
+                ])
+                ->collapsible()
+                ->collapsed(),
         ];
+    }
+
+    /**
+     * Get cross-page information for a Room entity
+     * Shows which PDF pages reference this room and what data was added on each
+     */
+    protected function getRoomCrossPageInfo(int $roomId): string
+    {
+        // Get all annotations that reference this room across different pages
+        $annotations = \App\Models\PdfPageAnnotation::where('room_id', $roomId)
+            ->with(['pdfPage'])
+            ->orderBy('pdf_page_id')
+            ->get();
+
+        if ($annotations->isEmpty()) {
+            return '<p class="text-sm text-gray-500">No cross-page references found for this room.</p>';
+        }
+
+        // Group by page and view type
+        $pageGroups = $annotations->groupBy('pdf_page_id');
+
+        $html = '<div class="space-y-3">';
+
+        foreach ($pageGroups as $pageId => $pageAnnotations) {
+            $page = $pageAnnotations->first()->pdfPage;
+            $pageNumber = $page ? $page->page_number : 'Unknown';
+
+            $html .= '<div class="border-l-2 border-primary-500 pl-3">';
+            $html .= '<p class="font-semibold text-sm">Page ' . $pageNumber . '</p>';
+            $html .= '<ul class="mt-1 space-y-1 text-sm text-gray-600">';
+
+            foreach ($pageAnnotations as $annotation) {
+                $viewType = ucfirst($annotation->view_type ?? 'plan');
+                $annotationType = ucfirst(str_replace('_', ' ', $annotation->annotation_type));
+                $label = $annotation->label ? ' - ' . $annotation->label : '';
+
+                $html .= '<li>';
+                $html .= '<span class="font-medium">' . $viewType . '</span> view: ';
+                $html .= $annotationType . $label;
+
+                // Show when it was created/updated
+                if ($annotation->updated_at) {
+                    $html .= ' <span class="text-xs text-gray-400">(updated ' . $annotation->updated_at->diffForHumans() . ')</span>';
+                }
+
+                $html .= '</li>';
+            }
+
+            $html .= '</ul>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+
+        // Add Chatter activity summary if available
+        $room = Room::find($roomId);
+        if ($room && method_exists($room, 'chats')) {
+            $recentActivity = $room->chats()->latest()->take(3)->get();
+
+            if ($recentActivity->isNotEmpty()) {
+                $html .= '<div class="mt-4 pt-4 border-t border-gray-200">';
+                $html .= '<p class="font-semibold text-sm mb-2">Recent Activity</p>';
+                $html .= '<ul class="space-y-1 text-sm text-gray-600">';
+
+                foreach ($recentActivity as $activity) {
+                    $html .= '<li class="text-xs">';
+                    $html .= '<span class="text-gray-400">' . $activity->created_at->format('M d, H:i') . '</span> - ';
+                    $html .= e($activity->message ?? $activity->comment ?? 'Activity logged');
+                    $html .= '</li>';
+                }
+
+                $html .= '</ul>';
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
     }
 
     /**
