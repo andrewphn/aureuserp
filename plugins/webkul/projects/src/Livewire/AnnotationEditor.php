@@ -579,10 +579,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->columnSpanFull(),
                         ]),  // Close Annotation Tab schema
 
-                    Tab::make('Entity Details')
-                        ->icon('heroicon-o-cube')
-                        ->schema(fn () => $this->getEntityTabSchema())
-                        ->visible(fn () => $this->hasLinkedEntity()),
+                    // Entity Details tab - TEMPORARILY DISABLED due to form state recursion
+                    // TODO: Implement without calling $this->form->getState() in visibility/schema closures
+                    // Tab::make('Entity Details')
+                    //     ->icon('heroicon-o-cube')
+                    //     ->schema(fn () => $this->getEntityTabSchema())
+                    //     ->visible(fn () => $this->hasLinkedEntity()),
                 ]),  // Close tabs()
         ])  // Close components()
             ->statePath('data');
