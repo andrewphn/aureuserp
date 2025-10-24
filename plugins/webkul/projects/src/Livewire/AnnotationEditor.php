@@ -744,16 +744,17 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->collapsible()
                 ->collapsed(),
 
-            // Cross-Page Information
-            Section::make('Cross-Page Information')
-                ->description('View where this room appears across different PDF pages')
-                ->schema([
-                    Placeholder::make('cross_page_info')
-                        ->label('')
-                        ->content(fn () => $this->getRoomCrossPageInfo($roomId))
-                ])
-                ->collapsible()
-                ->collapsed(),
+            // Cross-Page Information - TEMPORARILY DISABLED due to timeout issue
+            // TODO: Implement as lazy-loaded component or cached value
+            // Section::make('Cross-Page Information')
+            //     ->description('View where this room appears across different PDF pages')
+            //     ->schema([
+            //         Placeholder::make('cross_page_info')
+            //             ->label('')
+            //             ->content(fn () => $this->getRoomCrossPageInfo($roomId))
+            //     ])
+            //     ->collapsible()
+            //     ->collapsed(),
         ];
     }
 
