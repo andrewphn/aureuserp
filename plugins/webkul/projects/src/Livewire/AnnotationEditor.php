@@ -5,7 +5,6 @@ namespace Webkul\Project\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -647,44 +646,54 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      */
     protected function getRoomInfoSchema(int $roomId): array
     {
+        $room = \Webkul\Project\Models\Room::find($roomId);
+
+        if (!$room) {
+            return [
+                Placeholder::make('room_not_found')
+                    ->label('Room Not Found')
+                    ->content('Room ID ' . $roomId . ' not found in database.')
+            ];
+        }
+
         return [
             Section::make('Room Information')
                 ->description('Edit room details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Fieldset::make('room')
-                        ->relationship('room')
-                        ->schema([
-                            TextInput::make('name')
-                                ->label('Room Name')
-                                ->required()
-                                ->maxLength(255),
+                    TextInput::make('room.name')
+                        ->label('Room Name')
+                        ->default($room->name)
+                        ->required()
+                        ->maxLength(255),
 
-                            Select::make('room_type')
-                                ->label('Room Type')
-                                ->options([
-                                    'kitchen' => 'Kitchen',
-                                    'bathroom' => 'Bathroom',
-                                    'bedroom' => 'Bedroom',
-                                    'living_room' => 'Living Room',
-                                    'dining_room' => 'Dining Room',
-                                    'office' => 'Office',
-                                    'laundry' => 'Laundry',
-                                    'garage' => 'Garage',
-                                    'basement' => 'Basement',
-                                    'other' => 'Other',
-                                ]),
+                    Select::make('room.room_type')
+                        ->label('Room Type')
+                        ->default($room->room_type)
+                        ->options([
+                            'kitchen' => 'Kitchen',
+                            'bathroom' => 'Bathroom',
+                            'bedroom' => 'Bedroom',
+                            'living_room' => 'Living Room',
+                            'dining_room' => 'Dining Room',
+                            'office' => 'Office',
+                            'laundry' => 'Laundry',
+                            'garage' => 'Garage',
+                            'basement' => 'Basement',
+                            'other' => 'Other',
+                        ]),
 
-                            TextInput::make('floor_number')
-                                ->label('Floor Number')
-                                ->numeric(),
+                    TextInput::make('room.floor_number')
+                        ->label('Floor Number')
+                        ->default($room->floor_number)
+                        ->numeric(),
 
-                            Textarea::make('notes')
-                                ->label('Notes')
-                                ->rows(3)
-                                ->columnSpanFull(),
-                        ])
-                        ->columns(2),
-                ]),
+                    Textarea::make('room.notes')
+                        ->label('Notes')
+                        ->default($room->notes)
+                        ->rows(3)
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
         ];
     }
 
@@ -695,29 +704,35 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $location = \Webkul\Project\Models\RoomLocation::find($locationId);
 
+        if (!$location) {
+            return [
+                Placeholder::make('location_not_found')
+                    ->label('Location Not Found')
+                    ->content('Location ID ' . $locationId . ' not found in database.')
+            ];
+        }
+
         return [
             Section::make('Location Information')
                 ->description('Edit location details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Fieldset::make('roomLocation')
-                        ->relationship('roomLocation')
-                        ->schema([
-                            TextInput::make('name')
-                                ->label('Location Name')
-                                ->required()
-                                ->maxLength(255),
+                    TextInput::make('roomLocation.name')
+                        ->label('Location Name')
+                        ->default($location->name)
+                        ->required()
+                        ->maxLength(255),
 
-                            Placeholder::make('location_room_display')
-                                ->label('Parent Room')
-                                ->content($location->room->name ?? 'N/A'),
+                    Placeholder::make('location_room_display')
+                        ->label('Parent Room')
+                        ->content($location->room->name ?? 'N/A'),
 
-                            Textarea::make('notes')
-                                ->label('Notes')
-                                ->rows(3)
-                                ->columnSpanFull(),
-                        ])
-                        ->columns(2),
-                ]),
+                    Textarea::make('roomLocation.notes')
+                        ->label('Notes')
+                        ->default($location->notes)
+                        ->rows(3)
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
         ];
     }
 
@@ -728,45 +743,53 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $run = \Webkul\Project\Models\CabinetRun::find($runId);
 
+        if (!$run) {
+            return [
+                Placeholder::make('run_not_found')
+                    ->label('Cabinet Run Not Found')
+                    ->content('Cabinet Run ID ' . $runId . ' not found in database.')
+            ];
+        }
+
         return [
             Section::make('Cabinet Run Information')
                 ->description('Edit cabinet run details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Fieldset::make('cabinetRun')
-                        ->relationship('cabinetRun')
-                        ->schema([
-                            TextInput::make('name')
-                                ->label('Run Name')
-                                ->required()
-                                ->maxLength(255),
+                    TextInput::make('cabinetRun.name')
+                        ->label('Run Name')
+                        ->default($run->name)
+                        ->required()
+                        ->maxLength(255),
 
-                            Select::make('run_type')
-                                ->label('Run Type')
-                                ->options([
-                                    'base' => 'Base Cabinets',
-                                    'wall' => 'Wall Cabinets',
-                                    'tall' => 'Tall Cabinets',
-                                    'specialty' => 'Specialty',
-                                ])
-                                ->required(),
-
-                            Placeholder::make('run_location_display')
-                                ->label('Parent Location')
-                                ->content($run->roomLocation->name ?? 'N/A'),
-
-                            TextInput::make('total_linear_feet')
-                                ->label('Total Linear Feet')
-                                ->suffix('ft')
-                                ->numeric()
-                                ->step(0.01),
-
-                            Textarea::make('notes')
-                                ->label('Notes')
-                                ->rows(3)
-                                ->columnSpanFull(),
+                    Select::make('cabinetRun.run_type')
+                        ->label('Run Type')
+                        ->default($run->run_type)
+                        ->options([
+                            'base' => 'Base Cabinets',
+                            'wall' => 'Wall Cabinets',
+                            'tall' => 'Tall Cabinets',
+                            'specialty' => 'Specialty',
                         ])
-                        ->columns(2),
-                ]),
+                        ->required(),
+
+                    Placeholder::make('run_location_display')
+                        ->label('Parent Location')
+                        ->content($run->roomLocation->name ?? 'N/A'),
+
+                    TextInput::make('cabinetRun.total_linear_feet')
+                        ->label('Total Linear Feet')
+                        ->default($run->total_linear_feet)
+                        ->suffix('ft')
+                        ->numeric()
+                        ->step(0.01),
+
+                    Textarea::make('cabinetRun.notes')
+                        ->label('Notes')
+                        ->default($run->notes)
+                        ->rows(3)
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
         ];
     }
 
@@ -777,65 +800,77 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $cabinet = \Webkul\Project\Models\CabinetSpecification::find($cabinetId);
 
+        if (!$cabinet) {
+            return [
+                Placeholder::make('cabinet_not_found')
+                    ->label('Cabinet Not Found')
+                    ->content('Cabinet Specification ID ' . $cabinetId . ' not found in database.')
+            ];
+        }
+
         return [
             Section::make('Cabinet Specification Information')
                 ->description('Edit cabinet details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Fieldset::make('cabinetSpecification')
-                        ->relationship('cabinetSpecification')
-                        ->schema([
-                            TextInput::make('cabinet_number')
-                                ->label('Cabinet Number')
-                                ->required()
-                                ->maxLength(255),
+                    TextInput::make('cabinetSpecification.cabinet_number')
+                        ->label('Cabinet Number')
+                        ->default($cabinet->cabinet_number)
+                        ->required()
+                        ->maxLength(255),
 
-                            TextInput::make('position_in_run')
-                                ->label('Position in Run')
-                                ->numeric()
-                                ->minValue(1),
+                    TextInput::make('cabinetSpecification.position_in_run')
+                        ->label('Position in Run')
+                        ->default($cabinet->position_in_run)
+                        ->numeric()
+                        ->minValue(1),
 
-                            Placeholder::make('cabinet_run_display')
-                                ->label('Cabinet Run')
-                                ->content($cabinet->cabinetRun->name ?? 'N/A'),
+                    Placeholder::make('cabinet_run_display')
+                        ->label('Cabinet Run')
+                        ->content($cabinet->cabinetRun->name ?? 'N/A'),
 
-                            TextInput::make('length_inches')
-                                ->label('Length')
-                                ->suffix('in')
-                                ->required()
-                                ->numeric()
-                                ->step(0.125),
+                    TextInput::make('cabinetSpecification.length_inches')
+                        ->label('Length')
+                        ->default($cabinet->length_inches)
+                        ->suffix('in')
+                        ->required()
+                        ->numeric()
+                        ->step(0.125),
 
-                            TextInput::make('width_inches')
-                                ->label('Width')
-                                ->suffix('in')
-                                ->numeric()
-                                ->step(0.125),
+                    TextInput::make('cabinetSpecification.width_inches')
+                        ->label('Width')
+                        ->default($cabinet->width_inches)
+                        ->suffix('in')
+                        ->numeric()
+                        ->step(0.125),
 
-                            TextInput::make('depth_inches')
-                                ->label('Depth')
-                                ->suffix('in')
-                                ->numeric()
-                                ->step(0.125),
+                    TextInput::make('cabinetSpecification.depth_inches')
+                        ->label('Depth')
+                        ->default($cabinet->depth_inches)
+                        ->suffix('in')
+                        ->numeric()
+                        ->step(0.125),
 
-                            TextInput::make('height_inches')
-                                ->label('Height')
-                                ->suffix('in')
-                                ->numeric()
-                                ->step(0.125),
+                    TextInput::make('cabinetSpecification.height_inches')
+                        ->label('Height')
+                        ->default($cabinet->height_inches)
+                        ->suffix('in')
+                        ->numeric()
+                        ->step(0.125),
 
-                            TextInput::make('linear_feet')
-                                ->label('Linear Feet')
-                                ->suffix('ft')
-                                ->numeric()
-                                ->step(0.01),
+                    TextInput::make('cabinetSpecification.linear_feet')
+                        ->label('Linear Feet')
+                        ->default($cabinet->linear_feet)
+                        ->suffix('ft')
+                        ->numeric()
+                        ->step(0.01),
 
-                            Textarea::make('shop_notes')
-                                ->label('Shop Notes')
-                                ->rows(3)
-                                ->columnSpanFull(),
-                        ])
-                        ->columns(3),
-                ]),
+                    Textarea::make('cabinetSpecification.shop_notes')
+                        ->label('Shop Notes')
+                        ->default($cabinet->shop_notes)
+                        ->rows(3)
+                        ->columnSpanFull(),
+                ])
+                ->columns(3),
         ];
     }
 
@@ -1141,6 +1176,27 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ];
 
             $annotation->update($updateData);
+
+            // UPDATE RELATED MODELS if data exists in form
+            // Handle Room updates
+            if (isset($data['room']) && $annotation->room) {
+                $annotation->room->update($data['room']);
+            }
+
+            // Handle RoomLocation updates
+            if (isset($data['roomLocation']) && $annotation->roomLocation) {
+                $annotation->roomLocation->update($data['roomLocation']);
+            }
+
+            // Handle CabinetRun updates
+            if (isset($data['cabinetRun']) && $annotation->cabinetRun) {
+                $annotation->cabinetRun->update($data['cabinetRun']);
+            }
+
+            // Handle CabinetSpecification updates
+            if (isset($data['cabinetSpecification']) && $annotation->cabinetSpecification) {
+                $annotation->cabinetSpecification->update($data['cabinetSpecification']);
+            }
 
             // SYNC METADATA ACROSS ALL INSTANCES OF THIS ENTITY
             // If this is a location annotation, find all other location annotations
