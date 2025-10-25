@@ -5,6 +5,7 @@ namespace Webkul\Project\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -646,46 +647,43 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      */
     protected function getRoomInfoSchema(int $roomId): array
     {
-        $room = \Webkul\Project\Models\Room::find($roomId);
-
-        if (!$room) {
-            return [
-                Placeholder::make('room_not_found')
-                    ->label('Room Not Found')
-                    ->content('Room ID ' . $roomId . ' not found in database.')
-            ];
-        }
-
         return [
             Section::make('Room Information')
-                ->description('View room details and edit in the admin panel')
+                ->description('Edit room details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Placeholder::make('room_name_display')
-                        ->label('Room Name')
-                        ->content($room->name ?? 'N/A'),
+                    Fieldset::make('room')
+                        ->relationship('room')
+                        ->schema([
+                            TextInput::make('name')
+                                ->label('Room Name')
+                                ->required()
+                                ->maxLength(255),
 
-                    Placeholder::make('room_type_display')
-                        ->label('Room Type')
-                        ->content(ucfirst(str_replace('_', ' ', $room->room_type ?? 'Not specified'))),
+                            Select::make('room_type')
+                                ->label('Room Type')
+                                ->options([
+                                    'kitchen' => 'Kitchen',
+                                    'bathroom' => 'Bathroom',
+                                    'bedroom' => 'Bedroom',
+                                    'living_room' => 'Living Room',
+                                    'dining_room' => 'Dining Room',
+                                    'office' => 'Office',
+                                    'laundry' => 'Laundry',
+                                    'garage' => 'Garage',
+                                    'basement' => 'Basement',
+                                    'other' => 'Other',
+                                ]),
 
-                    Placeholder::make('floor_number_display')
-                        ->label('Floor Number')
-                        ->content($room->floor_number ?? 'Not specified'),
+                            TextInput::make('floor_number')
+                                ->label('Floor Number')
+                                ->numeric(),
 
-                    Placeholder::make('room_notes_display')
-                        ->label('Notes')
-                        ->content($room->notes ?? 'No notes'),
-                ])
-                ->columns(2)
-                ->footerActions([
-                    Action::make('editRoom')
-                        ->label('Edit Room in Admin Panel')
-                        ->icon('heroicon-o-pencil-square')
-                        ->color('primary')
-                        ->url(route('filament.admin.resources.project.projects.edit', [
-                            'record' => $room->project_id,
-                        ]) . '?activeRelationManager=rooms')
-                        ->openUrlInNewTab(),
+                            Textarea::make('notes')
+                                ->label('Notes')
+                                ->rows(3)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2),
                 ]),
         ];
     }
@@ -697,36 +695,28 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $location = \Webkul\Project\Models\RoomLocation::find($locationId);
 
-        if (!$location) {
-            return [
-                Placeholder::make('location_not_found')
-                    ->label('Location Not Found')
-                    ->content('Location ID ' . $locationId . ' not found in database.')
-            ];
-        }
-
         return [
             Section::make('Location Information')
-                ->description('View location details and edit in the admin panel')
+                ->description('Edit location details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Placeholder::make('location_name_display')
-                        ->label('Location Name')
-                        ->content($location->name ?? 'N/A'),
+                    Fieldset::make('roomLocation')
+                        ->relationship('roomLocation')
+                        ->schema([
+                            TextInput::make('name')
+                                ->label('Location Name')
+                                ->required()
+                                ->maxLength(255),
 
-                    Placeholder::make('location_room_display')
-                        ->label('Parent Room')
-                        ->content($location->room->name ?? 'N/A'),
-                ])
-                ->columns(2)
-                ->footerActions([
-                    Action::make('editLocation')
-                        ->label('Edit Location in Admin Panel')
-                        ->icon('heroicon-o-pencil-square')
-                        ->color('primary')
-                        ->url(route('filament.admin.resources.project.projects.edit', [
-                            'record' => $location->project_id,
-                        ]) . '?activeRelationManager=locations')
-                        ->openUrlInNewTab(),
+                            Placeholder::make('location_room_display')
+                                ->label('Parent Room')
+                                ->content($location->room->name ?? 'N/A'),
+
+                            Textarea::make('notes')
+                                ->label('Notes')
+                                ->rows(3)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2),
                 ]),
         ];
     }
@@ -738,40 +728,44 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $run = \Webkul\Project\Models\CabinetRun::find($runId);
 
-        if (!$run) {
-            return [
-                Placeholder::make('run_not_found')
-                    ->label('Cabinet Run Not Found')
-                    ->content('Cabinet Run ID ' . $runId . ' not found in database.')
-            ];
-        }
-
         return [
             Section::make('Cabinet Run Information')
-                ->description('View cabinet run details and edit in the admin panel')
+                ->description('Edit cabinet run details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Placeholder::make('run_name_display')
-                        ->label('Run Name')
-                        ->content($run->name ?? 'N/A'),
+                    Fieldset::make('cabinetRun')
+                        ->relationship('cabinetRun')
+                        ->schema([
+                            TextInput::make('name')
+                                ->label('Run Name')
+                                ->required()
+                                ->maxLength(255),
 
-                    Placeholder::make('run_type_display')
-                        ->label('Run Type')
-                        ->content(ucfirst($run->run_type ?? 'N/A')),
+                            Select::make('run_type')
+                                ->label('Run Type')
+                                ->options([
+                                    'base' => 'Base Cabinets',
+                                    'wall' => 'Wall Cabinets',
+                                    'tall' => 'Tall Cabinets',
+                                    'specialty' => 'Specialty',
+                                ])
+                                ->required(),
 
-                    Placeholder::make('run_location_display')
-                        ->label('Parent Location')
-                        ->content($run->roomLocation->name ?? 'N/A'),
-                ])
-                ->columns(2)
-                ->footerActions([
-                    Action::make('editCabinetRun')
-                        ->label('Edit Cabinet Run in Admin Panel')
-                        ->icon('heroicon-o-pencil-square')
-                        ->color('primary')
-                        ->url(route('filament.admin.resources.project.projects.edit', [
-                            'record' => $run->roomLocation->project_id,
-                        ]) . '?activeRelationManager=cabinetRuns')
-                        ->openUrlInNewTab(),
+                            Placeholder::make('run_location_display')
+                                ->label('Parent Location')
+                                ->content($run->roomLocation->name ?? 'N/A'),
+
+                            TextInput::make('total_linear_feet')
+                                ->label('Total Linear Feet')
+                                ->suffix('ft')
+                                ->numeric()
+                                ->step(0.01),
+
+                            Textarea::make('notes')
+                                ->label('Notes')
+                                ->rows(3)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2),
                 ]),
         ];
     }
@@ -783,49 +777,64 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         $cabinet = \Webkul\Project\Models\CabinetSpecification::find($cabinetId);
 
-        if (!$cabinet) {
-            return [
-                Placeholder::make('cabinet_not_found')
-                    ->label('Cabinet Not Found')
-                    ->content('Cabinet Specification ID ' . $cabinetId . ' not found in database.')
-            ];
-        }
-
         return [
             Section::make('Cabinet Specification Information')
-                ->description('View cabinet details and edit in the admin panel')
+                ->description('Edit cabinet details directly - changes save when you click "Save Changes"')
                 ->schema([
-                    Placeholder::make('cabinet_number_display')
-                        ->label('Cabinet Number')
-                        ->content($cabinet->cabinet_number ?? 'N/A'),
+                    Fieldset::make('cabinetSpecification')
+                        ->relationship('cabinetSpecification')
+                        ->schema([
+                            TextInput::make('cabinet_number')
+                                ->label('Cabinet Number')
+                                ->required()
+                                ->maxLength(255),
 
-                    Placeholder::make('cabinet_dimensions_display')
-                        ->label('Dimensions (W × H × D)')
-                        ->content(sprintf(
-                            '%s" × %s" × %s"',
-                            $cabinet->width_inches ?? '?',
-                            $cabinet->height_inches ?? '?',
-                            $cabinet->depth_inches ?? '?'
-                        )),
+                            TextInput::make('position_in_run')
+                                ->label('Position in Run')
+                                ->numeric()
+                                ->minValue(1),
 
-                    Placeholder::make('cabinet_linear_feet_display')
-                        ->label('Linear Feet')
-                        ->content(($cabinet->linear_feet ?? 0) . ' ft'),
+                            Placeholder::make('cabinet_run_display')
+                                ->label('Cabinet Run')
+                                ->content($cabinet->cabinetRun->name ?? 'N/A'),
 
-                    Placeholder::make('cabinet_run_display')
-                        ->label('Cabinet Run')
-                        ->content($cabinet->cabinetRun->name ?? 'N/A'),
-                ])
-                ->columns(2)
-                ->footerActions([
-                    Action::make('editCabinetSpec')
-                        ->label('Edit Cabinet in Admin Panel')
-                        ->icon('heroicon-o-pencil-square')
-                        ->color('primary')
-                        ->url(route('filament.admin.resources.project.projects.edit', [
-                            'record' => $cabinet->project_id,
-                        ]) . '?activeRelationManager=cabinets')
-                        ->openUrlInNewTab(),
+                            TextInput::make('length_inches')
+                                ->label('Length')
+                                ->suffix('in')
+                                ->required()
+                                ->numeric()
+                                ->step(0.125),
+
+                            TextInput::make('width_inches')
+                                ->label('Width')
+                                ->suffix('in')
+                                ->numeric()
+                                ->step(0.125),
+
+                            TextInput::make('depth_inches')
+                                ->label('Depth')
+                                ->suffix('in')
+                                ->numeric()
+                                ->step(0.125),
+
+                            TextInput::make('height_inches')
+                                ->label('Height')
+                                ->suffix('in')
+                                ->numeric()
+                                ->step(0.125),
+
+                            TextInput::make('linear_feet')
+                                ->label('Linear Feet')
+                                ->suffix('ft')
+                                ->numeric()
+                                ->step(0.01),
+
+                            Textarea::make('shop_notes')
+                                ->label('Shop Notes')
+                                ->rows(3)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(3),
                 ]),
         ];
     }

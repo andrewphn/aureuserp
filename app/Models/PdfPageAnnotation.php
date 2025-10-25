@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Room;
+use Webkul\Project\Models\RoomLocation;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
@@ -94,6 +96,16 @@ class PdfPageAnnotation extends Model
         return $this->hasMany(PdfPageAnnotation::class, 'parent_annotation_id');
     }
 
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function roomLocation(): BelongsTo
+    {
+        return $this->belongsTo(RoomLocation::class, 'room_location_id');
+    }
+
     public function cabinetRun(): BelongsTo
     {
         return $this->belongsTo(CabinetRun::class, 'cabinet_run_id');
@@ -107,11 +119,6 @@ class PdfPageAnnotation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
-    }
-
-    public function entityReferences(): HasMany
-    {
-        return $this->hasMany(AnnotationEntityReference::class, 'annotation_id');
     }
 
     /**
@@ -179,58 +186,6 @@ class PdfPageAnnotation extends Model
     }
 
     /**
-     * Add an entity reference to this annotation
-     *
-     * @param string $entityType 'room', 'location', 'cabinet_run', 'cabinet'
-     * @param int $entityId
-     * @param string $referenceType 'primary', 'secondary', 'context'
-     * @return AnnotationEntityReference
-     */
-    public function addEntityReference(string $entityType, int $entityId, string $referenceType = 'primary')
-    {
-        return $this->entityReferences()->create([
-            'entity_type' => $entityType,
-            'entity_id' => $entityId,
-            'reference_type' => $referenceType,
-        ]);
-    }
-
-    /**
-     * Get all primary entity references
-     */
-    public function getPrimaryReferences()
-    {
-        return $this->entityReferences()->where('reference_type', 'primary')->get();
-    }
-
-    /**
-     * Get all secondary entity references
-     */
-    public function getSecondaryReferences()
-    {
-        return $this->entityReferences()->where('reference_type', 'secondary')->get();
-    }
-
-    /**
-     * Get all context entity references
-     */
-    public function getContextReferences()
-    {
-        return $this->entityReferences()->where('reference_type', 'context')->get();
-    }
-
-    /**
-     * Sync entity references (replaces all existing)
-     *
-     * @param array $references Array of ['entity_type' => string, 'entity_id' => int, 'reference_type' => string]
-     * @return void
-     */
-    public function syncEntityReferences(array $references): void
-    {
-        AnnotationEntityReference::syncForAnnotation($this->id, $references);
-    }
-
-    /**
      * Get all descendant annotations (recursive)
      */
     public function getAllDescendants()
@@ -241,6 +196,126 @@ class PdfPageAnnotation extends Model
             ->flatMap(function ($child) {
                 return collect([$child])->merge($child->getAllDescendants());
             });
+    }
+
+    /**
+     * Get entity references as collection (uses existing foreign key columns)
+     * Returns format compatible with form: [['entity_type' => 'room', 'entity_id' => 5, 'reference_type' => 'primary'], ...]
+     */
+    public function entityReferences()
+    {
+        $references = collect();
+
+        // Add room reference if set
+        if ($this->room_id) {
+            $references->push((object)[
+                'entity_type' => 'room',
+                'entity_id' => $this->room_id,
+                'reference_type' => 'primary',
+            ]);
+        }
+
+        // Add location reference if set
+        if ($this->room_location_id) {
+            $references->push((object)[
+                'entity_type' => 'location',
+                'entity_id' => $this->room_location_id,
+                'reference_type' => $this->room_id ? 'secondary' : 'primary',
+            ]);
+        }
+
+        // Add cabinet run reference if set
+        if ($this->cabinet_run_id) {
+            $references->push((object)[
+                'entity_type' => 'cabinet_run',
+                'entity_id' => $this->cabinet_run_id,
+                'reference_type' => 'primary',
+            ]);
+        }
+
+        // Add cabinet specification reference if set
+        if ($this->cabinet_specification_id) {
+            $references->push((object)[
+                'entity_type' => 'cabinet',
+                'entity_id' => $this->cabinet_specification_id,
+                'reference_type' => 'primary',
+            ]);
+        }
+
+        return $references;
+    }
+
+    /**
+     * Sync entity references from form data (updates foreign key columns)
+     * @param array $references Format: [['entity_type' => 'room', 'entity_id' => 5], ...]
+     */
+    public function syncEntityReferences(array $references): void
+    {
+        // Clear all entity references first
+        $this->room_id = null;
+        $this->room_location_id = null;
+        $this->cabinet_run_id = null;
+        $this->cabinet_specification_id = null;
+
+        // Set new references from input
+        foreach ($references as $ref) {
+            $entityType = $ref['entity_type'] ?? null;
+            $entityId = $ref['entity_id'] ?? null;
+
+            if (!$entityType || !$entityId) {
+                continue;
+            }
+
+            match ($entityType) {
+                'room' => $this->room_id = $entityId,
+                'location' => $this->room_location_id = $entityId,
+                'cabinet_run' => $this->cabinet_run_id = $entityId,
+                'cabinet' => $this->cabinet_specification_id = $entityId,
+                default => null,
+            };
+        }
+
+        $this->save();
+    }
+
+    /**
+     * Get primary entity references
+     */
+    public function getPrimaryReferences()
+    {
+        return $this->entityReferences()->filter(fn($ref) => $ref->reference_type === 'primary');
+    }
+
+    /**
+     * Get secondary entity references
+     */
+    public function getSecondaryReferences()
+    {
+        return $this->entityReferences()->filter(fn($ref) => $ref->reference_type === 'secondary');
+    }
+
+    /**
+     * Get context entity references
+     */
+    public function getContextReferences()
+    {
+        return $this->entityReferences()->filter(fn($ref) => $ref->reference_type === 'context');
+    }
+
+    /**
+     * Add a single entity reference (updates appropriate foreign key column)
+     */
+    public function addEntityReference(string $entityType, int $entityId, string $referenceType = 'primary'): void
+    {
+        match ($entityType) {
+            'room' => $this->room_id = $entityId,
+            'location' => $this->room_location_id = $entityId,
+            'cabinet_run' => $this->cabinet_run_id = $entityId,
+            'cabinet' => $this->cabinet_specification_id = $entityId,
+            default => null,
+        };
+
+        $this->save();
     }
 
     /**
