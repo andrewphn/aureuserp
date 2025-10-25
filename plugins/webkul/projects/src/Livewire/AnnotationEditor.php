@@ -324,7 +324,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     }
 
                     return \Webkul\Project\Models\CabinetSpecification::where('cabinet_run_id', $cabinetRunId)
-                        ->orderBy('position')
+                        ->orderBy('position_in_run')
                         ->get()
                         ->mapWithKeys(function ($cabinet) {
                             // Create a descriptive label with position and dimensions
