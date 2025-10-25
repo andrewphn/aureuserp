@@ -535,7 +535,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                 return $label;
                             })->toArray();
                         })
-                        ->visibleJs("['elevation', 'section'].includes($get('view_type'))") // ✅ FilamentPHP v4 - JavaScript visibility (no server request)
+                        ->visible(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section'])) // Show only for elevation/section views
                         ->required(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section']))
                         ->helperText(function (callable $get) {
                             $viewType = $get('view_type');
