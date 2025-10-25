@@ -646,8 +646,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Room entity info schema using FilamentPHP v4 relationship pattern
-     * Uses ->relationship() on Section to auto-load and auto-save related model data
+     * Get Room entity info schema with nested tabs (Info + Contents)
+     * Uses FilamentPHP v4 relationship pattern with nested relationships for contents
      */
     protected function getRoomInfoSchema(int $roomId): array
     {
@@ -663,51 +663,123 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
 
         return [
-            Section::make('Room Information')
-                ->relationship('room')  // FilamentPHP v4 pattern: auto-loads from annotation->room()
-                ->description('Edit room details directly - changes save when you click "Save Changes"')
-                ->schema([
-                    TextInput::make('name')  // Simple field name, not 'room.name'
-                        ->label('Room Name')
-                        ->required()
-                        ->maxLength(255)
-                        ->live(onBlur: true),
+            Tabs::make('room_details_tabs')
+                ->tabs([
+                    // Tab 1: Room Info (editable)
+                    Tab::make('Room Info')
+                        ->icon('heroicon-o-home')
+                        ->schema([
+                            Section::make('Room Information')
+                                ->relationship('room')
+                                ->description('Edit room details - changes save when you click "Save Changes"')
+                                ->schema([
+                                    TextInput::make('name')
+                                        ->label('Room Name')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->live(onBlur: true),
 
-                    Select::make('room_type')  // Simple field name, not 'room.room_type'
-                        ->label('Room Type')
-                        ->options([
-                            'kitchen' => 'Kitchen',
-                            'bathroom' => 'Bathroom',
-                            'bedroom' => 'Bedroom',
-                            'living_room' => 'Living Room',
-                            'dining_room' => 'Dining Room',
-                            'office' => 'Office',
-                            'laundry' => 'Laundry',
-                            'garage' => 'Garage',
-                            'basement' => 'Basement',
-                            'other' => 'Other',
-                        ])
-                        ->live(),
+                                    Select::make('room_type')
+                                        ->label('Room Type')
+                                        ->options([
+                                            'kitchen' => 'Kitchen',
+                                            'bathroom' => 'Bathroom',
+                                            'bedroom' => 'Bedroom',
+                                            'living_room' => 'Living Room',
+                                            'dining_room' => 'Dining Room',
+                                            'office' => 'Office',
+                                            'laundry' => 'Laundry',
+                                            'garage' => 'Garage',
+                                            'basement' => 'Basement',
+                                            'other' => 'Other',
+                                        ])
+                                        ->live(),
 
-                    TextInput::make('floor_number')  // Simple field name
-                        ->label('Floor Number')
-                        ->numeric()
-                        ->live(onBlur: true),
+                                    TextInput::make('floor_number')
+                                        ->label('Floor Number')
+                                        ->numeric()
+                                        ->live(onBlur: true),
 
-                    Textarea::make('notes')  // Simple field name
-                        ->label('Notes')
-                        ->rows(3)
-                        ->columnSpanFull()
-                        ->live(onBlur: true),
+                                    Textarea::make('notes')
+                                        ->label('Notes')
+                                        ->rows(3)
+                                        ->columnSpanFull()
+                                        ->live(onBlur: true),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    // Tab 2: Room Contents (locations and cabinet runs)
+                    Tab::make('Contents')
+                        ->icon('heroicon-o-cube')
+                        ->badge(fn () => $room->locations()->count())
+                        ->schema([
+                            // Summary Statistics
+                            Placeholder::make('room_summary')
+                                ->label('Room Summary')
+                                ->content(function () use ($room) {
+                                    $locationCount = $room->locations()->count();
+                                    $cabinetRunCount = CabinetRun::whereIn('room_location_id', $room->locations()->pluck('id'))->count();
+                                    $totalLinearFeet = CabinetRun::whereIn('room_location_id', $room->locations()->pluck('id'))->sum('total_linear_feet');
+
+                                    return "
+                                        <div class='space-y-1 text-sm'>
+                                            <div><strong>Locations:</strong> {$locationCount}</div>
+                                            <div><strong>Cabinet Runs:</strong> {$cabinetRunCount}</div>
+                                            <div><strong>Total Linear Feet:</strong> " . number_format($totalLinearFeet, 2) . " ft</div>
+                                        </div>
+                                    ";
+                                })
+                                ->columnSpanFull(),
+
+                            // Locations in this room (inline editable)
+                            Section::make('Locations in this Room')
+                                ->relationship('room')
+                                ->schema([
+                                    Repeater::make('locations')
+                                        ->relationship('locations')
+                                        ->schema([
+                                            TextInput::make('name')
+                                                ->label('Location Name')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->live(onBlur: true),
+
+                                            Select::make('location_type')
+                                                ->label('Type')
+                                                ->options([
+                                                    'wall' => 'Wall',
+                                                    'island' => 'Island',
+                                                    'peninsula' => 'Peninsula',
+                                                    'corner' => 'Corner',
+                                                    'other' => 'Other',
+                                                ])
+                                                ->live(),
+
+                                            Textarea::make('notes')
+                                                ->label('Notes')
+                                                ->rows(2)
+                                                ->columnSpanFull()
+                                                ->live(onBlur: true),
+                                        ])
+                                        ->columns(2)
+                                        ->collapsible()
+                                        ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'New Location')
+                                        ->addActionLabel('Add Location')
+                                        ->reorderable(false)
+                                        ->defaultItems(0),
+                                ])
+                                ->columnSpanFull(),
+                        ]),
                 ])
-                ->visible(fn () => $this->linkedRoomId !== null)  // Only show when room exists
-                ->columns(2),
+                ->contained(false)
+                ->visible(fn () => $this->linkedRoomId !== null),
         ];
     }
 
     /**
-     * Get Location entity info schema using FilamentPHP v4 relationship pattern
-     * Uses ->relationship() on Section to auto-load and auto-save related model data
+     * Get Location entity info schema with nested tabs (Info + Contents)
+     * Uses FilamentPHP v4 relationship pattern with nested relationships for contents
      */
     protected function getLocationInfoSchema(int $locationId): array
     {
@@ -723,34 +795,124 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
 
         return [
-            Section::make('Location Information')
-                ->relationship('roomLocation')  // FilamentPHP v4 pattern: auto-loads from annotation->roomLocation()
-                ->description('Edit location details directly - changes save when you click "Save Changes"')
-                ->schema([
-                    TextInput::make('name')  // Simple field name, not 'roomLocation.name'
-                        ->label('Location Name')
-                        ->required()
-                        ->maxLength(255)
-                        ->live(onBlur: true),
+            Tabs::make('location_details_tabs')
+                ->tabs([
+                    // Tab 1: Location Info (editable)
+                    Tab::make('Location Info')
+                        ->icon('heroicon-o-map-pin')
+                        ->schema([
+                            Section::make('Location Information')
+                                ->relationship('roomLocation')
+                                ->description('Edit location details - changes save when you click "Save Changes"')
+                                ->schema([
+                                    TextInput::make('name')
+                                        ->label('Location Name')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->live(onBlur: true),
 
-                    Placeholder::make('location_room_display')
-                        ->label('Parent Room')
-                        ->content($location->room->name ?? 'N/A'),
+                                    Select::make('location_type')
+                                        ->label('Type')
+                                        ->options([
+                                            'wall' => 'Wall',
+                                            'island' => 'Island',
+                                            'peninsula' => 'Peninsula',
+                                            'corner' => 'Corner',
+                                            'other' => 'Other',
+                                        ])
+                                        ->live(),
 
-                    Textarea::make('notes')  // Simple field name, not 'roomLocation.notes'
-                        ->label('Notes')
-                        ->rows(3)
-                        ->columnSpanFull()
-                        ->live(onBlur: true),
+                                    Placeholder::make('location_room_display')
+                                        ->label('Parent Room')
+                                        ->content($location->room->name ?? 'N/A'),
+
+                                    Textarea::make('notes')
+                                        ->label('Notes')
+                                        ->rows(3)
+                                        ->columnSpanFull()
+                                        ->live(onBlur: true),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    // Tab 2: Location Contents (cabinet runs)
+                    Tab::make('Contents')
+                        ->icon('heroicon-o-cube')
+                        ->badge(fn () => $location->cabinetRuns()->count())
+                        ->schema([
+                            // Summary Statistics
+                            Placeholder::make('location_summary')
+                                ->label('Location Summary')
+                                ->content(function () use ($location) {
+                                    $cabinetRunCount = $location->cabinetRuns()->count();
+                                    $totalLinearFeet = $location->cabinetRuns()->sum('total_linear_feet');
+                                    $cabinetCount = CabinetSpecification::whereIn('cabinet_run_id', $location->cabinetRuns()->pluck('id'))->count();
+
+                                    return "
+                                        <div class='space-y-1 text-sm'>
+                                            <div><strong>Cabinet Runs:</strong> {$cabinetRunCount}</div>
+                                            <div><strong>Total Cabinets:</strong> {$cabinetCount}</div>
+                                            <div><strong>Total Linear Feet:</strong> " . number_format($totalLinearFeet, 2) . " ft</div>
+                                        </div>
+                                    ";
+                                })
+                                ->columnSpanFull(),
+
+                            // Cabinet Runs in this location (inline editable)
+                            Section::make('Cabinet Runs in this Location')
+                                ->relationship('roomLocation')
+                                ->schema([
+                                    Repeater::make('cabinetRuns')
+                                        ->relationship('cabinetRuns')
+                                        ->schema([
+                                            TextInput::make('name')
+                                                ->label('Run Name')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->live(onBlur: true),
+
+                                            Select::make('run_type')
+                                                ->label('Run Type')
+                                                ->options([
+                                                    'base' => 'Base Cabinets',
+                                                    'wall' => 'Wall Cabinets',
+                                                    'tall' => 'Tall Cabinets',
+                                                    'specialty' => 'Specialty',
+                                                ])
+                                                ->required()
+                                                ->live(),
+
+                                            TextInput::make('total_linear_feet')
+                                                ->label('Total Linear Feet')
+                                                ->suffix('ft')
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->live(onBlur: true),
+
+                                            Textarea::make('notes')
+                                                ->label('Notes')
+                                                ->rows(2)
+                                                ->columnSpanFull()
+                                                ->live(onBlur: true),
+                                        ])
+                                        ->columns(3)
+                                        ->collapsible()
+                                        ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'New Cabinet Run')
+                                        ->addActionLabel('Add Cabinet Run')
+                                        ->reorderable(false)
+                                        ->defaultItems(0),
+                                ])
+                                ->columnSpanFull(),
+                        ]),
                 ])
-                ->visible(fn () => $this->linkedLocationId !== null)  // Only show when location exists
-                ->columns(2),
+                ->contained(false)
+                ->visible(fn () => $this->linkedLocationId !== null),
         ];
     }
 
     /**
-     * Get Cabinet Run entity info schema using FilamentPHP v4 relationship pattern
-     * Uses ->relationship() on Section to auto-load and auto-save related model data
+     * Get Cabinet Run entity info schema with nested tabs (Info + Contents)
+     * Uses FilamentPHP v4 relationship pattern with nested relationships for contents
      */
     protected function getCabinetRunInfoSchema(int $runId): array
     {
@@ -766,52 +928,146 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
 
         return [
-            Section::make('Cabinet Run Information')
-                ->relationship('cabinetRun')  // FilamentPHP v4 pattern: auto-loads from annotation->cabinetRun()
-                ->description('Edit cabinet run details directly - changes save when you click "Save Changes"')
-                ->schema([
-                    TextInput::make('name')  // Simple field name, not 'cabinetRun.name'
-                        ->label('Run Name')
-                        ->required()
-                        ->maxLength(255)
-                        ->live(onBlur: true),
+            Tabs::make('cabinet_run_details_tabs')
+                ->tabs([
+                    // Tab 1: Cabinet Run Info (editable)
+                    Tab::make('Run Info')
+                        ->icon('heroicon-o-rectangle-group')
+                        ->schema([
+                            Section::make('Cabinet Run Information')
+                                ->relationship('cabinetRun')
+                                ->description('Edit cabinet run details - changes save when you click "Save Changes"')
+                                ->schema([
+                                    TextInput::make('name')
+                                        ->label('Run Name')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->live(onBlur: true),
 
-                    Select::make('run_type')  // Simple field name, not 'cabinetRun.run_type'
-                        ->label('Run Type')
-                        ->options([
-                            'base' => 'Base Cabinets',
-                            'wall' => 'Wall Cabinets',
-                            'tall' => 'Tall Cabinets',
-                            'specialty' => 'Specialty',
-                        ])
-                        ->required()
-                        ->live(),
+                                    Select::make('run_type')
+                                        ->label('Run Type')
+                                        ->options([
+                                            'base' => 'Base Cabinets',
+                                            'wall' => 'Wall Cabinets',
+                                            'tall' => 'Tall Cabinets',
+                                            'specialty' => 'Specialty',
+                                        ])
+                                        ->required()
+                                        ->live(),
 
-                    Placeholder::make('run_location_display')
-                        ->label('Parent Location')
-                        ->content($run->roomLocation->name ?? 'N/A'),
+                                    Placeholder::make('run_location_display')
+                                        ->label('Parent Location')
+                                        ->content($run->roomLocation->name ?? 'N/A'),
 
-                    TextInput::make('total_linear_feet')  // Simple field name
-                        ->label('Total Linear Feet')
-                        ->suffix('ft')
-                        ->numeric()
-                        ->step(0.01)
-                        ->live(onBlur: true),
+                                    TextInput::make('total_linear_feet')
+                                        ->label('Total Linear Feet')
+                                        ->suffix('ft')
+                                        ->numeric()
+                                        ->step(0.01)
+                                        ->live(onBlur: true),
 
-                    Textarea::make('notes')  // Simple field name, not 'cabinetRun.notes'
-                        ->label('Notes')
-                        ->rows(3)
-                        ->columnSpanFull()
-                        ->live(onBlur: true),
+                                    Textarea::make('notes')
+                                        ->label('Notes')
+                                        ->rows(3)
+                                        ->columnSpanFull()
+                                        ->live(onBlur: true),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    // Tab 2: Cabinet Run Contents (cabinet specs)
+                    Tab::make('Contents')
+                        ->icon('heroicon-o-cube')
+                        ->badge(fn () => $run->cabinetSpecifications()->count())
+                        ->schema([
+                            // Summary Statistics
+                            Placeholder::make('run_summary')
+                                ->label('Cabinet Run Summary')
+                                ->content(function () use ($run) {
+                                    $cabinetCount = $run->cabinetSpecifications()->count();
+                                    $totalLinearFeet = $run->cabinetSpecifications()->sum('linear_feet');
+
+                                    return "
+                                        <div class='space-y-1 text-sm'>
+                                            <div><strong>Total Cabinets:</strong> {$cabinetCount}</div>
+                                            <div><strong>Total Linear Feet:</strong> " . number_format($totalLinearFeet, 2) . " ft</div>
+                                        </div>
+                                    ";
+                                })
+                                ->columnSpanFull(),
+
+                            // Cabinet Specifications in this run (inline editable)
+                            Section::make('Cabinets in this Run')
+                                ->relationship('cabinetRun')
+                                ->schema([
+                                    Repeater::make('cabinetSpecifications')
+                                        ->relationship('cabinetSpecifications')
+                                        ->schema([
+                                            TextInput::make('cabinet_number')
+                                                ->label('Cabinet Number')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->live(onBlur: true),
+
+                                            TextInput::make('position_in_run')
+                                                ->label('Position')
+                                                ->numeric()
+                                                ->minValue(1)
+                                                ->live(onBlur: true),
+
+                                            TextInput::make('width_inches')
+                                                ->label('Width')
+                                                ->suffix('in')
+                                                ->numeric()
+                                                ->step(0.125)
+                                                ->live(onBlur: true),
+
+                                            TextInput::make('height_inches')
+                                                ->label('Height')
+                                                ->suffix('in')
+                                                ->numeric()
+                                                ->step(0.125)
+                                                ->live(onBlur: true),
+
+                                            TextInput::make('depth_inches')
+                                                ->label('Depth')
+                                                ->suffix('in')
+                                                ->numeric()
+                                                ->step(0.125)
+                                                ->live(onBlur: true),
+
+                                            TextInput::make('linear_feet')
+                                                ->label('Linear Feet')
+                                                ->suffix('ft')
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->live(onBlur: true),
+
+                                            Textarea::make('shop_notes')
+                                                ->label('Shop Notes')
+                                                ->rows(2)
+                                                ->columnSpanFull()
+                                                ->live(onBlur: true),
+                                        ])
+                                        ->columns(3)
+                                        ->collapsible()
+                                        ->itemLabel(fn (array $state): ?string => $state['cabinet_number'] ?? 'New Cabinet')
+                                        ->addActionLabel('Add Cabinet')
+                                        ->reorderable()
+                                        ->orderColumn('position_in_run')
+                                        ->defaultItems(0),
+                                ])
+                                ->columnSpanFull(),
+                        ]),
                 ])
-                ->visible(fn () => $this->linkedCabinetRunId !== null)  // Only show when cabinet run exists
-                ->columns(2),
+                ->contained(false)
+                ->visible(fn () => $this->linkedCabinetRunId !== null),
         ];
     }
 
     /**
-     * Get Cabinet Specification entity info schema using FilamentPHP v4 relationship pattern
-     * Uses ->relationship() on Section to auto-load and auto-save related model data
+     * Get Cabinet Specification entity info schema with nested tabs (Info + Context)
+     * Uses FilamentPHP v4 relationship pattern - shows parent hierarchy as context
      */
     protected function getCabinetSpecInfoSchema(int $cabinetId): array
     {
@@ -827,70 +1083,105 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
 
         return [
-            Section::make('Cabinet Specification Information')
-                ->relationship('cabinetSpecification')  // FilamentPHP v4 pattern: auto-loads from annotation->cabinetSpecification()
-                ->description('Edit cabinet details directly - changes save when you click "Save Changes"')
-                ->schema([
-                    TextInput::make('cabinet_number')  // Simple field name, not 'cabinetSpecification.cabinet_number'
-                        ->label('Cabinet Number')
-                        ->required()
-                        ->maxLength(255)
-                        ->live(onBlur: true),
+            Tabs::make('cabinet_spec_details_tabs')
+                ->tabs([
+                    // Tab 1: Cabinet Spec Info (editable)
+                    Tab::make('Cabinet Info')
+                        ->icon('heroicon-o-cube')
+                        ->schema([
+                            Section::make('Cabinet Specification')
+                                ->relationship('cabinetSpecification')
+                                ->description('Edit cabinet details - changes save when you click "Save Changes"')
+                                ->schema([
+                                    TextInput::make('cabinet_number')
+                                        ->label('Cabinet Number')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->live(onBlur: true),
 
-                    TextInput::make('position_in_run')  // Simple field name
-                        ->label('Position in Run')
-                        ->numeric()
-                        ->minValue(1)
-                        ->live(onBlur: true),
+                                    TextInput::make('position_in_run')
+                                        ->label('Position in Run')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->live(onBlur: true),
 
-                    Placeholder::make('cabinet_run_display')
-                        ->label('Cabinet Run')
-                        ->content($cabinet->cabinetRun->name ?? 'N/A'),
+                                    TextInput::make('width_inches')
+                                        ->label('Width')
+                                        ->suffix('in')
+                                        ->numeric()
+                                        ->step(0.125)
+                                        ->live(onBlur: true),
 
-                    TextInput::make('length_inches')  // Simple field name
-                        ->label('Length')
-                        ->suffix('in')
-                        ->required()
-                        ->numeric()
-                        ->step(0.125)
-                        ->live(onBlur: true),
+                                    TextInput::make('height_inches')
+                                        ->label('Height')
+                                        ->suffix('in')
+                                        ->numeric()
+                                        ->step(0.125)
+                                        ->live(onBlur: true),
 
-                    TextInput::make('width_inches')  // Simple field name
-                        ->label('Width')
-                        ->suffix('in')
-                        ->numeric()
-                        ->step(0.125)
-                        ->live(onBlur: true),
+                                    TextInput::make('depth_inches')
+                                        ->label('Depth')
+                                        ->suffix('in')
+                                        ->numeric()
+                                        ->step(0.125)
+                                        ->live(onBlur: true),
 
-                    TextInput::make('depth_inches')  // Simple field name
-                        ->label('Depth')
-                        ->suffix('in')
-                        ->numeric()
-                        ->step(0.125)
-                        ->live(onBlur: true),
+                                    TextInput::make('linear_feet')
+                                        ->label('Linear Feet')
+                                        ->suffix('ft')
+                                        ->numeric()
+                                        ->step(0.01)
+                                        ->live(onBlur: true),
 
-                    TextInput::make('height_inches')  // Simple field name
-                        ->label('Height')
-                        ->suffix('in')
-                        ->numeric()
-                        ->step(0.125)
-                        ->live(onBlur: true),
+                                    Textarea::make('shop_notes')
+                                        ->label('Shop Notes')
+                                        ->rows(3)
+                                        ->columnSpanFull()
+                                        ->live(onBlur: true),
+                                ])
+                                ->columns(3),
+                        ]),
 
-                    TextInput::make('linear_feet')  // Simple field name
-                        ->label('Linear Feet')
-                        ->suffix('ft')
-                        ->numeric()
-                        ->step(0.01)
-                        ->live(onBlur: true),
+                    // Tab 2: Parent Context (hierarchy info)
+                    Tab::make('Context')
+                        ->icon('heroicon-o-map')
+                        ->schema([
+                            Placeholder::make('hierarchy_context')
+                                ->label('Location in Project')
+                                ->content(function () use ($cabinet) {
+                                    $run = $cabinet->cabinetRun;
+                                    $location = $run?->roomLocation;
+                                    $room = $location?->room;
 
-                    Textarea::make('shop_notes')  // Simple field name, not 'cabinetSpecification.shop_notes'
-                        ->label('Shop Notes')
-                        ->rows(3)
-                        ->columnSpanFull()
-                        ->live(onBlur: true),
+                                    return "
+                                        <div class='space-y-3 text-sm'>
+                                            <div>
+                                                <strong class='text-gray-700 dark:text-gray-300'>Room:</strong>
+                                                <span class='ml-2'>" . ($room?->name ?? 'N/A') . "</span>
+                                                " . ($room?->room_type ? "<span class='ml-2 text-gray-500'>({$room->room_type})</span>" : "") . "
+                                            </div>
+                                            <div>
+                                                <strong class='text-gray-700 dark:text-gray-300'>Location:</strong>
+                                                <span class='ml-2'>" . ($location?->name ?? 'N/A') . "</span>
+                                                " . ($location?->location_type ? "<span class='ml-2 text-gray-500'>({$location->location_type})</span>" : "") . "
+                                            </div>
+                                            <div>
+                                                <strong class='text-gray-700 dark:text-gray-300'>Cabinet Run:</strong>
+                                                <span class='ml-2'>" . ($run?->name ?? 'N/A') . "</span>
+                                                " . ($run?->run_type ? "<span class='ml-2 text-gray-500'>({$run->run_type})</span>" : "") . "
+                                            </div>
+                                            <div>
+                                                <strong class='text-gray-700 dark:text-gray-300'>Run Total Linear Feet:</strong>
+                                                <span class='ml-2'>" . number_format($run?->total_linear_feet ?? 0, 2) . " ft</span>
+                                            </div>
+                                        </div>
+                                    ";
+                                })
+                                ->columnSpanFull(),
+                        ]),
                 ])
-                ->visible(fn () => $this->linkedCabinetSpecId !== null)  // Only show when cabinet spec exists
-                ->columns(3),
+                ->contained(false)
+                ->visible(fn () => $this->linkedCabinetSpecId !== null),
         ];
     }
 
