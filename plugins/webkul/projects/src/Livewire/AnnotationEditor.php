@@ -658,7 +658,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Room Information')
-                ->description('View room details - to edit room metadata, go to Projects → Rooms admin panel')
+                ->description('View room details and edit in the admin panel')
                 ->schema([
                     Placeholder::make('room_name_display')
                         ->label('Room Name')
@@ -676,7 +676,17 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->label('Notes')
                         ->content($room->notes ?? 'No notes'),
                 ])
-                ->columns(2),
+                ->columns(2)
+                ->footerActions([
+                    Action::make('editRoom')
+                        ->label('Edit Room in Admin Panel')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('primary')
+                        ->url(route('filament.admin.resources.project.projects.edit', [
+                            'record' => $room->project_id,
+                        ]) . '?activeRelationManager=rooms')
+                        ->openUrlInNewTab(),
+                ]),
         ];
     }
 
@@ -697,7 +707,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Location Information')
-                ->description('Location details')
+                ->description('View location details and edit in the admin panel')
                 ->schema([
                     Placeholder::make('location_name_display')
                         ->label('Location Name')
@@ -707,7 +717,17 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->label('Parent Room')
                         ->content($location->room->name ?? 'N/A'),
                 ])
-                ->columns(2),
+                ->columns(2)
+                ->footerActions([
+                    Action::make('editLocation')
+                        ->label('Edit Location in Admin Panel')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('primary')
+                        ->url(route('filament.admin.resources.project.projects.edit', [
+                            'record' => $location->project_id,
+                        ]) . '?activeRelationManager=locations')
+                        ->openUrlInNewTab(),
+                ]),
         ];
     }
 
@@ -728,17 +748,31 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Cabinet Run Information')
-                ->description('Cabinet run details')
+                ->description('View cabinet run details and edit in the admin panel')
                 ->schema([
                     Placeholder::make('run_name_display')
                         ->label('Run Name')
                         ->content($run->name ?? 'N/A'),
 
+                    Placeholder::make('run_type_display')
+                        ->label('Run Type')
+                        ->content(ucfirst($run->run_type ?? 'N/A')),
+
                     Placeholder::make('run_location_display')
                         ->label('Parent Location')
                         ->content($run->roomLocation->name ?? 'N/A'),
                 ])
-                ->columns(2),
+                ->columns(2)
+                ->footerActions([
+                    Action::make('editCabinetRun')
+                        ->label('Edit Cabinet Run in Admin Panel')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('primary')
+                        ->url(route('filament.admin.resources.project.projects.edit', [
+                            'record' => $run->roomLocation->project_id,
+                        ]) . '?activeRelationManager=cabinetRuns')
+                        ->openUrlInNewTab(),
+                ]),
         ];
     }
 
@@ -759,7 +793,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Cabinet Specification Information')
-                ->description('Cabinet details')
+                ->description('View cabinet details and edit in the admin panel')
                 ->schema([
                     Placeholder::make('cabinet_number_display')
                         ->label('Cabinet Number')
@@ -774,11 +808,25 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             $cabinet->depth_inches ?? '?'
                         )),
 
+                    Placeholder::make('cabinet_linear_feet_display')
+                        ->label('Linear Feet')
+                        ->content(($cabinet->linear_feet ?? 0) . ' ft'),
+
                     Placeholder::make('cabinet_run_display')
                         ->label('Cabinet Run')
                         ->content($cabinet->cabinetRun->name ?? 'N/A'),
                 ])
-                ->columns(2),
+                ->columns(2)
+                ->footerActions([
+                    Action::make('editCabinetSpec')
+                        ->label('Edit Cabinet in Admin Panel')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('primary')
+                        ->url(route('filament.admin.resources.project.projects.edit', [
+                            'record' => $cabinet->project_id,
+                        ]) . '?activeRelationManager=cabinets')
+                        ->openUrlInNewTab(),
+                ]),
         ];
     }
 
