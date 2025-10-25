@@ -79,10 +79,11 @@
                         <div>
                             {{ $this->deleteAction }}
                         </div>
-                        {{-- Cancel and Save on the right --}}
+                        {{-- Cancel, Save, and Save & Next on the right --}}
                         <div class="flex gap-3">
                             {{ $this->cancelAction }}
                             {{ $this->saveAction }}
+                            {{ $this->saveAndNextAction }}
                         </div>
                     </div>
                 </div>
