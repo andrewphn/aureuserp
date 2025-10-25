@@ -104,16 +104,18 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->visible(fn () => $this->annotationType !== 'room'),
 
             // Show inherited room (read-only, for reference)
-            Select::make('_inherited_room_id')
-                ->label('Room (inherited from parent)')
-                ->helperText('This room is automatically inherited from the parent annotation')
-                ->options(fn () => \Webkul\Project\Models\Room::where('project_id', $this->projectId)
-                    ->pluck('name', 'id')
-                    ->toArray())
-                ->disabled()
-                ->dehydrated(false)
-                ->default(fn (callable $get) => $this->getRoomIdFromParent($get('parent_annotation_id')))
-                ->visible(fn () => $this->annotationType !== 'room'),
+            // HIDDEN: Redundant since parent annotation already shows room context in tree view
+            // Room inheritance is automatic via parent_annotation_id chain
+            // Select::make('_inherited_room_id')
+            //     ->label('Room (inherited from parent)')
+            //     ->helperText('This room is automatically inherited from the parent annotation')
+            //     ->options(fn () => \Webkul\Project\Models\Room::where('project_id', $this->projectId)
+            //         ->pluck('name', 'id')
+            //         ->toArray())
+            //     ->disabled()
+            //     ->dehydrated(false)
+            //     ->default(fn (callable $get) => $this->getRoomIdFromParent($get('parent_annotation_id')))
+            //     ->visible(fn () => $this->annotationType !== 'room'),
 
             TextInput::make('label')
                 ->label('Label')
