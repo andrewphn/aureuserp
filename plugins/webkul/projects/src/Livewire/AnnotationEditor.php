@@ -5,6 +5,7 @@ namespace Webkul\Project\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -41,6 +42,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
     // Store original annotation for updates
     public ?array $originalAnnotation = null;
+
+    // Linked entity IDs (set during edit, used for Entity Details tab)
+    public ?int $linkedRoomId = null;
+    public ?int $linkedLocationId = null;
+    public ?int $linkedCabinetRunId = null;
+    public ?int $linkedCabinetSpecId = null;
 
     public function mount(): void
     {
@@ -582,12 +589,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->columnSpanFull(),
                         ]),  // Close Annotation Tab schema
 
-                    // Entity Details tab - TEMPORARILY DISABLED due to form state recursion
-                    // TODO: Implement without calling $this->form->getState() in visibility/schema closures
-                    // Tab::make('Entity Details')
-                    //     ->icon('heroicon-o-cube')
-                    //     ->schema(fn () => $this->getEntityTabSchema())
-                    //     ->visible(fn () => $this->hasLinkedEntity()),
+                    // Entity Details tab - Shows read-only entity info with edit links
+                    Tab::make('Entity Details')
+                        ->icon('heroicon-o-cube')
+                        ->schema(fn () => $this->getEntityTabSchema())
+                        ->visible(fn () => $this->hasLinkedEntity()),
                 ]),  // Close tabs()
         ])  // Close components()
             ->statePath('data');
@@ -595,287 +601,197 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
     /**
      * Check if the annotation has a linked entity
+     * Uses Livewire properties instead of form->getState() to avoid infinite recursion
      */
     protected function hasLinkedEntity(): bool
     {
-        $data = $this->form->getState();
-
-        return !empty($data['room_id'])
-            || !empty($data['room_location_id'])
-            || !empty($data['cabinet_run_id'])
-            || !empty($data['cabinet_specification_id']);
+        return !empty($this->linkedRoomId)
+            || !empty($this->linkedLocationId)
+            || !empty($this->linkedCabinetRunId)
+            || !empty($this->linkedCabinetSpecId);
     }
 
     /**
      * Get the entity tab schema based on which entity is linked
+     * Uses Livewire properties instead of form->getState() to avoid infinite recursion
      */
     protected function getEntityTabSchema(): array
     {
-        $data = $this->form->getState();
-
-        // Determine which entity type is linked
-        if (!empty($data['cabinet_specification_id'])) {
-            return $this->getCabinetSchema($data['cabinet_specification_id']);
+        // Determine which entity type is linked using Livewire properties
+        if (!empty($this->linkedCabinetSpecId)) {
+            return $this->getCabinetSpecInfoSchema($this->linkedCabinetSpecId);
         }
 
-        if (!empty($data['cabinet_run_id'])) {
-            return $this->getCabinetRunSchema($data['cabinet_run_id']);
+        if (!empty($this->linkedCabinetRunId)) {
+            return $this->getCabinetRunInfoSchema($this->linkedCabinetRunId);
         }
 
-        if (!empty($data['room_location_id'])) {
-            return $this->getLocationSchema($data['room_location_id']);
+        if (!empty($this->linkedLocationId)) {
+            return $this->getLocationInfoSchema($this->linkedLocationId);
         }
 
-        if (!empty($data['room_id'])) {
-            return $this->getRoomSchema($data['room_id']);
+        if (!empty($this->linkedRoomId)) {
+            return $this->getRoomInfoSchema($this->linkedRoomId);
         }
 
         // Fallback: No entity linked
         return [
             Placeholder::make('no_entity')
                 ->label('No Entity Linked')
-                ->content('Link an entity to edit its details here.')
+                ->content('This annotation is not linked to a room, location, cabinet run, or cabinet.')
         ];
     }
 
     /**
-     * Get Room entity form schema
+     * Get Room entity info schema (read-only display)
      */
-    protected function getRoomSchema(int $roomId): array
+    protected function getRoomInfoSchema(int $roomId): array
     {
-        // Load room data
-        $room = Room::find($roomId);
+        $room = \Webkul\Project\Models\Room::find($roomId);
 
         if (!$room) {
             return [
                 Placeholder::make('room_not_found')
-                    ->label('Error')
-                    ->content('Room not found (ID: ' . $roomId . ')')
+                    ->label('Room Not Found')
+                    ->content('Room ID ' . $roomId . ' not found in database.')
             ];
         }
 
         return [
-            // Core Room Fields
             Section::make('Room Information')
-                ->description('Edit room details - changes save automatically')
+                ->description('View room details - edit in Projects → Rooms admin panel')
                 ->schema([
-                    TextInput::make('room_name')
+                    Placeholder::make('room_name_display')
                         ->label('Room Name')
-                        ->default($room->name)
-                        ->required()
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['name' => $state]);
-                        })
-                        ->live(onBlur: true),
+                        ->content($room->name ?? 'N/A'),
 
-                    Select::make('room_type')
+                    Placeholder::make('room_type_display')
                         ->label('Room Type')
-                        ->options([
-                            'kitchen' => 'Kitchen',
-                            'bathroom' => 'Bathroom',
-                            'bedroom' => 'Bedroom',
-                            'living_room' => 'Living Room',
-                            'dining_room' => 'Dining Room',
-                            'office' => 'Office',
-                            'laundry' => 'Laundry',
-                            'garage' => 'Garage',
-                            'other' => 'Other',
-                        ])
-                        ->default($room->room_type)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['room_type' => $state]);
-                        })
-                        ->live(onBlur: true),
+                        ->content(ucfirst(str_replace('_', ' ', $room->room_type ?? 'Not specified'))),
 
-                    TextInput::make('floor_number')
+                    Placeholder::make('floor_number_display')
                         ->label('Floor Number')
-                        ->numeric()
-                        ->default($room->floor_number)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['floor_number' => $state]);
-                        })
-                        ->live(onBlur: true),
+                        ->content($room->floor_number ?? 'Not specified'),
 
-                    Textarea::make('room_notes')
+                    Placeholder::make('room_notes_display')
                         ->label('Notes')
-                        ->default($room->notes)
-                        ->rows(3)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['notes' => $state]);
-                        })
-                        ->live(onBlur: true),
+                        ->content($room->notes ?? 'No notes'),
                 ])
                 ->columns(2),
 
-            // PDF Reference Fields
-            Section::make('PDF References')
-                ->description('Information extracted from PDF pages')
+            Actions::make([
+                Action::make('edit_room')
+                    ->label('Edit Room in Admin Panel')
+                    ->icon('heroicon-o-pencil-square')
+                    ->url(fn () => \Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomsRelationManager::getUrl('edit', [
+                        'record' => $roomId,
+                        'tenant' => auth()->user()->defaultCompany
+                    ]))
+                    ->openUrlInNewTab()
+                    ->color('primary'),
+            ])
+        ];
+    }
+
+    /**
+     * Get Location entity info schema (read-only display)
+     */
+    protected function getLocationInfoSchema(int $locationId): array
+    {
+        $location = \Webkul\Project\Models\RoomLocation::find($locationId);
+
+        if (!$location) {
+            return [
+                Placeholder::make('location_not_found')
+                    ->label('Location Not Found')
+                    ->content('Location ID ' . $locationId . ' not found in database.')
+            ];
+        }
+
+        return [
+            Section::make('Location Information')
+                ->description('Location details')
                 ->schema([
-                    TextInput::make('pdf_page_number')
-                        ->label('PDF Page Number')
-                        ->numeric()
-                        ->default($room->pdf_page_number)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['pdf_page_number' => $state]);
-                        })
-                        ->live(onBlur: true),
+                    Placeholder::make('location_name_display')
+                        ->label('Location Name')
+                        ->content($location->name ?? 'N/A'),
 
-                    TextInput::make('pdf_room_label')
-                        ->label('PDF Room Label')
-                        ->default($room->pdf_room_label)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['pdf_room_label' => $state]);
-                        })
-                        ->live(onBlur: true),
-
-                    TextInput::make('pdf_detail_number')
-                        ->label('PDF Detail Number')
-                        ->default($room->pdf_detail_number)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['pdf_detail_number' => $state]);
-                        })
-                        ->live(onBlur: true),
-
-                    Textarea::make('pdf_notes')
-                        ->label('PDF Notes')
-                        ->default($room->pdf_notes)
-                        ->rows(2)
-                        ->afterStateUpdated(function ($state) use ($roomId) {
-                            Room::where('id', $roomId)->update(['pdf_notes' => $state]);
-                        })
-                        ->live(onBlur: true),
+                    Placeholder::make('location_room_display')
+                        ->label('Parent Room')
+                        ->content($location->room->name ?? 'N/A'),
                 ])
-                ->columns(2)
-                ->collapsible()
-                ->collapsed(),
-
-            // Cross-Page Information - TEMPORARILY DISABLED due to timeout issue
-            // TODO: Implement as lazy-loaded component or cached value
-            // Section::make('Cross-Page Information')
-            //     ->description('View where this room appears across different PDF pages')
-            //     ->schema([
-            //         Placeholder::make('cross_page_info')
-            //             ->label('')
-            //             ->content(fn () => $this->getRoomCrossPageInfo($roomId))
-            //     ])
-            //     ->collapsible()
-            //     ->collapsed(),
+                ->columns(2),
         ];
     }
 
     /**
-     * Get cross-page information for a Room entity
-     * Shows which PDF pages reference this room and what data was added on each
+     * Get Cabinet Run entity info schema (read-only display)
      */
-    protected function getRoomCrossPageInfo(int $roomId): string
+    protected function getCabinetRunInfoSchema(int $runId): array
     {
-        // Get all annotations that reference this room across different pages
-        $annotations = \App\Models\PdfPageAnnotation::where('room_id', $roomId)
-            ->with(['pdfPage'])
-            ->orderBy('pdf_page_id')
-            ->get();
+        $run = \Webkul\Project\Models\CabinetRun::find($runId);
 
-        if ($annotations->isEmpty()) {
-            return '<p class="text-sm text-gray-500">No cross-page references found for this room.</p>';
+        if (!$run) {
+            return [
+                Placeholder::make('run_not_found')
+                    ->label('Cabinet Run Not Found')
+                    ->content('Cabinet Run ID ' . $runId . ' not found in database.')
+            ];
         }
 
-        // Group by page and view type
-        $pageGroups = $annotations->groupBy('pdf_page_id');
-
-        $html = '<div class="space-y-3">';
-
-        foreach ($pageGroups as $pageId => $pageAnnotations) {
-            $page = $pageAnnotations->first()->pdfPage;
-            $pageNumber = $page ? $page->page_number : 'Unknown';
-
-            $html .= '<div class="border-l-2 border-primary-500 pl-3">';
-            $html .= '<p class="font-semibold text-sm">Page ' . $pageNumber . '</p>';
-            $html .= '<ul class="mt-1 space-y-1 text-sm text-gray-600">';
-
-            foreach ($pageAnnotations as $annotation) {
-                $viewType = ucfirst($annotation->view_type ?? 'plan');
-                $annotationType = ucfirst(str_replace('_', ' ', $annotation->annotation_type));
-                $label = $annotation->label ? ' - ' . $annotation->label : '';
-
-                $html .= '<li>';
-                $html .= '<span class="font-medium">' . $viewType . '</span> view: ';
-                $html .= $annotationType . $label;
-
-                // Show when it was created/updated
-                if ($annotation->updated_at) {
-                    $html .= ' <span class="text-xs text-gray-400">(updated ' . $annotation->updated_at->diffForHumans() . ')</span>';
-                }
-
-                $html .= '</li>';
-            }
-
-            $html .= '</ul>';
-            $html .= '</div>';
-        }
-
-        $html .= '</div>';
-
-        // Add Chatter activity summary if available
-        $room = Room::find($roomId);
-        if ($room && method_exists($room, 'chats')) {
-            $recentActivity = $room->chats()->latest()->take(3)->get();
-
-            if ($recentActivity->isNotEmpty()) {
-                $html .= '<div class="mt-4 pt-4 border-t border-gray-200">';
-                $html .= '<p class="font-semibold text-sm mb-2">Recent Activity</p>';
-                $html .= '<ul class="space-y-1 text-sm text-gray-600">';
-
-                foreach ($recentActivity as $activity) {
-                    $html .= '<li class="text-xs">';
-                    $html .= '<span class="text-gray-400">' . $activity->created_at->format('M d, H:i') . '</span> - ';
-                    $html .= e($activity->message ?? $activity->comment ?? 'Activity logged');
-                    $html .= '</li>';
-                }
-
-                $html .= '</ul>';
-                $html .= '</div>';
-            }
-        }
-
-        return $html;
-    }
-
-    /**
-     * Get Location entity form schema
-     */
-    protected function getLocationSchema(int $locationId): array
-    {
-        // Placeholder for Location schema - to be implemented
         return [
-            Placeholder::make('location_placeholder')
-                ->label('Location Entity')
-                ->content('Location editing form will be implemented here. Location ID: ' . $locationId)
+            Section::make('Cabinet Run Information')
+                ->description('Cabinet run details')
+                ->schema([
+                    Placeholder::make('run_name_display')
+                        ->label('Run Name')
+                        ->content($run->name ?? 'N/A'),
+
+                    Placeholder::make('run_location_display')
+                        ->label('Parent Location')
+                        ->content($run->roomLocation->name ?? 'N/A'),
+                ])
+                ->columns(2),
         ];
     }
 
     /**
-     * Get Cabinet Run entity form schema
+     * Get Cabinet Specification entity info schema (read-only display)
      */
-    protected function getCabinetRunSchema(int $runId): array
+    protected function getCabinetSpecInfoSchema(int $cabinetId): array
     {
-        // Placeholder for Cabinet Run schema - to be implemented
-        return [
-            Placeholder::make('run_placeholder')
-                ->label('Cabinet Run Entity')
-                ->content('Cabinet Run editing form will be implemented here. Run ID: ' . $runId)
-        ];
-    }
+        $cabinet = \Webkul\Project\Models\CabinetSpecification::find($cabinetId);
 
-    /**
-     * Get Cabinet Specification entity form schema
-     */
-    protected function getCabinetSchema(int $cabinetId): array
-    {
-        // Placeholder for Cabinet schema - to be implemented
+        if (!$cabinet) {
+            return [
+                Placeholder::make('cabinet_not_found')
+                    ->label('Cabinet Not Found')
+                    ->content('Cabinet Specification ID ' . $cabinetId . ' not found in database.')
+            ];
+        }
+
         return [
-            Placeholder::make('cabinet_placeholder')
-                ->label('Cabinet Entity')
-                ->content('Cabinet editing form will be implemented here. Cabinet ID: ' . $cabinetId)
+            Section::make('Cabinet Specification Information')
+                ->description('Cabinet details')
+                ->schema([
+                    Placeholder::make('cabinet_number_display')
+                        ->label('Cabinet Number')
+                        ->content($cabinet->cabinet_number ?? 'N/A'),
+
+                    Placeholder::make('cabinet_dimensions_display')
+                        ->label('Dimensions (W × H × D)')
+                        ->content(sprintf(
+                            '%s" × %s" × %s"',
+                            $cabinet->width_inches ?? '?',
+                            $cabinet->height_inches ?? '?',
+                            $cabinet->depth_inches ?? '?'
+                        )),
+
+                    Placeholder::make('cabinet_run_display')
+                        ->label('Cabinet Run')
+                        ->content($cabinet->cabinetRun->name ?? 'N/A'),
+                ])
+                ->columns(2),
         ];
     }
 
@@ -1365,6 +1281,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         // Extract context FIRST (needed for form schema)
         $this->annotationType = $annotation['type'] ?? null;
         $this->projectId = $annotation['projectId'] ?? null;
+
+        // Set linked entity IDs for Entity Details tab (avoids form->getState() calls)
+        $this->linkedRoomId = $annotation['roomId'] ?? null;
+        $this->linkedLocationId = $annotation['locationId'] ?? null;
+        $this->linkedCabinetRunId = $annotation['cabinetRunId'] ?? null;
+        $this->linkedCabinetSpecId = $annotation['cabinetSpecId'] ?? null;
 
         // Fill form with annotation data using Filament Forms API
         $this->form->fill([
