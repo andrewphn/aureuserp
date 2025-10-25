@@ -642,7 +642,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Room entity info schema using proper FilamentPHP v4 relationship() pattern
+     * Get Room entity info schema using FilamentPHP v4 relationship pattern
+     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
      */
     protected function getRoomInfoSchema(int $roomId): array
     {
@@ -660,9 +661,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Room Information')
                 ->description('Edit room details directly - changes save when you click "Save Changes"')
-                ->relationship('room') // FilamentPHP v4 pattern - automatically loads/saves related model
+                ->relationship('room') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('name') // Simple field name, scoped to room relationship
+                    TextInput::make('name')
                         ->label('Room Name')
                         ->required()
                         ->maxLength(255),
@@ -696,7 +697,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Location entity info schema using proper FilamentPHP v4 relationship() pattern
+     * Get Location entity info schema using FilamentPHP v4 relationship pattern
+     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
      */
     protected function getLocationInfoSchema(int $locationId): array
     {
@@ -714,9 +716,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Location Information')
                 ->description('Edit location details directly - changes save when you click "Save Changes"')
-                ->relationship('roomLocation') // FilamentPHP v4 pattern - automatically loads/saves
+                ->relationship('roomLocation') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('name') // Simple field name, scoped to roomLocation relationship
+                    TextInput::make('name')
                         ->label('Location Name')
                         ->required()
                         ->maxLength(255),
@@ -735,7 +737,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Cabinet Run entity info schema using proper FilamentPHP v4 relationship() pattern
+     * Get Cabinet Run entity info schema using FilamentPHP v4 relationship pattern
+     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
      */
     protected function getCabinetRunInfoSchema(int $runId): array
     {
@@ -753,9 +756,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Cabinet Run Information')
                 ->description('Edit cabinet run details directly - changes save when you click "Save Changes"')
-                ->relationship('cabinetRun') // FilamentPHP v4 pattern - automatically loads/saves
+                ->relationship('cabinetRun') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('name') // Simple field name, scoped to cabinetRun relationship
+                    TextInput::make('name')
                         ->label('Run Name')
                         ->required()
                         ->maxLength(255),
@@ -790,7 +793,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Cabinet Specification entity info schema using proper FilamentPHP v4 relationship() pattern
+     * Get Cabinet Specification entity info schema using FilamentPHP v4 relationship pattern
+     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
      */
     protected function getCabinetSpecInfoSchema(int $cabinetId): array
     {
@@ -808,9 +812,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Cabinet Specification Information')
                 ->description('Edit cabinet details directly - changes save when you click "Save Changes"')
-                ->relationship('cabinetSpecification') // FilamentPHP v4 pattern - automatically loads/saves
+                ->relationship('cabinetSpecification') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('cabinet_number') // Simple field name, scoped to cabinetSpecification relationship
+                    TextInput::make('cabinet_number')
                         ->label('Cabinet Number')
                         ->required()
                         ->maxLength(255),
@@ -1167,9 +1171,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
             $annotation->update($updateData);
 
-            // NOTE: Related model updates (room, roomLocation, cabinetRun, cabinetSpecification)
-            // are now handled automatically by FilamentPHP's ->relationship() method in the form schemas.
-            // No manual update logic needed!
+            // CRITICAL: Save related model changes using FilamentPHP v4 pattern
+            // The ->relationship() method on Sections automatically loads data,
+            // but we must explicitly call saveRelationships() to persist changes
+            $this->form->model($annotation)->saveRelationships();
 
             // SYNC METADATA ACROSS ALL INSTANCES OF THIS ENTITY
             // If this is a location annotation, find all other location annotations
@@ -1360,6 +1365,16 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         $this->linkedLocationId = $annotation['locationId'] ?? null;
         $this->linkedCabinetRunId = $annotation['cabinetRunId'] ?? null;
         $this->linkedCabinetSpecId = $annotation['cabinetSpecId'] ?? null;
+
+        // CRITICAL: Set the annotation model on the form for relationship() to work
+        // This allows FilamentPHP to properly load and save related model data
+        $annotationId = $annotation['id'];
+        if (!is_string($annotationId) || !str_starts_with($annotationId, 'temp_')) {
+            $annotationModel = \App\Models\PdfPageAnnotation::find($annotationId);
+            if ($annotationModel) {
+                $this->form->model($annotationModel);
+            }
+        }
 
         // Fill form with annotation data using Filament Forms API
         $this->form->fill([
