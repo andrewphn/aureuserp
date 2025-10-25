@@ -642,10 +642,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Room entity info schema (read-only display)
+     * Get Room entity info schema using proper FilamentPHP v4 relationship() pattern
      */
     protected function getRoomInfoSchema(int $roomId): array
     {
+        // Verify room exists
         $room = \Webkul\Project\Models\Room::find($roomId);
 
         if (!$room) {
@@ -659,16 +660,15 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Room Information')
                 ->description('Edit room details directly - changes save when you click "Save Changes"')
+                ->relationship('room') // FilamentPHP v4 pattern - automatically loads/saves related model
                 ->schema([
-                    TextInput::make('room.name')
+                    TextInput::make('name') // Simple field name, scoped to room relationship
                         ->label('Room Name')
-                        ->default($room->name)
                         ->required()
                         ->maxLength(255),
 
-                    Select::make('room.room_type')
+                    Select::make('room_type')
                         ->label('Room Type')
-                        ->default($room->room_type)
                         ->options([
                             'kitchen' => 'Kitchen',
                             'bathroom' => 'Bathroom',
@@ -682,14 +682,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             'other' => 'Other',
                         ]),
 
-                    TextInput::make('room.floor_number')
+                    TextInput::make('floor_number')
                         ->label('Floor Number')
-                        ->default($room->floor_number)
                         ->numeric(),
 
-                    Textarea::make('room.notes')
+                    Textarea::make('notes')
                         ->label('Notes')
-                        ->default($room->notes)
                         ->rows(3)
                         ->columnSpanFull(),
                 ])
@@ -698,10 +696,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Location entity info schema (read-only display)
+     * Get Location entity info schema using proper FilamentPHP v4 relationship() pattern
      */
     protected function getLocationInfoSchema(int $locationId): array
     {
+        // Verify location exists
         $location = \Webkul\Project\Models\RoomLocation::find($locationId);
 
         if (!$location) {
@@ -715,10 +714,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Location Information')
                 ->description('Edit location details directly - changes save when you click "Save Changes"')
+                ->relationship('roomLocation') // FilamentPHP v4 pattern - automatically loads/saves
                 ->schema([
-                    TextInput::make('roomLocation.name')
+                    TextInput::make('name') // Simple field name, scoped to roomLocation relationship
                         ->label('Location Name')
-                        ->default($location->name)
                         ->required()
                         ->maxLength(255),
 
@@ -726,9 +725,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->label('Parent Room')
                         ->content($location->room->name ?? 'N/A'),
 
-                    Textarea::make('roomLocation.notes')
+                    Textarea::make('notes')
                         ->label('Notes')
-                        ->default($location->notes)
                         ->rows(3)
                         ->columnSpanFull(),
                 ])
@@ -737,10 +735,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Cabinet Run entity info schema (read-only display)
+     * Get Cabinet Run entity info schema using proper FilamentPHP v4 relationship() pattern
      */
     protected function getCabinetRunInfoSchema(int $runId): array
     {
+        // Verify cabinet run exists
         $run = \Webkul\Project\Models\CabinetRun::find($runId);
 
         if (!$run) {
@@ -754,16 +753,15 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Cabinet Run Information')
                 ->description('Edit cabinet run details directly - changes save when you click "Save Changes"')
+                ->relationship('cabinetRun') // FilamentPHP v4 pattern - automatically loads/saves
                 ->schema([
-                    TextInput::make('cabinetRun.name')
+                    TextInput::make('name') // Simple field name, scoped to cabinetRun relationship
                         ->label('Run Name')
-                        ->default($run->name)
                         ->required()
                         ->maxLength(255),
 
-                    Select::make('cabinetRun.run_type')
+                    Select::make('run_type')
                         ->label('Run Type')
-                        ->default($run->run_type)
                         ->options([
                             'base' => 'Base Cabinets',
                             'wall' => 'Wall Cabinets',
@@ -776,16 +774,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->label('Parent Location')
                         ->content($run->roomLocation->name ?? 'N/A'),
 
-                    TextInput::make('cabinetRun.total_linear_feet')
+                    TextInput::make('total_linear_feet')
                         ->label('Total Linear Feet')
-                        ->default($run->total_linear_feet)
                         ->suffix('ft')
                         ->numeric()
                         ->step(0.01),
 
-                    Textarea::make('cabinetRun.notes')
+                    Textarea::make('notes')
                         ->label('Notes')
-                        ->default($run->notes)
                         ->rows(3)
                         ->columnSpanFull(),
                 ])
@@ -794,10 +790,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get Cabinet Specification entity info schema (read-only display)
+     * Get Cabinet Specification entity info schema using proper FilamentPHP v4 relationship() pattern
      */
     protected function getCabinetSpecInfoSchema(int $cabinetId): array
     {
+        // Verify cabinet exists
         $cabinet = \Webkul\Project\Models\CabinetSpecification::find($cabinetId);
 
         if (!$cabinet) {
@@ -811,16 +808,15 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return [
             Section::make('Cabinet Specification Information')
                 ->description('Edit cabinet details directly - changes save when you click "Save Changes"')
+                ->relationship('cabinetSpecification') // FilamentPHP v4 pattern - automatically loads/saves
                 ->schema([
-                    TextInput::make('cabinetSpecification.cabinet_number')
+                    TextInput::make('cabinet_number') // Simple field name, scoped to cabinetSpecification relationship
                         ->label('Cabinet Number')
-                        ->default($cabinet->cabinet_number)
                         ->required()
                         ->maxLength(255),
 
-                    TextInput::make('cabinetSpecification.position_in_run')
+                    TextInput::make('position_in_run')
                         ->label('Position in Run')
-                        ->default($cabinet->position_in_run)
                         ->numeric()
                         ->minValue(1),
 
@@ -828,45 +824,39 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->label('Cabinet Run')
                         ->content($cabinet->cabinetRun->name ?? 'N/A'),
 
-                    TextInput::make('cabinetSpecification.length_inches')
+                    TextInput::make('length_inches')
                         ->label('Length')
-                        ->default($cabinet->length_inches)
                         ->suffix('in')
                         ->required()
                         ->numeric()
                         ->step(0.125),
 
-                    TextInput::make('cabinetSpecification.width_inches')
+                    TextInput::make('width_inches')
                         ->label('Width')
-                        ->default($cabinet->width_inches)
                         ->suffix('in')
                         ->numeric()
                         ->step(0.125),
 
-                    TextInput::make('cabinetSpecification.depth_inches')
+                    TextInput::make('depth_inches')
                         ->label('Depth')
-                        ->default($cabinet->depth_inches)
                         ->suffix('in')
                         ->numeric()
                         ->step(0.125),
 
-                    TextInput::make('cabinetSpecification.height_inches')
+                    TextInput::make('height_inches')
                         ->label('Height')
-                        ->default($cabinet->height_inches)
                         ->suffix('in')
                         ->numeric()
                         ->step(0.125),
 
-                    TextInput::make('cabinetSpecification.linear_feet')
+                    TextInput::make('linear_feet')
                         ->label('Linear Feet')
-                        ->default($cabinet->linear_feet)
                         ->suffix('ft')
                         ->numeric()
                         ->step(0.01),
 
-                    Textarea::make('cabinetSpecification.shop_notes')
+                    Textarea::make('shop_notes')
                         ->label('Shop Notes')
-                        ->default($cabinet->shop_notes)
                         ->rows(3)
                         ->columnSpanFull(),
                 ])
@@ -1177,26 +1167,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
             $annotation->update($updateData);
 
-            // UPDATE RELATED MODELS if data exists in form
-            // Handle Room updates
-            if (isset($data['room']) && $annotation->room) {
-                $annotation->room->update($data['room']);
-            }
-
-            // Handle RoomLocation updates
-            if (isset($data['roomLocation']) && $annotation->roomLocation) {
-                $annotation->roomLocation->update($data['roomLocation']);
-            }
-
-            // Handle CabinetRun updates
-            if (isset($data['cabinetRun']) && $annotation->cabinetRun) {
-                $annotation->cabinetRun->update($data['cabinetRun']);
-            }
-
-            // Handle CabinetSpecification updates
-            if (isset($data['cabinetSpecification']) && $annotation->cabinetSpecification) {
-                $annotation->cabinetSpecification->update($data['cabinetSpecification']);
-            }
+            // NOTE: Related model updates (room, roomLocation, cabinetRun, cabinetSpecification)
+            // are now handled automatically by FilamentPHP's ->relationship() method in the form schemas.
+            // No manual update logic needed!
 
             // SYNC METADATA ACROSS ALL INSTANCES OF THIS ENTITY
             // If this is a location annotation, find all other location annotations
