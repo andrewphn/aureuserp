@@ -5,7 +5,6 @@ namespace Webkul\Project\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -659,7 +658,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Room Information')
-                ->description('View room details - edit in Projects → Rooms admin panel')
+                ->description('View room details - to edit room metadata, go to Projects → Rooms admin panel')
                 ->schema([
                     Placeholder::make('room_name_display')
                         ->label('Room Name')
@@ -678,18 +677,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->content($room->notes ?? 'No notes'),
                 ])
                 ->columns(2),
-
-            Actions::make([
-                Action::make('edit_room')
-                    ->label('Edit Room in Admin Panel')
-                    ->icon('heroicon-o-pencil-square')
-                    ->url(fn () => \Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomsRelationManager::getUrl('edit', [
-                        'record' => $roomId,
-                        'tenant' => auth()->user()->defaultCompany
-                    ]))
-                    ->openUrlInNewTab()
-                    ->color('primary'),
-            ])
         ];
     }
 
