@@ -327,12 +327,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->orderBy('position_in_run')
                         ->get()
                         ->mapWithKeys(function ($cabinet) {
-                            // Create a descriptive label with position and dimensions
-                            $label = $cabinet->name;
-                            if ($cabinet->width || $cabinet->height) {
+                            // Create a descriptive label with cabinet number and dimensions
+                            $label = $cabinet->cabinet_number ?? 'Cabinet';
+                            if ($cabinet->width_inches || $cabinet->height_inches) {
                                 $label .= sprintf(' (%s"W × %s"H)',
-                                    $cabinet->width ?? '?',
-                                    $cabinet->height ?? '?'
+                                    $cabinet->width_inches ?? '?',
+                                    $cabinet->height_inches ?? '?'
                                 );
                             }
                             return [$cabinet->id => $label];
