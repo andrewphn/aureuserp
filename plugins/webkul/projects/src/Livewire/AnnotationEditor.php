@@ -1376,6 +1376,13 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             'cabinet_run_id'         => $annotation['cabinetRunId'] ?? null,
             'measurement_width'      => $annotation['measurementWidth'] ?? null,
             'measurement_height'     => $annotation['measurementHeight'] ?? null,
+            // Multi-view support fields
+            'view_type'              => $annotation['viewType'] ?? 'plan',
+            'view_orientation'       => $annotation['viewOrientation'] ?? null,
+            'view_scale'             => $annotation['viewScale'] ?? null,
+            // Cabinet-specific fields
+            'inferred_position'      => $annotation['inferredPosition'] ?? null,
+            'vertical_zone'          => $annotation['verticalZone'] ?? null,
         ]);
 
         $this->showModal = true;
