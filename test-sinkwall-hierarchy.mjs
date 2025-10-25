@@ -9,6 +9,15 @@ const page = await context.newPage();
 // Listen for console messages
 page.on('console', msg => console.log(`[BROWSER] ${msg.text()}`));
 
+// Login first
+console.log('🔐 Logging in...');
+await page.goto('http://aureuserp.test/admin/login');
+await page.fill('input[type="email"]', 'info@tcswoodwork.com');
+await page.fill('input[type="password"]', 'Lola2024!');
+await page.click('button[type="submit"]');
+await page.waitForLoadState('networkidle');
+console.log('✅ Logged in successfully\n');
+
 // Navigate to the annotation page
 console.log('📍 Navigating to PDF annotation page (Page 2)...');
 await page.goto('http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1');
@@ -19,6 +28,32 @@ await page.waitForTimeout(2000);
 
 console.log('\n🔍 Checking annotation hierarchy from Livewire component...\n');
 
+// First, let's see what Alpine components are available
+const alpineInfo = await page.evaluate(() => {
+    const xDataElements = document.querySelectorAll('[x-data]');
+    const elements = [];
+    xDataElements.forEach(el => {
+        const xDataAttr = el.getAttribute('x-data');
+        elements.push({
+            tagName: el.tagName,
+            xData: xDataAttr.substring(0, 100), // First 100 chars
+            classList: Array.from(el.classList)
+        });
+    });
+    return {
+        alpineAvailable: typeof window.Alpine !== 'undefined',
+        totalXDataElements: xDataElements.length,
+        elements: elements
+    };
+});
+
+console.log('Alpine available:', alpineInfo.alpineAvailable);
+console.log('Total x-data elements:', alpineInfo.totalXDataElements);
+console.log('\nFound x-data elements:');
+alpineInfo.elements.forEach((el, i) => {
+    console.log(`  ${i+1}. <${el.tagName}> x-data="${el.xData}..." classes:`, el.classList);
+});
+
 // Query the Livewire component for annotation data
 const annotationsData = await page.evaluate(async () => {
     // Find the Livewire component
@@ -27,15 +62,22 @@ const annotationsData = await page.evaluate(async () => {
         return { error: 'No Livewire component found' };
     }
 
-    // Get the Alpine data
-    const alpineEl = document.querySelector('[x-data*="annotations"]');
+    // Get the Alpine data - try different selectors
+    let alpineEl = document.querySelector('[x-data*="annotationSystem"]') ||
+                   document.querySelector('[x-data*="annotations"]') ||
+                   document.querySelector('.pdf-annotation-viewer');
+
     if (!alpineEl || !window.Alpine) {
         return { error: 'No Alpine component found' };
     }
 
     const alpine = window.Alpine.$data(alpineEl);
-    if (!alpine || !alpine.annotations) {
-        return { error: 'No annotations in Alpine data' };
+    if (!alpine) {
+        return { error: 'No Alpine data found on element' };
+    }
+
+    if (!alpine.annotations) {
+        return { error: 'No annotations in Alpine data', alpineKeys: Object.keys(alpine) };
     }
 
     // Find Kitchen, K1, and Sinkwall

@@ -125,6 +125,7 @@ class PdfAnnotationController extends Controller
             $validated = $request->validate([
                 'annotations' => 'required|array',
                 'annotations.*.type' => 'nullable|string',
+                'annotations.*.parent_annotation_id' => 'nullable|integer',  // For hierarchical relationships
                 'annotations.*.x' => 'required|numeric|min:0|max:1',
                 'annotations.*.y' => 'required|numeric|min:0|max:1',
                 'annotations.*.width' => 'required|numeric|min:0|max:1',
@@ -132,8 +133,11 @@ class PdfAnnotationController extends Controller
                 'annotations.*.text' => 'nullable|string',
                 'annotations.*.room_type' => 'nullable|string',
                 'annotations.*.color' => 'nullable|string',
-                'annotations.*.cabinet_run_id' => 'nullable|integer',
                 'annotations.*.room_id' => 'nullable|integer',
+                'annotations.*.room_location_id' => 'nullable|integer',  // For location annotations
+                'annotations.*.cabinet_run_id' => 'nullable|integer',  // For cabinet run annotations
+                'annotations.*.cabinet_specification_id' => 'nullable|integer',  // For cabinet annotations
+                'annotations.*.view_type' => 'nullable|string|in:plan,elevation,section,detail',  // View type enum
                 'annotations.*.notes' => 'nullable|string',
                 'annotations.*.annotation_type' => 'nullable|string',
                 'annotations.*.context' => 'nullable|array',
@@ -181,6 +185,7 @@ class PdfAnnotationController extends Controller
 
                     $savedAnnotation = \App\Models\PdfPageAnnotation::create([
                         'pdf_page_id' => $pdfPageId,
+                        'parent_annotation_id' => $annotation['parent_annotation_id'] ?? null,  // Hierarchical relationship
                         'annotation_type' => $annotation['annotation_type'] ?? 'room',
                         'x' => $annotation['x'],
                         'y' => $annotation['y'],
@@ -189,8 +194,11 @@ class PdfAnnotationController extends Controller
                         'label' => $annotation['text'] ?? null,
                         'room_type' => $annotation['room_type'] ?? null,
                         'color' => $annotation['color'] ?? null,
-                        'cabinet_run_id' => $cabinetRunId,
                         'room_id' => $roomId,
+                        'room_location_id' => $annotation['room_location_id'] ?? null,  // For location annotations
+                        'cabinet_run_id' => $cabinetRunId,
+                        'cabinet_specification_id' => $annotation['cabinet_specification_id'] ?? null,  // For cabinet annotations
+                        'view_type' => $annotation['view_type'] ?? 'plan',  // Default to plan view
                         'notes' => $annotation['notes'] ?? null,
                         'created_by' => Auth::id(),
                     ]);
@@ -317,22 +325,32 @@ class PdfAnnotationController extends Controller
             $annotation = \App\Models\PdfPageAnnotation::findOrFail($annotationId);
             $pdfPageId = $annotation->pdf_page_id;
 
-            // Log deletion before deleting
-            PdfAnnotationHistory::logAction(
-                pdfPageId: $pdfPageId,
-                action: 'deleted',
-                beforeData: $annotation->toArray(),
-                afterData: null,
-                annotationId: null  // Set to null since annotation will be deleted
-            );
+            // Collect all annotations to delete (including children)
+            $annotationsToDelete = $this->getAnnotationsToDelete($annotation);
 
-            // Delete the annotation
-            $annotation->delete();
+            // Log deletion for each annotation before deleting
+            foreach ($annotationsToDelete as $annotationToDelete) {
+                PdfAnnotationHistory::logAction(
+                    pdfPageId: $annotationToDelete->pdf_page_id,
+                    action: 'deleted',
+                    beforeData: $annotationToDelete->toArray(),
+                    afterData: null,
+                    annotationId: null  // Set to null since annotation will be deleted
+                );
+            }
+
+            // Delete all annotations (parent and all children)
+            $deletedCount = 0;
+            foreach ($annotationsToDelete as $annotationToDelete) {
+                $annotationToDelete->delete();
+                $deletedCount++;
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Annotation deleted successfully',
+                'message' => "Annotation and {$deletedCount} related annotations deleted successfully",
                 'annotation_id' => $annotationId,
+                'deleted_count' => $deletedCount,
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -352,6 +370,53 @@ class PdfAnnotationController extends Controller
                 'error' => 'Failed to delete annotation: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get all annotations that should be deleted when deleting a parent annotation
+     * Implements hierarchical/cascading deletion using parent_annotation_id
+     *
+     * This recursively finds all child annotations regardless of whether they
+     * have foreign keys set (works for both regular and isolation mode annotations)
+     *
+     * @param \App\Models\PdfPageAnnotation $annotation The annotation being deleted
+     * @return array Array of annotations to delete (includes the parent annotation)
+     */
+    private function getAnnotationsToDelete(\App\Models\PdfPageAnnotation $annotation): array
+    {
+        $toDelete = collect([$annotation]);
+
+        // Recursively find all children using parent_annotation_id
+        $children = $this->findChildrenRecursively($annotation->id);
+        $toDelete = $toDelete->merge($children);
+
+        return $toDelete->unique('id')->all();
+    }
+
+    /**
+     * Recursively find all child annotations by parent_annotation_id
+     *
+     * @param int $parentId The parent annotation ID to search for
+     * @return \Illuminate\Support\Collection Collection of child annotations
+     */
+    private function findChildrenRecursively(int $parentId): \Illuminate\Support\Collection
+    {
+        // Find all direct children of this parent
+        $children = \App\Models\PdfPageAnnotation::where('parent_annotation_id', $parentId)->get();
+
+        if ($children->isEmpty()) {
+            return collect();
+        }
+
+        $allDescendants = collect($children);
+
+        // Recursively find children of each child
+        foreach ($children as $child) {
+            $grandchildren = $this->findChildrenRecursively($child->id);
+            $allDescendants = $allDescendants->merge($grandchildren);
+        }
+
+        return $allDescendants;
     }
 
     /**
@@ -397,6 +462,7 @@ class PdfAnnotationController extends Controller
                     'color' => $annotation->color,
                     'cabinet_run_id' => $annotation->cabinet_run_id,
                     'room_id' => $annotation->room_id,
+                    'parent_annotation_id' => $annotation->parent_annotation_id,  // Add parent relationship for hierarchy
                     'notes' => $annotation->notes,
                     'annotation_type' => $annotation->annotation_type,
                 ];

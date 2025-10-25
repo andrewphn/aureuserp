@@ -10,7 +10,7 @@ return new class extends Migration
      * Run the migrations.
      *
      * Adds support for multiple view types (plan, elevation, section, detail)
-     * and multi-parent entity references for annotations.
+     * to PDF page annotations for better organization of cabinet drawings.
      *
      * Use Cases:
      * - Plan view: Top-down layout (existing functionality)
@@ -18,8 +18,8 @@ return new class extends Migration
      * - Section view: Cut-through views showing internal structure
      * - Detail view: Zoomed callout regions with higher scale
      *
-     * Multi-parent support allows annotations to reference multiple entities.
-     * Example: End panel annotation can reference both cabinet AND cabinet_run
+     * NOTE: Originally included annotation_entity_references table for multi-parent support,
+     * but that feature was removed as unused (Oct 24, 2025).
      */
     public function up(): void
     {
@@ -56,38 +56,6 @@ return new class extends Migration
             $table->index(['view_type', 'view_orientation']);
             $table->index('inferred_position');
         });
-
-        // Create pivot table for multi-parent entity references
-        Schema::create('annotation_entity_references', function (Blueprint $table) {
-            $table->id();
-
-            // Annotation being referenced
-            $table->foreignId('annotation_id')
-                ->constrained('pdf_page_annotations')
-                ->onDelete('cascade')
-                ->comment('The annotation that references entities');
-
-            // Polymorphic entity reference
-            $table->enum('entity_type', ['room', 'location', 'cabinet_run', 'cabinet'])
-                ->comment('Type of entity being referenced');
-
-            $table->unsignedBigInteger('entity_id')
-                ->comment('ID of the referenced entity (polymorphic)');
-
-            // Reference classification
-            $table->enum('reference_type', ['primary', 'secondary', 'context'])
-                ->default('primary')
-                ->comment('primary=main entity, secondary=related entity, context=background info');
-
-            // Metadata
-            $table->timestamps();
-
-            // Indexes for efficient queries
-            $table->index('annotation_id');
-            $table->index(['entity_type', 'entity_id']);
-            $table->index('reference_type');
-            $table->unique(['annotation_id', 'entity_type', 'entity_id'], 'unique_annotation_entity_reference');
-        });
     }
 
     /**
@@ -95,10 +63,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Drop pivot table first (foreign key constraint)
-        Schema::dropIfExists('annotation_entity_references');
-
-        // Remove columns from annotations table
         Schema::table('pdf_page_annotations', function (Blueprint $table) {
             $table->dropIndex(['view_type', 'view_orientation']);
             $table->dropIndex(['inferred_position']);

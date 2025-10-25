@@ -41,11 +41,6 @@ class CustomerPanelProvider extends PanelProvider
             ->plugins([
                 PluginManager::make(),
             ])
-            ->renderHook(
-                PanelsRenderHook::HEAD_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('@vite("resources/js/centralized-entity-store.js")') .
-                                 \Illuminate\Support\Facades\Blade::render('@vite("resources/js/form-auto-populate.js")')
-            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
