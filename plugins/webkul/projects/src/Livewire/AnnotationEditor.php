@@ -666,7 +666,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     TextInput::make('name')
                         ->label('Room Name')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Select::make('room_type')
                         ->label('Room Type')
@@ -681,16 +682,19 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             'garage' => 'Garage',
                             'basement' => 'Basement',
                             'other' => 'Other',
-                        ]),
+                        ])
+                        ->live(), // Updates immediately on selection change
 
                     TextInput::make('floor_number')
                         ->label('Floor Number')
-                        ->numeric(),
+                        ->numeric()
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Textarea::make('notes')
                         ->label('Notes')
                         ->rows(3)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->live(onBlur: true), // Updates when field loses focus
                 ])
                 ->columns(2),
         ];
@@ -721,7 +725,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     TextInput::make('name')
                         ->label('Location Name')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Placeholder::make('location_room_display')
                         ->label('Parent Room')
@@ -730,7 +735,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     Textarea::make('notes')
                         ->label('Notes')
                         ->rows(3)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->live(onBlur: true), // Updates when field loses focus
                 ])
                 ->columns(2),
         ];
@@ -761,7 +767,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     TextInput::make('name')
                         ->label('Run Name')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Select::make('run_type')
                         ->label('Run Type')
@@ -771,7 +778,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             'tall' => 'Tall Cabinets',
                             'specialty' => 'Specialty',
                         ])
-                        ->required(),
+                        ->required()
+                        ->live(), // Updates immediately on selection change
 
                     Placeholder::make('run_location_display')
                         ->label('Parent Location')
@@ -781,12 +789,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->label('Total Linear Feet')
                         ->suffix('ft')
                         ->numeric()
-                        ->step(0.01),
+                        ->step(0.01)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Textarea::make('notes')
                         ->label('Notes')
                         ->rows(3)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->live(onBlur: true), // Updates when field loses focus
                 ])
                 ->columns(2),
         ];
@@ -817,12 +827,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     TextInput::make('cabinet_number')
                         ->label('Cabinet Number')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     TextInput::make('position_in_run')
                         ->label('Position in Run')
                         ->numeric()
-                        ->minValue(1),
+                        ->minValue(1)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Placeholder::make('cabinet_run_display')
                         ->label('Cabinet Run')
@@ -833,36 +845,42 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->suffix('in')
                         ->required()
                         ->numeric()
-                        ->step(0.125),
+                        ->step(0.125)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     TextInput::make('width_inches')
                         ->label('Width')
                         ->suffix('in')
                         ->numeric()
-                        ->step(0.125),
+                        ->step(0.125)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     TextInput::make('depth_inches')
                         ->label('Depth')
                         ->suffix('in')
                         ->numeric()
-                        ->step(0.125),
+                        ->step(0.125)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     TextInput::make('height_inches')
                         ->label('Height')
                         ->suffix('in')
                         ->numeric()
-                        ->step(0.125),
+                        ->step(0.125)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     TextInput::make('linear_feet')
                         ->label('Linear Feet')
                         ->suffix('ft')
                         ->numeric()
-                        ->step(0.01),
+                        ->step(0.01)
+                        ->live(onBlur: true), // Updates when field loses focus
 
                     Textarea::make('shop_notes')
                         ->label('Shop Notes')
                         ->rows(3)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->live(onBlur: true), // Updates when field loses focus
                 ])
                 ->columns(3),
         ];
