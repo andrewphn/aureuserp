@@ -48,6 +48,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     public ?int $linkedCabinetRunId = null;
     public ?int $linkedCabinetSpecId = null;
 
+    // Annotation model for FilamentPHP v4 relationship binding
+    public ?\App\Models\PdfPageAnnotation $annotationModel = null;
+
     public function mount(): void
     {
         // Don't fill form on mount, wait for annotation data
@@ -595,7 +598,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->visible(fn () => $this->hasLinkedEntity()),
                 ]),  // Close tabs()
         ])  // Close components()
-            ->statePath('data');
+            ->statePath('data')
+            ->model($this->annotationModel);  // Bind annotation model for relationship fields
     }
 
     /**
@@ -643,7 +647,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
     /**
      * Get Room entity info schema using FilamentPHP v4 relationship pattern
-     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
+     * Uses ->relationship() on Section to auto-load and auto-save related model data
      */
     protected function getRoomInfoSchema(int $roomId): array
     {
@@ -660,16 +664,16 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Room Information')
+                ->relationship('room')  // FilamentPHP v4 pattern: auto-loads from annotation->room()
                 ->description('Edit room details directly - changes save when you click "Save Changes"')
-                ->relationship('room') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('name')
+                    TextInput::make('name')  // Simple field name, not 'room.name'
                         ->label('Room Name')
                         ->required()
                         ->maxLength(255)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    Select::make('room_type')
+                    Select::make('room_type')  // Simple field name, not 'room.room_type'
                         ->label('Room Type')
                         ->options([
                             'kitchen' => 'Kitchen',
@@ -683,26 +687,27 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             'basement' => 'Basement',
                             'other' => 'Other',
                         ])
-                        ->live(), // Updates immediately on selection change
+                        ->live(),
 
-                    TextInput::make('floor_number')
+                    TextInput::make('floor_number')  // Simple field name
                         ->label('Floor Number')
                         ->numeric()
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    Textarea::make('notes')
+                    Textarea::make('notes')  // Simple field name
                         ->label('Notes')
                         ->rows(3)
                         ->columnSpanFull()
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
                 ])
+                ->visible(fn () => $this->linkedRoomId !== null)  // Only show when room exists
                 ->columns(2),
         ];
     }
 
     /**
      * Get Location entity info schema using FilamentPHP v4 relationship pattern
-     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
+     * Uses ->relationship() on Section to auto-load and auto-save related model data
      */
     protected function getLocationInfoSchema(int $locationId): array
     {
@@ -719,32 +724,33 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Location Information')
+                ->relationship('roomLocation')  // FilamentPHP v4 pattern: auto-loads from annotation->roomLocation()
                 ->description('Edit location details directly - changes save when you click "Save Changes"')
-                ->relationship('roomLocation') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('name')
+                    TextInput::make('name')  // Simple field name, not 'roomLocation.name'
                         ->label('Location Name')
                         ->required()
                         ->maxLength(255)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
                     Placeholder::make('location_room_display')
                         ->label('Parent Room')
                         ->content($location->room->name ?? 'N/A'),
 
-                    Textarea::make('notes')
+                    Textarea::make('notes')  // Simple field name, not 'roomLocation.notes'
                         ->label('Notes')
                         ->rows(3)
                         ->columnSpanFull()
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
                 ])
+                ->visible(fn () => $this->linkedLocationId !== null)  // Only show when location exists
                 ->columns(2),
         ];
     }
 
     /**
      * Get Cabinet Run entity info schema using FilamentPHP v4 relationship pattern
-     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
+     * Uses ->relationship() on Section to auto-load and auto-save related model data
      */
     protected function getCabinetRunInfoSchema(int $runId): array
     {
@@ -761,16 +767,16 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Cabinet Run Information')
+                ->relationship('cabinetRun')  // FilamentPHP v4 pattern: auto-loads from annotation->cabinetRun()
                 ->description('Edit cabinet run details directly - changes save when you click "Save Changes"')
-                ->relationship('cabinetRun') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('name')
+                    TextInput::make('name')  // Simple field name, not 'cabinetRun.name'
                         ->label('Run Name')
                         ->required()
                         ->maxLength(255)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    Select::make('run_type')
+                    Select::make('run_type')  // Simple field name, not 'cabinetRun.run_type'
                         ->label('Run Type')
                         ->options([
                             'base' => 'Base Cabinets',
@@ -779,32 +785,33 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             'specialty' => 'Specialty',
                         ])
                         ->required()
-                        ->live(), // Updates immediately on selection change
+                        ->live(),
 
                     Placeholder::make('run_location_display')
                         ->label('Parent Location')
                         ->content($run->roomLocation->name ?? 'N/A'),
 
-                    TextInput::make('total_linear_feet')
+                    TextInput::make('total_linear_feet')  // Simple field name
                         ->label('Total Linear Feet')
                         ->suffix('ft')
                         ->numeric()
                         ->step(0.01)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    Textarea::make('notes')
+                    Textarea::make('notes')  // Simple field name, not 'cabinetRun.notes'
                         ->label('Notes')
                         ->rows(3)
                         ->columnSpanFull()
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
                 ])
+                ->visible(fn () => $this->linkedCabinetRunId !== null)  // Only show when cabinet run exists
                 ->columns(2),
         ];
     }
 
     /**
      * Get Cabinet Specification entity info schema using FilamentPHP v4 relationship pattern
-     * Note: Requires the annotation model to be set on the form via $this->form->model($annotation)
+     * Uses ->relationship() on Section to auto-load and auto-save related model data
      */
     protected function getCabinetSpecInfoSchema(int $cabinetId): array
     {
@@ -821,67 +828,68 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         return [
             Section::make('Cabinet Specification Information')
+                ->relationship('cabinetSpecification')  // FilamentPHP v4 pattern: auto-loads from annotation->cabinetSpecification()
                 ->description('Edit cabinet details directly - changes save when you click "Save Changes"')
-                ->relationship('cabinetSpecification') // FilamentPHP v4 pattern - auto-loads/saves via saveRelationships()
                 ->schema([
-                    TextInput::make('cabinet_number')
+                    TextInput::make('cabinet_number')  // Simple field name, not 'cabinetSpecification.cabinet_number'
                         ->label('Cabinet Number')
                         ->required()
                         ->maxLength(255)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    TextInput::make('position_in_run')
+                    TextInput::make('position_in_run')  // Simple field name
                         ->label('Position in Run')
                         ->numeric()
                         ->minValue(1)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
                     Placeholder::make('cabinet_run_display')
                         ->label('Cabinet Run')
                         ->content($cabinet->cabinetRun->name ?? 'N/A'),
 
-                    TextInput::make('length_inches')
+                    TextInput::make('length_inches')  // Simple field name
                         ->label('Length')
                         ->suffix('in')
                         ->required()
                         ->numeric()
                         ->step(0.125)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    TextInput::make('width_inches')
+                    TextInput::make('width_inches')  // Simple field name
                         ->label('Width')
                         ->suffix('in')
                         ->numeric()
                         ->step(0.125)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    TextInput::make('depth_inches')
+                    TextInput::make('depth_inches')  // Simple field name
                         ->label('Depth')
                         ->suffix('in')
                         ->numeric()
                         ->step(0.125)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    TextInput::make('height_inches')
+                    TextInput::make('height_inches')  // Simple field name
                         ->label('Height')
                         ->suffix('in')
                         ->numeric()
                         ->step(0.125)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    TextInput::make('linear_feet')
+                    TextInput::make('linear_feet')  // Simple field name
                         ->label('Linear Feet')
                         ->suffix('ft')
                         ->numeric()
                         ->step(0.01)
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
 
-                    Textarea::make('shop_notes')
+                    Textarea::make('shop_notes')  // Simple field name, not 'cabinetSpecification.shop_notes'
                         ->label('Shop Notes')
                         ->rows(3)
                         ->columnSpanFull()
-                        ->live(onBlur: true), // Updates when field loses focus
+                        ->live(onBlur: true),
                 ])
+                ->visible(fn () => $this->linkedCabinetSpecId !== null)  // Only show when cabinet spec exists
                 ->columns(3),
         ];
     }
@@ -1384,17 +1392,17 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         $this->linkedCabinetRunId = $annotation['cabinetRunId'] ?? null;
         $this->linkedCabinetSpecId = $annotation['cabinetSpecId'] ?? null;
 
-        // CRITICAL: Set the annotation model on the form for relationship() to work
-        // This allows FilamentPHP to properly load and save related model data
+        // CRITICAL: Set the annotation model property for FilamentPHP v4 relationship binding
+        // This must happen BEFORE filling the form so relationship fields can load properly
         $annotationId = $annotation['id'];
         if (!is_string($annotationId) || !str_starts_with($annotationId, 'temp_')) {
-            $annotationModel = \App\Models\PdfPageAnnotation::find($annotationId);
-            if ($annotationModel) {
-                $this->form->model($annotationModel);
-            }
+            $this->annotationModel = \App\Models\PdfPageAnnotation::find($annotationId);
+        } else {
+            $this->annotationModel = null;  // New annotation, no model yet
         }
 
         // Fill form with annotation data using Filament Forms API
+        // The model is now set, so relationship fields will load correctly
         $this->form->fill([
             'label'                  => $annotation['label'] ?? '',
             'notes'                  => $annotation['notes'] ?? '',
