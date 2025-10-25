@@ -55,11 +55,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     Tab::make('Annotation')
                         ->icon('heroicon-o-pencil')
                         ->schema([
-                            // Hierarchy breadcrumb display
-                            Placeholder::make('hierarchy_path')
-                                ->label('Hierarchy')
-                                ->content(fn () => $this->getHierarchyPathHtml())
-                                ->visible(fn () => !empty($this->originalAnnotation['id'])),
+                            // Hierarchy breadcrumb display - TEMPORARILY DISABLED due to form state recursion
+                            // TODO: Implement using Livewire property instead of closure
+                            // Placeholder::make('hierarchy_path')
+                            //     ->label('Hierarchy')
+                            //     ->content(fn () => $this->getHierarchyPathHtml())
+                            //     ->visible(fn () => !empty($this->originalAnnotation['id'])),
 
             // Parent annotation selector
             Select::make('parent_annotation_id')
