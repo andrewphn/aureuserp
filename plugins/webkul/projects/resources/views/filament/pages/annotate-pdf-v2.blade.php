@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     {{-- Full-screen V3 HTML Overlay PDF Annotation Viewer --}}
-    <div class="w-full" style="height: calc(100vh - 120px);">
+    <div class="w-full pb-32" style="height: calc(100vh - 120px);">
         @if($pdfUrl)
             @include('webkul-project::filament.components.pdf-annotation-viewer', [
                 'pdfPageId' => $pdfPage?->id,

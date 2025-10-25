@@ -419,7 +419,7 @@ class PdfDocumentsRelationManager extends RelationManager
         foreach ($oldPages as $oldPage) {
             // Create corresponding page in new version
             $newPage = PdfPage::create([
-                'pdf_document_id' => $newVersion->id,
+                'document_id' => $newVersion->id,
                 'page_number' => $oldPage->page_number,
             ]);
 

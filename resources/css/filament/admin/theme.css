@@ -148,4 +148,13 @@
     .fi-toggle {
         @apply focus:ring-0 focus:ring-offset-0 checked:bg-gray-800 dark:checked:bg-gray-600;
     }
+
+    /* ============================================
+       PDF ANNOTATION TREE HIERARCHY
+       ============================================ */
+
+    /* Tree hierarchy indentation with connecting lines */
+    .tree-hierarchy-indent {
+        @apply ml-5 mt-1 pl-3 border-l-2 border-gray-300 dark:border-gray-600;
+    }
 }
