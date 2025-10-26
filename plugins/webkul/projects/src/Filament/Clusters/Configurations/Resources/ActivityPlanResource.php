@@ -45,7 +45,7 @@ class ActivityPlanResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('projects::filament/clusters/configurations/resources/activity-plan.navigation.title');
+        return __('webkul-project::filament/clusters/configurations/resources/activity-plan.navigation.title');
     }
 
     public static function form(Schema $schema): Schema
@@ -55,11 +55,11 @@ class ActivityPlanResource extends Resource
                 Section::make()
                     ->schema([
                         TextInput::make('name')
-                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan.form.name'))
+                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.form.name'))
                             ->required()
                             ->maxLength(255),
                         Toggle::make('is_active')
-                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan.form.status'))
+                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.form.status'))
                             ->default(true)
                             ->inline(false),
                     ])->columnSpanFull(),
@@ -71,36 +71,36 @@ class ActivityPlanResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.columns.name'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.columns.name'))
                     ->searchable()
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.columns.status'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.columns.status'))
                     ->sortable()
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.columns.created-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.columns.created-at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.columns.updated-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.columns.updated-at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->groups([
                 Group::make('name')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.groups.name'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.groups.name'))
                     ->collapsible(),
                 Group::make('is_active')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.groups.status'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.groups.status'))
                     ->collapsible(),
                 Group::make('created_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.groups.created-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.groups.created-at'))
                     ->collapsible(),
                 Group::make('updated_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan.table.groups.updated-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.groups.updated-at'))
                     ->date()
                     ->collapsible(),
             ])
@@ -113,22 +113,22 @@ class ActivityPlanResource extends Resource
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.actions.restore.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.actions.restore.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.actions.restore.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.actions.restore.notification.body')),
                     ),
                 DeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.actions.delete.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.actions.delete.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.actions.delete.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.actions.delete.notification.body')),
                     ),
                 ForceDeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.actions.force-delete.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.actions.force-delete.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.actions.force-delete.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.actions.force-delete.notification.body')),
                     ),
             ])
             ->toolbarActions([
@@ -137,22 +137,22 @@ class ActivityPlanResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.restore.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.restore.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.restore.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.restore.notification.body')),
                         ),
                     DeleteBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.delete.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.delete.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.delete.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.force-delete.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.force-delete.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.bulk-actions.force-delete.notification.body')),
                         ),
                 ]),
             ])
@@ -173,8 +173,8 @@ class ActivityPlanResource extends Resource
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan.table.empty-state.create.notification.body')),
                     ),
             ])
             ->modifyQueryUsing(function ($query) {
@@ -189,11 +189,11 @@ class ActivityPlanResource extends Resource
                 Section::make('General Information')
                     ->schema([
                         TextEntry::make('name')
-                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan.infolist.name'))
+                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.infolist.name'))
                             ->icon('heroicon-o-briefcase')
                             ->placeholder('—'),
                         IconEntry::make('is_active')
-                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan.infolist.status'))
+                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan.infolist.status'))
                             ->boolean(),
                     ])
                     ->columns(2),

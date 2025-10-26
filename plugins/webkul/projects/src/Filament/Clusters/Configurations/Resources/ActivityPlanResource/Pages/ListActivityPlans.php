@@ -19,12 +19,12 @@ class ListActivityPlans extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'all' => PresetView::make(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.all'))
+            'all' => PresetView::make(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.all'))
                 ->icon('heroicon-s-queue-list')
                 ->favorite()
                 ->setAsDefault()
                 ->modifyQueryUsing(fn ($query) => $query->where('plugin', 'projects')),
-            'archived' => PresetView::make(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.archived'))
+            'archived' => PresetView::make(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.tabs.archived'))
                 ->icon('heroicon-s-archive-box')
                 ->modifyQueryUsing(fn ($query) => $query->where('plugin', 'projects')->onlyTrashed()),
         ];
@@ -34,7 +34,7 @@ class ListActivityPlans extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.label'))
+                ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.label'))
                 ->icon('heroicon-o-plus-circle')
                 ->mutateDataUsing(function ($data) {
                     $user = Auth::user();
@@ -50,8 +50,8 @@ class ListActivityPlans extends ListRecords
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.notification.title'))
-                        ->body(__('projects::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.notification.body')),
+                        ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.notification.title'))
+                        ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/list-activity-plans.header-actions.create.notification.body')),
                 ),
         ];
     }

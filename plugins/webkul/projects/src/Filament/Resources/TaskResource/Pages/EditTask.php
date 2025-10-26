@@ -22,8 +22,8 @@ class EditTask extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('projects::filament/resources/task/pages/edit-task.notification.title'))
-            ->body(__('projects::filament/resources/task/pages/edit-task.notification.body'));
+            ->title(__('webkul-project::filament/resources/task/pages/edit-task.notification.title'))
+            ->body(__('webkul-project::filament/resources/task/pages/edit-task.notification.body'));
     }
 
     protected function getHeaderActions(): array
@@ -36,8 +36,8 @@ class EditTask extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('projects::filament/resources/task/pages/edit-task.header-actions.delete.notification.title'))
-                        ->body(__('projects::filament/resources/task/pages/edit-task.header-actions.delete.notification.body')),
+                        ->title(__('webkul-project::filament/resources/task/pages/edit-task.header-actions.delete.notification.title'))
+                        ->body(__('webkul-project::filament/resources/task/pages/edit-task.header-actions.delete.notification.body')),
                 ),
         ];
     }

@@ -42,7 +42,7 @@ class SubTasksRelationManager extends RelationManager
             ->groups([])
             ->headerActions([
                 CreateAction::make()
-                    ->label(__('projects::filament/resources/task/relation-managers/sub-tasks.table.header-actions.create.label'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->fillForm(function (array $arguments): array {
                         return [
@@ -63,8 +63,8 @@ class SubTasksRelationManager extends RelationManager
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/resources/task/relation-managers/sub-tasks.table.header-actions.create.notification.title'))
-                            ->body(__('projects::filament/resources/task/relation-managers/sub-tasks.table.header-actions.create.notification.body')),
+                            ->title(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.header-actions.create.notification.title'))
+                            ->body(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.header-actions.create.notification.body')),
                     ),
             ])
             ->recordActions([
@@ -79,22 +79,22 @@ class SubTasksRelationManager extends RelationManager
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/resources/task/relation-managers/sub-tasks.table.actions.restore.notification.title'))
-                                ->body(__('projects::filament/resources/task/relation-managers/sub-tasks.table.actions.restore.notification.body')),
+                                ->title(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.actions.restore.notification.title'))
+                                ->body(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.actions.restore.notification.body')),
                         ),
                     DeleteAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/resources/task/relation-managers/sub-tasks.table.actions.delete.notification.title'))
-                                ->body(__('projects::filament/resources/task/relation-managers/sub-tasks.table.actions.delete.notification.body')),
+                                ->title(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.actions.delete.notification.title'))
+                                ->body(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.actions.delete.notification.body')),
                         ),
                     ForceDeleteAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/resources/task/relation-managers/sub-tasks.table.actions.force-delete.notification.title'))
-                                ->body(__('projects::filament/resources/task/relation-managers/sub-tasks.table.actions.force-delete.notification.body')),
+                                ->title(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.actions.force-delete.notification.title'))
+                                ->body(__('webkul-project::filament/resources/task/relation-managers/sub-tasks.table.actions.force-delete.notification.body')),
                         ),
                 ]),
             ]);

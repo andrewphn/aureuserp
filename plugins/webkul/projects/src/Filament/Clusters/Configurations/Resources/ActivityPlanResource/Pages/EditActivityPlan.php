@@ -16,8 +16,8 @@ class EditActivityPlan extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('projects::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.notification.title'))
-            ->body(__('projects::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.notification.body'));
+            ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.notification.title'))
+            ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.notification.body'));
     }
 
     protected function getHeaderActions(): array
@@ -28,8 +28,8 @@ class EditActivityPlan extends EditRecord
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('projects::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.header-actions.delete.notification.title'))
-                        ->body(__('projects::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.header-actions.delete.notification.body')),
+                        ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.header-actions.delete.notification.title'))
+                        ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan/pages/edit-activity-plan.header-actions.delete.notification.body')),
                 ),
         ];
     }

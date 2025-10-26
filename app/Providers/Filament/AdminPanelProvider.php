@@ -19,6 +19,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\PluginManager;
@@ -129,9 +130,21 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 function (): string {
-                    // Load global footer and modal components
-                    $content = view('filament.components.project-sticky-footer-global')->render() .
-                               view('filament.components.project-selector-modal')->render();
+                    // Global footer with feature flag for staged migration
+                    // v1 = Original Blade-only implementation
+                    // v2 = New FilamentPHP v4 compliant widget
+                    $footerVersion = config('footer.version', 'v1');
+
+                    if ($footerVersion === 'v2') {
+                        // New FilamentPHP v4 widget - render Livewire component
+                        $content = \Livewire\Livewire::mount(\App\Filament\Widgets\GlobalContextFooter::class);
+                    } else {
+                        // Original v1 footer (fallback)
+                        $content = view('filament.components.project-sticky-footer-global')->render();
+                    }
+
+                    // Always include project selector modal (used by both versions)
+                    $content .= view('filament.components.project-selector-modal')->render();
 
                     return $content;
                 }

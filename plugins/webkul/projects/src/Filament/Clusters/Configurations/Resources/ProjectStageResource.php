@@ -40,7 +40,7 @@ class ProjectStageResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('projects::filament/clusters/configurations/resources/project-stage.navigation.title');
+        return __('webkul-project::filament/clusters/configurations/resources/project-stage.navigation.title');
     }
 
     public static function isDiscovered(): bool
@@ -57,7 +57,7 @@ class ProjectStageResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label(__('projects::filament/clusters/configurations/resources/project-stage.form.name'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/project-stage.form.name'))
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
@@ -75,7 +75,7 @@ class ProjectStageResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('projects::filament/clusters/configurations/resources/project-stage.table.columns.name'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.columns.name'))
                     ->searchable()
                     ->sortable()
                     ->badge()
@@ -87,7 +87,7 @@ class ProjectStageResource extends Resource
             ])
             ->groups([
                 Group::make('created_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/project-stage.table.columns.created-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.columns.created-at'))
                     ->date(),
             ])
             ->reorderable('sort')
@@ -98,22 +98,22 @@ class ProjectStageResource extends Resource
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.edit.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.edit.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.edit.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.edit.notification.body')),
                     ),
                 RestoreAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.restore.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.restore.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.restore.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.restore.notification.body')),
                     ),
                 DeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.delete.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.delete.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.delete.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.delete.notification.body')),
                     ),
                 ForceDeleteAction::make()
                     ->action(function (ProjectStage $record) {
@@ -122,14 +122,14 @@ class ProjectStageResource extends Resource
 
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.body'))
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.body'))
                                 ->send();
                         } catch (QueryException $e) {
                             Notification::make()
                                 ->danger()
-                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.body'))
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.body'))
                                 ->send();
                         }
                     }),
@@ -140,15 +140,15 @@ class ProjectStageResource extends Resource
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.restore.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.restore.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.bulk-actions.restore.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.bulk-actions.restore.notification.body')),
                         ),
                     DeleteBulkAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.delete.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.bulk-actions.delete.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.bulk-actions.delete.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
                         ->action(function (Collection $records) {
@@ -157,14 +157,14 @@ class ProjectStageResource extends Resource
 
                                 Notification::make()
                                     ->success()
-                                    ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.title'))
-                                    ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.body'))
+                                    ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.title'))
+                                    ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.success.body'))
                                     ->send();
                             } catch (QueryException $e) {
                                 Notification::make()
                                     ->danger()
-                                    ->title(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.title'))
-                                    ->body(__('projects::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.body'))
+                                    ->title(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('webkul-project::filament/clusters/configurations/resources/project-stage.table.actions.force-delete.notification.error.body'))
                                     ->send();
                             }
                         }),

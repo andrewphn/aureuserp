@@ -60,6 +60,9 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_10_08_000001_create_pdf_page_annotations_table',
                 '2025_10_08_173125_add_room_fields_to_pdf_page_annotations_table',
                 '2025_10_08_180053_add_versioning_to_pdf_documents_table',
+                '2025_10_24_214500_add_current_production_stage_to_projects_table',
+                '2025_10_25_000001_add_production_fields_to_milestones',
+                '2025_10_25_145337_create_projects_milestone_templates_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -78,9 +81,16 @@ class ProjectServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        // Load views with webkul-project namespace
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'webkul-project');
+
+        // Load translations with webkul-project namespace (overrides parent's 'projects' namespace)
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'webkul-project');
+        $this->loadJsonTranslationsFrom(__DIR__.'/../resources/lang');
 
         // Register Livewire components
         \Livewire\Livewire::component('annotation-editor', \Webkul\Project\Livewire\AnnotationEditor::class);
+        \Livewire\Livewire::component('milestone-timeline', \Webkul\Project\Livewire\MilestoneTimeline::class);
+        \Livewire\Livewire::component('production-timeline', \Webkul\Project\Livewire\ProductionTimeline::class);
     }
 }

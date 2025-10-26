@@ -19,7 +19,7 @@ class ListCabinetReports extends ListRecords
     public function getPresetTableViews(): array
     {
         return [
-            'all' => PresetView::make(__('projects::filament/resources/cabinet-report/pages/list-cabinet-reports.tabs.all'))
+            'all' => PresetView::make(__('webkul-project::filament/resources/cabinet-report/pages/list-cabinet-reports.tabs.all'))
                 ->icon('heroicon-s-queue-list')
                 ->favorite()
                 ->setAsDefault(),
