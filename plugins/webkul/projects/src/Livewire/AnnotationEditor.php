@@ -89,12 +89,26 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                     Select::make('parent_annotation_id')
                                         ->label('Parent Annotation')
                                         ->helperText('Change which annotation this belongs to')
-                                        ->options(fn () => AnnotationHierarchyService::getAvailableParents(
-                                            $this->projectId,
-                                            $this->annotationType,
-                                            $this->originalAnnotation['pdfPageId'] ?? null,
-                                            $this->originalAnnotation['id'] ?? null
-                                        ))
+                                        ->options(function () {
+                                            $options = AnnotationHierarchyService::getAvailableParents(
+                                                $this->projectId,
+                                                $this->annotationType,
+                                                $this->originalAnnotation['pdfPageId'] ?? null,
+                                                $this->originalAnnotation['id'] ?? null
+                                            );
+
+                                            // If current value is set and not in options, add it
+                                            $currentValue = $this->data['parent_annotation_id'] ?? null;
+                                            if ($currentValue && !isset($options[$currentValue])) {
+                                                $annotation = \App\Models\PdfPageAnnotation::find($currentValue);
+                                                if ($annotation) {
+                                                    $pageNumber = $annotation->pdfPage->page_number ?? '?';
+                                                    $options[$currentValue] = $annotation->label . ' (Page ' . $pageNumber . ')';
+                                                }
+                                            }
+
+                                            return $options;
+                                        })
                                         ->searchable()
                                         ->placeholder('None (top level)')
                                         ->nullable()
