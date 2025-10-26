@@ -25,7 +25,10 @@ use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Services\AnnotationHierarchyService;
+use Webkul\Project\Services\AnnotationSaveService;
+use Webkul\Project\Services\AnnotationSyncService;
 use Webkul\Project\Services\EntityDetectionService;
+use Webkul\Project\Services\EntityManagementService;
 use Webkul\Project\Services\ViewTypeTrackerService;
 use Webkul\Project\Utils\PositionInferenceUtil;
 
