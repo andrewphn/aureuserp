@@ -26,7 +26,7 @@
         @active-context-changed.window="handleContextChange($event.detail)"
         @entity-updated.window="handleEntityUpdate($event.detail)"
         class="fi-section rounded-t-xl shadow-lg ring-1 ring-gray-950/10 dark:ring-white/10 transition-all duration-300 ease-in-out"
-        :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'})`"
+        :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'}); padding-bottom: 0;`"
     >
         {{-- Toggle Button Bar --}}
         <div
