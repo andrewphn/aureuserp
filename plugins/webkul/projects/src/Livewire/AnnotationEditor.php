@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Tabs;
@@ -58,6 +59,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     // Hierarchy path for breadcrumb display
     public string $hierarchyPath = '';
 
+    // Entity-centric properties for new workflow
+    public string $linkMode = 'create'; // 'create' or 'existing'
+    public ?int $linkedEntityId = null; // ID of selected existing entity
+    public ?array $entityData = []; // Entity properties for create/edit
+
     public function mount(): void
     {
         // Don't fill form on mount, wait for annotation data
@@ -73,9 +79,79 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         ->schema([
 
                             // ============================================
-                            // SECTION: Context & Hierarchy
+                            // SECTION: Entity Selection & Linking (NEW)
                             // ============================================
-                            Section::make('Context & Hierarchy')
+                            Section::make('Entity Selection & Linking')
+                                ->description('Link to an existing entity or create a new one')
+                                ->icon('heroicon-o-link')
+                                ->schema([
+                                    // Link Mode Radio Buttons
+                                    Radio::make('link_mode')
+                                        ->label('How would you like to proceed?')
+                                        ->options([
+                                            'existing' => 'Link to existing entity',
+                                            'create' => 'Create new entity',
+                                        ])
+                                        ->default('create')
+                                        ->live()
+                                        ->inline()
+                                        ->required(),
+
+                                    // Hierarchical Entity Selector (for "Link to existing")
+                                    Select::make('linked_entity_id')
+                                        ->label('Select Entity')
+                                        ->helperText('Choose an existing entity from the project hierarchy')
+                                        ->options(fn () => $this->getHierarchicalEntityOptions())
+                                        ->searchable()
+                                        ->visible(fn (callable $get) => $get('link_mode') === 'existing')
+                                        ->required(fn (callable $get) => $get('link_mode') === 'existing')
+                                        ->live(),
+
+                                    // Parent Entity Selector (for "Create new")
+                                    Select::make('parent_annotation_id')
+                                        ->label('Parent Entity')
+                                        ->helperText(function () {
+                                            return match($this->annotationType) {
+                                                'room' => 'Rooms don\'t have parents',
+                                                'location' => 'Select the room this location belongs to',
+                                                'cabinet_run' => 'Select the location this cabinet run belongs to',
+                                                'cabinet' => 'Select the cabinet run this cabinet belongs to',
+                                                default => 'Select parent entity',
+                                            };
+                                        })
+                                        ->options(function () {
+                                            $options = AnnotationHierarchyService::getAvailableParents(
+                                                $this->projectId,
+                                                $this->annotationType,
+                                                $this->originalAnnotation['pdfPageId'] ?? null,
+                                                $this->originalAnnotation['id'] ?? null
+                                            );
+
+                                            // If current value is set and not in options, add it
+                                            $currentValue = $this->data['parent_annotation_id'] ?? null;
+                                            if ($currentValue && !isset($options[$currentValue])) {
+                                                $annotation = \App\Models\PdfPageAnnotation::find($currentValue);
+                                                if ($annotation) {
+                                                    $pageNumber = $annotation->pdfPage->page_number ?? '?';
+                                                    $options[$currentValue] = $annotation->label . ' (Page ' . $pageNumber . ')';
+                                                }
+                                            }
+
+                                            return $options;
+                                        })
+                                        ->searchable()
+                                        ->placeholder('None (top level)')
+                                        ->nullable()
+                                        ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType !== 'room')
+                                        ->live(),
+                                ])
+                                ->collapsible()
+                                ->collapsed(false),
+
+                            // ============================================
+                            // SECTION: Context & Hierarchy (OLD - TO BE REMOVED)
+                            // ============================================
+                            Section::make('Context & Hierarchy OLD')
                                 ->description('Define how this annotation fits into the project structure')
                                 ->icon('heroicon-o-folder-open')
                                 ->schema([
@@ -1257,6 +1333,143 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 // Close modal
                 $this->close();
             });
+    }
+
+    /**
+     * =================================================================
+     * ENTITY-CENTRIC HELPER METHODS
+     * =================================================================
+     */
+
+    /**
+     * Get the entity ID field name based on annotation type
+     */
+    protected function getEntityIdField(): string
+    {
+        return match($this->annotationType) {
+            'room' => 'room_id',
+            'location' => 'room_location_id',
+            'cabinet_run' => 'cabinet_run_id',
+            'cabinet' => 'cabinet_specification_id',
+            default => throw new \InvalidArgumentException("Unknown annotation type: {$this->annotationType}"),
+        };
+    }
+
+    /**
+     * Get hierarchical entity options for the dropdown selector
+     * Returns array with format: [id => "Parent > Child > Entity"]
+     */
+    protected function getHierarchicalEntityOptions(): array
+    {
+        if (!$this->projectId || !$this->annotationType) {
+            return [];
+        }
+
+        $options = [];
+
+        switch ($this->annotationType) {
+            case 'room':
+                // Rooms have no parents, just list all rooms in project
+                $rooms = Room::where('project_id', $this->projectId)
+                    ->orderBy('name')
+                    ->get();
+
+                foreach ($rooms as $room) {
+                    $options[$room->id] = $room->name;
+                }
+                break;
+
+            case 'location':
+                // Locations: show as "Room > Location"
+                $locations = RoomLocation::whereHas('room', function ($query) {
+                        $query->where('project_id', $this->projectId);
+                    })
+                    ->with('room')
+                    ->orderBy('name')
+                    ->get();
+
+                foreach ($locations as $location) {
+                    $roomName = $location->room->name ?? 'Unknown Room';
+                    $options[$location->id] = "{$roomName} > {$location->name}";
+                }
+                break;
+
+            case 'cabinet_run':
+                // Cabinet Runs: show as "Room > Location > Run"
+                $runs = CabinetRun::whereHas('roomLocation.room', function ($query) {
+                        $query->where('project_id', $this->projectId);
+                    })
+                    ->with(['roomLocation.room'])
+                    ->orderBy('name')
+                    ->get();
+
+                foreach ($runs as $run) {
+                    $roomName = $run->roomLocation->room->name ?? 'Unknown Room';
+                    $locationName = $run->roomLocation->name ?? 'Unknown Location';
+                    $options[$run->id] = "{$roomName} > {$locationName} > {$run->name}";
+                }
+                break;
+
+            case 'cabinet':
+                // Cabinets: show as "Room > Location > Run > Cabinet"
+                $cabinets = CabinetSpecification::whereHas('cabinetRun.roomLocation.room', function ($query) {
+                        $query->where('project_id', $this->projectId);
+                    })
+                    ->with(['cabinetRun.roomLocation.room'])
+                    ->orderBy('cabinet_number')
+                    ->get();
+
+                foreach ($cabinets as $cabinet) {
+                    $roomName = $cabinet->cabinetRun->roomLocation->room->name ?? 'Unknown Room';
+                    $locationName = $cabinet->cabinetRun->roomLocation->name ?? 'Unknown Location';
+                    $runName = $cabinet->cabinetRun->name ?? 'Unknown Run';
+                    $cabinetLabel = $cabinet->cabinet_number ?? "Cabinet #{$cabinet->id}";
+                    $options[$cabinet->id] = "{$roomName} > {$locationName} > {$runName} > {$cabinetLabel}";
+                }
+                break;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Create new entity from form data
+     */
+    protected function createEntityFromData(array $data): \Illuminate\Database\Eloquent\Model
+    {
+        $modelClass = match($this->annotationType) {
+            'room' => Room::class,
+            'location' => RoomLocation::class,
+            'cabinet_run' => CabinetRun::class,
+            'cabinet' => CabinetSpecification::class,
+            default => throw new \InvalidArgumentException("Unknown annotation type: {$this->annotationType}"),
+        };
+
+        // Add project_id for room entities
+        if ($this->annotationType === 'room') {
+            $data['project_id'] = $this->projectId;
+        }
+
+        // Add creator_id for all entities
+        $data['creator_id'] = auth()->id();
+
+        return $modelClass::create($data);
+    }
+
+    /**
+     * Load entity by ID based on annotation type
+     */
+    protected function loadEntity(int $entityId): ?\Illuminate\Database\Eloquent\Model
+    {
+        $modelClass = match($this->annotationType) {
+            'room' => Room::class,
+            'location' => RoomLocation::class,
+            'cabinet_run' => CabinetRun::class,
+            'cabinet' => CabinetSpecification::class,
+            default => null,
+        };
+
+        return $modelClass ? $modelClass::find($entityId) : null;
     }
 
     public function render()
