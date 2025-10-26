@@ -82,7 +82,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                     // Hierarchy breadcrumb display
                                     Placeholder::make('hierarchy_path')
                                         ->label('Hierarchy')
-                                        ->content(fn () => $this->hierarchyPath)
+                                        ->content(fn () => new \Illuminate\Support\HtmlString($this->hierarchyPath))
                                         ->visible(fn () => !empty($this->hierarchyPath)),
 
                                     // Parent annotation selector
@@ -637,7 +637,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                     // Linked Entity Summary - Read-only display with edit link
                                     Placeholder::make('linked_entity_summary')
                                         ->label('Linked Entity')
-                                        ->content(fn () => $this->getLinkedEntitySummary())
+                                        ->content(fn () => new \Illuminate\Support\HtmlString($this->getLinkedEntitySummary()))
                                         ->visible(fn () => $this->hasLinkedEntity())
                                         ->columnSpanFull(),
                                 ])
