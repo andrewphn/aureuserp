@@ -82,25 +82,20 @@ class ProjectContextProvider implements ContextProviderInterface
 
     public function getFieldSchema(array $data, bool $isMinimized = false): array
     {
+        // For minimized view, return only most important fields
         if ($isMinimized) {
-            return $this->getMinimizedSchema($data);
+            return [
+                ContextFieldBuilder::copyable('project_number', 'Project #')
+                    ->state($data['project_number'] ?? '—'),
+
+                ContextFieldBuilder::text('_customerName', 'Customer')
+                    ->state($data['_customerName'] ?? '—')
+                    ->weight(FontWeight::SemiBold),
+            ];
         }
 
+        // For expanded view, return all fields
         return $this->getExpandedSchema($data);
-    }
-
-    /**
-     * Get minimized field schema (2-3 most important fields)
-     */
-    protected function getMinimizedSchema(array $data): array
-    {
-        return [
-            ContextFieldBuilder::prominentText('project_number', 'Project #')
-                ->state($data['project_number'] ?? '—'),
-
-            ContextFieldBuilder::text('_customerName', 'Customer')
-                ->state($data['_customerName'] ?? '—'),
-        ];
     }
 
     /**

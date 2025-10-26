@@ -91,16 +91,12 @@
                 </button>
             </div>
 
-            {{-- Active Context State - Livewire Fields --}}
-            @if($hasActiveContext && !empty($fields))
+            {{-- Active Context State - Schema Fields --}}
+            @if($hasActiveContext)
                 <div class="flex items-center justify-between gap-4">
-                    {{-- Fields Grid --}}
-                    <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        @foreach($fields as $field)
-                            <div class="fi-in-entry">
-                                {{ $field->render() }}
-                            </div>
-                        @endforeach
+                    {{-- Schema Display --}}
+                    <div class="flex-1">
+                        {{ $this->contextInfolist }}
                     </div>
 
                     {{-- Action Buttons --}}
