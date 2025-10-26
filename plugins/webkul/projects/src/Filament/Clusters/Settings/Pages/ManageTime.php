@@ -26,18 +26,18 @@ class ManageTime extends SettingsPage
     public function getBreadcrumbs(): array
     {
         return [
-            __('projects::filament/clusters/settings/pages/manage-time.title'),
+            __('webkul-project::filament/clusters/settings/pages/manage-time.title'),
         ];
     }
 
     public function getTitle(): string
     {
-        return __('projects::filament/clusters/settings/pages/manage-time.title');
+        return __('webkul-project::filament/clusters/settings/pages/manage-time.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('projects::filament/clusters/settings/pages/manage-time.title');
+        return __('webkul-project::filament/clusters/settings/pages/manage-time.title');
     }
 
     public function form(Schema $schema): Schema
@@ -45,8 +45,8 @@ class ManageTime extends SettingsPage
         return $schema
             ->components([
                 Toggle::make('enable_timesheets')
-                    ->label(__('projects::filament/clusters/settings/pages/manage-time.form.enable-timesheets'))
-                    ->helperText(__('projects::filament/clusters/settings/pages/manage-time.form.enable-timesheets-helper-text'))
+                    ->label(__('webkul-project::filament/clusters/settings/pages/manage-time.form.enable-timesheets'))
+                    ->helperText(__('webkul-project::filament/clusters/settings/pages/manage-time.form.enable-timesheets-helper-text'))
                     ->required(),
             ]);
     }

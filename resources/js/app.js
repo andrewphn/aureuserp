@@ -6,6 +6,7 @@ import './livewire-component-loader.js';
 // Import all FilamentPHP components (these will auto-register via the loader)
 import './components/advanced-file-upload.js';
 import './components/filament-form-components.js';
+import './components/context-footer.js';
 
 // Import Entity Store and Form Auto-populate (loaded once, prevents double-loading)
 import './centralized-entity-store.js';

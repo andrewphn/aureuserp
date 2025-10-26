@@ -11,9 +11,9 @@ enum ProjectVisibility: string
     public static function options(): array
     {
         return [
-            self::PRIVATE->value  => __('projects::enums/project-visibility.private'),
-            self::INTERNAL->value => __('projects::enums/project-visibility.internal'),
-            self::PUBLIC->value   => __('projects::enums/project-visibility.public'),
+            self::PRIVATE->value  => __('webkul-project::enums/project-visibility.private'),
+            self::INTERNAL->value => __('webkul-project::enums/project-visibility.internal'),
+            self::PUBLIC->value   => __('webkul-project::enums/project-visibility.public'),
         ];
     }
 

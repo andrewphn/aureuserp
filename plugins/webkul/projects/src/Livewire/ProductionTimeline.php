@@ -17,10 +17,12 @@ class ProductionTimeline extends Component implements HasForms
     public int $daysRemaining = 0;
     public int $overdueCount = 0;
     public int $progress = 0;
+    public string $expandedStage = '';
 
     public function mount(Project $project): void
     {
         $this->project = $project;
+        $this->expandedStage = $this->project->current_production_stage ?? 'discovery';
         $this->loadTimelineData();
     }
 
@@ -104,12 +106,22 @@ class ProductionTimeline extends Component implements HasForms
     public function changeStage(string $stage): void
     {
         $this->project->update(['current_production_stage' => $stage]);
+        $this->expandedStage = $stage;
         $this->loadTimelineData();
         $this->dispatch('stage-changed', stage: $stage);
     }
 
+    public function toggleStage(string $stage): void
+    {
+        if ($this->expandedStage === $stage) {
+            $this->expandedStage = '';
+        } else {
+            $this->expandedStage = $stage;
+        }
+    }
+
     public function render()
     {
-        return view('projects::livewire.production-timeline');
+        return view('webkul-project::livewire.production-timeline');
     }
 }

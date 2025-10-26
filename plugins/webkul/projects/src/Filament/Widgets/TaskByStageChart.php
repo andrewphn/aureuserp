@@ -22,7 +22,7 @@ class TaskByStageChart extends ChartWidget
 
     public function getHeading(): string|Htmlable|null
     {
-        return __('projects::filament/widgets/task-by-stage.heading.title');
+        return __('webkul-project::filament/widgets/task-by-stage.heading.title');
     }
 
     protected function getData(): array
@@ -78,7 +78,7 @@ class TaskByStageChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => __('projects::filament/widgets/task-by-stage.datasets.label'),
+                    'label' => __('webkul-project::filament/widgets/task-by-stage.datasets.label'),
                     'data'  => $datasets['datasets'],
                 ],
             ],

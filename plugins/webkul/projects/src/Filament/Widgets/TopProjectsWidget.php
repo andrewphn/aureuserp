@@ -22,7 +22,7 @@ class TopProjectsWidget extends BaseWidget
 
     public function getHeading(): string|Htmlable|null
     {
-        return __('projects::filament/widgets/top-projects.heading.title');
+        return __('webkul-project::filament/widgets/top-projects.heading.title');
     }
     
     public function getTableRecordKey(Model | array $record): string
@@ -78,13 +78,13 @@ class TopProjectsWidget extends BaseWidget
             ->defaultPaginationPageOption(5)
             ->columns([
                 Tables\Columns\TextColumn::make('project_name')
-                    ->label(__('projects::filament/widgets/top-projects.table-columns.project-name'))
+                    ->label(__('webkul-project::filament/widgets/top-projects.table-columns.project-name'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_hours')
-                    ->label(__('projects::filament/widgets/top-projects.table-columns.hours-spent'))
+                    ->label(__('webkul-project::filament/widgets/top-projects.table-columns.hours-spent'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_tasks')
-                    ->label(__('projects::filament/widgets/top-projects.table-columns.tasks'))
+                    ->label(__('webkul-project::filament/widgets/top-projects.table-columns.tasks'))
                     ->sortable(),
             ]);
     }

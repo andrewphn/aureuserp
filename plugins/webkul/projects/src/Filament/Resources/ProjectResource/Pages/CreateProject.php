@@ -75,8 +75,8 @@ class CreateProject extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('projects::filament/resources/project/pages/create-project.notification.title'))
-            ->body(__('projects::filament/resources/project/pages/create-project.notification.body'));
+            ->title(__('webkul-project::filament/resources/project/pages/create-project.notification.title'))
+            ->body(__('webkul-project::filament/resources/project/pages/create-project.notification.body'));
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

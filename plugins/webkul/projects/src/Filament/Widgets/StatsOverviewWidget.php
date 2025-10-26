@@ -19,7 +19,7 @@ class StatsOverviewWidget extends BaseWidget
 
     protected function getHeading(): ?string
     {
-        return __('projects::filament/widgets/stats-overview.heading.title');
+        return __('webkul-project::filament/widgets/stats-overview.heading.title');
     }
 
     protected function getData(): array
@@ -161,19 +161,19 @@ class StatsOverviewWidget extends BaseWidget
         };
 
         return [
-            Stat::make(__('projects::filament/widgets/stats-overview.total-tasks'), $current['total_tasks'])
+            Stat::make(__('webkul-project::filament/widgets/stats-overview.total-tasks'), $current['total_tasks'])
                 ->description($tasksChange['percentage'].'% '.($tasksChange['trend'] === 'success' ? 'increase' : 'decrease'))
                 ->descriptionIcon($tasksChange['trend'] === 'success' ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($tasksChange['trend'])
                 ->chart($data['charts']['tasks']),
 
-            Stat::make(__('projects::filament/widgets/stats-overview.total-hours-spent'), $formatHours($current['total_hours_spent']))
+            Stat::make(__('webkul-project::filament/widgets/stats-overview.total-hours-spent'), $formatHours($current['total_hours_spent']))
                 ->description($hoursSpentChange['percentage'].'% '.($hoursSpentChange['trend'] === 'success' ? 'increase' : 'decrease'))
                 ->descriptionIcon($hoursSpentChange['trend'] === 'success' ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($hoursSpentChange['trend'])
                 ->chart($data['charts']['hoursSpent']),
 
-            Stat::make(__('projects::filament/widgets/stats-overview.total-time-remaining'), $formatHours($current['total_remaining_hours']))
+            Stat::make(__('webkul-project::filament/widgets/stats-overview.total-time-remaining'), $formatHours($current['total_remaining_hours']))
                 ->description($remainingHoursChange['percentage'].'% '.($remainingHoursChange['trend'] === 'success' ? 'increase' : 'decrease'))
                 ->descriptionIcon($remainingHoursChange['trend'] === 'success' ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($remainingHoursChange['trend'])

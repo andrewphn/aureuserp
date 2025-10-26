@@ -42,6 +42,6 @@ class MilestoneTimeline extends Component implements HasForms
 
     public function render()
     {
-        return view('projects::livewire.milestone-timeline');
+        return view('webkul-project::livewire.milestone-timeline');
     }
 }

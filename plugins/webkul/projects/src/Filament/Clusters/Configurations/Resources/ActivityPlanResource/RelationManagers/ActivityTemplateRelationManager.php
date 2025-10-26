@@ -44,12 +44,12 @@ class ActivityTemplateRelationManager extends RelationManager
                     ->schema([
                         Group::make()
                             ->schema([
-                                Section::make(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.title'))
+                                Section::make(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.title'))
                                     ->schema([
                                         Group::make()
                                             ->schema([
                                                 Select::make('activity_type_id')
-                                                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.fields.activity-type'))
+                                                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.fields.activity-type'))
                                                     ->options(ActivityType::pluck('name', 'id'))
                                                     ->relationship('activityType', 'name')
                                                     ->searchable()
@@ -68,19 +68,19 @@ class ActivityTemplateRelationManager extends RelationManager
                                                         }
                                                     }),
                                                 TextInput::make('summary')
-                                                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.fields.summary')),
+                                                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.fields.summary')),
                                             ])->columns(2),
                                         RichEditor::make('note')
-                                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.fields.note')),
+                                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.activity-details.fields.note')),
                                     ]),
                             ])
                             ->columnSpan(['lg' => 2]),
                         Group::make()
                             ->schema([
-                                Section::make(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.title'))
+                                Section::make(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.title'))
                                     ->schema([
                                         Select::make('responsible_type')
-                                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.fields.assignment'))
+                                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.fields.assignment'))
                                             ->options(ActivityResponsibleType::options())
                                             ->default(ActivityResponsibleType::ON_DEMAND->value)
                                             ->required()
@@ -89,33 +89,33 @@ class ActivityTemplateRelationManager extends RelationManager
                                             ->required()
                                             ->preload(),
                                         Select::make('responsible_id')
-                                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.fields.assignee'))
+                                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.assignment.fields.assignee'))
                                             ->options(fn () => User::pluck('name', 'id'))
                                             ->hidden(fn (Get $get) => $get('responsible_type') !== ActivityResponsibleType::OTHER->value)
                                             ->searchable()
                                             ->preload(),
                                     ]),
-                                Section::make(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.title'))
+                                Section::make(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.title'))
                                     ->schema([
                                         TextInput::make('delay_count')
-                                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-count'))
+                                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-count'))
                                             ->numeric()
                                             ->default(0)
                                             ->minValue(0)
                                             ->maxValue(99999999999),
                                         Select::make('delay_unit')
-                                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-unit'))
+                                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-unit'))
                                             ->searchable()
                                             ->preload()
                                             ->default(ActivityDelayUnit::DAYS->value)
                                             ->options(ActivityDelayUnit::options()),
                                         Select::make('delay_from')
-                                            ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-from'))
+                                            ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-from'))
                                             ->searchable()
                                             ->preload()
                                             ->default(ActivityDelayInterval::BEFORE_PLAN_DATE->value)
                                             ->options(ActivityDelayInterval::options())
-                                            ->helperText(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-from-helper-text')),
+                                            ->helperText(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.form.sections.delay-information.fields.delay-from-helper-text')),
                                     ]),
                             ])
                             ->columnSpan(['lg' => 1]),
@@ -130,70 +130,70 @@ class ActivityTemplateRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('activityType.name')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.activity-type'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.activity-type'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('summary')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.summary'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.summary'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('responsible_type')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.assignment'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.assignment'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('responsible.name')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.assigned-to'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.assigned-to'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('delay_count')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.interval'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.interval'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('delay_unit')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.delay-unit'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.delay-unit'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('delay_from')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.delay-from'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.delay-from'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('createdBy.name')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.created-by'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.created-by'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.created-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.created-at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.updated-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.columns.updated-at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('activity_type_id')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.activity-type'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.activity-type'))
                     ->options(ActivityType::pluck('name', 'id')),
                 TernaryFilter::make('is_active')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.activity-status')),
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.activity-status')),
                 Filter::make('has_delay')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.has-delay'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.filters.has-delay'))
                     ->query(fn ($query) => $query->whereNotNull('delay_count')),
             ])
             ->groups([
                 Tables\Grouping\Group::make('responsible.name')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.activity-type'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.activity-type'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('responsible_type')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.assignment'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.assignment'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('created_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.created-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.created-at'))
                     ->collapsible(),
                 Tables\Grouping\Group::make('updated_at')
-                    ->label(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.updated-at'))
+                    ->label(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.groups.updated-at'))
                     ->date()
                     ->collapsible(),
             ])
@@ -227,15 +227,15 @@ class ActivityTemplateRelationManager extends RelationManager
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.edit.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.edit.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.edit.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.delete.notification.title'))
-                                ->body(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.delete.notification.body')),
+                                ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.delete.notification.title'))
+                                ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.actions.delete.notification.body')),
                         ),
                 ]),
             ])
@@ -244,8 +244,8 @@ class ActivityTemplateRelationManager extends RelationManager
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.bulk-actions.delete.notification.title'))
-                            ->body(__('projects::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.bulk-actions.delete.notification.body')),
+                            ->title(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.bulk-actions.delete.notification.title'))
+                            ->body(__('webkul-project::filament/clusters/configurations/resources/activity-plan/relation-managers/activity-template.table.bulk-actions.delete.notification.body')),
                     ),
             ])
             ->reorderable('sort');

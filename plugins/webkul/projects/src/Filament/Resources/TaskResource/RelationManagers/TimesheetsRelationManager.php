@@ -43,24 +43,24 @@ class TimesheetsRelationManager extends RelationManager
                 Hidden::make('type')
                     ->default('projects'),
                 DatePicker::make('date')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.form.date'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.form.date'))
                     ->required()
                     ->native(false),
                 Select::make('user_id')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.form.employee'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.form.employee'))
                     ->required()
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload(),
                 TextInput::make('name')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.form.description')),
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.form.description')),
                 TextInput::make('unit_amount')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.form.time-spent'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.form.time-spent'))
                     ->numeric()
                     ->required()
                     ->minValue(0)
                     ->maxValue(99999999999)
-                    ->helperText(__('projects::filament/resources/task/relation-managers/timesheets.form.time-spent-helper-text')),
+                    ->helperText(__('webkul-project::filament/resources/task/relation-managers/timesheets.form.time-spent-helper-text')),
             ])
             ->columns(1);
     }
@@ -71,14 +71,14 @@ class TimesheetsRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('date')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.date'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.date'))
                     ->date('Y-m-d'),
                 TextColumn::make('user.name')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.employee')),
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.employee')),
                 TextColumn::make('name')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.description')),
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.description')),
                 TextColumn::make('unit_amount')
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.time-spent'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.time-spent'))
                     ->formatStateUsing(function ($state) {
                         $hours = floor($state);
                         $minutes = ($state - $hours) * 60;
@@ -87,7 +87,7 @@ class TimesheetsRelationManager extends RelationManager
                     })
                     ->summarize([
                         Sum::make()
-                            ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.time-spent'))
+                            ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.time-spent'))
                             ->formatStateUsing(function ($state) {
                                 $hours = floor($state);
                                 $minutes = ($state - $hours) * 60;
@@ -95,7 +95,7 @@ class TimesheetsRelationManager extends RelationManager
                                 return $hours.':'.$minutes;
                             }),
                         Sum::make()
-                            ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.time-spent-on-subtasks'))
+                            ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.time-spent-on-subtasks'))
                             ->formatStateUsing(function ($state) {
                                 $subtaskHours = $this->getOwnerRecord()->subtask_effective_hours;
                                 $hours = floor($subtaskHours);
@@ -104,7 +104,7 @@ class TimesheetsRelationManager extends RelationManager
                                 return $hours.':'.$minutes;
                             }),
                         Sum::make()
-                            ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.total-time-spent'))
+                            ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.total-time-spent'))
                             ->formatStateUsing(function ($state) {
                                 $subtaskHours = $this->getOwnerRecord()->total_hours_spent;
                                 $hours = floor($subtaskHours);
@@ -113,7 +113,7 @@ class TimesheetsRelationManager extends RelationManager
                                 return $hours.':'.$minutes;
                             }),
                         Sum::make()
-                            ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.columns.remaining-time'))
+                            ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.columns.remaining-time'))
                             ->formatStateUsing(function () {
                                 $remainingHours = $this->getOwnerRecord()->remaining_hours;
 
@@ -127,7 +127,7 @@ class TimesheetsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label(__('projects::filament/resources/task/relation-managers/timesheets.table.header-actions.create.label'))
+                    ->label(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateDataUsing(function (array $data): array {
                         $data['creator_id'] = Auth::id();
@@ -143,8 +143,8 @@ class TimesheetsRelationManager extends RelationManager
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/resources/task/relation-managers/timesheets.table.header-actions.create.notification.title'))
-                            ->body(__('projects::filament/resources/task/relation-managers/timesheets.table.header-actions.create.notification.body')),
+                            ->title(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.header-actions.create.notification.title'))
+                            ->body(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.header-actions.create.notification.body')),
                     ),
             ])
             ->recordActions([
@@ -152,15 +152,15 @@ class TimesheetsRelationManager extends RelationManager
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/resources/task/relation-managers/timesheets.table.actions.edit.notification.title'))
-                            ->body(__('projects::filament/resources/task/relation-managers/timesheets.table.actions.edit.notification.body')),
+                            ->title(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.actions.edit.notification.title'))
+                            ->body(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.actions.edit.notification.body')),
                     ),
                 DeleteAction::make()
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/resources/task/relation-managers/timesheets.table.actions.delete.notification.title'))
-                            ->body(__('projects::filament/resources/task/relation-managers/timesheets.table.actions.delete.notification.body')),
+                            ->title(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.actions.delete.notification.title'))
+                            ->body(__('webkul-project::filament/resources/task/relation-managers/timesheets.table.actions.delete.notification.body')),
                     ),
             ])
             ->paginated(false);

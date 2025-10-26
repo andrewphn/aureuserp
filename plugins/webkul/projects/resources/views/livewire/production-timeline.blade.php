@@ -340,7 +340,7 @@
         <div class="stage-line-minimal"></div>
 
         @foreach($stages as $index => $stage)
-        <div class="stage-minimal" wire:click="changeStage('{{ $stage['key'] }}')">
+        <div class="stage-minimal" wire:click="toggleStage('{{ $stage['key'] }}')">
             <div class="stage-dot-minimal {{ $stage['status'] }}">
                 @if($stage['status'] === 'completed')
                     <svg fill="currentColor" viewBox="0 0 20 20">
@@ -361,7 +361,14 @@
             @endif
 
             @if(count($stage['milestones']) > 0)
-                <div class="stage-count-minimal">{{ count($stage['milestones']) }}</div>
+                <div class="stage-count-minimal">
+                    {{ count($stage['milestones']) }}
+                    @if($expandedStage === $stage['key'])
+                        ▼
+                    @else
+                        ▶
+                    @endif
+                </div>
             @endif
         </div>
         @endforeach
@@ -375,13 +382,13 @@
         <div class="progress-text-minimal">{{ $progress }}%</div>
     </div>
 
-    <!-- Expandable Stage Content (Shown when stage has milestones) -->
+    <!-- Expandable Stage Content (Shown when stage is expanded) -->
     @foreach($stages as $stage)
-        @if($stage['status'] === 'current' && count($stage['milestones']) > 0)
-        <div class="stage-expansion-minimal">
+        @if($expandedStage === $stage['key'] && count($stage['milestones']) > 0)
+        <div class="stage-expansion-minimal" wire:transition>
             <div class="expansion-header-minimal">
                 <div class="expansion-title-minimal">{{ $stage['label'] }} Milestones</div>
-                <div class="expansion-close-minimal">[Click to collapse]</div>
+                <div class="expansion-close-minimal" wire:click="toggleStage('{{ $stage['key'] }}')">[Click to collapse]</div>
             </div>
 
             <div class="milestone-list-minimal">

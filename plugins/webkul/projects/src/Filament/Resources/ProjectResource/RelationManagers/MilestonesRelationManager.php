@@ -34,7 +34,7 @@ class MilestonesRelationManager extends RelationManager
             ->groups([])
             ->headerActions([
                 CreateAction::make()
-                    ->label(__('projects::filament/resources/project/relation-managers/milestones.table.header-actions.create.label'))
+                    ->label(__('webkul-project::filament/resources/project/relation-managers/milestones.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->mutateDataUsing(function (array $data): array {
                         $data['creator_id'] = Auth::id();
@@ -44,8 +44,8 @@ class MilestonesRelationManager extends RelationManager
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('projects::filament/resources/project/relation-managers/milestones.table.header-actions.create.notification.title'))
-                            ->body(__('projects::filament/resources/project/relation-managers/milestones.table.header-actions.create.notification.body')),
+                            ->title(__('webkul-project::filament/resources/project/relation-managers/milestones.table.header-actions.create.notification.title'))
+                            ->body(__('webkul-project::filament/resources/project/relation-managers/milestones.table.header-actions.create.notification.body')),
                     ),
             ]);
     }

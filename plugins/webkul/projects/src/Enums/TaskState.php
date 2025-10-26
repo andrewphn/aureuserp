@@ -30,11 +30,11 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
     public static function options(): array
     {
         return [
-            self::IN_PROGRESS->value      => __('projects::enums/task-state.in-progress'),
-            self::CHANGE_REQUESTED->value => __('projects::enums/task-state.change-requested'),
-            self::APPROVED->value         => __('projects::enums/task-state.approved'),
-            self::CANCELLED->value        => __('projects::enums/task-state.cancelled'),
-            self::DONE->value             => __('projects::enums/task-state.done'),
+            self::IN_PROGRESS->value      => __('webkul-project::enums/task-state.in-progress'),
+            self::CHANGE_REQUESTED->value => __('webkul-project::enums/task-state.change-requested'),
+            self::APPROVED->value         => __('webkul-project::enums/task-state.approved'),
+            self::CANCELLED->value        => __('webkul-project::enums/task-state.cancelled'),
+            self::DONE->value             => __('webkul-project::enums/task-state.done'),
         ];
     }
 

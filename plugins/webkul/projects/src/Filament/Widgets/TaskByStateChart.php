@@ -23,7 +23,7 @@ class TaskByStateChart extends ChartWidget
 
     public function getHeading(): string|Htmlable|null
     {
-        return __('projects::filament/widgets/task-by-state.heading.title');
+        return __('webkul-project::filament/widgets/task-by-state.heading.title');
     }
 
     protected function getData(): array

@@ -104,7 +104,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                     Select::make('linked_entity_id')
                                         ->label('Select Entity')
                                         ->helperText('Choose an existing entity from the project hierarchy')
-                                        ->options(fn () => $this->getHierarchicalEntityOptions())
+                                        ->options(function () {
+                                            $entityManagement = new EntityManagementService();
+                                            return $entityManagement->getHierarchicalEntityOptions($this->annotationType, $this->projectId);
+                                        })
                                         ->searchable()
                                         ->visible(fn (callable $get) => $get('link_mode') === 'existing')
                                         ->required(fn (callable $get) => $get('link_mode') === 'existing')
@@ -1182,348 +1185,51 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             });
     }
 
+    /**
+     * Save annotation using AnnotationSaveService
+     * Entity-centric workflow: delegates to service for all save logic
+     */
     public function save(): void
     {
         try {
-            // Get validated form state using proper Filament API
+            // Get validated form state
             $data = $this->form->getState();
+            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
 
-            $annotationId = $this->originalAnnotation['id'];
-
-            // Check for duplicate view types for location annotations
-            if (($this->originalAnnotation['type'] ?? null) === 'location') {
-                $locationId = $data['room_location_id'] ?? null;
-                $viewType = $data['view_type'] ?? null;
-                $viewOrientation = $data['view_orientation'] ?? null;
-                $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
-
-                if ($locationId && $viewType && $pdfPageId) {
-                    $pdfPage = \App\Models\PdfPage::find($pdfPageId);
-                    if ($pdfPage && $pdfPage->document_id) {
-                        $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
-
-                        // Build the key to check
-                        $checkKey = $viewType;
-                        if (in_array($viewType, ['elevation', 'section']) && $viewOrientation) {
-                            $checkKey = $viewType . '-' . $viewOrientation;
-                        }
-
-                        // Check if this view combination already exists
-                        if (isset($takenViews[$checkKey]) && !empty($takenViews[$checkKey])) {
-                            $pages = implode(', ', $takenViews[$checkKey]);
-                            $viewLabel = $viewType === 'plan'
-                                ? 'Plan View'
-                                : ucfirst($viewType) . ' View' . ($viewOrientation ? ' - ' . $viewOrientation : '');
-
-                            \Filament\Notifications\Notification::make()
-                                ->title('Duplicate View Warning')
-                                ->body("A {$viewLabel} already exists for this location on page(s) {$pages}. You are creating an additional view.")
-                                ->warning()
-                                ->duration(8000)
-                                ->send();
-                        }
-                    }
-                }
+            if (!$pdfPageId) {
+                throw new \Exception('PDF page ID is missing from annotation data');
             }
 
-            // If it's a temporary annotation (not saved yet), CREATE it in database
-            if (is_string($annotationId) && str_starts_with($annotationId, 'temp_')) {
-                // Get PDF page to calculate normalized dimensions
-                $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
-                $pageWidth = $pdfPage?->page_width ?? 2592;  // Default PDF page width
-                $pageHeight = $pdfPage?->page_height ?? 1728; // Default PDF page height
-
-                // Calculate normalized width and height from PDF dimensions
-                $normalizedWidth = ($this->originalAnnotation['pdfWidth'] ?? 0) / $pageWidth;
-                $normalizedHeight = ($this->originalAnnotation['pdfHeight'] ?? 0) / $pageHeight;
-
-                // Auto-detect position from Y coordinate
-                $normalizedY = $this->originalAnnotation['normalizedY'] ?? 0;
-                $positionData = PositionInferenceUtil::inferPositionFromCoordinates($normalizedY, $normalizedHeight);
-
-                // Create new annotation in database
-                // Auto-calculate room_id from parent chain for non-room annotations
-                $annotationType = $this->originalAnnotation['type'] ?? 'room';
-                $parentAnnotationId = $data['parent_annotation_id'] ?? null;
-                $roomId = $annotationType === 'room'
-                    ? ($data['room_id'] ?? null)
-                    : AnnotationHierarchyService::getRoomIdFromParent($parentAnnotationId);
-
-                // Auto-create cabinet_run if cabinet is created directly under a location
-                if ($annotationType === 'cabinet' && $parentAnnotationId) {
-                    $parentAnnotation = DB::table('pdf_page_annotations')
-                        ->where('id', $parentAnnotationId)
-                        ->first();
-
-                    // If parent is a location (not a cabinet_run), auto-create cabinet_run
-                    if ($parentAnnotation && $parentAnnotation->annotation_type === 'location') {
-                        // Create a cabinet run annotation with the same name as the cabinet
-                        $newCabinetRun = DB::table('pdf_page_annotations')->insertGetId([
-                            'pdf_page_id' => $this->originalAnnotation['pdfPageId'],
-                            'parent_annotation_id' => $parentAnnotationId, // Link to location
-                            'annotation_type' => 'cabinet_run',
-                            'label' => $data['label'] . ' Run', // Add " Run" suffix to differentiate
-                            'notes' => 'Auto-created cabinet run for ' . $data['label'],
-                            'room_id' => $roomId,
-                            'room_location_id' => $data['room_location_id'] ?? null,  // Use room_location_id from form data
-                            'cabinet_run_id' => $data['cabinet_run_id'] ?? null,  // Cabinet run entity reference (will be created later)
-                            'x' => $this->originalAnnotation['normalizedX'] ?? 0,
-                            'y' => $normalizedY ?? 0,
-                            'width' => $normalizedWidth ?? 100,
-                            'height' => $normalizedHeight ?? 100,
-                            'color' => $this->originalAnnotation['color'] ?? '#f59e0b',  // Default amber color
-                            'view_type' => $data['view_type'] ?? 'plan',
-                            'view_orientation' => $data['view_orientation'] ?? null,
-                            'view_scale' => $this->originalAnnotation['viewScale'] ?? null,
-                            'inferred_position' => $positionData['inferred_position'] ?? null,
-                            'vertical_zone' => $positionData['vertical_zone'] ?? null,
-                            'creator_id' => auth()->id(),  // Set creator
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-
-                        // Update parent to point to the new cabinet_run instead of location
-                        $parentAnnotationId = $newCabinetRun;
-                        $data['parent_annotation_id'] = $newCabinetRun;
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('Auto-Created Cabinet Run')
-                            ->body("Created cabinet run \"{$data['label']} Run\" to maintain proper hierarchy.")
-                            ->success()
-                            ->duration(5000)
-                            ->send();
-                    }
-                }
-
-                // Auto-create entity records based on annotation type
-                // For location annotations, use room_location_id from dropdown
-                // For cabinet_run/cabinet annotations, use location_id
-                $roomLocationId = ($annotationType === 'location')
-                    ? ($data['room_location_id'] ?? null)
-                    : ($data['location_id'] ?? null);
-
-                $cabinetRunId = $data['cabinet_run_id'] ?? null;
-                $cabinetSpecificationId = $data['cabinet_specification_id'] ?? null;
-
-                // 1. Location annotation → Create RoomLocation entity ONLY if not selected from dropdown
-                // Support multi-view: Check if entity already exists with same name + room_id before creating
-                if ($annotationType === 'location' && $roomId && !$roomLocationId) {
-                    // Check for existing entity (multi-view support)
-                    $existingLocation = \Webkul\Project\Models\RoomLocation::where('room_id', $roomId)
-                        ->where('name', $data['label'])
-                        ->first();
-
-                    if ($existingLocation) {
-                        // Reuse existing entity for multi-view annotation
-                        $roomLocationId = $existingLocation->id;
-                    } else {
-                        // Create new entity
-                        $roomLocation = \Webkul\Project\Models\RoomLocation::create([
-                            'room_id' => $roomId,
-                            'name' => $data['label'],
-                            'location_type' => null, // Can be set from form if needed
-                            'notes' => $data['notes'] ?? '',
-                            'creator_id' => auth()->id(),
-                        ]);
-                        $roomLocationId = $roomLocation->id;
-                    }
-                }
-
-                // 2. Cabinet Run annotation → Create CabinetRun entity
-                // Support multi-view: Check if entity already exists before creating
-                if ($annotationType === 'cabinet_run' && !$cabinetRunId) {
-                    // Get room_location_id from parent location annotation
-                    $parentLocationId = AnnotationHierarchyService::getRoomLocationIdFromParent($parentAnnotationId);
-                    if ($parentLocationId) {
-                        // Check for existing entity (multi-view support)
-                        $existingCabinetRun = \Webkul\Project\Models\CabinetRun::where('room_location_id', $parentLocationId)
-                            ->where('name', $data['label'])
-                            ->first();
-
-                        if ($existingCabinetRun) {
-                            // Reuse existing entity for multi-view annotation
-                            $cabinetRunId = $existingCabinetRun->id;
-                        } else {
-                            // Create new entity
-                            $cabinetRun = \Webkul\Project\Models\CabinetRun::create([
-                                'room_location_id' => $parentLocationId,
-                                'name' => $data['label'],
-                                'notes' => $data['notes'] ?? '',
-                                'creator_id' => auth()->id(),
-                            ]);
-                            $cabinetRunId = $cabinetRun->id;
-                        }
-                    }
-                }
-
-                // 3. Cabinet annotation → Create CabinetSpecification entity
-                if ($annotationType === 'cabinet' && !$cabinetSpecificationId) {
-                    // Get project_id from PDF page
-                    $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
-                    $projectId = $pdfPage?->pdfDocument?->project_id;
-
-                    // Get cabinet_run_id from parent cabinet_run annotation
-                    $parentCabinetRunId = AnnotationHierarchyService::getCabinetRunIdFromParent($parentAnnotationId);
-
-                    if ($projectId && $roomId && $parentCabinetRunId) {
-                        $cabinetSpec = \Webkul\Project\Models\CabinetSpecification::create([
-                            'project_id' => $projectId,
-                            'room_id' => $roomId,
-                            'cabinet_run_id' => $parentCabinetRunId,
-                            'cabinet_number' => $data['label'],
-                            'creator_id' => auth()->id(),
-                        ]);
-                        $cabinetSpecificationId = $cabinetSpec->id;
-                    }
-                }
-
-                $annotation = \App\Models\PdfPageAnnotation::create([
-                    'pdf_page_id'      => $this->originalAnnotation['pdfPageId'],
-                    'annotation_type'  => $annotationType,
-                    'label'            => $data['label'],
-                    'notes'            => $data['notes'] ?? '',
-                    'parent_annotation_id' => $parentAnnotationId,
-                    'room_id'          => $roomId,
-                    'room_location_id' => $roomLocationId,
-                    'cabinet_run_id'   => $cabinetRunId,
-                    'cabinet_specification_id' => $cabinetSpecificationId,
-                    'x'                => $this->originalAnnotation['normalizedX'] ?? 0,
-                    'y'                => $normalizedY,
-                    'width'            => $normalizedWidth,
-                    'height'           => $normalizedHeight,
-                    'color'            => $this->originalAnnotation['color'] ?? '#f59e0b',
-                    // View types and position detection (from FORM DATA)
-                    'view_type'        => $data['view_type'] ?? 'plan',
-                    'view_orientation' => $data['view_orientation'] ?? null,
-                    'view_scale'       => $this->originalAnnotation['viewScale'] ?? null,
-                    'inferred_position' => $positionData['inferred_position'],
-                    'vertical_zone'    => $positionData['vertical_zone'],
-                ]);
-
-                // Log creation
-                \App\Models\PdfAnnotationHistory::logAction(
-                    pdfPageId: $annotation->pdf_page_id,
-                    action: 'created',
-                    beforeData: null,
-                    afterData: $annotation->toArray(),
-                    annotationId: $annotation->id
-                );
-
-                // Build updated annotation with real database ID
-                $updatedAnnotation = array_merge($this->originalAnnotation, [
-                    'id'                => $annotation->id, // Replace temp ID with real ID
-                    'label'             => $data['label'],
-                    'notes'             => $data['notes'] ?? '',
-                    'parentId'          => $data['parent_annotation_id'] ?? null,  // Include parent ID for UI update
-                    'measurementWidth'  => $data['measurement_width'] ?? null,
-                    'measurementHeight' => $data['measurement_height'] ?? null,
-                    'roomId'            => $data['room_id'] ?? null,
-                    'locationId'        => $data['location_id'] ?? null,
-                    'cabinetRunId'      => isset($data['cabinet_run_id']) ? $data['cabinet_run_id'] : null,
-                ]);
-
-                // Update display names
-                if (isset($data['room_id']) && $data['room_id']) {
-                    $room = Room::find($data['room_id']);
-                    $updatedAnnotation['roomName'] = $room?->name;
-                }
-
-                if (isset($data['location_id']) && $data['location_id']) {
-                    $location = RoomLocation::find($data['location_id']);
-                    $updatedAnnotation['locationName'] = $location?->name;
-                }
-
-                // Dispatch event back to Alpine.js with new database ID
-                $this->dispatch('annotation-updated', annotation: $updatedAnnotation);
-
-                \Filament\Notifications\Notification::make()
-                    ->title('Annotation Saved')
-                    ->body('The annotation has been saved to the database.')
-                    ->success()
-                    ->send();
-
-                $this->close();
-
-                return;
-            }
-
-            // Otherwise, update in database
-            $annotation = \App\Models\PdfPageAnnotation::findOrFail($annotationId);
-            $pdfPageId = $annotation->pdf_page_id;
-
-            // Log before update
-            $beforeData = $annotation->toArray();
-
-            // Auto-calculate room_id from parent chain for non-room annotations
-            $parentAnnotationId = $data['parent_annotation_id'] ?? null;
-            $roomId = $annotation->annotation_type === 'room'
-                ? ($data['room_id'] ?? null)
-                : AnnotationHierarchyService::getRoomIdFromParent($parentAnnotationId);
-
-            // Update annotation in database
-            $updateData = [
-                'label'            => $data['label'],
-                'notes'            => $data['notes'] ?? '',
-                'parent_annotation_id' => $parentAnnotationId,
-                'room_id'          => $roomId,
-                'room_location_id' => $data['location_id'] ?? null,
-                'cabinet_run_id'   => $data['cabinet_run_id'] ?? null,
-                'cabinet_specification_id' => $data['cabinet_specification_id'] ?? null,
-                'view_type'        => $data['view_type'] ?? 'plan',
-                'view_orientation' => $data['view_orientation'] ?? null,
-            ];
-
-            $annotation->update($updateData);
-
-            // CRITICAL: Save related model changes using FilamentPHP v4 pattern
-            // The ->relationship() method on Sections automatically loads data,
-            // but we must explicitly call saveRelationships() to persist changes
-            $this->form->model($annotation)->saveRelationships();
-
-            // SYNC METADATA ACROSS ALL INSTANCES OF THIS ENTITY
-            // If this is a location annotation, find all other location annotations
-            // with the same room_location_id and update their metadata too
-            $this->syncMetadataAcrossPages($annotation, $updateData);
-
-            // Log after update
-            \App\Models\PdfAnnotationHistory::logAction(
+            // Delegate to AnnotationSaveService
+            $annotationSaveService = new AnnotationSaveService();
+            $annotation = $annotationSaveService->saveAnnotation(
+                formData: $data,
+                originalAnnotation: $this->originalAnnotation,
+                projectId: $this->projectId,
                 pdfPageId: $pdfPageId,
-                action: 'updated',
-                beforeData: $beforeData,
-                afterData: $annotation->fresh()->toArray(),
-                annotationId: $annotation->id
+                linkMode: $this->linkMode,
+                linkedEntityId: $this->linkedEntityId
             );
 
-            // Build updated annotation for Alpine.js
+            // Build updated annotation for Alpine.js UI update
             $updatedAnnotation = array_merge($this->originalAnnotation, [
-                'label'             => $data['label'],
-                'notes'             => $data['notes'] ?? '',
-                'parentId'          => $data['parent_annotation_id'] ?? null,  // Include parent ID for UI update
-                'measurementWidth'  => $data['measurement_width'] ?? null,
-                'measurementHeight' => $data['measurement_height'] ?? null,
-                'roomId'            => $data['room_id'] ?? null,
-                'locationId'        => isset($data['location_id']) ? $data['location_id'] : null,
-                'cabinetRunId'      => isset($data['cabinet_run_id']) ? $data['cabinet_run_id'] : null,
+                'id'                => $annotation->id,
+                'label'             => $annotation->label,
+                'notes'             => $annotation->notes ?? '',
+                'parentId'          => $annotation->parent_annotation_id,
+                'roomId'            => $annotation->room_id,
+                'locationId'        => $annotation->room_location_id,
+                'cabinetRunId'      => $annotation->cabinet_run_id,
+                'cabinetSpecId'     => $annotation->cabinet_specification_id,
             ]);
 
-            // Update display names
-            if (isset($data['room_id']) && $data['room_id']) {
-                $room = Room::find($data['room_id']);
-                $updatedAnnotation['roomName'] = $room?->name;
-            }
-
-            if (isset($data['location_id']) && $data['location_id']) {
-                $location = RoomLocation::find($data['location_id']);
-                $updatedAnnotation['locationName'] = $location?->name;
-            }
-
-            // Dispatch event back to Alpine.js to update UI
+            // Dispatch event back to Alpine.js
             $this->dispatch('annotation-updated', annotation: $updatedAnnotation);
 
             // Show success notification
             \Filament\Notifications\Notification::make()
-                ->title('Annotation Updated')
-                ->body('The annotation has been saved to the database.')
+                ->title('Annotation Saved')
+                ->body('The annotation has been saved successfully.')
                 ->success()
                 ->send();
 
@@ -1538,7 +1244,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->send();
 
             \Log::error('Annotation not found for update', [
-                'annotation_id' => $annotationId ?? 'unknown',
+                'annotation_id' => $this->originalAnnotation['id'] ?? 'unknown',
+                'error' => $e->getMessage(),
             ]);
         } catch (\Exception $e) {
             \Filament\Notifications\Notification::make()
@@ -1547,8 +1254,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ->danger()
                 ->send();
 
-            \Log::error('Annotation update failed', [
-                'annotation_id' => $annotationId ?? 'unknown',
+            \Log::error('Annotation save failed', [
+                'annotation_id' => $this->originalAnnotation['id'] ?? 'unknown',
                 'error'         => $e->getMessage(),
                 'trace'         => $e->getTraceAsString(),
             ]);
@@ -1659,27 +1366,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     /**
      * Get the entity ID field name based on annotation type
      */
-    protected function getEntityIdField(): string
-    {
-        return match($this->annotationType) {
-            'room' => 'room_id',
-            'location' => 'room_location_id',
-            'cabinet_run' => 'cabinet_run_id',
-            'cabinet' => 'cabinet_specification_id',
-            default => throw new \InvalidArgumentException("Unknown annotation type: {$this->annotationType}"),
-        };
-    }
-
     /**
      * Get hierarchical entity options for the dropdown selector
      * Returns array with format: [id => "Parent > Child > Entity"]
      */
-    protected function getHierarchicalEntityOptions(): array
-    {
-        if (!$this->projectId || !$this->annotationType) {
-            return [];
-        }
-
         $options = [];
 
         switch ($this->annotationType) {
@@ -1750,21 +1440,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     /**
      * Create new entity from form data
      */
-    protected function createEntityFromData(array $data): \Illuminate\Database\Eloquent\Model
-    {
-        $modelClass = match($this->annotationType) {
-            'room' => Room::class,
-            'location' => RoomLocation::class,
-            'cabinet_run' => CabinetRun::class,
-            'cabinet' => CabinetSpecification::class,
-            default => throw new \InvalidArgumentException("Unknown annotation type: {$this->annotationType}"),
-        };
-
-        // Add project_id for room entities
-        if ($this->annotationType === 'room') {
-            $data['project_id'] = $this->projectId;
-        }
-
         // Add creator_id for all entities
         $data['creator_id'] = auth()->id();
 
@@ -1774,19 +1449,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     /**
      * Load entity by ID based on annotation type
      */
-    protected function loadEntity(int $entityId): ?\Illuminate\Database\Eloquent\Model
-    {
-        $modelClass = match($this->annotationType) {
-            'room' => Room::class,
-            'location' => RoomLocation::class,
-            'cabinet_run' => CabinetRun::class,
-            'cabinet' => CabinetSpecification::class,
-            default => null,
-        };
-
-        return $modelClass ? $modelClass::find($entityId) : null;
-    }
-
     public function render()
     {
         return view('webkul-project::livewire.annotation-editor');
@@ -1827,13 +1489,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         // ============================================
         // ENTITY-CENTRIC WORKFLOW: Load entity data
         // ============================================
-        $entityIdField = $this->getEntityIdField();
+        $entityManagement = new EntityManagementService();
+        $entityIdField = $entityManagement->getEntityIdField($this->annotationType);
         $this->linkedEntityId = $annotation[str_replace('_id', 'Id', $entityIdField)] ?? null;
 
         if ($this->linkedEntityId) {
             // Annotation is linked to an existing entity - load entity data
             $this->linkMode = 'existing';
-            $entity = $this->loadEntity($this->linkedEntityId);
+            $entity = $entityManagement->loadEntity($this->annotationType, $this->linkedEntityId);
             $this->entityData = $entity ? $entity->toArray() : [];
         } else {
             // New entity will be created
@@ -1968,113 +1631,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * For example, "Sink Wall" on page 2 (plan) and page 3 (elevation) should
      * have the same parent, label, notes - only view_type and coordinates differ
      */
-    protected function syncMetadataAcrossPages(\App\Models\PdfPageAnnotation $annotation, array $updateData): void
-    {
-        // Determine the entity ID field to match on
-        $entityField = match($annotation->annotation_type) {
-            'room' => 'room_id',
-            'location' => 'room_location_id',
-            'cabinet_run' => 'cabinet_run_id',
-            'cabinet' => 'cabinet_specification_id',
-            default => null,
-        };
-
-        if (!$entityField || !$annotation->$entityField) {
-            return; // No entity to match, skip sync
-        }
-
-        $entityId = $annotation->$entityField;
-
-        // Get PDF document to search across all pages
-        $pdfDocumentId = $annotation->pdfPage->document_id ?? null;
-        if (!$pdfDocumentId) {
-            return;
-        }
-
-        // Find all other annotations of the same type with the same entity ID
-        $siblingAnnotations = \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfDocumentId) {
-                $query->where('document_id', $pdfDocumentId);
-            })
-            ->where('annotation_type', $annotation->annotation_type)
-            ->where($entityField, $entityId)
-            ->where('id', '!=', $annotation->id) // Exclude the one we just updated
-            ->get();
-
-        if ($siblingAnnotations->isEmpty()) {
-            return; // No siblings to sync
-        }
-
-        // Prepare metadata to sync (exclude page-specific fields)
-        $syncData = [
-            'label'            => $updateData['label'],
-            'notes'            => $updateData['notes'] ?? null,
-            'parent_annotation_id' => $updateData['parent_annotation_id'] ?? null,
-            'room_id'          => $updateData['room_id'] ?? null,
-            'room_location_id' => $updateData['room_location_id'] ?? null,
-            'cabinet_run_id'   => $updateData['cabinet_run_id'] ?? null,
-            'cabinet_specification_id' => $updateData['cabinet_specification_id'] ?? null,
-            // NOTE: We do NOT sync view_type, view_orientation, x, y, width, height
-            // Those are page-specific
-        ];
-
-        // However, parent relationships need special handling across pages
-        // The parent on page 2 might be annotation ID 10, but on page 3 it might be ID 25
-        // We need to find the equivalent parent on each page
-        if ($syncData['parent_annotation_id']) {
-            $parentAnnotation = \App\Models\PdfPageAnnotation::find($syncData['parent_annotation_id']);
-            if ($parentAnnotation) {
-                // Get the parent's entity field
-                $parentEntityField = match($parentAnnotation->annotation_type) {
-                    'room' => 'room_id',
-                    'location' => 'room_location_id',
-                    'cabinet_run' => 'cabinet_run_id',
-                    'cabinet' => 'cabinet_specification_id',
-                    default => null,
-                };
-
-                if ($parentEntityField && $parentAnnotation->$parentEntityField) {
-                    $parentEntityId = $parentAnnotation->$parentEntityField;
-
-                    // For each sibling, find the equivalent parent on its page
-                    foreach ($siblingAnnotations as $sibling) {
-                        $syncDataForSibling = $syncData;
-
-                        // Find parent annotation on sibling's page with same entity
-                        $equivalentParent = \App\Models\PdfPageAnnotation::where('pdf_page_id', $sibling->pdf_page_id)
-                            ->where('annotation_type', $parentAnnotation->annotation_type)
-                            ->where($parentEntityField, $parentEntityId)
-                            ->first();
-
-                        if ($equivalentParent) {
-                            $syncDataForSibling['parent_annotation_id'] = $equivalentParent->id;
-                        } else {
-                            // If parent doesn't exist on this page, keep it null or existing value
-                            $syncDataForSibling['parent_annotation_id'] = null;
-                        }
-
-                        $sibling->update($syncDataForSibling);
-
-                        \Log::info('Synced annotation metadata across pages', [
-                            'from_annotation_id' => $annotation->id,
-                            'from_page' => $annotation->pdfPage->page_number,
-                            'to_annotation_id' => $sibling->id,
-                            'to_page' => $sibling->pdfPage->page_number,
-                            'entity_type' => $annotation->annotation_type,
-                            'entity_id' => $entityId,
-                        ]);
-                    }
-
-                    return; // Early return since we handled parent relationships specially
-                }
-            }
-        }
-
-        // If no parent or parent handling failed, just sync without parent
-        $syncDataWithoutParent = array_diff_key($syncData, ['parent_annotation_id' => null]);
-        foreach ($siblingAnnotations as $sibling) {
-            $sibling->update($syncDataWithoutParent);
-        }
-    }
 
     /**
      * Auto-link form field to existing entity
