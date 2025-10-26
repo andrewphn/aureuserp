@@ -823,12 +823,13 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                 ->compact(),
 
                             // ============================================
-                            // SECTION: View Properties
+                            // SECTION: View-Specific Metadata (Optional)
                             // ============================================
-                            Section::make('View Type')
-                                ->description('Specify what type of view this annotation represents (Plan, Elevation, Section, or Detail)')
+                            Section::make('View-Specific Metadata')
+                                ->description('Optional: Specify view type, orientation, and scale for this specific annotation')
                                 ->icon('heroicon-o-eye')
                                 ->collapsible()
+                                ->collapsed(true)
                                 ->compact()
                                 ->schema([
                     Select::make('view_type')
@@ -1820,9 +1821,32 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             $this->annotationModel = null;  // New annotation, no model yet
         }
 
+        // ============================================
+        // ENTITY-CENTRIC WORKFLOW: Load entity data
+        // ============================================
+        $entityIdField = $this->getEntityIdField();
+        $this->linkedEntityId = $annotation[str_replace('_id', 'Id', $entityIdField)] ?? null;
+
+        if ($this->linkedEntityId) {
+            // Annotation is linked to an existing entity - load entity data
+            $this->linkMode = 'existing';
+            $entity = $this->loadEntity($this->linkedEntityId);
+            $this->entityData = $entity ? $entity->toArray() : [];
+        } else {
+            // New entity will be created
+            $this->linkMode = 'create';
+            $this->entityData = [];
+        }
+
         // Fill form with annotation data using Filament Forms API
         // The model is now set, so relationship fields will load correctly
         $this->form->fill([
+            // Entity-centric fields
+            'link_mode'              => $this->linkMode,
+            'linked_entity_id'       => $this->linkedEntityId,
+            'entity'                 => $this->entityData,
+
+            // Legacy annotation fields (still needed for view metadata)
             'label'                  => $annotation['label'] ?? '',
             'notes'                  => $annotation['notes'] ?? '',
             'parent_annotation_id'   => $annotation['parentId'] ?? null,
