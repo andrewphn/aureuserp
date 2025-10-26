@@ -9,13 +9,13 @@ use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
@@ -170,8 +170,8 @@ class EditProject extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title(__('webkul-project::filament/resources/project/pages/edit-project.notification.title'))
-            ->body(__('webkul-project::filament/resources/project/pages/edit-project.notification.body'));
+            ->title(__('projects::filament/resources/project/pages/edit-project.notification.title'))
+            ->body(__('projects::filament/resources/project/pages/edit-project.notification.body'));
     }
 
     protected function afterSave(): void
@@ -310,182 +310,12 @@ class EditProject extends EditRecord
                         ->title('PDF uploaded successfully')
                         ->send();
                 }),
-            Action::make('applyMilestoneTemplates')
-                ->label('Apply Milestone Templates')
-                ->icon('heroicon-o-flag')
-                ->color('success')
-                ->visible(fn () => $this->record->start_date && $this->record->desired_completion_date)
-                ->form([
-                    Section::make('Discovery Stage')
-                        ->description('Initial consultation, site assessment, and scope definition')
-                        ->schema([
-                            CheckboxList::make('discovery')
-                                ->label('')
-                                ->options(
-                                    MilestoneTemplate::active()
-                                        ->byStage('discovery')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [
-                                            $t->id => $t->name . ($t->is_critical ? ' ⚠️' : '') . ' (Day ' . $t->relative_days . ')'
-                                        ])
-                                )
-                                ->descriptions(
-                                    MilestoneTemplate::active()
-                                        ->byStage('discovery')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [$t->id => $t->description])
-                                )
-                                ->columns(1),
-                        ]),
-                    Section::make('Design Stage')
-                        ->description('Concepts, revisions, shop drawings, and material planning')
-                        ->schema([
-                            CheckboxList::make('design')
-                                ->label('')
-                                ->options(
-                                    MilestoneTemplate::active()
-                                        ->byStage('design')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [
-                                            $t->id => $t->name . ($t->is_critical ? ' ⚠️' : '') . ' (Day ' . $t->relative_days . ')'
-                                        ])
-                                )
-                                ->descriptions(
-                                    MilestoneTemplate::active()
-                                        ->byStage('design')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [$t->id => $t->description])
-                                )
-                                ->columns(1),
-                        ]),
-                    Section::make('Sourcing Stage')
-                        ->description('Material ordering, delivery, and acclimation')
-                        ->schema([
-                            CheckboxList::make('sourcing')
-                                ->label('')
-                                ->options(
-                                    MilestoneTemplate::active()
-                                        ->byStage('sourcing')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [
-                                            $t->id => $t->name . ($t->is_critical ? ' ⚠️' : '') . ' (Day ' . $t->relative_days . ')'
-                                        ])
-                                )
-                                ->descriptions(
-                                    MilestoneTemplate::active()
-                                        ->byStage('sourcing')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [$t->id => $t->description])
-                                )
-                                ->columns(1),
-                        ]),
-                    Section::make('Production Stage')
-                        ->description('Fabrication, assembly, finishing, and quality control')
-                        ->schema([
-                            CheckboxList::make('production')
-                                ->label('')
-                                ->options(
-                                    MilestoneTemplate::active()
-                                        ->byStage('production')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [
-                                            $t->id => $t->name . ($t->is_critical ? ' ⚠️' : '') . ' (Day ' . $t->relative_days . ')'
-                                        ])
-                                )
-                                ->descriptions(
-                                    MilestoneTemplate::active()
-                                        ->byStage('production')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [$t->id => $t->description])
-                                )
-                                ->columns(1),
-                        ]),
-                    Section::make('Delivery Stage')
-                        ->description('Site preparation, installation, and final walkthrough')
-                        ->schema([
-                            CheckboxList::make('delivery')
-                                ->label('')
-                                ->options(
-                                    MilestoneTemplate::active()
-                                        ->byStage('delivery')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [
-                                            $t->id => $t->name . ($t->is_critical ? ' ⚠️' : '') . ' (Day ' . $t->relative_days . ')'
-                                        ])
-                                )
-                                ->descriptions(
-                                    MilestoneTemplate::active()
-                                        ->byStage('delivery')
-                                        ->orderBy('sort_order')
-                                        ->get()
-                                        ->mapWithKeys(fn ($t) => [$t->id => $t->description])
-                                )
-                                ->columns(1),
-                        ]),
-                ])
-                ->action(function (array $data) {
-                    $templateIds = array_merge(
-                        $data['discovery'] ?? [],
-                        $data['design'] ?? [],
-                        $data['sourcing'] ?? [],
-                        $data['production'] ?? [],
-                        $data['delivery'] ?? []
-                    );
-
-                    if (empty($templateIds)) {
-                        Notification::make()
-                            ->warning()
-                            ->title('No templates selected')
-                            ->body('Please select at least one milestone template to apply.')
-                            ->send();
-                        return;
-                    }
-
-                    $templates = MilestoneTemplate::whereIn('id', $templateIds)->get();
-                    $created = 0;
-
-                    foreach ($templates as $template) {
-                        $deadline = $this->record->start_date->copy()->addDays($template->relative_days);
-
-                        Milestone::create([
-                            'name' => $template->name,
-                            'deadline' => $deadline,
-                            'is_completed' => false,
-                            'project_id' => $this->record->id,
-                            'creator_id' => Auth::id(),
-                            'production_stage' => $template->production_stage,
-                            'is_critical' => $template->is_critical,
-                            'description' => $template->description,
-                            'sort_order' => $template->sort_order,
-                        ]);
-
-                        $created++;
-                    }
-
-                    Notification::make()
-                        ->success()
-                        ->title('Milestones created')
-                        ->body("Successfully created {$created} milestones from templates.")
-                        ->send();
-
-                    // Refresh the page to show new milestones
-                    $this->dispatch('refresh-timeline');
-                }),
             DeleteAction::make()
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('webkul-project::filament/resources/project/pages/edit-project.header-actions.delete.notification.title'))
-                        ->body(__('webkul-project::filament/resources/project/pages/edit-project.header-actions.delete.notification.body')),
+                        ->title(__('projects::filament/resources/project/pages/edit-project.header-actions.delete.notification.title'))
+                        ->body(__('projects::filament/resources/project/pages/edit-project.header-actions.delete.notification.body')),
                 ),
         ];
     }
