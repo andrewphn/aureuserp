@@ -71,91 +71,95 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     Tab::make('Annotation')
                         ->icon('heroicon-o-pencil')
                         ->schema([
-                            // Hierarchy breadcrumb display - TEMPORARILY DISABLED due to form state recursion
-                            // TODO: Implement using Livewire property instead of closure
-                            // Placeholder::make('hierarchy_path')
-                            //     ->label('Hierarchy')
-                            //     ->content(fn () => $this->getHierarchyPathHtml())
-                            //     ->visible(fn () => !empty($this->originalAnnotation['id'])),
 
-            // Parent annotation selector
-            Select::make('parent_annotation_id')
-                ->label('Parent Annotation')
-                ->helperText('Change which annotation this belongs to')
-                ->options(fn () => AnnotationHierarchyService::getAvailableParents(
-                    $this->projectId,
-                    $this->annotationType,
-                    $this->originalAnnotation['pdfPageId'] ?? null,
-                    $this->originalAnnotation['id'] ?? null
-                ))
-                ->searchable()
-                ->placeholder('None (top level)')
-                ->nullable()
-                ->live()
-                ->rules([
-                    fn () => function (string $attribute, $value, \Closure $fail) {
-                        if (!$value) {
-                            return; // Allow null parent for top-level annotations
-                        }
+                            // ============================================
+                            // SECTION: Context & Hierarchy
+                            // ============================================
+                            Section::make('Context & Hierarchy')
+                                ->description('Define how this annotation fits into the project structure')
+                                ->icon('heroicon-o-folder-tree')
+                                ->schema([
+                                    // Hierarchy breadcrumb display
+                                    Placeholder::make('hierarchy_path')
+                                        ->label('Hierarchy')
+                                        ->content(fn () => $this->hierarchyPath)
+                                        ->visible(fn () => !empty($this->hierarchyPath)),
 
-                        // Query the parent annotation to check its type
-                        $parent = DB::table('pdf_page_annotations')
-                            ->where('id', $value)
-                            ->first();
+                                    // Parent annotation selector
+                                    Select::make('parent_annotation_id')
+                                        ->label('Parent Annotation')
+                                        ->helperText('Change which annotation this belongs to')
+                                        ->options(fn () => AnnotationHierarchyService::getAvailableParents(
+                                            $this->projectId,
+                                            $this->annotationType,
+                                            $this->originalAnnotation['pdfPageId'] ?? null,
+                                            $this->originalAnnotation['id'] ?? null
+                                        ))
+                                        ->searchable()
+                                        ->placeholder('None (top level)')
+                                        ->nullable()
+                                        ->live()
+                                        ->rules([
+                                            fn () => function (string $attribute, $value, \Closure $fail) {
+                                                if (!$value) {
+                                                    return; // Allow null parent for top-level annotations
+                                                }
 
-                        if (!$parent) {
-                            $fail('The selected parent annotation does not exist.');
-                            return;
-                        }
+                                                // Query the parent annotation to check its type
+                                                $parent = DB::table('pdf_page_annotations')
+                                                    ->where('id', $value)
+                                                    ->first();
 
-                        // Define valid parent types based on annotation type
-                        $validTypes = match($this->annotationType) {
-                            'location' => ['room'],
-                            'cabinet_run' => ['location'],
-                            'cabinet' => ['cabinet_run'],
-                            default => [],
-                        };
+                                                if (!$parent) {
+                                                    $fail('The selected parent annotation does not exist.');
+                                                    return;
+                                                }
 
-                        // Validate parent type matches allowed types
-                        if (!empty($validTypes) && !in_array($parent->annotation_type, $validTypes)) {
-                            $fail("Invalid parent type. {$this->annotationType} annotations can only have " . implode(', ', $validTypes) . " as parents. The selected annotation is a {$parent->annotation_type}.");
-                        }
-                    }
-                ])
-                ->visible(fn () => $this->annotationType !== 'room'),
+                                                // Define valid parent types based on annotation type
+                                                $validTypes = match($this->annotationType) {
+                                                    'location' => ['room'],
+                                                    'cabinet_run' => ['location'],
+                                                    'cabinet' => ['cabinet_run'],
+                                                    default => [],
+                                                };
 
-            // Show inherited room (read-only, for reference)
-            // HIDDEN: Redundant since parent annotation already shows room context in tree view
-            // Room inheritance is automatic via parent_annotation_id chain
-            // Select::make('_inherited_room_id')
-            //     ->label('Room (inherited from parent)')
-            //     ->helperText('This room is automatically inherited from the parent annotation')
-            //     ->options(fn () => \Webkul\Project\Models\Room::where('project_id', $this->projectId)
-            //         ->pluck('name', 'id')
-            //         ->toArray())
-            //     ->disabled()
-            //     ->dehydrated(false)
-            //     ->default(fn (callable $get) => $this->getRoomIdFromParent($get('parent_annotation_id')))
-            //     ->visible(fn () => $this->annotationType !== 'room'),
+                                                // Validate parent type matches allowed types
+                                                if (!empty($validTypes) && !in_array($parent->annotation_type, $validTypes)) {
+                                                    $fail("Invalid parent type. {$this->annotationType} annotations can only have " . implode(', ', $validTypes) . " as parents. The selected annotation is a {$parent->annotation_type}.");
+                                                }
+                                            }
+                                        ])
+                                        ->visible(fn () => $this->annotationType !== 'room'),
 
-            TextInput::make('label')
-                ->label('Label')
-                ->required()
-                ->maxLength(255)
-                ->live(onBlur: true),
+                                    TextInput::make('label')
+                                        ->label('Label')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->live(onBlur: true),
 
-            // Entity detection status - shows if annotation will create new or link to existing entity
-            Placeholder::make('entity_detection_status')
-                ->label('Entity Status')
-                ->content(function (callable $get) {
-                    return EntityDetectionService::getEntityDetectionStatus(
-                        $this->annotationType,
-                        $get('label'),
-                        $get('parent_annotation_id'),
-                        $this->originalAnnotation
-                    );
-                })
-                ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run'])),
+                                    // Entity detection status - shows if annotation will create new or link to existing entity
+                                    Placeholder::make('entity_detection_status')
+                                        ->label('Entity Status')
+                                        ->content(function (callable $get) {
+                                            return EntityDetectionService::getEntityDetectionStatus(
+                                                $this->annotationType,
+                                                $get('label'),
+                                                $get('parent_annotation_id'),
+                                                $this->originalAnnotation
+                                            );
+                                        })
+                                        ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run'])),
+                                ])
+                                ->collapsible()
+                                ->compact(),
+
+                            // ============================================
+                            // SECTION: Entity Linking
+                            // ============================================
+                            Section::make('Entity Linking')
+                                ->description('Link this annotation to rooms, locations, or cabinet runs')
+                                ->icon('heroicon-o-link')
+                                ->schema([
 
             Select::make('room_id')
                 ->label('Room')
@@ -386,29 +390,46 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                         }
                     }
                 }),
+                                ])
+                                ->collapsible()
+                                ->compact(),
 
-            Textarea::make('notes')
-                ->label('Notes / Comments')
-                ->rows(4)
-                ->columnSpanFull(),
+                            // ============================================
+                            // SECTION: Measurements & Notes
+                            // ============================================
+                            Section::make('Measurements & Notes')
+                                ->description('Record physical dimensions and additional notes')
+                                ->icon('heroicon-o-pencil-square')
+                                ->schema([
+                                    Textarea::make('notes')
+                                        ->label('Notes / Comments')
+                                        ->rows(4)
+                                        ->columnSpanFull(),
 
-            TextInput::make('measurement_width')
-                ->label('Width (in)')
-                ->numeric()
-                ->step(0.125)
-                ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+                                    TextInput::make('measurement_width')
+                                        ->label('Width (in)')
+                                        ->numeric()
+                                        ->step(0.125)
+                                        ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
 
-            TextInput::make('measurement_height')
-                ->label('Height (in)')
-                ->numeric()
-                ->step(0.125)
-                ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+                                    TextInput::make('measurement_height')
+                                        ->label('Height (in)')
+                                        ->numeric()
+                                        ->step(0.125)
+                                        ->visible(fn () => in_array($this->annotationType, ['cabinet_run', 'cabinet'])),
+                                ])
+                                ->collapsible()
+                                ->compact(),
 
-            // View Type Section
-            Section::make('View Type')
-                ->description('Specify what type of view this annotation represents (Plan, Elevation, Section, or Detail)')
-                ->collapsible()
-                ->schema([
+                            // ============================================
+                            // SECTION: View Properties
+                            // ============================================
+                            Section::make('View Type')
+                                ->description('Specify what type of view this annotation represents (Plan, Elevation, Section, or Detail)')
+                                ->icon('heroicon-o-eye')
+                                ->collapsible()
+                                ->compact()
+                                ->schema([
                     Select::make('view_type')
                         ->label('View Type')
                         ->options(function (callable $get) {
@@ -602,17 +623,28 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             }
 
                             return 'This is the first ' . $viewType . ' view for this location';
-                        }),
-                        // Note: ->live() removed - no dependent fields, unnecessary server requests
-                ])
-                ->columnSpanFull(),
+                                        }),
+                                        // Note: ->live() removed - no dependent fields, unnecessary server requests
+                                ]),
 
-                // Linked Entity Summary - Read-only display with edit link
-                Placeholder::make('linked_entity_summary')
-                    ->label('Linked Entity')
-                    ->content(fn () => $this->getLinkedEntitySummary())
-                    ->visible(fn () => $this->hasLinkedEntity())
-                    ->columnSpanFull(),
+                            // ============================================
+                            // SECTION: Linked Entity Summary
+                            // ============================================
+                            Section::make('Linked Entity Summary')
+                                ->description('View linked database entity information')
+                                ->icon('heroicon-o-check-badge')
+                                ->schema([
+                                    // Linked Entity Summary - Read-only display with edit link
+                                    Placeholder::make('linked_entity_summary')
+                                        ->label('Linked Entity')
+                                        ->content(fn () => $this->getLinkedEntitySummary())
+                                        ->visible(fn () => $this->hasLinkedEntity())
+                                        ->columnSpanFull(),
+                                ])
+                                ->collapsible()
+                                ->compact()
+                                ->visible(fn () => $this->hasLinkedEntity()),
+
                         ]),  // Close Annotation Tab schema
                 ]),  // Close tabs()
         ])  // Close components()
@@ -1228,6 +1260,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         $this->linkedLocationId = $annotation['locationId'] ?? null;
         $this->linkedCabinetRunId = $annotation['cabinetRunId'] ?? null;
         $this->linkedCabinetSpecId = $annotation['cabinetSpecId'] ?? null;
+
+        // Build hierarchy breadcrumb path for display
+        $annotationId = $annotation['id'] ?? null;
+        if ($annotationId && (!is_string($annotationId) || !str_starts_with($annotationId, 'temp_'))) {
+            $this->hierarchyPath = AnnotationHierarchyService::getHierarchyPathHtml($annotationId);
+        } else {
+            $this->hierarchyPath = '<span class="text-gray-500">New annotation</span>';
+        }
 
         // CRITICAL: Set the annotation model property for FilamentPHP v4 relationship binding
         // This must happen BEFORE filling the form so relationship fields can load properly
