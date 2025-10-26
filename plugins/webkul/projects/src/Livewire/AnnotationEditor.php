@@ -23,6 +23,10 @@ use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
+use Webkul\Project\Services\AnnotationHierarchyService;
+use Webkul\Project\Services\EntityDetectionService;
+use Webkul\Project\Services\ViewTypeTrackerService;
+use Webkul\Project\Utils\PositionInferenceUtil;
 
 class AnnotationEditor extends Component implements HasActions, HasForms
 {
@@ -51,6 +55,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     // Annotation model for FilamentPHP v4 relationship binding
     public ?\App\Models\PdfPageAnnotation $annotationModel = null;
 
+    // Hierarchy path for breadcrumb display
+    public string $hierarchyPath = '';
+
     public function mount(): void
     {
         // Don't fill form on mount, wait for annotation data
@@ -75,7 +82,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             Select::make('parent_annotation_id')
                 ->label('Parent Annotation')
                 ->helperText('Change which annotation this belongs to')
-                ->options(fn () => $this->getAvailableParents())
+                ->options(fn () => AnnotationHierarchyService::getAvailableParents(
+                    $this->projectId,
+                    $this->annotationType,
+                    $this->originalAnnotation['pdfPageId'] ?? null,
+                    $this->originalAnnotation['id'] ?? null
+                ))
                 ->searchable()
                 ->placeholder('None (top level)')
                 ->nullable()
@@ -136,7 +148,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             Placeholder::make('entity_detection_status')
                 ->label('Entity Status')
                 ->content(function (callable $get) {
-                    return $this->getEntityDetectionStatus($get);
+                    return EntityDetectionService::getEntityDetectionStatus(
+                        $this->annotationType,
+                        $get('label'),
+                        $get('parent_annotation_id'),
+                        $this->originalAnnotation
+                    );
                 })
                 ->visible(fn () => in_array($this->annotationType, ['location', 'cabinet_run'])),
 
@@ -193,7 +210,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     }
 
                     // Get room_id from parent or form
-                    $roomId = $this->getRoomIdFromParent($get('parent_annotation_id'));
+                    $roomId = AnnotationHierarchyService::getRoomIdFromParent($get('parent_annotation_id'));
 
                     // Get all RoomLocations in the project (not filtered by room)
                     return RoomLocation::whereHas('room', function ($query) {
@@ -226,7 +243,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ])
                 ->createOptionUsing(function (array $data, callable $get): int {
                     // Get room_id from parent chain
-                    $roomId = $this->getRoomIdFromParent($get('parent_annotation_id'));
+                    $roomId = AnnotationHierarchyService::getRoomIdFromParent($get('parent_annotation_id'));
 
                     if (!$roomId) {
                         throw new \Exception('Room ID could not be determined from parent annotation');
@@ -426,7 +443,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             }
 
                             // Get taken view types for this location
-                            $takenViews = $this->getLocationViewTypes($locationId, $pdfPage->document_id);
+                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
 
                             // Only mark Plan as taken (elevation/section depend on orientation, detail allows multiple)
                             return collect($baseOptions)->map(function ($label, $key) use ($takenViews) {
@@ -526,7 +543,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             }
 
                             // Get taken view types for this location
-                            $takenViews = $this->getLocationViewTypes($locationId, $pdfPage->document_id);
+                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
 
                             // Mark taken orientations with checkmark and page numbers
                             return collect($baseOptions)->map(function ($label, $orientation) use ($takenViews, $viewType) {
@@ -742,7 +759,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 if ($locationId && $viewType && $pdfPageId) {
                     $pdfPage = \App\Models\PdfPage::find($pdfPageId);
                     if ($pdfPage && $pdfPage->document_id) {
-                        $takenViews = $this->getLocationViewTypes($locationId, $pdfPage->document_id);
+                        $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
 
                         // Build the key to check
                         $checkKey = $viewType;
@@ -781,7 +798,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
                 // Auto-detect position from Y coordinate
                 $normalizedY = $this->originalAnnotation['normalizedY'] ?? 0;
-                $positionData = $this->inferPositionFromCoordinates($normalizedY, $normalizedHeight);
+                $positionData = PositionInferenceUtil::inferPositionFromCoordinates($normalizedY, $normalizedHeight);
 
                 // Create new annotation in database
                 // Auto-calculate room_id from parent chain for non-room annotations
@@ -789,7 +806,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 $parentAnnotationId = $data['parent_annotation_id'] ?? null;
                 $roomId = $annotationType === 'room'
                     ? ($data['room_id'] ?? null)
-                    : $this->getRoomIdFromParent($parentAnnotationId);
+                    : AnnotationHierarchyService::getRoomIdFromParent($parentAnnotationId);
 
                 // Auto-create cabinet_run if cabinet is created directly under a location
                 if ($annotationType === 'cabinet' && $parentAnnotationId) {
@@ -875,7 +892,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 // Support multi-view: Check if entity already exists before creating
                 if ($annotationType === 'cabinet_run' && !$cabinetRunId) {
                     // Get room_location_id from parent location annotation
-                    $parentLocationId = $this->getRoomLocationIdFromParent($parentAnnotationId);
+                    $parentLocationId = AnnotationHierarchyService::getRoomLocationIdFromParent($parentAnnotationId);
                     if ($parentLocationId) {
                         // Check for existing entity (multi-view support)
                         $existingCabinetRun = \Webkul\Project\Models\CabinetRun::where('room_location_id', $parentLocationId)
@@ -905,7 +922,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                     $projectId = $pdfPage?->pdfDocument?->project_id;
 
                     // Get cabinet_run_id from parent cabinet_run annotation
-                    $parentCabinetRunId = $this->getCabinetRunIdFromParent($parentAnnotationId);
+                    $parentCabinetRunId = AnnotationHierarchyService::getCabinetRunIdFromParent($parentAnnotationId);
 
                     if ($projectId && $roomId && $parentCabinetRunId) {
                         $cabinetSpec = \Webkul\Project\Models\CabinetSpecification::create([
@@ -1000,7 +1017,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             $parentAnnotationId = $data['parent_annotation_id'] ?? null;
             $roomId = $annotation->annotation_type === 'room'
                 ? ($data['room_id'] ?? null)
-                : $this->getRoomIdFromParent($parentAnnotationId);
+                : AnnotationHierarchyService::getRoomIdFromParent($parentAnnotationId);
 
             // Update annotation in database
             $updateData = [
@@ -1274,7 +1291,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             $normalizedHeight = $pdfHeight / $pageHeight;
 
             // Auto-detect position from new Y coordinate
-            $positionData = $this->inferPositionFromCoordinates($normalizedY, $normalizedHeight);
+            $positionData = PositionInferenceUtil::inferPositionFromCoordinates($normalizedY, $normalizedHeight);
 
             // Log before update
             $beforeData = $annotation->toArray();
@@ -1334,246 +1351,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     public function cancel(): void
     {
         $this->close();
-    }
-
-    /**
-     * Auto-detect cabinet position from Y coordinate on page
-     *
-     * @param float $normalizedY Y coordinate (normalized 0-1)
-     * @param float $normalizedHeight Height (normalized 0-1)
-     * @return array ['inferred_position' => string, 'vertical_zone' => string]
-     */
-    private function inferPositionFromCoordinates(float $normalizedY, float $normalizedHeight): array
-    {
-        // Convert normalized Y to percentage (flip Y axis for typical drawing orientation)
-        $yPercent = (1 - $normalizedY) * 100;
-
-        // Determine vertical zone based on Y position
-        // Note: In PDF coordinates, Y=0 is at bottom, so we flip to get standard top=0 orientation
-        if ($yPercent < 30) {
-            $zone = 'upper';
-            $position = 'wall_cabinet';
-        } elseif ($yPercent > 70) {
-            $zone = 'lower';
-            $position = 'base_cabinet';
-        } else {
-            $zone = 'middle';
-
-            // Check height to determine if it's a tall cabinet or standard base
-            $heightPercent = $normalizedHeight * 100;
-
-            if ($heightPercent > 40) {
-                $position = 'tall_cabinet';
-            } else {
-                $position = 'base_cabinet';
-            }
-        }
-
-        return [
-            'inferred_position' => $position,
-            'vertical_zone'     => $zone,
-        ];
-    }
-
-    /**
-     * Get room_id by traversing parent annotation chain
-     */
-    protected function getRoomIdFromParent(?int $parentAnnotationId): ?int
-    {
-        if (!$parentAnnotationId) {
-            return null;
-        }
-
-        $annotation = \App\Models\PdfPageAnnotation::find($parentAnnotationId);
-
-        if (!$annotation) {
-            return null;
-        }
-
-        // If this annotation is a room, return its room_id
-        if ($annotation->annotation_type === 'room') {
-            return $annotation->room_id;
-        }
-
-        // Otherwise, recursively check parent
-        if ($annotation->parent_annotation_id) {
-            return $this->getRoomIdFromParent($annotation->parent_annotation_id);
-        }
-
-        // Fallback: return the annotation's room_id if it has one
-        return $annotation->room_id;
-    }
-
-    /**
-     * Get room_location_id from parent location annotation
-     */
-    protected function getRoomLocationIdFromParent(?int $parentAnnotationId): ?int
-    {
-        if (!$parentAnnotationId) {
-            return null;
-        }
-
-        $annotation = \App\Models\PdfPageAnnotation::find($parentAnnotationId);
-
-        if (!$annotation) {
-            return null;
-        }
-
-        // If this annotation is a location, return its room_location_id
-        if ($annotation->annotation_type === 'location') {
-            return $annotation->room_location_id;
-        }
-
-        // Otherwise, recursively check parent
-        if ($annotation->parent_annotation_id) {
-            return $this->getRoomLocationIdFromParent($annotation->parent_annotation_id);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get cabinet_run_id from parent cabinet_run annotation
-     */
-    protected function getCabinetRunIdFromParent(?int $parentAnnotationId): ?int
-    {
-        if (!$parentAnnotationId) {
-            return null;
-        }
-
-        $annotation = \App\Models\PdfPageAnnotation::find($parentAnnotationId);
-
-        if (!$annotation) {
-            return null;
-        }
-
-        // If this annotation is a cabinet_run, return its cabinet_run_id
-        if ($annotation->annotation_type === 'cabinet_run') {
-            return $annotation->cabinet_run_id;
-        }
-
-        // Otherwise, recursively check parent
-        if ($annotation->parent_annotation_id) {
-            return $this->getCabinetRunIdFromParent($annotation->parent_annotation_id);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get HTML for hierarchy breadcrumb display
-     */
-    protected function getHierarchyPathHtml(): string
-    {
-        if (empty($this->originalAnnotation['id'])) {
-            return '<span class="text-gray-500">New annotation</span>';
-        }
-
-        $path = $this->buildHierarchyPath($this->originalAnnotation['id']);
-
-        if (empty($path)) {
-            return '<span class="text-gray-500">Top level</span>';
-        }
-
-        $breadcrumbs = [];
-        foreach ($path as $item) {
-            $color = match($item['type']) {
-                'room' => 'bg-blue-100 text-blue-800',
-                'location' => 'bg-green-100 text-green-800',
-                'cabinet_run' => 'bg-purple-100 text-purple-800',
-                'cabinet' => 'bg-orange-100 text-orange-800',
-                default => 'bg-gray-100 text-gray-800',
-            };
-
-            $breadcrumbs[] = sprintf(
-                '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium %s">%s</span>',
-                $color,
-                htmlspecialchars($item['label'])
-            );
-        }
-
-        return implode(' <span class="text-gray-400">→</span> ', $breadcrumbs);
-    }
-
-    /**
-     * Build hierarchy path from annotation ID up to root
-     */
-    protected function buildHierarchyPath(int|string $annotationId, array $path = []): array
-    {
-        // Don't query if it's a temp ID
-        if (is_string($annotationId) && str_starts_with($annotationId, 'temp_')) {
-            return $path;
-        }
-
-        $annotation = \App\Models\PdfPageAnnotation::find($annotationId);
-
-        if (!$annotation) {
-            return $path;
-        }
-
-        // Add current annotation to path
-        array_unshift($path, [
-            'id' => $annotation->id,
-            'label' => $annotation->label,
-            'type' => $annotation->annotation_type,
-        ]);
-
-        // Recursively get parent
-        if ($annotation->parent_annotation_id) {
-            return $this->buildHierarchyPath($annotation->parent_annotation_id, $path);
-        }
-
-        return $path;
-    }
-
-    /**
-     * Get available parent annotations based on annotation type
-     */
-    protected function getAvailableParents(): array
-    {
-        if (!$this->projectId || !$this->annotationType) {
-            return [];
-        }
-
-        // Get PDF page ID from original annotation
-        $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
-        if (!$pdfPageId) {
-            return [];
-        }
-
-        // Get PDF document ID to search across all pages
-        $pdfPage = \App\Models\PdfPage::find($pdfPageId);
-        if (!$pdfPage || !$pdfPage->document_id) {
-            return [];
-        }
-
-        // Determine valid parent types based on annotation type
-        $validParentTypes = match($this->annotationType) {
-            'location' => ['room'],
-            'cabinet_run' => ['location'],
-            'cabinet' => ['cabinet_run'],
-            default => [],
-        };
-
-        if (empty($validParentTypes)) {
-            return [];
-        }
-
-        // Query annotations across ALL pages in the same PDF document
-        // This allows locations on page 3 to have room parents from page 2
-        return \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfPage) {
-                $query->where('document_id', $pdfPage->document_id);
-            })
-            ->whereIn('annotation_type', $validParentTypes)
-            ->where('id', '!=', $this->originalAnnotation['id'] ?? 0) // Exclude self
-            ->orderBy('label')
-            ->get()
-            ->mapWithKeys(function ($annotation) {
-                // Include page number in label for context
-                $pageNumber = $annotation->pdfPage->page_number ?? '?';
-                return [$annotation->id => $annotation->label . ' (Page ' . $pageNumber . ')'];
-            })
-            ->toArray();
     }
 
     /**
@@ -1691,44 +1468,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     /**
-     * Get existing view types for a given location across all pages in the document
-     *
-     * @param int $locationId The room_location_id to check
-     * @param int $pdfDocumentId The PDF document ID to search within
-     * @return array Map of view combinations to page arrays
-     *               For plan: ['plan' => [2]]
-     *               For elevation/section: ['elevation-front' => [3], 'section-A-A' => [5]]
-     *               For detail: ['detail' => [4, 6, 8]] (multiple allowed)
-     */
-    protected function getLocationViewTypes(int $locationId, int $pdfDocumentId): array
-    {
-        $annotations = \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfDocumentId) {
-                $query->where('document_id', $pdfDocumentId);
-            })
-            ->where('room_location_id', $locationId)
-            ->where('annotation_type', 'location')
-            ->get();
-
-        $result = [];
-        foreach ($annotations as $ann) {
-            // For elevation and section, include orientation in the key
-            if (in_array($ann->view_type, ['elevation', 'section']) && $ann->view_orientation) {
-                $key = $ann->view_type . '-' . $ann->view_orientation;
-            } else {
-                $key = $ann->view_type;
-            }
-
-            // Store as array of pages (to handle multiple detail views)
-            if (!isset($result[$key])) {
-                $result[$key] = [];
-            }
-            $result[$key][] = $ann->pdfPage->page_number;
-        }
-
-        return $result;
-    }
-
-    /**
      * Auto-link form field to existing entity
      * Called when user clicks "Auto-Link to Existing" button
      *
@@ -1748,161 +1487,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ->body('The annotation has been linked to the existing entity.')
             ->success()
             ->send();
-    }
-
-    /**
-     * Get entity detection status to display in form
-     * Shows whether annotation will create new entity or link to existing one
-     *
-     * @param callable $get Form data getter
-     * @return \Illuminate\Support\HtmlString
-     */
-    protected function getEntityDetectionStatus(callable $get): \Illuminate\Support\HtmlString
-    {
-        $label = $get('label');
-        $parentAnnotationId = $get('parent_annotation_id');
-
-        if (empty($label)) {
-            return new \Illuminate\Support\HtmlString(
-                '<span class="text-gray-500 dark:text-gray-400">Enter a label to check entity status</span>'
-            );
-        }
-
-        // For locations: check if RoomLocation exists with same name + room_id
-        if ($this->annotationType === 'location') {
-            $roomId = $this->getRoomIdFromParent($parentAnnotationId);
-
-            if (!$roomId) {
-                return new \Illuminate\Support\HtmlString(
-                    '<span class="text-gray-500 dark:text-gray-400">Select a parent room first</span>'
-                );
-            }
-
-            $existingLocation = \Webkul\Project\Models\RoomLocation::where('room_id', $roomId)
-                ->where('name', $label)
-                ->first();
-
-            if ($existingLocation) {
-                // Find which pages have annotations using this location
-                $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
-                $pdfDocumentId = $pdfPage?->document_id;
-
-                $annotationsWithLocation = \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfDocumentId) {
-                        $query->where('document_id', $pdfDocumentId);
-                    })
-                    ->where('room_location_id', $existingLocation->id)
-                    ->with('pdfPage')
-                    ->get();
-
-                $pages = $annotationsWithLocation->pluck('pdfPage.page_number')->unique()->sort()->values()->toArray();
-                $pagesStr = implode(', ', $pages);
-
-                return new \Illuminate\Support\HtmlString(
-                    '<div class="flex flex-col gap-2">' .
-                    '<div class="flex items-center gap-2">' .
-                    '<svg class="w-5 h-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
-                    '</svg>' .
-                    '<span class="text-success-600 dark:text-success-400">' .
-                    'Will link to existing: <strong>' . e($existingLocation->name) . '</strong>' .
-                    (!empty($pages) ? ' (Pages: ' . $pagesStr . ')' : '') .
-                    '</span>' .
-                    '</div>' .
-                    '<button ' .
-                    'type="button" ' .
-                    'wire:click="linkToExistingEntity(\'room_location_id\', ' . $existingLocation->id . ')" ' .
-                    'class="fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-color-custom fi-btn-color-primary fi-size-sm fi-btn-size-sm gap-1 px-3 py-2 text-sm inline-grid shadow-sm bg-custom-600 text-white hover:bg-custom-500 focus-visible:ring-custom-500/50 dark:bg-custom-500 dark:hover:bg-custom-400 dark:focus-visible:ring-custom-400/50 fi-ac-btn-action" ' .
-                    'style="--c-400:var(--primary-400);--c-500:var(--primary-500);--c-600:var(--primary-600);">' .
-                    '<svg class="fi-btn-icon transition duration-75 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">' .
-                    '<path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z"/>' .
-                    '<path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z"/>' .
-                    '</svg>' .
-                    '<span class="fi-btn-label">Auto-Link to Existing</span>' .
-                    '</button>' .
-                    '</div>'
-                );
-            } else {
-                return new \Illuminate\Support\HtmlString(
-                    '<div class="flex items-center gap-2">' .
-                    '<svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
-                    '</svg>' .
-                    '<span class="text-primary-600 dark:text-primary-400">' .
-                    'Will create new location: <strong>' . e($label) . '</strong>' .
-                    '</span>' .
-                    '</div>'
-                );
-            }
-        }
-
-        // For cabinet_runs: check if CabinetRun exists with same name + room_location_id
-        if ($this->annotationType === 'cabinet_run') {
-            $roomLocationId = $this->getRoomLocationIdFromParent($parentAnnotationId);
-
-            if (!$roomLocationId) {
-                return new \Illuminate\Support\HtmlString(
-                    '<span class="text-gray-500 dark:text-gray-400">Select a parent location first</span>'
-                );
-            }
-
-            $existingCabinetRun = \Webkul\Project\Models\CabinetRun::where('room_location_id', $roomLocationId)
-                ->where('name', $label)
-                ->first();
-
-            if ($existingCabinetRun) {
-                // Find which pages have annotations using this cabinet run
-                $pdfPage = \App\Models\PdfPage::find($this->originalAnnotation['pdfPageId']);
-                $pdfDocumentId = $pdfPage?->document_id;
-
-                $annotationsWithCabinetRun = \App\Models\PdfPageAnnotation::whereHas('pdfPage', function ($query) use ($pdfDocumentId) {
-                        $query->where('document_id', $pdfDocumentId);
-                    })
-                    ->where('cabinet_run_id', $existingCabinetRun->id)
-                    ->with('pdfPage')
-                    ->get();
-
-                $pages = $annotationsWithCabinetRun->pluck('pdfPage.page_number')->unique()->sort()->values()->toArray();
-                $pagesStr = implode(', ', $pages);
-
-                return new \Illuminate\Support\HtmlString(
-                    '<div class="flex flex-col gap-2">' .
-                    '<div class="flex items-center gap-2">' .
-                    '<svg class="w-5 h-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
-                    '</svg>' .
-                    '<span class="text-success-600 dark:text-success-400">' .
-                    'Will link to existing: <strong>' . e($existingCabinetRun->name) . '</strong>' .
-                    (!empty($pages) ? ' (Pages: ' . $pagesStr . ')' : '') .
-                    '</span>' .
-                    '</div>' .
-                    '<button ' .
-                    'type="button" ' .
-                    'wire:click="linkToExistingEntity(\'cabinet_run_id\', ' . $existingCabinetRun->id . ')" ' .
-                    'class="fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-color-custom fi-btn-color-primary fi-size-sm fi-btn-size-sm gap-1 px-3 py-2 text-sm inline-grid shadow-sm bg-custom-600 text-white hover:bg-custom-500 focus-visible:ring-custom-500/50 dark:bg-custom-500 dark:hover:bg-custom-400 dark:focus-visible:ring-custom-400/50 fi-ac-btn-action" ' .
-                    'style="--c-400:var(--primary-400);--c-500:var(--primary-500);--c-600:var(--primary-600);">' .
-                    '<svg class="fi-btn-icon transition duration-75 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">' .
-                    '<path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z"/>' .
-                    '<path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z"/>' .
-                    '</svg>' .
-                    '<span class="fi-btn-label">Auto-Link to Existing</span>' .
-                    '</button>' .
-                    '</div>'
-                );
-            } else {
-                return new \Illuminate\Support\HtmlString(
-                    '<div class="flex items-center gap-2">' .
-                    '<svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' .
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>' .
-                    '</svg>' .
-                    '<span class="text-primary-600 dark:text-primary-400">' .
-                    'Will create new cabinet run: <strong>' . e($label) . '</strong>' .
-                    '</span>' .
-                    '</div>'
-                );
-            }
-        }
-
-        return new \Illuminate\Support\HtmlString('');
     }
 
     private function close(): void

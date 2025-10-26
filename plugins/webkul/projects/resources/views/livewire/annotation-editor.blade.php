@@ -9,7 +9,7 @@
     >
         {{-- Slideover Panel - Filament native styling --}}
         <div
-            class="bg-white dark:bg-gray-900 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-gray-200 dark:border-gray-700 pb-40"
+            class="bg-white dark:bg-gray-900 h-full w-full max-w-3xl shadow-2xl overflow-y-auto border-l border-gray-200 dark:border-gray-700 pb-40"
             style="position: relative; z-index: 55;"
             @click.stop
             x-data
