@@ -77,7 +77,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             // ============================================
                             Section::make('Context & Hierarchy')
                                 ->description('Define how this annotation fits into the project structure')
-                                ->icon('heroicon-o-folder-tree')
+                                ->icon('heroicon-o-folder-open')
                                 ->schema([
                                     // Hierarchy breadcrumb display
                                     Placeholder::make('hierarchy_path')
