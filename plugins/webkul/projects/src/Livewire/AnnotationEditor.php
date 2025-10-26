@@ -149,6 +149,317 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                 ->collapsed(false),
 
                             // ============================================
+                            // SECTION: Room Entity Properties
+                            // ============================================
+                            Section::make('Room Properties')
+                                ->description('Define the room entity details')
+                                ->icon('heroicon-o-home')
+                                ->schema([
+                                    Tabs::make('room_tabs')
+                                        ->tabs([
+                                            // Basic Info Tab
+                                            Tab::make('Basic Information')
+                                                ->icon('heroicon-o-information-circle')
+                                                ->schema([
+                                                    TextInput::make('entity.name')
+                                                        ->label('Room Name')
+                                                        ->required()
+                                                        ->maxLength(255)
+                                                        ->live(onBlur: true),
+
+                                                    Select::make('entity.room_type')
+                                                        ->label('Room Type')
+                                                        ->options([
+                                                            'kitchen' => 'Kitchen',
+                                                            'bathroom' => 'Bathroom',
+                                                            'bedroom' => 'Bedroom',
+                                                            'living' => 'Living Room',
+                                                            'dining' => 'Dining Room',
+                                                            'office' => 'Office',
+                                                            'utility' => 'Utility',
+                                                            'other' => 'Other',
+                                                        ])
+                                                        ->searchable(),
+
+                                                    TextInput::make('entity.floor_number')
+                                                        ->label('Floor Number')
+                                                        ->maxLength(50),
+                                                ]),
+
+                                            // PDF Reference Tab
+                                            Tab::make('PDF Reference')
+                                                ->icon('heroicon-o-document')
+                                                ->schema([
+                                                    TextInput::make('entity.pdf_page_number')
+                                                        ->label('PDF Page Number')
+                                                        ->numeric()
+                                                        ->minValue(1),
+
+                                                    TextInput::make('entity.pdf_room_label')
+                                                        ->label('PDF Room Label')
+                                                        ->maxLength(100)
+                                                        ->helperText('Label as it appears in the PDF'),
+
+                                                    TextInput::make('entity.pdf_detail_number')
+                                                        ->label('PDF Detail Number')
+                                                        ->maxLength(50),
+
+                                                    Textarea::make('entity.pdf_notes')
+                                                        ->label('PDF Notes')
+                                                        ->rows(3),
+                                                ]),
+
+                                            // Notes Tab
+                                            Tab::make('Notes')
+                                                ->icon('heroicon-o-pencil')
+                                                ->schema([
+                                                    Textarea::make('entity.notes')
+                                                        ->label('General Notes')
+                                                        ->rows(4),
+                                                ]),
+                                        ]),
+                                ])
+                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'room')
+                                ->collapsible()
+                                ->collapsed(false),
+
+                            // ============================================
+                            // SECTION: Location Entity Properties
+                            // ============================================
+                            Section::make('Location Properties')
+                                ->description('Define the location entity details')
+                                ->icon('heroicon-o-map-pin')
+                                ->schema([
+                                    Tabs::make('location_tabs')
+                                        ->tabs([
+                                            // Basic Info Tab
+                                            Tab::make('Basic Information')
+                                                ->icon('heroicon-o-information-circle')
+                                                ->schema([
+                                                    TextInput::make('entity.name')
+                                                        ->label('Location Name')
+                                                        ->required()
+                                                        ->maxLength(255)
+                                                        ->live(onBlur: true)
+                                                        ->helperText('e.g., "Sink Wall", "Island", "Pantry Wall"'),
+
+                                                    Select::make('entity.location_type')
+                                                        ->label('Location Type')
+                                                        ->options([
+                                                            'wall' => 'Wall',
+                                                            'island' => 'Island',
+                                                            'peninsula' => 'Peninsula',
+                                                            'corner' => 'Corner',
+                                                            'alcove' => 'Alcove',
+                                                            'other' => 'Other',
+                                                        ])
+                                                        ->searchable(),
+
+                                                    TextInput::make('entity.sequence')
+                                                        ->label('Sequence')
+                                                        ->numeric()
+                                                        ->minValue(1)
+                                                        ->helperText('Order of this location in the room'),
+                                                ]),
+
+                                            // Details Tab
+                                            Tab::make('Details')
+                                                ->icon('heroicon-o-adjustments-horizontal')
+                                                ->schema([
+                                                    TextInput::make('entity.elevation_reference')
+                                                        ->label('Elevation Reference')
+                                                        ->maxLength(100)
+                                                        ->helperText('Reference to elevation drawing/view'),
+
+                                                    Textarea::make('entity.notes')
+                                                        ->label('Notes')
+                                                        ->rows(4),
+                                                ]),
+                                        ]),
+                                ])
+                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'location')
+                                ->collapsible()
+                                ->collapsed(false),
+
+                            // ============================================
+                            // SECTION: Cabinet Run Entity Properties
+                            // ============================================
+                            Section::make('Cabinet Run Properties')
+                                ->description('Define the cabinet run entity details')
+                                ->icon('heroicon-o-squares-2x2')
+                                ->schema([
+                                    Tabs::make('cabinet_run_tabs')
+                                        ->tabs([
+                                            // Basic Info Tab
+                                            Tab::make('Basic Information')
+                                                ->icon('heroicon-o-information-circle')
+                                                ->schema([
+                                                    TextInput::make('entity.name')
+                                                        ->label('Cabinet Run Name')
+                                                        ->required()
+                                                        ->maxLength(255)
+                                                        ->live(onBlur: true)
+                                                        ->helperText('e.g., "Upper Cabinets", "Base Cabinets", "Tall Units"'),
+
+                                                    Select::make('entity.run_type')
+                                                        ->label('Run Type')
+                                                        ->options([
+                                                            'base' => 'Base Cabinets',
+                                                            'wall' => 'Wall Cabinets',
+                                                            'tall' => 'Tall Cabinets',
+                                                            'specialty' => 'Specialty',
+                                                        ])
+                                                        ->searchable(),
+                                                ]),
+
+                                            // Measurements Tab
+                                            Tab::make('Measurements')
+                                                ->icon('heroicon-o-calculator')
+                                                ->schema([
+                                                    TextInput::make('entity.total_linear_feet')
+                                                        ->label('Total Linear Feet')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->minValue(0)
+                                                        ->suffix('ft'),
+
+                                                    TextInput::make('entity.start_wall_measurement')
+                                                        ->label('Start Wall Measurement')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('inches')
+                                                        ->helperText('Starting point on wall'),
+
+                                                    TextInput::make('entity.end_wall_measurement')
+                                                        ->label('End Wall Measurement')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('inches')
+                                                        ->helperText('Ending point on wall'),
+                                                ]),
+
+                                            // Notes Tab
+                                            Tab::make('Notes')
+                                                ->icon('heroicon-o-pencil')
+                                                ->schema([
+                                                    Textarea::make('entity.notes')
+                                                        ->label('Notes')
+                                                        ->rows(4),
+                                                ]),
+                                        ]),
+                                ])
+                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'cabinet_run')
+                                ->collapsible()
+                                ->collapsed(false),
+
+                            // ============================================
+                            // SECTION: Cabinet Entity Properties
+                            // ============================================
+                            Section::make('Cabinet Properties')
+                                ->description('Define the cabinet specification entity details')
+                                ->icon('heroicon-o-cube')
+                                ->schema([
+                                    Tabs::make('cabinet_tabs')
+                                        ->tabs([
+                                            // Basic Info Tab
+                                            Tab::make('Basic Information')
+                                                ->icon('heroicon-o-information-circle')
+                                                ->schema([
+                                                    TextInput::make('entity.cabinet_number')
+                                                        ->label('Cabinet Number')
+                                                        ->required()
+                                                        ->maxLength(50)
+                                                        ->live(onBlur: true)
+                                                        ->helperText('e.g., "WC-01", "BC-12"'),
+
+                                                    TextInput::make('entity.position_in_run')
+                                                        ->label('Position in Run')
+                                                        ->numeric()
+                                                        ->minValue(1)
+                                                        ->helperText('Sequence number within the cabinet run'),
+                                                ]),
+
+                                            // Dimensions Tab
+                                            Tab::make('Dimensions')
+                                                ->icon('heroicon-o-arrows-pointing-out')
+                                                ->schema([
+                                                    TextInput::make('entity.length_inches')
+                                                        ->label('Length')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('inches'),
+
+                                                    TextInput::make('entity.width_inches')
+                                                        ->label('Width')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('inches'),
+
+                                                    TextInput::make('entity.depth_inches')
+                                                        ->label('Depth')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('inches'),
+
+                                                    TextInput::make('entity.height_inches')
+                                                        ->label('Height')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('inches'),
+
+                                                    TextInput::make('entity.linear_feet')
+                                                        ->label('Linear Feet')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->suffix('ft'),
+                                                ]),
+
+                                            // Pricing Tab
+                                            Tab::make('Pricing')
+                                                ->icon('heroicon-o-currency-dollar')
+                                                ->schema([
+                                                    TextInput::make('entity.quantity')
+                                                        ->label('Quantity')
+                                                        ->numeric()
+                                                        ->default(1)
+                                                        ->minValue(1),
+
+                                                    TextInput::make('entity.unit_price_per_lf')
+                                                        ->label('Unit Price per Linear Foot')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->prefix('$'),
+
+                                                    TextInput::make('entity.total_price')
+                                                        ->label('Total Price')
+                                                        ->numeric()
+                                                        ->step(0.01)
+                                                        ->prefix('$'),
+                                                ]),
+
+                                            // Notes Tab
+                                            Tab::make('Notes')
+                                                ->icon('heroicon-o-pencil')
+                                                ->schema([
+                                                    Textarea::make('entity.hardware_notes')
+                                                        ->label('Hardware Notes')
+                                                        ->rows(3),
+
+                                                    Textarea::make('entity.custom_modifications')
+                                                        ->label('Custom Modifications')
+                                                        ->rows(3),
+
+                                                    Textarea::make('entity.shop_notes')
+                                                        ->label('Shop Notes')
+                                                        ->rows(3),
+                                                ]),
+                                        ]),
+                                ])
+                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'cabinet')
+                                ->collapsible()
+                                ->collapsed(false),
+
+                            // ============================================
                             // SECTION: Context & Hierarchy (OLD - TO BE REMOVED)
                             // ============================================
                             Section::make('Context & Hierarchy OLD')
