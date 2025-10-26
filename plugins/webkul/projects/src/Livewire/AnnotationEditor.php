@@ -680,14 +680,15 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             $run = $cabinet->cabinetRun;
             $location = $run?->roomLocation;
             $room = $location?->room;
+            $projectId = $room?->project_id;
 
             return sprintf(
-                '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s</div><div><strong>Cabinet Run:</strong> %s</div><div><strong>Cabinet:</strong> %s <a href="/admin/projects/cabinet-specifications/%d/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">Edit Details →</a></div></div>',
+                '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s</div><div><strong>Cabinet Run:</strong> %s</div><div><strong>Cabinet:</strong> %s</div>%s</div>',
                 e($room?->name ?? 'N/A'),
                 e($location?->name ?? 'N/A'),
                 e($run?->name ?? 'N/A'),
                 e($cabinet->cabinet_number ?? 'N/A'),
-                $this->linkedCabinetSpecId
+                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/' . $projectId . '/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
             );
         }
 
@@ -700,13 +701,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
             $location = $run->roomLocation;
             $room = $location?->room;
+            $projectId = $room?->project_id;
 
             return sprintf(
-                '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s</div><div><strong>Cabinet Run:</strong> %s <a href="/admin/projects/cabinet-runs/%d/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">Edit Details →</a></div></div>',
+                '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s</div><div><strong>Cabinet Run:</strong> %s</div>%s</div>',
                 e($room?->name ?? 'N/A'),
                 e($location?->name ?? 'N/A'),
                 e($run->name),
-                $this->linkedCabinetRunId
+                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/' . $projectId . '/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
             );
         }
 
@@ -718,12 +720,13 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             }
 
             $room = $location->room;
+            $projectId = $room?->project_id;
 
             return sprintf(
-                '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s <a href="/admin/projects/room-locations/%d/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">Edit Details →</a></div></div>',
+                '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s</div>%s</div>',
                 e($room?->name ?? 'N/A'),
                 e($location->name),
-                $this->linkedLocationId
+                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/' . $projectId . '/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
             );
         }
 
@@ -734,10 +737,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 return '<span class="text-gray-500">Room not found</span>';
             }
 
+            // Rooms are managed through the project's relation manager
             return sprintf(
-                '<div class="text-sm"><strong>Room:</strong> %s <a href="/admin/projects/rooms/%d/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">Edit Details →</a></div>',
+                '<div class="text-sm"><strong>Room:</strong> %s <a href="/admin/project/projects/%d/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>',
                 e($room->name),
-                $this->linkedRoomId
+                $room->project_id
             );
         }
 
