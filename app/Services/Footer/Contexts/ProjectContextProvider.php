@@ -164,7 +164,7 @@ class ProjectContextProvider implements ContextProviderInterface
 
         return TextEntry::make('_tags')
             ->label('Tags')
-            ->state($tagCount . ' ' . str_plural('tag', $tagCount))
+            ->state($tagCount . ' ' . \Illuminate\Support\Str::plural('tag', $tagCount))
             ->badge()
             ->color('primary')
             ->icon('heroicon-o-tag')
