@@ -153,7 +153,7 @@
                         {{-- Edit Button (when not on edit page) --}}
                         @if(!$isOnEditPage && $contextType && $contextId)
                             <a
-                                href="{{ url("/admin/{$contextType}/".str_plural($contextType)."/{$contextId}/edit") }}"
+                                href="{{ url("/admin/{$contextType}/".\Illuminate\Support\Str::plural($contextType)."/{$contextId}/edit") }}"
                                 class="fi-btn fi-btn-size-sm fi-btn-color-gray inline-flex items-center justify-center font-semibold rounded-lg px-3 py-1.5 text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                             >
                                 Edit
