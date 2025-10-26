@@ -286,18 +286,7 @@ class AnnotationSaveService
 
         // Handle linking to existing entity
         if ($linkMode === 'existing' && $linkedEntityId) {
-            $entity = $this->entityManagement->loadEntity($annotationType, $linkedEntityId);
-            if ($entity) {
-                $result['label'] = $entity->name;
-                $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
-                $result[$entityIdField] = $linkedEntityId;
-
-                // For room entities, also set room_id
-                if ($annotationType === 'room') {
-                    $result['room_id'] = $linkedEntityId;
-                }
-            }
-            return $result;
+            return $this->linkToExistingEntity($annotationType, $linkedEntityId, $result);
         }
 
         // Handle creating new entity
@@ -313,23 +302,11 @@ class AnnotationSaveService
 
             if ($existingEntity) {
                 // Reuse existing entity
-                $result['label'] = $existingEntity->name;
-                $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
-                $result[$entityIdField] = $existingEntity->id;
-
-                if ($annotationType === 'room') {
-                    $result['room_id'] = $existingEntity->id;
-                }
+                return $this->linkToExistingEntity($annotationType, $existingEntity->id, $result);
             } else {
                 // Create new entity
                 $entity = $this->entityManagement->createEntity($annotationType, $entityData, $projectId);
-                $result['label'] = $entity->name;
-                $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
-                $result[$entityIdField] = $entity->id;
-
-                if ($annotationType === 'room') {
-                    $result['room_id'] = $entity->id;
-                }
+                return $this->linkToExistingEntity($annotationType, $entity->id, $result);
             }
         }
 
@@ -358,12 +335,7 @@ class AnnotationSaveService
 
         // Handle switching to different entity
         if ($linkMode === 'existing' && $linkedEntityId && $linkedEntityId !== $currentEntityId) {
-            $entity = $this->entityManagement->loadEntity($annotationType, $linkedEntityId);
-            if ($entity) {
-                $result['label'] = $entity->name;
-                $result[$entityIdField] = $linkedEntityId;
-            }
-            return $result;
+            return $this->linkToExistingEntity($annotationType, $linkedEntityId, $result);
         }
 
         // Handle updating existing entity
@@ -378,6 +350,26 @@ class AnnotationSaveService
             }
         }
 
+        return $result;
+    }
+
+    /**
+     * Helper method to link annotation to existing entity
+     * Consolidates duplicate logic from handleEntityLinking and handleEntityUpdate
+     */
+    protected function linkToExistingEntity(string $annotationType, int $entityId, array $result): array
+    {
+        $entity = $this->entityManagement->loadEntity($annotationType, $entityId);
+        if ($entity) {
+            $result['label'] = $entity->name;
+            $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
+            $result[$entityIdField] = $entityId;
+
+            // For room entities, also set room_id
+            if ($annotationType === 'room') {
+                $result['room_id'] = $entityId;
+            }
+        }
         return $result;
     }
 
