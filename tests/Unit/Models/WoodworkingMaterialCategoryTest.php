@@ -18,7 +18,7 @@ class WoodworkingMaterialCategoryTest extends TestCase
         parent::setUp();
 
         $this->category = WoodworkingMaterialCategory::create([
-            'name' => 'Sheet Goods - Plywood',
+            'name' => 'Sheet Goods - Plywood', 'code' => 'SG-PLYWOOD',
             'code' => 'SG-PLY',
             'description' => 'Plywood sheet goods for cabinet boxes',
             'sort_order' => 10,
@@ -29,7 +29,7 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function it_can_be_created_with_valid_attributes(): void
     {
         $category = WoodworkingMaterialCategory::create([
-            'name' => 'Hardware - Hinges',
+            'name' => 'Hardware - Hinges', 'code' => 'HW-HINGES',
             'code' => 'HW-HINGE',
             'description' => 'Cabinet door hinges',
             'sort_order' => 5,
@@ -45,12 +45,12 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function it_can_be_created_with_minimal_attributes(): void
     {
         $category = WoodworkingMaterialCategory::create([
-            'name' => 'Finishes',
+            'name' => 'Minimal Test Category',
             'sort_order' => 0,
         ]);
 
         $this->assertInstanceOf(WoodworkingMaterialCategory::class, $category);
-        $this->assertEquals('Finishes', $category->name);
+        $this->assertEquals('Minimal Test Category', $category->name);
         $this->assertNull($category->code);
         $this->assertNull($category->description);
         $this->assertEquals(0, $category->sort_order);
@@ -78,15 +78,15 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_by_type_filters_categories_by_prefix(): void
     {
         WoodworkingMaterialCategory::create([
-            'name' => 'Hardware - Slides',
+            'name' => 'Hardware - Slides', 'code' => 'HW-SLIDES',
             'sort_order' => 0,
         ]);
         WoodworkingMaterialCategory::create([
-            'name' => 'Hardware - Hinges',
+            'name' => 'Hardware - Hinges', 'code' => 'HW-HINGES',
             'sort_order' => 0,
         ]);
         WoodworkingMaterialCategory::create([
-            'name' => 'Solid Wood - Oak',
+            'name' => 'Solid Wood - Oak', 'code' => 'SW-OAK',
             'sort_order' => 0,
         ]);
 
@@ -100,11 +100,11 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_sheet_goods_filters_categories(): void
     {
         WoodworkingMaterialCategory::create([
-            'name' => 'Sheet Goods - MDF',
+            'name' => 'Sheet Goods - MDF', 'code' => 'SG-MDF',
             'sort_order' => 0,
         ]);
         WoodworkingMaterialCategory::create([
-            'name' => 'Hardware - Hinges',
+            'name' => 'Hardware - Hinges', 'code' => 'HW-HINGES',
             'sort_order' => 0,
         ]);
 
@@ -118,11 +118,11 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_solid_wood_filters_categories(): void
     {
         WoodworkingMaterialCategory::create([
-            'name' => 'Solid Wood - Oak',
+            'name' => 'Solid Wood - Oak', 'code' => 'SW-OAK',
             'sort_order' => 0,
         ]);
         WoodworkingMaterialCategory::create([
-            'name' => 'Solid Wood - Maple',
+            'name' => 'Solid Wood - Maple', 'code' => 'SW-MAPLE',
             'sort_order' => 0,
         ]);
 
@@ -136,11 +136,11 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_hardware_filters_categories(): void
     {
         WoodworkingMaterialCategory::create([
-            'name' => 'Hardware - Hinges',
+            'name' => 'Hardware - Hinges', 'code' => 'HW-HINGES',
             'sort_order' => 0,
         ]);
         WoodworkingMaterialCategory::create([
-            'name' => 'Sheet Goods - MDF',
+            'name' => 'Sheet Goods - MDF', 'code' => 'SG-MDF',
             'sort_order' => 0,
         ]);
 
@@ -154,11 +154,11 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_finishes_filters_categories(): void
     {
         WoodworkingMaterialCategory::create([
-            'name' => 'Finishes - Stain',
+            'name' => 'Finishes - Stain', 'code' => 'FIN-STAIN',
             'sort_order' => 0,
         ]);
         WoodworkingMaterialCategory::create([
-            'name' => 'Finishes - Lacquer',
+            'name' => 'Finishes - Lacquer', 'code' => 'FIN-LACQ',
             'sort_order' => 0,
         ]);
 
@@ -172,7 +172,7 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_accessories_filters_categories(): void
     {
         WoodworkingMaterialCategory::create([
-            'name' => 'Accessories - Shelf Pins',
+            'name' => 'Accessories - Shelf Pins', 'code' => 'ACC-PINS',
             'sort_order' => 0,
         ]);
 
@@ -185,9 +185,9 @@ class WoodworkingMaterialCategoryTest extends TestCase
     /** @test */
     public function scope_ordered_sorts_by_sort_order(): void
     {
-        WoodworkingMaterialCategory::create(['name' => 'Cat C', 'sort_order' => 30]);
-        WoodworkingMaterialCategory::create(['name' => 'Cat A', 'sort_order' => 10]);
-        WoodworkingMaterialCategory::create(['name' => 'Cat B', 'sort_order' => 20]);
+        WoodworkingMaterialCategory::create(['name' => 'Cat C', 'code' => 'CAT-C', 'sort_order' => 30]);
+        WoodworkingMaterialCategory::create(['name' => 'Cat A', 'code' => 'CAT-A', 'sort_order' => 10]);
+        WoodworkingMaterialCategory::create(['name' => 'Cat B', 'code' => 'CAT-B', 'sort_order' => 20]);
 
         $ordered = WoodworkingMaterialCategory::ordered()->get();
 
@@ -245,7 +245,7 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function code_can_be_null(): void
     {
         $category = WoodworkingMaterialCategory::create([
-            'name' => 'Test Category',
+            'name' => 'Test Category For Null Code',
             'sort_order' => 0,
         ]);
 
@@ -256,7 +256,8 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function description_can_be_null(): void
     {
         $category = WoodworkingMaterialCategory::create([
-            'name' => 'Test Category',
+            'name' => 'Test Category For Null Description',
+            'code' => 'TEST-NULL-DESC',
             'sort_order' => 0,
         ]);
 

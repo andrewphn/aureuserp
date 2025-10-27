@@ -20,12 +20,9 @@ class CabinetMaterialsBomTest extends TestCase
     {
         parent::setUp();
 
-        // Create a test product manually
-        $this->product = Product::create([
+        // Create a test product using factory
+        $this->product = Product::factory()->create([
             'name' => '3/4" Plywood - Birch',
-            'type' => 'goods',
-            'uom_id' => 1, // Units
-            'uom_po_id' => 1, // Units for purchase orders
         ]);
 
         // Create basic BOM entry
@@ -141,11 +138,16 @@ class CabinetMaterialsBomTest extends TestCase
     /** @test */
     public function it_casts_decimal_fields_correctly(): void
     {
-        $this->assertIsFloat($this->bom->quantity_required);
-        $this->assertIsFloat($this->bom->waste_factor_percentage);
-        $this->assertIsFloat($this->bom->quantity_with_waste);
-        $this->assertIsFloat($this->bom->unit_cost);
-        $this->assertIsFloat($this->bom->total_material_cost);
+        // Laravel's decimal cast returns strings for precision
+        $this->assertIsString($this->bom->quantity_required);
+        $this->assertIsString($this->bom->waste_factor_percentage);
+        $this->assertIsString($this->bom->quantity_with_waste);
+        $this->assertIsString($this->bom->unit_cost);
+        $this->assertIsString($this->bom->total_material_cost);
+
+        // But they should be numeric strings
+        $this->assertIsNumeric($this->bom->quantity_required);
+        $this->assertIsNumeric($this->bom->waste_factor_percentage);
     }
 
     /** @test */
@@ -197,7 +199,7 @@ class CabinetMaterialsBomTest extends TestCase
     /** @test */
     public function it_belongs_to_substituted_product(): void
     {
-        $substitute = Product::create(['name' => 'Substitute Material', 'type' => 'goods', 'uom_id' => 1, 'uom_po_id' => 1]);
+        $substitute = Product::factory()->create(['name' => 'Substitute Material']);
 
         $this->bom->update(['substituted_product_id' => $substitute->id]);
 
@@ -504,7 +506,7 @@ class CabinetMaterialsBomTest extends TestCase
     /** @test */
     public function it_can_store_substitution_details(): void
     {
-        $substitute = Product::create(['name' => 'Alternate Plywood', 'type' => 'goods', 'uom_id' => 1, 'uom_po_id' => 1]);
+        $substitute = Product::factory()->create(['name' => 'Alternate Plywood']);
 
         $bom = CabinetMaterialsBom::create([
             'product_id' => $this->product->id,

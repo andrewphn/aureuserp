@@ -34,6 +34,14 @@ class Order extends Model
 
     protected $table = 'sales_orders';
 
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return \Webkul\Sale\Database\Factories\OrderFactory::new();
+    }
+
     protected $fillable = [
         'utm_source_id',
         'medium_id',

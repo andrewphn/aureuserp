@@ -20,16 +20,12 @@ class SalesOrderLineItemTest extends TestCase
     {
         parent::setUp();
 
-        // Create test order and product manually
-        $this->order = Order::create([
+        // Create test order and product using factories
+        $this->order = Order::factory()->create([
             'name' => 'SO-TEST-001',
-            'state' => \Webkul\Sale\Enums\OrderState::SALE,
         ]);
-        $this->product = Product::create([
+        $this->product = Product::factory()->create([
             'name' => 'Base Cabinet',
-            'type' => 'goods',
-            'uom_id' => 1, // Units
-            'uom_po_id' => 1, // Units for purchase orders
         ]);
 
         // Create basic line item

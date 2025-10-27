@@ -20,7 +20,7 @@ class HardwareRequirementTest extends TestCase
         parent::setUp();
 
         // Create a test product manually
-        $this->product = Product::create([
+        $this->product = Product::factory()->create([
             'name' => 'Blum Hinge - Clip Top 110°',
             'type' => 'goods',
             'uom_id' => 1, // Units
@@ -96,9 +96,11 @@ class HardwareRequirementTest extends TestCase
             'unit_cost' => 12.99,
         ]);
 
-        $this->assertIsFloat($hardware->slide_length_inches);
-        $this->assertIsFloat($hardware->unit_cost);
-        $this->assertEquals(18.5, $hardware->slide_length_inches);
+        // Laravel's decimal cast returns strings for precision
+        $this->assertIsString($hardware->slide_length_inches);
+        $this->assertIsString($hardware->unit_cost);
+        $this->assertIsNumeric($hardware->slide_length_inches);
+        $this->assertEquals('18.5', $hardware->slide_length_inches);
     }
 
     /** @test */
@@ -168,7 +170,7 @@ class HardwareRequirementTest extends TestCase
     /** @test */
     public function it_belongs_to_substituted_product(): void
     {
-        $substitute = Product::create(['name' => 'Alternative Hinge', 'type' => 'goods', 'uom_id' => 1, 'uom_po_id' => 1]);
+        $substitute = Product::factory()->create(['name' => 'Alternative Hinge']);
         $this->hardware->update(['substituted_product_id' => $substitute->id]);
 
         $this->assertTrue(method_exists($this->hardware, 'substitutedProduct'));
@@ -600,7 +602,7 @@ class HardwareRequirementTest extends TestCase
     /** @test */
     public function it_can_track_substitutions(): void
     {
-        $substitute = Product::create(['name' => 'Alternative Hinge', 'type' => 'goods', 'uom_id' => 1, 'uom_po_id' => 1]);
+        $substitute = Product::factory()->create(['name' => 'Alternative Hinge']);
 
         $hardware = HardwareRequirement::create([
             'product_id' => $this->product->id,
