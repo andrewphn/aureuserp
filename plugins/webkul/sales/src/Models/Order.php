@@ -237,6 +237,11 @@ class Order extends Model
         return $this->hasMany(Operation::class, 'sale_order_id');
     }
 
+    public function lineItems(): HasMany
+    {
+        return $this->hasMany(SalesOrderLineItem::class, 'sales_order_id');
+    }
+
     protected static function boot()
     {
         parent::boot();
