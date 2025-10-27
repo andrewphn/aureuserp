@@ -23,11 +23,17 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
+        // Create a single partner to use for both invoice and shipping
+        $partner = Partner::factory();
+
         return [
             'name' => fake()->unique()->numerify('SO-####'),
             'state' => OrderState::SALE,
             'company_id' => Company::factory(),
-            'partner_id' => Partner::factory(),
+            'partner_id' => $partner,
+            'partner_invoice_id' => $partner,
+            'partner_shipping_id' => $partner,
+            'currency_id' => 1, // Default to USD or base currency
             'user_id' => User::factory(),
             'creator_id' => User::factory(),
         ];
