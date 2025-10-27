@@ -41,6 +41,8 @@ class ProductFactory extends Factory
             'description_sale'     => fake()->sentence(),
             'enable_sales'         => true,
             'sort'                 => fake()->randomNumber(),
+            'uom_id'               => 1, // Default to "Units" UOM
+            'uom_po_id'            => 1, // Default to "Units" for purchase orders
             'category_id'          => Category::factory(),
             'creator_id'           => User::factory(),
             'company_id'           => Company::factory(),
