@@ -4,12 +4,21 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
@@ -85,6 +94,10 @@ class ViewProject extends ViewRecord
                         ->label('Notes')
                         ->rows(3)
                         ->helperText('Optional notes about this document'),
+
+                    Checkbox::make('is_primary_reference')
+                        ->label('Set as Primary Reference')
+                        ->helperText('Mark this document as the primary reference for the project (will be displayed in project overview)'),
                 ])
                 ->action(function (array $data) {
                     // Get file size
@@ -97,6 +110,13 @@ class ViewProject extends ViewRecord
                         $data['mime_type'] = 'application/pdf';
                     }
 
+                    // If this document is being set as primary reference, unmark any existing primary references
+                    if (!empty($data['is_primary_reference'])) {
+                        $this->record->pdfDocuments()
+                            ->where('is_primary_reference', true)
+                            ->update(['is_primary_reference' => false]);
+                    }
+
                     // Create PDF document
                     $this->record->pdfDocuments()->create([
                         'file_path' => $data['file_path'],
@@ -105,6 +125,7 @@ class ViewProject extends ViewRecord
                         'mime_type' => $data['mime_type'],
                         'document_type' => $data['document_type'],
                         'notes' => $data['notes'] ?? null,
+                        'is_primary_reference' => $data['is_primary_reference'] ?? false,
                         'uploaded_by' => Auth::id(),
                     ]);
 
@@ -121,6 +142,146 @@ class ViewProject extends ViewRecord
                         ->body(__('webkul-project::filament/resources/project/pages/view-project.header-actions.delete.notification.body')),
                 ),
         ];
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Eager load relationships for hierarchical display
+        $this->record->load([
+            'rooms.locations',
+            'rooms.cabinets',
+            'pdfDocuments.pages'
+        ]);
+
+        return $data;
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->columns(3) // Set 3 columns for 2/3 + 1/3 split
+            ->schema([
+                // Left Column: Project Overview with Gallery (2/3 width)
+                Section::make('Project Overview')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->label('Project Name')
+                                    ->icon('heroicon-o-folder')
+                                    ->weight(FontWeight::Bold),
+                                TextEntry::make('status')
+                                    ->badge()
+                                    ->color(fn ($state): string => match ($state) {
+                                        'active' => 'success',
+                                        'completed' => 'info',
+                                        'on_hold' => 'warning',
+                                        'cancelled' => 'danger',
+                                        default => 'gray',
+                                    }),
+                                TextEntry::make('partner.name')
+                                    ->label('Customer')
+                                    ->icon('heroicon-o-user'),
+                            ]),
+
+                        // Primary Reference Gallery
+                        ViewEntry::make('primary_reference_gallery')
+                            ->label('Primary Reference')
+                            ->view('filament.infolists.components.primary-reference-gallery')
+                            ->state(fn ($record) => $record->pdfDocuments()->where('is_primary_reference', true)->first())
+                            ->visible(fn ($record) => $record->pdfDocuments()->where('is_primary_reference', true)->exists())
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible()
+                    ->collapsed(false)
+                    ->columnSpan(2), // Takes 2/3 of the width
+
+                // Right Column: Project Breakdown (1/3 width)
+                Section::make('Project Breakdown')
+                    ->schema([
+                        RepeatableEntry::make('rooms')
+                            ->label('')
+                            ->schema([
+                                // Room Header
+                                Section::make(fn ($record) => "Room: {$record->name}")
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextEntry::make('room_type')
+                                                    ->label('Type')
+                                                    ->badge(),
+                                                TextEntry::make('estimated_cabinet_value')
+                                                    ->label('Est. Value')
+                                                    ->money('USD')
+                                                    ->weight(FontWeight::Bold)
+                                                    ->color('success'),
+                                            ]),
+
+                                        // Compact Linear Feet Display
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextEntry::make('total_linear_feet_tier_1')
+                                                    ->label('Tier 1')
+                                                    ->suffix(' LF')
+                                                    ->default('—'),
+                                                TextEntry::make('total_linear_feet_tier_2')
+                                                    ->label('Tier 2')
+                                                    ->suffix(' LF')
+                                                    ->default('—'),
+                                            ]),
+
+                                        // Locations within this Room
+                                        RepeatableEntry::make('locations')
+                                            ->label('Locations')
+                                            ->schema([
+                                                TextEntry::make('location_name')
+                                                    ->label('')
+                                                    ->icon('heroicon-o-map-pin')
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->contained(false)
+                                            ->columnSpanFull(),
+
+                                        // Cabinets within this Room
+                                        RepeatableEntry::make('cabinets')
+                                            ->label('Cabinets')
+                                            ->schema([
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextEntry::make('cabinet_code')
+                                                            ->label('Code')
+                                                            ->badge()
+                                                            ->color('gray'),
+                                                        TextEntry::make('cabinet_type')
+                                                            ->label('Type')
+                                                            ->badge()
+                                                            ->size('xs'),
+                                                    ]),
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextEntry::make('width_inches')
+                                                            ->label('W')
+                                                            ->suffix('"'),
+                                                        TextEntry::make('height_inches')
+                                                            ->label('H')
+                                                            ->suffix('"'),
+                                                    ]),
+                                            ])
+                                            ->contained(false)
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->collapsible()
+                                    ->collapsed(true)
+                                    ->compact()
+                                    ->icon('heroicon-o-home')
+                                    ->description(fn ($record) => $record->notes ?? null),
+                            ])
+                            ->contained(false),
+                    ])
+                    ->collapsible()
+                    ->collapsed(false)
+                    ->columnSpan(1), // Takes 1/3 of the width
+            ]);
     }
 
     private function getActivityPlans(): mixed

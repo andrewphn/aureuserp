@@ -12,22 +12,21 @@
     - Plugin-extensible architecture
 --}}
 
-<x-filament-widgets::widget>
-    <div
-        x-data="contextFooter({
-            contextType: @js($contextType),
-            contextId: @js($contextId),
-            contextData: @js($contextData),
-            contextConfigs: @js($jsContextConfigs),
-            isMinimized: @entangle('isMinimized'),
-            hasActiveContext: @js($hasActiveContext),
-        })"
-        x-cloak
-        @active-context-changed.window="handleContextChange($event.detail)"
-        @entity-updated.window="handleEntityUpdate($event.detail)"
-        class="fi-section rounded-t-xl shadow-lg ring-1 ring-gray-950/10 dark:ring-white/10 transition-all duration-300 ease-in-out"
-        :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'}); padding-bottom: 0;`"
-    >
+<div
+    x-data="contextFooter({
+        contextType: @js($contextType),
+        contextId: @js($contextId),
+        contextData: @js($contextData),
+        contextConfigs: @js($jsContextConfigs),
+        isMinimized: @entangle('isMinimized'),
+        hasActiveContext: @js($hasActiveContext),
+    })"
+    x-cloak
+    @active-context-changed.window="handleContextChange($event.detail)"
+    @entity-updated.window="handleEntityUpdate($event.detail)"
+    class="fi-section rounded-t-xl shadow-lg ring-1 ring-gray-950/10 dark:ring-white/10 transition-all duration-300 ease-in-out"
+    :style="`position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(8px); background: linear-gradient(to right, rgb(249, 250, 251), rgb(243, 244, 246)); border-top: 3px solid ${contextConfig.borderColor}; transform: translateY(${isMinimized ? 'calc(100% - 44px)' : '0'}); padding: 0; margin: 0;`"
+>
         {{-- Toggle Button Bar --}}
         <div
             class="flex items-center justify-between px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -59,7 +58,7 @@
 
         {{-- Expanded Content --}}
         <div
-            class="fi-section-content p-3"
+            class="fi-section-content px-3 pt-3 pb-0"
             x-show="!isMinimized"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
@@ -172,5 +171,4 @@
                 </div>
             @endif
         </div>
-    </div>
-</x-filament-widgets::widget>
+</div>

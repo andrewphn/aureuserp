@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cabinet_materials_bom', function (Blueprint $table) {
+        Schema::create('projects_bom', function (Blueprint $table) {
             $table->id();
 
             // Cabinet Reference (can be cabinet_specification OR cabinet_run for aggregation)
@@ -127,6 +127,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cabinet_materials_bom');
+        Schema::dropIfExists('projects_bom');
     }
 };
