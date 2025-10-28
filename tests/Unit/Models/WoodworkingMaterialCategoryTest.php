@@ -186,11 +186,13 @@ class WoodworkingMaterialCategoryTest extends TestCase
     public function scope_ordered_sorts_by_sort_order(): void
     {
         WoodworkingMaterialCategory::create(['name' => 'Cat C', 'code' => 'CAT-C', 'sort_order' => 30]);
-        WoodworkingMaterialCategory::create(['name' => 'Cat A', 'code' => 'CAT-A', 'sort_order' => 10]);
+        WoodworkingMaterialCategory::create(['name' => 'Cat A', 'code' => 'CAT-A', 'sort_order' => 5]);
         WoodworkingMaterialCategory::create(['name' => 'Cat B', 'code' => 'CAT-B', 'sort_order' => 20]);
 
         $ordered = WoodworkingMaterialCategory::ordered()->get();
 
+        // First should be Cat A (sort_order 5), last should be Cat C (sort_order 30)
+        // Note: setUp() creates a category with sort_order 10
         $this->assertEquals('Cat A', $ordered->first()->name);
         $this->assertEquals('Cat C', $ordered->last()->name);
     }

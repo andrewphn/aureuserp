@@ -36,8 +36,10 @@ class SalesOrderLineItemTest extends TestCase
             'description' => '24" Base Cabinet',
             'quantity' => 1.00,
             'linear_feet' => 2.00,
-            'unit_price_per_lf' => 150.00,
-            'sort_order' => 1,
+            'base_rate_per_lf' => 100.00,
+            'material_rate_per_lf' => 50.00,
+            'combined_rate_per_lf' => 150.00,
+            'sequence' => 1,
         ]);
     }
 
@@ -60,7 +62,7 @@ class SalesOrderLineItemTest extends TestCase
     /** @test */
     public function it_auto_calculates_cabinet_subtotal_with_linear_feet(): void
     {
-        // Cabinet pricing: subtotal = linear_feet * unit_price_per_lf * quantity
+        // Cabinet pricing: subtotal = linear_feet * combined_rate_per_lf * quantity
         // Expected: 2.00 * 150.00 * 1.00 = 300.00
         $this->assertEquals(300.00, $this->lineItem->subtotal);
     }
@@ -90,7 +92,9 @@ class SalesOrderLineItemTest extends TestCase
             'description' => '24" Wall Cabinet',
             'quantity' => 3.00,
             'linear_feet' => 2.00,
-            'unit_price_per_lf' => 100.00,
+            'base_rate_per_lf' => 60.00,
+            'material_rate_per_lf' => 40.00,
+            'combined_rate_per_lf' => 100.00,
         ]);
 
         // Cabinet with quantity: 2.00 LF * 100.00 * 3 qty = 600.00
@@ -152,7 +156,9 @@ class SalesOrderLineItemTest extends TestCase
     {
         $this->lineItem->update([
             'linear_feet' => 4.00,
-            'unit_price_per_lf' => 200.00,
+            'base_rate_per_lf' => 120.00,
+            'material_rate_per_lf' => 80.00,
+            'combined_rate_per_lf' => 200.00,
         ]);
 
         // New subtotal: 4.00 * 200.00 * 1.00 = 800.00
@@ -195,18 +201,28 @@ class SalesOrderLineItemTest extends TestCase
     /** @test */
     public function it_casts_decimal_fields_correctly(): void
     {
-        $this->assertIsFloat($this->lineItem->quantity);
-        $this->assertIsFloat($this->lineItem->linear_feet);
-        $this->assertIsFloat($this->lineItem->unit_price_per_lf);
-        $this->assertIsFloat($this->lineItem->subtotal);
-        $this->assertIsFloat($this->lineItem->line_total);
+        // Laravel 11.5 decimal casting returns strings, not floats
+        $this->assertIsString($this->lineItem->quantity);
+        $this->assertIsString($this->lineItem->linear_feet);
+        $this->assertIsString($this->lineItem->base_rate_per_lf);
+        $this->assertIsString($this->lineItem->material_rate_per_lf);
+        $this->assertIsString($this->lineItem->combined_rate_per_lf);
+        $this->assertIsString($this->lineItem->subtotal);
+        $this->assertIsString($this->lineItem->line_total);
+
+        // Verify values are correct decimal strings
+        $this->assertEquals('1.00', $this->lineItem->quantity);
+        $this->assertEquals('2.00', $this->lineItem->linear_feet);
+        $this->assertEquals('100.00', $this->lineItem->base_rate_per_lf);
+        $this->assertEquals('50.00', $this->lineItem->material_rate_per_lf);
+        $this->assertEquals('150.00', $this->lineItem->combined_rate_per_lf);
     }
 
     /** @test */
     public function it_casts_integer_fields_correctly(): void
     {
-        $this->assertIsInt($this->lineItem->sort_order);
-        $this->assertEquals(1, $this->lineItem->sort_order);
+        $this->assertIsInt($this->lineItem->sequence);
+        $this->assertEquals(1, $this->lineItem->sequence);
     }
 
     /** @test */
@@ -356,7 +372,7 @@ class SalesOrderLineItemTest extends TestCase
             'description' => 'Item C',
             'quantity' => 1.00,
             'unit_price' => 100.00,
-            'sort_order' => 30,
+            'sequence' => 30,
         ]);
 
         SalesOrderLineItem::create([
@@ -365,7 +381,7 @@ class SalesOrderLineItemTest extends TestCase
             'description' => 'Item A',
             'quantity' => 1.00,
             'unit_price' => 100.00,
-            'sort_order' => 10,
+            'sequence' => 10,
         ]);
 
         SalesOrderLineItem::create([
@@ -374,29 +390,14 @@ class SalesOrderLineItemTest extends TestCase
             'description' => 'Item B',
             'quantity' => 1.00,
             'unit_price' => 100.00,
-            'sort_order' => 20,
+            'sequence' => 20,
         ]);
 
         $ordered = SalesOrderLineItem::ordered()->get();
 
-        // First should have lowest sort_order
-        $this->assertEquals(1, $ordered->first()->sort_order); // Setup item has sort_order 1
+        // First should have lowest sequence
+        $this->assertEquals(1, $ordered->first()->sequence); // Setup item has sequence 1
         $this->assertEquals('Item A', $ordered->skip(1)->first()->description);
-    }
-
-    /** @test */
-    public function it_can_store_notes(): void
-    {
-        $lineItem = SalesOrderLineItem::create([
-            'sales_order_id' => $this->order->id,
-            'line_item_type' => 'cabinet',
-            'description' => 'Custom Cabinet',
-            'quantity' => 1.00,
-            'unit_price' => 100.00,
-            'notes' => 'Customer requested special finish',
-        ]);
-
-        $this->assertEquals('Customer requested special finish', $lineItem->notes);
     }
 
     /** @test */
@@ -408,7 +409,9 @@ class SalesOrderLineItemTest extends TestCase
             'description' => '18" Cabinet',
             'quantity' => 1.00,
             'linear_feet' => 1.50,
-            'unit_price_per_lf' => 200.00,
+            'base_rate_per_lf' => 120.00,
+            'material_rate_per_lf' => 80.00,
+            'combined_rate_per_lf' => 200.00,
         ]);
 
         // 1.50 LF * 200.00 = 300.00
@@ -424,7 +427,9 @@ class SalesOrderLineItemTest extends TestCase
             'description' => 'Standard Cabinet',
             'quantity' => 10.00,
             'linear_feet' => 2.00,
-            'unit_price_per_lf' => 150.00,
+            'base_rate_per_lf' => 90.00,
+            'material_rate_per_lf' => 60.00,
+            'combined_rate_per_lf' => 150.00,
         ]);
 
         // 2.00 LF * 150.00 * 10 qty = 3000.00
@@ -500,9 +505,10 @@ class SalesOrderLineItemTest extends TestCase
         $this->assertNull($lineItem->cabinet_specification_id);
         $this->assertNull($lineItem->product_id);
         $this->assertNull($lineItem->linear_feet);
-        $this->assertNull($lineItem->unit_price_per_lf);
+        $this->assertNull($lineItem->base_rate_per_lf);
+        $this->assertNull($lineItem->material_rate_per_lf);
+        $this->assertNull($lineItem->combined_rate_per_lf);
         $this->assertNull($lineItem->discount_percentage);
-        $this->assertNull($lineItem->notes);
     }
 
     /** @test */
@@ -515,7 +521,9 @@ class SalesOrderLineItemTest extends TestCase
             'description' => 'Cabinet',
             'quantity' => 1.00,
             'linear_feet' => 3.00,
-            'unit_price_per_lf' => 100.00,
+            'base_rate_per_lf' => 60.00,
+            'material_rate_per_lf' => 40.00,
+            'combined_rate_per_lf' => 100.00,
         ]);
 
         // Standard item pricing
@@ -543,7 +551,9 @@ class SalesOrderLineItemTest extends TestCase
             'description' => 'Test Cabinet',
             'quantity' => 1.00,
             'linear_feet' => 2.33,
-            'unit_price_per_lf' => 123.45,
+            'base_rate_per_lf' => 74.07,
+            'material_rate_per_lf' => 49.38,
+            'combined_rate_per_lf' => 123.45,
         ]);
 
         // 2.33 * 123.45 = 287.6385, should round to 287.64

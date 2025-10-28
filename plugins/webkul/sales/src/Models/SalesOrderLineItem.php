@@ -26,26 +26,29 @@ class SalesOrderLineItem extends Model
         'description',
         'quantity',
         'linear_feet',
-        'unit_price_per_lf',
+        'base_rate_per_lf',
+        'material_rate_per_lf',
+        'combined_rate_per_lf',
         'unit_price',
         'subtotal',
         'discount_percentage',
         'discount_amount',
         'line_total',
-        'notes',
-        'sort_order',
+        'sequence',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
         'linear_feet' => 'decimal:2',
-        'unit_price_per_lf' => 'decimal:2',
+        'base_rate_per_lf' => 'decimal:2',
+        'material_rate_per_lf' => 'decimal:2',
+        'combined_rate_per_lf' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'discount_percentage' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'line_total' => 'decimal:2',
-        'sort_order' => 'integer',
+        'sequence' => 'integer',
     ];
 
     /**
@@ -57,7 +60,9 @@ class SalesOrderLineItem extends Model
         'line_item_type' => 'Type',
         'quantity' => 'Quantity',
         'linear_feet' => 'Linear Feet',
-        'unit_price_per_lf' => 'Price per LF',
+        'base_rate_per_lf' => 'Base Rate per LF',
+        'material_rate_per_lf' => 'Material Rate per LF',
+        'combined_rate_per_lf' => 'Combined Rate per LF',
         'unit_price' => 'Unit Price',
         'line_total' => 'Line Total',
     ];
@@ -120,7 +125,7 @@ class SalesOrderLineItem extends Model
 
     public function scopeOrdered($query)
     {
-        return $query->orderBy('sort_order');
+        return $query->orderBy('sequence');
     }
 
     /**
@@ -132,9 +137,9 @@ class SalesOrderLineItem extends Model
 
         static::saving(function ($lineItem) {
             // Auto-calculate subtotal based on line_item_type
-            if ($lineItem->line_item_type === 'cabinet' && $lineItem->linear_feet && $lineItem->unit_price_per_lf) {
+            if ($lineItem->line_item_type === 'cabinet' && $lineItem->linear_feet && $lineItem->combined_rate_per_lf) {
                 $lineItem->subtotal = round(
-                    $lineItem->linear_feet * $lineItem->unit_price_per_lf * ($lineItem->quantity ?? 1),
+                    $lineItem->linear_feet * $lineItem->combined_rate_per_lf * ($lineItem->quantity ?? 1),
                     2
                 );
             } elseif ($lineItem->quantity && $lineItem->unit_price) {
