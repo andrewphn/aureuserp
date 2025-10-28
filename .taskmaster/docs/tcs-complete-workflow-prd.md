@@ -254,11 +254,262 @@ CREATE TABLE projects_meeting_decisions (
 - Alert notification system
 - Historical project pricing analysis
 
+**Database Integration for Alert System:**
+
+Alerts connect to existing employee and notification infrastructure:
+
+```sql
+-- Alert Triggering Architecture
+
+-- 1. Find Employee by Role/Name
+employees_employees
+    ├─ company_id → companies.id (TCS Woodwork)
+    ├─ user_id → users.id (notification recipient)
+    ├─ name (e.g., "Levi", "JG")
+    ├─ job_title (e.g., "Production Lead", "Delivery Coordinator")
+    └─ Used to identify WHO should receive alerts
+
+-- 2. Send Notification via FilamentPHP
+notifications (FilamentPHP database notifications table)
+    ├─ id (uuid)
+    ├─ type (e.g., App\Notifications\ProjectComplexityAlert)
+    ├─ notifiable_type (App\Models\User)
+    ├─ notifiable_id → users.id ⭐ (WHO gets notified)
+    ├─ data (JSON) containing:
+    │   ├─ title: "High Complexity Project Alert"
+    │   ├─ body: "Level 4/5 requires production review"
+    │   ├─ project_id: 123
+    │   ├─ severity: "warning" | "info" | "success"
+    │   └─ actions: [{"type":"view","url":"..."}]
+    ├─ read_at (null = unread, timestamp = read)
+    ├─ created_at
+    └─ Updated_at
+
+-- 3. Alert Trigger Conditions
+
+-- Condition 1: High Complexity Pricing (Level 4/5)
+SELECT DISTINCT
+    so.project_id,
+    so.id as sales_order_id,
+    aopt.name as pricing_level
+FROM sales_orders so
+JOIN sales_order_lines sol ON sol.order_id = so.id
+JOIN sales_order_line_items soli ON soli.order_line_id = sol.id
+WHERE soli.complexity_tier >= 4  -- Level 4 or 5
+AND so.project_id = ?;
+
+-- Condition 2: Ferry Delivery Logistics
+SELECT p.id
+FROM projects_projects p
+JOIN projects_site_access_plans sap ON sap.project_id = p.id
+WHERE sap.requires_ferry = true
+AND p.id = ?;
+
+-- OR via tags:
+SELECT p.id
+FROM projects_projects p
+JOIN projects_project_tags pt ON pt.project_id = p.id
+JOIN projects_tags t ON t.id = pt.tag_id
+WHERE t.name IN ('Ferry Access Required', 'Nantucket', 'Island Delivery')
+AND p.id = ?;
+
+-- Condition 3: Premium Materials
+SELECT DISTINCT
+    so.project_id,
+    pc.name as material_category
+FROM sales_orders so
+JOIN sales_order_lines sol ON sol.order_id = so.id
+JOIN sales_order_line_items soli ON soli.order_line_id = sol.id
+WHERE soli.material_rate_per_lf >= 185  -- Premium materials ($185/LF+)
+AND so.project_id = ?;
+
+-- 4. Employee Lookup for Notifications
+-- Levi (Production Lead)
+SELECT u.id, u.email, e.name
+FROM employees_employees e
+JOIN users u ON u.id = e.user_id
+WHERE (e.name LIKE '%Levi%' OR e.job_title LIKE '%Production Lead%')
+AND e.company_id = ?
+AND e.is_active = true
+LIMIT 1;
+
+-- JG (Delivery/CAD Coordinator)
+SELECT u.id, u.email, e.name
+FROM employees_employees e
+JOIN users u ON u.id = e.user_id
+WHERE (e.name LIKE '%JG%'
+    OR e.job_title LIKE '%Delivery%'
+    OR e.job_title LIKE '%CAD%')
+AND e.company_id = ?
+AND e.is_active = true
+LIMIT 1;
+
+-- Purchasing Manager
+SELECT u.id, u.email, e.name
+FROM employees_employees e
+JOIN users u ON u.id = e.user_id
+WHERE (e.job_title LIKE '%Purchas%'
+    OR e.job_title LIKE '%Inventory%'
+    OR e.job_title LIKE '%Materials%')
+AND e.company_id = ?
+AND e.is_active = true
+LIMIT 1;
+```
+
+**Alert Implementation Locations:**
+
+Alerts should trigger in these workflow events:
+
+1. **Sales Order Creation** (`ReviewPdfAndPrice.php::createSalesOrder()` - line 488)
+   - After creating sales_orders and sales_order_lines
+   - Check complexity_tier values
+   - Send notifications to appropriate employees
+
+2. **Project Status Change** (Project model Observer or `afterSave()` hook)
+   - When project moves to certain stages
+   - When tags are added/changed
+   - When site_access_plan is created
+
+3. **Material Selection** (When material upgrades selected)
+   - During quote/order creation
+   - When material_rate_per_lf >= $185/LF
+
+**Implementation Example:**
+
+```php
+// In ReviewPdfAndPrice.php after createSalesOrder() completes
+use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action;
+use Webkul\Employee\Models\Employee;
+
+protected function sendComplexityAlerts(int $salesOrderId, int $projectId): void
+{
+    // Check for Level 4/5 complexity
+    $hasHighComplexity = \DB::table('sales_order_line_items')
+        ->join('sales_order_lines', 'sales_order_lines.id', '=', 'sales_order_line_items.order_line_id')
+        ->where('sales_order_lines.order_id', $salesOrderId)
+        ->where('sales_order_line_items.complexity_tier', '>=', 4)
+        ->exists();
+
+    if ($hasHighComplexity) {
+        $levi = Employee::where('company_id', $this->record->company_id)
+            ->where(function($q) {
+                $q->where('name', 'LIKE', '%Levi%')
+                  ->orWhere('job_title', 'LIKE', '%Production Lead%');
+            })
+            ->first();
+
+        if ($levi && $levi->user) {
+            // Send FilamentPHP notification to user
+            Notification::make()
+                ->warning()
+                ->title('High Complexity Project Alert')
+                ->body("Project {$this->record->project_number} uses Level 4/5 pricing. Production review required.")
+                ->actions([
+                    Action::make('view')
+                        ->button()
+                        ->url(ProjectResource::getUrl('view', ['record' => $projectId])),
+                ])
+                ->sendToDatabase($levi->user);
+
+            // Log to Chatter activity feed (permanent project history)
+            $this->record->addMessage([
+                'type'        => 'activity',
+                'subject'     => 'High Complexity Alert',
+                'body'        => "Level 4/5 complexity detected. {$levi->name} (Production Lead) notified for production review.",
+                'is_internal' => true,
+            ]);
+        }
+    }
+
+    // Check for premium materials
+    $hasPremiumMaterials = \DB::table('sales_order_line_items')
+        ->join('sales_order_lines', 'sales_order_lines.id', '=', 'sales_order_line_items.order_line_id')
+        ->where('sales_order_lines.order_id', $salesOrderId)
+        ->where('sales_order_line_items.material_rate_per_lf', '>=', 185)
+        ->exists();
+
+    if ($hasPremiumMaterials) {
+        $purchasing = Employee::where('company_id', $this->record->company_id)
+            ->where(function($q) {
+                $q->where('job_title', 'LIKE', '%Purchas%')
+                  ->orWhere('job_title', 'LIKE', '%Inventory%');
+            })
+            ->first();
+
+        if ($purchasing && $purchasing->user) {
+            // Send FilamentPHP notification to user
+            Notification::make()
+                ->success()
+                ->title('Premium Materials Detected')
+                ->body("Project {$this->record->project_number} requires premium materials ($185+/LF). Early procurement recommended.")
+                ->actions([
+                    Action::make('view')
+                        ->button()
+                        ->url(ProjectResource::getUrl('view', ['record' => $projectId])),
+                ])
+                ->sendToDatabase($purchasing->user);
+
+            // Log to Chatter activity feed (permanent project history)
+            $this->record->addMessage([
+                'type'        => 'activity',
+                'subject'     => 'Premium Materials Alert',
+                'body'        => "Premium materials required. {$purchasing->name} (Purchasing) notified for early procurement.",
+                'is_internal' => true,
+            ]);
+        }
+    }
+}
+```
+
+**Chatter Integration:**
+
+The alert system uses **dual notification architecture**:
+
+1. **FilamentPHP Database Notifications** (Real-time user alerts)
+   - Appears in notification bell icon in admin panel
+   - User-specific, can be marked as read/dismissed
+   - Includes clickable action buttons
+   - Stored in `notifications` table
+
+2. **Chatter Activity Feed** (Permanent project history)
+   - Creates activity record on project using `HasChatter` trait
+   - Visible in project's activity timeline
+   - Permanent audit trail (cannot be dismissed)
+   - Stored in `messages` table (polymorphic to `projects_projects`)
+   - Marked as `type='activity'` and `is_internal=true`
+
+**Chatter Message Structure:**
+```sql
+-- chatter_messages table
+INSERT INTO chatter_messages (
+    messageable_type,  -- 'Webkul\Project\Models\Project'
+    messageable_id,    -- project.id
+    type,              -- 'activity' (not visible as regular message)
+    subject,           -- 'High Complexity Alert'
+    body,              -- 'Level 4/5 complexity detected. Levi notified...'
+    is_internal,       -- true (team-only visibility)
+    creator_id,        -- current user
+    company_id,        -- project company
+    created_at
+)
+```
+
 **Acceptance Criteria:**
 - Pricing calculations match TCS price sheet exactly
 - Level selection properly sets project pricing
 - Material upgrades add correctly
-- Alerts trigger for Level 4/5 projects
+- Alerts trigger for Level 4/5 projects ⭐
+- Levi receives notification when Level 4/5 selected ⭐
+- JG receives notification for ferry/island delivery projects ⭐
+- Purchasing receives notification for premium materials ($185+/LF) ⭐
+- Notifications appear in FilamentPHP notification panel
+- Notifications include clickable "View Project" action
+- Employee lookup finds correct user by name or job_title
+- **Chatter activity feed logs all alerts** ⭐
+- **Activity entries persist in project history** ⭐
+- **Activity shows who was notified and why** ⭐
+- **Activities marked as internal (team-only visibility)** ⭐
 - Historical pricing data accurate
 
 ---
