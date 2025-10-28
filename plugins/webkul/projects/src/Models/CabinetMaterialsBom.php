@@ -13,7 +13,7 @@ class CabinetMaterialsBom extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
 
-    protected $table = 'cabinet_materials_bom';
+    protected $table = 'projects_bom';
 
     protected $fillable = [
         'cabinet_specification_id',

@@ -452,7 +452,7 @@ class CabinetMaterialsBomTest extends TestCase
         $id = $this->bom->id;
         $this->bom->delete();
 
-        $this->assertSoftDeleted('cabinet_materials_bom', ['id' => $id]);
+        $this->assertSoftDeleted('projects_bom', ['id' => $id]);
         $this->assertNotNull($this->bom->fresh()->deleted_at);
     }
 
@@ -463,7 +463,7 @@ class CabinetMaterialsBomTest extends TestCase
         $this->bom->restore();
 
         $this->assertNull($this->bom->fresh()->deleted_at);
-        $this->assertDatabaseHas('cabinet_materials_bom', [
+        $this->assertDatabaseHas('projects_bom', [
             'id' => $this->bom->id,
             'deleted_at' => null,
         ]);
