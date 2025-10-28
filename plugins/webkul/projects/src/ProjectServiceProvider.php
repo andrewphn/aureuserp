@@ -59,10 +59,13 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_10_07_200202_create_pdf_page_rooms_table',
                 '2025_10_08_000001_create_pdf_page_annotations_table',
                 '2025_10_08_173125_add_room_fields_to_pdf_page_annotations_table',
-                '2025_10_08_180053_add_versioning_to_pdf_documents_table',
                 '2025_10_24_214500_add_current_production_stage_to_projects_table',
                 '2025_10_25_000001_add_production_fields_to_milestones',
                 '2025_10_25_145337_create_projects_milestone_templates_table',
+                '2025_10_20_162000_create_pdf_annotation_history_table',
+                '2025_10_26_000002_add_woodworking_columns_to_projects_room_locations_table',
+                '2025_10_26_000008_create_cabinet_materials_bom_table',
+                '2025_10_26_000009_create_hardware_requirements_table',
             ])
             ->runsMigrations()
             ->hasSettings([

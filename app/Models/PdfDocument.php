@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Chatter\Traits\HasChatter;
@@ -112,13 +113,20 @@ class PdfDocument extends Model
     }
 
     /**
-     * Get all annotations for this document.
+     * Get all annotations for this document through its pages.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function annotations(): HasMany
+    public function annotations(): HasManyThrough
     {
-        return $this->hasMany(PdfAnnotation::class, 'document_id');
+        return $this->hasManyThrough(
+            PdfPageAnnotation::class,  // Final model
+            PdfPage::class,             // Intermediate model
+            'document_id',              // FK on pdf_pages table
+            'pdf_page_id',              // FK on pdf_page_annotations table
+            'id',                       // PK on pdf_documents table
+            'id'                        // PK on pdf_pages table
+        );
     }
 
     /**

@@ -2,67 +2,67 @@
 
 namespace App\Observers;
 
-use App\Models\PdfAnnotation;
+use App\Models\PdfPageAnnotation;
 use Illuminate\Support\Facades\Auth;
 
-class PdfAnnotationObserver
+class PdfPageAnnotationObserver
 {
     /**
-     * Handle the PdfAnnotation "created" event.
+     * Handle the PdfPageAnnotation "created" event.
      */
-    public function created(PdfAnnotation $annotation): void
+    public function created(PdfPageAnnotation $annotation): void
     {
         if (!function_exists('activity')) {
             return;
         }
 
         activity()
-            ->performedOn($annotation->document)
+            ->performedOn($annotation->pdfPage->document)
             ->causedBy(Auth::user())
             ->withProperties([
                 'annotation_id' => $annotation->id,
                 'annotation_type' => $annotation->annotation_type,
-                'page_number' => $annotation->page_number,
+                'page_number' => $annotation->pdfPage->page_number,
             ])
             ->log('Annotation added');
     }
 
     /**
-     * Handle the PdfAnnotation "updated" event.
+     * Handle the PdfPageAnnotation "updated" event.
      */
-    public function updated(PdfAnnotation $annotation): void
+    public function updated(PdfPageAnnotation $annotation): void
     {
         if (!function_exists('activity')) {
             return;
         }
 
         activity()
-            ->performedOn($annotation->document)
+            ->performedOn($annotation->pdfPage->document)
             ->causedBy(Auth::user())
             ->withProperties([
                 'annotation_id' => $annotation->id,
                 'annotation_type' => $annotation->annotation_type,
-                'page_number' => $annotation->page_number,
+                'page_number' => $annotation->pdfPage->page_number,
             ])
             ->log('Annotation modified');
     }
 
     /**
-     * Handle the PdfAnnotation "deleted" event.
+     * Handle the PdfPageAnnotation "deleted" event.
      */
-    public function deleted(PdfAnnotation $annotation): void
+    public function deleted(PdfPageAnnotation $annotation): void
     {
         if (!function_exists('activity')) {
             return;
         }
 
         activity()
-            ->performedOn($annotation->document)
+            ->performedOn($annotation->pdfPage->document)
             ->causedBy(Auth::user())
             ->withProperties([
                 'annotation_id' => $annotation->id,
                 'annotation_type' => $annotation->annotation_type,
-                'page_number' => $annotation->page_number,
+                'page_number' => $annotation->pdfPage->page_number,
             ])
             ->log('Annotation deleted');
     }

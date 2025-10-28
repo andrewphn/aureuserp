@@ -15,6 +15,7 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\Pages\ListOrder
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\Pages\ManageDeliveries;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\Pages\ManageInvoices;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\Pages\ViewOrder;
+use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\RelationManagers\LineItemsRelationManager;
 use Webkul\Sale\Models\Order;
 
 class OrderResource extends Resource
@@ -65,6 +66,13 @@ class OrderResource extends Resource
             ManageInvoices::class,
             ManageDeliveries::class,
         ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            LineItemsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

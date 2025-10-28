@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\PdfAnnotation;
+use App\Models\PdfPageAnnotation;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
