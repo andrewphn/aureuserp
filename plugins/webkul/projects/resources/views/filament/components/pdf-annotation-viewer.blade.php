@@ -29,26 +29,13 @@
     class="w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900"
 >
     <!-- Context Bar (Top - Sticky) -->
-    <div class="context-bar sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 shadow-md">
-        <div class="flex items-center gap-4 flex-wrap">
-            <!-- V3 Header Title -->
-            <div class="flex items-center gap-2">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <x-filament::icon icon="heroicon-o-document-text" class="h-5 w-5" style="color: var(--primary-600);" />
-                    PDF Annotations
-                    <span class="text-gray-600 dark:text-gray-400" x-text="`Page ${currentPage}`">Page {{ $pageNumber }}</span>
-                    <span class="px-2 py-1 text-xs rounded-md font-semibold" style="background-color: var(--primary-50); color: var(--primary-700);">Page-by-Page</span>
-                </h2>
-            </div>
+    <div class="context-bar sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-md">
+        <div class="p-3 md:p-4 flex items-center gap-4 md:gap-6 flex-wrap">
 
-            <!-- Project Context Display -->
-            <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                <x-filament::icon icon="heroicon-o-map-pin" class="h-4 w-4" style="color: var(--warning-600);" />
-                <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="getContextLabel()"></span>
-            </div>
-
-            <!-- Room Autocomplete -->
-            <div class="relative flex-1 max-w-xs">
+            <!-- GROUP 1: Context Selection -->
+            <div class="flex items-center gap-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3 flex-1 min-w-fit">
+                <!-- Room Autocomplete -->
+                <div class="relative flex-1 max-w-xs min-w-[200px]">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Room</label>
                 <input
                     type="text"
@@ -57,7 +44,7 @@
                     @focus="showRoomDropdown = true"
                     @click.away="showRoomDropdown = false"
                     placeholder="Type to search or create..."
-                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ring-primary-600"
+                    class="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ring-primary-600 shadow-sm"
                 />
 
                 <!-- Room Suggestions Dropdown -->
@@ -80,19 +67,19 @@
                 </div>
             </div>
 
-            <!-- Location Autocomplete -->
-            <div class="relative flex-1 max-w-xs">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                <input
-                    type="text"
-                    x-model="locationSearchQuery"
-                    @input="searchLocations($event.target.value)"
-                    @focus="showLocationDropdown = true"
-                    @click.away="showLocationDropdown = false"
-                    :disabled="!activeRoomId"
-                    placeholder="Select room first..."
-                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ring-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
+                <!-- Location Autocomplete -->
+                <div class="relative flex-1 max-w-xs min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                    <input
+                        type="text"
+                        x-model="locationSearchQuery"
+                        @input="searchLocations($event.target.value)"
+                        @focus="showLocationDropdown = true"
+                        @click.away="showLocationDropdown = false"
+                        :disabled="!activeRoomId"
+                        placeholder="Select room first..."
+                        class="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ring-primary-600 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                    />
 
                 <!-- Location Suggestions Dropdown -->
                 <div
@@ -112,112 +99,121 @@
                         </div>
                     </template>
                 </div>
+                </div>
             </div>
+            <!-- END GROUP 1: Context Selection -->
 
-            <!-- Zoom Controls -->
-            <div class="flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 pr-4">
-                <button
-                    @click="zoomOut()"
-                    :disabled="zoomLevel <= zoomMin"
-                    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Zoom Out (min: 100% fit to frame)"
-                >
-                    <x-filament::icon icon="heroicon-o-magnifying-glass-minus" class="h-4 w-4" />
-                </button>
-                <span class="text-sm text-gray-700 dark:text-white font-semibold min-w-[4rem] text-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg" x-text="`${getZoomPercentage()}%`"></span>
-                <button
-                    @click="zoomIn()"
-                    :disabled="zoomLevel >= zoomMax"
-                    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Zoom In (max: 300%)"
-                >
-                    <x-filament::icon icon="heroicon-o-magnifying-glass-plus" class="h-4 w-4" />
-                </button>
-                <button
-                    @click="resetZoom()"
-                    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
-                    title="Reset Zoom (100% - fit to frame)"
-                >
-                    <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4" />
-                </button>
-            </div>
+            <!-- GROUP 2: Navigation + Zoom -->
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Pagination Controls -->
+                <div class="flex items-center gap-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3">
+                    <button
+                        @click="previousPage()"
+                        :disabled="currentPage <= 1"
+                        class="px-3 py-2 rounded-lg text-white text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 hover:shadow-md"
+                        style="background-color: var(--primary-600);"
+                        onmouseover="this.style.backgroundColor='var(--primary-700)'"
+                        onmouseout="this.style.backgroundColor='var(--primary-600)'"
+                        title="Previous Page"
+                    >
+                        <x-filament::icon icon="heroicon-o-chevron-left" class="h-4 w-4" />
+                    </button>
 
-            <!-- Pagination Controls with Page Type Selector (Phase 2 + Phase 3.1) -->
-            <div class="flex items-center gap-2 border-r border-gray-200 dark:border-gray-600 pr-4">
-                <button
-                    @click="previousPage()"
-                    :disabled="currentPage <= 1"
-                    class="px-3 py-2 rounded-lg text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style="background-color: var(--primary-600);"
-                    onmouseover="this.style.backgroundColor='var(--primary-700)'"
-                    onmouseout="this.style.backgroundColor='var(--primary-600)'"
-                    title="Previous Page"
-                >
-                    <x-filament::icon icon="heroicon-o-chevron-left" class="h-4 w-4" />
-                </button>
+                    <!-- Page number and type selector stacked vertically -->
+                    <div class="flex flex-col gap-1.5 min-w-[8rem]">
+                        <span class="text-sm text-gray-700 dark:text-white font-semibold text-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg" x-text="`Page ${currentPage} of ${totalPages}`"></span>
 
-                <!-- Page number and type selector stacked vertically -->
-                <div class="flex flex-col gap-1.5 min-w-[8rem]">
-                    <span class="text-sm text-gray-700 dark:text-white font-semibold text-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg" x-text="`Page ${currentPage} of ${totalPages}`"></span>
+                        <!-- Page Type Selector - UNDER page number -->
+                        <div class="relative">
+                            <select
+                                x-model="pageType"
+                                @change="savePageType()"
+                                class="w-full h-9 pl-3 pr-8 text-xs rounded-lg border-2 font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-600"
+                                :class="{
+                                    'border-blue-300 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 dark:border-blue-600': pageType === 'cover',
+                                    'border-green-300 bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-100 dark:border-green-600': pageType === 'floor_plan',
+                                    'border-purple-300 bg-purple-50 text-purple-900 dark:bg-purple-900/20 dark:text-purple-100 dark:border-purple-600': pageType === 'elevation',
+                                    'border-orange-300 bg-orange-50 text-orange-900 dark:bg-orange-900/20 dark:text-orange-100 dark:border-orange-600': pageType === 'detail',
+                                    'border-gray-300 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600': pageType === 'other',
+                                    'border-gray-300 bg-white text-gray-500 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600': !pageType
+                                }"
+                                title="Set page type for current page"
+                            >
+                                <option value="">Type...</option>
+                                <option value="cover">📋 Cover</option>
+                                <option value="floor_plan">🏗️ Floor</option>
+                                <option value="elevation">📐 Elev</option>
+                                <option value="detail">🔍 Detail</option>
+                                <option value="other">📄 Other</option>
+                            </select>
 
-                    <!-- Page Type Selector - UNDER page number -->
-                    <div class="relative">
-                        <select
-                            x-model="pageType"
-                            @change="savePageType()"
-                            class="w-full h-9 pl-3 pr-8 text-xs rounded-lg border-2 font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-600"
-                            :class="{
-                                'border-blue-300 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 dark:border-blue-600': pageType === 'cover',
-                                'border-green-300 bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-100 dark:border-green-600': pageType === 'floor_plan',
-                                'border-purple-300 bg-purple-50 text-purple-900 dark:bg-purple-900/20 dark:text-purple-100 dark:border-purple-600': pageType === 'elevation',
-                                'border-orange-300 bg-orange-50 text-orange-900 dark:bg-orange-900/20 dark:text-orange-100 dark:border-orange-600': pageType === 'detail',
-                                'border-gray-300 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600': pageType === 'other',
-                                'border-gray-300 bg-white text-gray-500 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600': !pageType
-                            }"
-                            title="Set page type for current page"
-                        >
-                            <option value="">Type...</option>
-                            <option value="cover">📋 Cover</option>
-                            <option value="floor_plan">🏗️ Floor</option>
-                            <option value="elevation">📐 Elev</option>
-                            <option value="detail">🔍 Detail</option>
-                            <option value="other">📄 Other</option>
-                        </select>
-
-                        <!-- Page Type Badge (compact version) -->
-                        <div x-show="pageType" class="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-bold rounded-full shadow-sm pointer-events-none" :class="{
-                            'bg-blue-500 text-white': pageType === 'cover',
-                            'bg-green-500 text-white': pageType === 'floor_plan',
-                            'bg-purple-500 text-white': pageType === 'elevation',
-                            'bg-orange-500 text-white': pageType === 'detail',
-                            'bg-gray-500 text-white': pageType === 'other'
-                        }">
-                            <span x-text="pageType === 'cover' ? 'C' : pageType === 'floor_plan' ? 'F' : pageType === 'elevation' ? 'E' : pageType === 'detail' ? 'D' : 'O'"></span>
+                            <!-- Page Type Badge (compact version) -->
+                            <div x-show="pageType" class="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-bold rounded-full shadow-sm pointer-events-none" :class="{
+                                'bg-blue-500 text-white': pageType === 'cover',
+                                'bg-green-500 text-white': pageType === 'floor_plan',
+                                'bg-purple-500 text-white': pageType === 'elevation',
+                                'bg-orange-500 text-white': pageType === 'detail',
+                                'bg-gray-500 text-white': pageType === 'other'
+                            }">
+                                <span x-text="pageType === 'cover' ? 'C' : pageType === 'floor_plan' ? 'F' : pageType === 'elevation' ? 'E' : pageType === 'detail' ? 'D' : 'O'"></span>
+                            </div>
                         </div>
                     </div>
+
+                    <button
+                        @click="nextPage()"
+                        :disabled="currentPage >= totalPages"
+                        class="px-3 py-2 rounded-lg text-white text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 hover:shadow-md"
+                        style="background-color: var(--primary-600);"
+                        onmouseover="this.style.backgroundColor='var(--primary-700)'"
+                        onmouseout="this.style.backgroundColor='var(--primary-600)'"
+                        title="Next Page"
+                    >
+                        <x-filament::icon icon="heroicon-o-chevron-right" class="h-4 w-4" />
+                    </button>
                 </div>
 
-                <button
-                    @click="nextPage()"
-                    :disabled="currentPage >= totalPages"
-                    class="px-3 py-2 rounded-lg text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style="background-color: var(--primary-600);"
-                    onmouseover="this.style.backgroundColor='var(--primary-700)'"
-                    onmouseout="this.style.backgroundColor='var(--primary-600)'"
-                    title="Next Page"
-                >
-                    <x-filament::icon icon="heroicon-o-chevron-right" class="h-4 w-4" />
-                </button>
-            </div>
+                <!-- Zoom Controls -->
+                <div class="flex items-center gap-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3">
+                    <button
+                        @click="zoomOut()"
+                        :disabled="zoomLevel <= zoomMin"
+                        class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 hover:shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600"
+                        title="Zoom Out"
+                    >
+                        <x-filament::icon icon="heroicon-o-minus" class="h-4 w-4" />
+                    </button>
 
-            <!-- Draw Mode Buttons (Icon-Only) -->
-            <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-700 dark:text-white font-semibold text-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg min-w-[4rem]" x-text="`${getZoomPercentage()}%`"></span>
+
+                    <button
+                        @click="zoomIn()"
+                        :disabled="zoomLevel >= zoomMax"
+                        class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 hover:shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600"
+                        title="Zoom In"
+                    >
+                        <x-filament::icon icon="heroicon-o-plus" class="h-4 w-4" />
+                    </button>
+
+                    <button
+                        @click="resetZoom()"
+                        class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white text-xs font-semibold transition-all hover:scale-105 hover:shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600"
+                        title="Reset Zoom (100%)"
+                    >
+                        Reset
+                    </button>
+                </div>
+            </div>
+            <!-- END GROUP 2: Navigation + Zoom -->
+
+            <!-- GROUP 3: Drawing Tools -->
+            <div class="flex items-center gap-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3">
                 <!-- Draw Room Boundary (no pre-selection required) -->
                 <button
                     @click="setDrawMode('room')"
-                    :class="drawMode === 'room' ? 'ring-2 shadow-lg' : ''"
+                    :class="drawMode === 'room' ? 'ring-2 ring-warning-500 shadow-lg transform scale-105' : ''"
                     :style="drawMode === 'room' ? 'background-color: var(--warning-600); color: white; border-color: var(--warning-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all flex items-center justify-center border dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg hover:scale-105 hover:shadow-sm transition-all flex items-center justify-center border dark:bg-gray-700 dark:text-white"
                     title="Draw Room Boundary - Create new room"
                 >
                     <x-filament::icon icon="heroicon-o-home" class="h-5 w-5" />
@@ -226,10 +222,10 @@
                 <!-- Draw Room Location (only requires Room) -->
                 <button
                     @click="setDrawMode('location')"
-                    :class="drawMode === 'location' ? 'ring-2 shadow-lg' : ''"
+                    :class="drawMode === 'location' ? 'ring-2 ring-info-500 shadow-lg transform scale-105' : ''"
                     :style="drawMode === 'location' ? 'background-color: var(--info-600); color: white; border-color: var(--info-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDrawLocation()"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg hover:scale-105 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
                     title="Draw Room Location (Room required)"
                 >
                     <x-filament::icon icon="heroicon-o-squares-2x2" class="h-5 w-5" />
@@ -238,10 +234,10 @@
                 <!-- Draw Cabinet Run (requires Room + Location) -->
                 <button
                     @click="setDrawMode('cabinet_run')"
-                    :class="drawMode === 'cabinet_run' ? 'ring-2 shadow-lg' : ''"
+                    :class="drawMode === 'cabinet_run' ? 'ring-2 ring-primary-500 shadow-lg transform scale-105' : ''"
                     :style="drawMode === 'cabinet_run' ? 'background-color: var(--primary-600); color: white; border-color: var(--primary-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDraw()"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg hover:scale-105 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
                     title="Draw Cabinet Run (Room + Location required)"
                 >
                     <x-filament::icon icon="heroicon-o-rectangle-group" class="h-5 w-5" />
@@ -250,26 +246,27 @@
                 <!-- Draw Cabinet (requires Room + Location) -->
                 <button
                     @click="setDrawMode('cabinet')"
-                    :class="drawMode === 'cabinet' ? 'ring-2 shadow-lg' : ''"
+                    :class="drawMode === 'cabinet' ? 'ring-2 ring-success-500 shadow-lg transform scale-105' : ''"
                     :style="drawMode === 'cabinet' ? 'background-color: var(--success-600); color: white; border-color: var(--success-400);' : 'background-color: var(--gray-100); color: var(--gray-700);'"
                     :disabled="!canDraw()"
-                    class="px-3 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg hover:scale-105 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center border dark:bg-gray-700 dark:text-white"
                     title="Draw Cabinet (Room + Location required)"
                 >
                     <x-filament::icon icon="heroicon-o-cube" class="h-5 w-5" />
                 </button>
             </div>
+            <!-- END GROUP 3: Drawing Tools -->
 
-            <!-- View Type Toggle (Plan, Elevation, Section, Detail) -->
-            <div class="flex items-center gap-2 border-l pl-3 dark:border-gray-600">
-                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">View:</span>
+            <!-- GROUP 4: View Type Toggle -->
+            <div class="flex items-center gap-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3">
+                <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">View:</span>
 
                 <!-- Plan View -->
                 <button
                     @click="setViewType('plan')"
-                    :class="activeViewType === 'plan' ? 'ring-2 shadow-md' : ''"
+                    :class="activeViewType === 'plan' ? 'ring-2 ring-primary-500 shadow-md transform scale-105' : ''"
                     :style="activeViewType === 'plan' ? 'background-color: var(--primary-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
-                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 hover:shadow-sm transition-all dark:bg-gray-700 dark:text-white"
                     title="Plan View (Top-Down)"
                 >
                     Plan
@@ -278,9 +275,9 @@
                 <!-- Elevation View -->
                 <button
                     @click="setViewType('elevation', 'front')"
-                    :class="activeViewType === 'elevation' ? 'ring-2 shadow-md' : ''"
+                    :class="activeViewType === 'elevation' ? 'ring-2 ring-warning-500 shadow-md transform scale-105' : ''"
                     :style="activeViewType === 'elevation' ? 'background-color: var(--warning-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
-                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 hover:shadow-sm transition-all dark:bg-gray-700 dark:text-white"
                     title="Elevation View (Side)"
                 >
                     Elevation
@@ -289,9 +286,9 @@
                 <!-- Section View -->
                 <button
                     @click="setViewType('section', 'A-A')"
-                    :class="activeViewType === 'section' ? 'ring-2 shadow-md' : ''"
+                    :class="activeViewType === 'section' ? 'ring-2 ring-info-500 shadow-md transform scale-105' : ''"
                     :style="activeViewType === 'section' ? 'background-color: var(--info-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
-                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 hover:shadow-sm transition-all dark:bg-gray-700 dark:text-white"
                     title="Section View (Cut-Through)"
                 >
                     Section
@@ -300,9 +297,9 @@
                 <!-- Detail View -->
                 <button
                     @click="setViewType('detail')"
-                    :class="activeViewType === 'detail' ? 'ring-2 shadow-md' : ''"
+                    :class="activeViewType === 'detail' ? 'ring-2 ring-success-500 shadow-md transform scale-105' : ''"
                     :style="activeViewType === 'detail' ? 'background-color: var(--success-600); color: white;' : 'background-color: var(--gray-100); color: var(--gray-700);'"
-                    class="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-all dark:bg-gray-700 dark:text-white"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 hover:shadow-sm transition-all dark:bg-gray-700 dark:text-white"
                     title="Detail View (Zoomed)"
                 >
                     Detail
@@ -313,7 +310,7 @@
                     <select
                         x-model="activeOrientation"
                         @change="setOrientation(activeOrientation)"
-                        class="px-2 py-1 rounded text-xs border dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                        class="px-3 py-2 rounded-lg text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-primary-600"
                     >
                         <template x-if="activeViewType === 'elevation'">
                             <optgroup label="Elevation">
@@ -333,13 +330,16 @@
                     </select>
                 </template>
             </div>
+            <!-- END GROUP 4: View Type Toggle -->
 
-            <!-- Draw Mode Actions -->
-            <div class="flex items-center gap-2 border-l pl-3 dark:border-gray-600">
+            <!-- GROUP 5: Actions -->
+            <div class="flex items-center gap-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3 ml-auto">
                 <button
                     @click="clearContext()"
-                    class="px-3 py-2 rounded-lg text-white hover:opacity-90 transition-all text-sm font-semibold flex items-center gap-2"
+                    class="px-3 py-2 rounded-lg text-white hover:scale-105 hover:shadow-md transition-all text-sm font-semibold flex items-center gap-2"
                     style="background-color: var(--danger-600);"
+                    onmouseover="this.style.backgroundColor='var(--danger-700)'"
+                    onmouseout="this.style.backgroundColor='var(--danger-600)'"
                     title="Clear Context"
                 >
                     <x-filament::icon icon="heroicon-o-x-mark" class="h-4 w-4" />
@@ -348,22 +348,25 @@
 
                 <button
                     @click="saveAnnotations()"
-                    class="px-3 py-2 rounded-lg text-white hover:opacity-90 transition-all text-sm font-semibold shadow-md flex items-center gap-2"
+                    class="px-4 py-2.5 rounded-lg text-white hover:scale-105 hover:shadow-lg transition-all text-sm font-bold shadow-md flex items-center gap-2 ring-2 ring-success-500/50"
                     style="background-color: var(--success-600);"
+                    onmouseover="this.style.backgroundColor='var(--success-700)'"
+                    onmouseout="this.style.backgroundColor='var(--success-600)'"
                     title="Save All Annotations"
                 >
-                    <x-filament::icon icon="heroicon-o-check-circle" class="h-4 w-4" />
+                    <x-filament::icon icon="heroicon-o-check-circle" class="h-5 w-5" />
                     Save
                 </button>
 
                 <button
                     @click="$dispatch('close-v3-modal')"
-                    class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-semibold flex items-center gap-2"
+                    class="px-2.5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 hover:scale-105 transition-all text-sm font-semibold flex items-center justify-center"
                     title="Close Viewer"
                 >
-                    <x-filament::icon icon="heroicon-o-x-circle" class="h-4 w-4" />
+                    <x-filament::icon icon="heroicon-o-x-circle" class="h-5 w-5" />
                 </button>
             </div>
+            <!-- END GROUP 5: Actions -->
         </div>
 
         <!-- Context Hint -->
@@ -1466,6 +1469,22 @@
                     console.log('✓ Page observer initialized');
                 },
 
+                // Get effective CSS zoom factor (accounts for html { zoom: 0.9; })
+                getEffectiveZoom() {
+                    // Check if zoom is cached
+                    if (this._cachedZoom !== undefined) {
+                        return this._cachedZoom;
+                    }
+
+                    // Detect zoom from computed style
+                    const computedStyle = window.getComputedStyle(document.documentElement);
+                    const zoom = parseFloat(computedStyle.zoom || '1');
+
+                    this._cachedZoom = zoom;
+                    console.log('🔍 Detected CSS zoom factor:', zoom);
+                    return zoom;
+                },
+
                 // Get canvas rect for coordinate transformations
                 getCanvasRect() {
                     const now = Date.now();
@@ -1494,9 +1513,14 @@
                     const rect = this.getOverlayRect();
                     if (!rect) return { x: 0, y: 0 };
 
-                    // Normalize to 0-1 range
-                    const normalizedX = screenX / rect.width;
-                    const normalizedY = screenY / rect.height;
+                    // Account for CSS zoom - screen coordinates are in zoomed space
+                    const zoom = this.getEffectiveZoom();
+                    const adjustedX = screenX * zoom;
+                    const adjustedY = screenY * zoom;
+
+                    // Normalize to 0-1 range using adjusted coordinates
+                    const normalizedX = adjustedX / rect.width;
+                    const normalizedY = adjustedY / rect.height;
 
                     // Convert to PDF coordinates (PDF y-axis is from bottom)
                     const pdfX = normalizedX * this.pageDimensions.width;
@@ -1526,11 +1550,14 @@
                     const screenWidth = (width / this.pageDimensions.width) * canvasRect.width;
                     const screenHeight = (height / this.pageDimensions.height) * canvasRect.height;
 
+                    // Account for CSS zoom - adjust coordinates back to zoomed coordinate space
+                    const zoom = this.getEffectiveZoom();
+
                     return {
-                        x: screenX,
-                        y: screenY,
-                        width: screenWidth,
-                        height: screenHeight
+                        x: screenX / zoom,
+                        y: screenY / zoom,
+                        width: screenWidth / zoom,
+                        height: screenHeight / zoom
                     };
                 },
 
@@ -2012,7 +2039,8 @@
                         roomId: this.activeRoomId,
                         roomName: this.activeRoomName,
                         roomLocationId: this.drawMode === 'location' ? this.activeLocationId : null,  // For location annotations
-                        cabinetRunId: this.drawMode === 'cabinet_run' ? this.activeLocationId : null,  // For cabinet run annotations (activeLocationId holds run ID in this context)
+                        cabinetRunId: this.drawMode === 'cabinet_run' ? this.activeLocationId :
+                                      (this.drawMode === 'cabinet' && this.isolationMode && this.isolationLevel === 'cabinet_run') ? this.isolatedCabinetRunId : null,  // For cabinet run annotations OR cabinets drawn in cabinet_run isolation
                         locationName: this.activeLocationName,
                         viewType: 'plan',  // Default to plan view (can be changed in UI later)
                         label: this.generateAnnotationLabel(),
@@ -2114,7 +2142,66 @@
                                 };
                             });
 
-                            console.log(`✓ Loaded ${this.annotations.length} annotations`);
+                            // Post-process: Recursively populate parent entity connections
+                            // This is needed for isolation mode to work when double-clicking canvas annotations
+                            const populateParentConnections = (anno, visited = new Set()) => {
+                                // Prevent infinite loops
+                                if (visited.has(anno.id)) return;
+                                visited.add(anno.id);
+
+                                // Add roomName using helper function
+                                if (anno.roomId && !anno.roomName) {
+                                    anno.roomName = this.getRoomNameById(anno.roomId);
+                                }
+
+                                // If has parent, inherit properties recursively
+                                if (anno.parentId) {
+                                    const parentAnno = this.annotations.find(a => a.id === anno.parentId);
+                                    if (parentAnno) {
+                                        // First, ensure parent has its connections populated
+                                        populateParentConnections(parentAnno, visited);
+
+                                        // Inherit room context from any parent
+                                        if (!anno.roomId && parentAnno.roomId) {
+                                            anno.roomId = parentAnno.roomId;
+                                            anno.roomName = parentAnno.roomName;
+                                        }
+
+                                        // Inherit location context based on parent type
+                                        if (parentAnno.type === 'location') {
+                                            anno.locationId = parentAnno.roomLocationId;
+                                            anno.locationName = parentAnno.label;
+                                        } else if (parentAnno.locationId) {
+                                            // Inherit from grandparent
+                                            anno.locationId = parentAnno.locationId;
+                                            anno.locationName = parentAnno.locationName;
+                                        }
+
+                                        // Inherit cabinet run context
+                                        if (parentAnno.type === 'cabinet_run') {
+                                            anno.cabinetRunId = parentAnno.cabinetRunId;
+                                            anno.cabinetRunName = parentAnno.label;
+                                        } else if (parentAnno.cabinetRunId) {
+                                            // Inherit from grandparent
+                                            anno.cabinetRunId = parentAnno.cabinetRunId;
+                                            anno.cabinetRunName = parentAnno.cabinetRunName;
+                                        }
+                                    }
+                                }
+                            };
+
+                            // Apply to all annotations
+                            this.annotations.forEach(anno => populateParentConnections(anno));
+
+                            console.log(`✓ Loaded ${this.annotations.length} annotations with parent connections`);
+                            // Debug: Log entity connections
+                            this.annotations.forEach(anno => {
+                                if (anno.type === 'cabinet_run') {
+                                    console.log(`  📦 ${anno.label}: roomId=${anno.roomId}, locationId=${anno.locationId}, cabinetRunId=${anno.cabinetRunId}`);
+                                } else if (anno.type === 'cabinet') {
+                                    console.log(`  🗄️ ${anno.label}: roomId=${anno.roomId}, locationId=${anno.locationId}, cabinetRunId=${anno.cabinetRunId}`);
+                                }
+                            });
                         }
                     } catch (error) {
                         console.error('Failed to load annotations:', error);
@@ -2195,6 +2282,10 @@
                 canDraw() {
                     // In location isolation mode: always enabled
                     if (this.isolationMode && this.isolationLevel === 'location') {
+                        return this.pdfReady;
+                    }
+                    // In cabinet_run isolation mode: always enabled (for drawing cabinets inside the run)
+                    if (this.isolationMode && this.isolationLevel === 'cabinet_run') {
                         return this.pdfReady;
                     }
                     // Normal mode: requires room + location selection + PDF ready
@@ -2303,11 +2394,14 @@
                     return this.expandedNodes.includes(nodeId);
                 },
 
-                selectNode(nodeId, type, name, parentRoomId = null, parentLocationId = null, parentCabinetRunId = null) {
+                async selectNode(nodeId, type, name, parentRoomId = null, parentLocationId = null, parentCabinetRunId = null) {
                     this.selectedNodeId = nodeId;
 
                     // Build the full hierarchical path from root to clicked node
                     const path = [];
+                    let node = null;
+                    let parentLocationNode = null;
+                    let parentRoomNode = null;
 
                     if (type === 'room') {
                         // Room is the root - path contains only the room
@@ -2318,6 +2412,8 @@
                         this.activeLocationId = null;
                         this.activeLocationName = '';
                         this.locationSearchQuery = '';
+                        // Find room node in tree
+                        node = this.tree.find(r => r.id === nodeId);
                     } else if (type === 'room_location') {
                         // Location - path includes room and location
                         if (parentRoomId) path.push(parentRoomId);
@@ -2326,6 +2422,11 @@
                         this.activeLocationId = nodeId;
                         this.activeLocationName = name;
                         this.locationSearchQuery = name;
+                        // Find location node in tree
+                        parentRoomNode = this.tree.find(r => r.id === parentRoomId);
+                        if (parentRoomNode) {
+                            node = parentRoomNode.children?.find(l => l.id === nodeId);
+                        }
                     } else if (type === 'cabinet_run') {
                         // Cabinet run - path includes room, location, and cabinet run
                         if (parentRoomId) path.push(parentRoomId);
@@ -2333,6 +2434,14 @@
                         path.push(nodeId);
                         this.activeRoomId = parentRoomId;
                         this.activeLocationId = parentLocationId;
+                        // Find cabinet run node in tree
+                        parentRoomNode = this.tree.find(r => r.id === parentRoomId);
+                        if (parentRoomNode) {
+                            parentLocationNode = parentRoomNode.children?.find(l => l.id === parentLocationId);
+                            if (parentLocationNode) {
+                                node = parentLocationNode.children?.find(run => run.id === nodeId);
+                            }
+                        }
                     } else if (type === 'cabinet') {
                         // Cabinet - path includes room, location, cabinet run, and cabinet
                         if (parentRoomId) path.push(parentRoomId);
@@ -2346,7 +2455,56 @@
                     // Store the complete hierarchical path
                     this.selectedPath = path;
 
+                    // Navigate to page with matching view type (with hierarchical fallback)
+                    await this.navigateToNodePage(node, parentLocationNode, parentRoomNode);
+
                     console.log('🌳 Selected node:', { nodeId, type, name, path });
+                },
+
+                // Navigate to page with matching view type, with hierarchical fallback
+                async navigateToNodePage(node, parentLocation, parentRoom) {
+                    const currentViewType = this.activeViewType; // Get current view type from top bar
+
+                    // Try to find page with matching view type, searching hierarchically
+                    let targetPage = null;
+
+                    // 1. Try the clicked node first
+                    if (node && node.pages && node.pages.length > 0) {
+                        const matchingPage = node.pages.find(p => p.viewType === currentViewType);
+                        if (matchingPage) {
+                            targetPage = matchingPage.page;
+                            console.log(`📍 Found ${currentViewType} view on ${node.name} at page ${targetPage}`);
+                        }
+                    }
+
+                    // 2. If not found, try parent location
+                    if (!targetPage && parentLocation && parentLocation.pages && parentLocation.pages.length > 0) {
+                        const matchingPage = parentLocation.pages.find(p => p.viewType === currentViewType);
+                        if (matchingPage) {
+                            targetPage = matchingPage.page;
+                            console.log(`📍 Found ${currentViewType} view on parent location ${parentLocation.name} at page ${targetPage}`);
+                        }
+                    }
+
+                    // 3. If still not found, try parent room
+                    if (!targetPage && parentRoom && parentRoom.pages && parentRoom.pages.length > 0) {
+                        const matchingPage = parentRoom.pages.find(p => p.viewType === currentViewType);
+                        if (matchingPage) {
+                            targetPage = matchingPage.page;
+                            console.log(`📍 Found ${currentViewType} view on parent room ${parentRoom.name} at page ${targetPage}`);
+                        }
+                    }
+
+                    // 4. If still no match, just take the first page from the node
+                    if (!targetPage && node && node.pages && node.pages.length > 0) {
+                        targetPage = node.pages[0].page;
+                        console.log(`📍 No ${currentViewType} view found, using first available page ${targetPage}`);
+                    }
+
+                    // Navigate to the found page
+                    if (targetPage && targetPage !== this.currentPage) {
+                        await this.goToPage(targetPage);
+                    }
                 },
 
                 // Show context menu on right-click
@@ -2719,39 +2877,50 @@
                         return false;
                     }
 
-                    // THEN: Check hierarchy visibility using parent-child relationships
+                    // THEN: Check hierarchy visibility using entity relationships
+                    // This elegantly uses the entity IDs that annotations already have,
+                    // so we hide the isolated entity and show only its children
                     if (this.isolationLevel === 'room') {
-                        console.log(`   🏠 Room isolation mode, isolated room: ${this.isolatedRoomId}`);
+                        console.log(`   🏠 Room isolation mode, isolated room entity: ${this.isolatedRoomId}`);
 
-                        // Show the isolated room itself
-                        if (anno.id === this.isolatedRoomId) {
-                            console.log(`   ✅ This IS the isolated room`);
-                            return true;
+                        // HIDE the isolated room annotation (we're "inside" the room entity)
+                        // Match by entity ID: room annotation's roomId matches the isolated room entity
+                        if (anno.type === 'room' && anno.roomId === this.isolatedRoomId) {
+                            console.log(`   ❌ Hiding room annotation (entity match: ${anno.roomId} === ${this.isolatedRoomId})`);
+                            return false;
                         }
 
-                        // Show all descendants of the isolated room
+                        // Show all children/descendants of the isolated room entity
                         const isDescendant = this.isDescendantOf(anno, this.isolatedRoomId);
                         console.log(`   ${isDescendant ? '✅' : '❌'} Is descendant: ${isDescendant}`);
                         return isDescendant;
 
                     } else if (this.isolationLevel === 'location') {
-                        // Show the isolated location itself
-                        if (anno.id === this.isolatedLocationId) return true;
+                        // HIDE the isolated location annotation (we're "inside" the location entity)
+                        // Match by entity ID: location annotation's roomLocationId matches the isolated location entity
+                        if (anno.type === 'location' && anno.roomLocationId === this.isolatedLocationId) {
+                            console.log(`   ❌ Hiding location annotation (entity match: ${anno.roomLocationId} === ${this.isolatedLocationId})`);
+                            return false;
+                        }
 
-                        // Show all descendants of the isolated location (cabinet runs and cabinets only, not parent room)
+                        // Show all children/descendants of the isolated location entity
                         if (this.isDescendantOf(anno, this.isolatedLocationId)) return true;
 
-                        // Do NOT show parent layers (room) - isolation mode should focus only on this location and its children
+                        // Do NOT show parent layers (room) - isolation mode shows only children
                         return false;
 
                     } else if (this.isolationLevel === 'cabinet_run') {
-                        // Show the isolated cabinet run itself
-                        if (anno.id === this.isolatedCabinetRunId) return true;
+                        // HIDE the isolated cabinet run annotation (we're "inside" the cabinet run entity)
+                        // Match by entity ID: cabinet_run annotation's cabinetRunId matches the isolated cabinet run entity
+                        if (anno.type === 'cabinet_run' && anno.cabinetRunId === this.isolatedCabinetRunId) {
+                            console.log(`   ❌ Hiding cabinet run annotation (entity match: ${anno.cabinetRunId} === ${this.isolatedCabinetRunId})`);
+                            return false;
+                        }
 
-                        // Show all descendants of the isolated cabinet run (cabinets only, not parent layers)
+                        // Show all children/descendants of the isolated cabinet run entity (cabinets only)
                         if (this.isDescendantOf(anno, this.isolatedCabinetRunId)) return true;
 
-                        // Do NOT show parent layers (room/location) - isolation mode should focus only on this run and its children
+                        // Do NOT show parent layers (room/location) - isolation mode shows only children
                         return false;
                     }
 
@@ -2773,15 +2942,16 @@
                         this.isolationLevel = 'cabinet_run';
                         this.isolatedRoomId = anno.roomId;
                         this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        this.isolatedLocationId = anno.locationId;
-                        this.isolatedLocationName = anno.locationName || this.getLocationNameById(anno.locationId);
-                        this.isolatedCabinetRunId = anno.id;
+                        this.isolatedLocationId = anno.locationId || anno.roomLocationId;
+                        this.isolatedLocationName = anno.locationName || this.getLocationNameById(anno.locationId || anno.roomLocationId);
+                        // Use cabinet run entity ID - this is what links the annotation to its entity
+                        this.isolatedCabinetRunId = anno.cabinetRunId || anno.id;
                         this.isolatedCabinetRunName = anno.label;
 
                         // Set active context
                         this.activeRoomId = anno.roomId;
                         this.activeRoomName = this.isolatedRoomName;
-                        this.activeLocationId = anno.locationId;
+                        this.activeLocationId = anno.locationId || anno.roomLocationId;
                         this.activeLocationName = this.isolatedLocationName;
 
                         // Update search fields
@@ -2795,7 +2965,8 @@
                         this.isolationLevel = 'location';
                         this.isolatedRoomId = anno.roomId;
                         this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        this.isolatedLocationId = anno.id;
+                        // Use location entity ID - this is what links the annotation to its entity
+                        this.isolatedLocationId = anno.roomLocationId || anno.id;
                         this.isolatedLocationName = anno.label;
                         this.isolatedCabinetRunId = null;
                         this.isolatedCabinetRunName = '';
@@ -2803,7 +2974,7 @@
                         // Set active context
                         this.activeRoomId = anno.roomId;
                         this.activeRoomName = this.isolatedRoomName;
-                        this.activeLocationId = anno.id;
+                        this.activeLocationId = anno.roomLocationId || anno.id;
                         this.activeLocationName = anno.label;
 
                         // Update search fields
@@ -2814,10 +2985,9 @@
                     } else {
                         // For any other type, treat as room isolation
                         // This handles clicking on room annotations directly
-                        // For room-type annotations, use the annotation's own ID as the roomId
-                        // For other types, use their roomId property
-                        const roomId = anno.type === 'room' ? anno.id : anno.roomId;
-                        const roomName = anno.type === 'room' ? anno.label : (anno.roomName || this.getRoomNameById(anno.roomId));
+                        // Use room entity ID - this is what links the annotation to its entity
+                        const roomId = anno.roomId || anno.id;
+                        const roomName = anno.roomName || anno.label || this.getRoomNameById(roomId);
 
                         this.isolationMode = true;
                         this.isolationLevel = 'room';
@@ -2923,7 +3093,39 @@
                     // Get all visible annotations (not in hiddenAnnotations array)
                     const visibleAnnotations = this.annotations.filter(a => !this.hiddenAnnotations.includes(a.id));
 
-                    // Create a black rect for each visible annotation
+                    // ALSO find the isolated entity annotation (the boundary we're "inside of")
+                    let isolatedEntityAnnotation = null;
+                    if (this.isolationMode) {
+                        if (this.isolationLevel === 'room') {
+                            isolatedEntityAnnotation = this.annotations.find(a =>
+                                a.type === 'room' && a.roomId === this.isolatedRoomId
+                            );
+                        } else if (this.isolationLevel === 'location') {
+                            isolatedEntityAnnotation = this.annotations.find(a =>
+                                a.type === 'location' && a.roomLocationId === this.isolatedLocationId
+                            );
+                        } else if (this.isolationLevel === 'cabinet_run') {
+                            isolatedEntityAnnotation = this.annotations.find(a =>
+                                a.type === 'cabinet_run' && a.cabinetRunId === this.isolatedCabinetRunId
+                            );
+                        }
+                    }
+
+                    // Create cutout for the isolated entity boundary (even though annotation is hidden)
+                    if (isolatedEntityAnnotation && isolatedEntityAnnotation.screenX !== undefined) {
+                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', (isolatedEntityAnnotation.screenX || 0) - 15);
+                        rect.setAttribute('y', (isolatedEntityAnnotation.screenY || 0) - 15);
+                        rect.setAttribute('width', (isolatedEntityAnnotation.screenWidth || 0) + 30);
+                        rect.setAttribute('height', (isolatedEntityAnnotation.screenHeight || 0) + 30);
+                        rect.setAttribute('fill', 'black');
+                        rect.setAttribute('rx', '8');
+                        rect.setAttribute('filter', 'url(#feather)');
+                        maskRects.appendChild(rect);
+                        console.log(`✓ Added isolated entity boundary to mask: ${isolatedEntityAnnotation.label}`);
+                    }
+
+                    // Create cutouts for all visible child annotations
                     visibleAnnotations.forEach(anno => {
                         if (anno.screenX !== undefined && anno.screenWidth > 0 && anno.screenHeight > 0) {
                             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
