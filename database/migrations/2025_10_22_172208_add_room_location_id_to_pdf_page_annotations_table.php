@@ -11,13 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pdf_page_annotations', function (Blueprint $table) {
-            $table->foreignId('room_location_id')
-                ->nullable()
-                ->after('room_id')
-                ->constrained('projects_room_locations')
-                ->onDelete('set null');
-        });
+        // Only run if table exists
+        if (Schema::hasTable('pdf_page_annotations')) {
+            Schema::table('pdf_page_annotations', function (Blueprint $table) {
+                // Only add column if it doesn't already exist
+                if (!Schema::hasColumn('pdf_page_annotations', 'room_location_id')) {
+                    $table->foreignId('room_location_id')
+                        ->nullable()
+                        ->after('room_id')
+                        ->constrained('projects_room_locations')
+                        ->onDelete('set null');
+                }
+            });
+        }
     }
 
     /**

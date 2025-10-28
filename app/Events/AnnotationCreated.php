@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\PdfAnnotation;
+use App\Models\PdfPageAnnotation;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -14,12 +14,12 @@ class AnnotationCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public PdfAnnotation $annotation;
+    public PdfPageAnnotation $annotation;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(PdfAnnotation $annotation)
+    public function __construct(PdfPageAnnotation $annotation)
     {
         $this->annotation = $annotation;
     }
@@ -32,7 +32,7 @@ class AnnotationCreated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('document.' . $this->annotation->document_id),
+            new PresenceChannel('document.' . $this->annotation->pdfPage->document_id),
         ];
     }
 
@@ -54,13 +54,20 @@ class AnnotationCreated implements ShouldBroadcast
         return [
             'annotation' => [
                 'id' => $this->annotation->id,
-                'document_id' => $this->annotation->document_id,
-                'page_number' => $this->annotation->page_number,
+                'document_id' => $this->annotation->pdfPage->document_id,
+                'page_number' => $this->annotation->pdfPage->page_number,
                 'type' => $this->annotation->annotation_type,
-                'data' => $this->annotation->annotation_data,
-                'author' => [
-                    'id' => $this->annotation->author_id,
-                    'name' => $this->annotation->author_name,
+                'label' => $this->annotation->label,
+                'position' => [
+                    'x' => $this->annotation->x,
+                    'y' => $this->annotation->y,
+                    'width' => $this->annotation->width,
+                    'height' => $this->annotation->height,
+                ],
+                'visual_properties' => $this->annotation->visual_properties,
+                'creator' => [
+                    'id' => $this->annotation->creator_id,
+                    'name' => $this->annotation->creator?->name ?? 'Unknown',
                 ],
                 'created_at' => $this->annotation->created_at->toIso8601String(),
             ],

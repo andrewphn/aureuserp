@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\PdfAnnotation;
 use App\Models\PdfDocument;
 use App\Models\PdfDocumentActivity;
 use App\Models\PdfPage;
+use App\Models\PdfPageAnnotation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -89,15 +89,25 @@ class PdfDocumentTest extends TestCase
     /** @test */
     public function it_has_many_annotations(): void
     {
-        $this->markTestSkipped('PdfAnnotation model not implemented yet');
+        // Skip if pdf_page_annotations table doesn't exist in test database
+        if (!\Illuminate\Support\Facades\Schema::hasTable('pdf_page_annotations')) {
+            $this->markTestSkipped('pdf_page_annotations table not available in test database');
+        }
 
-        PdfAnnotation::factory()->count(5)->create([
+        // Create a page for this document
+        $page = PdfPage::factory()->create([
             'document_id' => $this->document->id,
         ]);
 
+        // Create annotations via the page
+        PdfPageAnnotation::factory()->count(5)->create([
+            'pdf_page_id' => $page->id,
+        ]);
+
+        // Test hasManyThrough relationship
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $this->document->annotations);
         $this->assertCount(5, $this->document->annotations);
-        $this->assertInstanceOf(PdfAnnotation::class, $this->document->annotations->first());
+        $this->assertInstanceOf(PdfPageAnnotation::class, $this->document->annotations->first());
     }
 
     /** @test */

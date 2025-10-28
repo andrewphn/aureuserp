@@ -16,24 +16,14 @@ async function testAnnotationEditor() {
         await page.fill('input[type="email"]', 'info@tcswoodwork.com');
         await page.fill('input[type="password"]', 'Lola2024!');
         await page.click('button[type="submit"]');
-        await page.waitForURL(`${BASE_URL}/admin`);
+        await page.waitForURL(`${BASE_URL}/admin/project`);
         console.log('✅ Logged in successfully\n');
 
-        // Step 2: Navigate to a room that has PDF pages
-        console.log('📝 Step 2: Finding a project with PDF annotations...');
-        await page.goto(`${BASE_URL}/admin/projects/rooms`);
+        // Step 2: Navigate directly to annotation page
+        console.log('📝 Step 2: Navigating to annotation page...');
+        await page.goto(`${BASE_URL}/admin/project/projects/9/annotate-v2/1?pdf=1`);
         await page.waitForLoadState('networkidle');
-
-        // Find a room with PDF page (look for "View" or "Edit" button)
-        const firstRoom = await page.locator('table tbody tr').first();
-        if (!firstRoom) {
-            throw new Error('No rooms found');
-        }
-
-        // Click on the first room to view it
-        await firstRoom.locator('a').first().click();
-        await page.waitForLoadState('networkidle');
-        console.log('✅ Opened room page\n');
+        console.log('✅ Navigated to annotation page\n');
 
         // Step 3: Check if annotation editor is on the page
         console.log('📝 Step 3: Checking for annotation editor component...');
