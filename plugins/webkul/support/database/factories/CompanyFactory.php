@@ -3,6 +3,7 @@
 namespace Webkul\Support\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\State;
 
@@ -34,7 +35,7 @@ class CompanyFactory extends Factory
             'color'                 => $this->faker->hexColor(),
             'is_active'             => $this->faker->boolean(),
             'founded_date'          => $this->faker->date('Y-m-d', '-10 years'),
-            'creator_id'            => 1,
+            'creator_id'            => User::factory(),
             'currency_id'           => null,
         ];
     }

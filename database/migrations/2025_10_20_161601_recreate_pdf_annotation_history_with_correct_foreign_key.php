@@ -14,6 +14,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Only create if pdf_page_annotations table exists
+        if (! Schema::hasTable('pdf_page_annotations')) {
+            return;
+        }
+
         Schema::create('pdf_annotation_history', function (Blueprint $table) {
             $table->id();
 
