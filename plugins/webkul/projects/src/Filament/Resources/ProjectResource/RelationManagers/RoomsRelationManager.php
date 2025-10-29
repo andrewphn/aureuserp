@@ -116,6 +116,38 @@ class RoomsRelationManager extends RelationManager
                     ->label('Floor')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('material_category')
+                    ->label('Material')
+                    ->badge()
+                    ->color('info')
+                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
+                        'paint_grade' => 'Paint',
+                        'stain_grade' => 'Stain',
+                        'premium' => 'Premium',
+                        'custom_exotic' => 'Custom',
+                        default => null,
+                    })
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('cabinet_level')
+                    ->label('Level')
+                    ->badge()
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('finish_option')
+                    ->label('Finish')
+                    ->badge()
+                    ->color('warning')
+                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
+                        'unfinished' => 'Unfinished',
+                        'natural_stain' => 'Natural',
+                        'custom_stain' => 'Custom',
+                        'paint_finish' => 'Paint',
+                        'clear_coat' => 'Clear',
+                        default => null,
+                    })
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('locations_count')
                     ->label('Locations')
                     ->counts('locations')

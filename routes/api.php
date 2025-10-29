@@ -75,6 +75,23 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             ->groupBy('room_id')
             ->pluck('count', 'room_id');
 
+        // Room pages and view types
+        $roomPages = \DB::table('pdf_page_annotations')
+            ->join('pdf_pages', 'pdf_page_annotations.pdf_page_id', '=', 'pdf_pages.id')
+            ->select('room_id', 'pdf_pages.page_number', 'pdf_page_annotations.view_type')
+            ->whereNotNull('room_id')
+            ->whereNull('pdf_page_annotations.deleted_at')
+            ->get()
+            ->groupBy('room_id')
+            ->map(function ($annotations) {
+                return $annotations->map(function ($anno) {
+                    return [
+                        'page' => $anno->page_number,
+                        'viewType' => $anno->view_type
+                    ];
+                })->unique()->values();
+            });
+
         // Cabinet run annotations: WHERE cabinet_run_id = run.id AND deleted_at IS NULL (exclude soft-deleted)
         $runAnnotationCounts = \DB::table('pdf_page_annotations')
             ->select('cabinet_run_id', \DB::raw('COUNT(*) as count'))
@@ -83,37 +100,70 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             ->groupBy('cabinet_run_id')
             ->pluck('count', 'cabinet_run_id');
 
-        // Location annotations: Count by inferring from room annotations with parent_annotation_id
-        // For now, we'll count location-type annotations per room location by checking hierarchy
-        $locationAnnotationCounts = \DB::table('pdf_page_annotations as child')
-            ->join('pdf_page_annotations as parent', 'child.parent_annotation_id', '=', 'parent.id')
-            ->join('projects_room_locations', 'parent.room_id', '=', 'projects_room_locations.room_id')
-            ->select('projects_room_locations.id as location_id', \DB::raw('COUNT(child.id) as count'))
-            ->where('child.annotation_type', 'location')
-            ->whereNull('child.deleted_at')
-            ->whereNull('parent.deleted_at')
-            ->groupBy('projects_room_locations.id')
-            ->pluck('count', 'location_id');
+        // Cabinet run pages and view types
+        $runPages = \DB::table('pdf_page_annotations')
+            ->join('pdf_pages', 'pdf_page_annotations.pdf_page_id', '=', 'pdf_pages.id')
+            ->select('cabinet_run_id', 'pdf_pages.page_number', 'pdf_page_annotations.view_type')
+            ->whereNotNull('cabinet_run_id')
+            ->whereNull('pdf_page_annotations.deleted_at')
+            ->get()
+            ->groupBy('cabinet_run_id')
+            ->map(function ($annotations) {
+                return $annotations->map(function ($anno) {
+                    return [
+                        'page' => $anno->page_number,
+                        'viewType' => $anno->view_type
+                    ];
+                })->unique()->values();
+            });
+
+        // Location annotations: Count by room_location_id
+        $locationAnnotationCounts = \DB::table('pdf_page_annotations')
+            ->select('room_location_id', \DB::raw('COUNT(*) as count'))
+            ->whereNotNull('room_location_id')
+            ->whereNull('deleted_at')
+            ->groupBy('room_location_id')
+            ->pluck('count', 'room_location_id');
+
+        // Location pages and view types
+        $locationPages = \DB::table('pdf_page_annotations')
+            ->join('pdf_pages', 'pdf_page_annotations.pdf_page_id', '=', 'pdf_pages.id')
+            ->select('room_location_id', 'pdf_pages.page_number', 'pdf_page_annotations.view_type')
+            ->whereNotNull('room_location_id')
+            ->whereNull('pdf_page_annotations.deleted_at')
+            ->get()
+            ->groupBy('room_location_id')
+            ->map(function ($annotations) {
+                return $annotations->map(function ($anno) {
+                    return [
+                        'page' => $anno->page_number,
+                        'viewType' => $anno->view_type
+                    ];
+                })->unique()->values();
+            });
 
         // Transform to tree structure expected by V3 component
-        $tree = $project->rooms->map(function ($room) use ($roomAnnotationCounts, $locationAnnotationCounts, $runAnnotationCounts) {
+        $tree = $project->rooms->map(function ($room) use ($roomAnnotationCounts, $roomPages, $locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages) {
             return [
                 'id' => $room->id,
                 'name' => $room->name,
                 'type' => 'room',
                 'annotation_count' => $roomAnnotationCounts->get($room->id, 0),
-                'children' => $room->locations->map(function ($location) use ($locationAnnotationCounts, $runAnnotationCounts) {
+                'pages' => $roomPages->get($room->id, collect())->toArray(),
+                'children' => $room->locations->map(function ($location) use ($locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages) {
                     return [
                         'id' => $location->id,
                         'name' => $location->name,
                         'type' => 'room_location',
                         'annotation_count' => $locationAnnotationCounts->get($location->id, 0),
-                        'children' => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts) {
+                        'pages' => $locationPages->get($location->id, collect())->toArray(),
+                        'children' => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts, $runPages) {
                             return [
                                 'id' => $run->id,
                                 'name' => $run->name ?: "Run {$run->id}",
                                 'type' => 'cabinet_run',
                                 'annotation_count' => $runAnnotationCounts->get($run->id, 0),
+                                'pages' => $runPages->get($run->id, collect())->toArray(),
                             ];
                         })->values()
                     ];

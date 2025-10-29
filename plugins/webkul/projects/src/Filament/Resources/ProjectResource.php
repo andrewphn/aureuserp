@@ -1139,6 +1139,11 @@ class ProjectResource extends Resource
 
     public static function getRecordSubNavigation(Page $page): array
     {
+        // Hide sub-navigation on annotation pages
+        if ($page instanceof AnnotatePdfV2 || $page instanceof AnnotatePdf || $page instanceof ReviewPdfAndPrice) {
+            return [];
+        }
+
         return $page->generateNavigationItems([
             ViewProject::class,
             EditProject::class,

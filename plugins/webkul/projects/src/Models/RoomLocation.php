@@ -24,6 +24,9 @@ class RoomLocation extends Model
         'elevation_reference',
         'notes',
         'sort_order',
+        'cabinet_level',
+        'material_category',
+        'finish_option',
         'creator_id',
     ];
 

@@ -229,23 +229,16 @@ class Project extends Model implements Sortable
 
     public function cabinetRuns()
     {
-        // Multi-level relationship: Project → Room → RoomLocation → CabinetRun
-        // This creates a proper Eloquent relationship that FilamentPHP can use
-        // while still allowing query builder methods for API controllers
-
+        // Note: This relationship doesn't work correctly for hasManyThrough across 3 levels
+        // The relation manager uses modifyQueryUsing to bypass this and query correctly
         return $this->hasManyThrough(
             CabinetRun::class,
             Room::class,
-            'project_id',      // Foreign key on rooms table
-            'room_location_id', // Foreign key on cabinet_runs table (but we need to join through room_locations)
-            'id',              // Local key on projects table
-            'id'               // Local key on rooms table
-        )
-        ->join('projects_room_locations', function($join) {
-            $join->on('projects_rooms.id', '=', 'projects_room_locations.room_id');
-        })
-        ->whereColumn('projects_cabinet_runs.room_location_id', '=', 'projects_room_locations.id')
-        ->select('projects_cabinet_runs.*');
+            'project_id',
+            'room_location_id',
+            'id',
+            'id'
+        );
     }
 
     protected static function booted()

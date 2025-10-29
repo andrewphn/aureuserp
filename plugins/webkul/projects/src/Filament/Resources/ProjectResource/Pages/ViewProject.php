@@ -148,8 +148,7 @@ class ViewProject extends ViewRecord
     {
         // Eager load relationships for hierarchical display
         $this->record->load([
-            'rooms.locations',
-            'rooms.cabinets',
+            'rooms.locations.cabinetRuns.cabinets',
             'pdfDocuments.pages'
         ]);
 
@@ -217,6 +216,41 @@ class ViewProject extends ViewRecord
                                                     ->color('success'),
                                             ]),
 
+                                        // TCS Pricing Metadata
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextEntry::make('material_category')
+                                                    ->label('Material')
+                                                    ->badge()
+                                                    ->color('info')
+                                                    ->default('—')
+                                                    ->formatStateUsing(fn ($state) => match($state) {
+                                                        'paint_grade' => 'Paint Grade',
+                                                        'stain_grade' => 'Stain Grade',
+                                                        'premium' => 'Premium',
+                                                        'custom_exotic' => 'Custom/Exotic',
+                                                        default => $state ?? '—',
+                                                    }),
+                                                TextEntry::make('cabinet_level')
+                                                    ->label('Level')
+                                                    ->badge()
+                                                    ->default('—'),
+                                                TextEntry::make('finish_option')
+                                                    ->label('Finish')
+                                                    ->badge()
+                                                    ->color('warning')
+                                                    ->default('—')
+                                                    ->formatStateUsing(fn ($state) => match($state) {
+                                                        'unfinished' => 'Unfinished',
+                                                        'natural_stain' => 'Natural Stain',
+                                                        'custom_stain' => 'Custom Stain',
+                                                        'paint_finish' => 'Paint Finish',
+                                                        'clear_coat' => 'Clear Coat',
+                                                        default => $state ?? '—',
+                                                    }),
+                                            ])
+                                            ->visible(fn ($record) => $record->material_category || $record->cabinet_level || $record->finish_option),
+
                                         // Compact Linear Feet Display
                                         Grid::make(2)
                                             ->schema([
@@ -234,38 +268,179 @@ class ViewProject extends ViewRecord
                                         RepeatableEntry::make('locations')
                                             ->label('Locations')
                                             ->schema([
-                                                TextEntry::make('location_name')
+                                                TextEntry::make('name')
                                                     ->label('')
                                                     ->icon('heroicon-o-map-pin')
+                                                    ->weight(FontWeight::Bold)
                                                     ->columnSpanFull(),
-                                            ])
-                                            ->contained(false)
-                                            ->columnSpanFull(),
-
-                                        // Cabinets within this Room
-                                        RepeatableEntry::make('cabinets')
-                                            ->label('Cabinets')
-                                            ->schema([
-                                                Grid::make(2)
+                                                Grid::make(3)
                                                     ->schema([
-                                                        TextEntry::make('cabinet_code')
-                                                            ->label('Code')
+                                                        TextEntry::make('material_category')
+                                                            ->label('Material')
                                                             ->badge()
-                                                            ->color('gray'),
-                                                        TextEntry::make('cabinet_type')
-                                                            ->label('Type')
+                                                            ->color('info')
+                                                            ->size('xs')
+                                                            ->formatStateUsing(fn ($state) => match($state) {
+                                                                'paint_grade' => 'Paint',
+                                                                'stain_grade' => 'Stain',
+                                                                'premium' => 'Premium',
+                                                                'custom_exotic' => 'Custom',
+                                                                default => null,
+                                                            }),
+                                                        TextEntry::make('cabinet_level')
+                                                            ->label('Level')
                                                             ->badge()
                                                             ->size('xs'),
-                                                    ]),
-                                                Grid::make(2)
+                                                        TextEntry::make('finish_option')
+                                                            ->label('Finish')
+                                                            ->badge()
+                                                            ->color('warning')
+                                                            ->size('xs')
+                                                            ->formatStateUsing(fn ($state) => match($state) {
+                                                                'unfinished' => 'Unfinished',
+                                                                'natural_stain' => 'Natural',
+                                                                'custom_stain' => 'Custom',
+                                                                'paint_finish' => 'Paint',
+                                                                'clear_coat' => 'Clear',
+                                                                default => null,
+                                                            }),
+                                                    ])
+                                                    ->visible(fn ($record) => $record->material_category || $record->cabinet_level || $record->finish_option)
+                                                    ->columnSpanFull(),
+
+                                                // Cabinet Runs within this Location
+                                                RepeatableEntry::make('cabinetRuns')
+                                                    ->label('Cabinet Runs')
                                                     ->schema([
-                                                        TextEntry::make('width_inches')
-                                                            ->label('W')
-                                                            ->suffix('"'),
-                                                        TextEntry::make('height_inches')
-                                                            ->label('H')
-                                                            ->suffix('"'),
-                                                    ]),
+                                                        TextEntry::make('name')
+                                                            ->label('')
+                                                            ->icon('heroicon-o-rectangle-stack')
+                                                            ->weight(FontWeight::Bold)
+                                                            ->columnSpanFull(),
+
+                                                        // TCS Metadata for Cabinet Run
+                                                        Grid::make(3)
+                                                            ->schema([
+                                                                TextEntry::make('material_category')
+                                                                    ->label('Material')
+                                                                    ->badge()
+                                                                    ->color('info')
+                                                                    ->size('xs')
+                                                                    ->formatStateUsing(fn ($state) => match($state) {
+                                                                        'paint_grade' => 'Paint',
+                                                                        'stain_grade' => 'Stain',
+                                                                        'premium' => 'Premium',
+                                                                        'custom_exotic' => 'Custom',
+                                                                        default => null,
+                                                                    }),
+                                                                TextEntry::make('cabinet_level')
+                                                                    ->label('Level')
+                                                                    ->badge()
+                                                                    ->size('xs'),
+                                                                TextEntry::make('finish_option')
+                                                                    ->label('Finish')
+                                                                    ->badge()
+                                                                    ->color('warning')
+                                                                    ->size('xs')
+                                                                    ->formatStateUsing(fn ($state) => match($state) {
+                                                                        'unfinished' => 'Unfinished',
+                                                                        'natural_stain' => 'Natural',
+                                                                        'custom_stain' => 'Custom',
+                                                                        'paint_finish' => 'Paint',
+                                                                        'clear_coat' => 'Clear',
+                                                                        default => null,
+                                                                    }),
+                                                            ])
+                                                            ->visible(fn ($record) => $record->material_category || $record->cabinet_level || $record->finish_option)
+                                                            ->columnSpanFull(),
+
+                                                        // Cabinets within this Cabinet Run
+                                                        RepeatableEntry::make('cabinets')
+                                                            ->label('Cabinets')
+                                                            ->schema([
+                                                                Grid::make(3)
+                                                                    ->schema([
+                                                                        TextEntry::make('cabinet_number')
+                                                                            ->label('Cabinet #')
+                                                                            ->badge()
+                                                                            ->color('gray')
+                                                                            ->weight(FontWeight::Bold),
+                                                                        TextEntry::make('linear_feet')
+                                                                            ->label('LF')
+                                                                            ->suffix(' LF')
+                                                                            ->weight(FontWeight::Bold)
+                                                                            ->color('success'),
+                                                                        TextEntry::make('quantity')
+                                                                            ->label('Qty')
+                                                                            ->default(1)
+                                                                            ->badge()
+                                                                            ->size('xs'),
+                                                                    ]),
+                                                                Grid::make(3)
+                                                                    ->schema([
+                                                                        TextEntry::make('length_inches')
+                                                                            ->label('W')
+                                                                            ->suffix('"'),
+                                                                        TextEntry::make('depth_inches')
+                                                                            ->label('D')
+                                                                            ->suffix('"'),
+                                                                        TextEntry::make('height_inches')
+                                                                            ->label('H')
+                                                                            ->suffix('"'),
+                                                                    ]),
+                                                                Grid::make(3)
+                                                                    ->schema([
+                                                                        TextEntry::make('material_category')
+                                                                            ->label('Material')
+                                                                            ->badge()
+                                                                            ->color('info')
+                                                                            ->size('xs')
+                                                                            ->formatStateUsing(fn ($state) => match($state) {
+                                                                                'paint_grade' => 'Paint',
+                                                                                'stain_grade' => 'Stain',
+                                                                                'premium' => 'Premium',
+                                                                                'custom_exotic' => 'Custom',
+                                                                                default => null,
+                                                                            }),
+                                                                        TextEntry::make('cabinet_level')
+                                                                            ->label('Level')
+                                                                            ->badge()
+                                                                            ->size('xs'),
+                                                                        TextEntry::make('finish_option')
+                                                                            ->label('Finish')
+                                                                            ->badge()
+                                                                            ->color('warning')
+                                                                            ->size('xs')
+                                                                            ->formatStateUsing(fn ($state) => match($state) {
+                                                                                'unfinished' => 'Unfinished',
+                                                                                'natural_stain' => 'Natural',
+                                                                                'custom_stain' => 'Custom',
+                                                                                'paint_finish' => 'Paint',
+                                                                                'clear_coat' => 'Clear',
+                                                                                default => null,
+                                                                            }),
+                                                                    ])
+                                                                    ->visible(fn ($record) => $record->material_category || $record->cabinet_level || $record->finish_option),
+                                                                Grid::make(2)
+                                                                    ->schema([
+                                                                        TextEntry::make('unit_price_per_lf')
+                                                                            ->label('Unit Price')
+                                                                            ->money('USD')
+                                                                            ->suffix('/LF'),
+                                                                        TextEntry::make('total_price')
+                                                                            ->label('Total')
+                                                                            ->money('USD')
+                                                                            ->weight(FontWeight::Bold)
+                                                                            ->color('success')
+                                                                            ->state(fn ($record) => $record->unit_price_per_lf * $record->linear_feet * ($record->quantity ?? 1)),
+                                                                    ])
+                                                                    ->visible(fn ($record) => $record->unit_price_per_lf > 0),
+                                                            ])
+                                                            ->contained(false)
+                                                            ->columnSpanFull(),
+                                                    ])
+                                                    ->contained(false)
+                                                    ->columnSpanFull(),
                                             ])
                                             ->contained(false)
                                             ->columnSpanFull(),

@@ -2,38 +2,38 @@
 
 namespace Webkul\Project\Services;
 
+use App\Models\PdfAnnotationHistory;
 use App\Models\PdfPage;
 use App\Models\PdfPageAnnotation;
-use App\Models\PdfAnnotationHistory;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Filament\Notifications\Notification;
 use Webkul\Project\Models\Room;
-use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Utils\PositionInferenceUtil;
 
 class AnnotationSaveService
 {
     protected EntityManagementService $entityManagement;
+
     protected AnnotationSyncService $annotationSync;
 
     public function __construct()
     {
-        $this->entityManagement = new EntityManagementService();
-        $this->annotationSync = new AnnotationSyncService();
+        $this->entityManagement = new EntityManagementService;
+        $this->annotationSync = new AnnotationSyncService;
     }
 
     /**
      * Main entry point for saving annotations
      *
-     * @param array $formData The validated form data
-     * @param array $originalAnnotation The original annotation data from Alpine.js
-     * @param int $projectId The project ID
-     * @param int $pdfPageId The PDF page ID
-     * @param string $linkMode The link mode ('existing' or 'create')
-     * @param int|null $linkedEntityId The linked entity ID if linking to existing
+     * @param  array  $formData  The validated form data
+     * @param  array  $originalAnnotation  The original annotation data from Alpine.js
+     * @param  int  $projectId  The project ID
+     * @param  int  $pdfPageId  The PDF page ID
+     * @param  string  $linkMode  The link mode ('existing' or 'create')
+     * @param  int|null  $linkedEntityId  The linked entity ID if linking to existing
      * @return PdfPageAnnotation The created or updated annotation
+     *
      * @throws \Exception If save fails
      */
     public function saveAnnotation(
@@ -63,9 +63,8 @@ class AnnotationSaveService
     /**
      * Validate for duplicate view types
      *
-     * @param array $formData The form data
-     * @param array $originalAnnotation The original annotation
-     * @return void
+     * @param  array  $formData  The form data
+     * @param  array  $originalAnnotation  The original annotation
      */
     protected function validateDuplicateView(array $formData, array $originalAnnotation): void
     {
@@ -78,12 +77,12 @@ class AnnotationSaveService
         $viewOrientation = $formData['view_orientation'] ?? null;
         $pdfPageId = $originalAnnotation['pdfPageId'] ?? null;
 
-        if (!$locationId || !$viewType || !$pdfPageId) {
+        if (! $locationId || ! $viewType || ! $pdfPageId) {
             return;
         }
 
         $pdfPage = PdfPage::find($pdfPageId);
-        if (!$pdfPage || !$pdfPage->document_id) {
+        if (! $pdfPage || ! $pdfPage->document_id) {
             return;
         }
 
@@ -92,15 +91,15 @@ class AnnotationSaveService
         // Build the key to check
         $checkKey = $viewType;
         if (in_array($viewType, ['elevation', 'section']) && $viewOrientation) {
-            $checkKey = $viewType . '-' . $viewOrientation;
+            $checkKey = $viewType.'-'.$viewOrientation;
         }
 
         // Check if this view combination already exists
-        if (isset($takenViews[$checkKey]) && !empty($takenViews[$checkKey])) {
+        if (isset($takenViews[$checkKey]) && ! empty($takenViews[$checkKey])) {
             $pages = implode(', ', $takenViews[$checkKey]);
             $viewLabel = $viewType === 'plan'
                 ? 'Plan View'
-                : ucfirst($viewType) . ' View' . ($viewOrientation ? ' - ' . $viewOrientation : '');
+                : ucfirst($viewType).' View'.($viewOrientation ? ' - '.$viewOrientation : '');
 
             Notification::make()
                 ->title('Duplicate View Warning')
@@ -172,25 +171,25 @@ class AnnotationSaveService
 
         // Create the annotation
         $annotation = PdfPageAnnotation::create([
-            'pdf_page_id'      => $pdfPageId,
-            'annotation_type'  => $annotationType,
-            'label'            => $entityResult['label'],
-            'notes'            => $formData['notes'] ?? '',
-            'parent_annotation_id' => $parentAnnotationId,
-            'room_id'          => $roomId,
-            'room_location_id' => $entityResult['room_location_id'] ?? null,
-            'cabinet_run_id'   => $entityResult['cabinet_run_id'] ?? null,
+            'pdf_page_id'              => $pdfPageId,
+            'annotation_type'          => $annotationType,
+            'label'                    => $entityResult['label'],
+            'notes'                    => $formData['notes'] ?? '',
+            'parent_annotation_id'     => $parentAnnotationId,
+            'room_id'                  => $roomId,
+            'room_location_id'         => $entityResult['room_location_id'] ?? null,
+            'cabinet_run_id'           => $entityResult['cabinet_run_id'] ?? null,
             'cabinet_specification_id' => $entityResult['cabinet_specification_id'] ?? null,
-            'x'                => $originalAnnotation['normalizedX'] ?? 0,
-            'y'                => $normalizedY,
-            'width'            => $normalizedWidth,
-            'height'           => $normalizedHeight,
-            'color'            => $originalAnnotation['color'] ?? '#f59e0b',
-            'view_type'        => $formData['view_type'] ?? 'plan',
-            'view_orientation' => $formData['view_orientation'] ?? null,
-            'view_scale'       => $originalAnnotation['viewScale'] ?? null,
-            'inferred_position' => $positionData['inferred_position'],
-            'vertical_zone'    => $positionData['vertical_zone'],
+            'x'                        => $originalAnnotation['normalizedX'] ?? 0,
+            'y'                        => $normalizedY,
+            'width'                    => $normalizedWidth,
+            'height'                   => $normalizedHeight,
+            'color'                    => $originalAnnotation['color'] ?? '#f59e0b',
+            'view_type'                => $formData['view_type'] ?? 'plan',
+            'view_orientation'         => $formData['view_orientation'] ?? null,
+            'view_scale'               => $originalAnnotation['viewScale'] ?? null,
+            'inferred_position'        => $positionData['inferred_position'],
+            'vertical_zone'            => $positionData['vertical_zone'],
         ]);
 
         // Log creation
@@ -236,15 +235,15 @@ class AnnotationSaveService
 
         // Prepare update data
         $updateData = [
-            'label'            => $entityResult['label'],
-            'notes'            => $formData['notes'] ?? '',
-            'parent_annotation_id' => $parentAnnotationId,
-            'room_id'          => $roomId,
-            'room_location_id' => $entityResult['room_location_id'] ?? null,
-            'cabinet_run_id'   => $entityResult['cabinet_run_id'] ?? null,
+            'label'                    => $entityResult['label'],
+            'notes'                    => $formData['notes'] ?? '',
+            'parent_annotation_id'     => $parentAnnotationId,
+            'room_id'                  => $roomId,
+            'room_location_id'         => $entityResult['room_location_id'] ?? null,
+            'cabinet_run_id'           => $entityResult['cabinet_run_id'] ?? null,
             'cabinet_specification_id' => $entityResult['cabinet_specification_id'] ?? null,
-            'view_type'        => $formData['view_type'] ?? 'plan',
-            'view_orientation' => $formData['view_orientation'] ?? null,
+            'view_type'                => $formData['view_type'] ?? 'plan',
+            'view_orientation'         => $formData['view_orientation'] ?? null,
         ];
 
         // Update annotation
@@ -277,10 +276,10 @@ class AnnotationSaveService
         ?int $linkedEntityId
     ): array {
         $result = [
-            'label' => $formData['label'] ?? '',
-            'room_id' => null,
-            'room_location_id' => null,
-            'cabinet_run_id' => null,
+            'label'                    => $formData['label'] ?? '',
+            'room_id'                  => null,
+            'room_location_id'         => null,
+            'cabinet_run_id'           => null,
             'cabinet_specification_id' => null,
         ];
 
@@ -290,7 +289,7 @@ class AnnotationSaveService
         }
 
         // Handle creating new entity
-        if ($linkMode === 'create' && isset($formData['entity']) && !empty($formData['entity'])) {
+        if ($linkMode === 'create' && isset($formData['entity']) && ! empty($formData['entity'])) {
             $entityData = $formData['entity'];
             $entityName = $entityData['name'] ?? $formData['label'];
 
@@ -305,7 +304,8 @@ class AnnotationSaveService
                 return $this->linkToExistingEntity($annotationType, $existingEntity->id, $result);
             } else {
                 // Create new entity
-                $entity = $this->entityManagement->createEntity($annotationType, $entityData, $projectId);
+                $entity = $this->entityManagement->createEntity($annotationType, $entityData, $projectId, $parentEntityId);
+
                 return $this->linkToExistingEntity($annotationType, $entity->id, $result);
             }
         }
@@ -324,9 +324,9 @@ class AnnotationSaveService
         ?int $linkedEntityId
     ): array {
         $result = [
-            'label' => $formData['label'] ?? $annotation->label,
-            'room_location_id' => $annotation->room_location_id,
-            'cabinet_run_id' => $annotation->cabinet_run_id,
+            'label'                    => $formData['label'] ?? $annotation->label,
+            'room_location_id'         => $annotation->room_location_id,
+            'cabinet_run_id'           => $annotation->cabinet_run_id,
             'cabinet_specification_id' => $annotation->cabinet_specification_id,
         ];
 
@@ -339,14 +339,15 @@ class AnnotationSaveService
         }
 
         // Handle updating existing entity
-        if ($linkMode === 'create' && $currentEntityId && isset($formData['entity']) && !empty($formData['entity'])) {
+        if ($linkMode === 'create' && $currentEntityId && isset($formData['entity']) && ! empty($formData['entity'])) {
             $entityData = $formData['entity'];
             $this->entityManagement->updateEntity($annotationType, $currentEntityId, $entityData);
 
             // Load updated entity to get new name
             $entity = $this->entityManagement->loadEntity($annotationType, $currentEntityId);
             if ($entity) {
-                $result['label'] = $entity->name;
+                // Use the correct name field for the entity type
+                $result['label'] = $this->entityManagement->getEntityName($annotationType, $entity);
             }
         }
 
@@ -361,7 +362,8 @@ class AnnotationSaveService
     {
         $entity = $this->entityManagement->loadEntity($annotationType, $entityId);
         if ($entity) {
-            $result['label'] = $entity->name;
+            // Use the correct name field for the entity type
+            $result['label'] = $this->entityManagement->getEntityName($annotationType, $entity);
             $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
             $result[$entityIdField] = $entityId;
 
@@ -370,6 +372,7 @@ class AnnotationSaveService
                 $result['room_id'] = $entityId;
             }
         }
+
         return $result;
     }
 
@@ -378,11 +381,11 @@ class AnnotationSaveService
      */
     protected function getParentEntityId(string $annotationType, ?int $parentAnnotationId): ?int
     {
-        return match($annotationType) {
-            'location' => AnnotationHierarchyService::getRoomIdFromParent($parentAnnotationId),
+        return match ($annotationType) {
+            'location'    => AnnotationHierarchyService::getRoomIdFromParent($parentAnnotationId),
             'cabinet_run' => AnnotationHierarchyService::getRoomLocationIdFromParent($parentAnnotationId),
-            'cabinet' => AnnotationHierarchyService::getCabinetRunIdFromParent($parentAnnotationId),
-            default => null,
+            'cabinet'     => AnnotationHierarchyService::getCabinetRunIdFromParent($parentAnnotationId),
+            default       => null,
         };
     }
 
@@ -405,33 +408,33 @@ class AnnotationSaveService
             ->first();
 
         // Only auto-create if parent is a location (not a cabinet_run)
-        if (!$parentAnnotation || $parentAnnotation->annotation_type !== 'location') {
+        if (! $parentAnnotation || $parentAnnotation->annotation_type !== 'location') {
             return $parentAnnotationId;
         }
 
         // Create a cabinet run annotation
         $newCabinetRunId = DB::table('pdf_page_annotations')->insertGetId([
-            'pdf_page_id' => $pdfPageId,
+            'pdf_page_id'          => $pdfPageId,
             'parent_annotation_id' => $parentAnnotationId,
-            'annotation_type' => 'cabinet_run',
-            'label' => ($formData['label'] ?? 'Cabinet') . ' Run',
-            'notes' => 'Auto-created cabinet run for ' . ($formData['label'] ?? 'cabinet'),
-            'room_id' => $roomId,
-            'room_location_id' => $formData['room_location_id'] ?? null,
-            'cabinet_run_id' => $formData['cabinet_run_id'] ?? null,
-            'x' => $originalAnnotation['normalizedX'] ?? 0,
-            'y' => $normalizedY ?? 0,
-            'width' => $normalizedWidth ?? 100,
-            'height' => $normalizedHeight ?? 100,
-            'color' => $originalAnnotation['color'] ?? '#f59e0b',
-            'view_type' => $formData['view_type'] ?? 'plan',
-            'view_orientation' => $formData['view_orientation'] ?? null,
-            'view_scale' => $originalAnnotation['viewScale'] ?? null,
-            'inferred_position' => $positionData['inferred_position'] ?? null,
-            'vertical_zone' => $positionData['vertical_zone'] ?? null,
-            'creator_id' => auth()->id(),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'annotation_type'      => 'cabinet_run',
+            'label'                => ($formData['label'] ?? 'Cabinet').' Run',
+            'notes'                => 'Auto-created cabinet run for '.($formData['label'] ?? 'cabinet'),
+            'room_id'              => $roomId,
+            'room_location_id'     => $formData['room_location_id'] ?? null,
+            'cabinet_run_id'       => $formData['cabinet_run_id'] ?? null,
+            'x'                    => $originalAnnotation['normalizedX'] ?? 0,
+            'y'                    => $normalizedY ?? 0,
+            'width'                => $normalizedWidth ?? 100,
+            'height'               => $normalizedHeight ?? 100,
+            'color'                => $originalAnnotation['color'] ?? '#f59e0b',
+            'view_type'            => $formData['view_type'] ?? 'plan',
+            'view_orientation'     => $formData['view_orientation'] ?? null,
+            'view_scale'           => $originalAnnotation['viewScale'] ?? null,
+            'inferred_position'    => $positionData['inferred_position'] ?? null,
+            'vertical_zone'        => $positionData['vertical_zone'] ?? null,
+            'creator_id'           => auth()->id(),
+            'created_at'           => now(),
+            'updated_at'           => now(),
         ]);
 
         Notification::make()

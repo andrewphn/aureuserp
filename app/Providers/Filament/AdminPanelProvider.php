@@ -124,6 +124,19 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Pages\TestFooter::class,
             ])
             ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => <<<'HTML'
+                    <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=3.0, user-scalable=yes">
+                    <style>
+                        @media (min-width: 1280px) {
+                            html {
+                                zoom: 0.9;
+                            }
+                        }
+                    </style>
+                HTML
+            )
+            ->renderHook(
                 PanelsRenderHook::SCRIPTS_BEFORE,
                 fn (): string => view('filament.scripts.global-app-js')->render()
             )

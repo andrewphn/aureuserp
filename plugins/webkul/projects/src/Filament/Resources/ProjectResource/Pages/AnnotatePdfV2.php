@@ -86,8 +86,13 @@ class AnnotatePdfV2 extends Page implements HasForms
             ->pluck('id', 'page_number')
             ->toArray();
 
-        // Get the PDF URL
+        // Get the PDF URL - force HTTPS if the request is secure to prevent mixed content errors
         $this->pdfUrl = Storage::disk('public')->url($this->pdfDocument->file_path);
+
+        // Force HTTPS protocol if the page is accessed via HTTPS (prevents mixed content blocking)
+        if (request()->secure() && str_starts_with($this->pdfUrl, 'http://')) {
+            $this->pdfUrl = str_replace('http://', 'https://', $this->pdfUrl);
+        }
     }
 
     public function getTitle(): string | Htmlable
@@ -97,12 +102,12 @@ class AnnotatePdfV2 extends Page implements HasForms
 
     public function getHeading(): string | Htmlable
     {
-        return "Annotate Page {$this->pageNumber}";
+        return ''; // Hide the large heading, breadcrumb only
     }
 
     public function getSubheading(): string | Htmlable | null
     {
-        return $this->record->name ?? null;
+        return null; // Hide the subheading
     }
 
     protected function getHeaderActions(): array

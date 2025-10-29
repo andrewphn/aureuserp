@@ -7,15 +7,14 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
@@ -26,7 +25,6 @@ use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Services\AnnotationHierarchyService;
 use Webkul\Project\Services\AnnotationSaveService;
-use Webkul\Project\Services\AnnotationSyncService;
 use Webkul\Project\Services\EntityDetectionService;
 use Webkul\Project\Services\EntityManagementService;
 use Webkul\Project\Services\ViewTypeTrackerService;
@@ -52,8 +50,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
     // Linked entity IDs (set during edit, used for Entity Details tab)
     public ?int $linkedRoomId = null;
+
     public ?int $linkedLocationId = null;
+
     public ?int $linkedCabinetRunId = null;
+
     public ?int $linkedCabinetSpecId = null;
 
     // Annotation model for FilamentPHP v4 relationship binding
@@ -64,7 +65,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
     // Entity-centric properties for new workflow
     public string $linkMode = 'create'; // 'create' or 'existing'
+
     public ?int $linkedEntityId = null; // ID of selected existing entity
+
     public ?array $entityData = []; // Entity properties for create/edit
 
     public function mount(): void
@@ -93,7 +96,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                         ->label('How would you like to proceed?')
                                         ->options([
                                             'existing' => 'Link to existing entity',
-                                            'create' => 'Create new entity',
+                                            'create'   => 'Create new entity',
                                         ])
                                         ->default('create')
                                         ->live()
@@ -105,7 +108,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                         ->label('Select Entity')
                                         ->helperText('Choose an existing entity from the project hierarchy')
                                         ->options(function () {
-                                            $entityManagement = new EntityManagementService();
+                                            $entityManagement = new EntityManagementService;
+
                                             return $entityManagement->getHierarchicalEntityOptions($this->annotationType, $this->projectId);
                                         })
                                         ->searchable()
@@ -117,12 +121,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                     Select::make('parent_annotation_id')
                                         ->label('Parent Entity')
                                         ->helperText(function () {
-                                            return match($this->annotationType) {
-                                                'room' => 'Rooms don\'t have parents',
-                                                'location' => 'Select the room this location belongs to',
+                                            return match ($this->annotationType) {
+                                                'room'        => 'Rooms don\'t have parents',
+                                                'location'    => 'Select the room this location belongs to',
                                                 'cabinet_run' => 'Select the location this cabinet run belongs to',
-                                                'cabinet' => 'Select the cabinet run this cabinet belongs to',
-                                                default => 'Select parent entity',
+                                                'cabinet'     => 'Select the cabinet run this cabinet belongs to',
+                                                default       => 'Select parent entity',
                                             };
                                         })
                                         ->options(function () {
@@ -135,11 +139,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
                                             // If current value is set and not in options, add it
                                             $currentValue = $this->data['parent_annotation_id'] ?? null;
-                                            if ($currentValue && !isset($options[$currentValue])) {
+                                            if ($currentValue && ! isset($options[$currentValue])) {
                                                 $annotation = \App\Models\PdfPageAnnotation::find($currentValue);
                                                 if ($annotation) {
                                                     $pageNumber = $annotation->pdfPage->page_number ?? '?';
-                                                    $options[$currentValue] = $annotation->label . ' (Page ' . $pageNumber . ')';
+                                                    $options[$currentValue] = $annotation->label.' (Page '.$pageNumber.')';
                                                 }
                                             }
 
@@ -176,14 +180,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                     Select::make('entity.room_type')
                                                         ->label('Room Type')
                                                         ->options([
-                                                            'kitchen' => 'Kitchen',
+                                                            'kitchen'  => 'Kitchen',
                                                             'bathroom' => 'Bathroom',
-                                                            'bedroom' => 'Bedroom',
-                                                            'living' => 'Living Room',
-                                                            'dining' => 'Dining Room',
-                                                            'office' => 'Office',
-                                                            'utility' => 'Utility',
-                                                            'other' => 'Other',
+                                                            'bedroom'  => 'Bedroom',
+                                                            'living'   => 'Living Room',
+                                                            'dining'   => 'Dining Room',
+                                                            'office'   => 'Office',
+                                                            'utility'  => 'Utility',
+                                                            'other'    => 'Other',
                                                         ])
                                                         ->searchable(),
 
@@ -252,12 +256,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                     Select::make('entity.location_type')
                                                         ->label('Location Type')
                                                         ->options([
-                                                            'wall' => 'Wall',
-                                                            'island' => 'Island',
+                                                            'wall'      => 'Wall',
+                                                            'island'    => 'Island',
                                                             'peninsula' => 'Peninsula',
-                                                            'corner' => 'Corner',
-                                                            'alcove' => 'Alcove',
-                                                            'other' => 'Other',
+                                                            'corner'    => 'Corner',
+                                                            'alcove'    => 'Alcove',
+                                                            'other'     => 'Other',
                                                         ])
                                                         ->searchable(),
 
@@ -310,9 +314,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                     Select::make('entity.run_type')
                                                         ->label('Run Type')
                                                         ->options([
-                                                            'base' => 'Base Cabinets',
-                                                            'wall' => 'Wall Cabinets',
-                                                            'tall' => 'Tall Cabinets',
+                                                            'base'      => 'Base Cabinets',
+                                                            'wall'      => 'Wall Cabinets',
+                                                            'tall'      => 'Tall Cabinets',
                                                             'specialty' => 'Specialty',
                                                         ])
                                                         ->searchable(),
@@ -391,56 +395,137 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                 ->schema([
                                                     TextInput::make('entity.length_inches')
                                                         ->label('Length')
-                                                        ->numeric()
-                                                        ->step(0.01)
-                                                        ->suffix('inches'),
+                                                        ->helperText('Enter as decimal (12.5) or fraction (12 1/2, 1-2/3, 3/4)')
+                                                        ->suffix('inches')
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                            $parsedValue = $this->parseFractionalMeasurement($state);
+                                                            $set('entity.length_inches', $parsedValue);
+                                                            // Recalculate pricing when length changes
+                                                            $this->calculateTotalPrice($get, $set);
+                                                        }),
 
                                                     TextInput::make('entity.width_inches')
                                                         ->label('Width')
-                                                        ->numeric()
-                                                        ->step(0.01)
-                                                        ->suffix('inches'),
+                                                        ->helperText('Enter as decimal (12.5) or fraction (12 1/2, 1-2/3, 3/4)')
+                                                        ->suffix('inches')
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(fn ($state, callable $set) => $set('entity.width_inches', $this->parseFractionalMeasurement($state))
+                                                        ),
 
                                                     TextInput::make('entity.depth_inches')
                                                         ->label('Depth')
-                                                        ->numeric()
-                                                        ->step(0.01)
-                                                        ->suffix('inches'),
+                                                        ->helperText('Enter as decimal (12.5) or fraction (12 1/2, 1-2/3, 3/4)')
+                                                        ->suffix('inches')
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(fn ($state, callable $set) => $set('entity.depth_inches', $this->parseFractionalMeasurement($state))
+                                                        ),
 
                                                     TextInput::make('entity.height_inches')
                                                         ->label('Height')
-                                                        ->numeric()
-                                                        ->step(0.01)
-                                                        ->suffix('inches'),
+                                                        ->helperText('Enter as decimal (12.5) or fraction (12 1/2, 1-2/3, 3/4)')
+                                                        ->suffix('inches')
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(fn ($state, callable $set) => $set('entity.height_inches', $this->parseFractionalMeasurement($state))
+                                                        ),
 
                                                     TextInput::make('entity.linear_feet')
                                                         ->label('Linear Feet')
+                                                        ->helperText('Auto-calculated from length, or enter manually')
                                                         ->numeric()
                                                         ->step(0.01)
                                                         ->suffix('ft'),
                                                 ]),
 
-                                            // Pricing Tab
+                                            // Pricing Tab - TCS Pricing Structure
                                             Tab::make('Pricing')
                                                 ->icon('heroicon-o-currency-dollar')
                                                 ->schema([
-                                                    TextInput::make('entity.quantity')
-                                                        ->label('Quantity')
-                                                        ->numeric()
-                                                        ->default(1)
-                                                        ->minValue(1),
+                                                    // TCS Pricing Structure: Base + Material + Finish = Total/LF
+                                                    Select::make('entity.cabinet_level')
+                                                        ->label('Base Cabinet Level')
+                                                        ->helperText('Select construction complexity level')
+                                                        ->options([
+                                                            '1' => 'Level 1 - $168/LF (Open boxes only, no doors)',
+                                                            '2' => 'Level 2 - $192/LF (Paint grade, semi-European)',
+                                                            '3' => 'Level 3 - $210/LF (Stain grade, enhanced details)',
+                                                            '4' => 'Level 4 - $225/LF (Beaded frames, specialty doors)',
+                                                            '5' => 'Level 5 - $240/LF (Unique custom work)',
+                                                        ])
+                                                        ->live()
+                                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTcsPrice($get, $set)),
+
+                                                    Select::make('entity.material_category')
+                                                        ->label('Material Category')
+                                                        ->helperText('Select wood species and grade')
+                                                        ->options([
+                                                            'paint_grade' => 'Paint Grade +$138/LF (Hard Maple, Poplar)',
+                                                            'stain_grade' => 'Stain Grade +$156/LF (Oak, Maple)',
+                                                            'premium' => 'Premium +$185/LF (Rifted White Oak, Black Walnut)',
+                                                            'custom' => 'Custom/Exotic (TBD - requires quote)',
+                                                        ])
+                                                        ->live()
+                                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTcsPrice($get, $set)),
+
+                                                    Select::make('entity.finish_option')
+                                                        ->label('Finish Option (Optional)')
+                                                        ->helperText('Outsourced finishing - adds to base price')
+                                                        ->options([
+                                                            'unfinished' => 'Unfinished +$0/LF',
+                                                            'prime_only' => 'Prime Only +$60/LF',
+                                                            'prime_paint' => 'Prime + Paint +$118/LF',
+                                                            'custom_color' => 'Custom Color +$125/LF',
+                                                            'clear_coat' => 'Clear Coat +$95/LF',
+                                                            'stain_clear' => 'Stain + Clear +$213/LF',
+                                                            'color_match_stain' => 'Color Match Stain +$255/LF',
+                                                            'two_tone' => 'Two-tone +$235/LF',
+                                                        ])
+                                                        ->default('unfinished')
+                                                        ->live()
+                                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTcsPrice($get, $set)),
+
+                                                    Placeholder::make('price_breakdown')
+                                                        ->label('Price Breakdown')
+                                                        ->content(function (callable $get) {
+                                                            return $this->getTcsPriceBreakdown($get);
+                                                        }),
 
                                                     TextInput::make('entity.unit_price_per_lf')
-                                                        ->label('Unit Price per Linear Foot')
+                                                        ->label('Total Unit Price per LF')
+                                                        ->helperText('Auto-calculated from selections above')
                                                         ->numeric()
                                                         ->step(0.01)
-                                                        ->prefix('$'),
+                                                        ->prefix('$')
+                                                        ->disabled()
+                                                        ->dehydrated(),
+
+                                                    TextInput::make('entity.quantity')
+                                                        ->label('Quantity')
+                                                        ->helperText('Number of identical cabinets')
+                                                        ->numeric()
+                                                        ->default(1)
+                                                        ->minValue(1)
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTotalPrice($get, $set)),
+
+                                                    Placeholder::make('calculated_linear_feet')
+                                                        ->label('Linear Feet')
+                                                        ->helperText('Auto-calculated from length')
+                                                        ->content(function (callable $get) {
+                                                            $lengthInches = $get('entity.length_inches') ?? 0;
+                                                            $linearFeet = round($lengthInches / 12, 2);
+
+                                                            return $linearFeet.' ft';
+                                                        }),
 
                                                     TextInput::make('entity.total_price')
                                                         ->label('Total Price')
+                                                        ->helperText('Auto-calculated: unit price/LF × linear feet × quantity')
                                                         ->numeric()
                                                         ->step(0.01)
-                                                        ->prefix('$'),
+                                                        ->prefix('$')
+                                                        ->disabled()
+                                                        ->dehydrated(),
                                                 ]),
 
                                             // Notes Tab
@@ -466,6 +551,77 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                 ->collapsed(false),
 
                             // ============================================
+                            // SECTION: TCS Pricing Configuration (Hierarchical)
+                            // ============================================
+                            Section::make('TCS Pricing Configuration')
+                                ->description('Configure 3-tier pricing that cascades down the hierarchy')
+                                ->icon('heroicon-o-currency-dollar')
+                                ->schema([
+                                    Placeholder::make('pricing_info')
+                                        ->label('Pricing Inheritance')
+                                        ->content(new \Illuminate\Support\HtmlString(
+                                            '<div class="text-sm text-gray-600">
+                                                <p class="mb-2">Pricing configuration cascades down: <strong>Room → Location → Cabinet Run → Cabinet</strong></p>
+                                                <p>Set defaults at any level. Lower levels inherit from above unless explicitly overridden.</p>
+                                            </div>'
+                                        )),
+
+                                    Select::make('entity.cabinet_level')
+                                        ->label('Base Cabinet Level')
+                                        ->helperText('Construction complexity level - inherits from parent if not set')
+                                        ->options(function () {
+                                            $pricingService = new \Webkul\Project\Services\TcsPricingService;
+                                            return $pricingService->getCabinetLevelOptions();
+                                        })
+                                        ->placeholder('Inherit from parent')
+                                        ->nullable()
+                                        ->live()
+                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTcsPrice($get, $set)),
+
+                                    Select::make('entity.material_category')
+                                        ->label('Material Category')
+                                        ->helperText('Wood species and grade - inherits from parent if not set')
+                                        ->options(function () {
+                                            $pricingService = new \Webkul\Project\Services\TcsPricingService;
+                                            return $pricingService->getMaterialCategoryOptions();
+                                        })
+                                        ->placeholder('Inherit from parent')
+                                        ->nullable()
+                                        ->live()
+                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTcsPrice($get, $set)),
+
+                                    Select::make('entity.finish_option')
+                                        ->label('Finish Option (Optional)')
+                                        ->helperText('Outsourced finishing - adds to base price - inherits from parent if not set')
+                                        ->options(function () {
+                                            $pricingService = new \Webkul\Project\Services\TcsPricingService;
+                                            return $pricingService->getFinishOptions();
+                                        })
+                                        ->placeholder('Inherit from parent')
+                                        ->nullable()
+                                        ->live()
+                                        ->afterStateUpdated(fn (callable $get, callable $set) => $this->calculateTcsPrice($get, $set)),
+
+                                    Placeholder::make('price_breakdown')
+                                        ->label('Price Breakdown')
+                                        ->content(function (callable $get) {
+                                            return new \Illuminate\Support\HtmlString($this->getTcsPriceBreakdown($get));
+                                        })
+                                        ->visible(fn () => $this->annotationType === 'cabinet'),
+
+                                    TextInput::make('entity.unit_price_per_lf')
+                                        ->label('Total Unit Price per LF')
+                                        ->helperText('Auto-calculated from pricing configuration above')
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->prefix('$')
+                                        ->visible(fn () => $this->annotationType === 'cabinet'),
+                                ])
+                                ->visible(fn (callable $get) => $get('link_mode') === 'create')
+                                ->collapsible()
+                                ->collapsed(fn () => ! in_array($this->annotationType, ['room', 'cabinet'])),
+
+                            // ============================================
                             // SECTION: Context & Hierarchy (OLD - TO BE REMOVED)
                             // ============================================
                             Section::make('Context & Hierarchy OLD')
@@ -476,7 +632,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                     Placeholder::make('hierarchy_path')
                                         ->label('Hierarchy')
                                         ->content(fn () => new \Illuminate\Support\HtmlString($this->hierarchyPath))
-                                        ->visible(fn () => !empty($this->hierarchyPath)),
+                                        ->visible(fn () => ! empty($this->hierarchyPath)),
 
                                     // Parent annotation selector
                                     Select::make('parent_annotation_id')
@@ -492,11 +648,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
                                             // If current value is set and not in options, add it
                                             $currentValue = $this->data['parent_annotation_id'] ?? null;
-                                            if ($currentValue && !isset($options[$currentValue])) {
+                                            if ($currentValue && ! isset($options[$currentValue])) {
                                                 $annotation = \App\Models\PdfPageAnnotation::find($currentValue);
                                                 if ($annotation) {
                                                     $pageNumber = $annotation->pdfPage->page_number ?? '?';
-                                                    $options[$currentValue] = $annotation->label . ' (Page ' . $pageNumber . ')';
+                                                    $options[$currentValue] = $annotation->label.' (Page '.$pageNumber.')';
                                                 }
                                             }
 
@@ -508,7 +664,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                         ->live()
                                         ->rules([
                                             fn () => function (string $attribute, $value, \Closure $fail) {
-                                                if (!$value) {
+                                                if (! $value) {
                                                     return; // Allow null parent for top-level annotations
                                                 }
 
@@ -517,24 +673,25 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                     ->where('id', $value)
                                                     ->first();
 
-                                                if (!$parent) {
+                                                if (! $parent) {
                                                     $fail('The selected parent annotation does not exist.');
+
                                                     return;
                                                 }
 
                                                 // Define valid parent types based on annotation type
-                                                $validTypes = match($this->annotationType) {
-                                                    'location' => ['room'],
+                                                $validTypes = match ($this->annotationType) {
+                                                    'location'    => ['room'],
                                                     'cabinet_run' => ['location'],
-                                                    'cabinet' => ['cabinet_run'],
-                                                    default => [],
+                                                    'cabinet'     => ['cabinet_run'],
+                                                    default       => [],
                                                 };
 
                                                 // Validate parent type matches allowed types
-                                                if (!empty($validTypes) && !in_array($parent->annotation_type, $validTypes)) {
-                                                    $fail("Invalid parent type. {$this->annotationType} annotations can only have " . implode(', ', $validTypes) . " as parents. The selected annotation is a {$parent->annotation_type}.");
+                                                if (! empty($validTypes) && ! in_array($parent->annotation_type, $validTypes)) {
+                                                    $fail("Invalid parent type. {$this->annotationType} annotations can only have ".implode(', ', $validTypes)." as parents. The selected annotation is a {$parent->annotation_type}.");
                                                 }
-                                            }
+                                            },
                                         ])
                                         ->visible(fn () => $this->annotationType !== 'room'),
 
@@ -598,201 +755,206 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                 ->collapsed(true)
                                 ->compact()
                                 ->schema([
-                    Select::make('view_type')
-                        ->label('View Type')
-                        ->options(function (callable $get) {
-                            // Base view type options
-                            $baseOptions = [
-                                'plan' => 'Plan View (Top-Down)',
-                                'elevation' => 'Elevation View (Front/Side)',
-                                'section' => 'Section View (Cut-Through)',
-                                'detail' => 'Detail View (Zoom/Closeup)',
-                            ];
+                                    Select::make('view_type')
+                                        ->label('View Type')
+                                        ->options(function (callable $get) {
+                                            // Base view type options
+                                            $baseOptions = [
+                                                'plan'      => 'Plan View (Top-Down)',
+                                                'elevation' => 'Elevation View (Front/Side)',
+                                                'section'   => 'Section View (Cut-Through)',
+                                                'detail'    => 'Detail View (Zoom/Closeup)',
+                                            ];
 
-                            // Only check for taken views if this is a location annotation with a location selected
-                            if ($this->annotationType !== 'location') {
-                                return $baseOptions;
-                            }
+                                            // Only check for taken views if this is a location annotation with a location selected
+                                            if ($this->annotationType !== 'location') {
+                                                return $baseOptions;
+                                            }
 
-                            // Get location ID from form or original annotation
-                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
-                            if (!$locationId) {
-                                return $baseOptions;
-                            }
+                                            // Get location ID from form or original annotation
+                                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
+                                            if (! $locationId) {
+                                                return $baseOptions;
+                                            }
 
-                            // Get PDF document ID
-                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
-                            if (!$pdfPageId) {
-                                return $baseOptions;
-                            }
+                                            // Get PDF document ID
+                                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
+                                            if (! $pdfPageId) {
+                                                return $baseOptions;
+                                            }
 
-                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
-                            if (!$pdfPage || !$pdfPage->document_id) {
-                                return $baseOptions;
-                            }
+                                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
+                                            if (! $pdfPage || ! $pdfPage->document_id) {
+                                                return $baseOptions;
+                                            }
 
-                            // Get taken view types for this location
-                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
+                                            // Get taken view types for this location
+                                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
 
-                            // Only mark Plan as taken (elevation/section depend on orientation, detail allows multiple)
-                            return collect($baseOptions)->map(function ($label, $key) use ($takenViews) {
-                                if ($key === 'plan' && isset($takenViews['plan'])) {
-                                    $pages = implode(', ', $takenViews['plan']);
-                                    return $label . ' ✓ (Page ' . $pages . ')';
-                                }
-                                return $label;
-                            })->toArray();
-                        })
-                        ->default('plan')
-                        ->required()
-                        ->live()
-                        ->helperText(function (callable $get) {
-                            // Only show special helper for location annotations
-                            if ($this->annotationType !== 'location') {
-                                return 'Select the type of view this annotation represents';
-                            }
+                                            // Only mark Plan as taken (elevation/section depend on orientation, detail allows multiple)
+                                            return collect($baseOptions)->map(function ($label, $key) use ($takenViews) {
+                                                if ($key === 'plan' && isset($takenViews['plan'])) {
+                                                    $pages = implode(', ', $takenViews['plan']);
 
-                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
-                            if (!$locationId) {
-                                return 'Select the type of view this annotation represents';
-                            }
+                                                    return $label.' ✓ (Page '.$pages.')';
+                                                }
 
-                            // Get PDF document ID
-                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
-                            if (!$pdfPageId) {
-                                return 'Select the type of view this annotation represents';
-                            }
+                                                return $label;
+                                            })->toArray();
+                                        })
+                                        ->default('plan')
+                                        ->required()
+                                        ->live()
+                                        ->helperText(function (callable $get) {
+                                            // Only show special helper for location annotations
+                                            if ($this->annotationType !== 'location') {
+                                                return 'Select the type of view this annotation represents';
+                                            }
 
-                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
-                            if (!$pdfPage || !$pdfPage->document_id) {
-                                return 'Select the type of view this annotation represents';
-                            }
+                                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
+                                            if (! $locationId) {
+                                                return 'Select the type of view this annotation represents';
+                                            }
 
-                            $takenViews = $this->getLocationViewTypes($locationId, $pdfPage->document_id);
+                                            // Get PDF document ID
+                                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
+                                            if (! $pdfPageId) {
+                                                return 'Select the type of view this annotation represents';
+                                            }
 
-                            if (empty($takenViews)) {
-                                return 'This is the first view for this location';
-                            }
+                                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
+                                            if (! $pdfPage || ! $pdfPage->document_id) {
+                                                return 'Select the type of view this annotation represents';
+                                            }
 
-                            return 'Views marked with ✓ already exist on other pages. You can still select them if needed.';
-                        })
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            // Reset orientation when view type changes
-                            if ($state === 'plan' || $state === 'detail') {
-                                $set('view_orientation', null);
-                            } elseif ($state === 'elevation' && !$this->data['view_orientation']) {
-                                $set('view_orientation', 'front');
-                            } elseif ($state === 'section' && !$this->data['view_orientation']) {
-                                $set('view_orientation', 'A-A');
-                            }
-                        }),
+                                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
 
-                    Select::make('view_orientation')
-                        ->label('Orientation')
-                        ->options(function (callable $get) {
-                            $viewType = $get('view_type');
+                                            if (empty($takenViews)) {
+                                                return 'This is the first view for this location';
+                                            }
 
-                            // Base orientation options
-                            $baseOptions = match ($viewType) {
-                                'elevation' => [
-                                    'front' => 'Front',
-                                    'back' => 'Back',
-                                    'left' => 'Left',
-                                    'right' => 'Right',
-                                ],
-                                'section' => [
-                                    'A-A' => 'A-A',
-                                    'B-B' => 'B-B',
-                                    'C-C' => 'C-C',
-                                    'D-D' => 'D-D',
-                                ],
-                                default => [],
-                            };
-
-                            // Only check for taken orientations if this is a location annotation
-                            if ($this->annotationType !== 'location' || !in_array($viewType, ['elevation', 'section'])) {
-                                return $baseOptions;
-                            }
-
-                            // Get location ID from form
-                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
-                            if (!$locationId) {
-                                return $baseOptions;
-                            }
-
-                            // Get PDF document ID
-                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
-                            if (!$pdfPageId) {
-                                return $baseOptions;
-                            }
-
-                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
-                            if (!$pdfPage || !$pdfPage->document_id) {
-                                return $baseOptions;
-                            }
-
-                            // Get taken view types for this location
-                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
-
-                            // Mark taken orientations with checkmark and page numbers
-                            return collect($baseOptions)->map(function ($label, $orientation) use ($takenViews, $viewType) {
-                                $key = $viewType . '-' . $orientation;
-                                if (isset($takenViews[$key])) {
-                                    $pages = implode(', ', $takenViews[$key]);
-                                    return $label . ' ✓ (Page ' . $pages . ')';
-                                }
-                                return $label;
-                            })->toArray();
-                        })
-                        ->visible(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section'])) // Show only for elevation/section views
-                        ->required(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section']))
-                        ->helperText(function (callable $get) {
-                            $viewType = $get('view_type');
-
-                            // Only show availability info for location annotations
-                            if ($this->annotationType !== 'location' || !in_array($viewType, ['elevation', 'section'])) {
-                                if ($viewType === 'elevation') {
-                                    return 'Select which side/face this elevation shows';
-                                } elseif ($viewType === 'section') {
-                                    return 'Select which section cut line this represents';
-                                }
-                                return '';
-                            }
-
-                            // Get location ID and check for taken orientations
-                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
-                            if (!$locationId) {
-                                return 'Select which orientation this view shows';
-                            }
-
-                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
-                            if (!$pdfPageId) {
-                                return 'Select which orientation this view shows';
-                            }
-
-                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
-                            if (!$pdfPage || !$pdfPage->document_id) {
-                                return 'Select which orientation this view shows';
-                            }
-
-                            $takenViews = $this->getLocationViewTypes($locationId, $pdfPage->document_id);
-
-                            // Check if any orientations for this view type are taken
-                            $hasTakenOrientations = false;
-                            foreach ($takenViews as $key => $pages) {
-                                if (str_starts_with($key, $viewType . '-')) {
-                                    $hasTakenOrientations = true;
-                                    break;
-                                }
-                            }
-
-                            if ($hasTakenOrientations) {
-                                return 'Orientations marked with ✓ already exist. You can still select them for additional views.';
-                            }
-
-                            return 'This is the first ' . $viewType . ' view for this location';
+                                            return 'Views marked with ✓ already exist on other pages. You can still select them if needed.';
+                                        })
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            // Reset orientation when view type changes
+                                            if ($state === 'plan' || $state === 'detail') {
+                                                $set('view_orientation', null);
+                                            } elseif ($state === 'elevation' && ! $this->data['view_orientation']) {
+                                                $set('view_orientation', 'front');
+                                            } elseif ($state === 'section' && ! $this->data['view_orientation']) {
+                                                $set('view_orientation', 'A-A');
+                                            }
                                         }),
-                                        // Note: ->live() removed - no dependent fields, unnecessary server requests
+
+                                    Select::make('view_orientation')
+                                        ->label('Orientation')
+                                        ->options(function (callable $get) {
+                                            $viewType = $get('view_type');
+
+                                            // Base orientation options
+                                            $baseOptions = match ($viewType) {
+                                                'elevation' => [
+                                                    'front' => 'Front',
+                                                    'back'  => 'Back',
+                                                    'left'  => 'Left',
+                                                    'right' => 'Right',
+                                                ],
+                                                'section' => [
+                                                    'A-A' => 'A-A',
+                                                    'B-B' => 'B-B',
+                                                    'C-C' => 'C-C',
+                                                    'D-D' => 'D-D',
+                                                ],
+                                                default => [],
+                                            };
+
+                                            // Only check for taken orientations if this is a location annotation
+                                            if ($this->annotationType !== 'location' || ! in_array($viewType, ['elevation', 'section'])) {
+                                                return $baseOptions;
+                                            }
+
+                                            // Get location ID from form
+                                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
+                                            if (! $locationId) {
+                                                return $baseOptions;
+                                            }
+
+                                            // Get PDF document ID
+                                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
+                                            if (! $pdfPageId) {
+                                                return $baseOptions;
+                                            }
+
+                                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
+                                            if (! $pdfPage || ! $pdfPage->document_id) {
+                                                return $baseOptions;
+                                            }
+
+                                            // Get taken view types for this location
+                                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
+
+                                            // Mark taken orientations with checkmark and page numbers
+                                            return collect($baseOptions)->map(function ($label, $orientation) use ($takenViews, $viewType) {
+                                                $key = $viewType.'-'.$orientation;
+                                                if (isset($takenViews[$key])) {
+                                                    $pages = implode(', ', $takenViews[$key]);
+
+                                                    return $label.' ✓ (Page '.$pages.')';
+                                                }
+
+                                                return $label;
+                                            })->toArray();
+                                        })
+                                        ->visible(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section'])) // Show only for elevation/section views
+                                        ->required(fn (callable $get) => in_array($get('view_type'), ['elevation', 'section']))
+                                        ->helperText(function (callable $get) {
+                                            $viewType = $get('view_type');
+
+                                            // Only show availability info for location annotations
+                                            if ($this->annotationType !== 'location' || ! in_array($viewType, ['elevation', 'section'])) {
+                                                if ($viewType === 'elevation') {
+                                                    return 'Select which side/face this elevation shows';
+                                                } elseif ($viewType === 'section') {
+                                                    return 'Select which section cut line this represents';
+                                                }
+
+                                                return '';
+                                            }
+
+                                            // Get location ID and check for taken orientations
+                                            $locationId = $get('room_location_id') ?? $this->originalAnnotation['roomLocationId'] ?? null;
+                                            if (! $locationId) {
+                                                return 'Select which orientation this view shows';
+                                            }
+
+                                            $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
+                                            if (! $pdfPageId) {
+                                                return 'Select which orientation this view shows';
+                                            }
+
+                                            $pdfPage = \App\Models\PdfPage::find($pdfPageId);
+                                            if (! $pdfPage || ! $pdfPage->document_id) {
+                                                return 'Select which orientation this view shows';
+                                            }
+
+                                            $takenViews = ViewTypeTrackerService::getLocationViewTypes($locationId, $pdfPage->document_id);
+
+                                            // Check if any orientations for this view type are taken
+                                            $hasTakenOrientations = false;
+                                            foreach ($takenViews as $key => $pages) {
+                                                if (str_starts_with($key, $viewType.'-')) {
+                                                    $hasTakenOrientations = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if ($hasTakenOrientations) {
+                                                return 'Orientations marked with ✓ already exist. You can still select them for additional views.';
+                                            }
+
+                                            return 'This is the first '.$viewType.' view for this location';
+                                        }),
+                                    // Note: ->live() removed - no dependent fields, unnecessary server requests
                                 ]),
 
                             // ============================================
@@ -826,10 +988,10 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      */
     protected function hasLinkedEntity(): bool
     {
-        return !empty($this->linkedRoomId)
-            || !empty($this->linkedLocationId)
-            || !empty($this->linkedCabinetRunId)
-            || !empty($this->linkedCabinetSpecId);
+        return ! empty($this->linkedRoomId)
+            || ! empty($this->linkedLocationId)
+            || ! empty($this->linkedCabinetRunId)
+            || ! empty($this->linkedCabinetSpecId);
     }
 
     /**
@@ -839,9 +1001,9 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     protected function getLinkedEntitySummary(): string
     {
         // Cabinet Specification (most specific)
-        if (!empty($this->linkedCabinetSpecId)) {
+        if (! empty($this->linkedCabinetSpecId)) {
             $cabinet = CabinetSpecification::find($this->linkedCabinetSpecId);
-            if (!$cabinet) {
+            if (! $cabinet) {
                 return '<span class="text-gray-500">Cabinet specification not found</span>';
             }
 
@@ -856,14 +1018,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 e($location?->name ?? 'N/A'),
                 e($run?->name ?? 'N/A'),
                 e($cabinet->cabinet_number ?? 'N/A'),
-                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/' . $projectId . '/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
+                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/'.$projectId.'/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
             );
         }
 
         // Cabinet Run
-        if (!empty($this->linkedCabinetRunId)) {
+        if (! empty($this->linkedCabinetRunId)) {
             $run = CabinetRun::find($this->linkedCabinetRunId);
-            if (!$run) {
+            if (! $run) {
                 return '<span class="text-gray-500">Cabinet run not found</span>';
             }
 
@@ -876,14 +1038,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 e($room?->name ?? 'N/A'),
                 e($location?->name ?? 'N/A'),
                 e($run->name),
-                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/' . $projectId . '/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
+                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/'.$projectId.'/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
             );
         }
 
         // Room Location
-        if (!empty($this->linkedLocationId)) {
+        if (! empty($this->linkedLocationId)) {
             $location = RoomLocation::find($this->linkedLocationId);
-            if (!$location) {
+            if (! $location) {
                 return '<span class="text-gray-500">Location not found</span>';
             }
 
@@ -894,14 +1056,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 '<div class="space-y-1 text-sm"><div><strong>Room:</strong> %s</div><div><strong>Location:</strong> %s</div>%s</div>',
                 e($room?->name ?? 'N/A'),
                 e($location->name),
-                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/' . $projectId . '/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
+                $projectId ? '<div class="mt-2"><a href="/admin/project/projects/'.$projectId.'/edit" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">View in Project →</a></div>' : ''
             );
         }
 
         // Room
-        if (!empty($this->linkedRoomId)) {
+        if (! empty($this->linkedRoomId)) {
             $room = Room::find($this->linkedRoomId);
-            if (!$room) {
+            if (! $room) {
                 return '<span class="text-gray-500">Room not found</span>';
             }
 
@@ -916,7 +1078,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         // No entity linked
         return '<span class="text-gray-500 text-sm">Not linked to any entity</span>';
     }
-
 
     public function saveAction(): Action
     {
@@ -956,12 +1117,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             $data = $this->form->getState();
             $pdfPageId = $this->originalAnnotation['pdfPageId'] ?? null;
 
-            if (!$pdfPageId) {
+            if (! $pdfPageId) {
                 throw new \Exception('PDF page ID is missing from annotation data');
             }
 
             // Delegate to AnnotationSaveService
-            $annotationSaveService = new AnnotationSaveService();
+            $annotationSaveService = new AnnotationSaveService;
             $annotation = $annotationSaveService->saveAnnotation(
                 formData: $data,
                 originalAnnotation: $this->originalAnnotation,
@@ -1005,7 +1166,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
             \Log::error('Annotation not found for update', [
                 'annotation_id' => $this->originalAnnotation['id'] ?? 'unknown',
-                'error' => $e->getMessage(),
+                'error'         => $e->getMessage(),
             ]);
         } catch (\Exception $e) {
             \Filament\Notifications\Notification::make()
@@ -1122,7 +1283,6 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * ENTITY-CENTRIC HELPER METHODS
      * =================================================================
      */
-
     public function render()
     {
         return view('webkul-project::livewire.annotation-editor');
@@ -1145,7 +1305,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
         // Build hierarchy breadcrumb path for display
         $annotationId = $annotation['id'] ?? null;
-        if ($annotationId && (!is_string($annotationId) || !str_starts_with($annotationId, 'temp_'))) {
+        if ($annotationId && (! is_string($annotationId) || ! str_starts_with($annotationId, 'temp_'))) {
             $this->hierarchyPath = AnnotationHierarchyService::getHierarchyPathHtml($annotationId);
         } else {
             $this->hierarchyPath = '<span class="text-gray-500">New annotation</span>';
@@ -1154,7 +1314,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         // CRITICAL: Set the annotation model property for FilamentPHP v4 relationship binding
         // This must happen BEFORE filling the form so relationship fields can load properly
         $annotationId = $annotation['id'];
-        if (!is_string($annotationId) || !str_starts_with($annotationId, 'temp_')) {
+        if (! is_string($annotationId) || ! str_starts_with($annotationId, 'temp_')) {
             $this->annotationModel = \App\Models\PdfPageAnnotation::find($annotationId);
         } else {
             $this->annotationModel = null;  // New annotation, no model yet
@@ -1163,7 +1323,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         // ============================================
         // ENTITY-CENTRIC WORKFLOW: Load entity data
         // ============================================
-        $entityManagement = new EntityManagementService();
+        $entityManagement = new EntityManagementService;
         $entityIdField = $entityManagement->getEntityIdField($this->annotationType);
         $this->linkedEntityId = $annotation[str_replace('_id', 'Id', $entityIdField)] ?? null;
 
@@ -1173,9 +1333,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             $entity = $entityManagement->loadEntity($this->annotationType, $this->linkedEntityId);
             $this->entityData = $entity ? $entity->toArray() : [];
         } else {
-            // New entity will be created
+            // New entity will be created - populate name from annotation label
             $this->linkMode = 'create';
-            $this->entityData = [];
+            $this->entityData = [
+                'name' => $annotation['label'] ?? '',
+                // Other entity fields remain empty and will be filled by user
+            ];
         }
 
         // Fill form with annotation data using Filament Forms API
@@ -1310,8 +1473,8 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * Auto-link form field to existing entity
      * Called when user clicks "Auto-Link to Existing" button
      *
-     * @param string $fieldName Field name to populate (room_location_id or cabinet_run_id)
-     * @param int $entityId Entity ID to link to
+     * @param  string  $fieldName  Field name to populate (room_location_id or cabinet_run_id)
+     * @param  int  $entityId  Entity ID to link to
      */
     public function linkToExistingEntity(string $fieldName, int $entityId): void
     {
@@ -1326,6 +1489,186 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ->body('The annotation has been linked to the existing entity.')
             ->success()
             ->send();
+    }
+
+    /**
+     * Calculate total price based on dimensions and pricing
+     *
+     * Formula: unit_price_per_lf × (length_inches / 12) × quantity
+     *
+     * @param  callable  $get  Form get callable
+     * @param  callable  $set  Form set callable
+     */
+    protected function calculateTotalPrice(callable $get, callable $set): void
+    {
+        $lengthInches = $get('entity.length_inches') ?? 0;
+        $unitPrice = $get('entity.unit_price_per_lf') ?? 0;
+        $quantity = $get('entity.quantity') ?? 1;
+
+        if ($lengthInches > 0 && $unitPrice > 0) {
+            $linearFeet = round($lengthInches / 12, 2);
+            $totalPrice = round($unitPrice * $linearFeet * $quantity, 2);
+
+            $set('entity.linear_feet', $linearFeet);
+            $set('entity.total_price', $totalPrice);
+        }
+    }
+
+    /**
+     * Parse fractional measurement input and convert to decimal inches
+     *
+     * Supports formats:
+     * - "12.5" -> 12.5
+     * - "12 1/2" -> 12.5
+     * - "1-2/3" -> 1.667
+     * - "3/4" -> 0.75
+     * - "1/2" -> 0.5
+     *
+     * @param  string|float|null  $input  The input measurement
+     * @return float|null The decimal value or null if invalid
+     */
+    protected function parseFractionalMeasurement($input): ?float
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        // If already a number, return it
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        // Convert to string for parsing
+        $input = trim((string) $input);
+
+        // Pattern: Match "12 1/2", "1-2/3", "3/4", "12.5", etc.
+        // Format 1: "12 1/2" (whole number space fraction)
+        if (preg_match('/^(\d+)\s+(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $whole + ($numerator / $denominator);
+        }
+
+        // Format 2: "1-2/3" (whole number dash fraction)
+        if (preg_match('/^(\d+)-(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $whole + ($numerator / $denominator);
+        }
+
+        // Format 3: "3/4" (just fraction)
+        if (preg_match('/^(\d+)\/(\d+)$/', $input, $matches)) {
+            $numerator = (int) $matches[1];
+            $denominator = (int) $matches[2];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $numerator / $denominator;
+        }
+
+        // Format 4: Try as decimal
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        // Invalid format - return original value
+        return null;
+    }
+
+    /**
+     * Calculate TCS unit price per LF from pricing configuration
+     *
+     * Uses TcsPricingService to calculate price based on:
+     * - Cabinet Level (base price)
+     * - Material Category (material upgrade)
+     * - Finish Option (finishing cost)
+     *
+     * Handles inheritance from parent entities in the hierarchy.
+     *
+     * @param  callable  $get  Form get callable
+     * @param  callable  $set  Form set callable
+     */
+    protected function calculateTcsPrice(callable $get, callable $set): void
+    {
+        // Only calculate for cabinets
+        if ($this->annotationType !== 'cabinet') {
+            return;
+        }
+
+        $pricingService = new \Webkul\Project\Services\TcsPricingService;
+
+        // Get current values (may be null = inherited)
+        $cabinetLevel = $get('entity.cabinet_level');
+        $materialCategory = $get('entity.material_category');
+        $finishOption = $get('entity.finish_option');
+
+        // If any are null, we need to resolve from parent hierarchy
+        // For now, use defaults if not set
+        $cabinetLevel = $cabinetLevel ?? '3';
+        $materialCategory = $materialCategory ?? 'stain_grade';
+        $finishOption = $finishOption ?? 'unfinished';
+
+        // Calculate unit price
+        $unitPrice = $pricingService->calculateUnitPrice(
+            $cabinetLevel,
+            $materialCategory,
+            $finishOption
+        );
+
+        // Set the calculated price
+        $set('entity.unit_price_per_lf', $unitPrice);
+
+        // Trigger total price recalculation
+        $this->calculateTotalPrice($get, $set);
+    }
+
+    /**
+     * Get formatted TCS price breakdown for display
+     *
+     * Shows the three pricing components and their sum.
+     *
+     * @param  callable  $get  Form get callable
+     * @return string HTML price breakdown
+     */
+    protected function getTcsPriceBreakdown(callable $get): string
+    {
+        // Only show for cabinets
+        if ($this->annotationType !== 'cabinet') {
+            return '';
+        }
+
+        $pricingService = new \Webkul\Project\Services\TcsPricingService;
+
+        // Get current values (may be null = inherited)
+        $cabinetLevel = $get('entity.cabinet_level');
+        $materialCategory = $get('entity.material_category');
+        $finishOption = $get('entity.finish_option');
+
+        // Use defaults if not set (inherited)
+        $cabinetLevel = $cabinetLevel ?? '3';
+        $materialCategory = $materialCategory ?? 'stain_grade';
+        $finishOption = $finishOption ?? 'unfinished';
+
+        // Get formatted breakdown
+        return $pricingService->getFormattedPriceBreakdown(
+            $cabinetLevel,
+            $materialCategory,
+            $finishOption
+        );
     }
 
     private function close(): void
