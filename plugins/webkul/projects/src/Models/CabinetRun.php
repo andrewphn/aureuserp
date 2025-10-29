@@ -25,6 +25,9 @@ class CabinetRun extends Model
         'end_wall_measurement',
         'notes',
         'sort_order',
+        'cabinet_level',
+        'material_category',
+        'finish_option',
         'creator_id',
     ];
 
@@ -158,5 +161,56 @@ class CabinetRun extends Model
                 }
             }
         });
+    }
+
+    /**
+     * Material BOM Methods
+     */
+
+    /**
+     * Generate Bill of Materials for all cabinets in this run
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function generateBom(): \Illuminate\Support\Collection
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        return $bomService->generateBomForCabinets($this->cabinets);
+    }
+
+    /**
+     * Get formatted BOM with product details
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getFormattedBom(): \Illuminate\Support\Collection
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        $bom = $bomService->generateBomForCabinets($this->cabinets);
+        return $bomService->formatBom($bom, true);
+    }
+
+    /**
+     * Get material cost estimate for this cabinet run
+     *
+     * @return float
+     */
+    public function estimateMaterialCost(): float
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        $bom = $bomService->generateBomForCabinets($this->cabinets);
+        return $bomService->estimateMaterialCost($bom);
+    }
+
+    /**
+     * Check if materials are available in inventory for this run
+     *
+     * @return array
+     */
+    public function checkMaterialAvailability(): array
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        $bom = $bomService->generateBomForCabinets($this->cabinets);
+        return $bomService->checkMaterialAvailability($bom);
     }
 }

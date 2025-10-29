@@ -43,12 +43,15 @@ class CabinetsRelationManager extends RelationManager
                         Select::make('cabinet_run_id')
                             ->label('Cabinet Run')
                             ->relationship('cabinetRun', 'name', fn ($query, Get $get, RelationManager $livewire) =>
-                                $query->whereHas('roomLocation', fn ($q) =>
-                                    $q->where('project_id', $livewire->getOwnerRecord()->id)
-                                        ->when($get('room_id'), fn ($q2) =>
-                                            $q2->where('room_id', $get('room_id'))
-                                        )
-                                )
+                                $query->whereHas('roomLocation', function ($q) use ($get, $livewire) {
+                                    $q->whereHas('room', fn ($q2) =>
+                                        $q2->where('project_id', $livewire->getOwnerRecord()->id)
+                                    );
+
+                                    if ($get('room_id')) {
+                                        $q->where('room_id', $get('room_id'));
+                                    }
+                                })
                             )
                             ->searchable()
                             ->preload()
@@ -83,7 +86,6 @@ class CabinetsRelationManager extends RelationManager
                                         TextInput::make('length_inches')
                                             ->label('Length')
                                             ->suffix('in')
-                                            ->required()
                                             ->numeric()
                                             ->step(0.125)
                                             ->live(onBlur: true)
@@ -91,7 +93,8 @@ class CabinetsRelationManager extends RelationManager
                                                 if ($state) {
                                                     $set('linear_feet', round($state / 12, 2));
                                                 }
-                                            }),
+                                            })
+                                            ->helperText('Optional during annotation stage'),
 
                                         TextInput::make('width_inches')
                                             ->label('Width')
@@ -202,6 +205,38 @@ class CabinetsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn (?string $state): string => $state ? ucfirst($state) : '—'),
 
+                Tables\Columns\TextColumn::make('material_category')
+                    ->label('Material')
+                    ->badge()
+                    ->color('info')
+                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
+                        'paint_grade' => 'Paint',
+                        'stain_grade' => 'Stain',
+                        'premium' => 'Premium',
+                        'custom_exotic' => 'Custom',
+                        default => null,
+                    })
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('cabinet_level')
+                    ->label('Level')
+                    ->badge()
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('finish_option')
+                    ->label('Finish')
+                    ->badge()
+                    ->color('warning')
+                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
+                        'unfinished' => 'Unfinished',
+                        'natural_stain' => 'Natural',
+                        'custom_stain' => 'Custom',
+                        'paint_finish' => 'Paint',
+                        'clear_coat' => 'Clear',
+                        default => null,
+                    })
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('length_inches')
                     ->label('Length')
                     ->suffix(' in')
@@ -256,6 +291,16 @@ class CabinetsRelationManager extends RelationManager
                 ]),
             ])
             ->defaultSort('cabinet_number')
-            ->modifyQueryUsing(fn ($query) => $query->with(['room', 'cabinetRun']));
+            ->modifyQueryUsing(function ($query) use ($table) {
+                $livewire = $table->getLivewire();
+                $projectId = $livewire->getOwnerRecord()->id;
+
+                // Bypass the broken direct relationship and use proper filtering
+                return CabinetSpecification::query()
+                    ->whereHas('room', function ($q) use ($projectId) {
+                        $q->where('project_id', $projectId);
+                    })
+                    ->with(['room', 'cabinetRun']);
+            });
     }
 }

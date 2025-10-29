@@ -34,6 +34,9 @@ class CabinetSpecification extends Model
         'quantity',
         'unit_price_per_lf',
         'total_price',
+        'cabinet_level',
+        'material_category',
+        'finish_option',
         'hardware_notes',
         'custom_modifications',
         'shop_notes',
@@ -274,5 +277,120 @@ class CabinetSpecification extends Model
             $linearFeet <= 4.0 => 'large',
             default => 'extra-large',
         };
+    }
+
+    /**
+     * Material BOM Methods
+     */
+
+    /**
+     * Generate Bill of Materials for this cabinet
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function generateBom(): \Illuminate\Support\Collection
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        return $bomService->generateBomForCabinet($this);
+    }
+
+    /**
+     * Get formatted BOM with product details
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getFormattedBom(): \Illuminate\Support\Collection
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        $bom = $bomService->generateBomForCabinet($this);
+        return $bomService->formatBom($bom, true);
+    }
+
+    /**
+     * Get material cost estimate for this cabinet
+     *
+     * @return float
+     */
+    public function estimateMaterialCost(): float
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        $bom = $bomService->generateBomForCabinet($this);
+        return $bomService->estimateMaterialCost($bom);
+    }
+
+    /**
+     * Check if materials are available in inventory
+     *
+     * @return array
+     */
+    public function checkMaterialAvailability(): array
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        $bom = $bomService->generateBomForCabinet($this);
+        return $bomService->checkMaterialAvailability($bom);
+    }
+
+    /**
+     * Get material recommendations for this cabinet
+     *
+     * @param string $usageType box|face_frame|door
+     * @return \Illuminate\Support\Collection
+     */
+    public function getMaterialRecommendations(string $usageType = 'box'): \Illuminate\Support\Collection
+    {
+        $bomService = new \Webkul\Project\Services\MaterialBomService();
+        return $bomService->getMaterialRecommendations($this, $usageType);
+    }
+
+    /**
+     * Check if this cabinet has material category assigned
+     *
+     * @return bool
+     */
+    public function hasMaterialCategory(): bool
+    {
+        return !empty($this->material_category);
+    }
+
+    /**
+     * Get the inherited material category from parent entities
+     *
+     * Cascades: CabinetRun → RoomLocation → Room
+     *
+     * @return string|null
+     */
+    public function getInheritedMaterialCategory(): ?string
+    {
+        // Check own material category first
+        if ($this->material_category) {
+            return $this->material_category;
+        }
+
+        // Check cabinet run
+        if ($this->cabinetRun && $this->cabinetRun->material_category) {
+            return $this->cabinetRun->material_category;
+        }
+
+        // Check room location
+        if ($this->cabinetRun && $this->cabinetRun->roomLocation && $this->cabinetRun->roomLocation->material_category) {
+            return $this->cabinetRun->roomLocation->material_category;
+        }
+
+        // Check room
+        if ($this->room && $this->room->material_category) {
+            return $this->room->material_category;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the effective material category (with inheritance)
+     *
+     * @return string|null
+     */
+    public function getEffectiveMaterialCategoryAttribute(): ?string
+    {
+        return $this->getInheritedMaterialCategory();
     }
 }

@@ -462,6 +462,7 @@ class PdfAnnotationController extends Controller
                     'color' => $annotation->color,
                     'cabinet_run_id' => $annotation->cabinet_run_id,
                     'room_id' => $annotation->room_id,
+                    'room_location_id' => $annotation->room_location_id,  // CRITICAL: Include room_location_id for location isolation mode
                     'parent_annotation_id' => $annotation->parent_annotation_id,  // Add parent relationship for hierarchy
                     'notes' => $annotation->notes,
                     'annotation_type' => $annotation->annotation_type,

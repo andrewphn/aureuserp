@@ -29,8 +29,9 @@ class CabinetRunsRelationManager extends RelationManager
                         Select::make('room_location_id')
                             ->label('Room Location')
                             ->relationship('roomLocation', 'name', fn ($query, RelationManager $livewire) =>
-                                $query->where('project_id', $livewire->getOwnerRecord()->id)
-                                    ->with('room')
+                                $query->whereHas('room', fn ($q) =>
+                                    $q->where('project_id', $livewire->getOwnerRecord()->id)
+                                )->with('room')
                             )
                             ->required()
                             ->searchable()
@@ -61,7 +62,7 @@ class CabinetRunsRelationManager extends RelationManager
                             ->suffix('ft')
                             ->numeric()
                             ->step(0.01)
-                            ->helperText('Auto-calculated from cabinets if left blank'),
+                            ->helperText('Optional: Auto-calculated from cabinets if left blank'),
 
                         TextInput::make('start_wall_measurement')
                             ->label('Start Wall Measurement')
@@ -123,6 +124,38 @@ class CabinetRunsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
+                Tables\Columns\TextColumn::make('material_category')
+                    ->label('Material')
+                    ->badge()
+                    ->color('info')
+                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
+                        'paint_grade' => 'Paint',
+                        'stain_grade' => 'Stain',
+                        'premium' => 'Premium',
+                        'custom_exotic' => 'Custom',
+                        default => null,
+                    })
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('cabinet_level')
+                    ->label('Level')
+                    ->badge()
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('finish_option')
+                    ->label('Finish')
+                    ->badge()
+                    ->color('warning')
+                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
+                        'unfinished' => 'Unfinished',
+                        'natural_stain' => 'Natural',
+                        'custom_stain' => 'Custom',
+                        'paint_finish' => 'Paint',
+                        'clear_coat' => 'Clear',
+                        default => null,
+                    })
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('total_linear_feet')
                     ->label('Total LF')
                     ->suffix(' ft')
@@ -163,6 +196,19 @@ class CabinetRunsRelationManager extends RelationManager
             ])
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
-            ->modifyQueryUsing(fn ($query) => $query->with(['roomLocation.room'])->withCount('cabinets'));
+            ->modifyQueryUsing(function ($query) use ($table) {
+                $livewire = $table->getLivewire();
+                $projectId = $livewire->getOwnerRecord()->id;
+
+                // Completely bypass the broken hasManyThrough relationship
+                // and build a proper 3-level join query
+                return CabinetRun::query()
+                    ->join('projects_room_locations', 'projects_cabinet_runs.room_location_id', '=', 'projects_room_locations.id')
+                    ->join('projects_rooms', 'projects_room_locations.room_id', '=', 'projects_rooms.id')
+                    ->where('projects_rooms.project_id', $projectId)
+                    ->select('projects_cabinet_runs.*')
+                    ->with(['roomLocation.room'])
+                    ->withCount('cabinets');
+            });
     }
 }

@@ -27,6 +27,9 @@ class Room extends Model
         'pdf_notes',
         'notes',
         'sort_order',
+        'cabinet_level',
+        'material_category',
+        'finish_option',
         'creator_id',
     ];
 

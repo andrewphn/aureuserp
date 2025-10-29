@@ -14,6 +14,7 @@
 @endphp
 
 <div
+    wire:ignore
     x-cloak
     x-data="annotationSystemV3({
         pdfUrl: '{{ $pdfUrl }}',
@@ -25,7 +26,6 @@
         pageMap: {{ json_encode($pageMap) }}
     })"
     x-init="init()"
-    wire:ignore
     class="w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900"
 >
     <!-- Context Bar (Top - Sticky) -->
@@ -334,6 +334,361 @@
 
             <!-- GROUP 5: Actions -->
             <div class="flex items-center gap-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg p-3 ml-auto">
+                <!-- Filter Button (NEW) - wrapped in relative container -->
+                <div class="relative z-40">
+                    <button
+                        @click="showFilters = true"
+                        class="px-3 py-2 rounded-lg text-white hover:scale-105 hover:shadow-md transition-all text-sm font-semibold flex items-center gap-2 relative"
+                        :style="activeFiltersCount > 0 ? 'background-color: var(--primary-600);' : 'background-color: var(--gray-600);'"
+                        @mouseover="$el.style.backgroundColor = activeFiltersCount > 0 ? 'var(--primary-700)' : 'var(--gray-700)'"
+                        @mouseout="$el.style.backgroundColor = activeFiltersCount > 0 ? 'var(--primary-600)' : 'var(--gray-600)'"
+                        title="Filter Annotations"
+                    >
+                        <x-filament::icon icon="heroicon-o-funnel" class="h-4 w-4" />
+                        <span>Filter</span>
+                        <!-- Active Filter Count Badge -->
+                        <span
+                            x-show="activeFiltersCount > 0"
+                            x-text="activeFiltersCount"
+                            class="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full shadow-md z-10"
+                            style="background-color: var(--danger-600);"
+                        ></span>
+                    </button>
+
+                    {{-- Filter Panel Dropdown - teleported to body to escape stacking context --}}
+                    <template x-teleport="body">
+                        <div
+                            x-show="showFilters"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            class="fixed inset-0"
+                            style="display: none; z-index: 9999;"
+                        >
+                            <!-- Backdrop - clicks here close the modal -->
+                            <div class="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/75" @click="showFilters = false"></div>
+
+                            <!-- Dropdown Panel - positioned relative to Filter button -->
+                            <div class="fixed top-16 right-4 w-[36rem] max-h-[calc(100vh-5rem)]" style="z-index: 10000;" @click.stop>
+                            <div
+                                x-show="showFilters"
+                                x-transition:enter="transform transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                x-transition:leave="transform transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                                class="origin-top-right"
+                            >
+                                <div class="flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[calc(100vh-5rem)]">
+                                    <!-- Header -->
+                                    <div class="px-4 py-4 sm:px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                                <x-filament::icon icon="heroicon-o-funnel" class="h-5 w-5" />
+                                                Filters
+                                                <span x-show="activeFiltersCount > 0"
+                                                      class="ml-1 px-2 py-0.5 bg-primary-600 text-white text-xs rounded-full"
+                                                      x-text="activeFiltersCount">
+                                                </span>
+                                            </h2>
+                                            <div class="flex items-center gap-2">
+                                                <button x-show="hasActiveFilters()"
+                                                        @click="clearAllFilters()"
+                                                        class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition">
+                                                    Clear all
+                                                </button>
+                                                <button @click="showFilters = false"
+                                                        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition">
+                                                    <x-filament::icon icon="heroicon-o-x-mark" class="h-5 w-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Active Filter Chips -->
+                                        <div x-show="activeFilterChips.length > 0" class="flex flex-wrap gap-2">
+                                            <template x-for="chip in activeFilterChips" :key="chip.key">
+                                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-lg text-xs font-medium border border-primary-200 dark:border-primary-700">
+                                                    <span x-text="chip.label"></span>
+                                                    <button @click="removeFilter(chip)"
+                                                            class="hover:bg-primary-100 dark:hover:bg-primary-800 rounded-full p-0.5 transition">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                                        <!-- Scope Toggle -->
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                                Scope
+                                            </label>
+                                            <div class="flex gap-1">
+                                                <button
+                                                    @click="filterScope = 'page'"
+                                                    :class="filterScope === 'page' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                                    class="p-1.5 rounded-md transition"
+                                                    title="Current Page Only"
+                                                >
+                                                    <x-filament::icon icon="heroicon-o-document" class="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    @click="filterScope = 'all'"
+                                                    :class="filterScope === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                                    class="p-1.5 rounded-md transition"
+                                                    title="All Pages"
+                                                >
+                                                    <x-filament::icon icon="heroicon-o-document-duplicate" class="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Quick Filter Presets -->
+                                        <div>
+                                            <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+                                                Quick Filters
+                                            </label>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <button
+                                                    @click="applyPreset('myWork')"
+                                                    :class="isPresetActive('myWork') ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                                    class="p-3 rounded-md transition flex flex-col items-center gap-2"
+                                                >
+                                                    <x-filament::icon icon="heroicon-o-user" class="h-5 w-5" />
+                                                    <span class="text-xs font-medium">My Work</span>
+                                                </button>
+                                                <button
+                                                    @click="applyPreset('recent')"
+                                                    :class="isPresetActive('recent') ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                                    class="p-3 rounded-md transition flex flex-col items-center gap-2"
+                                                >
+                                                    <x-filament::icon icon="heroicon-o-clock" class="h-5 w-5" />
+                                                    <span class="text-xs font-medium">Recent</span>
+                                                </button>
+                                                <button
+                                                    @click="applyPreset('unlinked')"
+                                                    :class="isPresetActive('unlinked') ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                                    class="p-3 rounded-md transition flex flex-col items-center gap-2"
+                                                >
+                                                    <x-filament::icon icon="heroicon-o-link-slash" class="h-5 w-5" />
+                                                    <span class="text-xs font-medium">Unlinked</span>
+                                                </button>
+                                                <button
+                                                    @click="applyPreset('all')"
+                                                    :class="isPresetActive('all') ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                                    class="p-3 rounded-md transition flex flex-col items-center gap-2"
+                                                >
+                                                    <x-filament::icon icon="heroicon-o-squares-2x2" class="h-5 w-5" />
+                                                    <span class="text-xs font-medium">Show All</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Advanced Filters (Collapsible) -->
+                                        <div x-data="{ advancedExpanded: true }" class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                                            <button
+                                                @click="advancedExpanded = !advancedExpanded"
+                                                class="flex items-center justify-between w-full mb-3 text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide hover:text-gray-900 dark:hover:text-white transition"
+                                            >
+                                                <span class="flex items-center gap-1.5">
+                                                    <x-filament::icon icon="heroicon-o-adjustments-horizontal" class="h-3.5 w-3.5" />
+                                                    Advanced
+                                                </span>
+                                                <x-filament::icon
+                                                    x-bind:icon="advancedExpanded ? 'heroicon-m-chevron-up' : 'heroicon-m-chevron-down'"
+                                                    class="h-3.5 w-3.5 transition-transform"
+                                                />
+                                            </button>
+
+                                            <div x-show="advancedExpanded" x-collapse class="space-y-5">
+                                                <!-- Type Filter -->
+                                                <div>
+                                                    <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+                                                        <span>Type</span>
+                                                        <span x-show="availableTypes.length > 0" class="text-gray-500 dark:text-gray-500 font-normal ml-1" x-text="'(' + availableTypes.length + ')'"></span>
+                                                    </label>
+                                                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 max-h-48 overflow-y-auto">
+                                                        <template x-for="type in availableTypes" :key="type">
+                                                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    :value="type"
+                                                                    x-model="filters.types"
+                                                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400"
+                                                                >
+                                                                <span class="text-sm text-gray-700 dark:text-gray-300" x-text="type"></span>
+                                                            </label>
+                                                        </template>
+                                                        <div x-show="availableTypes.length === 0" class="col-span-2 text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                            No types available
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Room Filter -->
+                                                <div>
+                                                    <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+                                                        <span>Room</span>
+                                                        <span x-show="availableRooms.length > 0" class="text-gray-500 dark:text-gray-500 font-normal ml-1" x-text="'(' + availableRooms.length + ')'"></span>
+                                                    </label>
+                                                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 max-h-48 overflow-y-auto">
+                                                        <template x-for="room in availableRooms" :key="room.id">
+                                                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    :value="room.id"
+                                                                    x-model="filters.rooms"
+                                                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400"
+                                                                >
+                                                                <span class="text-sm text-gray-700 dark:text-gray-300" x-text="room.name"></span>
+                                                            </label>
+                                                        </template>
+                                                        <div x-show="availableRooms.length === 0" class="col-span-2 text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                            No rooms available
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Location Filter -->
+                                                <div>
+                                                    <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+                                                        <span>Location</span>
+                                                        <span x-show="availableLocations.length > 0" class="text-gray-500 dark:text-gray-500 font-normal ml-1" x-text="'(' + availableLocations.length + ')'"></span>
+                                                    </label>
+                                                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 max-h-48 overflow-y-auto">
+                                                        <template x-for="location in availableLocations" :key="location.id">
+                                                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    :value="location.id"
+                                                                    x-model="filters.locations"
+                                                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400"
+                                                                >
+                                                                <span class="text-sm text-gray-700 dark:text-gray-300" x-text="location.name"></span>
+                                                            </label>
+                                                        </template>
+                                                        <div x-show="availableLocations.length === 0" class="col-span-2 text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                            No locations available
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- View Type Filter -->
+                                                <div>
+                                                    <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+                                                        <span>View Type</span>
+                                                        <span x-show="availableViewTypes.length > 0" class="text-gray-500 dark:text-gray-500 font-normal ml-1" x-text="'(' + availableViewTypes.length + ')'"></span>
+                                                    </label>
+                                                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 max-h-48 overflow-y-auto">
+                                                        <template x-for="viewType in availableViewTypes" :key="viewType">
+                                                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    :value="viewType"
+                                                                    x-model="filters.viewTypes"
+                                                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400"
+                                                                >
+                                                                <span class="text-sm text-gray-700 dark:text-gray-300" x-text="viewType"></span>
+                                                            </label>
+                                                        </template>
+                                                        <div x-show="availableViewTypes.length === 0" class="col-span-2 text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                            No view types available
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Vertical Zone Filter -->
+                                                <div>
+                                                    <label class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+                                                        <span>Vertical Zone</span>
+                                                        <span x-show="availableVerticalZones.length > 0" class="text-gray-500 dark:text-gray-500 font-normal ml-1" x-text="'(' + availableVerticalZones.length + ')'"></span>
+                                                    </label>
+                                                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 max-h-48 overflow-y-auto">
+                                                        <template x-for="zone in availableVerticalZones" :key="zone">
+                                                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    :value="zone"
+                                                                    x-model="filters.verticalZones"
+                                                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400"
+                                                                >
+                                                                <span class="text-sm text-gray-700 dark:text-gray-300" x-text="zone"></span>
+                                                            </label>
+                                                        </template>
+                                                        <div x-show="availableVerticalZones.length === 0" class="col-span-2 text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                            No zones available
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+                                            <button
+                                                x-show="hasActiveFilters()"
+                                                @click="clearAllFilters()"
+                                                class="flex-1 px-3 py-1.5 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
+                                                title="Clear all filters"
+                                            >
+                                                <x-filament::icon icon="heroicon-o-x-circle" class="h-3.5 w-3.5" />
+                                                <span>Clear</span>
+                                            </button>
+                                            <button
+                                                @click="showFilters = false"
+                                                class="px-3 py-1.5 rounded-md text-xs font-medium text-white transition-colors flex items-center justify-center gap-1.5"
+                                                :class="hasActiveFilters() ? 'flex-1' : 'w-full'"
+                                                style="background-color: var(--primary-600);"
+                                                @mouseover="$el.style.backgroundColor = 'var(--primary-700)'"
+                                                @mouseout="$el.style.backgroundColor = 'var(--primary-600)'"
+                                            >
+                                                <x-filament::icon icon="heroicon-o-check" class="h-3.5 w-3.5" />
+                                                <span>Done</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </template>
+
+                    {{-- Clear All Button - appears below Filter button when active --}}
+                    <div
+                        x-show="activeFiltersCount > 0"
+                        x-transition
+                        class="absolute -bottom-8 left-0 right-0 z-50"
+                    >
+                        <button
+                            @click="clearAllFilters()"
+                            class="w-full px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                            title="Clear all filters"
+                        >
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Status Indicator -->
+                <div
+                    x-show="activeFiltersCount > 0"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
+                    style="background-color: var(--primary-50); color: var(--primary-700);"
+                >
+                    <x-filament::icon icon="heroicon-o-information-circle" class="h-4 w-4" />
+                    <span>
+                        Showing <strong x-text="filteredAnnotations.length"></strong> of <strong x-text="annotations.length"></strong>
+                    </span>
+                </div>
+
                 <button
                     @click="clearContext()"
                     class="px-3 py-2 rounded-lg text-white hover:scale-105 hover:shadow-md transition-all text-sm font-semibold flex items-center gap-2"
@@ -477,12 +832,12 @@
             </div>
 
             <!-- Tree Content - Room View -->
-            <div x-show="!loading && !error && tree && treeViewMode === 'room'">
-                <template x-for="room in tree" :key="room.id">
+            <div x-show="!loading && !error && filteredTree && treeViewMode === 'room'">
+                <template x-for="room in filteredTree" :key="room.id">
                     <div class="tree-node mb-2">
                         <!-- Room Level -->
                         <div
-                            @click="selectNode(room.id, 'room', room.name)"
+                            @click="selectAnnotationContext({ type: 'room', id: room.id, label: room.name, roomId: room.id })"
                             @dblclick.prevent.stop="enterIsolationMode({ type: 'room', id: room.id, label: room.name })"
                             @contextmenu.prevent.stop="showContextMenu($event, room.id, 'room', room.name)"
                             :class="selectedPath.includes(room.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
@@ -510,8 +865,8 @@
                                 <div class="tree-node mb-1">
                                     <!-- Location Level -->
                                     <div
-                                        @click="selectNode(location.id, 'room_location', location.name, room.id)"
-                                        @dblclick.prevent.stop="enterIsolationMode({ type: 'location', id: location.id, label: location.name, roomId: room.id, roomName: room.name })"
+                                        @click="selectAnnotationContext({ type: 'location', id: location.id, label: location.name, roomId: room.id, roomLocationId: location.id })"
+                                        @dblclick.prevent.stop="enterIsolationMode({ type: 'location', roomLocationId: location.id, label: location.name, roomId: room.id, roomName: room.name })"
                                         @contextmenu.prevent.stop="showContextMenu($event, location.id, 'room_location', location.name, room.id)"
                                         :class="selectedPath.includes(location.id) ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
@@ -538,8 +893,8 @@
                                             <div class="tree-node mb-1">
                                                 <!-- Cabinet Run Level -->
                                                 <div
-                                                    @click="selectNode(run.id, 'cabinet_run', run.name, room.id, location.id)"
-                                                    @dblclick.prevent.stop="enterIsolationMode({ type: 'cabinet_run', id: run.id, label: run.name, locationId: location.id, locationName: location.name, roomId: room.id, roomName: room.name })"
+                                                    @click="selectAnnotationContext({ type: 'cabinet_run', id: run.id, label: run.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
+                                                    @dblclick.prevent.stop="enterIsolationMode({ type: 'cabinet_run', cabinetRunId: run.id, label: run.name, roomLocationId: location.id, locationName: location.name, roomId: room.id, roomName: room.name })"
                                                     @contextmenu.prevent.stop="showContextMenu($event, run.id, 'cabinet_run', run.name, room.id, location.id)"
                                                     :class="selectedPath.includes(run.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -602,7 +957,7 @@
                                 <div class="tree-node mb-1">
                                     <!-- Root Annotation (Room or orphan) -->
                                     <div
-                                        @click="selectAnnotation(anno)"
+                                        @click="selectAnnotationContext(anno)"
                                         @dblclick.prevent.stop="anno.type === 'room' && enterIsolationMode({ type: 'room', id: anno.roomId, label: anno.label })"
                                         :class="selectedAnnotation?.id === anno.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -635,7 +990,7 @@
                                             <div class="tree-node mb-1">
                                                 <!-- Location Level -->
                                                 <div
-                                                    @click="selectAnnotation(location)"
+                                                    @click="selectAnnotationContext(location)"
                                                     @dblclick.prevent.stop="location.type === 'location' && enterIsolationMode({ type: 'location', id: location.roomLocationId, label: location.label, roomId: anno.roomId, roomName: anno.label })"
                                                     :class="selectedAnnotation?.id === location.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -668,7 +1023,7 @@
                                                         <div class="tree-node mb-1">
                                                             <!-- Cabinet Run Level -->
                                                             <div
-                                                                @click="selectAnnotation(run)"
+                                                                @click="selectAnnotationContext(run)"
                                                                 @dblclick.prevent.stop="run.type === 'cabinet_run' && enterIsolationMode({ type: 'cabinet_run', id: run.cabinetRunId, label: run.label, locationId: location.roomLocationId, locationName: location.label, roomId: anno.roomId, roomName: anno.label })"
                                                                 :class="selectedAnnotation?.id === run.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                                 class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -701,7 +1056,7 @@
                                                                     <div class="tree-node mb-1">
                                                                         <!-- Cabinet Level (Leaf) -->
                                                                         <div
-                                                                            @click="selectAnnotation(cabinet)"
+                                                                            @click="selectAnnotationContext(cabinet)"
                                                                             :class="selectedAnnotation?.id === cabinet.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                                         >
@@ -755,8 +1110,102 @@
 
         <!-- PDF Viewer (Center) with HTML Overlay -->
         <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative">
+            <!-- Skeleton Loading Overlay -->
+            <div
+                x-show="!pdfReady"
+                x-transition:leave="transition ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="absolute inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center"
+                @touchmove.prevent
+                @wheel.prevent
+            >
+                <div class="w-full h-full flex flex-col">
+                    <!-- Skeleton Header Bar -->
+                    <div class="h-16 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 animate-pulse"></div>
+
+                    <!-- Skeleton Content Area -->
+                    <div class="flex-1 flex items-center justify-center p-8">
+                        <div class="max-w-md w-full space-y-6">
+                            <!-- Loading Icon -->
+                            <div class="flex justify-center">
+                                <svg class="animate-spin h-16 w-16 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Loading Text -->
+                            <div class="text-center space-y-2">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Loading PDF Viewer</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Preparing your document and annotations...</p>
+                            </div>
+
+                            <!-- Skeleton PDF Preview -->
+                            <div class="space-y-3">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-5/6"></div>
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-4/6"></div>
+                                <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-4"></div>
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/6"></div>
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-5/6"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div
+                x-show="pdfReady && error"
+                class="absolute inset-0 bg-white dark:bg-gray-900 z-40 flex items-center justify-center p-8"
+            >
+                <div class="max-w-md w-full space-y-6 text-center">
+                    <!-- Error Icon -->
+                    <div class="flex justify-center">
+                        <svg class="h-16 w-16 text-danger-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="space-y-2">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Failed to Load PDF Viewer</h3>
+                        <p class="text-sm text-danger-600 dark:text-danger-400" x-text="error"></p>
+                    </div>
+
+                    <!-- Help Text -->
+                    <div class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                        <p>This error may occur if:</p>
+                        <ul class="list-disc list-inside text-left space-y-1">
+                            <li>The PDF file is missing or corrupted</li>
+                            <li>Your browser blocked the PDF due to security settings</li>
+                            <li>There's a network connectivity issue</li>
+                        </ul>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3 justify-center">
+                        <button
+                            @click="window.location.reload()"
+                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                        >
+                            Reload Page
+                        </button>
+                        <a
+                            href="{{ url()->previous() }}"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
+                        >
+                            Go Back
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- PDF Container -->
-            <div id="pdf-container-{{ $viewerId }}" class="relative w-full h-full overflow-auto">
+            <div id="pdf-container-{{ $viewerId }}" class="relative w-full h-full overflow-auto"
+                :class="{ 'overflow-hidden': !pdfReady }"
+            >
                 <!-- PDFObject.js embed goes here -->
                 <div x-ref="pdfEmbed" class="w-full h-full min-h-full"></div>
 
@@ -790,7 +1239,14 @@
                     :style="`width: ${overlayWidth}; height: ${overlayHeight}; display: ${isolationMode ? 'block' : 'none'};`"
                 >
                     <!-- SVG for blur with proper masking -->
-                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Only render viewBox when we have pixel dimensions (not '100%') -->
+                    <svg
+                        x-show="overlayWidth.includes('px')"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="none"
+                        style="display: block; width: 100%; height: 100%;"
+                        :viewBox="`0 0 ${overlayWidth.replace('px', '')} ${overlayHeight.replace('px', '')}`"
+                    >
                         <defs>
                             <!-- Blur filter for background -->
                             <filter id="blur">
@@ -805,7 +1261,14 @@
                             <!-- Mask: white = show blur, black = hide blur -->
                             <mask id="blurMask">
                                 <!-- White everywhere = show blur everywhere -->
-                                <rect x="0" y="0" width="100%" height="100%" fill="white"/>
+                                <!-- Dynamically sized to match canvas -->
+                                <rect
+                                    x="0"
+                                    y="0"
+                                    :width="overlayWidth.replace('px', '')"
+                                    :height="overlayHeight.replace('px', '')"
+                                    fill="white"
+                                />
 
                                 <!-- Black rectangle at selected annotation and its visible children = hide blur there -->
                                 <!-- This excludes the focused area from the darkening blur in isolation mode -->
@@ -814,11 +1277,12 @@
                         </defs>
 
                         <!-- Dark overlay with blur, masked to exclude annotation -->
+                        <!-- Dynamically sized to match canvas -->
                         <rect
                             x="0"
                             y="0"
-                            width="100%"
-                            height="100%"
+                            :width="overlayWidth.replace('px', '')"
+                            :height="overlayHeight.replace('px', '')"
                             fill="rgba(0, 0, 0, 0.65)"
                             filter="url(#blur)"
                             mask="url(#blurMask)"
@@ -838,7 +1302,7 @@
                     style="z-index: 10; will-change: width, height;"
                 >
                     <!-- Existing Annotations -->
-                    <template x-for="anno in annotations.filter(a => !hiddenAnnotations.includes(a.id) && isAnnotationVisibleInView(a))" :key="anno.id">
+                    <template x-for="anno in filteredAnnotations.filter(a => !hiddenAnnotations.includes(a.id) && isAnnotationVisibleInView(a))" :key="anno.id">
                         <!-- Wrapper div to hide frame of isolated object itself (you "jumped into it") -->
                         <div x-show="!isolationMode || (isolationLevel === 'room' && anno.id !== isolatedRoomId) || (isolationLevel === 'location' && anno.id !== isolatedLocationId) || (isolationLevel === 'cabinet_run' && anno.id !== isolatedCabinetRunId)">
                             <div
@@ -864,8 +1328,41 @@
                                 class="annotation-marker group"
                             >
                             <!-- Annotation Label -->
-                            <div class="annotation-label absolute -top-10 left-0 bg-white dark:bg-gray-900 px-3 py-2 rounded-lg text-base font-bold whitespace-nowrap shadow-xl border-2" style="color: var(--gray-900); border-color: var(--primary-400);">
+                            <div class="annotation-label absolute -top-7 left-0 bg-white dark:bg-gray-900 px-2 py-1 rounded text-xs font-medium whitespace-nowrap shadow-md border z-30" style="color: var(--gray-900); border-color: var(--primary-400); pointer-events: none;">
                                 <span x-text="anno.label" class="dark:text-white"></span>
+                            </div>
+
+                            <!-- Edit/Delete Buttons (visible on hover) - Top Right Corner -->
+                            <div
+                                x-show="showMenu"
+                                x-transition:enter="transition ease-out duration-150"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                class="absolute -top-2 -right-14 flex gap-1 z-30"
+                                @click.stop
+                            >
+                                <!-- Edit Button - Pencil Icon -->
+                                <button
+                                    @click="editAnnotation(anno)"
+                                    class="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors flex items-center justify-center shadow-md"
+                                    style="color: var(--primary-600);"
+                                    title="Edit annotation"
+                                >
+                                    <x-filament::icon icon="heroicon-o-pencil" class="h-3 w-3" />
+                                </button>
+
+                                <!-- Delete Button - X Icon -->
+                                <button
+                                    @click="deleteAnnotation(anno)"
+                                    class="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-danger-50 dark:hover:bg-danger-900 transition-colors flex items-center justify-center shadow-md"
+                                    style="color: var(--danger-600);"
+                                    title="Delete annotation"
+                                >
+                                    <x-filament::icon icon="heroicon-o-x-mark" class="h-3 w-3" />
+                                </button>
                             </div>
 
                             <!-- Corner Resize Handles -->
@@ -953,40 +1450,6 @@
                                 class="resize-handle"
                             ></div>
 
-                            <!-- Hover Action Menu -->
-                            <div
-                                x-show="showMenu"
-                                x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0 scale-95"
-                                x-transition:enter-end="opacity-100 scale-100"
-                                x-transition:leave="transition ease-in duration-150"
-                                x-transition:leave-start="opacity-100 scale-100"
-                                x-transition:leave-end="opacity-0 scale-95"
-                                class="absolute -top-10 -right-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 flex gap-1 p-1"
-                                @click.stop
-                            >
-                                <!-- Edit Button -->
-                                <button
-                                    @click="editAnnotation(anno)"
-                                    class="px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1 text-sm font-medium"
-                                    style="color: var(--primary-600);"
-                                    title="Edit annotation"
-                                >
-                                    <x-filament::icon icon="heroicon-o-pencil" class="h-4 w-4" />
-                                    <span>Edit</span>
-                                </button>
-
-                                <!-- Delete Button -->
-                                <button
-                                    @click="deleteAnnotation(anno)"
-                                    class="px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1 text-sm font-medium"
-                                    style="color: var(--danger-600);"
-                                    title="Delete annotation"
-                                >
-                                    <x-filament::icon icon="heroicon-o-trash" class="h-4 w-4" />
-                                    <span>Delete</span>
-                                </button>
-                            </div>
                         </div>
                         </div><!-- End wrapper div for hiding frames in isolation mode -->
                     </template>
@@ -1013,23 +1476,21 @@
 
     {{-- Filament Annotation Editor Component --}}
     @livewire('annotation-editor')
-</div>
+
 
 @once
     <!-- Load PDFObject.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js"></script>
 
-    <!-- Load PDF.js for metadata extraction -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        if (typeof pdfjsLib !== 'undefined') {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        }
-    </script>
+    <!-- PDF.js is loaded via annotations.js Vite bundle (pdfjs-dist v5.4.296) -->
+    <!-- The bundled version is already configured with worker and exported to window.pdfjsLib -->
 
     <!-- V3 Alpine Component -->
     <script>
         document.addEventListener('alpine:init', () => {
+            // Store PDF documents outside Alpine's reactive system to avoid Proxy issues with private fields
+            const pdfDocumentCache = new Map();
+
             Alpine.data('annotationSystemV3', (config) => ({
                 // Configuration
                 pdfUrl: config.pdfUrl,
@@ -1045,6 +1506,7 @@
 
                 // PDF State
                 pdfReady: false,
+                // pdfDocument stored in pdfDocumentCache Map outside reactive system (see closure above)
                 pageDimensions: null,
                 canvasScale: 1.0,    // Canvas scale factor (PDF → Screen)
                 zoomLevel: 1.0,  // Current zoom level (1.0 = 100% = fit to window)
@@ -1084,6 +1546,350 @@
                 error: null,
                 treeViewMode: 'room', // 'room' or 'page'
                 treeSidebarState: 'full', // 'full', 'mini', 'hidden'
+
+                // Filter State (NEW - Phase 1)
+                showFilters: false,              // Whether filter panel is open
+                filterScope: 'page',             // 'page' (current page only) or 'all' (all pages)
+                filters: {
+                    types: [],                   // Array of annotation types to show
+                    rooms: [],                   // Array of room IDs to show
+                    locations: [],               // Array of location IDs to show
+                    viewTypes: [],               // Array of view types to show
+                    verticalZones: [],           // Array of vertical zones to show
+                    myAnnotations: false,        // Show only current user's annotations
+                    recent: false,               // Show only recent (7 days) annotations
+                    unlinked: false,             // Show only unlinked annotations
+                    pageRange: {                 // Page range filter
+                        from: null,
+                        to: null
+                    },
+                    dateRange: {                 // Date range filter
+                        from: null,
+                        to: null
+                    }
+                },
+
+                // Computed: Active filter count
+                get activeFiltersCount() {
+                    let count = 0;
+
+                    // Count array filters
+                    count += this.filters.types.length;
+                    count += this.filters.rooms.length;
+                    count += this.filters.locations.length;
+                    count += this.filters.viewTypes.length;
+                    count += this.filters.verticalZones.length;
+
+                    // Count boolean filters
+                    if (this.filters.myAnnotations) count++;
+                    if (this.filters.recent) count++;
+                    if (this.filters.unlinked) count++;
+
+                    // Count range filters (if any value is set)
+                    if (this.filters.pageRange.from || this.filters.pageRange.to) count++;
+                    if (this.filters.dateRange.from || this.filters.dateRange.to) count++;
+
+                    // Count scope filter (only if not default 'page')
+                    if (this.filterScope !== 'page') count++;
+
+                    return count;
+                },
+
+                // Computed: Filtered annotations based on active filters
+                get filteredAnnotations() {
+                    let filtered = [...this.annotations];
+
+                    // If no filters are active, return all annotations
+                    if (this.activeFiltersCount === 0) {
+                        return filtered;
+                    }
+
+                    // Filter by scope (current page vs all pages)
+                    if (this.filterScope === 'page') {
+                        filtered = filtered.filter(anno => anno.pageNumber === this.currentPage);
+                    }
+
+                    // Filter by annotation types
+                    if (this.filters.types.length > 0) {
+                        filtered = filtered.filter(anno => this.filters.types.includes(anno.type));
+                    }
+
+                    // Filter by rooms
+                    if (this.filters.rooms.length > 0) {
+                        filtered = filtered.filter(anno =>
+                            anno.roomId && this.filters.rooms.includes(anno.roomId)
+                        );
+                    }
+
+                    // Filter by locations
+                    if (this.filters.locations.length > 0) {
+                        filtered = filtered.filter(anno =>
+                            anno.locationId && this.filters.locations.includes(anno.locationId)
+                        );
+                    }
+
+                    // Filter by view types
+                    if (this.filters.viewTypes.length > 0) {
+                        filtered = filtered.filter(anno =>
+                            anno.viewType && this.filters.viewTypes.includes(anno.viewType)
+                        );
+                    }
+
+                    // Filter by vertical zones
+                    if (this.filters.verticalZones.length > 0) {
+                        filtered = filtered.filter(anno =>
+                            anno.verticalZone && this.filters.verticalZones.includes(anno.verticalZone)
+                        );
+                    }
+
+                    // Filter: My Annotations (current user)
+                    if (this.filters.myAnnotations) {
+                        const currentUserId = {{ auth()->id() ?? 'null' }};
+                        filtered = filtered.filter(anno => anno.createdBy === currentUserId);
+                    }
+
+                    // Filter: Recent (last 7 days)
+                    if (this.filters.recent) {
+                        const sevenDaysAgo = new Date();
+                        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                        filtered = filtered.filter(anno => {
+                            const annoDate = new Date(anno.createdAt || anno.created_at);
+                            return annoDate >= sevenDaysAgo;
+                        });
+                    }
+
+                    // Filter: Unlinked annotations (no room, location, or cabinet run)
+                    if (this.filters.unlinked) {
+                        filtered = filtered.filter(anno =>
+                            !anno.roomId && !anno.locationId && !anno.cabinetRunId
+                        );
+                    }
+
+                    // Filter by page range
+                    if (this.filters.pageRange.from || this.filters.pageRange.to) {
+                        const from = this.filters.pageRange.from ? parseInt(this.filters.pageRange.from) : 1;
+                        const to = this.filters.pageRange.to ? parseInt(this.filters.pageRange.to) : this.totalPages;
+                        filtered = filtered.filter(anno =>
+                            anno.pageNumber >= from && anno.pageNumber <= to
+                        );
+                    }
+
+                    // Filter by date range
+                    if (this.filters.dateRange.from || this.filters.dateRange.to) {
+                        filtered = filtered.filter(anno => {
+                            const annoDate = new Date(anno.createdAt || anno.created_at);
+                            const from = this.filters.dateRange.from ? new Date(this.filters.dateRange.from) : null;
+                            const to = this.filters.dateRange.to ? new Date(this.filters.dateRange.to) : null;
+
+                            if (from && to) {
+                                return annoDate >= from && annoDate <= to;
+                            } else if (from) {
+                                return annoDate >= from;
+                            } else if (to) {
+                                return annoDate <= to;
+                            }
+                            return true;
+                        });
+                    }
+
+                    return filtered;
+                },
+
+                // Computed: Filtered tree (room-based hierarchy) based on filtered annotations
+                get filteredTree() {
+                    if (this.activeFiltersCount === 0) {
+                        return this.tree;
+                    }
+
+                    const filteredIds = new Set(this.filteredAnnotations.map(a => a.id));
+
+                    // Recursively filter tree nodes
+                    const filterNode = (node) => {
+                        // Clone the node
+                        const filtered = { ...node };
+
+                        // If this node is an annotation, check if it's in filtered set
+                        if (node.id && !filteredIds.has(node.id)) {
+                            return null; // This annotation is filtered out
+                        }
+
+                        // Filter children recursively
+                        if (node.children && node.children.length > 0) {
+                            filtered.children = node.children
+                                .map(child => filterNode(child))
+                                .filter(child => child !== null);
+
+                            // If this is a container node (room/location/run) with no children after filtering, hide it
+                            if (filtered.children.length === 0 && !node.isAnnotation) {
+                                return null;
+                            }
+                        }
+
+                        return filtered;
+                    };
+
+                    return this.tree
+                        .map(room => filterNode(room))
+                        .filter(room => room !== null);
+                },
+
+                // Computed: Available filter options (dynamic based on current page if scope='page')
+                get availableTypes() {
+                    const sourceAnnotations = this.filterScope === 'page'
+                        ? this.annotations.filter(a => a.pageNumber === this.currentPage)
+                        : this.annotations;
+
+                    const types = [...new Set(sourceAnnotations.map(a => a.type).filter(Boolean))];
+                    return types.sort();
+                },
+
+                get availableRooms() {
+                    const sourceAnnotations = this.filterScope === 'page'
+                        ? this.annotations.filter(a => a.pageNumber === this.currentPage)
+                        : this.annotations;
+
+                    const roomMap = new Map();
+                    sourceAnnotations.forEach(anno => {
+                        if (anno.roomId && anno.roomName) {
+                            roomMap.set(anno.roomId, { id: anno.roomId, name: anno.roomName });
+                        }
+                    });
+                    return Array.from(roomMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+                },
+
+                get availableLocations() {
+                    const sourceAnnotations = this.filterScope === 'page'
+                        ? this.annotations.filter(a => a.pageNumber === this.currentPage)
+                        : this.annotations;
+
+                    const locationMap = new Map();
+                    sourceAnnotations.forEach(anno => {
+                        if (anno.locationId && anno.locationName) {
+                            locationMap.set(anno.locationId, { id: anno.locationId, name: anno.locationName });
+                        }
+                    });
+                    return Array.from(locationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+                },
+
+                get availableViewTypes() {
+                    const sourceAnnotations = this.filterScope === 'page'
+                        ? this.annotations.filter(a => a.pageNumber === this.currentPage)
+                        : this.annotations;
+
+                    const viewTypes = [...new Set(sourceAnnotations.map(a => a.viewType).filter(Boolean))];
+                    return viewTypes.sort();
+                },
+
+                get availableVerticalZones() {
+                    const sourceAnnotations = this.filterScope === 'page'
+                        ? this.annotations.filter(a => a.pageNumber === this.currentPage)
+                        : this.annotations;
+
+                    const zones = [...new Set(sourceAnnotations.map(a => a.verticalZone).filter(Boolean))];
+                    return zones.sort();
+                },
+
+                // Computed: Filtered page numbers based on active view type filters
+                get filteredPageNumbers() {
+                    // If no view type filters are active, return all page numbers
+                    if (this.filters.viewTypes.length === 0) {
+                        return Object.keys(this.pageMap).map(p => parseInt(p)).sort((a, b) => a - b);
+                    }
+
+                    // Get pages that have annotations matching the active view type filters
+                    const pagesWithMatchingAnnotations = new Set();
+
+                    this.annotations.forEach(anno => {
+                        if (anno.pageNumber && anno.viewType && this.filters.viewTypes.includes(anno.viewType)) {
+                            pagesWithMatchingAnnotations.add(anno.pageNumber);
+                        }
+                    });
+
+                    return Array.from(pagesWithMatchingAnnotations).sort((a, b) => a - b);
+                },
+
+                // Computed: Active filter chips for display
+                get activeFilterChips() {
+                    const chips = [];
+
+                    // Quick filters
+                    if (this.filters.myAnnotations) {
+                        chips.push({ key: 'myAnnotations', label: 'My Annotations', type: 'boolean' });
+                    }
+                    if (this.filters.recent) {
+                        chips.push({ key: 'recent', label: 'Recent (7 days)', type: 'boolean' });
+                    }
+                    if (this.filters.unlinked) {
+                        chips.push({ key: 'unlinked', label: 'Unlinked', type: 'boolean' });
+                    }
+
+                    // Type filters
+                    this.filters.types.forEach(type => {
+                        const labels = { room: 'Room', location: 'Location', cabinet_run: 'Cabinet Run', cabinet: 'Cabinet' };
+                        chips.push({
+                            key: `type:${type}`,
+                            label: `Type: ${labels[type] || type}`,
+                            type: 'array',
+                            arrayKey: 'types',
+                            value: type
+                        });
+                    });
+
+                    // Room filters
+                    this.filters.rooms.forEach(roomId => {
+                        const room = this.availableRooms.find(r => r.id === roomId);
+                        chips.push({
+                            key: `room:${roomId}`,
+                            label: `Room: ${room?.name || roomId}`,
+                            type: 'array',
+                            arrayKey: 'rooms',
+                            value: roomId
+                        });
+                    });
+
+                    // Location filters
+                    this.filters.locations.forEach(locId => {
+                        const location = this.availableLocations.find(l => l.id === locId);
+                        chips.push({
+                            key: `location:${locId}`,
+                            label: `Location: ${location?.name || locId}`,
+                            type: 'array',
+                            arrayKey: 'locations',
+                            value: locId
+                        });
+                    });
+
+                    // View type filters
+                    this.filters.viewTypes.forEach(viewType => {
+                        const labels = { plan: 'Plan', elevation: 'Elevation', section: 'Section', detail: 'Detail' };
+                        chips.push({
+                            key: `viewType:${viewType}`,
+                            label: `View: ${labels[viewType] || viewType}`,
+                            type: 'array',
+                            arrayKey: 'viewTypes',
+                            value: viewType
+                        });
+                    });
+
+                    // Vertical zone filters
+                    this.filters.verticalZones.forEach(zone => {
+                        const labels = { upper: 'Upper', base: 'Base', tall: 'Tall' };
+                        chips.push({
+                            key: `zone:${zone}`,
+                            label: `Zone: ${labels[zone] || zone}`,
+                            type: 'array',
+                            arrayKey: 'verticalZones',
+                            value: zone
+                        });
+                    });
+
+                    // Scope filter
+                    if (this.filterScope === 'all') {
+                        chips.push({ key: 'scope', label: 'All Pages', type: 'scope' });
+                    }
+
+                    return chips;
+                },
 
                 // Context Menu State
                 contextMenu: {
@@ -1145,15 +1951,40 @@
                 scrollX: 0,
                 scrollY: 0,
 
+                // Initialization guard
+                _initialized: false,
+
                 // Initialize
                 async init() {
+                    // Prevent duplicate initialization
+                    if (this._initialized) {
+                        console.log('⚠️ V3 Annotation System already initialized - skipping duplicate init');
+                        return;
+                    }
+                    this._initialized = true;
+
                     console.log('🚀 V3 Annotation System initializing...');
 
+                    // Lock body scroll during loading
+                    document.body.style.overflow = 'hidden';
+
+                    // Watch pdfReady to unlock scroll when ready
+                    this.$watch('pdfReady', (ready) => {
+                        if (ready) {
+                            // Unlock scroll when PDF is ready
+                            document.body.style.overflow = '';
+                            console.log('✓ PDF loaded - scroll enabled');
+                        }
+                    });
+
                     try {
-                        // Step 1: Extract PDF page dimensions using PDF.js (metadata only)
+                        // Step 1: Preload entire PDF document (cache for instant page switches)
+                        await this.preloadPdf();
+
+                        // Step 2: Extract PDF page dimensions using PDF.js (metadata only)
                         await this.extractPdfDimensions();
 
-                        // Step 2: Display PDF using PDFObject.js
+                        // Step 3: Display PDF using PDFObject.js
                         await this.displayPdf();
 
                         // Step 3: Load project tree
@@ -1262,39 +2093,66 @@
                             }
                         });
 
-                        // Step 8: Setup ResizeObserver to keep overlay locked to canvas (browser zoom safe)
-                        const syncOverlayToCanvas = () => {
+                        // Step 8: Sync overlay to canvas dimensions (manual, event-driven approach)
+                        // Store reference to sync function for use in other methods
+                        this.syncOverlayToCanvas = () => {
                             const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
                             const overlay = this.$refs.annotationOverlay;
                             if (canvas && overlay) {
-                                const canvasRect = canvas.getBoundingClientRect();
-                                const width = `${canvasRect.width}px`;
-                                const height = `${canvasRect.height}px`;
+                                const width = `${canvas.offsetWidth}px`;
+                                const height = `${canvas.offsetHeight}px`;
 
                                 overlay.style.width = width;
                                 overlay.style.height = height;
 
-                                // Sync blur layer dimensions (reactive)
-                                this.overlayWidth = width;
-                                this.overlayHeight = height;
+                                // Only update reactive properties if in isolation mode (needed for blur layer)
+                                if (this.isolationMode) {
+                                    this.overlayWidth = width;
+                                    this.overlayHeight = height;
+                                }
 
-                                // Update annotation positions when size changes
-                                this.updateAnnotationPositions();
-
-                                console.log(`🔄 Overlay synced to canvas: ${canvasRect.width} × ${canvasRect.height}`);
+                                console.log(`🔄 Overlay synced to canvas: ${canvas.offsetWidth} × ${canvas.offsetHeight}`);
                             }
                         };
 
-                        // Observe canvas size changes (handles browser zoom)
-                        const resizeObserver = new ResizeObserver(() => {
-                            syncOverlayToCanvas();
-                        });
+                        // Do initial sync when canvas is ready
+                        const waitForCanvas = () => {
+                            const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
+                            if (canvas) {
+                                this.syncOverlayToCanvas();
+                            } else {
+                                setTimeout(waitForCanvas, 100);
+                            }
+                        };
+                        waitForCanvas();
 
-                        // Start observing the PDF embed container
-                        const embedContainer = this.$refs.pdfEmbed;
-                        if (embedContainer) {
-                            resizeObserver.observe(embedContainer);
-                        }
+                        // Handle window resize events (optimized with debouncing)
+                        let resizeTimeout;
+                        const handleResize = () => {
+                            // Clear any pending re-render
+                            if (resizeTimeout) {
+                                clearTimeout(resizeTimeout);
+                            }
+
+                            // Immediately sync overlay (fast, no re-render)
+                            this.syncOverlayToCanvas();
+                            this.updateAnnotationPositions();
+                            if (this.isolationMode) {
+                                this.updateIsolationMask();
+                            }
+
+                            // Debounce the expensive PDF re-render
+                            resizeTimeout = setTimeout(async () => {
+                                console.log('🪟 Resize complete - re-rendering PDF at new size');
+                                await this.displayPdf();
+                                this.syncOverlayToCanvas();
+                                this.updateAnnotationPositions();
+                                if (this.isolationMode) {
+                                    this.updateIsolationMask();
+                                }
+                            }, 300); // Wait 300ms after resize stops
+                        };
+                        window.addEventListener('resize', handleResize);
 
                         // Step 9: Setup scroll listener to update isolation mask when panning
                         const pdfContainer = document.getElementById('pdf-container-{{ $viewerId }}');
@@ -1320,7 +2178,43 @@
                         console.log('✅ V3 system ready!');
                     } catch (error) {
                         console.error('❌ Initialization error:', error);
-                        this.error = error.message;
+
+                        // Set error message for display
+                        this.error = error.message || 'Failed to load PDF viewer';
+
+                        // Still mark as ready to hide loading screen and show error instead
+                        this.pdfReady = true;
+
+                        // Unlock body scroll even on error
+                        document.body.style.overflow = '';
+
+                        console.log('❌ Initialization failed - error message displayed to user');
+                    }
+                },
+
+                // Preload entire PDF document (cache for instant page switches)
+                async preloadPdf() {
+                    if (pdfDocumentCache.has(this.pdfUrl)) {
+                        console.log('✓ PDF already preloaded, skipping...');
+                        return;
+                    }
+
+                    console.log('📥 Preloading entire PDF document...');
+                    console.log(`📄 URL: ${this.pdfUrl}`);
+
+                    try {
+                        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+                        const pdfDoc = await loadingTask.promise;
+
+                        // Store in non-reactive cache to avoid Alpine Proxy wrapper
+                        pdfDocumentCache.set(this.pdfUrl, pdfDoc);
+
+                        const numPages = pdfDoc.numPages;
+                        console.log(`✓ PDF preloaded: ${numPages} pages cached in memory`);
+                        console.log('⚡ Page switches will now be instant!');
+                    } catch (error) {
+                        console.error('❌ Failed to preload PDF:', error);
+                        throw error;
                     }
                 },
 
@@ -1328,9 +2222,15 @@
                 async extractPdfDimensions() {
                     console.log('📏 Extracting PDF dimensions...');
 
-                    const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
-                    const pdf = await loadingTask.promise;
-                    const page = await pdf.getPage(this.currentPage);  // PHASE 2: Use currentPage
+                    // Get cached PDF document from non-reactive storage
+                    const pdfDoc = pdfDocumentCache.get(this.pdfUrl);
+                    if (!pdfDoc) {
+                        const errorMsg = 'PDF document not preloaded - cannot extract dimensions';
+                        console.error(`❌ ${errorMsg}`);
+                        throw new Error(errorMsg);
+                    }
+
+                    const page = await pdfDoc.getPage(this.currentPage);  // PHASE 2: Use currentPage
                     const viewport = page.getViewport({ scale: 1.0 });
 
                     this.pageDimensions = {
@@ -1340,8 +2240,7 @@
 
                     console.log(`✓ Page ${this.currentPage} dimensions: ${Math.round(this.pageDimensions.width)} × ${Math.round(this.pageDimensions.height)} pts`);
 
-                    // Clean up to avoid memory leaks
-                    await pdf.destroy();
+                    // Do NOT destroy - we're using the cached document
                 },
 
                 // Display PDF using canvas rendering (PDF.js) - True page isolation
@@ -1354,12 +2253,16 @@
                     const embedContainer = this.$refs.pdfEmbed;
 
                     try {
-                        // Load PDF document
-                        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
-                        const pdf = await loadingTask.promise;
+                        // Get cached PDF document from non-reactive storage (instant, no loading delay!)
+                        const pdfDoc = pdfDocumentCache.get(this.pdfUrl);
+                        if (!pdfDoc) {
+                            const errorMsg = 'PDF document not preloaded - cannot display PDF';
+                            console.error(`❌ ${errorMsg}`);
+                            throw new Error(errorMsg);
+                        }
 
-                        // Get the specific page
-                        const page = await pdf.getPage(this.currentPage);
+                        // Get the specific page from cached document (instant!)
+                        const page = await pdfDoc.getPage(this.currentPage);
 
                         // Get unscaled viewport for dimension reference
                         const unscaledViewport = page.getViewport({ scale: 1.0 });
@@ -1403,9 +2306,9 @@
                         await this.$nextTick();
                         const overlay = this.$refs.annotationOverlay;
                         if (overlay) {
-                            const canvasRect = canvas.getBoundingClientRect();
-                            const width = `${canvasRect.width}px`;
-                            const height = `${canvasRect.height}px`;
+                            // Use offsetWidth/offsetHeight to avoid CSS zoom affecting measurements
+                            const width = `${canvas.offsetWidth}px`;
+                            const height = `${canvas.offsetHeight}px`;
 
                             overlay.style.width = width;
                             overlay.style.height = height;
@@ -1414,7 +2317,7 @@
                             this.overlayWidth = width;
                             this.overlayHeight = height;
 
-                            console.log(`🔒 Overlay locked to canvas: ${canvasRect.width} × ${canvasRect.height}`);
+                            console.log(`🔒 Overlay locked to canvas: ${canvas.offsetWidth} × ${canvas.offsetHeight}`);
                         }
 
                         // Store canvas scale factor for coordinate transformations
@@ -1426,10 +2329,9 @@
 
                         this.pdfReady = true;
 
-                        // Clean up PDF document
-                        await pdf.destroy();
+                        // Do NOT destroy - PDF document stays cached for instant page switches!
 
-                        console.log(`✓ PDF page ${this.currentPage} displayed successfully`);
+                        console.log(`✓ PDF page ${this.currentPage} displayed successfully (from cache)`);
                     } catch (error) {
                         console.error('❌ Failed to render PDF:', error);
                         throw error;
@@ -2137,6 +3039,7 @@
                                     label: anno.text || 'Annotation',
                                     color: anno.color || this.getColorForType(anno.annotation_type),
                                     notes: anno.notes,
+                                    pageNumber: this.currentPage,  // Add page number for filtering
                                     pdfPageId: this.pdfPageId,  // Add pdfPageId for context
                                     projectId: this.projectId   // Add projectId for form loading
                                 };
@@ -2202,6 +3105,23 @@
                                     console.log(`  🗄️ ${anno.label}: roomId=${anno.roomId}, locationId=${anno.locationId}, cabinetRunId=${anno.cabinetRunId}`);
                                 }
                             });
+
+                            // CRITICAL: If in isolation mode, re-apply visibility filter to newly loaded annotations
+                            if (this.isolationMode) {
+                                console.log('🔍 [LOAD] Re-applying isolation filter to newly loaded annotations');
+                                this.hiddenAnnotations = [];
+                                this.annotations.forEach(a => {
+                                    if (!this.isAnnotationVisibleInIsolation(a)) {
+                                        console.log(`👁️ [LOAD] Hiding annotation ${a.id} (${a.label} - type: ${a.type})`);
+                                        this.hiddenAnnotations.push(a.id);
+                                    }
+                                });
+                                console.log(`👁️ [LOAD] Hidden annotations after filter: [${this.hiddenAnnotations.join(', ')}]`);
+
+                                // Update isolation mask with new annotations
+                                await this.$nextTick();
+                                this.updateIsolationMask();
+                            }
                         }
                     } catch (error) {
                         console.error('Failed to load annotations:', error);
@@ -2692,7 +3612,24 @@
                     console.log('🎯 Selecting annotation context:', anno.type, anno.label);
 
                     // Hierarchical context enabling based on annotation type
-                    if (anno.type === 'location') {
+                    if (anno.type === 'room') {
+                        // Clicking a room annotation:
+                        // - Sets room context
+                        // - Clears location context
+                        // - Enables: Draw Location
+                        this.activeRoomId = anno.roomId || anno.id;
+                        this.activeRoomName = anno.label;
+                        this.activeLocationId = null;
+                        this.activeLocationName = '';
+
+                        // Update search fields
+                        this.roomSearchQuery = anno.label;
+                        this.locationSearchQuery = '';
+
+                        console.log(`✓ Room context set: Room "${anno.label}"`);
+                        console.log('✓ Enabled tools: Draw Location');
+                    }
+                    else if (anno.type === 'location') {
                         // Clicking a location annotation:
                         // - Sets room context (from the location's parent)
                         // - Sets location context
@@ -2839,17 +3776,24 @@
 
                 // Helper: Check if annotation should be visible in current isolation mode
                 // Helper: Check if annotation is descendant of parent ID
-                isDescendantOf(anno, parentId) {
-                    console.log(`🔍 [isDescendantOf] Checking if ${anno?.id} (${anno?.label}) is descendant of ${parentId}`);
-                    console.log(`   anno.parentId: ${anno?.parentId}, anno.type: ${anno?.type}`);
+                isDescendantOf(anno, parentEntityId) {
+                    console.log(`🔍 [isDescendantOf] Checking if ${anno?.id} (${anno?.label}) is descendant of entity ${parentEntityId}`);
+                    console.log(`   anno.roomId: ${anno?.roomId}, anno.parentId: ${anno?.parentId}, anno.type: ${anno?.type}`);
 
-                    if (!anno || !parentId) {
-                        console.log(`   ❌ Missing anno or parentId`);
+                    if (!anno || !parentEntityId) {
+                        console.log(`   ❌ Missing anno or parentEntityId`);
                         return false;
                     }
 
-                    // Direct child
-                    if (anno.parentId === parentId) {
+                    // CRITICAL: Check if annotation belongs to the entity by roomId
+                    // This handles the case where location/cabinet annotations are children of a room ENTITY
+                    if (anno.roomId === parentEntityId) {
+                        console.log(`   ✅ Belongs to room entity! (roomId ${anno.roomId} === ${parentEntityId})`);
+                        return true;
+                    }
+
+                    // Direct child by annotation parentId
+                    if (anno.parentId === parentEntityId) {
                         console.log(`   ✅ Direct child! parentId matches`);
                         return true;
                     }
@@ -2858,10 +3802,10 @@
                     if (anno.parentId) {
                         const parent = this.annotations.find(a => a.id === anno.parentId);
                         console.log(`   ⬆️ Has parent ID ${anno.parentId}, checking parent recursively...`);
-                        return this.isDescendantOf(parent, parentId);
+                        return this.isDescendantOf(parent, parentEntityId);
                     }
 
-                    console.log(`   ❌ No parent ID, not a descendant`);
+                    console.log(`   ❌ Not a descendant of entity ${parentEntityId}`);
                     return false;
                 },
 
@@ -2890,26 +3834,57 @@
                             return false;
                         }
 
-                        // Show all children/descendants of the isolated room entity
-                        const isDescendant = this.isDescendantOf(anno, this.isolatedRoomId);
-                        console.log(`   ${isDescendant ? '✅' : '❌'} Is descendant: ${isDescendant}`);
-                        return isDescendant;
+                        // Show ONLY direct children (location type), NOT deeper descendants
+                        // This shows one level down from the isolated room
+                        if (anno.type === 'location' && anno.roomId === this.isolatedRoomId) {
+                            console.log(`   ✅ Showing location - direct child of isolated room (roomId: ${anno.roomId})`);
+                            return true;
+                        }
+
+                        // Hide cabinet_run and cabinet type annotations (grandchildren/deeper) when isolating on room
+                        if (anno.type === 'cabinet_run' || anno.type === 'cabinet') {
+                            console.log(`   ❌ Hiding ${anno.type} - too deep in hierarchy for room isolation`);
+                            return false;
+                        }
+
+                        // Hide other rooms
+                        console.log(`   ❌ Hiding annotation - not part of isolated room`);
+                        return false;
 
                     } else if (this.isolationLevel === 'location') {
                         // HIDE the isolated location annotation (we're "inside" the location entity)
                         // Match by entity ID: location annotation's roomLocationId matches the isolated location entity
                         if (anno.type === 'location' && anno.roomLocationId === this.isolatedLocationId) {
-                            console.log(`   ❌ Hiding location annotation (entity match: ${anno.roomLocationId} === ${this.isolatedLocationId})`);
+                            console.log(`   ❌ Hiding isolated location annotation (entity match: ${anno.roomLocationId} === ${this.isolatedLocationId})`);
                             return false;
                         }
 
-                        // Show all children/descendants of the isolated location entity
-                        if (this.isDescendantOf(anno, this.isolatedLocationId)) return true;
+                        // Show ONLY direct children (cabinet_run type), NOT grandchildren (cabinet type)
+                        // This shows one level down from the isolated location
+                        if (anno.type === 'cabinet_run' && (anno.roomLocationId === this.isolatedLocationId || anno.locationId === this.isolatedLocationId)) {
+                            console.log(`   ✅ Showing cabinet_run - direct child of isolated location (roomLocationId: ${anno.roomLocationId}, locationId: ${anno.locationId})`);
+                            return true;
+                        }
 
-                        // Do NOT show parent layers (room) - isolation mode shows only children
+                        // Hide cabinet type annotations (grandchildren) when isolating on location
+                        if (anno.type === 'cabinet') {
+                            console.log(`   ❌ Hiding cabinet - too deep in hierarchy for location isolation`);
+                            return false;
+                        }
+
+                        // Do NOT show parent layers (room) or other locations - isolation mode shows only children
+                        console.log(`   ❌ Hiding annotation - not part of isolated location`);
                         return false;
 
                     } else if (this.isolationLevel === 'cabinet_run') {
+                        // SPECIAL CASE: If this annotation IS the isolated cabinet run (by ID match),
+                        // and it doesn't have a proper cabinetRunId field (orphaned), SHOW it anyway
+                        // This handles cabinet runs where cabinetRunId is null and we used anno.id as the entity ID
+                        if (anno.type === 'cabinet_run' && anno.id === this.isolatedCabinetRunId && !anno.cabinetRunId) {
+                            console.log(`   ✅ Showing isolated cabinet run annotation (ID match with no entity ID: ${anno.id})`);
+                            return true;
+                        }
+
                         // HIDE the isolated cabinet run annotation (we're "inside" the cabinet run entity)
                         // Match by entity ID: cabinet_run annotation's cabinetRunId matches the isolated cabinet run entity
                         if (anno.type === 'cabinet_run' && anno.cabinetRunId === this.isolatedCabinetRunId) {
@@ -2960,13 +3935,33 @@
 
                         console.log(`✓ Cabinet Run isolation: 🏠 ${this.isolatedRoomName} → 📍 ${this.isolatedLocationName} → 🗄️ ${anno.label}`);
                     } else if (anno.type === 'location') {
+                        // CRITICAL: Location annotations MUST have room_location_id to work in isolation mode
+                        if (!anno.roomLocationId) {
+                            console.error('❌ Cannot enter location isolation mode: room_location_id is missing', {
+                                annotationId: anno.id,
+                                label: anno.label,
+                                roomLocationId: anno.roomLocationId
+                            });
+
+                            // Show user-friendly notification
+                            if (window.Filament) {
+                                new FilamentNotification()
+                                    .title('Isolation Mode Unavailable')
+                                    .body(`Cannot isolate "${anno.label}" - annotation data is incomplete. Please re-create this location annotation.`)
+                                    .danger()
+                                    .send();
+                            }
+
+                            return; // Exit without entering isolation mode
+                        }
+
                         // Isolate at location level
                         this.isolationMode = true;
                         this.isolationLevel = 'location';
                         this.isolatedRoomId = anno.roomId;
                         this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
                         // Use location entity ID - this is what links the annotation to its entity
-                        this.isolatedLocationId = anno.roomLocationId || anno.id;
+                        this.isolatedLocationId = anno.roomLocationId;  // NO FALLBACK - must be valid
                         this.isolatedLocationName = anno.label;
                         this.isolatedCabinetRunId = null;
                         this.isolatedCabinetRunName = '';
@@ -2974,14 +3969,14 @@
                         // Set active context
                         this.activeRoomId = anno.roomId;
                         this.activeRoomName = this.isolatedRoomName;
-                        this.activeLocationId = anno.roomLocationId || anno.id;
+                        this.activeLocationId = anno.roomLocationId;  // NO FALLBACK - must be valid
                         this.activeLocationName = anno.label;
 
                         // Update search fields
                         this.roomSearchQuery = this.isolatedRoomName;
                         this.locationSearchQuery = anno.label;
 
-                        console.log(`✓ Location isolation: 🏠 ${this.isolatedRoomName} → 📍 ${anno.label}`);
+                        console.log(`✓ Location isolation: 🏠 ${this.isolatedRoomName} → 📍 ${anno.label} (entity ID: ${anno.roomLocationId})`);
                     } else {
                         // For any other type, treat as room isolation
                         // This handles clicking on room annotations directly
@@ -3043,6 +4038,13 @@
                     // Zoom to fit annotation box on screen (double-click behavior)
                     await this.zoomToFitAnnotation(anno);
 
+                    // Wait for overlay dimensions to sync after zoom
+                    await this.$nextTick();
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    // Sync overlay dimensions for blur layer
+                    this.syncOverlayToCanvas();
+
                     // Update the isolation mask to show visible annotations clearly
                     this.updateIsolationMask();
                 },
@@ -3090,6 +4092,9 @@
                     // Clear existing rects
                     maskRects.innerHTML = '';
 
+                    // Log current overlay dimensions for debugging
+                    console.log(`📐 [MASK UPDATE] Overlay dimensions: ${this.overlayWidth} × ${this.overlayHeight}`);
+
                     // Get all visible annotations (not in hiddenAnnotations array)
                     const visibleAnnotations = this.annotations.filter(a => !this.hiddenAnnotations.includes(a.id));
 
@@ -3113,11 +4118,17 @@
 
                     // Create cutout for the isolated entity boundary (even though annotation is hidden)
                     if (isolatedEntityAnnotation && isolatedEntityAnnotation.screenX !== undefined) {
+                        // SVG viewBox now matches screen coordinate space, so use screenX/Y directly
+                        const x = (isolatedEntityAnnotation.screenX || 0) - 15;
+                        const y = (isolatedEntityAnnotation.screenY || 0) - 15;
+                        const width = (isolatedEntityAnnotation.screenWidth || 0) + 30;
+                        const height = (isolatedEntityAnnotation.screenHeight || 0) + 30;
+
                         const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                        rect.setAttribute('x', (isolatedEntityAnnotation.screenX || 0) - 15);
-                        rect.setAttribute('y', (isolatedEntityAnnotation.screenY || 0) - 15);
-                        rect.setAttribute('width', (isolatedEntityAnnotation.screenWidth || 0) + 30);
-                        rect.setAttribute('height', (isolatedEntityAnnotation.screenHeight || 0) + 30);
+                        rect.setAttribute('x', x);
+                        rect.setAttribute('y', y);
+                        rect.setAttribute('width', width);
+                        rect.setAttribute('height', height);
                         rect.setAttribute('fill', 'black');
                         rect.setAttribute('rx', '8');
                         rect.setAttribute('filter', 'url(#feather)');
@@ -3128,11 +4139,17 @@
                     // Create cutouts for all visible child annotations
                     visibleAnnotations.forEach(anno => {
                         if (anno.screenX !== undefined && anno.screenWidth > 0 && anno.screenHeight > 0) {
+                            // SVG viewBox now matches screen coordinate space, so use screenX/Y directly
+                            const x = (anno.screenX || 0) - 15;
+                            const y = (anno.screenY || 0) - 15;
+                            const width = (anno.screenWidth || 0) + 30;
+                            const height = (anno.screenHeight || 0) + 30;
+
                             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                            rect.setAttribute('x', (anno.screenX || 0) - 15);
-                            rect.setAttribute('y', (anno.screenY || 0) - 15);
-                            rect.setAttribute('width', (anno.screenWidth || 0) + 30);
-                            rect.setAttribute('height', (anno.screenHeight || 0) + 30);
+                            rect.setAttribute('x', x);
+                            rect.setAttribute('y', y);
+                            rect.setAttribute('width', width);
+                            rect.setAttribute('height', height);
                             rect.setAttribute('fill', 'black');
                             rect.setAttribute('rx', '8');
                             rect.setAttribute('filter', 'url(#feather)');
@@ -3225,6 +4242,9 @@
                     await this.$nextTick();
                     await new Promise(resolve => setTimeout(resolve, 100));
 
+                    // Sync overlay dimensions to canvas after zoom
+                    this.syncOverlayToCanvas();
+
                     // Invalidate cache again to force fresh rect
                     this._overlayRect = null;
 
@@ -3267,6 +4287,57 @@
                 async zoomToFitAnnotation(anno) {
                     console.log('🔍 Zooming to fit annotation:', anno.label);
 
+                    // UNIVERSAL APPROACH: Find annotation with screen coordinates
+                    // Works for ANY hierarchical type (room, location, cabinet_run, cabinet, etc.)
+                    let annotationWithCoords;
+
+                    // Strategy 1: Anno already has screen coordinates (direct double-click on annotation)
+                    if (anno.screenWidth && anno.screenHeight) {
+                        annotationWithCoords = anno;
+                        console.log('   ✓ Using annotation directly (has screen coordinates)');
+                    }
+                    // Strategy 2: Find by annotation ID (works for double-clicks passing annotation object)
+                    else {
+                        annotationWithCoords = this.annotations.find(a =>
+                            a.id === anno.id &&
+                            a.screenWidth &&
+                            a.screenHeight
+                        );
+
+                        if (annotationWithCoords) {
+                            console.log('   ✓ Found by annotation ID');
+                        }
+                    }
+
+                    // Strategy 3: Find by type and entity ID (works for tree clicks passing entity ID)
+                    if (!annotationWithCoords) {
+                        annotationWithCoords = this.annotations.find(a => {
+                            // Must match type and have coordinates
+                            if (a.type !== anno.type || !a.screenWidth || !a.screenHeight) {
+                                return false;
+                            }
+
+                            // Universal check: match any entity ID field with anno.id
+                            // Works for all hierarchical types without case-by-case logic
+                            return a.roomId === anno.id ||
+                                   a.roomLocationId === anno.id ||
+                                   a.cabinetRunId === anno.id ||
+                                   a.cabinetId === anno.id;
+                        });
+
+                        if (annotationWithCoords) {
+                            console.log(`   ✓ Found by entity ID match for type: ${anno.type}`);
+                        }
+                    }
+
+                    if (!annotationWithCoords) {
+                        console.warn('⚠️ Annotation does not have valid screen coordinates yet, skipping zoom', {
+                            searchedType: anno.type,
+                            searchedId: anno.id
+                        });
+                        return;
+                    }
+
                     // Get container dimensions
                     const container = this.$refs.annotationOverlay;
                     if (!container) {
@@ -3281,9 +4352,9 @@
                     // Add padding around annotation (20% margin)
                     const paddingFactor = 0.8; // 80% of container = 20% padding total
 
-                    // Calculate required zoom to fit annotation width and height
-                    const zoomX = (containerWidth * paddingFactor) / anno.screenWidth;
-                    const zoomY = (containerHeight * paddingFactor) / anno.screenHeight;
+                    // Calculate required zoom to fit annotation width and height (use annotation with coordinates)
+                    const zoomX = (containerWidth * paddingFactor) / annotationWithCoords.screenWidth;
+                    const zoomY = (containerHeight * paddingFactor) / annotationWithCoords.screenHeight;
 
                     // Use the smaller zoom to ensure both dimensions fit
                     let targetZoom = Math.min(zoomX, zoomY);
@@ -3297,49 +4368,140 @@
                     // After zoom, scroll annotation to center of viewport
                     await this.$nextTick();
 
-                    // Calculate annotation center in screen coordinates at new zoom
+                    // Get the canvas element
+                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
+                    if (!canvas) {
+                        console.warn('⚠️ Canvas not found for centering');
+                        return;
+                    }
+
+                    // FilamentPHP uses separate scroll containers for X and Y
+                    // Find them independently
+                    let scrollContainerX = container.parentElement;
+                    let scrollContainerY = container.parentElement;
+
+                    // Find horizontal scroll container
+                    let current = container.parentElement;
+                    while (current && current !== document.body) {
+                        const style = window.getComputedStyle(current);
+                        const hasHorizontalScroll = current.scrollWidth > current.clientWidth;
+
+                        if ((style.overflowX === 'auto' || style.overflowX === 'scroll') && hasHorizontalScroll) {
+                            scrollContainerX = current;
+                            console.log('📍 Found X scroll container:', current.tagName, current.className.substring(0, 30));
+                            break;
+                        }
+                        current = current.parentElement;
+                    }
+
+                    // Find vertical scroll container
+                    current = container.parentElement;
+                    while (current && current !== document.body) {
+                        const style = window.getComputedStyle(current);
+                        const hasVerticalScroll = current.scrollHeight > current.clientHeight;
+
+                        if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && hasVerticalScroll) {
+                            scrollContainerY = current;
+                            console.log('📍 Found Y scroll container:', current.tagName, current.className.substring(0, 30));
+                            break;
+                        }
+                        current = current.parentElement;
+                    }
+
+                    // Default to body/documentElement if not found
+                    if (!scrollContainerX || scrollContainerX === document.body) {
+                        scrollContainerX = document.documentElement || document.body;
+                    }
+                    if (!scrollContainerY || scrollContainerY === document.body) {
+                        scrollContainerY = document.documentElement || document.body;
+                    }
+
+                    // Calculate annotation center in screen coordinates at NEW zoom level
                     const annoScreenPos = this.pdfToScreen(
-                        anno.pdfX + anno.pdfWidth / 2,
-                        anno.pdfY - anno.pdfHeight / 2, // PDF Y is inverted
+                        annotationWithCoords.pdfX + annotationWithCoords.pdfWidth / 2,
+                        annotationWithCoords.pdfY - annotationWithCoords.pdfHeight / 2, // PDF Y is inverted
                         0,
                         0
                     );
 
-                    // Get the canvas element
-                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
-                    if (canvas) {
-                        // Calculate scroll position to center the annotation
-                        const canvasRect = canvas.getBoundingClientRect();
-                        const scrollContainer = container.parentElement;
+                    console.log('📍 Centering calculation:', {
+                        annoScreenPos,
+                        containerWidth,
+                        containerHeight,
+                        targetScrollLeft: annoScreenPos.x - containerWidth / 2,
+                        targetScrollTop: annoScreenPos.y - containerHeight / 2,
+                        scrollContainerXTag: scrollContainerX.tagName,
+                        scrollContainerYTag: scrollContainerY.tagName,
+                        scrollContainerXScrollWidth: scrollContainerX.scrollWidth,
+                        scrollContainerXClientWidth: scrollContainerX.clientWidth,
+                        scrollContainerYScrollHeight: scrollContainerY.scrollHeight,
+                        scrollContainerYClientHeight: scrollContainerY.clientHeight,
+                        currentScrollLeft: scrollContainerX.scrollLeft,
+                        currentScrollTop: scrollContainerY.scrollTop
+                    });
 
-                        if (scrollContainer) {
-                            // Center the annotation in viewport
-                            scrollContainer.scrollLeft = annoScreenPos.x - containerWidth / 2;
-                            scrollContainer.scrollTop = annoScreenPos.y - containerHeight / 2;
-                        }
-                    }
+                    // Center the annotation in viewport using SEPARATE scroll containers
+                    scrollContainerX.scrollLeft = annoScreenPos.x - containerWidth / 2;
+                    scrollContainerY.scrollTop = annoScreenPos.y - containerHeight / 2;
+
+                    console.log('📍 After scroll:', {
+                        actualScrollLeft: scrollContainerX.scrollLeft,
+                        actualScrollTop: scrollContainerY.scrollTop,
+                        scrollContainerXInfo: `${scrollContainerX.tagName}.${scrollContainerX.className.substring(0, 30)}`,
+                        scrollContainerYInfo: `${scrollContainerY.tagName}.${scrollContainerY.className.substring(0, 30)}`
+                    });
 
                     console.log(`✓ Zoomed to ${Math.round(targetZoom * 100)}% and centered annotation`);
                 },
 
                 // Pagination methods (NEW - Phase 2)
                 async nextPage() {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
+                    // Get filtered page numbers based on active view type filters
+                    const availablePages = this.filteredPageNumbers;
+
+                    if (availablePages.length === 0) {
+                        console.log('⚠️ No pages match the current filter criteria');
+                        return;
+                    }
+
+                    // Find the next page in the filtered list
+                    const currentIndex = availablePages.indexOf(this.currentPage);
+
+                    if (currentIndex < availablePages.length - 1) {
+                        // Go to next page in filtered list
+                        const nextPage = availablePages[currentIndex + 1];
+                        this.currentPage = nextPage;
                         this.updatePdfPageId();
-                        console.log(`📄 Navigating to page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
+                        console.log(`📄 Navigating to filtered page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
                         await this.displayPdf();
                         await this.loadAnnotations();
+                    } else {
+                        console.log('📄 Already at last page matching filters');
                     }
                 },
 
                 async previousPage() {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
+                    // Get filtered page numbers based on active view type filters
+                    const availablePages = this.filteredPageNumbers;
+
+                    if (availablePages.length === 0) {
+                        console.log('⚠️ No pages match the current filter criteria');
+                        return;
+                    }
+
+                    // Find the previous page in the filtered list
+                    const currentIndex = availablePages.indexOf(this.currentPage);
+
+                    if (currentIndex > 0) {
+                        // Go to previous page in filtered list
+                        const prevPage = availablePages[currentIndex - 1];
+                        this.currentPage = prevPage;
                         this.updatePdfPageId();
-                        console.log(`📄 Navigating to page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
+                        console.log(`📄 Navigating to filtered page ${this.currentPage}, pdfPageId: ${this.pdfPageId}`);
                         await this.displayPdf();
                         await this.loadAnnotations();
+                    } else {
+                        console.log('📄 Already at first page matching filters');
                     }
                 },
 
@@ -3400,8 +4562,8 @@
                         });
                     });
 
-                    // Add annotations to their respective pages
-                    this.annotations.forEach(anno => {
+                    // Add filtered annotations to their respective pages
+                    this.filteredAnnotations.forEach(anno => {
                         const pageNum = this.currentPage; // All current annotations are on current page
                         if (pages.has(pageNum)) {
                             pages.get(pageNum).annotations.push(anno);
@@ -3477,6 +4639,116 @@
                     );
 
                     return isVisible;
+                },
+
+                // Filter Helper Methods
+
+                // Get unique rooms from all annotations
+                getUniqueRooms() {
+                    const roomMap = new Map();
+                    this.annotations.forEach(anno => {
+                        if (anno.roomId && anno.roomName) {
+                            roomMap.set(anno.roomId, { id: anno.roomId, name: anno.roomName });
+                        }
+                    });
+                    return Array.from(roomMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+                },
+
+                // Get unique locations from all annotations
+                getUniqueLocations() {
+                    const locationMap = new Map();
+                    this.annotations.forEach(anno => {
+                        if (anno.locationId && anno.locationName) {
+                            locationMap.set(anno.locationId, { id: anno.locationId, name: anno.locationName });
+                        }
+                    });
+                    return Array.from(locationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+                },
+
+                // Clear all filters
+                clearAllFilters() {
+                    this.filterScope = 'page';
+                    this.filters.types = [];
+                    this.filters.rooms = [];
+                    this.filters.locations = [];
+                    this.filters.viewTypes = [];
+                    this.filters.verticalZones = [];
+                    this.filters.myAnnotations = false;
+                    this.filters.recent = false;
+                    this.filters.unlinked = false;
+                    this.filters.pageRange.from = null;
+                    this.filters.pageRange.to = null;
+                    this.filters.dateRange.from = null;
+                    this.filters.dateRange.to = null;
+                    console.log('✓ All filters cleared');
+                },
+
+                // Remove individual filter from chip
+                removeFilter(chip) {
+                    if (chip.type === 'boolean') {
+                        this.filters[chip.key] = false;
+                    } else if (chip.type === 'array') {
+                        const index = this.filters[chip.arrayKey].indexOf(chip.value);
+                        if (index > -1) {
+                            this.filters[chip.arrayKey].splice(index, 1);
+                        }
+                    } else if (chip.type === 'scope') {
+                        this.filterScope = 'page';
+                    }
+                    console.log('✓ Filter removed:', chip.label);
+                },
+
+                // Apply filter preset
+                applyPreset(presetName) {
+                    // Clear all filters first
+                    this.clearAllFilters();
+
+                    // Apply preset-specific filters
+                    switch(presetName) {
+                        case 'myWork':
+                            this.filters.myAnnotations = true;
+                            break;
+                        case 'recent':
+                            this.filters.recent = true;
+                            break;
+                        case 'unlinked':
+                            this.filters.unlinked = true;
+                            break;
+                        case 'all':
+                            // Already cleared
+                            break;
+                    }
+                    console.log('✓ Preset applied:', presetName);
+                },
+
+                // Check if preset is currently active
+                isPresetActive(presetName) {
+                    switch(presetName) {
+                        case 'myWork':
+                            return this.filters.myAnnotations &&
+                                   !this.filters.recent &&
+                                   !this.filters.unlinked &&
+                                   this.filters.types.length === 0;
+                        case 'recent':
+                            return this.filters.recent &&
+                                   !this.filters.myAnnotations &&
+                                   !this.filters.unlinked &&
+                                   this.filters.types.length === 0;
+                        case 'unlinked':
+                            return this.filters.unlinked &&
+                                   !this.filters.myAnnotations &&
+                                   !this.filters.recent &&
+                                   this.filters.types.length === 0;
+                        case 'all':
+                            return this.activeFiltersCount === 0;
+                        default:
+                            return false;
+                    }
+                },
+
+                // Check if any filters are active
+                hasActiveFilters() {
+                    return this.activeFiltersCount > 0;
                 }
             }));
         });
