@@ -1112,7 +1112,7 @@
         <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative">
             <!-- Skeleton Loading Overlay -->
             <div
-                x-show="!pdfReady"
+                x-show="!systemReady"
                 x-transition:leave="transition ease-in duration-300"
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
@@ -1157,7 +1157,7 @@
 
             <!-- Error Display -->
             <div
-                x-show="pdfReady && error"
+                x-show="systemReady && error"
                 class="absolute inset-0 bg-white dark:bg-gray-900 z-40 flex items-center justify-center p-8"
             >
                 <div class="max-w-md w-full space-y-6 text-center">
@@ -1204,7 +1204,7 @@
 
             <!-- PDF Container -->
             <div id="pdf-container-{{ $viewerId }}" class="relative w-full h-full overflow-auto"
-                :class="{ 'overflow-hidden': !pdfReady }"
+                :class="{ 'overflow-hidden': !systemReady }"
             >
                 <!-- PDFObject.js embed goes here -->
                 <div x-ref="pdfEmbed" class="w-full h-full min-h-full"></div>
@@ -1506,6 +1506,9 @@
 
                 // PDF State
                 pdfReady: false,
+                treeReady: false,      // Track tree loading status
+                annotationsReady: false, // Track annotations loading status
+                systemReady: false,    // Master flag: true when PDF + tree + annotations all loaded
                 // pdfDocument stored in pdfDocumentCache Map outside reactive system (see closure above)
                 pageDimensions: null,
                 canvasScale: 1.0,    // Canvas scale factor (PDF → Screen)
@@ -1968,14 +1971,18 @@
                     // Lock body scroll during loading
                     document.body.style.overflow = 'hidden';
 
-                    // Watch pdfReady to unlock scroll when ready
-                    this.$watch('pdfReady', (ready) => {
-                        if (ready) {
-                            // Unlock scroll when PDF is ready
+                    // Watch each component and check if all are ready
+                    const checkAllReady = () => {
+                        if (this.pdfReady && this.treeReady && this.annotationsReady && !this.systemReady) {
+                            this.systemReady = true;
                             document.body.style.overflow = '';
-                            console.log('✓ PDF loaded - scroll enabled');
+                            console.log('✅ All systems ready - PDF + Tree + Annotations loaded');
                         }
-                    });
+                    };
+
+                    this.$watch('pdfReady', () => checkAllReady());
+                    this.$watch('treeReady', () => checkAllReady());
+                    this.$watch('annotationsReady', () => checkAllReady());
 
                     try {
                         // Step 1: Preload entire PDF document (cache for instant page switches)
@@ -1986,12 +1993,18 @@
 
                         // Step 3: Display PDF using PDFObject.js
                         await this.displayPdf();
+                        this.pdfReady = true;
+                        console.log('✓ PDF ready');
 
-                        // Step 3: Load project tree
+                        // Step 4: Load project tree
                         await this.loadTree();
+                        this.treeReady = true;
+                        console.log('✓ Tree ready');
 
-                        // Step 4: Load existing annotations
+                        // Step 5: Load existing annotations
                         await this.loadAnnotations();
+                        this.annotationsReady = true;
+                        console.log('✓ Annotations ready');
 
                         // Step 5: Listen for annotation updates from Livewire
                         Livewire.on('annotation-updated', async (event) => {
@@ -2182,8 +2195,11 @@
                         // Set error message for display
                         this.error = error.message || 'Failed to load PDF viewer';
 
-                        // Still mark as ready to hide loading screen and show error instead
+                        // Mark all systems as ready to hide loading screen and show error instead
                         this.pdfReady = true;
+                        this.treeReady = true;
+                        this.annotationsReady = true;
+                        this.systemReady = true;
 
                         // Unlock body scroll even on error
                         document.body.style.overflow = '';
@@ -2327,7 +2343,7 @@
                         console.log(`✓ Canvas dimensions: ${canvas.width} × ${canvas.height}`);
                         console.log(`✓ Canvas scale factor: ${scale.toFixed(3)}`);
 
-                        this.pdfReady = true;
+                        // pdfReady flag is set by init() after displayPdf() completes
 
                         // Do NOT destroy - PDF document stays cached for instant page switches!
 
