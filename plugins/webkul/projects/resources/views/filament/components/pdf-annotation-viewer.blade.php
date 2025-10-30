@@ -2528,15 +2528,9 @@
                 },
 
                 // Cancel drawing if mouse leaves canvas
+                // → Manager: DrawingSystem (drawing-system.js)
                 cancelDrawing(event) {
-                    if (!this.isDrawing) return;
-
-                    console.log('❌ Drawing cancelled (mouse left canvas)');
-
-                    // Reset drawing state without creating annotation
-                    this.isDrawing = false;
-                    this.drawStart = null;
-                    this.drawPreview = null;
+                    window.PdfViewerManagers?.DrawingSystem?.cancelDrawing(this);
                 },
 
                 // === RESIZE AND MOVE HANDLERS ===
@@ -2851,11 +2845,10 @@
                 },
 
                 // Get color for annotation type (for loaded annotations)
+                // Get color for annotation type
+                // → Manager: StateManager (state-manager.js)
                 getColorForType(type) {
-                    if (type === 'room') return '#f59e0b'; // Amber/Orange (room boundary)
-                    if (type === 'location') return '#9333ea'; // Purple
-                    if (type === 'cabinet_run') return '#3b82f6'; // Blue
-                    return '#10b981'; // Green (cabinet)
+                    return window.PdfViewerManagers?.StateManager?.getColorForType(type) || '#10b981';
                 },
 
                 // Context methods (Updated for isolation mode)
@@ -3276,20 +3269,15 @@
                 },
 
                 // Helper: Get room name by ID from tree
+                // → Manager: TreeManager (tree-manager.js)
                 getRoomNameById(roomId) {
-                    if (!this.tree || !roomId) return '';
-                    const room = this.tree.find(r => r.id === roomId);
-                    return room ? room.name : '';
+                    return window.PdfViewerManagers?.TreeManager?.getRoomNameById(roomId, this.$data) || '';
                 },
 
                 // Helper: Get location name by ID from tree
+                // → Manager: TreeManager (tree-manager.js)
                 getLocationNameById(locationId) {
-                    if (!this.tree || !locationId) return '';
-                    for (const room of this.tree) {
-                        const location = room.children?.find(l => l.id === locationId);
-                        if (location) return location.name;
-                    }
-                    return '';
+                    return window.PdfViewerManagers?.TreeManager?.getLocationNameById(locationId, this.$data) || '';
                 },
 
                 // Helper: Find annotation by entity ID on current page
