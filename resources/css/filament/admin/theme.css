@@ -157,4 +157,64 @@
     .tree-hierarchy-indent {
         @apply ml-5 mt-1 pl-3 border-l-2 border-gray-300 dark:border-gray-600;
     }
+
+    /* ============================================
+       PDF ANNOTATION DYNAMIC POSITIONING
+       For intelligent label/button positioning
+       ============================================ */
+
+    .-top-2 {
+        top: -0.5rem !important;
+    }
+
+    .-top-7 {
+        top: -1.75rem !important;
+    }
+
+    .-bottom-2 {
+        bottom: -0.5rem !important;
+    }
+
+    .-bottom-7 {
+        bottom: -1.75rem !important;
+    }
+
+    .-left-2 {
+        left: -0.5rem !important;
+    }
+
+    .left-0 {
+        left: 0 !important;
+    }
+
+    .-right-2 {
+        right: -0.5rem !important;
+    }
+
+    .right-0 {
+        right: 0 !important;
+    }
+
+    .top-0 {
+        top: 0 !important;
+    }
+
+    .bottom-0 {
+        bottom: 0 !important;
+    }
+
+    /* ============================================
+       PDF ANNOTATION MARKER TRANSITIONS
+       For instant resize/move responsiveness
+       ============================================ */
+
+    /* Default smooth transitions for annotations */
+    .annotation-marker {
+        transition: all 0.2s;
+    }
+
+    /* Disable transitions during active resize/move for instant responsiveness */
+    .annotation-marker.annotation-active {
+        transition: none !important;
+    }
 }

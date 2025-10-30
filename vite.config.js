@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/pdf-thumbnail.js',
                 'resources/js/pdf-document-manager.js',
                 'resources/js/annotations.js', // PDF annotation system - loaded separately by PDF pages
+                'plugins/webkul/projects/resources/js/pdf-viewer.js', // Projects plugin: Modular PDF annotation viewer
                 // Note: centralized-entity-store.js and form-auto-populate.js are imported in app.js
                 'resources/css/filament/admin/theme.css',
             ],

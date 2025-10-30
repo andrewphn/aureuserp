@@ -838,7 +838,7 @@
                         <!-- Room Level -->
                         <div
                             @click="selectAnnotationContext({ type: 'room', id: room.id, label: room.name, roomId: room.id })"
-                            @dblclick.prevent.stop="enterIsolationMode({ type: 'room', id: room.id, label: room.name })"
+                            @dblclick.prevent.stop="navigateToNodeOnDoubleClick(room.id, 'room')"
                             @contextmenu.prevent.stop="showContextMenu($event, room.id, 'room', room.name)"
                             :class="selectedPath.includes(room.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
@@ -866,7 +866,7 @@
                                     <!-- Location Level -->
                                     <div
                                         @click="selectAnnotationContext({ type: 'location', id: location.id, label: location.name, roomId: room.id, roomLocationId: location.id })"
-                                        @dblclick.prevent.stop="enterIsolationMode({ type: 'location', roomLocationId: location.id, label: location.name, roomId: room.id, roomName: room.name })"
+                                        @dblclick.prevent.stop="navigateToNodeOnDoubleClick(location.id, 'room_location', room.id)"
                                         @contextmenu.prevent.stop="showContextMenu($event, location.id, 'room_location', location.name, room.id)"
                                         :class="selectedPath.includes(location.id) ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
@@ -894,7 +894,7 @@
                                                 <!-- Cabinet Run Level -->
                                                 <div
                                                     @click="selectAnnotationContext({ type: 'cabinet_run', id: run.id, label: run.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
-                                                    @dblclick.prevent.stop="enterIsolationMode({ type: 'cabinet_run', cabinetRunId: run.id, label: run.name, roomLocationId: location.id, locationName: location.name, roomId: room.id, roomName: room.name })"
+                                                    @dblclick.prevent.stop="navigateToNodeOnDoubleClick(run.id, 'cabinet_run', room.id, location.id)"
                                                     @contextmenu.prevent.stop="showContextMenu($event, run.id, 'cabinet_run', run.name, room.id, location.id)"
                                                     :class="selectedPath.includes(run.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -1293,13 +1293,14 @@
                 <!-- Annotation Overlay (HTML Elements) -->
                 <div
                     x-ref="annotationOverlay"
+                    @click="activeAnnotationId = null; selectedAnnotation = null;"
                     @mousedown="startDrawing($event)"
-                    @mousemove="if (isResizing) handleResize($event); else if (isMoving) handleMove($event); else updateDrawing($event);"
-                    @mouseup="if (isResizing || isMoving) finishResizeOrMove($event); else finishDrawing($event);"
-                    @mouseleave="if (isResizing || isMoving) finishResizeOrMove($event); else cancelDrawing($event);"
+                    @mousemove="if (isResizing) window.PdfViewerManagers?.ResizeMoveSystem?.handleResizeMove($event, $data); else if (isMoving) window.PdfViewerManagers?.ResizeMoveSystem?.handleMoveUpdate($event, $data); else updateDrawing($event);"
+                    @mouseup="if (isResizing) window.PdfViewerManagers?.ResizeMoveSystem?.handleResizeEnd($event, $data, $refs); else if (isMoving) window.PdfViewerManagers?.ResizeMoveSystem?.handleMoveEnd($event, $data, $refs); else finishDrawing($event);"
+                    @mouseleave="if (isResizing) window.PdfViewerManagers?.ResizeMoveSystem?.handleResizeEnd($event, $data, $refs); else if (isMoving) window.PdfViewerManagers?.ResizeMoveSystem?.handleMoveEnd($event, $data, $refs); else cancelDrawing($event);"
                     :class="(drawMode && !editorModalOpen) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'"
                     class="annotation-overlay absolute top-0 left-0"
-                    style="z-index: 10; will-change: width, height;"
+                    :style="`z-index: 10; will-change: width, height; width: ${overlayWidth}; height: ${overlayHeight};`"
                 >
                     <!-- Existing Annotations -->
                     <template x-for="anno in filteredAnnotations.filter(a => !hiddenAnnotations.includes(a.id) && isAnnotationVisibleInView(a))" :key="anno.id">
@@ -1312,57 +1313,80 @@
                                     transform: translate(${anno.screenX}px, ${anno.screenY}px);
                                     width: ${anno.screenWidth}px;
                                     height: ${anno.screenHeight}px;
-                                    border: 2px solid ${anno.color};
+                                    border: ${activeAnnotationId === anno.id ? '3px' : '2px'} solid ${anno.color};
                                     background: ${anno.color}33;
                                     border-radius: 4px;
-                                    pointer-events: auto;
-                                    cursor: ${isMoving && activeAnnotationId === anno.id ? 'grabbing' : 'grab'};
+                                    pointer-events: ${anno.locked ? 'none' : 'auto'};
+                                    cursor: ${anno.locked ? 'not-allowed' : (isMoving && activeAnnotationId === anno.id ? 'grabbing' : 'grab')};
+                                    z-index: ${window.PdfViewerManagers?.AnnotationManager?.getAnnotationZIndex(anno, this) || 10};
                                     transition: all 0.2s;
                                     will-change: transform;
+                                    opacity: ${anno.locked ? 0.7 : 1};
+                                    box-shadow: ${activeAnnotationId === anno.id ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none'};
                                 `"
-                                @click="selectAnnotationContext(anno)"
-                                @dblclick.prevent.stop="enterIsolationMode(anno)"
-                                @mousedown="startMove($event, anno)"
+                                @click.stop="!anno.locked && selectAnnotationContext(anno)"
+                                @dblclick.prevent.stop="!anno.locked && enterIsolationMode(anno)"
+                                @mousedown="!anno.locked && startMove($event, anno)"
                                 @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
-                                @mouseleave="$el.style.background = anno.color + '33'; showMenu = false"
+                                @mouseleave="$el.style.background = anno.color + '33'; showMenu = anno.locked"
                                 class="annotation-marker group"
                             >
-                            <!-- Annotation Label -->
-                            <div class="annotation-label absolute -top-7 left-0 bg-white dark:bg-gray-900 px-2 py-1 rounded text-xs font-medium whitespace-nowrap shadow-md border z-30" style="color: var(--gray-900); border-color: var(--primary-400); pointer-events: none;">
+                            <!-- Annotation Label - Bottom Left -->
+                            <div class="annotation-label absolute -bottom-7 left-0 bg-white dark:bg-gray-900 px-2 py-1 rounded text-xs font-medium whitespace-nowrap shadow-md border z-30" style="color: var(--gray-900); border-color: var(--primary-400); pointer-events: none;">
                                 <span x-text="anno.label" class="dark:text-white"></span>
                             </div>
 
-                            <!-- Edit/Delete Buttons (visible on hover) - Top Right Corner -->
+                            <!-- Edit/Lock/Delete Buttons (visible on hover or if locked) - Top Right Corner -->
                             <div
-                                x-show="showMenu"
+                                x-show="showMenu || anno.locked"
                                 x-transition:enter="transition ease-out duration-150"
                                 x-transition:enter-start="opacity-0"
                                 x-transition:enter-end="opacity-100"
                                 x-transition:leave="transition ease-in duration-100"
                                 x-transition:leave-start="opacity-100"
                                 x-transition:leave-end="opacity-0"
-                                class="absolute -top-2 -right-14 flex gap-1 z-30"
+                                class="absolute -top-7 -right-2 flex gap-1 z-30 bg-white dark:bg-gray-900 px-2 py-1 rounded shadow-md border border-gray-300 dark:border-gray-600"
                                 @click.stop
                             >
-                                <!-- Edit Button - Pencil Icon -->
-                                <button
+                                <!-- Edit Button -->
+                                <x-filament::icon-button
+                                    icon="heroicon-o-pencil"
                                     @click="editAnnotation(anno)"
-                                    class="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors flex items-center justify-center shadow-md"
-                                    style="color: var(--primary-600);"
-                                    title="Edit annotation"
-                                >
-                                    <x-filament::icon icon="heroicon-o-pencil" class="h-3 w-3" />
-                                </button>
+                                    tooltip="Edit annotation"
+                                    size="sm"
+                                    color="primary"
+                                />
 
-                                <!-- Delete Button - X Icon -->
-                                <button
+                                <!-- Lock Button - Unlocked State -->
+                                <span x-show="!anno.locked">
+                                    <x-filament::icon-button
+                                        icon="heroicon-o-lock-open"
+                                        @click="window.PdfViewerManagers?.AnnotationManager?.toggleLockAnnotation(anno, $data)"
+                                        tooltip="Lock annotation"
+                                        size="sm"
+                                        color="info"
+                                    />
+                                </span>
+
+                                <!-- Lock Button - Locked State -->
+                                <span x-show="anno.locked">
+                                    <x-filament::icon-button
+                                        icon="heroicon-s-lock-closed"
+                                        @click="window.PdfViewerManagers?.AnnotationManager?.toggleLockAnnotation(anno, $data)"
+                                        tooltip="Unlock annotation"
+                                        size="sm"
+                                        color="warning"
+                                    />
+                                </span>
+
+                                <!-- Delete Button -->
+                                <x-filament::icon-button
+                                    icon="heroicon-o-x-mark"
                                     @click="deleteAnnotation(anno)"
-                                    class="w-5 h-5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-danger-50 dark:hover:bg-danger-900 transition-colors flex items-center justify-center shadow-md"
-                                    style="color: var(--danger-600);"
-                                    title="Delete annotation"
-                                >
-                                    <x-filament::icon icon="heroicon-o-x-mark" class="h-3 w-3" />
-                                </button>
+                                    tooltip="Delete annotation"
+                                    size="sm"
+                                    color="danger"
+                                />
                             </div>
 
                             <!-- Corner Resize Handles -->
@@ -1380,8 +1404,8 @@
                                     border-radius: 50%;
                                     cursor: nw-resize;
                                     pointer-events: auto;
-                                    z-index: 10;
-                                    opacity: ${showMenu ? 1 : 0};
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 1 : 0};
                                     transition: opacity 0.2s;
                                 `"
                                 class="resize-handle"
@@ -1401,8 +1425,8 @@
                                     border-radius: 50%;
                                     cursor: ne-resize;
                                     pointer-events: auto;
-                                    z-index: 10;
-                                    opacity: ${showMenu ? 1 : 0};
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 1 : 0};
                                     transition: opacity 0.2s;
                                 `"
                                 class="resize-handle"
@@ -1422,8 +1446,8 @@
                                     border-radius: 50%;
                                     cursor: sw-resize;
                                     pointer-events: auto;
-                                    z-index: 10;
-                                    opacity: ${showMenu ? 1 : 0};
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 1 : 0};
                                     transition: opacity 0.2s;
                                 `"
                                 class="resize-handle"
@@ -1443,11 +1467,88 @@
                                     border-radius: 50%;
                                     cursor: se-resize;
                                     pointer-events: auto;
-                                    z-index: 10;
-                                    opacity: ${showMenu ? 1 : 0};
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 1 : 0};
                                     transition: opacity 0.2s;
                                 `"
                                 class="resize-handle"
+                            ></div>
+
+                            <!-- Edge Resize Handles (Invisible hit areas) -->
+                            <!-- Top Edge -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'n')"
+                                :style="`
+                                    position: absolute;
+                                    top: -4px;
+                                    left: 12px;
+                                    right: 12px;
+                                    height: 8px;
+                                    cursor: n-resize;
+                                    pointer-events: auto;
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 0.3 : 0};
+                                    background: ${anno.color};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle-edge"
+                            ></div>
+
+                            <!-- Right Edge -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'e')"
+                                :style="`
+                                    position: absolute;
+                                    top: 12px;
+                                    bottom: 12px;
+                                    right: -4px;
+                                    width: 8px;
+                                    cursor: e-resize;
+                                    pointer-events: auto;
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 0.3 : 0};
+                                    background: ${anno.color};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle-edge"
+                            ></div>
+
+                            <!-- Bottom Edge -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 's')"
+                                :style="`
+                                    position: absolute;
+                                    bottom: -4px;
+                                    left: 12px;
+                                    right: 12px;
+                                    height: 8px;
+                                    cursor: s-resize;
+                                    pointer-events: auto;
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 0.3 : 0};
+                                    background: ${anno.color};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle-edge"
+                            ></div>
+
+                            <!-- Left Edge -->
+                            <div
+                                @mousedown.prevent.stop="startResize($event, anno, 'w')"
+                                :style="`
+                                    position: absolute;
+                                    top: 12px;
+                                    bottom: 12px;
+                                    left: -4px;
+                                    width: 8px;
+                                    cursor: w-resize;
+                                    pointer-events: auto;
+                                    z-index: 200;
+                                    opacity: ${showMenu || activeAnnotationId === anno.id ? 0.3 : 0};
+                                    background: ${anno.color};
+                                    transition: opacity 0.2s;
+                                `"
+                                class="resize-handle-edge"
                             ></div>
 
                         </div>
@@ -1993,6 +2094,7 @@
 
                         // Step 3: Display PDF using PDFObject.js
                         await this.displayPdf();
+
                         this.pdfReady = true;
                         console.log('✓ PDF ready');
 
@@ -2008,6 +2110,12 @@
 
                         // Step 5: Listen for annotation updates from Livewire
                         Livewire.on('annotation-updated', async (event) => {
+                            // CRITICAL: Don't process updates during active resize/move operations
+                            if (this._resizeLockout || this.isResizing || this.isMoving) {
+                                console.log('⚠️ Update blocked - resize/move in progress');
+                                return;
+                            }
+
                             const updatedAnnotation = event.annotation;
 
                             // For newly created annotations, the ID changed from temp_XXX to real database ID
@@ -2060,6 +2168,12 @@
 
                         // Listen for annotation deletion from Livewire
                         Livewire.on('annotation-deleted', async (event) => {
+                            // CRITICAL: Don't process deletes during active resize/move operations
+                            if (this._resizeLockout || this.isResizing || this.isMoving) {
+                                console.log('⚠️ Delete blocked - resize/move in progress');
+                                return;
+                            }
+
                             const annotationId = event.annotationId;
                             const index = this.annotations.findIndex(a => a.id === annotationId);
                             if (index !== -1) {
@@ -2106,26 +2220,9 @@
                             }
                         });
 
-                        // Step 8: Sync overlay to canvas dimensions (manual, event-driven approach)
-                        // Store reference to sync function for use in other methods
+                        // Step 8: Sync overlay to canvas dimensions using coordinate transform manager
                         this.syncOverlayToCanvas = () => {
-                            const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
-                            const overlay = this.$refs.annotationOverlay;
-                            if (canvas && overlay) {
-                                const width = `${canvas.offsetWidth}px`;
-                                const height = `${canvas.offsetHeight}px`;
-
-                                overlay.style.width = width;
-                                overlay.style.height = height;
-
-                                // Only update reactive properties if in isolation mode (needed for blur layer)
-                                if (this.isolationMode) {
-                                    this.overlayWidth = width;
-                                    this.overlayHeight = height;
-                                }
-
-                                console.log(`🔄 Overlay synced to canvas: ${canvas.offsetWidth} × ${canvas.offsetHeight}`);
-                            }
+                            window.PdfViewerManagers?.CoordTransform?.syncOverlayToCanvas(this.$refs, this);
                         };
 
                         // Do initial sync when canvas is ready
@@ -2139,33 +2236,16 @@
                         };
                         waitForCanvas();
 
-                        // Handle window resize events (optimized with debouncing)
-                        let resizeTimeout;
-                        const handleResize = () => {
-                            // Clear any pending re-render
-                            if (resizeTimeout) {
-                                clearTimeout(resizeTimeout);
-                            }
+                        // REMOVED: Automatic window resize handler
+                        // Previously re-rendered PDF on every window resize, causing interruptions
+                        // Now using industry-standard approach: render once, let CSS scale naturally
+                        // Annotations still sync perfectly via coordinate transforms
+                        // PDF re-renders only on explicit zoom changes (via zoom buttons)
 
-                            // Immediately sync overlay (fast, no re-render)
-                            this.syncOverlayToCanvas();
-                            this.updateAnnotationPositions();
-                            if (this.isolationMode) {
-                                this.updateIsolationMask();
-                            }
-
-                            // Debounce the expensive PDF re-render
-                            resizeTimeout = setTimeout(async () => {
-                                console.log('🪟 Resize complete - re-rendering PDF at new size');
-                                await this.displayPdf();
-                                this.syncOverlayToCanvas();
-                                this.updateAnnotationPositions();
-                                if (this.isolationMode) {
-                                    this.updateIsolationMask();
-                                }
-                            }, 300); // Wait 300ms after resize stops
-                        };
-                        window.addEventListener('resize', handleResize);
+                        // Note: Browser zoom (Ctrl/Cmd +/-) is handled separately by coordinate-transform.js
+                        // via visualViewport resize events, which only update annotation positions without
+                        // re-rendering the entire PDF
+                        console.log('✓ Window resize handler disabled - using CSS scaling for performance');
 
                         // Step 9: Setup scroll listener to update isolation mask when panning
                         const pdfContainer = document.getElementById('pdf-container-{{ $viewerId }}');
@@ -2318,22 +2398,10 @@
                         embedContainer.innerHTML = '';
                         embedContainer.appendChild(canvas);
 
-                        // LOCK overlay to canvas dimensions (browser zoom safe)
+                        // Wait for canvas to be in DOM, then sync overlay (call manager directly)
                         await this.$nextTick();
-                        const overlay = this.$refs.annotationOverlay;
-                        if (overlay) {
-                            // Use offsetWidth/offsetHeight to avoid CSS zoom affecting measurements
-                            const width = `${canvas.offsetWidth}px`;
-                            const height = `${canvas.offsetHeight}px`;
-
-                            overlay.style.width = width;
-                            overlay.style.height = height;
-
-                            // Sync blur layer dimensions (reactive)
-                            this.overlayWidth = width;
-                            this.overlayHeight = height;
-
-                            console.log(`🔒 Overlay locked to canvas: ${canvas.offsetWidth} × ${canvas.offsetHeight}`);
+                        if (window.PdfViewerManagers?.CoordTransform?.syncOverlayToCanvas) {
+                            window.PdfViewerManagers.CoordTransform.syncOverlayToCanvas(this.$refs, this);
                         }
 
                         // Store canvas scale factor for coordinate transformations
@@ -2404,82 +2472,36 @@
                 },
 
                 // Get canvas rect for coordinate transformations
+                // → Manager: CoordTransform (coordinate-transform.js)
                 getCanvasRect() {
-                    const now = Date.now();
-                    if (this._overlayRect && (now - this._lastRectUpdate) < this._rectCacheMs) {
-                        return this._overlayRect;
-                    }
-
-                    // Get the canvas element (not the overlay)
-                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
-                    if (!canvas) return null;
-
-                    this._overlayRect = canvas.getBoundingClientRect();
-                    this._lastRectUpdate = now;
-                    return this._overlayRect;
+                    const result = window.PdfViewerManagers?.CoordTransform?.getCanvasRect(this.$refs, this);
+                    return result || this.$refs.pdfEmbed?.querySelector('canvas')?.getBoundingClientRect() || null;
                 },
 
-                // Deprecated: Use getCanvasRect() instead
+                // Get overlay rect (alias for getCanvasRect)
+                // → Manager: CoordTransform (coordinate-transform.js)
                 getOverlayRect() {
-                    return this.getCanvasRect();
+                    const result = window.PdfViewerManagers?.CoordTransform?.getOverlayRect(this.$refs, this);
+                    return result || this.getCanvasRect();
                 },
 
                 // Coordinate transformation: Screen → PDF
+                // → Manager: CoordTransform (coordinate-transform.js)
                 screenToPdf(screenX, screenY) {
-                    if (!this.pageDimensions) return { x: 0, y: 0 };
-
-                    const rect = this.getOverlayRect();
-                    if (!rect) return { x: 0, y: 0 };
-
-                    // Account for CSS zoom - screen coordinates are in zoomed space
-                    const zoom = this.getEffectiveZoom();
-                    const adjustedX = screenX * zoom;
-                    const adjustedY = screenY * zoom;
-
-                    // Normalize to 0-1 range using adjusted coordinates
-                    const normalizedX = adjustedX / rect.width;
-                    const normalizedY = adjustedY / rect.height;
-
-                    // Convert to PDF coordinates (PDF y-axis is from bottom)
-                    const pdfX = normalizedX * this.pageDimensions.width;
-                    const pdfY = this.pageDimensions.height - (normalizedY * this.pageDimensions.height);
-
-                    return {
-                        x: pdfX,
-                        y: pdfY,
-                        normalized: { x: normalizedX, y: normalizedY }
-                    };
+                    const result = window.PdfViewerManagers?.CoordTransform?.screenToPdf(screenX, screenY, this.$refs, this);
+                    return result || { x: 0, y: 0, normalized: { x: 0, y: 0 } };
                 },
 
                 // Coordinate transformation: PDF → Screen (Canvas)
+                // → Manager: CoordTransform (coordinate-transform.js)
                 pdfToScreen(pdfX, pdfY, width = 0, height = 0) {
-                    if (!this.pageDimensions) return { x: 0, y: 0, width: 0, height: 0 };
-
-                    const canvasRect = this.getCanvasRect();
-                    if (!canvasRect) return { x: 0, y: 0, width: 0, height: 0 };
-
-                    // Normalize PDF coordinates to 0-1 range
-                    const normalizedX = pdfX / this.pageDimensions.width;
-                    const normalizedY = (this.pageDimensions.height - pdfY) / this.pageDimensions.height;
-
-                    // Apply canvas scale to get screen coordinates
-                    const screenX = normalizedX * canvasRect.width;
-                    const screenY = normalizedY * canvasRect.height;
-                    const screenWidth = (width / this.pageDimensions.width) * canvasRect.width;
-                    const screenHeight = (height / this.pageDimensions.height) * canvasRect.height;
-
-                    // Account for CSS zoom - adjust coordinates back to zoomed coordinate space
-                    const zoom = this.getEffectiveZoom();
-
-                    return {
-                        x: screenX / zoom,
-                        y: screenY / zoom,
-                        width: screenWidth / zoom,
-                        height: screenHeight / zoom
-                    };
+                    const result = window.PdfViewerManagers?.CoordTransform?.pdfToScreen(pdfX, pdfY, width, height, this.$refs, this);
+                    return result || { x: 0, y: 0, width: 0, height: 0 };
                 },
 
                 // Start drawing rectangle on mousedown
+                // Start drawing annotation
+                // → Manager: DrawingSystem (drawing-system.js)
                 startDrawing(event) {
                     // Check if we can draw based on mode
                     const canProceed = this.drawMode === 'room'
@@ -2490,54 +2512,19 @@
 
                     if (!canProceed || !this.drawMode) return;
 
-                    const overlay = this.$refs.annotationOverlay;
-                    const rect = overlay.getBoundingClientRect();
-                    const x = event.clientX - rect.left;
-                    const y = event.clientY - rect.top;
-
-                    // Start drawing
-                    this.isDrawing = true;
-                    this.drawStart = { x, y };
-                    this.drawPreview = { x, y, width: 0, height: 0 };
-
-                    console.log('🖱️ Started drawing at', { x, y });
+                    window.PdfViewerManagers?.DrawingSystem?.startDrawing(event, this, this.$refs);
                 },
 
                 // Update rectangle preview on mousemove
+                // → Manager: DrawingSystem (drawing-system.js)
                 updateDrawing(event) {
-                    if (!this.isDrawing || !this.drawStart) return;
-
-                    const overlay = this.$refs.annotationOverlay;
-                    const rect = overlay.getBoundingClientRect();
-                    const currentX = event.clientX - rect.left;
-                    const currentY = event.clientY - rect.top;
-
-                    // Update preview rectangle (normalize so top-left is always correct)
-                    this.drawPreview = {
-                        x: Math.min(this.drawStart.x, currentX),
-                        y: Math.min(this.drawStart.y, currentY),
-                        width: Math.abs(currentX - this.drawStart.x),
-                        height: Math.abs(currentY - this.drawStart.y)
-                    };
+                    window.PdfViewerManagers?.DrawingSystem?.updateDrawPreview(event, this, this.$refs);
                 },
 
                 // Finish drawing on mouseup
+                // → Drawing logic: DrawingSystem manager (drawing-system.js)
                 finishDrawing(event) {
-                    if (!this.isDrawing) return;
-
-                    console.log('🖱️ Finished drawing', this.drawPreview);
-
-                    // Create annotation if rectangle is large enough (10px minimum)
-                    if (this.drawPreview && this.drawPreview.width > 10 && this.drawPreview.height > 10) {
-                        this.createAnnotation(this.drawPreview);
-                    } else {
-                        console.log('⚠️ Rectangle too small, discarded');
-                    }
-
-                    // Reset drawing state
-                    this.isDrawing = false;
-                    this.drawStart = null;
-                    this.drawPreview = null;
+                    window.PdfViewerManagers?.DrawingSystem?.finishDrawing(event, this, this.$refs);
                 },
 
                 // Cancel drawing if mouse leaves canvas
@@ -2555,29 +2542,15 @@
                 // === RESIZE AND MOVE HANDLERS ===
 
                 // Start resizing annotation from corner handle
+                // → Manager: ResizeMoveSystem (resize-move-system.js)
                 startResize(event, anno, handle) {
-                    console.log(`📐 Starting resize for annotation ${anno.id} from ${handle} corner`);
-
-                    this.isResizing = true;
-                    this.resizeHandle = handle;
-                    this.activeAnnotationId = anno.id;
-
-                    const overlay = this.$refs.annotationOverlay;
-                    const rect = overlay.getBoundingClientRect();
-
-                    this.resizeStart = {
-                        x: event.clientX - rect.left,
-                        y: event.clientY - rect.top,
-                        annoStartX: anno.screenX,
-                        annoStartY: anno.screenY,
-                        annoStartWidth: anno.screenWidth,
-                        annoStartHeight: anno.screenHeight
-                    };
+                    window.PdfViewerManagers?.ResizeMoveSystem?.startResize(event, anno, handle, this);
                 },
 
                 // Start moving annotation
+                // → Manager: ResizeMoveSystem (resize-move-system.js)
                 startMove(event, anno) {
-                    // Don't start move if clicking on edit/delete buttons or other UI elements
+                    // Don't start move if clicking on UI elements (buttons, labels, resize handles)
                     if (event.target.closest('.resize-handle') ||
                         event.target.closest('button') ||
                         event.target.closest('.annotation-label')) {
@@ -2587,155 +2560,12 @@
                     // Prevent default to avoid text selection while dragging
                     event.preventDefault();
 
-                    console.log(`✋ Starting move for annotation ${anno.id}`);
-
-                    this.isMoving = true;
-                    this.activeAnnotationId = anno.id;
-
-                    const overlay = this.$refs.annotationOverlay;
-                    const rect = overlay.getBoundingClientRect();
-
-                    this.moveStart = {
-                        x: event.clientX - rect.left,
-                        y: event.clientY - rect.top,
-                        annoStartX: anno.screenX,
-                        annoStartY: anno.screenY
-                    };
+                    window.PdfViewerManagers?.ResizeMoveSystem?.startMove(event, anno, this);
                 },
 
-                // Handle resize during mouse move
-                handleResize(event) {
-                    if (!this.isResizing || !this.resizeStart || !this.activeAnnotationId) return;
-
-                    const overlay = this.$refs.annotationOverlay;
-                    const rect = overlay.getBoundingClientRect();
-                    const currentX = event.clientX - rect.left;
-                    const currentY = event.clientY - rect.top;
-
-                    const deltaX = currentX - this.resizeStart.x;
-                    const deltaY = currentY - this.resizeStart.y;
-
-                    // Find the annotation being resized
-                    const anno = this.annotations.find(a => a.id === this.activeAnnotationId);
-                    if (!anno) return;
-
-                    // Calculate new dimensions based on which corner is being dragged
-                    let newX = anno.screenX;
-                    let newY = anno.screenY;
-                    let newWidth = anno.screenWidth;
-                    let newHeight = anno.screenHeight;
-
-                    switch (this.resizeHandle) {
-                        case 'nw': // Top-left corner
-                            newX = this.resizeStart.annoStartX + deltaX;
-                            newY = this.resizeStart.annoStartY + deltaY;
-                            newWidth = this.resizeStart.annoStartWidth - deltaX;
-                            newHeight = this.resizeStart.annoStartHeight - deltaY;
-                            break;
-                        case 'ne': // Top-right corner
-                            newY = this.resizeStart.annoStartY + deltaY;
-                            newWidth = this.resizeStart.annoStartWidth + deltaX;
-                            newHeight = this.resizeStart.annoStartHeight - deltaY;
-                            break;
-                        case 'sw': // Bottom-left corner
-                            newX = this.resizeStart.annoStartX + deltaX;
-                            newWidth = this.resizeStart.annoStartWidth - deltaX;
-                            newHeight = this.resizeStart.annoStartHeight + deltaY;
-                            break;
-                        case 'se': // Bottom-right corner
-                            newWidth = this.resizeStart.annoStartWidth + deltaX;
-                            newHeight = this.resizeStart.annoStartHeight + deltaY;
-                            break;
-                    }
-
-                    // Enforce minimum size (20px)
-                    if (newWidth < 20 || newHeight < 20) return;
-
-                    // Update annotation dimensions in place (reactive)
-                    anno.screenX = newX;
-                    anno.screenY = newY;
-                    anno.screenWidth = newWidth;
-                    anno.screenHeight = newHeight;
-                },
-
-                // Handle move during mouse move
-                handleMove(event) {
-                    if (!this.isMoving || !this.moveStart || !this.activeAnnotationId) return;
-
-                    const overlay = this.$refs.annotationOverlay;
-                    const rect = overlay.getBoundingClientRect();
-                    const currentX = event.clientX - rect.left;
-                    const currentY = event.clientY - rect.top;
-
-                    const deltaX = currentX - this.moveStart.x;
-                    const deltaY = currentY - this.moveStart.y;
-
-                    // Find the annotation being moved
-                    const anno = this.annotations.find(a => a.id === this.activeAnnotationId);
-                    if (!anno) return;
-
-                    // Update annotation position in place (reactive)
-                    anno.screenX = this.moveStart.annoStartX + deltaX;
-                    anno.screenY = this.moveStart.annoStartY + deltaY;
-
-                    // Keep within bounds
-                    const overlayWidth = rect.width;
-                    const overlayHeight = rect.height;
-
-                    if (anno.screenX < 0) anno.screenX = 0;
-                    if (anno.screenY < 0) anno.screenY = 0;
-                    if (anno.screenX + anno.screenWidth > overlayWidth) {
-                        anno.screenX = overlayWidth - anno.screenWidth;
-                    }
-                    if (anno.screenY + anno.screenHeight > overlayHeight) {
-                        anno.screenY = overlayHeight - anno.screenHeight;
-                    }
-                },
-
-                // Finish resize or move and save to database
-                finishResizeOrMove(event) {
-                    if (!this.isResizing && !this.isMoving) return;
-
-                    const operationType = this.isResizing ? 'resize' : 'move';
-                    console.log(`✓ Finished ${operationType} for annotation ${this.activeAnnotationId}`);
-
-                    // Find the annotation that was modified
-                    const anno = this.annotations.find(a => a.id === this.activeAnnotationId);
-                    if (!anno) {
-                        this.resetResizeMove();
-                        return;
-                    }
-
-                    // Convert screen coordinates back to PDF coordinates
-                    const pdfTopLeft = this.screenToPdf(anno.screenX, anno.screenY);
-                    const pdfBottomRight = this.screenToPdf(
-                        anno.screenX + anno.screenWidth,
-                        anno.screenY + anno.screenHeight
-                    );
-
-                    // Update PDF coordinates
-                    anno.pdfX = pdfTopLeft.x;
-                    anno.pdfY = pdfTopLeft.y;
-                    anno.pdfWidth = Math.abs(pdfBottomRight.x - pdfTopLeft.x);
-                    anno.pdfHeight = Math.abs(pdfTopLeft.y - pdfBottomRight.y);
-                    anno.normalizedX = pdfTopLeft.normalized.x;
-                    anno.normalizedY = pdfTopLeft.normalized.y;
-
-                    // Save to database via Livewire
-                    console.log(`💾 Saving ${operationType} changes to database...`);
-                    Livewire.dispatch('update-annotation-position', {
-                        annotationId: anno.id,
-                        pdfX: anno.pdfX,
-                        pdfY: anno.pdfY,
-                        pdfWidth: anno.pdfWidth,
-                        pdfHeight: anno.pdfHeight,
-                        normalizedX: anno.normalizedX,
-                        normalizedY: anno.normalizedY
-                    });
-
-                    // Reset state
-                    this.resetResizeMove();
-                },
+                // === RESIZE AND MOVE HANDLERS ===
+                // Note: Delegated to ResizeMoveSystem manager (resize-move-system.js)
+                // Handlers are called directly from overlay event listeners
 
                 // Reset resize/move state
                 resetResizeMove() {
@@ -2756,32 +2586,31 @@
                  * @param {string} viewType - 'plan', 'elevation', 'section', 'detail'
                  * @param {string|null} orientation - Optional orientation for elevation/section
                  */
+                // Set view type (plan, elevation, section, detail)
+                // → Manager: ViewTypeManager (view-type-manager.js)
                 setViewType(viewType, orientation = null) {
-                    console.log(`📐 Switching to ${viewType} view${orientation ? ' (' + orientation + ')' : ''}`);
-
-                    this.activeViewType = viewType;
-                    this.activeOrientation = orientation;
-
-                    // Reset orientation if switching to plan view
-                    if (viewType === 'plan') {
-                        this.activeOrientation = null;
+                    if (window.PdfViewerManagers?.ViewTypeManager?.setViewType) {
+                        window.PdfViewerManagers.ViewTypeManager.setViewType(viewType, orientation, this.$data, {
+                            updateAnnotationVisibility: this.updateAnnotationVisibility.bind(this)
+                        });
+                    } else {
+                        console.error('❌ ViewTypeManager.setViewType not available');
                     }
-
-                    // Filter annotations based on new view
-                    this.updateAnnotationVisibility();
-
-                    // Update UI to reflect new view
-                    console.log(`✓ View switched to ${viewType}${orientation ? ' - ' + orientation : ''}`);
                 },
 
                 /**
                  * Set orientation for elevation or section views
                  * @param {string} orientation - 'front', 'back', 'left', 'right', 'A-A', etc.
                  */
+                // → Manager: ViewTypeManager (view-type-manager.js)
                 setOrientation(orientation) {
-                    console.log(`🧭 Setting orientation to ${orientation}`);
-                    this.activeOrientation = orientation;
-                    this.updateAnnotationVisibility();
+                    if (window.PdfViewerManagers?.ViewTypeManager?.setOrientation) {
+                        window.PdfViewerManagers.ViewTypeManager.setOrientation(orientation, this.$data, {
+                            updateAnnotationVisibility: this.updateAnnotationVisibility.bind(this)
+                        });
+                    } else {
+                        console.error('❌ ViewTypeManager.setOrientation not available');
+                    }
                 },
 
                 /**
@@ -2789,35 +2618,29 @@
                  * @param {object} anno - Annotation object
                  * @returns {boolean}
                  */
+                // → Manager: ViewTypeManager (view-type-manager.js)
                 isAnnotationVisibleInView(anno) {
-                    // If no view type specified on annotation, assume it's visible in plan view
-                    const annoViewType = anno.viewType || 'plan';
-
-                    // If we're in plan view, show all plan annotations
-                    if (this.activeViewType === 'plan') {
-                        return annoViewType === 'plan';
+                    if (window.PdfViewerManagers?.ViewTypeManager?.isAnnotationVisibleInView) {
+                        return window.PdfViewerManagers.ViewTypeManager.isAnnotationVisibleInView(anno, this.$data);
+                    } else {
+                        // Fallback: show all annotations in plan view
+                        console.warn('⚠️ ViewTypeManager.isAnnotationVisibleInView not available, using fallback');
+                        const annoViewType = anno.viewType || 'plan';
+                        return this.activeViewType === 'plan' ? annoViewType === 'plan' : this.activeViewType === annoViewType;
                     }
-
-                    // If we're in elevation/section/detail view, show matching annotations
-                    if (this.activeViewType === annoViewType) {
-                        // If orientation is set, check if it matches
-                        if (this.activeOrientation && anno.viewOrientation) {
-                            return anno.viewOrientation === this.activeOrientation;
-                        }
-                        // If no orientation filter, show all annotations of this view type
-                        return true;
-                    }
-
-                    return false;
                 },
 
                 /**
                  * Update visibility of all annotations based on current view
                  */
+                // → Manager: ViewTypeManager (view-type-manager.js)
                 updateAnnotationVisibility() {
-                    // This will be used in the rendering loop to filter visible annotations
-                    // The actual filtering happens in the x-for template
-                    console.log(`🔍 Updating annotation visibility for ${this.activeViewType} view`);
+                    if (window.PdfViewerManagers?.ViewTypeManager?.updateAnnotationVisibility) {
+                        window.PdfViewerManagers.ViewTypeManager.updateAnnotationVisibility(this.$data);
+                    } else {
+                        console.warn('⚠️ ViewTypeManager.updateAnnotationVisibility not available');
+                        console.log(`🔍 Updating annotation visibility for ${this.activeViewType} view`);
+                    }
                 },
 
                 /**
@@ -3012,189 +2835,19 @@
                 },
 
                 // Load existing annotations
+                // Load annotations from API and transform to screen coordinates
+                // → Manager: AnnotationManager (annotation-manager.js)
                 async loadAnnotations() {
-                    console.log(`📥 Loading annotations for page ${this.currentPage} (pdfPageId: ${this.pdfPageId})...`);
-
-                    // PHASE 5: Clear existing annotations before loading new ones
-                    this.annotations = [];
-
-                    try {
-                        const response = await fetch(`/api/pdf/page/${this.pdfPageId}/annotations`);
-                        const data = await response.json();
-
-                        if (data.success && data.annotations) {
-                            // Convert loaded annotations to screen coordinates
-                            this.annotations = data.annotations.map(anno => {
-                                // Transform normalized coordinates to screen position
-                                const screenPos = this.pdfToScreen(
-                                    anno.x * this.pageDimensions.width,
-                                    (1 - anno.y) * this.pageDimensions.height,  // Invert Y
-                                    anno.width * this.pageDimensions.width,
-                                    anno.height * this.pageDimensions.height
-                                );
-
-                                return {
-                                    id: anno.id,
-                                    type: anno.annotation_type,
-                                    parentId: anno.parent_annotation_id,  // Parent annotation ID for hierarchy
-                                    pdfX: anno.x * this.pageDimensions.width,
-                                    pdfY: (1 - anno.y) * this.pageDimensions.height,
-                                    pdfWidth: anno.width * this.pageDimensions.width,
-                                    pdfHeight: anno.height * this.pageDimensions.height,
-                                    normalizedX: anno.x,
-                                    normalizedY: anno.y,
-                                    screenX: screenPos.x,
-                                    screenY: screenPos.y,
-                                    screenWidth: screenPos.width,
-                                    screenHeight: screenPos.height,
-                                    roomId: anno.room_id,
-                                    roomLocationId: anno.room_location_id,  // For location annotations
-                                    cabinetRunId: anno.cabinet_run_id,  // For cabinet run annotations
-                                    cabinetSpecId: anno.cabinet_specification_id,  // For cabinet annotations
-                                    viewType: anno.view_type,  // Load view type (plan, elevation, section, detail)
-                                    label: anno.text || 'Annotation',
-                                    color: anno.color || this.getColorForType(anno.annotation_type),
-                                    notes: anno.notes,
-                                    pageNumber: this.currentPage,  // Add page number for filtering
-                                    pdfPageId: this.pdfPageId,  // Add pdfPageId for context
-                                    projectId: this.projectId   // Add projectId for form loading
-                                };
-                            });
-
-                            // Post-process: Recursively populate parent entity connections
-                            // This is needed for isolation mode to work when double-clicking canvas annotations
-                            const populateParentConnections = (anno, visited = new Set()) => {
-                                // Prevent infinite loops
-                                if (visited.has(anno.id)) return;
-                                visited.add(anno.id);
-
-                                // Add roomName using helper function
-                                if (anno.roomId && !anno.roomName) {
-                                    anno.roomName = this.getRoomNameById(anno.roomId);
-                                }
-
-                                // If has parent, inherit properties recursively
-                                if (anno.parentId) {
-                                    const parentAnno = this.annotations.find(a => a.id === anno.parentId);
-                                    if (parentAnno) {
-                                        // First, ensure parent has its connections populated
-                                        populateParentConnections(parentAnno, visited);
-
-                                        // Inherit room context from any parent
-                                        if (!anno.roomId && parentAnno.roomId) {
-                                            anno.roomId = parentAnno.roomId;
-                                            anno.roomName = parentAnno.roomName;
-                                        }
-
-                                        // Inherit location context based on parent type
-                                        if (parentAnno.type === 'location') {
-                                            anno.locationId = parentAnno.roomLocationId;
-                                            anno.locationName = parentAnno.label;
-                                        } else if (parentAnno.locationId) {
-                                            // Inherit from grandparent
-                                            anno.locationId = parentAnno.locationId;
-                                            anno.locationName = parentAnno.locationName;
-                                        }
-
-                                        // Inherit cabinet run context
-                                        if (parentAnno.type === 'cabinet_run') {
-                                            anno.cabinetRunId = parentAnno.cabinetRunId;
-                                            anno.cabinetRunName = parentAnno.label;
-                                        } else if (parentAnno.cabinetRunId) {
-                                            // Inherit from grandparent
-                                            anno.cabinetRunId = parentAnno.cabinetRunId;
-                                            anno.cabinetRunName = parentAnno.cabinetRunName;
-                                        }
-                                    }
-                                }
-                            };
-
-                            // Apply to all annotations
-                            this.annotations.forEach(anno => populateParentConnections(anno));
-
-                            console.log(`✓ Loaded ${this.annotations.length} annotations with parent connections`);
-                            // Debug: Log entity connections
-                            this.annotations.forEach(anno => {
-                                if (anno.type === 'cabinet_run') {
-                                    console.log(`  📦 ${anno.label}: roomId=${anno.roomId}, locationId=${anno.locationId}, cabinetRunId=${anno.cabinetRunId}`);
-                                } else if (anno.type === 'cabinet') {
-                                    console.log(`  🗄️ ${anno.label}: roomId=${anno.roomId}, locationId=${anno.locationId}, cabinetRunId=${anno.cabinetRunId}`);
-                                }
-                            });
-
-                            // CRITICAL: If in isolation mode, re-apply visibility filter to newly loaded annotations
-                            if (this.isolationMode) {
-                                console.log('🔍 [LOAD] Re-applying isolation filter to newly loaded annotations');
-                                this.hiddenAnnotations = [];
-                                this.annotations.forEach(a => {
-                                    if (!this.isAnnotationVisibleInIsolation(a)) {
-                                        console.log(`👁️ [LOAD] Hiding annotation ${a.id} (${a.label} - type: ${a.type})`);
-                                        this.hiddenAnnotations.push(a.id);
-                                    }
-                                });
-                                console.log(`👁️ [LOAD] Hidden annotations after filter: [${this.hiddenAnnotations.join(', ')}]`);
-
-                                // Update isolation mask with new annotations
-                                await this.$nextTick();
-                                this.updateIsolationMask();
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Failed to load annotations:', error);
-                    }
+                    await window.PdfViewerManagers?.AnnotationManager?.loadAnnotations(this, this.$refs);
                 },
 
-                // Save annotations
+                // Save annotations to API
+                // → Manager: AnnotationManager (annotation-manager.js)
                 async saveAnnotations() {
-                    console.log('💾 Saving annotations...', this.annotations);
-
-                    try {
-                        // Transform annotations to API format
-                        const annotationsData = this.annotations.map(anno => ({
-                            annotation_type: anno.type,
-                            parent_annotation_id: anno.parentId || null,  // CRITICAL: Save parent relationship for hierarchy
-                            x: anno.normalizedX,
-                            y: anno.normalizedY,
-                            width: anno.pdfWidth / this.pageDimensions.width,
-                            height: anno.pdfHeight / this.pageDimensions.height,
-                            text: anno.label,
-                            color: anno.color,
-                            room_id: anno.roomId || null,
-                            room_location_id: anno.roomLocationId || null,  // For location annotations
-                            cabinet_run_id: anno.cabinetRunId || null,  // For cabinet run annotations
-                            cabinet_specification_id: anno.cabinetSpecId || null,  // For cabinet annotations
-                            view_type: anno.viewType || 'plan',  // Save view type (plan, elevation, section, detail)
-                            notes: anno.notes || null,
-                            room_type: anno.type,  // Use type as room_type for compatibility
-                        }));
-
-                        const response = await fetch(`/api/pdf/page/${this.pdfPageId}/annotations`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                            },
-                            body: JSON.stringify({
-                                annotations: annotationsData,
-                                create_entities: false  // Don't auto-create entities for now
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            console.log(`✓ Saved ${data.count} annotations`);
-                            alert(`Successfully saved ${data.count} annotations!`);
-
-                            // Reload annotations to get server-assigned IDs
-                            await this.loadAnnotations();
-                        } else {
-                            throw new Error(data.error || 'Failed to save annotations');
-                        }
-                    } catch (error) {
-                        console.error('Failed to save annotations:', error);
-                        alert(`Error saving annotations: ${error.message}`);
-                    }
+                    await window.PdfViewerManagers?.AnnotationManager?.saveAnnotations(
+                        this,
+                        this.loadAnnotations.bind(this)
+                    );
                 },
 
                 // Get color for annotation type (for loaded annotations)
@@ -3206,96 +2859,46 @@
                 },
 
                 // Context methods (Updated for isolation mode)
+                // Check if can draw location annotations
+                // → Manager: DrawingSystem (drawing-system.js)
                 canDrawLocation() {
-                    // In room isolation mode: always enabled
-                    if (this.isolationMode && this.isolationLevel === 'room') {
-                        return this.pdfReady;
-                    }
-                    // Normal mode: requires room selection + PDF ready
-                    return this.activeRoomId && this.pdfReady;
+                    return window.PdfViewerManagers?.DrawingSystem?.canDrawLocation(this) || false;
                 },
 
+                // Check if can draw cabinet/run annotations
+                // → Manager: DrawingSystem (drawing-system.js)
                 canDraw() {
-                    // In location isolation mode: always enabled
-                    if (this.isolationMode && this.isolationLevel === 'location') {
-                        return this.pdfReady;
-                    }
-                    // In cabinet_run isolation mode: always enabled (for drawing cabinets inside the run)
-                    if (this.isolationMode && this.isolationLevel === 'cabinet_run') {
-                        return this.pdfReady;
-                    }
-                    // Normal mode: requires room + location selection + PDF ready
-                    return this.activeRoomId && this.activeLocationId && this.pdfReady;
+                    return window.PdfViewerManagers?.DrawingSystem?.canDraw(this) || false;
                 },
 
+                // Set draw mode with duplicate checking
+                // → Manager: DrawingSystem (drawing-system.js)
                 setDrawMode(mode) {
-                    // If turning OFF draw mode, just disable it
-                    if (this.drawMode === mode) {
-                        this.drawMode = null;
-                        return;
-                    }
-
-                    // If turning ON draw mode, check for duplicates first
-                    const existingAnnotation = this.checkForDuplicateEntity(mode);
-
-                    if (existingAnnotation) {
-                        // Duplicate found! Show notification and highlight existing
-                        const entityName = existingAnnotation.label || 'This entity';
-
-                        // Show notification
-                        new FilamentNotification()
-                            .title('Annotation Already Exists')
-                            .warning()
-                            .body(`${entityName} already has an annotation on this page. Highlighting it now.`)
-                            .send();
-
-                        // Highlight existing annotation with pulse effect
-                        this.highlightAnnotation(existingAnnotation);
-
-                        // Don't enter draw mode
-                        return;
-                    }
-
-                    // No duplicate found - proceed with normal draw mode
-                    this.drawMode = mode;
+                    window.PdfViewerManagers?.DrawingSystem?.setDrawMode(
+                        mode,
+                        this,
+                        this.checkForDuplicateEntity.bind(this),
+                        this.highlightAnnotation.bind(this)
+                    );
                 },
 
                 // Helper: Highlight an annotation temporarily
+                // Temporarily highlight annotation with red color
+                // → Manager: AnnotationManager (annotation-manager.js)
                 highlightAnnotation(annotation) {
-                    // Add temporary highlight state
-                    const originalColor = annotation.color;
-                    annotation.color = '#ff0000'; // Red highlight
-
-                    // Force re-render
-                    this.renderAnnotations();
-
-                    // Pan to annotation
-                    const centerX = annotation.screenX + annotation.screenWidth / 2;
-                    const centerY = annotation.screenY + annotation.screenHeight / 2;
-
-                    // Restore original color after 2 seconds
-                    setTimeout(() => {
-                        annotation.color = originalColor;
-                        this.renderAnnotations();
-                    }, 2000);
-
-                    console.log(`🎯 Highlighted annotation: ${annotation.label}`);
+                    window.PdfViewerManagers?.AnnotationManager?.highlightAnnotation(annotation, this);
                 },
 
+                // Clear room/location context
+                // → Manager: DrawingSystem (drawing-system.js)
                 clearContext() {
-                    this.activeRoomId = null;
-                    this.activeRoomName = '';
-                    this.activeLocationId = null;
-                    this.activeLocationName = '';
-                    this.roomSearchQuery = '';
-                    this.locationSearchQuery = '';
-                    this.drawMode = null;
+                    window.PdfViewerManagers?.DrawingSystem?.clearContext(this);
                 },
 
+                // Get formatted context label
+                // → Manager: DrawingSystem (drawing-system.js)
                 getContextLabel() {
-                    if (!this.activeRoomName) return 'No context selected';
-                    if (!this.activeLocationName) return `🏠 ${this.activeRoomName}`;
-                    return `🏠 ${this.activeRoomName} → 📍 ${this.activeLocationName}`;
+                    return window.PdfViewerManagers?.DrawingSystem?.getContextLabel(this) || 'No context selected';
                 },
 
                 // Tree methods
@@ -3313,8 +2916,12 @@
                     }
                 },
 
+                // Refresh project tree (lockout-aware)
+                // → Manager: TreeManager (tree-manager.js)
                 async refreshTree() {
-                    await this.loadTree();
+                    if (window.PdfViewerManagers?.TreeManager?.refreshTree) {
+                        await window.PdfViewerManagers.TreeManager.refreshTree(this.$data);
+                    }
                 },
 
                 toggleNode(nodeId) {
@@ -3517,6 +3124,36 @@
                     }
                 },
 
+                // Navigate to page on double-click
+                async navigateToNodeOnDoubleClick(nodeId, nodeType, parentRoomId = null, parentLocationId = null) {
+                    let node = null;
+                    let parentLocationNode = null;
+                    let parentRoomNode = null;
+
+                    // Find the node in the tree based on type
+                    if (nodeType === 'room') {
+                        node = this.tree.find(r => r.id === nodeId);
+                    } else if (nodeType === 'room_location') {
+                        parentRoomNode = this.tree.find(r => r.id === parentRoomId);
+                        if (parentRoomNode) {
+                            node = parentRoomNode.children?.find(l => l.id === nodeId);
+                        }
+                    } else if (nodeType === 'cabinet_run') {
+                        parentRoomNode = this.tree.find(r => r.id === parentRoomId);
+                        if (parentRoomNode) {
+                            parentLocationNode = parentRoomNode.children?.find(l => l.id === parentLocationId);
+                            if (parentLocationNode) {
+                                node = parentLocationNode.children?.find(run => run.id === nodeId);
+                            }
+                        }
+                    }
+
+                    // Navigate to the page with matching view type
+                    if (node || parentLocationNode || parentRoomNode) {
+                        await this.navigateToNodePage(node, parentLocationNode, parentRoomNode);
+                    }
+                },
+
                 // Autocomplete methods
                 searchRooms(query) {
                     console.log('🔍 Searching rooms with query:', query);
@@ -3623,81 +3260,19 @@
                     Livewire.dispatch('edit-annotation', { annotation: anno });
                 },
 
-                // NEW: Select annotation context for hierarchical tool enabling
+                // Select annotation context for hierarchical tool enabling
+                // → Manager: StateManager (state-manager.js)
                 selectAnnotationContext(anno) {
-                    console.log('🎯 Selecting annotation context:', anno.type, anno.label);
-
-                    // Hierarchical context enabling based on annotation type
-                    if (anno.type === 'room') {
-                        // Clicking a room annotation:
-                        // - Sets room context
-                        // - Clears location context
-                        // - Enables: Draw Location
-                        this.activeRoomId = anno.roomId || anno.id;
-                        this.activeRoomName = anno.label;
-                        this.activeLocationId = null;
-                        this.activeLocationName = '';
-
-                        // Update search fields
-                        this.roomSearchQuery = anno.label;
-                        this.locationSearchQuery = '';
-
-                        console.log(`✓ Room context set: Room "${anno.label}"`);
-                        console.log('✓ Enabled tools: Draw Location');
+                    if (window.PdfViewerManagers?.StateManager?.selectAnnotationContext) {
+                        window.PdfViewerManagers.StateManager.selectAnnotationContext(
+                            anno,
+                            this.$data,
+                            {
+                                getRoomNameById: this.getRoomNameById.bind(this),
+                                getLocationNameById: this.getLocationNameById.bind(this)
+                            }
+                        );
                     }
-                    else if (anno.type === 'location') {
-                        // Clicking a location annotation:
-                        // - Sets room context (from the location's parent)
-                        // - Sets location context
-                        // - Enables: Draw Cabinet Run, Draw Cabinet
-                        this.activeRoomId = anno.roomId;
-                        this.activeRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        this.activeLocationId = anno.id;
-                        this.activeLocationName = anno.label;
-
-                        // Update search fields
-                        this.roomSearchQuery = this.activeRoomName;
-                        this.locationSearchQuery = anno.label;
-
-                        console.log(`✓ Location context set: Room "${this.activeRoomName}" → Location "${anno.label}"`);
-                        console.log('✓ Enabled tools: Draw Cabinet Run, Draw Cabinet');
-                    }
-                    else if (anno.type === 'cabinet_run') {
-                        // Clicking a cabinet run annotation:
-                        // - Sets room context (from the cabinet run's parent hierarchy)
-                        // - Sets location context (parent location)
-                        // - Enables: Draw Cabinet (inside this run)
-                        this.activeRoomId = anno.roomId;
-                        this.activeRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        this.activeLocationId = anno.locationId;
-                        this.activeLocationName = anno.locationName || this.getLocationNameById(anno.locationId);
-
-                        // Update search fields
-                        this.roomSearchQuery = this.activeRoomName;
-                        this.locationSearchQuery = this.activeLocationName;
-
-                        console.log(`✓ Cabinet Run context set: Room "${this.activeRoomName}" → Location "${this.activeLocationName}" → Run "${anno.label}"`);
-                        console.log('✓ Enabled tools: Draw Cabinet');
-                    }
-                    else if (anno.type === 'cabinet') {
-                        // Clicking a cabinet annotation:
-                        // - Sets full hierarchy context
-                        // - Enables: Draw Cabinet (sibling cabinets)
-                        this.activeRoomId = anno.roomId;
-                        this.activeRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        this.activeLocationId = anno.locationId;
-                        this.activeLocationName = anno.locationName || this.getLocationNameById(anno.locationId);
-
-                        // Update search fields
-                        this.roomSearchQuery = this.activeRoomName;
-                        this.locationSearchQuery = this.activeLocationName;
-
-                        console.log(`✓ Cabinet context set: Room "${this.activeRoomName}" → Location "${this.activeLocationName}" → Cabinet "${anno.label}"`);
-                        console.log('✓ Enabled tools: Draw Cabinet (sibling)');
-                    }
-
-                    // Visual feedback: Select the corresponding tree node
-                    this.selectedNodeId = anno.id;
                 },
 
                 // Helper: Get room name by ID from tree
@@ -3718,76 +3293,16 @@
                 },
 
                 // Helper: Find annotation by entity ID on current page
+                // Find annotation by entity type and ID
+                // → Manager: AnnotationManager (annotation-manager.js)
                 findAnnotationByEntity(entityType, entityId) {
-                    if (!entityId || !this.annotations) return null;
-
-                    console.log(`🔍 [findAnnotationByEntity] Looking for ${entityType} with ID ${entityId}`);
-
-                    // Search through all annotations on this page
-                    for (const anno of this.annotations) {
-                        // Match based on entity type
-                        if (entityType === 'room' && anno.roomId === entityId && anno.type === 'room') {
-                            console.log(`✅ Found room annotation:`, anno);
-                            return anno;
-                        } else if (entityType === 'room_location' && anno.roomLocationId === entityId && anno.type === 'location') {
-                            console.log(`✅ Found location annotation:`, anno);
-                            return anno;
-                        } else if (entityType === 'cabinet_run' && anno.cabinetRunId === entityId && anno.type === 'cabinet_run') {
-                            console.log(`✅ Found cabinet run annotation:`, anno);
-                            return anno;
-                        }
-                    }
-
-                    console.log(`❌ No annotation found for ${entityType} with ID ${entityId}`);
-                    return null;
+                    return window.PdfViewerManagers?.AnnotationManager?.findAnnotationByEntity(entityType, entityId, this) || null;
                 },
 
-                // Helper: Check if entity already has annotation on current page
-                // Returns existing annotation if duplicate found, null if safe to draw
+                // Check if entity already has annotation (prevents duplicates)
+                // → Manager: AnnotationManager (annotation-manager.js)
                 checkForDuplicateEntity(drawMode) {
-                    if (!this.annotations) return null;
-
-                    console.log(`🔍 [checkForDuplicateEntity] Checking for duplicates - mode: ${drawMode}`);
-
-                    // Determine entity type and ID based on draw mode
-                    let entityType = null;
-                    let entityId = null;
-                    let annotationType = null;
-
-                    if (drawMode === 'room') {
-                        entityType = 'room';
-                        entityId = this.activeRoomId;
-                        annotationType = 'room';
-                    } else if (drawMode === 'location') {
-                        entityType = 'room_location';
-                        entityId = this.activeLocationId;
-                        annotationType = 'location';
-                    } else if (drawMode === 'cabinet_run') {
-                        entityType = 'cabinet_run';
-                        entityId = this.activeLocationId; // For cabinet runs, activeLocationId holds the run ID
-                        annotationType = 'cabinet_run';
-                    } else if (drawMode === 'cabinet') {
-                        // For cabinets, we check cabinet_specification_id (not implemented yet)
-                        // For now, allow multiple cabinets
-                        return null;
-                    }
-
-                    // If no entity selected (creating new), allow drawing
-                    if (!entityId) {
-                        console.log(`✅ No entity selected - allowing new entity creation`);
-                        return null;
-                    }
-
-                    // Search for existing annotation with this entity
-                    const existing = this.findAnnotationByEntity(entityType, entityId);
-
-                    if (existing) {
-                        console.log(`⚠️  Duplicate found! Entity ${entityId} already has annotation:`, existing);
-                        return existing;
-                    }
-
-                    console.log(`✅ No duplicate found - safe to draw`);
-                    return null;
+                    return window.PdfViewerManagers?.AnnotationManager?.checkForDuplicateEntity(drawMode, this) || null;
                 },
 
                 // Helper: Check if annotation should be visible in current isolation mode
@@ -3825,424 +3340,108 @@
                     return false;
                 },
 
+                // Check if annotation is visible in isolation mode
+                // → Manager: IsolationModeManager (isolation-mode-manager.js)
                 isAnnotationVisibleInIsolation(anno) {
-                    if (!this.isolationMode) return true;
-
-                    console.log(`👁️ [isAnnotationVisibleInIsolation] Checking ${anno.id} (${anno.label}) - type: ${anno.type}`);
-
-                    // FIRST: Check view type compatibility (respects current active view, not isolation view)
-                    // This allows users to switch views while in isolation mode
-                    if (!this.isAnnotationVisibleInView(anno)) {
-                        console.log(`   ❌ Not visible in current view`);
-                        return false;
-                    }
-
-                    // THEN: Check hierarchy visibility using entity relationships
-                    // This elegantly uses the entity IDs that annotations already have,
-                    // so we hide the isolated entity and show only its children
-                    if (this.isolationLevel === 'room') {
-                        console.log(`   🏠 Room isolation mode, isolated room entity: ${this.isolatedRoomId}`);
-
-                        // HIDE the isolated room annotation (we're "inside" the room entity)
-                        // Match by entity ID: room annotation's roomId matches the isolated room entity
-                        if (anno.type === 'room' && anno.roomId === this.isolatedRoomId) {
-                            console.log(`   ❌ Hiding room annotation (entity match: ${anno.roomId} === ${this.isolatedRoomId})`);
-                            return false;
-                        }
-
-                        // Show ONLY direct children (location type), NOT deeper descendants
-                        // This shows one level down from the isolated room
-                        if (anno.type === 'location' && anno.roomId === this.isolatedRoomId) {
-                            console.log(`   ✅ Showing location - direct child of isolated room (roomId: ${anno.roomId})`);
-                            return true;
-                        }
-
-                        // Hide cabinet_run and cabinet type annotations (grandchildren/deeper) when isolating on room
-                        if (anno.type === 'cabinet_run' || anno.type === 'cabinet') {
-                            console.log(`   ❌ Hiding ${anno.type} - too deep in hierarchy for room isolation`);
-                            return false;
-                        }
-
-                        // Hide other rooms
-                        console.log(`   ❌ Hiding annotation - not part of isolated room`);
-                        return false;
-
-                    } else if (this.isolationLevel === 'location') {
-                        // HIDE the isolated location annotation (we're "inside" the location entity)
-                        // Match by entity ID: location annotation's roomLocationId matches the isolated location entity
-                        if (anno.type === 'location' && anno.roomLocationId === this.isolatedLocationId) {
-                            console.log(`   ❌ Hiding isolated location annotation (entity match: ${anno.roomLocationId} === ${this.isolatedLocationId})`);
-                            return false;
-                        }
-
-                        // Show ONLY direct children (cabinet_run type), NOT grandchildren (cabinet type)
-                        // This shows one level down from the isolated location
-                        if (anno.type === 'cabinet_run' && (anno.roomLocationId === this.isolatedLocationId || anno.locationId === this.isolatedLocationId)) {
-                            console.log(`   ✅ Showing cabinet_run - direct child of isolated location (roomLocationId: ${anno.roomLocationId}, locationId: ${anno.locationId})`);
-                            return true;
-                        }
-
-                        // Hide cabinet type annotations (grandchildren) when isolating on location
-                        if (anno.type === 'cabinet') {
-                            console.log(`   ❌ Hiding cabinet - too deep in hierarchy for location isolation`);
-                            return false;
-                        }
-
-                        // Do NOT show parent layers (room) or other locations - isolation mode shows only children
-                        console.log(`   ❌ Hiding annotation - not part of isolated location`);
-                        return false;
-
-                    } else if (this.isolationLevel === 'cabinet_run') {
-                        // SPECIAL CASE: If this annotation IS the isolated cabinet run (by ID match),
-                        // and it doesn't have a proper cabinetRunId field (orphaned), SHOW it anyway
-                        // This handles cabinet runs where cabinetRunId is null and we used anno.id as the entity ID
-                        if (anno.type === 'cabinet_run' && anno.id === this.isolatedCabinetRunId && !anno.cabinetRunId) {
-                            console.log(`   ✅ Showing isolated cabinet run annotation (ID match with no entity ID: ${anno.id})`);
-                            return true;
-                        }
-
-                        // HIDE the isolated cabinet run annotation (we're "inside" the cabinet run entity)
-                        // Match by entity ID: cabinet_run annotation's cabinetRunId matches the isolated cabinet run entity
-                        if (anno.type === 'cabinet_run' && anno.cabinetRunId === this.isolatedCabinetRunId) {
-                            console.log(`   ❌ Hiding cabinet run annotation (entity match: ${anno.cabinetRunId} === ${this.isolatedCabinetRunId})`);
-                            return false;
-                        }
-
-                        // Show all children/descendants of the isolated cabinet run entity (cabinets only)
-                        if (this.isDescendantOf(anno, this.isolatedCabinetRunId)) return true;
-
-                        // Do NOT show parent layers (room/location) - isolation mode shows only children
-                        return false;
-                    }
-
-                    return true;
+                    return window.PdfViewerManagers?.IsolationModeManager?.isAnnotationVisibleInIsolation?.(anno, this.$data) ?? true;
                 },
 
-                // NEW: Enter Isolation Mode (Illustrator-style layer isolation)
+                // Enter Isolation Mode (Illustrator-style layer isolation)
+                // → Manager: IsolationModeManager (isolation-mode-manager.js)
                 async enterIsolationMode(anno) {
-                    console.log('🔒 Entering isolation mode for:', anno.type, anno.label);
-
-                    // Store current view context for isolation mode
-                    this.isolationViewType = this.activeViewType;
-                    this.isolationOrientation = this.activeOrientation;
-                    console.log(`📐 Isolation view context: ${this.isolationViewType}${this.isolationOrientation ? ` (${this.isolationOrientation})` : ''}`);
-
-                    if (anno.type === 'cabinet_run') {
-                        // Isolate at cabinet run level
-                        this.isolationMode = true;
-                        this.isolationLevel = 'cabinet_run';
-                        this.isolatedRoomId = anno.roomId;
-                        this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        this.isolatedLocationId = anno.locationId || anno.roomLocationId;
-                        this.isolatedLocationName = anno.locationName || this.getLocationNameById(anno.locationId || anno.roomLocationId);
-                        // Use cabinet run entity ID - this is what links the annotation to its entity
-                        this.isolatedCabinetRunId = anno.cabinetRunId || anno.id;
-                        this.isolatedCabinetRunName = anno.label;
-
-                        // Set active context
-                        this.activeRoomId = anno.roomId;
-                        this.activeRoomName = this.isolatedRoomName;
-                        this.activeLocationId = anno.locationId || anno.roomLocationId;
-                        this.activeLocationName = this.isolatedLocationName;
-
-                        // Update search fields
-                        this.roomSearchQuery = this.isolatedRoomName;
-                        this.locationSearchQuery = this.isolatedLocationName;
-
-                        console.log(`✓ Cabinet Run isolation: 🏠 ${this.isolatedRoomName} → 📍 ${this.isolatedLocationName} → 🗄️ ${anno.label}`);
-                    } else if (anno.type === 'location') {
-                        // CRITICAL: Location annotations MUST have room_location_id to work in isolation mode
-                        if (!anno.roomLocationId) {
-                            console.error('❌ Cannot enter location isolation mode: room_location_id is missing', {
-                                annotationId: anno.id,
-                                label: anno.label,
-                                roomLocationId: anno.roomLocationId
-                            });
-
-                            // Show user-friendly notification
-                            if (window.Filament) {
-                                new FilamentNotification()
-                                    .title('Isolation Mode Unavailable')
-                                    .body(`Cannot isolate "${anno.label}" - annotation data is incomplete. Please re-create this location annotation.`)
-                                    .danger()
-                                    .send();
-                            }
-
-                            return; // Exit without entering isolation mode
-                        }
-
-                        // Isolate at location level
-                        this.isolationMode = true;
-                        this.isolationLevel = 'location';
-                        this.isolatedRoomId = anno.roomId;
-                        this.isolatedRoomName = anno.roomName || this.getRoomNameById(anno.roomId);
-                        // Use location entity ID - this is what links the annotation to its entity
-                        this.isolatedLocationId = anno.roomLocationId;  // NO FALLBACK - must be valid
-                        this.isolatedLocationName = anno.label;
-                        this.isolatedCabinetRunId = null;
-                        this.isolatedCabinetRunName = '';
-
-                        // Set active context
-                        this.activeRoomId = anno.roomId;
-                        this.activeRoomName = this.isolatedRoomName;
-                        this.activeLocationId = anno.roomLocationId;  // NO FALLBACK - must be valid
-                        this.activeLocationName = anno.label;
-
-                        // Update search fields
-                        this.roomSearchQuery = this.isolatedRoomName;
-                        this.locationSearchQuery = anno.label;
-
-                        console.log(`✓ Location isolation: 🏠 ${this.isolatedRoomName} → 📍 ${anno.label} (entity ID: ${anno.roomLocationId})`);
-                    } else {
-                        // For any other type, treat as room isolation
-                        // This handles clicking on room annotations directly
-                        // Use room entity ID - this is what links the annotation to its entity
-                        const roomId = anno.roomId || anno.id;
-                        const roomName = anno.roomName || anno.label || this.getRoomNameById(roomId);
-
-                        this.isolationMode = true;
-                        this.isolationLevel = 'room';
-                        this.isolatedRoomId = roomId;
-                        this.isolatedRoomName = roomName;
-                        this.isolatedLocationId = null;
-                        this.isolatedLocationName = '';
-                        this.isolatedCabinetRunId = null;
-                        this.isolatedCabinetRunName = '';
-
-                        // Set active context
-                        this.activeRoomId = roomId;
-                        this.activeRoomName = roomName;
-                        this.activeLocationId = null;
-                        this.activeLocationName = '';
-                        this.locationSearchQuery = '';
-
-                        // Update search field
-                        this.roomSearchQuery = roomName;
-
-                        console.log(`✓ Room isolation: 🏠 ${roomName}`);
-                    }
-
-                    // Expand the isolated node in tree
-                    if (!this.expandedNodes.includes(this.isolatedRoomId)) {
-                        this.expandedNodes.push(this.isolatedRoomId);
-                    }
-                    if (this.isolatedLocationId && !this.expandedNodes.includes(this.isolatedLocationId)) {
-                        this.expandedNodes.push(this.isolatedLocationId);
-                    }
-                    if (this.isolatedCabinetRunId && !this.expandedNodes.includes(this.isolatedCabinetRunId)) {
-                        this.expandedNodes.push(this.isolatedCabinetRunId);
-                    }
-
-                    // Select the isolated node
-                    this.selectedNodeId = this.isolationLevel === 'cabinet_run' ? this.isolatedCabinetRunId :
-                                          this.isolationLevel === 'location' ? this.isolatedLocationId :
-                                          this.isolatedRoomId;
-
-                    // Clear previous hidden annotations
-                    this.hiddenAnnotations = [];
-
-                    // Populate hidden annotations based on isolation mode using helper function
-                    this.annotations.forEach(a => {
-                        if (!this.isAnnotationVisibleInIsolation(a)) {
-                            console.log(`👁️ [ENTER ISOLATION] Hiding annotation ${a.id} (${a.label} - type: ${a.type})`);
-                            this.hiddenAnnotations.push(a.id);
-                        }
-                    });
-
-                    console.log(`👁️ [ENTER ISOLATION] Hidden annotations: [${this.hiddenAnnotations.join(', ')}]`);
-
-                    // Zoom to fit annotation box on screen (double-click behavior)
-                    await this.zoomToFitAnnotation(anno);
-
-                    // Wait for overlay dimensions to sync after zoom
-                    await this.$nextTick();
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
-                    // Sync overlay dimensions for blur layer
-                    this.syncOverlayToCanvas();
-
-                    // Update the isolation mask to show visible annotations clearly
-                    this.updateIsolationMask();
-                },
-
-                // NEW: Exit Isolation Mode
-                async exitIsolationMode() {
-                    console.log('🔓 Exiting isolation mode');
-
-                    // Clear isolation state
-                    this.isolationMode = false;
-                    this.isolationLevel = null;
-                    this.isolatedRoomId = null;
-                    this.isolatedRoomName = '';
-                    this.isolatedLocationId = null;
-                    this.isolatedLocationName = '';
-                    this.isolatedCabinetRunId = null;
-                    this.isolatedCabinetRunName = '';
-                    this.isolationViewType = null;
-                    this.isolationOrientation = null;
-
-                    // Clear active context
-                    this.clearContext();
-
-                    // Deselect node
-                    this.selectedNodeId = null;
-
-                    // Clear hidden annotations array (show all annotations)
-                    console.log(`👁️ [EXIT ISOLATION] Clearing hidden annotations (was: [${this.hiddenAnnotations.join(', ')}])`);
-                    this.hiddenAnnotations = [];
-
-                    // Reset zoom to fit full page (100%)
-                    await this.resetZoom();
-
-                    console.log('✓ Returned to normal view with reset zoom');
-
-                    // Update the isolation mask after exiting
-                    this.updateIsolationMask();
-                },
-
-                // Update the SVG mask to exclude visible annotations from darkening blur
-                updateIsolationMask() {
-                    const maskRects = document.getElementById('maskRects');
-                    if (!maskRects) return;
-
-                    // Clear existing rects
-                    maskRects.innerHTML = '';
-
-                    // Log current overlay dimensions for debugging
-                    console.log(`📐 [MASK UPDATE] Overlay dimensions: ${this.overlayWidth} × ${this.overlayHeight}`);
-
-                    // Get all visible annotations (not in hiddenAnnotations array)
-                    const visibleAnnotations = this.annotations.filter(a => !this.hiddenAnnotations.includes(a.id));
-
-                    // ALSO find the isolated entity annotation (the boundary we're "inside of")
-                    let isolatedEntityAnnotation = null;
-                    if (this.isolationMode) {
-                        if (this.isolationLevel === 'room') {
-                            isolatedEntityAnnotation = this.annotations.find(a =>
-                                a.type === 'room' && a.roomId === this.isolatedRoomId
-                            );
-                        } else if (this.isolationLevel === 'location') {
-                            isolatedEntityAnnotation = this.annotations.find(a =>
-                                a.type === 'location' && a.roomLocationId === this.isolatedLocationId
-                            );
-                        } else if (this.isolationLevel === 'cabinet_run') {
-                            isolatedEntityAnnotation = this.annotations.find(a =>
-                                a.type === 'cabinet_run' && a.cabinetRunId === this.isolatedCabinetRunId
-                            );
-                        }
-                    }
-
-                    // Create cutout for the isolated entity boundary (even though annotation is hidden)
-                    if (isolatedEntityAnnotation && isolatedEntityAnnotation.screenX !== undefined) {
-                        // SVG viewBox now matches screen coordinate space, so use screenX/Y directly
-                        const x = (isolatedEntityAnnotation.screenX || 0) - 15;
-                        const y = (isolatedEntityAnnotation.screenY || 0) - 15;
-                        const width = (isolatedEntityAnnotation.screenWidth || 0) + 30;
-                        const height = (isolatedEntityAnnotation.screenHeight || 0) + 30;
-
-                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                        rect.setAttribute('x', x);
-                        rect.setAttribute('y', y);
-                        rect.setAttribute('width', width);
-                        rect.setAttribute('height', height);
-                        rect.setAttribute('fill', 'black');
-                        rect.setAttribute('rx', '8');
-                        rect.setAttribute('filter', 'url(#feather)');
-                        maskRects.appendChild(rect);
-                        console.log(`✓ Added isolated entity boundary to mask: ${isolatedEntityAnnotation.label}`);
-                    }
-
-                    // Create cutouts for all visible child annotations
-                    visibleAnnotations.forEach(anno => {
-                        if (anno.screenX !== undefined && anno.screenWidth > 0 && anno.screenHeight > 0) {
-                            // SVG viewBox now matches screen coordinate space, so use screenX/Y directly
-                            const x = (anno.screenX || 0) - 15;
-                            const y = (anno.screenY || 0) - 15;
-                            const width = (anno.screenWidth || 0) + 30;
-                            const height = (anno.screenHeight || 0) + 30;
-
-                            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                            rect.setAttribute('x', x);
-                            rect.setAttribute('y', y);
-                            rect.setAttribute('width', width);
-                            rect.setAttribute('height', height);
-                            rect.setAttribute('fill', 'black');
-                            rect.setAttribute('rx', '8');
-                            rect.setAttribute('filter', 'url(#feather)');
-                            maskRects.appendChild(rect);
-                        }
-                    });
-                },
-
-                // Edit annotation (NEW - Full CRUD)
-                editAnnotation(anno) {
-                    console.log('✏️ Editing annotation:', anno);
-                    // Add pdfPageId and projectId to annotation for Livewire context loading
-                    const annotationWithContext = {
-                        ...anno,
-                        pdfPageId: this.pdfPageId,
-                        projectId: this.projectId
-                    };
-                    // Dispatch to Livewire component for editing
-                    Livewire.dispatch('edit-annotation', { annotation: annotationWithContext });
-                },
-
-                // Delete annotation (NEW - Full CRUD)
-                async deleteAnnotation(anno) {
-                    if (!confirm(`Delete "${anno.label}"?`)) {
-                        return;
-                    }
-
-                    console.log('🗑️ Deleting annotation:', anno);
-
-                    // If it's a temporary annotation (not saved yet), just remove from array
-                    if (anno.id.toString().startsWith('temp_')) {
-                        this.annotations = this.annotations.filter(a => a.id !== anno.id);
-                        console.log('✓ Temporary annotation removed from local state');
-                        return;
-                    }
-
-                    // Otherwise, delete from server
-                    try {
-                        const response = await fetch(`/api/pdf/page/annotations/${anno.id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                            }
+                    if (window.PdfViewerManagers?.IsolationModeManager?.enterIsolationMode) {
+                        await window.PdfViewerManagers.IsolationModeManager.enterIsolationMode(anno, this.$data, {
+                            zoomToFitAnnotation: this.zoomToFitAnnotation.bind(this),
+                            $nextTick: this.$nextTick.bind(this),
+                            syncOverlayToCanvas: this.syncOverlayToCanvas.bind(this),
+                            clearContext: this.clearContext.bind(this),
+                            resetZoom: this.resetZoom.bind(this)
                         });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            // Remove from local state
-                            this.annotations = this.annotations.filter(a => a.id !== anno.id);
-                            console.log('✓ Annotation deleted successfully');
-
-                            // Refresh tree to update counts
-                            await this.refreshTree();
-                        } else {
-                            throw new Error(data.error || 'Failed to delete annotation');
-                        }
-                    } catch (error) {
-                        console.error('Failed to delete annotation:', error);
-                        alert(`Error deleting annotation: ${error.message}`);
+                    } else {
+                        console.error('❌ IsolationModeManager.enterIsolationMode not available');
                     }
+                },
+
+                // Exit Isolation Mode
+                // → Manager: IsolationModeManager (isolation-mode-manager.js)
+                async exitIsolationMode() {
+                    if (window.PdfViewerManagers?.IsolationModeManager?.exitIsolationMode) {
+                        await window.PdfViewerManagers.IsolationModeManager.exitIsolationMode(this.$data, {
+                            clearContext: this.clearContext.bind(this),
+                            resetZoom: this.resetZoom.bind(this)
+                        });
+                    } else {
+                        console.error('❌ IsolationModeManager.exitIsolationMode not available');
+                    }
+                },
+
+                // Update SVG isolation mask
+                // → Manager: IsolationModeManager (isolation-mode-manager.js)
+                updateIsolationMask() {
+                    if (window.PdfViewerManagers?.IsolationModeManager?.updateIsolationMask) {
+                        window.PdfViewerManagers.IsolationModeManager.updateIsolationMask(this.$data);
+                    } else {
+                        console.error('❌ IsolationModeManager.updateIsolationMask not available');
+                    }
+                },
+
+                // Edit annotation - opens Livewire modal
+                // → Manager: AnnotationManager (annotation-manager.js)
+                editAnnotation(anno) {
+                    window.PdfViewerManagers?.AnnotationManager?.editAnnotation(anno, this);
+                },
+
+                // Delete annotation from API
+                // → Manager: AnnotationManager (annotation-manager.js)
+                async deleteAnnotation(anno) {
+                    await window.PdfViewerManagers?.AnnotationManager?.deleteAnnotation(
+                        anno,
+                        this,
+                        this.refreshTree.bind(this)
+                    );
                 },
 
                 // Zoom methods
-                zoomIn() {
-                    const newZoom = Math.min(this.zoomLevel + 0.25, this.zoomMax);
-                    this.setZoom(newZoom);
+                // Zoom in
+                // → Manager: ZoomManager (zoom-manager.js)
+                async zoomIn() {
+                    if (window.PdfViewerManagers?.ZoomManager?.zoomIn) {
+                        await window.PdfViewerManagers.ZoomManager.zoomIn(this.$data, this.$refs, {
+                            displayPdf: this.displayPdf.bind(this),
+                            $nextTick: this.$nextTick.bind(this),
+                            updateIsolationMask: this.updateIsolationMask.bind(this)
+                        });
+                    } else {
+                        console.error('❌ ZoomManager.zoomIn not available');
+                    }
                 },
 
-                zoomOut() {
-                    const newZoom = Math.max(this.zoomLevel - 0.25, this.zoomMin);
-                    this.setZoom(newZoom);
+                // Zoom out
+                // → Manager: ZoomManager (zoom-manager.js)
+                async zoomOut() {
+                    if (window.PdfViewerManagers?.ZoomManager?.zoomOut) {
+                        await window.PdfViewerManagers.ZoomManager.zoomOut(this.$data, this.$refs, {
+                            displayPdf: this.displayPdf.bind(this),
+                            $nextTick: this.$nextTick.bind(this),
+                            updateIsolationMask: this.updateIsolationMask.bind(this)
+                        });
+                    } else {
+                        console.error('❌ ZoomManager.zoomOut not available');
+                    }
                 },
 
-                resetZoom() {
-                    this.setZoom(1.0);
+                // Reset zoom to 100%
+                // → Manager: ZoomManager (zoom-manager.js)
+                async resetZoom() {
+                    if (window.PdfViewerManagers?.ZoomManager?.resetZoom) {
+                        await window.PdfViewerManagers.ZoomManager.resetZoom(this.$data, this.$refs, {
+                            displayPdf: this.displayPdf.bind(this),
+                            $nextTick: this.$nextTick.bind(this),
+                            updateIsolationMask: this.updateIsolationMask.bind(this)
+                        });
+                    } else {
+                        console.error('❌ ZoomManager.resetZoom not available');
+                    }
                 },
 
                 async setZoom(level) {
@@ -4276,23 +3475,23 @@
                 },
 
                 // Update annotation screen positions for current zoom level
+                // → Manager: CoordTransform (coordinate-transform.js)
                 updateAnnotationPositions() {
-                    if (!this.pageDimensions) return;
+                    if (window.PdfViewerManagers?.CoordTransform?.updateAnnotationPositions) {
+                        window.PdfViewerManagers.CoordTransform.updateAnnotationPositions(this.$data, this.$refs);
+                    } else {
+                        console.error('❌ CoordTransform.updateAnnotationPositions not available');
+                    }
+                },
 
-                    // Mutate annotations in-place to preserve Alpine reactivity
-                    this.annotations.forEach(anno => {
-                        const screenPos = this.pdfToScreen(
-                            anno.pdfX,
-                            anno.pdfY,
-                            anno.pdfWidth,
-                            anno.pdfHeight
-                        );
-
-                        anno.screenX = screenPos.x;
-                        anno.screenY = screenPos.y;
-                        anno.screenWidth = screenPos.width;
-                        anno.screenHeight = screenPos.height;
-                    });
+                // Render annotations (lockout-aware wrapper for updateAnnotationPositions)
+                // → Manager: CoordTransform (coordinate-transform.js)
+                renderAnnotations() {
+                    if (window.PdfViewerManagers?.CoordTransform?.renderAnnotations) {
+                        window.PdfViewerManagers.CoordTransform.renderAnnotations(this.$data, this.$refs);
+                    } else {
+                        console.error('❌ CoordTransform.renderAnnotations not available');
+                    }
                 },
 
                 getZoomPercentage() {
@@ -4300,174 +3499,15 @@
                 },
 
                 // Zoom to fit annotation box on screen
+                // → Manager: ZoomManager (zoom-manager.js)
                 async zoomToFitAnnotation(anno) {
-                    console.log('🔍 Zooming to fit annotation:', anno.label);
-
-                    // UNIVERSAL APPROACH: Find annotation with screen coordinates
-                    // Works for ANY hierarchical type (room, location, cabinet_run, cabinet, etc.)
-                    let annotationWithCoords;
-
-                    // Strategy 1: Anno already has screen coordinates (direct double-click on annotation)
-                    if (anno.screenWidth && anno.screenHeight) {
-                        annotationWithCoords = anno;
-                        console.log('   ✓ Using annotation directly (has screen coordinates)');
-                    }
-                    // Strategy 2: Find by annotation ID (works for double-clicks passing annotation object)
-                    else {
-                        annotationWithCoords = this.annotations.find(a =>
-                            a.id === anno.id &&
-                            a.screenWidth &&
-                            a.screenHeight
-                        );
-
-                        if (annotationWithCoords) {
-                            console.log('   ✓ Found by annotation ID');
-                        }
-                    }
-
-                    // Strategy 3: Find by type and entity ID (works for tree clicks passing entity ID)
-                    if (!annotationWithCoords) {
-                        annotationWithCoords = this.annotations.find(a => {
-                            // Must match type and have coordinates
-                            if (a.type !== anno.type || !a.screenWidth || !a.screenHeight) {
-                                return false;
-                            }
-
-                            // Universal check: match any entity ID field with anno.id
-                            // Works for all hierarchical types without case-by-case logic
-                            return a.roomId === anno.id ||
-                                   a.roomLocationId === anno.id ||
-                                   a.cabinetRunId === anno.id ||
-                                   a.cabinetId === anno.id;
+                    if (window.PdfViewerManagers?.ZoomManager?.zoomToFitAnnotation) {
+                        await window.PdfViewerManagers.ZoomManager.zoomToFitAnnotation(anno, this.$data, this.$refs, {
+                            $nextTick: this.$nextTick.bind(this)
                         });
-
-                        if (annotationWithCoords) {
-                            console.log(`   ✓ Found by entity ID match for type: ${anno.type}`);
-                        }
+                    } else {
+                        console.error('❌ ZoomManager.zoomToFitAnnotation not available');
                     }
-
-                    if (!annotationWithCoords) {
-                        console.warn('⚠️ Annotation does not have valid screen coordinates yet, skipping zoom', {
-                            searchedType: anno.type,
-                            searchedId: anno.id
-                        });
-                        return;
-                    }
-
-                    // Get container dimensions
-                    const container = this.$refs.annotationOverlay;
-                    if (!container) {
-                        console.warn('⚠️ Container not found for zoom calculation');
-                        return;
-                    }
-
-                    const containerRect = container.getBoundingClientRect();
-                    const containerWidth = containerRect.width;
-                    const containerHeight = containerRect.height;
-
-                    // Add padding around annotation (20% margin)
-                    const paddingFactor = 0.8; // 80% of container = 20% padding total
-
-                    // Calculate required zoom to fit annotation width and height (use annotation with coordinates)
-                    const zoomX = (containerWidth * paddingFactor) / annotationWithCoords.screenWidth;
-                    const zoomY = (containerHeight * paddingFactor) / annotationWithCoords.screenHeight;
-
-                    // Use the smaller zoom to ensure both dimensions fit
-                    let targetZoom = Math.min(zoomX, zoomY);
-
-                    // Clamp to zoom limits
-                    targetZoom = Math.max(this.zoomMin, Math.min(targetZoom, this.zoomMax));
-
-                    // Apply the zoom
-                    await this.setZoom(targetZoom);
-
-                    // After zoom, scroll annotation to center of viewport
-                    await this.$nextTick();
-
-                    // Get the canvas element
-                    const canvas = this.$refs.pdfEmbed?.querySelector('canvas');
-                    if (!canvas) {
-                        console.warn('⚠️ Canvas not found for centering');
-                        return;
-                    }
-
-                    // FilamentPHP uses separate scroll containers for X and Y
-                    // Find them independently
-                    let scrollContainerX = container.parentElement;
-                    let scrollContainerY = container.parentElement;
-
-                    // Find horizontal scroll container
-                    let current = container.parentElement;
-                    while (current && current !== document.body) {
-                        const style = window.getComputedStyle(current);
-                        const hasHorizontalScroll = current.scrollWidth > current.clientWidth;
-
-                        if ((style.overflowX === 'auto' || style.overflowX === 'scroll') && hasHorizontalScroll) {
-                            scrollContainerX = current;
-                            console.log('📍 Found X scroll container:', current.tagName, current.className.substring(0, 30));
-                            break;
-                        }
-                        current = current.parentElement;
-                    }
-
-                    // Find vertical scroll container
-                    current = container.parentElement;
-                    while (current && current !== document.body) {
-                        const style = window.getComputedStyle(current);
-                        const hasVerticalScroll = current.scrollHeight > current.clientHeight;
-
-                        if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && hasVerticalScroll) {
-                            scrollContainerY = current;
-                            console.log('📍 Found Y scroll container:', current.tagName, current.className.substring(0, 30));
-                            break;
-                        }
-                        current = current.parentElement;
-                    }
-
-                    // Default to body/documentElement if not found
-                    if (!scrollContainerX || scrollContainerX === document.body) {
-                        scrollContainerX = document.documentElement || document.body;
-                    }
-                    if (!scrollContainerY || scrollContainerY === document.body) {
-                        scrollContainerY = document.documentElement || document.body;
-                    }
-
-                    // Calculate annotation center in screen coordinates at NEW zoom level
-                    const annoScreenPos = this.pdfToScreen(
-                        annotationWithCoords.pdfX + annotationWithCoords.pdfWidth / 2,
-                        annotationWithCoords.pdfY - annotationWithCoords.pdfHeight / 2, // PDF Y is inverted
-                        0,
-                        0
-                    );
-
-                    console.log('📍 Centering calculation:', {
-                        annoScreenPos,
-                        containerWidth,
-                        containerHeight,
-                        targetScrollLeft: annoScreenPos.x - containerWidth / 2,
-                        targetScrollTop: annoScreenPos.y - containerHeight / 2,
-                        scrollContainerXTag: scrollContainerX.tagName,
-                        scrollContainerYTag: scrollContainerY.tagName,
-                        scrollContainerXScrollWidth: scrollContainerX.scrollWidth,
-                        scrollContainerXClientWidth: scrollContainerX.clientWidth,
-                        scrollContainerYScrollHeight: scrollContainerY.scrollHeight,
-                        scrollContainerYClientHeight: scrollContainerY.clientHeight,
-                        currentScrollLeft: scrollContainerX.scrollLeft,
-                        currentScrollTop: scrollContainerY.scrollTop
-                    });
-
-                    // Center the annotation in viewport using SEPARATE scroll containers
-                    scrollContainerX.scrollLeft = annoScreenPos.x - containerWidth / 2;
-                    scrollContainerY.scrollTop = annoScreenPos.y - containerHeight / 2;
-
-                    console.log('📍 After scroll:', {
-                        actualScrollLeft: scrollContainerX.scrollLeft,
-                        actualScrollTop: scrollContainerY.scrollTop,
-                        scrollContainerXInfo: `${scrollContainerX.tagName}.${scrollContainerX.className.substring(0, 30)}`,
-                        scrollContainerYInfo: `${scrollContainerY.tagName}.${scrollContainerY.className.substring(0, 30)}`
-                    });
-
-                    console.log(`✓ Zoomed to ${Math.round(targetZoom * 100)}% and centered annotation`);
                 },
 
                 // Pagination methods (NEW - Phase 2)

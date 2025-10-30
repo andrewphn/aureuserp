@@ -12,6 +12,9 @@ import './components/context-footer.js';
 import './centralized-entity-store.js';
 import './form-auto-populate.js';
 
+// Import PDF viewer managers (exports window.PdfViewerManagers for Alpine components)
+import '../../plugins/webkul/projects/resources/js/pdf-viewer.js';
+
 // Note: annotations.js is loaded separately via @vite() on PDF pages to prevent double-loading
 
 // Ensure components are immediately available globally before Alpine starts
