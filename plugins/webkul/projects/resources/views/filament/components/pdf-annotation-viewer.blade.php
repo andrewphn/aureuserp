@@ -1319,7 +1319,7 @@
                                     pointer-events: ${anno.locked ? 'none' : 'auto'};
                                     cursor: ${anno.locked ? 'not-allowed' : (isMoving && activeAnnotationId === anno.id ? 'grabbing' : 'grab')};
                                     z-index: ${window.PdfViewerManagers?.AnnotationManager?.getAnnotationZIndex(anno, this) || 10};
-                                    transition: all 0.2s;
+                                    transition: ${(isResizing || isMoving) && activeAnnotationId === anno.id ? 'none' : 'all 0.2s'};
                                     will-change: transform;
                                     opacity: ${anno.locked ? 0.7 : 1};
                                     box-shadow: ${activeAnnotationId === anno.id ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none'};
