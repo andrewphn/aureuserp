@@ -107,6 +107,22 @@ export function finishDrawing(event, state, refs) {
 }
 
 /**
+ * Cancel drawing operation (e.g., mouse left canvas)
+ * @param {Object} state - Component state
+ */
+export function cancelDrawing(state) {
+    if (!state.isDrawing) return;
+
+    console.log('❌ Drawing cancelled (mouse left canvas)');
+
+    // Clear drawing lockout if active
+    clearDrawingLockout(state);
+
+    // Reset drawing state without creating annotation
+    resetDrawing(state);
+}
+
+/**
  * Reset drawing state
  * @param {Object} state - Component state
  */

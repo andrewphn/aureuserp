@@ -447,3 +447,30 @@ export function getPageGroupedAnnotations(state) {
     // Convert to array and sort by page number
     return Array.from(pages.values()).sort((a, b) => a.pageNumber - b.pageNumber);
 }
+
+/**
+ * Get room name by ID from tree
+ * @param {Number|String} roomId - Room ID to lookup
+ * @param {Object} state - Component state
+ * @returns {String} Room name or empty string
+ */
+export function getRoomNameById(roomId, state) {
+    if (!state.tree || !roomId) return '';
+    const room = state.tree.find(r => r.id === roomId);
+    return room ? room.name : '';
+}
+
+/**
+ * Get location name by ID from tree
+ * @param {Number|String} locationId - Location ID to lookup
+ * @param {Object} state - Component state
+ * @returns {String} Location name or empty string
+ */
+export function getLocationNameById(locationId, state) {
+    if (!state.tree || !locationId) return '';
+    for (const room of state.tree) {
+        const location = room.children?.find(l => l.id === locationId);
+        if (location) return location.name;
+    }
+    return '';
+}
