@@ -33,9 +33,15 @@ export function startResize(event, annotation, handle, state) {
 
     console.log('🔄 Resize started:', { annotation: annotation.label, handle });
 
-    // NOTE: Document event listeners are handled by inline handlers in pdf-viewer-core.js
-    // which have proper access to Alpine.js context via 'this'
-    // Do NOT add document listeners here as they lose context
+    // Add document-level event listeners to track mouse even when it leaves the annotation
+    // Store bound functions so we can remove them later
+    state._resizeMoveHandler = (e) => handleResizeMove(e, state);
+    state._resizeEndHandler = (e) => handleResizeEnd(e, state, state._refs);
+
+    document.addEventListener('mousemove', state._resizeMoveHandler);
+    document.addEventListener('mouseup', state._resizeEndHandler);
+
+    console.log('📎 Document resize listeners attached');
 }
 
 /**
@@ -149,6 +155,15 @@ export function handleResizeEnd(event, state, refs) {
             // Clear lockout since we're not saving
             clearResizeLockout(state);
 
+            // Remove document listeners
+            if (state._resizeMoveHandler) {
+                document.removeEventListener('mousemove', state._resizeMoveHandler);
+                document.removeEventListener('mouseup', state._resizeEndHandler);
+                state._resizeMoveHandler = null;
+                state._resizeEndHandler = null;
+                console.log('🔌 Document resize listeners removed (cancelled)');
+            }
+
             return;
         }
 
@@ -168,9 +183,14 @@ export function handleResizeEnd(event, state, refs) {
     state.resizeStart = null;
     state.activeAnnotationId = null;
 
-    // Remove global listeners
-    document.removeEventListener('mousemove', handleResizeMove);
-    document.removeEventListener('mouseup', handleResizeEnd);
+    // Remove document listeners
+    if (state._resizeMoveHandler) {
+        document.removeEventListener('mousemove', state._resizeMoveHandler);
+        document.removeEventListener('mouseup', state._resizeEndHandler);
+        state._resizeMoveHandler = null;
+        state._resizeEndHandler = null;
+        console.log('🔌 Document resize listeners removed');
+    }
 }
 
 /**
@@ -229,9 +249,15 @@ export function startMove(event, annotation, state) {
 
     console.log('🖱️ Move started:', annotation.label);
 
-    // NOTE: Document event listeners are handled by inline handlers in pdf-viewer-core.js
-    // which have proper access to Alpine.js context via 'this'
-    // Do NOT add document listeners here as they lose context
+    // Add document-level event listeners to track mouse even when it leaves the annotation
+    // Store bound functions so we can remove them later
+    state._moveMoveHandler = (e) => handleMoveUpdate(e, state);
+    state._moveEndHandler = (e) => handleMoveEnd(e, state, state._refs);
+
+    document.addEventListener('mousemove', state._moveMoveHandler);
+    document.addEventListener('mouseup', state._moveEndHandler);
+
+    console.log('📎 Document move listeners attached');
 }
 
 /**
@@ -309,6 +335,15 @@ export function handleMoveEnd(event, state, refs) {
             // Clear lockout since we're not saving
             clearResizeLockout(state);
 
+            // Remove document listeners
+            if (state._moveMoveHandler) {
+                document.removeEventListener('mousemove', state._moveMoveHandler);
+                document.removeEventListener('mouseup', state._moveEndHandler);
+                state._moveMoveHandler = null;
+                state._moveEndHandler = null;
+                console.log('🔌 Document move listeners removed (cancelled)');
+            }
+
             return;
         }
 
@@ -327,9 +362,14 @@ export function handleMoveEnd(event, state, refs) {
     state.moveStart = null;
     state.activeAnnotationId = null;
 
-    // Remove global listeners
-    document.removeEventListener('mousemove', handleMoveUpdate);
-    document.removeEventListener('mouseup', handleMoveEnd);
+    // Remove document listeners
+    if (state._moveMoveHandler) {
+        document.removeEventListener('mousemove', state._moveMoveHandler);
+        document.removeEventListener('mouseup', state._moveEndHandler);
+        state._moveMoveHandler = null;
+        state._moveEndHandler = null;
+        console.log('🔌 Document move listeners removed');
+    }
 }
 
 /**
