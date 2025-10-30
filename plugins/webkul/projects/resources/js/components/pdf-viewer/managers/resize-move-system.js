@@ -424,11 +424,8 @@ async function saveAnnotationToServer(annotation, state) {
         return;
     }
 
-    // CRITICAL CHECK: Don't save if lockout is active
-    if (state._resizeLockout) {
-        console.error('🚨 [API] SAVE BLOCKED - Resize lockout is active! This should not happen!');
-        return;
-    }
+    // Note: Lockout remains active during debounced save to prevent interruptions
+    // It will be cleared after this save completes in debouncedSaveAnnotation()
 
     console.log('📤 [API] Sending PATCH request to server...');
 
