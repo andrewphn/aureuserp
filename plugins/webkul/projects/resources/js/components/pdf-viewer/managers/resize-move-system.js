@@ -43,7 +43,7 @@ export function startResize(event, annotation, handle, state) {
  * @param {MouseEvent} event - Mouse move event
  * @param {Object} state - Component state
  */
-const handleResizeMove = throttleRAF(function(event, state) {
+export const handleResizeMove = throttleRAF(function(event, state) {
     if (!state.isResizing || !state.resizeStart) return;
 
     updateResize(event, state);
@@ -121,7 +121,7 @@ function updateResize(event, state) {
  * @param {Object} state - Component state
  * @param {Object} refs - Alpine.js $refs
  */
-function handleResizeEnd(event, state, refs) {
+export function handleResizeEnd(event, state, refs) {
     if (!state.isResizing) return;
 
     // Check if annotation actually resized (minimum 2 pixels change in width or height)
@@ -239,7 +239,7 @@ export function startMove(event, annotation, state) {
  * @param {MouseEvent} event - Mouse move event
  * @param {Object} state - Component state
  */
-const handleMoveUpdate = throttleRAF(function(event, state) {
+export const handleMoveUpdate = throttleRAF(function(event, state) {
     if (!state.isMoving || !state.moveStart) return;
 
     updateMove(event, state);
@@ -284,7 +284,7 @@ function updateMove(event, state) {
  * @param {Object} state - Component state
  * @param {Object} refs - Alpine.js $refs
  */
-function handleMoveEnd(event, state, refs) {
+export function handleMoveEnd(event, state, refs) {
     if (!state.isMoving) return;
 
     // Check if annotation actually moved (minimum 2 pixels)

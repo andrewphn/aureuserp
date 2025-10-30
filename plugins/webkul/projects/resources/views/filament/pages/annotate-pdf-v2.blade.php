@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     {{-- Full-screen V3 HTML Overlay PDF Annotation Viewer --}}
-    <div class="w-full h-full min-h-screen pb-32">
+    <div class="w-full h-screen overflow-hidden">
         @if($pdfUrl)
             @include('webkul-project::filament.components.pdf-annotation-viewer', [
                 'pdfPageId' => $pdfPage?->id,

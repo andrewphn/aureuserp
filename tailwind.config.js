@@ -208,5 +208,17 @@ export default {
         'to-blue-600',
         'shadow-lg',
         'hover:shadow-xl',
+
+        // PDF Annotation Dynamic Positioning Classes (for intelligent label/button positioning)
+        '-top-2',
+        '-top-7',
+        '-bottom-2',
+        '-bottom-7',
+        '-left-2',
+        'left-0',
+        '-right-2',
+        'right-0',
+        'top-0',
+        'bottom-0',
     ]
 };
