@@ -179,6 +179,19 @@ export function createPdfViewerComponent(config) {
                 console.log('📥 Livewire: annotation-updated', event);
                 AnnotationManager.loadAnnotations(this, this.$refs);
             });
+
+            window.Livewire.on('annotation-editor-closed', (event) => {
+                console.log('📥 Livewire: annotation-editor-closed', event);
+                // Remove any temporary annotations that weren't saved
+                const beforeCount = this.annotations.length;
+                this.annotations = this.annotations.filter(anno =>
+                    !anno.id.toString().startsWith('temp_')
+                );
+                const afterCount = this.annotations.length;
+                if (beforeCount > afterCount) {
+                    console.log(`✓ Cleaned up ${beforeCount - afterCount} temporary annotation(s)`);
+                }
+            });
         },
 
         // PDF Management
