@@ -40,6 +40,20 @@ window.PdfViewerManagers = {
     AutocompleteManager
 };
 
+// Register Alpine component when Alpine is available
+if (typeof Alpine !== 'undefined') {
+    Alpine.data('annotationSystemV3', createPdfViewerComponent);
+    Alpine.data('annotationSystemV2', createPdfViewerComponent); // Backward compatibility
+    console.log('✅ PDF Annotation System loaded - Alpine components registered (V2 + V3)');
+} else {
+    // Wait for Alpine to be ready
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('annotationSystemV3', createPdfViewerComponent);
+        Alpine.data('annotationSystemV2', createPdfViewerComponent); // Backward compatibility
+        console.log('✅ PDF Annotation System loaded - Alpine components registered (V2 + V3)');
+    });
+}
+
 // Export for ES module imports
 export default createPdfViewerComponent;
 
