@@ -25,8 +25,8 @@
         @endif
     </div>
 
-    {{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}
+    {{-- Load annotation system via Vite (bundles PDF.js + Alpine component with modular managers) --}}
     @once
-        @vite('resources/js/annotations.js')
+        @vite('plugins/webkul/projects/resources/js/pdf-viewer.js')
     @endonce
 </x-filament-panels::page>
