@@ -38,11 +38,16 @@ class AnnotatePdf extends Page implements HasForms
     #[Url]
     public $pdf;
 
-    public function mount(int|string $record, int $page = 1): void
+    public function mount(int|string $record): void
     {
         $this->record = $this->resolveRecord($record);
         $this->projectId = $this->record->id;
-        $this->pageNumber = $page;
+
+        // Get page number from route parameter (Livewire will bind it automatically)
+        // If not set, default to 1
+        if (!isset($this->pageNumber) || $this->pageNumber < 1) {
+            $this->pageNumber = 1;
+        }
 
         // Check if PDF ID is provided via URL parameter
         if (!$this->pdf) {
