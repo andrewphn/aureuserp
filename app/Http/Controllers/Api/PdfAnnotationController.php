@@ -138,6 +138,7 @@ class PdfAnnotationController extends Controller
                 'annotations.*.cabinet_run_id' => 'nullable|integer',  // For cabinet run annotations
                 'annotations.*.cabinet_specification_id' => 'nullable|integer',  // For cabinet annotations
                 'annotations.*.view_type' => 'nullable|string|in:plan,elevation,section,detail',  // View type enum
+                'annotations.*.view_orientation' => 'nullable|string',  // View orientation for elevation/section (front, back, left, right, A-A, etc.)
                 'annotations.*.notes' => 'nullable|string',
                 'annotations.*.annotation_type' => 'nullable|string',
                 'annotations.*.context' => 'nullable|array',
@@ -199,6 +200,7 @@ class PdfAnnotationController extends Controller
                         'cabinet_run_id' => $cabinetRunId,
                         'cabinet_specification_id' => $annotation['cabinet_specification_id'] ?? null,  // For cabinet annotations
                         'view_type' => $annotation['view_type'] ?? 'plan',  // Default to plan view
+                        'view_orientation' => $annotation['view_orientation'] ?? null,  // Orientation for elevation/section views
                         'notes' => $annotation['notes'] ?? null,
                         'created_by' => Auth::id(),
                     ]);
@@ -461,11 +463,14 @@ class PdfAnnotationController extends Controller
                     'room_type' => $annotation->room_type,
                     'color' => $annotation->color,
                     'cabinet_run_id' => $annotation->cabinet_run_id,
+                    'cabinet_specification_id' => $annotation->cabinet_specification_id,  // CRITICAL: Include linked entity ID so editor can detect "existing" mode
                     'room_id' => $annotation->room_id,
                     'room_location_id' => $annotation->room_location_id,  // CRITICAL: Include room_location_id for location isolation mode
                     'parent_annotation_id' => $annotation->parent_annotation_id,  // Add parent relationship for hierarchy
                     'notes' => $annotation->notes,
                     'annotation_type' => $annotation->annotation_type,
+                    'view_type' => $annotation->view_type,  // Include view type for filtering
+                    'view_orientation' => $annotation->view_orientation,  // Include orientation for elevation/section views
                 ];
             });
 
