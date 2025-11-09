@@ -296,6 +296,6 @@ class HierarchyBuilderModal extends Component
 
     public function render()
     {
-        return view('projects::livewire.hierarchy-builder-modal');
+        return view('webkul-project::livewire.hierarchy-builder-modal');
     }
 }
