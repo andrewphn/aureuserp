@@ -221,11 +221,27 @@ export function createPdfViewerComponent(config) {
         },
 
         async saveAnnotations(silent = false) {
-            await AnnotationManager.saveAnnotations(this, () => this.loadAnnotations(), silent);
+            await AnnotationManager.saveAnnotations(
+                this,
+                async () => {
+                    await this.loadAnnotations();
+
+                    // CRITICAL: Wait for Alpine to render annotations before tree refresh
+                    // Tree refresh causes DOM layout shifts that misalign annotations
+                    await this.$nextTick();
+
+                    await this.refreshTree();
+
+                    // Final sync after tree is stable to ensure annotations are aligned
+                    await this.$nextTick();
+                    this.syncOverlayToCanvas();
+                },
+                silent
+            );
         },
 
         async deleteAnnotation(anno) {
-            await AnnotationManager.deleteAnnotation(anno, this, () => TreeManager.refreshTree(this));
+            await AnnotationManager.deleteAnnotation(anno, this, () => this.refreshTree());
         },
 
         editAnnotation(anno) {
@@ -528,7 +544,7 @@ export function createPdfViewerComponent(config) {
         },
 
         async refreshTree() {
-            await TreeManager.refreshTree(this);
+            await TreeManager.refreshTree(this, this.$refs, this.getCallbacks());
         },
 
         toggleNode(nodeId) {

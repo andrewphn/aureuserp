@@ -138,6 +138,13 @@ class EntityManagementService
             $entityData['unit_price_per_lf'] = $entityData['unit_price_per_lf'] ?? 0;
             $entityData['total_price'] = $entityData['total_price'] ?? 0;
             $entityData['product_variant_id'] = $entityData['product_variant_id'] ?? null;
+
+            // Log cabinet data for debugging
+            \Log::info('Creating cabinet entity', [
+                'entityData' => $entityData,
+                'parentEntityId' => $parentEntityId,
+                'projectId' => $projectId,
+            ]);
         }
 
         return $modelClass::create($entityData);
@@ -157,6 +164,15 @@ class EntityManagementService
 
         if (! $entity) {
             return false;
+        }
+
+        // Log cabinet updates for debugging
+        if ($annotationType === 'cabinet') {
+            \Log::info('Updating cabinet entity', [
+                'entityId' => $entityId,
+                'entityData' => $entityData,
+                'beforeUpdate' => $entity->toArray(),
+            ]);
         }
 
         return $entity->update($entityData);

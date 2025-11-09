@@ -33,20 +33,38 @@ export async function loadTree(state) {
  * Refresh the project tree (lockout-aware wrapper for loadTree)
  * Defers refresh if resize/move operations are in progress
  * @param {Object} state - Component state
+ * @param {Object} refs - Alpine.js $refs (optional)
+ * @param {Object} callbacks - Callback functions (optional)
  * @returns {Promise<void>}
  */
-export async function refreshTree(state) {
+export async function refreshTree(state, refs = null, callbacks = null) {
     // CRITICAL: Don't refresh during active resize/move operations
     if (state._resizeLockout || state.isResizing || state.isMoving) {
         console.log('⏳ Tree refresh deferred - resize/move in progress');
 
         // Retry after lockout clears (poll every 100ms)
-        setTimeout(() => refreshTree(state), 100);
+        setTimeout(() => refreshTree(state, refs, callbacks), 100);
         return;
     }
 
     console.log('🌳 Refreshing project tree');
     await loadTree(state);
+
+    // After tree refresh, recalculate annotation positions
+    // Tree refresh can cause DOM layout shifts that misalign annotations
+    if (refs && callbacks) {
+        // Wait for tree to render
+        if (callbacks.$nextTick) {
+            await callbacks.$nextTick();
+        }
+
+        // Re-sync overlay to canvas (in case tree changed layout)
+        if (callbacks.syncOverlayToCanvas) {
+            callbacks.syncOverlayToCanvas();
+        }
+
+        console.log('✓ Annotation positions recalculated after tree refresh');
+    }
 }
 
 /**
@@ -148,6 +166,8 @@ export async function selectNode(params, state, callbacks) {
         path.push(nodeId);
         state.activeRoomId = parentRoomId;
         state.activeLocationId = parentLocationId;
+        state.activeCabinetRunId = nodeId;  // ✅ Set active cabinet run for drawing context
+        state.activeCabinetRunName = name;
 
         parentRoomNode = state.tree.find(r => r.id === parentRoomId);
         if (parentRoomNode) {
@@ -170,6 +190,9 @@ export async function selectNode(params, state, callbacks) {
         path.push(nodeId);
         state.activeRoomId = parentRoomId;
         state.activeLocationId = parentLocationId;
+        state.activeCabinetRunId = parentCabinetRunId;  // ✅ Set cabinet run when selecting a cabinet
+        state.activeCabinetId = nodeId;  // ✅ Set selected cabinet ID
+        state.activeCabinetName = name;
 
         parentRoomNode = state.tree.find(r => r.id === parentRoomId);
         if (parentRoomNode) {
@@ -180,6 +203,11 @@ export async function selectNode(params, state, callbacks) {
             if (parentLocationNode) {
                 state.activeLocationName = parentLocationNode.name;
                 state.locationSearchQuery = parentLocationNode.name;
+
+                const cabinetRunNode = parentLocationNode.children?.find(run => run.id === parentCabinetRunId);
+                if (cabinetRunNode) {
+                    state.activeCabinetRunName = cabinetRunNode.name;
+                }
             }
         }
     }

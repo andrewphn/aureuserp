@@ -11,6 +11,7 @@ import * as DrawingSystem from './components/pdf-viewer/managers/drawing-system.
 import * as ResizeMoveSystem from './components/pdf-viewer/managers/resize-move-system.js';
 import * as StateManager from './components/pdf-viewer/managers/state-manager.js';
 import * as IsolationModeManager from './components/pdf-viewer/managers/isolation-mode-manager.js';
+import * as VisibilityToggleManager from './components/pdf-viewer/managers/visibility-toggle-manager.js';
 import * as ZoomManager from './components/pdf-viewer/managers/zoom-manager.js';
 import * as ViewTypeManager from './components/pdf-viewer/managers/view-type-manager.js';
 import * as EntityReferenceManager from './components/pdf-viewer/managers/entity-reference-manager.js';
@@ -31,6 +32,7 @@ window.PdfViewerManagers = {
     ResizeMoveSystem,
     StateManager,
     IsolationModeManager,
+    VisibilityToggleManager,
     ZoomManager,
     ViewTypeManager,
     EntityReferenceManager,
