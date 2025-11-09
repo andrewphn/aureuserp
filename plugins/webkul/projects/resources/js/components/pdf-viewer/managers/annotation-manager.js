@@ -175,23 +175,63 @@ export async function saveAnnotations(state, reloadCallback, silent = false) {
 
     try {
         // Transform annotations to API format
-        const annotationsData = state.annotations.map(anno => ({
-            annotation_type: anno.type,
-            parent_annotation_id: anno.parentId || null,
-            x: anno.normalizedX,
-            y: anno.normalizedY,
-            width: anno.pdfWidth / state.pageDimensions.width,
-            height: anno.pdfHeight / state.pageDimensions.height,
-            text: anno.label,
-            color: anno.color,
-            room_id: anno.roomId || null,
-            room_location_id: anno.roomLocationId || null,
-            cabinet_run_id: anno.cabinetRunId || null,
-            cabinet_specification_id: anno.cabinetSpecId || null,
-            view_type: anno.viewType || 'plan',
-            notes: anno.notes || null,
-            room_type: anno.type
-        }));
+        const annotationsData = state.annotations.map(anno => {
+            const isNewAnnotation = anno.id && anno.id.toString().startsWith('temp_');
+
+            const annotationData = {
+                annotation_type: anno.type,
+                parent_annotation_id: anno.parentId || null,
+                x: anno.normalizedX,
+                y: anno.normalizedY,
+                width: anno.pdfWidth / state.pageDimensions.width,
+                height: anno.pdfHeight / state.pageDimensions.height,
+                text: anno.label,
+                color: anno.color,
+                view_type: anno.viewType || 'plan',
+                notes: anno.notes || null,
+                room_type: anno.type
+            };
+
+            // For NEW annotations, check if we should link to existing entities or create new ones
+            if (isNewAnnotation) {
+                // If a cabinet is selected in tree, link this annotation to that cabinet
+                if (anno.type === 'cabinet' && state.activeCabinetId) {
+                    annotationData.cabinet_specification_id = state.activeCabinetId;
+                    annotationData.cabinet_run_id = state.activeCabinetRunId;
+                    annotationData.room_location_id = state.activeLocationId;
+                    annotationData.room_id = state.activeRoomId;
+                    console.log(`🔗 Linking new annotation to existing cabinet ${state.activeCabinetId}`);
+                } else {
+                    // Set hierarchy IDs from annotation or active context
+                    annotationData.room_id = anno.roomId || state.activeRoomId || null;
+                    annotationData.room_location_id = anno.roomLocationId || state.activeLocationId || null;
+                    annotationData.cabinet_run_id = anno.cabinetRunId || state.activeCabinetRunId || null;
+                    annotationData.cabinet_specification_id = anno.cabinetSpecId || null;
+
+                    // Add context for entity creation
+                    annotationData.context = {
+                        project_id: state.projectId,
+                        room_id: annotationData.room_id,
+                        room_location_id: annotationData.room_location_id,
+                        cabinet_run_id: annotationData.cabinet_run_id,
+                        location_type: 'wall',
+                        run_type: 'base',
+                        position_in_run: 0,
+                        product_variant_id: 1,
+                    };
+
+                    console.log('🆕 New annotation will create entity:', annotationData.context);
+                }
+            } else {
+                // Existing annotation - preserve current entity links
+                annotationData.room_id = anno.roomId || null;
+                annotationData.room_location_id = anno.roomLocationId || null;
+                annotationData.cabinet_run_id = anno.cabinetRunId || null;
+                annotationData.cabinet_specification_id = anno.cabinetSpecId || null;
+            }
+
+            return annotationData;
+        });
 
         const response = await fetch(`/api/pdf/page/${state.pdfPageId}/annotations`, {
             method: 'POST',
@@ -201,7 +241,7 @@ export async function saveAnnotations(state, reloadCallback, silent = false) {
             },
             body: JSON.stringify({
                 annotations: annotationsData,
-                create_entities: false
+                create_entities: true
             })
         });
 

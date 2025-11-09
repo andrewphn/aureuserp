@@ -212,7 +212,10 @@ function applyIsolationVisibilityFilter(state) {
  * @returns {Boolean} True if visible
  */
 export function isAnnotationVisibleInIsolation(anno, state) {
-    if (!state.isolationMode) return true;
+    if (!state.isolationMode) {
+        // DEFAULT VIEW: Show all annotations
+        return true;
+    }
 
     // First check view type compatibility
     if (!isAnnotationVisibleInView(anno, state)) {
@@ -224,9 +227,12 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         // Show the isolated room itself (template wrapper will hide it via x-show)
         if (anno.id === state.isolatedRoomId) return true;
 
-        // Show direct children (locations in this room)
+        // Show level 1: locations in this room
         // Use entity ID for matching since child annotations reference parent by entity ID
         if (anno.type === 'location' && anno.roomId === state.isolatedRoomEntityId) return true;
+
+        // Show level 2: cabinet_runs in this room's locations
+        if (anno.type === 'cabinet_run' && anno.roomId === state.isolatedRoomEntityId) return true;
 
         // Hide everything else
         return false;
@@ -238,8 +244,11 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         // Show the isolated location itself (template wrapper will hide it via x-show)
         if (anno.id === state.isolatedLocationId) return true;
 
-        // Show direct children (cabinet runs in this location)
+        // Show direct children (cabinet runs in this location) - level 1
         if (anno.type === 'cabinet_run' && anno.locationId === state.isolatedLocationId) return true;
+
+        // Show grandchildren (cabinets within cabinet runs in this location) - level 2
+        if (anno.type === 'cabinet' && anno.locationId === state.isolatedLocationId) return true;
 
         // Hide everything else
         return false;

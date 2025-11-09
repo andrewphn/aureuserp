@@ -142,28 +142,58 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
                 })->unique()->values();
             });
 
+        // Cabinet annotations: Get cabinet details grouped by cabinet_run_id
+        $cabinetsByCabinetRun = \DB::table('pdf_page_annotations')
+            ->join('pdf_pages', 'pdf_page_annotations.pdf_page_id', '=', 'pdf_pages.id')
+            ->select(
+                'pdf_page_annotations.cabinet_run_id',
+                'pdf_page_annotations.id',
+                'pdf_page_annotations.label',
+                'pdf_pages.page_number',
+                'pdf_page_annotations.view_type'
+            )
+            ->where('pdf_page_annotations.annotation_type', 'cabinet')
+            ->whereNotNull('pdf_page_annotations.cabinet_run_id')
+            ->whereNull('pdf_page_annotations.deleted_at')
+            ->get()
+            ->groupBy('cabinet_run_id')
+            ->map(function ($cabinets) {
+                return $cabinets->map(function ($cabinet) {
+                    return [
+                        'id' => $cabinet->id,
+                        'name' => $cabinet->label,
+                        'type' => 'cabinet',
+                        'pages' => [[
+                            'page' => $cabinet->page_number,
+                            'viewType' => $cabinet->view_type
+                        ]]
+                    ];
+                })->values();
+            });
+
         // Transform to tree structure expected by V3 component
-        $tree = $project->rooms->map(function ($room) use ($roomAnnotationCounts, $roomPages, $locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages) {
+        $tree = $project->rooms->map(function ($room) use ($roomAnnotationCounts, $roomPages, $locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
             return [
                 'id' => $room->id,
                 'name' => $room->name,
                 'type' => 'room',
                 'annotation_count' => $roomAnnotationCounts->get($room->id, 0),
                 'pages' => $roomPages->get($room->id, collect())->toArray(),
-                'children' => $room->locations->map(function ($location) use ($locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages) {
+                'children' => $room->locations->map(function ($location) use ($locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
                     return [
                         'id' => $location->id,
                         'name' => $location->name,
                         'type' => 'room_location',
                         'annotation_count' => $locationAnnotationCounts->get($location->id, 0),
                         'pages' => $locationPages->get($location->id, collect())->toArray(),
-                        'children' => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts, $runPages) {
+                        'children' => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
                             return [
                                 'id' => $run->id,
                                 'name' => $run->name ?: "Run {$run->id}",
                                 'type' => 'cabinet_run',
                                 'annotation_count' => $runAnnotationCounts->get($run->id, 0),
                                 'pages' => $runPages->get($run->id, collect())->toArray(),
+                                'children' => $cabinetsByCabinetRun->get($run->id, collect())->toArray(),
                             ];
                         })->values()
                     ];

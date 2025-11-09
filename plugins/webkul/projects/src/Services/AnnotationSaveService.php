@@ -8,6 +8,7 @@ use App\Models\PdfPageAnnotation;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Utils\PositionInferenceUtil;
 
@@ -190,6 +191,8 @@ class AnnotationSaveService
             'view_scale'               => $originalAnnotation['viewScale'] ?? null,
             'inferred_position'        => $positionData['inferred_position'],
             'vertical_zone'            => $positionData['vertical_zone'],
+            'measurement_width'        => $formData['measurement_width'] ?? null,
+            'measurement_height'       => $formData['measurement_height'] ?? null,
         ]);
 
         // Log creation
@@ -233,6 +236,11 @@ class AnnotationSaveService
             $linkedEntityId
         );
 
+        // Update cabinet entity hierarchy if linking to existing entity
+        if ($linkMode === 'existing' && $linkedEntityId && $annotationType === 'cabinet') {
+            $this->updateCabinetHierarchy($linkedEntityId, $annotation, $formData);
+        }
+
         // Prepare update data
         $updateData = [
             'label'                    => $entityResult['label'],
@@ -244,6 +252,9 @@ class AnnotationSaveService
             'cabinet_specification_id' => $entityResult['cabinet_specification_id'] ?? null,
             'view_type'                => $formData['view_type'] ?? 'plan',
             'view_orientation'         => $formData['view_orientation'] ?? null,
+            'view_scale'               => $formData['view_scale'] ?? null,  // Allow updating view scale
+            'measurement_width'        => $formData['measurement_width'] ?? null,
+            'measurement_height'       => $formData['measurement_height'] ?? null,
         ];
 
         // Update annotation
@@ -291,7 +302,10 @@ class AnnotationSaveService
         // Handle creating new entity
         if ($linkMode === 'create' && isset($formData['entity']) && ! empty($formData['entity'])) {
             $entityData = $formData['entity'];
-            $entityName = $entityData['name'] ?? $formData['label'];
+
+            // Get the correct name field for this entity type
+            $nameField = $this->entityManagement->getEntityNameField($annotationType);
+            $entityName = $entityData[$nameField] ?? $formData['label'];
 
             // Get parent entity ID based on type
             $parentEntityId = $this->getParentEntityId($annotationType, $parentAnnotationId);
@@ -333,8 +347,21 @@ class AnnotationSaveService
         $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
         $currentEntityId = $annotation->$entityIdField;
 
+        \Log::info('🔄 handleEntityUpdate called', [
+            'annotation_id' => $annotation->id,
+            'annotation_type' => $annotationType,
+            'link_mode' => $linkMode,
+            'linked_entity_id' => $linkedEntityId,
+            'current_entity_id' => $currentEntityId,
+            'entity_id_field' => $entityIdField,
+        ]);
+
         // Handle switching to different entity
         if ($linkMode === 'existing' && $linkedEntityId && $linkedEntityId !== $currentEntityId) {
+            \Log::info('✅ Switching to different entity', [
+                'from' => $currentEntityId,
+                'to' => $linkedEntityId,
+            ]);
             return $this->linkToExistingEntity($annotationType, $linkedEntityId, $result);
         }
 
@@ -367,13 +394,101 @@ class AnnotationSaveService
             $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
             $result[$entityIdField] = $entityId;
 
-            // For room entities, also set room_id
+            // CRITICAL: Copy hierarchy IDs from entity to annotation
+            // This ensures the annotation has the same hierarchy context as the entity
             if ($annotationType === 'room') {
                 $result['room_id'] = $entityId;
+            } elseif ($annotationType === 'location') {
+                $result['room_location_id'] = $entityId;
+                $result['room_id'] = $entity->room_id ?? null;
+            } elseif ($annotationType === 'cabinet_run') {
+                $result['cabinet_run_id'] = $entityId;
+                $result['room_location_id'] = $entity->room_location_id ?? null;
+                $result['room_id'] = $entity->roomLocation->room_id ?? null;
+            } elseif ($annotationType === 'cabinet') {
+                $result['cabinet_specification_id'] = $entityId;
+                $result['cabinet_run_id'] = $entity->cabinet_run_id ?? null;
+
+                // Get location and room IDs from cabinet entity or traverse cabinet run relationship
+                $result['room_location_id'] = $entity->room_location_id ?? $entity->cabinetRun->room_location_id ?? null;
+                $result['room_id'] = $entity->room_id ?? $entity->cabinetRun->roomLocation->room_id ?? null;
             }
+
+            \Log::info('🔗 linkToExistingEntity result', [
+                'annotation_type' => $annotationType,
+                'entity_id' => $entityId,
+                'entity_id_field' => $entityIdField,
+                'new_label' => $result['label'],
+                'hierarchy_copied' => [
+                    'room_id' => $result['room_id'] ?? null,
+                    'room_location_id' => $result['room_location_id'] ?? null,
+                    'cabinet_run_id' => $result['cabinet_run_id'] ?? null,
+                ],
+                'result' => $result,
+            ]);
         }
 
         return $result;
+    }
+
+    /**
+     * Update cabinet entity with hierarchy IDs from annotation context
+     * This ensures cabinet entities have proper parent relationships for tree display
+     */
+    protected function updateCabinetHierarchy(int $cabinetId, PdfPageAnnotation $annotation, array $formData): void
+    {
+        $cabinet = CabinetSpecification::find($cabinetId);
+        if (!$cabinet) {
+            return;
+        }
+
+        // Get hierarchy IDs from form data (set by annotation editor)
+        $roomId = $formData['entity']['room_id'] ?? null;
+        $roomLocationId = $formData['entity']['room_location_id'] ?? null;
+        $cabinetRunId = $formData['entity']['cabinet_run_id'] ?? null;
+        $projectId = $annotation->pdfPage->document->project_id ?? null;
+
+        // Fallback to annotation hierarchy if form data not available
+        if (!$roomId) {
+            $roomId = $annotation->room_id ?? AnnotationHierarchyService::getRoomIdFromParent($annotation->parent_annotation_id);
+        }
+        if (!$roomLocationId) {
+            $roomLocationId = $annotation->room_location_id ?? AnnotationHierarchyService::getRoomLocationIdFromParent($annotation->parent_annotation_id);
+        }
+        if (!$cabinetRunId) {
+            $cabinetRunId = $annotation->cabinet_run_id ?? AnnotationHierarchyService::getCabinetRunIdFromParent($annotation->parent_annotation_id);
+        }
+
+        // Build update data - only update NULL fields to avoid breaking existing relationships
+        $updateData = [];
+        if (is_null($cabinet->project_id) && $projectId) {
+            $updateData['project_id'] = $projectId;
+        }
+        if (is_null($cabinet->room_id) && $roomId) {
+            $updateData['room_id'] = $roomId;
+        }
+        if (is_null($cabinet->room_location_id) && $roomLocationId) {
+            $updateData['room_location_id'] = $roomLocationId;
+        }
+        if (is_null($cabinet->cabinet_run_id) && $cabinetRunId) {
+            $updateData['cabinet_run_id'] = $cabinetRunId;
+        }
+
+        // Update cabinet if we have any hierarchy IDs to set
+        if (!empty($updateData)) {
+            \Log::info('Updating cabinet hierarchy IDs', [
+                'cabinet_id' => $cabinetId,
+                'updateData' => $updateData,
+                'before' => [
+                    'project_id' => $cabinet->project_id,
+                    'room_id' => $cabinet->room_id,
+                    'room_location_id' => $cabinet->room_location_id,
+                    'cabinet_run_id' => $cabinet->cabinet_run_id,
+                ]
+            ]);
+
+            $cabinet->update($updateData);
+        }
     }
 
     /**

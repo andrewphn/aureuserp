@@ -13,6 +13,34 @@
     $viewerId = 'overlayViewer_' . $pdfPageId . '_' . uniqid();
 @endphp
 
+<style>
+    /* Prevent body-level scroll - force viewport-constrained layout */
+    html, body {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+    /* Ensure FilamentPHP containers fill height properly */
+    .fi-layout, .fi-main-ctn, .fi-main, .fi-page, .fi-page-content, .fi-page-main {
+        height: 100% !important;
+        max-height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    /* Constrain PDF viewer container with viewport-based max-height */
+    .pdf-viewer-container {
+        overflow: auto !important;
+        max-height: calc(100vh - 280px) !important;
+    }
+
+    /* PDF container should just contain content */
+    [id^="pdf-container"] {
+        overflow: visible !important;
+        height: auto !important;
+    }
+</style>
+
 <div
     wire:ignore
     x-cloak
@@ -26,10 +54,10 @@
         pageMap: {{ json_encode($pageMap) }}
     })"
     x-init="init()"
-    class="w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900"
+    class="w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900 overflow-hidden"
 >
-    <!-- Context Bar (Top - Sticky) -->
-    <div class="context-bar sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-md">
+    <!-- Context Bar (Top - Fixed) -->
+    <div class="context-bar flex-none z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-md">
         <div class="p-3 md:p-4 flex items-center gap-4 md:gap-6 flex-wrap">
 
             <!-- GROUP 1: Context Selection -->
@@ -781,9 +809,9 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex flex-1 overflow-hidden">
-        <!-- Left Sidebar (Project Tree) -->
-        <div class="tree-sidebar w-64 border-r border-gray-200 dark:border-gray-700 overflow-y-auto bg-white dark:bg-gray-800 p-4">
+    <div class="main-content-area flex flex-1 min-h-0 overflow-hidden">
+        <!-- Left Sidebar (Project Tree) - Fixed with internal scroll -->
+        <div class="tree-sidebar w-64 border-r border-gray-200 dark:border-gray-700 overflow-y-auto bg-white dark:bg-gray-800 p-4 flex-none">
             <div class="mb-3 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Project Structure</h3>
 
@@ -857,6 +885,15 @@
                                 class="badge bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs"
                                 x-text="room.annotation_count"
                             ></span>
+                            <!-- Visibility Toggle -->
+                            <button
+                                @click.stop="window.PdfViewerManagers.VisibilityToggleManager.toggleRoomVisibility(room.id, $data)"
+                                class="w-5 h-5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                :title="window.PdfViewerManagers.VisibilityToggleManager.isRoomVisible(room.id, $data) ? 'Hide room annotations' : 'Show room annotations'"
+                            >
+                                <span x-show="window.PdfViewerManagers.VisibilityToggleManager.isRoomVisible(room.id, $data)" class="text-sm">👁️</span>
+                                <span x-show="!window.PdfViewerManagers.VisibilityToggleManager.isRoomVisible(room.id, $data)" class="text-sm" style="text-decoration: line-through;">👁️</span>
+                            </button>
                         </div>
 
                         <!-- Locations (Children) -->
@@ -885,6 +922,15 @@
                                             class="badge bg-indigo-600 text-white px-2 py-0.5 rounded-full text-xs"
                                             x-text="location.annotation_count"
                                         ></span>
+                                        <!-- Visibility Toggle -->
+                                        <button
+                                            @click.stop="window.PdfViewerManagers.VisibilityToggleManager.toggleLocationVisibility(location.id, $data)"
+                                            class="w-5 h-5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                            :title="window.PdfViewerManagers.VisibilityToggleManager.isLocationVisible(location.id, $data) ? 'Hide location annotations' : 'Show location annotations'"
+                                        >
+                                            <span x-show="window.PdfViewerManagers.VisibilityToggleManager.isLocationVisible(location.id, $data)" class="text-sm">👁️</span>
+                                            <span x-show="!window.PdfViewerManagers.VisibilityToggleManager.isLocationVisible(location.id, $data)" class="text-sm" style="text-decoration: line-through;">👁️</span>
+                                        </button>
                                     </div>
 
                                     <!-- Cabinet Runs (Children) -->
@@ -899,6 +945,15 @@
                                                     :class="selectedPath.includes(run.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                 >
+                                                    <button
+                                                        @click.stop="toggleNode(run.id)"
+                                                        class="w-4 h-4 flex items-center justify-center"
+                                                        x-show="run.children && run.children.length > 0"
+                                                    >
+                                                        <span x-show="isExpanded(run.id)">▼</span>
+                                                        <span x-show="!isExpanded(run.id)">▶</span>
+                                                    </button>
+                                                    <span class="w-4" x-show="!run.children || run.children.length === 0"></span>
                                                     <span class="text-base">📦</span>
                                                     <span class="flex-1" x-text="run.name"></span>
                                                     <span
@@ -906,6 +961,44 @@
                                                         class="badge bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs"
                                                         x-text="run.annotation_count"
                                                     ></span>
+                                                    <!-- Visibility Toggle -->
+                                                    <button
+                                                        @click.stop="window.PdfViewerManagers.VisibilityToggleManager.toggleCabinetRunVisibility(run.id, $data)"
+                                                        class="w-5 h-5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                                        :title="window.PdfViewerManagers.VisibilityToggleManager.isCabinetRunVisible(run.id, $data) ? 'Hide cabinet run annotations' : 'Show cabinet run annotations'"
+                                                    >
+                                                        <span x-show="window.PdfViewerManagers.VisibilityToggleManager.isCabinetRunVisible(run.id, $data)" class="text-sm">👁️</span>
+                                                        <span x-show="!window.PdfViewerManagers.VisibilityToggleManager.isCabinetRunVisible(run.id, $data)" class="text-sm" style="text-decoration: line-through;">👁️</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Cabinets (Children) -->
+                                                <div x-show="isExpanded(run.id)" class="tree-hierarchy-indent">
+                                                    <template x-for="cabinet in run.children" :key="cabinet.id">
+                                                        <div class="tree-node mb-1">
+                                                            <!-- Cabinet Level (Leaf Node) -->
+                                                            <div
+                                                                @click="selectAnnotationContext({ type: 'cabinet', id: cabinet.id, label: cabinet.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
+                                                                @dblclick.prevent.stop="navigateToNodeOnDoubleClick(cabinet.id, 'cabinet', room.id, location.id, run.id)"
+                                                                @contextmenu.prevent.stop="showContextMenu($event, cabinet.id, 'cabinet', cabinet.name, room.id, location.id, run.id)"
+                                                                :class="selectedPath.includes(cabinet.id) ? 'bg-purple-100 dark:bg-purple-900 text-purple-900 dark:text-purple-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                                                class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-xs"
+                                                            >
+                                                                <span class="w-4"></span>
+                                                                <span class="text-sm">🗄️</span>
+                                                                <span class="flex-1" x-text="cabinet.name"></span>
+                                                                <!-- Visibility Toggle -->
+                                                                <button
+                                                                    @click.stop="window.PdfViewerManagers.VisibilityToggleManager.toggleAnnotationVisibility(cabinet.id, $data)"
+                                                                    class="w-5 h-5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                                                    :title="window.PdfViewerManagers.VisibilityToggleManager.isAnnotationVisible(cabinet.id, $data) ? 'Hide cabinet' : 'Show cabinet'"
+                                                                >
+                                                                    <span x-show="window.PdfViewerManagers.VisibilityToggleManager.isAnnotationVisible(cabinet.id, $data)" class="text-sm">👁️</span>
+                                                                    <span x-show="!window.PdfViewerManagers.VisibilityToggleManager.isAnnotationVisible(cabinet.id, $data)" class="text-sm" style="text-decoration: line-through;">👁️</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </template>
                                                 </div>
                                             </div>
                                         </template>
@@ -1063,6 +1156,15 @@
                                                                             <span class="w-4"></span>
                                                                             <span>🗄️</span>
                                                                             <span class="flex-1" x-text="cabinet.label"></span>
+                                                                            <!-- Visibility Toggle -->
+                                                                            <button
+                                                                                @click.stop="window.PdfViewerManagers.VisibilityToggleManager.toggleAnnotationVisibility(cabinet.id, $data)"
+                                                                                class="w-5 h-5 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                                                                :title="window.PdfViewerManagers.VisibilityToggleManager.isAnnotationVisible(cabinet.id, $data) ? 'Hide cabinet' : 'Show cabinet'"
+                                                                            >
+                                                                                <span x-show="window.PdfViewerManagers.VisibilityToggleManager.isAnnotationVisible(cabinet.id, $data)" class="text-sm">👁️</span>
+                                                                                <span x-show="!window.PdfViewerManagers.VisibilityToggleManager.isAnnotationVisible(cabinet.id, $data)" class="text-sm" style="text-decoration: line-through;">👁️</span>
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 </template>
@@ -1109,7 +1211,7 @@
         </div>
 
         <!-- PDF Viewer (Center) with HTML Overlay -->
-        <div class="pdf-viewer-container flex-1 bg-white dark:bg-gray-900 overflow-hidden relative">
+        <div class="pdf-viewer-container flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-900 overflow-hidden relative">
             <!-- Skeleton Loading Overlay -->
             <div
                 x-show="!systemReady"
@@ -1203,7 +1305,7 @@
             </div>
 
             <!-- PDF Container -->
-            <div id="pdf-container-{{ $viewerId }}" class="relative w-full h-full overflow-auto"
+            <div id="pdf-container-{{ $viewerId }}" class="relative w-full flex-1 min-h-0 overflow-auto"
                 :class="{ 'overflow-hidden': !systemReady }"
             >
                 <!-- PDFObject.js embed goes here -->
@@ -1303,7 +1405,7 @@
                     :style="`z-index: 10; will-change: width, height; width: ${overlayWidth}; height: ${overlayHeight};`"
                 >
                     <!-- Existing Annotations -->
-                    <template x-for="anno in filteredAnnotations.filter(a => !hiddenAnnotations.includes(a.id) && isAnnotationVisibleInView(a))" :key="anno.id">
+                    <template x-for="anno in filteredAnnotations.filter(a => !hiddenAnnotations.includes(a.id) && isAnnotationVisibleInView(a) && isAnnotationVisibleInIsolation(a))" :key="anno.id">
                         <!-- Wrapper div to hide frame of isolated object itself (you "jumped into it") -->
                         <div x-show="!isolationMode || (isolationLevel === 'room' && anno.id !== isolatedRoomId) || (isolationLevel === 'location' && anno.id !== isolatedLocationId) || (isolationLevel === 'cabinet_run' && anno.id !== isolatedCabinetRunId)">
                             <div

@@ -28,8 +28,7 @@ class ProjectEntityTreeController extends Controller
         // Load rooms with their locations, runs, and cabinets
         $rooms = Room::where('project_id', $projectId)
             ->with([
-                'locations.cabinetRuns.cabinets',
-                'annotations' // PDF annotations linked to rooms
+                'locations.cabinetRuns.cabinets'
             ])
             ->orderBy('name')
             ->get();
@@ -57,20 +56,16 @@ class ProjectEntityTreeController extends Controller
                 'pages' => $roomPages,
                 'children' => $room->locations->map(function ($location) use ($room) {
                     // Count annotations for this location
-                    $locationAnnotationCount = PdfPageAnnotation::whereHas('metadata', function ($query) use ($location) {
-                        $query->where('room_location_id', $location->id);
-                    })
-                    ->where('annotation_type', 'room_location')
-                    ->count();
+                    $locationAnnotationCount = PdfPageAnnotation::where('room_location_id', $location->id)
+                        ->where('annotation_type', 'location')
+                        ->count();
 
                     // Get pages where location is annotated
-                    $locationPages = PdfPageAnnotation::whereHas('metadata', function ($query) use ($location) {
-                        $query->where('room_location_id', $location->id);
-                    })
-                    ->where('annotation_type', 'room_location')
-                    ->pluck('pdf_page_id')
-                    ->unique()
-                    ->toArray();
+                    $locationPages = PdfPageAnnotation::where('room_location_id', $location->id)
+                        ->where('annotation_type', 'location')
+                        ->pluck('pdf_page_id')
+                        ->unique()
+                        ->toArray();
 
                     return [
                         'id' => $location->id,

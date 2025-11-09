@@ -88,7 +88,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                             // SECTION: Entity Selection & Linking (NEW)
                             // ============================================
                             Section::make('Entity Selection & Linking')
-                                ->description('Link to an existing entity or create a new one')
+                                ->description(function (callable $get) {
+                                    $linkMode = $get('link_mode');
+                                    if ($linkMode === 'existing') {
+                                        return '🔗 Linking to an existing entity - select one from the dropdown below';
+                                    } else {
+                                        return '✨ Creating a new entity - fill in the details below';
+                                    }
+                                })
                                 ->icon('heroicon-o-link')
                                 ->schema([
                                     // Link Mode Radio Buttons
@@ -98,10 +105,33 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                             'existing' => 'Link to existing entity',
                                             'create'   => 'Create new entity',
                                         ])
-                                        ->default('create')
+                                        ->default(fn () => $this->linkMode ?? 'create')
                                         ->live()
                                         ->inline()
-                                        ->required(),
+                                        ->required()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            if ($state === 'create') {
+                                                // Switching to CREATE mode - clear linked entity and reset to fresh form
+                                                $this->linkedEntityId = null;
+                                                $set('linked_entity_id', null);
+
+                                                // Keep current label but clear all other entity fields
+                                                $currentLabel = $get('entity.name') ?? $get('entity.cabinet_number') ?? '';
+
+                                                // Reset entity data to blank state with just the name/label
+                                                $nameField = $this->annotationType === 'cabinet' ? 'cabinet_number' : 'name';
+                                                $this->entityData = [$nameField => $currentLabel];
+
+                                                // Clear all entity fields except name
+                                                $set('entity', [$nameField => $currentLabel]);
+
+                                                \Log::info('Switched to CREATE mode - cleared linked entity', [
+                                                    'annotation_type' => $this->annotationType,
+                                                    'kept_label' => $currentLabel,
+                                                ]);
+                                            }
+                                            // If switching to 'existing', the linked_entity_id select will handle loading
+                                        }),
 
                                     // Hierarchical Entity Selector (for "Link to existing")
                                     Select::make('linked_entity_id')
@@ -109,13 +139,42 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                         ->helperText('Choose an existing entity from the project hierarchy')
                                         ->options(function () {
                                             $entityManagement = new EntityManagementService;
+                                            $validOptions = $entityManagement->getHierarchicalEntityOptions($this->annotationType, $this->projectId);
 
-                                            return $entityManagement->getHierarchicalEntityOptions($this->annotationType, $this->projectId);
+                                            // If current entity is not in valid options (orphaned), add it with warning
+                                            if ($this->linkedEntityId && !isset($validOptions[$this->linkedEntityId])) {
+                                                $entity = $entityManagement->loadEntity($this->annotationType, $this->linkedEntityId);
+                                                if ($entity) {
+                                                    $entityName = $entityManagement->getEntityName($this->annotationType, $entity);
+                                                    $validOptions = [$this->linkedEntityId => "⚠️ {$entityName} (Orphaned - No Hierarchy)"] + $validOptions;
+                                                }
+                                            }
+
+                                            return $validOptions;
                                         })
                                         ->searchable()
+                                        ->default(fn () => $this->linkedEntityId)
                                         ->visible(fn (callable $get) => $get('link_mode') === 'existing')
                                         ->required(fn (callable $get) => $get('link_mode') === 'existing')
-                                        ->live(),
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            if (!$state) {
+                                                return;
+                                            }
+
+                                            // Load the entity from database
+                                            $entityManagement = new EntityManagementService;
+                                            $entity = $entityManagement->loadEntity($this->annotationType, $state);
+
+                                            if ($entity) {
+                                                // Populate all entity fields with the loaded data
+                                                $set('entity', $entity->toArray());
+
+                                                // Store for save operation
+                                                $this->linkedEntityId = $state;
+                                                $this->entityData = $entity->toArray();
+                                            }
+                                        }),
 
                                     // Parent Entity Selector (for "Create new")
                                     Select::make('parent_annotation_id')
@@ -229,7 +288,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                 ]),
                                         ]),
                                 ])
-                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'room')
+                                ->visible(fn () => $this->annotationType === 'room')
                                 ->collapsible()
                                 ->collapsed(false),
 
@@ -287,7 +346,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                 ]),
                                         ]),
                                 ])
-                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'location')
+                                ->visible(fn () => $this->annotationType === 'location')
                                 ->collapsible()
                                 ->collapsed(false),
 
@@ -358,7 +417,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                 ]),
                                         ]),
                                 ])
-                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'cabinet_run')
+                                ->visible(fn () => $this->annotationType === 'cabinet_run')
                                 ->collapsible()
                                 ->collapsed(false),
 
@@ -546,7 +605,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                                 ]),
                                         ]),
                                 ])
-                                ->visible(fn (callable $get) => $get('link_mode') === 'create' && $this->annotationType === 'cabinet')
+                                ->visible(fn () => $this->annotationType === 'cabinet')
                                 ->collapsible()
                                 ->collapsed(false),
 
@@ -617,7 +676,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                                         ->prefix('$')
                                         ->visible(fn () => $this->annotationType === 'cabinet'),
                                 ])
-                                ->visible(fn (callable $get) => $get('link_mode') === 'create')
+                                ->visible(fn () => true)  // Always visible - shows pricing for both create and existing
                                 ->collapsible()
                                 ->collapsed(fn () => ! in_array($this->annotationType, ['room', 'cabinet'])),
 
@@ -1122,6 +1181,14 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             }
 
             // Delegate to AnnotationSaveService
+            \Log::info('💾 AnnotationEditor::save calling AnnotationSaveService', [
+                'annotation_id' => $this->originalAnnotation['id'] ?? 'new',
+                'annotation_type' => $this->annotationType,
+                'link_mode' => $this->linkMode,
+                'linked_entity_id' => $this->linkedEntityId,
+                'form_linked_entity_id' => $data['linked_entity_id'] ?? 'not set',
+            ]);
+
             $annotationSaveService = new AnnotationSaveService;
             $annotation = $annotationSaveService->saveAnnotation(
                 formData: $data,
@@ -1142,6 +1209,15 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 'locationId'        => $annotation->room_location_id,
                 'cabinetRunId'      => $annotation->cabinet_run_id,
                 'cabinetSpecId'     => $annotation->cabinet_specification_id,
+                'viewType'          => $annotation->view_type,
+                'viewOrientation'   => $annotation->view_orientation,
+                'viewScale'         => $annotation->view_scale,
+                'inferredPosition'  => $annotation->inferred_position,  // May change if repositioned
+                'verticalZone'      => $annotation->vertical_zone,  // May change if repositioned
+                'color'             => $annotation->color,
+                'roomType'          => $annotation->room_type,
+                'measurementWidth'  => $annotation->measurement_width,
+                'measurementHeight' => $annotation->measurement_height,
             ]);
 
             // Dispatch event back to Alpine.js
@@ -1324,14 +1400,49 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         // ENTITY-CENTRIC WORKFLOW: Load entity data
         // ============================================
         $entityManagement = new EntityManagementService;
+
+        // Determine which entity ID field to check based on annotation type
         $entityIdField = $entityManagement->getEntityIdField($this->annotationType);
-        $this->linkedEntityId = $annotation[str_replace('_id', 'Id', $entityIdField)] ?? null;
+
+        // Convert snake_case to camelCase for annotation array access
+        // e.g., 'room_id' -> 'roomId', 'cabinet_specification_id' -> 'cabinetSpecId'
+        $camelCaseField = match($entityIdField) {
+            'room_id' => 'roomId',
+            'room_location_id' => 'locationId',
+            'cabinet_run_id' => 'cabinetRunId',
+            'cabinet_specification_id' => 'cabinetSpecId',
+            default => str_replace('_id', 'Id', $entityIdField)
+        };
+
+        $this->linkedEntityId = $annotation[$camelCaseField] ?? null;
 
         if ($this->linkedEntityId) {
-            // Annotation is linked to an existing entity - load entity data
+            // Annotation is already linked to an existing entity - load full entity data
             $this->linkMode = 'existing';
             $entity = $entityManagement->loadEntity($this->annotationType, $this->linkedEntityId);
-            $this->entityData = $entity ? $entity->toArray() : [];
+
+            if ($entity) {
+                // Load complete entity data from database
+                $this->entityData = $entity->toArray();
+
+                \Log::info('Loaded existing entity for annotation', [
+                    'annotation_id' => $annotation['id'],
+                    'annotation_type' => $this->annotationType,
+                    'entity_id' => $this->linkedEntityId,
+                    'entity_data' => $this->entityData,
+                ]);
+            } else {
+                // Entity reference exists but entity not found - treat as new
+                $this->entityData = [
+                    'name' => $annotation['label'] ?? '',
+                ];
+
+                \Log::warning('Entity reference exists but entity not found', [
+                    'annotation_id' => $annotation['id'],
+                    'entity_id' => $this->linkedEntityId,
+                    'entity_type' => $this->annotationType,
+                ]);
+            }
         } else {
             // New entity will be created - populate name from annotation label
             $this->linkMode = 'create';

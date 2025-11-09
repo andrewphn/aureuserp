@@ -66,13 +66,21 @@ export async function setZoom(level, state, refs, callbacks) {
     if (callbacks.$nextTick) {
         await callbacks.$nextTick();
     }
-    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Wait for canvas to be fully rendered
+    // Poll for canvas to have the correct dimensions
+    await waitForCanvasReady(refs, 50, 500); // 50ms intervals, 500ms max
 
     // Sync overlay dimensions to canvas after zoom
     syncOverlayToCanvas(refs, state);
 
     // Invalidate cache again to force fresh rect
     state._overlayRect = null;
+
+    // Extra tick to ensure overlay dimensions are applied
+    if (callbacks.$nextTick) {
+        await callbacks.$nextTick();
+    }
 
     // Re-render annotations at new zoom level
     updateAnnotationPositions(state, refs);
@@ -83,6 +91,50 @@ export async function setZoom(level, state, refs, callbacks) {
     }
 
     console.log(`🔍 Zoom set to ${Math.round(level * 100)}%`);
+}
+
+/**
+ * Wait for canvas to be ready with correct dimensions
+ * @param {Object} refs - Alpine.js $refs
+ * @param {Number} interval - Poll interval in ms
+ * @param {Number} maxWait - Maximum wait time in ms
+ * @returns {Promise<void>}
+ */
+async function waitForCanvasReady(refs, interval = 50, maxWait = 500) {
+    const canvas = refs.pdfEmbed?.querySelector('canvas');
+    if (!canvas) {
+        console.warn('⚠️ Canvas not found, skipping ready check');
+        return;
+    }
+
+    const startTime = Date.now();
+    let lastWidth = canvas.offsetWidth;
+    let lastHeight = canvas.offsetHeight;
+    let stableCount = 0;
+
+    while (Date.now() - startTime < maxWait) {
+        await new Promise(resolve => setTimeout(resolve, interval));
+
+        const currentWidth = canvas.offsetWidth;
+        const currentHeight = canvas.offsetHeight;
+
+        // Check if dimensions have stabilized
+        if (currentWidth === lastWidth && currentHeight === lastHeight && currentWidth > 0 && currentHeight > 0) {
+            stableCount++;
+            // Need 2 consecutive stable readings
+            if (stableCount >= 2) {
+                console.log(`✓ Canvas stable at ${currentWidth} × ${currentHeight} (${Date.now() - startTime}ms)`);
+                return;
+            }
+        } else {
+            stableCount = 0;
+        }
+
+        lastWidth = currentWidth;
+        lastHeight = currentHeight;
+    }
+
+    console.warn(`⚠️ Canvas not stable after ${maxWait}ms, proceeding anyway`);
 }
 
 /**
