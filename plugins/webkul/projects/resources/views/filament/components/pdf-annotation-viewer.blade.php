@@ -1680,6 +1680,9 @@
     {{-- Filament Annotation Editor Component --}}
     @livewire('annotation-editor')
 
+    {{-- Hierarchy Builder Modal Component --}}
+    @livewire('hierarchy-builder-modal')
+
 
 @once
     <!-- Load PDFObject.js from CDN -->

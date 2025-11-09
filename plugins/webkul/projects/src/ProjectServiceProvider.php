@@ -93,6 +93,7 @@ class ProjectServiceProvider extends PackageServiceProvider
 
         // Register Livewire components
         \Livewire\Livewire::component('annotation-editor', \Webkul\Project\Livewire\AnnotationEditor::class);
+        \Livewire\Livewire::component('hierarchy-builder-modal', \Webkul\Project\Livewire\HierarchyBuilderModal::class);
         \Livewire\Livewire::component('milestone-timeline', \Webkul\Project\Livewire\MilestoneTimeline::class);
         \Livewire\Livewire::component('production-timeline', \Webkul\Project\Livewire\ProductionTimeline::class);
     }

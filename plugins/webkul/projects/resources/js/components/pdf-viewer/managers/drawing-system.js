@@ -6,6 +6,7 @@
 import { screenToPdf } from './coordinate-transform.js';
 import { generateTempId } from '../utilities.js';
 import { getColorForType } from './state-manager.js';
+import { detectMissingHierarchy } from './hierarchy-detection-manager.js';
 
 /**
  * Start drawing annotation
@@ -212,8 +213,28 @@ function createAnnotationFromDrawing(state, refs) {
     state.annotations.push(annotation);
     console.log('✓ Annotation created:', annotation);
 
-    // Dispatch to Livewire for editing
-    window.Livewire.dispatch('edit-annotation', { annotation: annotation });
+    // Check for missing hierarchy levels
+    const missingLevels = detectMissingHierarchy(state.drawMode, state);
+
+    if (missingLevels.length > 0) {
+        // Missing hierarchy - open hierarchy builder modal
+        console.log('🏗️ Missing hierarchy detected, opening builder modal:', missingLevels);
+
+        window.Livewire.dispatch('open-hierarchy-builder', {
+            annotation: annotation,
+            missingLevels: missingLevels,
+            context: {
+                projectId: state.projectId,
+                roomId: state.activeRoomId,
+                locationId: state.activeLocationId,
+                cabinetRunId: state.activeCabinetRunId
+            }
+        });
+    } else {
+        // Complete hierarchy - open annotation editor directly
+        console.log('✅ Complete hierarchy, opening annotation editor');
+        window.Livewire.dispatch('edit-annotation', { annotation: annotation });
+    }
 }
 
 /**
