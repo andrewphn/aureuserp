@@ -192,6 +192,31 @@ export function createPdfViewerComponent(config) {
                     console.log(`✓ Cleaned up ${beforeCount - afterCount} temporary annotation(s)`);
                 }
             });
+
+            window.Livewire.on('hierarchy-completed', (event) => {
+                console.log('📥 Livewire: hierarchy-completed', event);
+                const { annotation, createdIds, context } = event;
+
+                // Find the temp annotation in state
+                const tempAnno = this.annotations.find(a => a.id === annotation.id);
+                if (tempAnno) {
+                    // Update annotation with created entity IDs
+                    if (createdIds.room) tempAnno.roomId = createdIds.room;
+                    if (createdIds.room_location) tempAnno.roomLocationId = createdIds.room_location;
+                    if (createdIds.cabinet_run) tempAnno.cabinetRunId = createdIds.cabinet_run;
+                    if (createdIds.cabinet) tempAnno.cabinetSpecId = createdIds.cabinet;
+
+                    console.log('✓ Updated annotation with hierarchy:', tempAnno);
+                }
+
+                // Update active context for future annotations
+                if (context.roomId) this.activeRoomId = context.roomId;
+                if (context.locationId) this.activeLocationId = context.locationId;
+                if (context.cabinetRunId) this.activeCabinetRunId = context.cabinetRunId;
+
+                // Save the annotation with complete hierarchy
+                this.saveAnnotations(true); // silent = true
+            });
         },
 
         // PDF Management
