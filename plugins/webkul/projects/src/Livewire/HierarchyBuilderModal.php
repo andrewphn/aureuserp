@@ -98,7 +98,7 @@ class HierarchyBuilderModal extends Component
                 break;
 
             case 'cabinet_run':
-                $defaults['room_id'] = $this->roomId;
+                // CabinetRun only has room_location_id (room accessed via roomLocation->room)
                 $defaults['room_location_id'] = $this->locationId;
                 // Infer run type from view type
                 $viewType = $this->annotation['viewType'] ?? 'plan';
@@ -109,7 +109,7 @@ class HierarchyBuilderModal extends Component
                     $defaults['run_type'] = 'base';
                     $defaults['name'] = 'Base Cabinet';
                 }
-                $defaults['position_in_location'] = 0;
+                $defaults['sort_order'] = 0;
                 break;
 
             case 'cabinet':
