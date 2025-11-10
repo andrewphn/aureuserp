@@ -200,6 +200,9 @@ function createAnnotationFromDrawing(state, refs) {
         roomLocationId: state.drawMode === 'location' ? state.activeLocationId : null,
         cabinetRunId: state.drawMode === 'cabinet_run' ? state.activeLocationId :
                       (state.drawMode === 'cabinet' && state.isolationMode && state.isolationLevel === 'cabinet_run') ? state.isolatedCabinetRunId : null,
+        // CRITICAL: Add locationId field for isolation mode visibility filtering
+        // This matches the naming used in populateParentConnections() (annotation-manager.js)
+        locationId: state.activeLocationId,
         locationName: state.activeLocationName,
         viewType: 'plan',
         label: generateAnnotationLabel(state),
