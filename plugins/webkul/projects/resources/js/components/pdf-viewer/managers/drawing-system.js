@@ -181,6 +181,24 @@ function createAnnotationFromDrawing(state, refs) {
         }
     }
 
+    // Determine roomLocationId based on context
+    let roomLocationId = null;
+    if (state.drawMode === 'location') {
+        // Drawing a location annotation - it references its own entity ID
+        roomLocationId = state.activeLocationId;
+    } else if (state.drawMode === 'cabinet_run' || state.drawMode === 'cabinet') {
+        // Drawing cabinet_run or cabinet - needs parent location's entity ID
+        // In isolation mode, use isolated location
+        if (state.isolationMode && state.isolationLevel === 'location') {
+            // Find parent location annotation to get its roomLocationId
+            const parentLocationAnno = state.annotations.find(a => a.id === state.isolatedLocationId);
+            roomLocationId = parentLocationAnno?.roomLocationId || null;
+        } else {
+            // Normal mode: use active location ID
+            roomLocationId = state.activeLocationId;
+        }
+    }
+
     // Create annotation object
     const annotation = {
         id: generateTempId('temp'),
@@ -197,10 +215,10 @@ function createAnnotationFromDrawing(state, refs) {
         screenHeight: screenRect.height,
         roomId: state.activeRoomId,
         roomName: state.activeRoomName,
-        roomLocationId: state.drawMode === 'location' ? state.activeLocationId : null,
+        roomLocationId: roomLocationId,  // Entity ID for database hierarchy
         cabinetRunId: state.drawMode === 'cabinet_run' ? state.activeLocationId :
                       (state.drawMode === 'cabinet' && state.isolationMode && state.isolationLevel === 'cabinet_run') ? state.isolatedCabinetRunId : null,
-        // CRITICAL: Add locationId field for isolation mode visibility filtering
+        // CRITICAL: locationId is for isolation mode visibility filtering
         // This matches the naming used in populateParentConnections() (annotation-manager.js)
         locationId: state.activeLocationId,
         locationName: state.activeLocationName,
@@ -212,6 +230,8 @@ function createAnnotationFromDrawing(state, refs) {
         projectId: state.projectId,
         parentId: parentAnnotationId
     };
+
+    console.log('📍 [createAnnotation] roomLocationId set to:', roomLocationId, '(activeLocationId:', state.activeLocationId, ')');
 
     state.annotations.push(annotation);
     console.log('✓ Annotation created:', annotation);
