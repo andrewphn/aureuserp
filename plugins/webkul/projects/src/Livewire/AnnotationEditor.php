@@ -1359,6 +1359,56 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * ENTITY-CENTRIC HELPER METHODS
      * =================================================================
      */
+    /**
+     * Get smart defaults for creating a new entity
+     * Matches logic from HierarchyBuilderModal to ensure consistent entity creation
+     */
+    protected function getSmartDefaultsForNewEntity(array $annotation): array
+    {
+        $defaults = [];
+
+        switch ($this->annotationType) {
+            case 'room':
+                $defaults['room_type'] = 'general';
+                $defaults['floor_number'] = 1;
+                $defaults['project_id'] = $this->projectId;
+                break;
+
+            case 'location':
+                $defaults['location_type'] = 'wall';
+                $defaults['room_id'] = $annotation['roomId'] ?? null;
+                $defaults['sort_order'] = 0;
+                break;
+
+            case 'cabinet_run':
+                // CabinetRun only has room_location_id (room accessed via roomLocation->room)
+                $defaults['room_location_id'] = $annotation['locationId'] ?? $annotation['roomLocationId'] ?? null;
+
+                // Infer run type from view type
+                $viewType = $annotation['viewType'] ?? 'plan';
+                if ($viewType === 'elevation') {
+                    $defaults['run_type'] = 'wall';
+                } else {
+                    $defaults['run_type'] = 'base';
+                }
+                $defaults['sort_order'] = 0;
+                break;
+
+            case 'cabinet':
+                $defaults['room_id'] = $annotation['roomId'] ?? null;
+                $defaults['cabinet_run_id'] = $annotation['cabinetRunId'] ?? null;
+                $defaults['product_variant_id'] = 1;
+                $defaults['position_in_run'] = 0;
+                $defaults['length_inches'] = 24;
+                $defaults['depth_inches'] = 24;
+                $defaults['height_inches'] = 30;
+                $defaults['quantity'] = 1;
+                break;
+        }
+
+        return $defaults;
+    }
+
     public function render()
     {
         return view('webkul-project::livewire.annotation-editor');
@@ -1444,12 +1494,20 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 ]);
             }
         } else {
-            // New entity will be created - populate name from annotation label
+            // New entity will be created - populate name from annotation label AND smart defaults
             $this->linkMode = 'create';
-            $this->entityData = [
+
+            // Get smart defaults based on annotation type and context
+            $defaults = $this->getSmartDefaultsForNewEntity($annotation);
+
+            $this->entityData = array_merge($defaults, [
                 'name' => $annotation['label'] ?? '',
-                // Other entity fields remain empty and will be filled by user
-            ];
+            ]);
+
+            \Log::info('New entity - populated smart defaults', [
+                'annotation_type' => $this->annotationType,
+                'defaults' => $this->entityData,
+            ]);
         }
 
         // Fill form with annotation data using Filament Forms API
