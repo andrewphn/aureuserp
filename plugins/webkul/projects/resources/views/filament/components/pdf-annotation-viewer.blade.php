@@ -1049,7 +1049,7 @@
                                     <!-- Root Annotation (Room or orphan) -->
                                     <div
                                         @click="handleNodeClick(anno)"
-                                        @dblclick.prevent.stop="anno.type === 'room' && enterIsolationMode({ type: 'room', id: anno.roomId, label: anno.label })"
+                                        @dblclick.prevent.stop="anno.type === 'room' && handleAnnotationDoubleClick({ type: 'room', id: anno.roomId, label: anno.label })"
                                         :class="selectedAnnotation?.id === anno.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                     >
@@ -1082,7 +1082,7 @@
                                                 <!-- Location Level -->
                                                 <div
                                                     @click="handleNodeClick(location)"
-                                                    @dblclick.prevent.stop="location.type === 'location' && enterIsolationMode({ type: 'location', id: location.roomLocationId, label: location.label, roomId: anno.roomId, roomName: anno.label })"
+                                                    @dblclick.prevent.stop="location.type === 'location' && handleAnnotationDoubleClick({ type: 'location', id: location.roomLocationId, label: location.label, roomId: anno.roomId, roomName: anno.label })"
                                                     :class="selectedAnnotation?.id === location.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                 >
@@ -1115,7 +1115,7 @@
                                                             <!-- Cabinet Run Level -->
                                                             <div
                                                                 @click="handleNodeClick(run)"
-                                                                @dblclick.prevent.stop="run.type === 'cabinet_run' && enterIsolationMode({ type: 'cabinet_run', id: run.cabinetRunId, label: run.label, locationId: location.roomLocationId, locationName: location.label, roomId: anno.roomId, roomName: anno.label })"
+                                                                @dblclick.prevent.stop="run.type === 'cabinet_run' && handleAnnotationDoubleClick({ type: 'cabinet_run', id: run.cabinetRunId, label: run.label, locationId: location.roomLocationId, locationName: location.label, roomId: anno.roomId, roomName: anno.label })"
                                                                 :class="selectedAnnotation?.id === run.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                                 class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                             >
@@ -1425,7 +1425,7 @@
                                     box-shadow: ${activeAnnotationId === anno.id ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none'};
                                 `"
                                 @click.stop="!anno.locked && handleNodeClick(anno)"
-                                @dblclick.prevent.stop="!anno.locked && enterIsolationMode(anno)"
+                                @dblclick.prevent.stop="!anno.locked && handleAnnotationDoubleClick(anno)"
                                 @mousedown="!anno.locked && startMove($event, anno)"
                                 @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
                                 @mouseleave="$el.style.background = anno.color + '33'; showMenu = anno.locked"
@@ -3290,6 +3290,18 @@
 
                     // Execute double-click action (navigate to page)
                     await this.navigateToNodeOnDoubleClick(nodeId, nodeType, parentRoomId, parentLocationId);
+                },
+
+                // Handle annotation double click (clears single-click timer and enters isolation mode)
+                async handleAnnotationDoubleClick(anno) {
+                    // Clear the single-click timer to prevent context selection
+                    if (this.clickTimer) {
+                        clearTimeout(this.clickTimer);
+                        this.clickTimer = null;
+                    }
+
+                    // Execute double-click action (enter isolation mode)
+                    await this.enterIsolationMode(anno);
                 },
 
                 // Navigate to page on double-click
