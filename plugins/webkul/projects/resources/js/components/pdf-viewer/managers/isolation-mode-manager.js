@@ -249,10 +249,11 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         if (anno.id === state.isolatedLocationId) return true;
 
         // Show direct children (cabinet runs in this location) - level 1
-        if (anno.type === 'cabinet_run' && anno.locationId === state.isolatedLocationId) return true;
+        // Use activeLocationId (entity ID) not isolatedLocationId (annotation ID)
+        if (anno.type === 'cabinet_run' && anno.locationId === state.activeLocationId) return true;
 
         // Show grandchildren (cabinets within cabinet runs in this location) - level 2
-        if (anno.type === 'cabinet' && anno.locationId === state.isolatedLocationId) return true;
+        if (anno.type === 'cabinet' && anno.locationId === state.activeLocationId) return true;
 
         // Hide everything else
         return false;
