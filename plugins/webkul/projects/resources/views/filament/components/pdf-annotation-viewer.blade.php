@@ -2098,6 +2098,50 @@
                     return chips;
                 },
 
+                // Computed: Isolation mode breadcrumbs
+                get isolationBreadcrumbs() {
+                    // Call the manager function if available
+                    if (window.PdfViewerManagers?.IsolationModeManager?.getIsolationBreadcrumbs) {
+                        return window.PdfViewerManagers.IsolationModeManager.getIsolationBreadcrumbs(this);
+                    }
+                    return [];
+                },
+
+                // Isolation mode methods (use manager functions)
+                isAnnotationVisibleInIsolation(anno) {
+                    if (window.PdfViewerManagers?.IsolationModeManager?.isAnnotationVisibleInIsolation) {
+                        return window.PdfViewerManagers.IsolationModeManager.isAnnotationVisibleInIsolation(anno, this);
+                    }
+                    return true;
+                },
+
+                async enterIsolationMode(anno) {
+                    if (window.PdfViewerManagers?.IsolationModeManager?.enterIsolationMode) {
+                        await window.PdfViewerManagers.IsolationModeManager.enterIsolationMode(anno, this, {
+                            zoomToFitAnnotation: this.zoomToFitAnnotation,
+                            $nextTick: this.$nextTick,
+                            syncOverlayToCanvas: this.syncOverlayToCanvas,
+                            clearContext: this.clearContext,
+                            resetZoom: this.resetZoom
+                        });
+                    }
+                },
+
+                async exitIsolationMode() {
+                    if (window.PdfViewerManagers?.IsolationModeManager?.exitIsolationMode) {
+                        await window.PdfViewerManagers.IsolationModeManager.exitIsolationMode(this, {
+                            clearContext: this.clearContext,
+                            resetZoom: this.resetZoom
+                        });
+                    }
+                },
+
+                updateIsolationMask() {
+                    if (window.PdfViewerManagers?.IsolationModeManager?.updateIsolationMask) {
+                        window.PdfViewerManagers.IsolationModeManager.updateIsolationMask(this);
+                    }
+                },
+
                 // Context Menu State
                 contextMenu: {
                     show: false,
@@ -3548,6 +3592,10 @@
                 },
 
                 getZoomPercentage() {
+                    if (window.PdfViewerManagers?.ZoomManager?.getZoomPercentage) {
+                        return window.PdfViewerManagers.ZoomManager.getZoomPercentage(this.$data);
+                    }
+                    // Fallback
                     return Math.round(this.zoomLevel * 100);
                 },
 
