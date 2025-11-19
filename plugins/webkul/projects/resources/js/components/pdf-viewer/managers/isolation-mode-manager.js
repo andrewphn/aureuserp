@@ -213,8 +213,12 @@ function applyIsolationVisibilityFilter(state) {
  */
 export function isAnnotationVisibleInIsolation(anno, state) {
     if (!state.isolationMode) {
-        // DEFAULT VIEW: Show all annotations
-        return true;
+        // NORMAL MODE: Only show room and location annotations (1 level deep)
+        // Hide cabinet_run and cabinet types - they're only visible in isolation mode
+        if (anno.type === 'room' || anno.type === 'location') {
+            return true;
+        }
+        return false;
     }
 
     // First check view type compatibility

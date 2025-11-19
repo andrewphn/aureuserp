@@ -933,8 +933,8 @@
                                         </button>
                                     </div>
 
-                                    <!-- Cabinet Runs (Children) - Only show in isolation mode -->
-                                    <div x-show="isExpanded(location.id) && isolationMode && isolationLevel === 'location'" class="tree-hierarchy-indent">
+                                    <!-- Cabinet Runs (Children) -->
+                                    <div x-show="isExpanded(location.id)" class="tree-hierarchy-indent">
                                         <template x-for="run in location.children" :key="run.id">
                                             <div class="tree-node mb-1">
                                                 <!-- Cabinet Run Level -->
@@ -972,8 +972,8 @@
                                                     </button>
                                                 </div>
 
-                                                <!-- Cabinets (Children) - Only show in isolation mode at location or cabinet run level -->
-                                                <div x-show="isExpanded(run.id) && isolationMode && (isolationLevel === 'location' || isolationLevel === 'cabinet_run')" class="tree-hierarchy-indent">
+                                                <!-- Cabinets (Children) -->
+                                                <div x-show="isExpanded(run.id)" class="tree-hierarchy-indent">
                                                     <template x-for="cabinet in run.children" :key="cabinet.id">
                                                         <div class="tree-node mb-1">
                                                             <!-- Cabinet Level (Leaf Node) -->
