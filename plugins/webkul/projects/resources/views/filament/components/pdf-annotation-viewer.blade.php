@@ -776,21 +776,19 @@
                 </span>
             </div>
 
-            <!-- Breadcrumb Path -->
+            <!-- Breadcrumb Path (using computed property) -->
             <div class="flex items-center gap-2 text-sm font-semibold text-primary-800 dark:text-primary-200">
-                <!-- Room Level -->
-                <span class="flex items-center gap-1.5">
-                    <span class="text-lg">🏠</span>
-                    <span x-text="isolatedRoomName"></span>
-                </span>
-
-                <!-- Location Level (if in location isolation) -->
-                <template x-if="isolationLevel === 'location'">
+                <template x-for="(crumb, index) in isolationBreadcrumbs" :key="crumb.level">
                     <div class="flex items-center gap-2">
-                        <x-filament::icon icon="heroicon-o-chevron-right" class="h-4 w-4 text-primary-600" />
+                        <!-- Chevron separator (skip for first item) -->
+                        <template x-if="index > 0">
+                            <x-filament::icon icon="heroicon-o-chevron-right" class="h-4 w-4 text-primary-600" />
+                        </template>
+
+                        <!-- Breadcrumb item -->
                         <span class="flex items-center gap-1.5">
-                            <span class="text-lg">📍</span>
-                            <span x-text="isolatedLocationName"></span>
+                            <span class="text-lg" x-text="crumb.icon"></span>
+                            <span x-text="crumb.label"></span>
                         </span>
                     </div>
                 </template>
@@ -3434,49 +3432,11 @@
                 },
 
                 // Check if annotation is visible in isolation mode
-                // → Manager: IsolationModeManager (isolation-mode-manager.js)
-                isAnnotationVisibleInIsolation(anno) {
-                    return window.PdfViewerManagers?.IsolationModeManager?.isAnnotationVisibleInIsolation?.(anno, this.$data) ?? true;
-                },
-
-                // Enter Isolation Mode (Illustrator-style layer isolation)
-                // → Manager: IsolationModeManager (isolation-mode-manager.js)
-                async enterIsolationMode(anno) {
-                    if (window.PdfViewerManagers?.IsolationModeManager?.enterIsolationMode) {
-                        await window.PdfViewerManagers.IsolationModeManager.enterIsolationMode(anno, this.$data, {
-                            zoomToFitAnnotation: this.zoomToFitAnnotation.bind(this),
-                            $nextTick: this.$nextTick.bind(this),
-                            syncOverlayToCanvas: this.syncOverlayToCanvas.bind(this),
-                            clearContext: this.clearContext.bind(this),
-                            resetZoom: this.resetZoom.bind(this)
-                        });
-                    } else {
-                        console.error('❌ IsolationModeManager.enterIsolationMode not available');
-                    }
-                },
-
-                // Exit Isolation Mode
-                // → Manager: IsolationModeManager (isolation-mode-manager.js)
-                async exitIsolationMode() {
-                    if (window.PdfViewerManagers?.IsolationModeManager?.exitIsolationMode) {
-                        await window.PdfViewerManagers.IsolationModeManager.exitIsolationMode(this.$data, {
-                            clearContext: this.clearContext.bind(this),
-                            resetZoom: this.resetZoom.bind(this)
-                        });
-                    } else {
-                        console.error('❌ IsolationModeManager.exitIsolationMode not available');
-                    }
-                },
-
-                // Update SVG isolation mask
-                // → Manager: IsolationModeManager (isolation-mode-manager.js)
-                updateIsolationMask() {
-                    if (window.PdfViewerManagers?.IsolationModeManager?.updateIsolationMask) {
-                        window.PdfViewerManagers.IsolationModeManager.updateIsolationMask(this.$data);
-                    } else {
-                        console.error('❌ IsolationModeManager.updateIsolationMask not available');
-                    }
-                },
+                // REMOVED: Isolation mode methods now use component methods from pdf-viewer-core.js
+                // - isAnnotationVisibleInIsolation
+                // - enterIsolationMode
+                // - exitIsolationMode
+                // - updateIsolationMask
 
                 // Edit annotation - opens Livewire modal
                 // → Manager: AnnotationManager (annotation-manager.js)
