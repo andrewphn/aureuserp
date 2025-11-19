@@ -242,8 +242,7 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         return false;
 
     } else if (state.isolationLevel === 'location') {
-        // Show parent room for context by entity relationship
-        if (anno.type === 'room' && anno.roomId === state.isolatedRoomId) return true;
+        // Hide parent room - shown in breadcrumb bar only
 
         // Hide the isolated location itself (container) - only show children
         // Template wrapper in tree already handles display via x-show
@@ -259,11 +258,9 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         return false;
 
     } else if (state.isolationLevel === 'cabinet_run') {
-        // Show parent location for context by entity relationship
-        if (anno.type === 'location' && anno.roomLocationId === state.isolatedLocationId) return true;
+        // Hide parent location - shown in breadcrumb bar only
 
-        // Show parent room for context by entity relationship
-        if (anno.type === 'room' && anno.roomId === state.isolatedRoomId) return true;
+        // Hide parent room - shown in breadcrumb bar only
 
         // Hide the isolated cabinet run itself (container) - only show children
         // Template wrapper in tree already handles display via x-show
