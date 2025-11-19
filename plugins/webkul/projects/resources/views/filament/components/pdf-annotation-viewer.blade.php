@@ -863,8 +863,8 @@
                     <div class="tree-node mb-2">
                         <!-- Room Level -->
                         <div
-                            @click="selectAnnotationContext({ type: 'room', id: room.id, label: room.name, roomId: room.id })"
-                            @dblclick.prevent.stop="navigateToNodeOnDoubleClick(room.id, 'room')"
+                            @click="handleNodeClick({ type: 'room', id: room.id, label: room.name, roomId: room.id })"
+                            @dblclick.prevent.stop="handleNodeDoubleClick('room', room.id)"
                             @contextmenu.prevent.stop="showContextMenu($event, room.id, 'room', room.name)"
                             :class="selectedPath.includes(room.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
@@ -900,8 +900,8 @@
                                 <div class="tree-node mb-1">
                                     <!-- Location Level -->
                                     <div
-                                        @click="selectAnnotationContext({ type: 'location', id: location.id, label: location.name, roomId: room.id, roomLocationId: location.id })"
-                                        @dblclick.prevent.stop="navigateToNodeOnDoubleClick(location.id, 'room_location', room.id)"
+                                        @click="handleNodeClick({ type: 'location', id: location.id, label: location.name, roomId: room.id, roomLocationId: location.id })"
+                                        @dblclick.prevent.stop="handleNodeDoubleClick('room_location', location.id, room.id)"
                                         @contextmenu.prevent.stop="showContextMenu($event, location.id, 'room_location', location.name, room.id)"
                                         :class="selectedPath.includes(location.id) ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors"
@@ -937,8 +937,8 @@
                                             <div class="tree-node mb-1">
                                                 <!-- Cabinet Run Level -->
                                                 <div
-                                                    @click="selectAnnotationContext({ type: 'cabinet_run', id: run.id, label: run.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
-                                                    @dblclick.prevent.stop="navigateToNodeOnDoubleClick(run.id, 'cabinet_run', room.id, location.id)"
+                                                    @click="handleNodeClick({ type: 'cabinet_run', id: run.id, label: run.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
+                                                    @dblclick.prevent.stop="handleNodeDoubleClick('cabinet_run', run.id, room.id, location.id)"
                                                     @contextmenu.prevent.stop="showContextMenu($event, run.id, 'cabinet_run', run.name, room.id, location.id)"
                                                     :class="selectedPath.includes(run.id) ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -976,8 +976,8 @@
                                                         <div class="tree-node mb-1">
                                                             <!-- Cabinet Level (Leaf Node) -->
                                                             <div
-                                                                @click="selectAnnotationContext({ type: 'cabinet', id: cabinet.id, label: cabinet.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
-                                                                @dblclick.prevent.stop="navigateToNodeOnDoubleClick(cabinet.id, 'cabinet', room.id, location.id, run.id)"
+                                                                @click="handleNodeClick({ type: 'cabinet', id: cabinet.id, label: cabinet.name, locationId: location.id, roomId: room.id, cabinetRunId: run.id })"
+                                                                @dblclick.prevent.stop="handleNodeDoubleClick('cabinet', cabinet.id, room.id, location.id, run.id)"
                                                                 @contextmenu.prevent.stop="showContextMenu($event, cabinet.id, 'cabinet', cabinet.name, room.id, location.id, run.id)"
                                                                 :class="selectedPath.includes(cabinet.id) ? 'bg-purple-100 dark:bg-purple-900 text-purple-900 dark:text-purple-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                                 class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-xs"
@@ -1048,7 +1048,7 @@
                                 <div class="tree-node mb-1">
                                     <!-- Root Annotation (Room or orphan) -->
                                     <div
-                                        @click="selectAnnotationContext(anno)"
+                                        @click="handleNodeClick(anno)"
                                         @dblclick.prevent.stop="anno.type === 'room' && enterIsolationMode({ type: 'room', id: anno.roomId, label: anno.label })"
                                         :class="selectedAnnotation?.id === anno.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -1081,7 +1081,7 @@
                                             <div class="tree-node mb-1">
                                                 <!-- Location Level -->
                                                 <div
-                                                    @click="selectAnnotationContext(location)"
+                                                    @click="handleNodeClick(location)"
                                                     @dblclick.prevent.stop="location.type === 'location' && enterIsolationMode({ type: 'location', id: location.roomLocationId, label: location.label, roomId: anno.roomId, roomName: anno.label })"
                                                     :class="selectedAnnotation?.id === location.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                     class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -1114,7 +1114,7 @@
                                                         <div class="tree-node mb-1">
                                                             <!-- Cabinet Run Level -->
                                                             <div
-                                                                @click="selectAnnotationContext(run)"
+                                                                @click="handleNodeClick(run)"
                                                                 @dblclick.prevent.stop="run.type === 'cabinet_run' && enterIsolationMode({ type: 'cabinet_run', id: run.cabinetRunId, label: run.label, locationId: location.roomLocationId, locationName: location.label, roomId: anno.roomId, roomName: anno.label })"
                                                                 :class="selectedAnnotation?.id === run.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                                 class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
@@ -1147,7 +1147,7 @@
                                                                     <div class="tree-node mb-1">
                                                                         <!-- Cabinet Level (Leaf) -->
                                                                         <div
-                                                                            @click="selectAnnotationContext(cabinet)"
+                                                                            @click="handleNodeClick(cabinet)"
                                                                             :class="selectedAnnotation?.id === cabinet.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                                                                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors text-sm"
                                                                         >
@@ -1424,7 +1424,7 @@
                                     opacity: ${anno.locked ? 0.7 : 1};
                                     box-shadow: ${activeAnnotationId === anno.id ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none'};
                                 `"
-                                @click.stop="!anno.locked && selectAnnotationContext(anno)"
+                                @click.stop="!anno.locked && handleNodeClick(anno)"
                                 @dblclick.prevent.stop="!anno.locked && enterIsolationMode(anno)"
                                 @mousedown="!anno.locked && startMove($event, anno)"
                                 @mouseenter="$el.style.background = anno.color + '66'; showMenu = true"
@@ -2201,6 +2201,9 @@
                 pdfIframe: null,
                 scrollX: 0,
                 scrollY: 0,
+
+                // Click/Double-click handling
+                clickTimer: null,
 
                 // Initialization guard
                 _initialized: false,
@@ -3262,6 +3265,31 @@
                         alert(`Error deleting ${nodeType}: ${error.message}`);
                         this.contextMenu.show = false;
                     }
+                },
+
+                // Handle single click with delay (prevents firing on double-click)
+                handleNodeClick(contextData) {
+                    // Clear any existing timer
+                    if (this.clickTimer) {
+                        clearTimeout(this.clickTimer);
+                    }
+
+                    // Set a delay before executing click action
+                    this.clickTimer = setTimeout(() => {
+                        this.selectAnnotationContext(contextData);
+                    }, 200); // 200ms delay
+                },
+
+                // Handle double click (clears single-click timer and navigates)
+                async handleNodeDoubleClick(nodeType, nodeId, parentRoomId = null, parentLocationId = null) {
+                    // Clear the single-click timer to prevent context selection
+                    if (this.clickTimer) {
+                        clearTimeout(this.clickTimer);
+                        this.clickTimer = null;
+                    }
+
+                    // Execute double-click action (navigate to page)
+                    await this.navigateToNodeOnDoubleClick(nodeId, nodeType, parentRoomId, parentLocationId);
                 },
 
                 // Navigate to page on double-click
