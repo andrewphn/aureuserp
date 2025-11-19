@@ -242,11 +242,11 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         return false;
 
     } else if (state.isolationLevel === 'location') {
-        // Show parent room
+        // Show parent room for context
         if (anno.id === state.isolatedRoomId) return true;
 
-        // Show the isolated location itself (template wrapper will hide it via x-show)
-        if (anno.id === state.isolatedLocationId) return true;
+        // Hide the isolated location itself (container) - only show children
+        // Template wrapper in tree already handles display via x-show
 
         // Show direct children (cabinet runs in this location) - level 1
         // Use activeLocationId (entity ID) not isolatedLocationId (annotation ID)
@@ -259,14 +259,14 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         return false;
 
     } else if (state.isolationLevel === 'cabinet_run') {
-        // Show parent location
+        // Show parent location for context
         if (anno.id === state.isolatedLocationId) return true;
 
-        // Show parent room
+        // Show parent room for context
         if (anno.id === state.isolatedRoomId) return true;
 
-        // Show the isolated cabinet run itself (template wrapper will hide it via x-show)
-        if (anno.id === state.isolatedCabinetRunId) return true;
+        // Hide the isolated cabinet run itself (container) - only show children
+        // Template wrapper in tree already handles display via x-show
 
         // Show direct children (cabinets in this run)
         if (anno.type === 'cabinet' && anno.cabinetRunId === state.isolatedCabinetRunId) return true;
