@@ -19,6 +19,10 @@ use Webkul\Project\Enums\TaskState;
 use Webkul\Security\Models\Scopes\UserPermissionScope;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Project\Models\Room;
+use Webkul\Project\Models\RoomLocation;
+use Webkul\Project\Models\CabinetRun;
+use Webkul\Project\Models\CabinetSpecification;
 
 class Task extends Model implements Sortable
 {
@@ -61,6 +65,10 @@ class Task extends Model implements Sortable
         'parent_id',
         'company_id',
         'creator_id',
+        'room_id',
+        'room_location_id',
+        'cabinet_run_id',
+        'cabinet_specification_id',
     ];
 
     /**
@@ -101,6 +109,10 @@ class Task extends Model implements Sortable
         'parent.title' => 'Parent',
         'company.name' => 'Company',
         'creator.name' => 'Creator',
+        'room.name' => 'Room',
+        'roomLocation.name' => 'Room Location',
+        'cabinetRun.name' => 'Cabinet Run',
+        'cabinetSpecification.cabinet_number' => 'Cabinet',
     ];
 
     public string $recordTitleAttribute = 'title';
@@ -163,6 +175,26 @@ class Task extends Model implements Sortable
     public function timesheets(): HasMany
     {
         return $this->hasMany(Timesheet::class);
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class);
+    }
+
+    public function roomLocation(): BelongsTo
+    {
+        return $this->belongsTo(RoomLocation::class);
+    }
+
+    public function cabinetRun(): BelongsTo
+    {
+        return $this->belongsTo(CabinetRun::class);
+    }
+
+    public function cabinetSpecification(): BelongsTo
+    {
+        return $this->belongsTo(CabinetSpecification::class);
     }
 
     protected static function booted()

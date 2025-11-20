@@ -10,7 +10,7 @@ class ProjectAlertsWidget extends Widget
 {
     public ?Model $record = null;
 
-    protected static string $view = 'webkul-project::filament.widgets.project-alerts';
+    protected string $view = 'webkul-project::filament.widgets.project-alerts';
 
     protected int | string | array $columnSpan = 'full';
 
@@ -53,9 +53,9 @@ class ProjectAlertsWidget extends Widget
         // Check for incomplete specifications
         $cabinetsWithoutDimensions = $this->record->cabinets()
             ->where(function ($query) {
-                $query->whereNull('width')
-                    ->orWhereNull('height')
-                    ->orWhereNull('depth');
+                $query->whereNull('width_inches')
+                    ->orWhereNull('height_inches')
+                    ->orWhereNull('depth_inches');
             })
             ->count();
 

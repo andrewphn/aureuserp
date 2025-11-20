@@ -21,6 +21,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\ViewField;
+use App\Forms\Components\TagSelectorPanel;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -138,26 +140,9 @@ class TaskResource extends Resource
                                     ->options(TaskState::options())
                                     ->colors(TaskState::colors())
                                     ->icons(TaskState::icons()),
-                                Select::make('tags')
+                                TagSelectorPanel::make('tags')
                                     ->label(__('webkul-project::filament/resources/task.form.sections.general.fields.tags'))
-                                    ->relationship(name: 'tags', titleAttribute: 'name')
-                                    ->multiple()
-                                    ->searchable()
-                                    ->preload()
-                                    ->createOptionForm([
-                                        Group::make()
-                                            ->schema([
-                                                TextInput::make('name')
-                                                    ->label(__('webkul-project::filament/resources/task.form.sections.general.fields.name'))
-                                                    ->required()
-                                                    ->maxLength(255)
-                                                    ->unique('projects_tags'),
-                                                ColorPicker::make('color')
-                                                    ->default('#808080')
-                                                    ->hexColor()
-                                                    ->label(__('webkul-project::filament/resources/task.form.sections.general.fields.color')),
-                                            ])->columns(2),
-                                    ]),
+                                    ->columnSpan('full'),
                                 RichEditor::make('description')
                                     ->label(__('webkul-project::filament/resources/task.form.sections.general.fields.description')),
                             ]),
@@ -189,6 +174,69 @@ class TaskResource extends Resource
                                     ->afterStateUpdated(function (Set $set) {
                                         $set('milestone_id', null);
                                     }),
+                                ViewField::make('hierarchy_search')
+                                    ->label('🔍 Quick Search')
+                                    ->view('forms.components.hierarchy-search-wrapper')
+                                    ->visible(fn (Get $get) => filled($get('project_id'))),
+
+                                Select::make('room_id')
+                                    ->label('Room')
+                                    ->relationship(
+                                        name: 'room',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('project_id', $get('project_id'))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function (Set $set) {
+                                        $set('room_location_id', null);
+                                        $set('cabinet_run_id', null);
+                                        $set('cabinet_specification_id', null);
+                                    })
+                                    ->visible(fn (Get $get) => filled($get('project_id'))),
+
+                                Select::make('room_location_id')
+                                    ->label('Room Location')
+                                    ->relationship(
+                                        name: 'roomLocation',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('room_id', $get('room_id'))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function (Set $set) {
+                                        $set('cabinet_run_id', null);
+                                        $set('cabinet_specification_id', null);
+                                    })
+                                    ->visible(fn (Get $get) => filled($get('room_id'))),
+
+                                Select::make('cabinet_run_id')
+                                    ->label('Cabinet Run')
+                                    ->relationship(
+                                        name: 'cabinetRun',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('room_location_id', $get('room_location_id'))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function (Set $set) {
+                                        $set('cabinet_specification_id', null);
+                                    })
+                                    ->visible(fn (Get $get) => filled($get('room_location_id'))),
+
+                                Select::make('cabinet_specification_id')
+                                    ->label('Cabinet')
+                                    ->relationship(
+                                        name: 'cabinetSpecification',
+                                        titleAttribute: 'cabinet_number',
+                                        modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('cabinet_run_id', $get('cabinet_run_id'))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->visible(fn (Get $get) => filled($get('cabinet_run_id'))),
                                 Select::make('milestone_id')
                                     ->label(__('webkul-project::filament/resources/task.form.sections.settings.fields.milestone'))
                                     ->relationship(
