@@ -1,0 +1,159 @@
+/**
+ * PDF Annotation Viewer Component Styles
+ * BEM Methodology: Block__Element--Modifier
+ * Uses Filament CSS custom properties for theming
+ */
+
+/* ==========================================================================
+   1. VIEWPORT & LAYOUT CONSTRAINTS
+   ========================================================================== */
+
+/**
+ * Prevent body-level scroll - force viewport-constrained layout
+ * Required for fixed-height PDF viewer within FilamentPHP admin
+ */
+html,
+body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/**
+ * Ensure FilamentPHP containers fill height properly
+ * Overrides default FilamentPHP flex layouts
+ */
+.fi-layout,
+.fi-main-ctn,
+.fi-main,
+.fi-page,
+.fi-page-content,
+.fi-page-main {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+/* ==========================================================================
+   2. PDF VIEWER CONTAINER
+   ========================================================================== */
+
+/**
+ * Constrain PDF viewer container with viewport-based max-height
+ * 280px accounts for: FilamentPHP header (64px) + context bar (~140px) + margins
+ */
+.pdf-viewer-container {
+    overflow: auto !important;
+    max-height: calc(100vh - 280px) !important;
+}
+
+/**
+ * PDF container should just contain content
+ * Prevents nested scroll containers
+ */
+[id^="pdf-container"] {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* ==========================================================================
+   3. ISOLATION MODE BREADCRUMB
+   ========================================================================== */
+
+/**
+ * Illustrator-style isolation breadcrumb
+ * Fixed at top of viewer, above all content
+ */
+.isolation-breadcrumb {
+    position: relative;
+    z-index: 15;
+}
+
+/* ==========================================================================
+   4. STATUS MESSAGES & HINTS
+   ========================================================================== */
+
+/**
+ * Warning hint - shown when user needs to select context
+ * Uses Filament warning color scheme
+ */
+.pdf-viewer__hint--warning {
+    background-color: var(--warning-50);
+    border-color: var(--warning-200);
+    color: var(--warning-700);
+}
+
+/**
+ * Info hint - shown during PDF loading
+ * Uses Filament info color scheme
+ */
+.pdf-viewer__hint--info {
+    background-color: var(--info-50);
+    border-color: var(--info-200);
+    color: var(--info-700);
+}
+
+/* ==========================================================================
+   5. TREE SIDEBAR ELEMENTS
+   ========================================================================== */
+
+/**
+ * Active tree view mode button
+ * Highlighted with primary color
+ */
+.tree-sidebar__view-toggle--active {
+    color: var(--primary-600);
+}
+
+/**
+ * Inactive tree view mode button
+ * Muted gray color
+ */
+.tree-sidebar__view-toggle--inactive {
+    color: var(--gray-500);
+}
+
+/**
+ * Tree refresh button
+ * Primary color for consistency
+ */
+.tree-sidebar__refresh-button {
+    color: var(--primary-600);
+}
+
+/* ==========================================================================
+   6. ANNOTATION OVERLAY DYNAMIC STYLES
+   ========================================================================== */
+
+/**
+ * Note: Annotation frames, resize handles, and drawing previews
+ * require dynamic inline styles for:
+ * - transform: translate() for positioning
+ * - width/height from annotation data
+ * - border/background colors from annotation.color
+ * - z-index calculations based on annotation hierarchy
+ *
+ * These CANNOT be extracted to static CSS due to runtime data dependencies
+ * and performance requirements (transform-based positioning).
+ */
+
+/* ==========================================================================
+   7. CONTEXT MENU
+   ========================================================================== */
+
+/**
+ * Note: Context menu positioning requires dynamic inline styles:
+ * - top/left calculated from mouse event coordinates
+ * - Cannot use CSS due to runtime positioning
+ */
+
+/* ==========================================================================
+   8. ISOLATION BLUR SVG
+   ========================================================================== */
+
+/**
+ * Note: Isolation blur overlay requires dynamic inline styles:
+ * - width/height matching PDF canvas dimensions
+ * - SVG viewBox calculated from overlay dimensions
+ * - Cannot use static CSS due to runtime PDF dimensions
+ */

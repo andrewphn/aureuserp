@@ -25,13 +25,13 @@
     </div>
 
     <!-- Context Hint -->
-    <div x-show="!canDrawLocation()" class="mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border" style="background-color: var(--warning-50); border-color: var(--warning-200); color: var(--warning-700);">
+    <div x-show="!canDrawLocation()" class="pdf-viewer__hint--warning mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border">
         <x-filament::icon icon="heroicon-o-information-circle" class="h-4 w-4" />
         <span>Select a Room to draw Locations, or Room + Location to draw Cabinet Runs/Cabinets</span>
     </div>
 
     <!-- PDF Loading Status -->
-    <div x-show="!pdfReady" class="mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border" style="background-color: var(--info-50); border-color: var(--info-200); color: var(--info-700);">
+    <div x-show="!pdfReady" class="pdf-viewer__hint--info mt-3 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border">
         <x-filament::icon icon="heroicon-o-arrow-path" class="h-4 w-4 animate-spin" />
         <span>Loading PDF dimensions...</span>
     </div>

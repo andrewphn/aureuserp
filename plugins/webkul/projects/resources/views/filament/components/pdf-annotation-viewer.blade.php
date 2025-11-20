@@ -13,33 +13,9 @@
     $viewerId = 'overlayViewer_' . $pdfPageId . '_' . uniqid();
 @endphp
 
-<style>
-    /* Prevent body-level scroll - force viewport-constrained layout */
-    html, body {
-        height: 100vh !important;
-        max-height: 100vh !important;
-        overflow: hidden !important;
-    }
-
-    /* Ensure FilamentPHP containers fill height properly */
-    .fi-layout, .fi-main-ctn, .fi-main, .fi-page, .fi-page-content, .fi-page-main {
-        height: 100% !important;
-        max-height: 100% !important;
-        overflow: hidden !important;
-    }
-
-    /* Constrain PDF viewer container with viewport-based max-height */
-    .pdf-viewer-container {
-        overflow: auto !important;
-        max-height: calc(100vh - 280px) !important;
-    }
-
-    /* PDF container should just contain content */
-    [id^="pdf-container"] {
-        overflow: visible !important;
-        height: auto !important;
-    }
-</style>
+@once
+    @vite(['resources/css/pdf-annotation-viewer.css'], 'plugins/webkul/projects')
+@endonce
 
 <div
     wire:ignore
@@ -59,7 +35,7 @@
     @include('webkul-project::components.pdf.context-bar')
 
     <!-- Isolation Mode Breadcrumb (NEW - Illustrator-style) -->
-    <div x-show="isolationMode" x-transition class="isolation-breadcrumb bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 border-b-4 border-primary-500 px-6 py-4 shadow-lg" style="position: relative; z-index: 15;">
+    <div x-show="isolationMode" x-transition class="isolation-breadcrumb bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 border-b-4 border-primary-500 px-6 py-4 shadow-lg">
         <div class="flex items-center gap-4">
             <!-- Lock Icon + Label -->
             <div class="flex items-center gap-2">
