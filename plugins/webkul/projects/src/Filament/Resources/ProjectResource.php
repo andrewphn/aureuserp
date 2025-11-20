@@ -98,6 +98,11 @@ class ProjectResource extends Resource
         return __('webkul-project::filament/resources/project.navigation.group');
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withoutTrashed();
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'user.name', 'partner.name'];

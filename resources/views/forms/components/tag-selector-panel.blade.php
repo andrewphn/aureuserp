@@ -4,6 +4,7 @@
             state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$getStatePath()}')") }} || [],
             searchQuery: '',
             expandedSections: {},
+            viewMode: localStorage.getItem('tagSelectorViewMode') || 'accordion',
 
             toggleTag(tagId) {
                 // Ensure state is always an array
@@ -20,6 +21,11 @@
 
             toggleSection(type) {
                 this.expandedSections[type] = !this.expandedSections[type]
+            },
+
+            toggleViewMode() {
+                this.viewMode = this.viewMode === 'accordion' ? 'columns' : 'accordion';
+                localStorage.setItem('tagSelectorViewMode', this.viewMode);
             },
 
             filteredTags(tags) {
@@ -46,14 +52,27 @@
             }
         }"
     >
-        <!-- Search Bar -->
-        <div class="mb-3">
+        <!-- Search Bar and View Switcher -->
+        <div class="mb-3 flex gap-2">
             <input
                 type="text"
                 x-model="searchQuery"
                 placeholder="🔍 Search tags..."
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
+                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
             >
+            <button
+                type="button"
+                @click="toggleViewMode()"
+                class="px-3 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:hover:bg-gray-800 transition-colors"
+                :title="viewMode === 'accordion' ? 'Switch to Columns View' : 'Switch to Accordion View'"
+            >
+                <svg x-show="viewMode === 'accordion'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                <svg x-show="viewMode === 'columns'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
         </div>
 
         <!-- Selected Tags -->
@@ -75,12 +94,13 @@
         </div>
 
         <!-- Helper text -->
-        <div class="mb-3 text-xs text-gray-500 dark:text-gray-400" x-show="!searchQuery">
+        <div class="mb-3 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between" x-show="!searchQuery">
             <p>💡 Browse by category below, or search to filter tags</p>
+            <span class="text-xs font-medium" x-text="viewMode === 'accordion' ? 'Accordion View' : 'Columns View'"></span>
         </div>
 
-        <!-- Tags by Category -->
-        <div class="space-y-2 max-h-96 overflow-y-auto">
+        <!-- Tags by Category - Accordion View -->
+        <div x-show="viewMode === 'accordion'" class="space-y-2 max-h-96 overflow-y-auto">
             @foreach($getTagsByType() as $type => $tags)
                 @php
                     $typeInfo = $getTypeLabels()[$type] ?? ['label' => $type, 'icon' => '📌'];
@@ -151,6 +171,51 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+
+        <!-- Tags by Category - Columns View -->
+        <div x-show="viewMode === 'columns'" class="max-h-96 overflow-y-auto">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                @foreach($getTagsByType() as $type => $tags)
+                    @php
+                        $typeInfo = $getTypeLabels()[$type] ?? ['label' => $type, 'icon' => '📌'];
+                        $tagsJson = json_encode($tags);
+                    @endphp
+
+                    <div
+                        x-show="!searchQuery || hasSearchResults({{ $tagsJson }})"
+                        class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800"
+                    >
+                        <!-- Category Header -->
+                        <div class="mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                                <span>{{ $typeInfo['icon'] }} {{ $typeInfo['label'] }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {{ count($tags) }} {{ Str::plural('tag', count($tags)) }}
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="flex flex-col gap-1">
+                            <template x-for="tag in filteredTags({{ $tagsJson }})" :key="tag.id">
+                                <button
+                                    type="button"
+                                    @click="toggleTag(tag.id)"
+                                    :class="{
+                                        'bg-primary-500 text-white ring-2 ring-primary-500': state && state.includes(tag.id),
+                                        'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700': !state || !state.includes(tag.id)
+                                    }"
+                                    class="w-full px-2 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded-md transition-all text-left"
+                                    :style="tag.color ? 'border-left: 3px solid ' + tag.color : ''"
+                                    :title="tag.description"
+                                    x-text="tag.name"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
 </x-dynamic-component>

@@ -114,7 +114,7 @@ class ProjectStatusWidget extends BaseWidget
             return null;
         }
 
-        $actual = $this->record->orders()->sum('total');
+        $actual = $this->record->orders()->sum('amount_total');
 
         if ($actual === 0) {
             return null;

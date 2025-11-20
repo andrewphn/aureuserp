@@ -52,7 +52,7 @@ class ProjectFinancialsWidget extends BaseWidget
         $pricePerLF = $linearFeet > 0 ? $quoted / $linearFeet : 0;
 
         // Calculate actual costs from orders
-        $actual = $this->record->orders()->sum('total') ?? 0;
+        $actual = $this->record->orders()->sum('amount_total') ?? 0;
 
         // Calculate margin
         $margin = $quoted > 0 ? (($quoted - $actual) / $quoted) * 100 : 0;
