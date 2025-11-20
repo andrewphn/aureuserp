@@ -3,7 +3,7 @@
  * Vite bundle entry for PDF annotation viewer
  */
 
-import createPdfViewerComponent from './components/pdf-viewer/pdf-viewer-core.js';
+import { createPdfViewerComponent } from './components/pdf-viewer/pdf-viewer-core.js';
 import * as AnnotationManager from './components/pdf-viewer/managers/annotation-manager.js';
 import * as TreeManager from './components/pdf-viewer/managers/tree-manager.js';
 import * as CoordTransform from './components/pdf-viewer/managers/coordinate-transform.js';
