@@ -159,7 +159,8 @@ class ViewProject extends ViewRecord
         // Eager load relationships for hierarchical display
         $this->record->load([
             'rooms.locations.cabinetRuns.cabinets',
-            'pdfDocuments.pages'
+            'pdfDocuments.pages',
+            'tags'
         ]);
 
         return $data;
@@ -192,6 +193,22 @@ class ViewProject extends ViewRecord
                                     ->label('Customer')
                                     ->icon('heroicon-o-user'),
                             ]),
+
+                        // Project Tags
+                        TextEntry::make('tags.name')
+                            ->label('Tags')
+                            ->badge()
+                            ->state(function ($record): array {
+                                return $record->tags->map(fn ($tag) => [
+                                    'label' => $tag->name,
+                                    'color' => $tag->color ?? '#808080',
+                                ])->toArray();
+                            })
+                            ->formatStateUsing(fn ($state) => $state['label'] ?? '')
+                            ->color(fn ($state) => \Filament\Support\Colors\Color::generateV3Palette($state['color'] ?? '#808080'))
+                            ->separator(', ')
+                            ->visible(fn ($record) => $record->tags->count() > 0)
+                            ->columnSpanFull(),
 
                         // Primary Reference Gallery
                         ViewEntry::make('primary_reference_gallery')
