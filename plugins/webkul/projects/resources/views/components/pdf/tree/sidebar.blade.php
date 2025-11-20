@@ -8,18 +8,16 @@
             <div class="flex gap-0.5 p-0.5 bg-gray-100 dark:bg-gray-700 rounded">
                 <button
                     @click="treeViewMode = 'room'"
-                    :class="treeViewMode === 'room' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''"
+                    :class="treeViewMode === 'room' ? 'bg-white dark:bg-gray-600 shadow-sm tree-sidebar__view-toggle--active' : 'tree-sidebar__view-toggle--inactive'"
                     class="p-1 rounded transition-all"
-                    :style="treeViewMode === 'room' ? 'color: var(--primary-600);' : 'color: var(--gray-500);'"
                     title="Group by Room"
                 >
                     <x-filament::icon icon="heroicon-o-home" class="h-3.5 w-3.5" />
                 </button>
                 <button
                     @click="treeViewMode = 'page'"
-                    :class="treeViewMode === 'page' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''"
+                    :class="treeViewMode === 'page' ? 'bg-white dark:bg-gray-600 shadow-sm tree-sidebar__view-toggle--active' : 'tree-sidebar__view-toggle--inactive'"
                     class="p-1 rounded transition-all"
-                    :style="treeViewMode === 'page' ? 'color: var(--primary-600);' : 'color: var(--gray-500);'"
                     title="Group by Page"
                 >
                     <x-filament::icon icon="heroicon-o-document-text" class="h-3.5 w-3.5" />
@@ -28,8 +26,7 @@
 
             <button
                 @click="refreshTree()"
-                class="p-1 hover:opacity-80 transition-opacity"
-                style="color: var(--primary-600);"
+                class="tree-sidebar__refresh-button p-1 hover:opacity-80 transition-opacity"
                 title="Refresh tree"
             >
                 <x-filament::icon icon="heroicon-o-arrow-path" class="h-3.5 w-3.5" />
