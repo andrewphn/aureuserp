@@ -66,6 +66,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\Milestone
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\PdfDocumentsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\TaskStagesRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomsRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomLocationsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRunsRelationManager;
 use Webkul\Project\Models\Project;
@@ -1157,6 +1158,7 @@ class ProjectResource extends Resource
         return [
             RelationGroup::make('Project Data', [
                 RoomsRelationManager::class,
+                RoomLocationsRelationManager::class,
                 CabinetRunsRelationManager::class,
                 CabinetsRelationManager::class,
             ])

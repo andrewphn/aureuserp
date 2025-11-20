@@ -217,6 +217,18 @@ class Project extends Model implements Sortable
         return $this->hasMany(Room::class);
     }
 
+    public function roomLocations()
+    {
+        return $this->hasManyThrough(
+            RoomLocation::class,
+            Room::class,
+            'project_id', // Foreign key on rooms table
+            'room_id',    // Foreign key on room_locations table
+            'id',         // Local key on projects table
+            'id'          // Local key on rooms table
+        );
+    }
+
     public function cabinets(): HasMany
     {
         return $this->hasMany(CabinetSpecification::class);
