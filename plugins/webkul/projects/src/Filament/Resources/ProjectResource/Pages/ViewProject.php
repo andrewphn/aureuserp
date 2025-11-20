@@ -144,6 +144,16 @@ class ViewProject extends ViewRecord
         ];
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ProjectResource\Widgets\ProjectStatusWidget::class,
+            ProjectResource\Widgets\ProjectFinancialsWidget::class,
+            ProjectResource\Widgets\ProjectTimelineWidget::class,
+            ProjectResource\Widgets\ProjectAlertsWidget::class,
+        ];
+    }
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Eager load relationships for hierarchical display
