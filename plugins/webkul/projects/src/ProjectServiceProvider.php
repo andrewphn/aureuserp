@@ -7,10 +7,20 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Project Service Provider service provider
+ *
+ */
 class ProjectServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'projects';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -48,24 +58,45 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_10_03_190205_seed_complete_tcs_tag_system',
                 '2025_10_03_193000_fix_phase_tag_colors_to_match_stages',
                 '2025_10_04_124625_create_projects_cabinet_specifications_table',
+                '2025_10_06_000003_add_project_id_to_sales_orders',
+                '2025_10_07_131429_add_attribute_selections_to_sales_order_lines',
                 '2025_10_07_161656_create_projects_rooms_table',
                 '2025_10_07_161931_create_projects_room_locations_table',
                 '2025_10_07_161947_create_projects_cabinet_runs_table',
                 '2025_10_07_162003_add_room_and_run_columns_to_projects_cabinet_specifications',
-                '2025_10_06_000003_add_project_id_to_sales_orders',
-                '2025_10_07_131429_add_attribute_selections_to_sales_order_lines',
                 '2025_10_07_193846_create_pdf_pages_table',
                 '2025_10_07_194258_create_pdf_document_tag_pivot_table',
                 '2025_10_07_200202_create_pdf_page_rooms_table',
                 '2025_10_08_000001_create_pdf_page_annotations_table',
                 '2025_10_08_173125_add_room_fields_to_pdf_page_annotations_table',
+                '2025_10_13_173038_add_branch_id_to_projects_projects_table',
+                '2025_10_20_162000_create_pdf_annotation_history_table',
+                '2025_10_23_000001_add_view_types_and_multi_parent_support',
                 '2025_10_24_214500_add_current_production_stage_to_projects_table',
                 '2025_10_25_000001_add_production_fields_to_milestones',
                 '2025_10_25_145337_create_projects_milestone_templates_table',
-                '2025_10_20_162000_create_pdf_annotation_history_table',
+                '2025_10_26_000001_add_pricing_columns_to_projects_rooms_table',
                 '2025_10_26_000002_add_woodworking_columns_to_projects_room_locations_table',
+                '2025_10_26_000003_add_production_columns_to_projects_cabinet_runs_table',
+                '2025_10_26_000004_add_detailed_specs_to_projects_cabinet_specifications_table',
                 '2025_10_26_000008_create_cabinet_materials_bom_table',
                 '2025_10_26_000009_create_hardware_requirements_table',
+                '2025_10_28_115827_rename_cabinet_materials_bom_to_projects_bom',
+                '2025_10_28_122833_make_product_variant_id_nullable_in_cabinet_specifications',
+                '2025_10_28_130000_add_tcs_pricing_fields_to_project_entities',
+                '2025_10_28_140000_create_tcs_material_inventory_mappings_table',
+                '2025_10_29_111825_make_total_linear_feet_nullable_in_cabinet_runs_table',
+                '2025_10_29_113649_make_cabinet_spec_dimensions_and_pricing_nullable',
+                '2025_11_20_115206_add_hierarchy_columns_to_tasks_table',
+                '2025_11_20_121238_add_search_indexes_to_hierarchy_tables',
+                '2025_11_21_000001_create_projects_cabinet_sections_table',
+                '2025_11_21_000002_create_projects_doors_table',
+                '2025_11_21_000003_create_projects_drawers_table',
+                '2025_11_21_000004_create_projects_shelves_table',
+                '2025_11_21_000005_create_projects_pullouts_table',
+                '2025_11_21_000006_add_section_and_component_to_projects_tasks_table',
+                '2025_11_21_000007_add_product_links_to_cabinets_and_components',
+                '2025_11_26_183527_add_timestamps_to_projects_project_tag_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -82,6 +113,11 @@ class ProjectServiceProvider extends PackageServiceProvider
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         // Load views with webkul-project namespace
