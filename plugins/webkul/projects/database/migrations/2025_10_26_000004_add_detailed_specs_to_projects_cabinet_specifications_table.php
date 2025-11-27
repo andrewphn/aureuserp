@@ -4,7 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -197,7 +201,8 @@ return new class extends Migration
                 ->comment('When inspected');
 
             // Indexes for common queries
-            $table->index(['cabinet_type', 'complexity_tier'], 'idx_cabinet_type_tier');
+            // Note: cabinet_type column may not exist in all installations, so we skip that index
+            // $table->index(['cabinet_type', 'complexity_tier'], 'idx_cabinet_type_tier');
             $table->index(['assembled_at', 'finished_at'], 'idx_cabinet_production');
         });
     }
@@ -208,7 +213,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('projects_cabinet_specifications', function (Blueprint $table) {
-            $table->dropIndex('idx_cabinet_type_tier');
+            // Note: idx_cabinet_type_tier may not exist
+            // $table->dropIndex('idx_cabinet_type_tier');
             $table->dropIndex('idx_cabinet_production');
 
             $table->dropForeign(['assembled_by_user_id']);
