@@ -10,6 +10,11 @@ use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Posts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPosts extends ListRecords
 {
     use HasTableViews;

@@ -11,6 +11,11 @@ use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Filament\Resources\JournalResource;
 
+/**
+ * Edit Journal class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditJournal extends EditRecord
 {
     protected static string $resource = JournalResource::class;
@@ -36,6 +41,12 @@ class EditJournal extends EditRecord
             ->body(__('accounts::filament/resources/journal/pages/edit-journal.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['creator_id'] = Auth::user()->id;

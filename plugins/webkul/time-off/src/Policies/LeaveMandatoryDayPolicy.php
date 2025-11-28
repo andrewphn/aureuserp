@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\LeaveMandatoryDay;
 
+/**
+ * Leave Mandatory Day Policy authorization policy
+ *
+ */
 class LeaveMandatoryDayPolicy
 {
     use HandlesAuthorization;

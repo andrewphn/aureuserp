@@ -8,6 +8,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\CategoryResource;
 
+/**
+ * Create Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateCategory extends CreateRecord
 {
     protected static string $resource = CategoryResource::class;
@@ -17,6 +22,12 @@ class CreateCategory extends CreateRecord
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();
@@ -26,6 +37,12 @@ class CreateCategory extends CreateRecord
         return $data;
     }
 
+    /**
+     * Create
+     *
+     * @param bool $another
+     * @return void
+     */
     public function create(bool $another = false): void
     {
         try {

@@ -5,6 +5,10 @@ namespace Webkul\Inventory\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 
+/**
+ * Product Quantity Policy authorization policy
+ *
+ */
 class ProductQuantityPolicy
 {
     use HandlesAuthorization;

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\Bill;
 use Webkul\Security\Models\User;
 
+/**
+ * Bill Policy authorization policy
+ *
+ */
 class BillPolicy
 {
     use HandlesAuthorization;

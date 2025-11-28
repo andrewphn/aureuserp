@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\Incoterm;
 use Webkul\Security\Models\User;
 
+/**
+ * Incoterm Policy authorization policy
+ *
+ */
 class IncotermPolicy
 {
     use HandlesAuthorization;

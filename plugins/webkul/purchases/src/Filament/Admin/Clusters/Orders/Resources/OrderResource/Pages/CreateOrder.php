@@ -10,6 +10,11 @@ use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Create Order class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateOrder extends CreateRecord
 {
     use HasRepeaterColumnManager;
@@ -29,6 +34,12 @@ class CreateOrder extends CreateRecord
             ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/create-order.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();
@@ -40,6 +51,11 @@ class CreateOrder extends CreateRecord
         return $data;
     }
 
+    /**
+     * After Create
+     *
+     * @return void
+     */
     protected function afterCreate(): void
     {
         PurchaseOrder::computePurchaseOrder($this->getRecord());

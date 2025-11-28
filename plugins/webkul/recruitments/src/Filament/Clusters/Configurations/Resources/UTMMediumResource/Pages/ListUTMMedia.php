@@ -10,6 +10,11 @@ use Webkul\Recruitment\Models\UTMMedium;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List UTMMedia class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListUTMMedia extends ListRecords
 {
     use HasTableViews;

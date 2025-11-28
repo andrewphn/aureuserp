@@ -26,6 +26,11 @@ use Illuminate\Support\Carbon;
 use Webkul\Project\Models\Timesheet;
 use Webkul\Timesheet\Filament\Resources\TimesheetResource\Pages\ManageTimesheets;
 
+/**
+ * Timesheet Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TimesheetResource extends Resource
 {
     protected static ?string $model = Timesheet::class;
@@ -40,6 +45,12 @@ class TimesheetResource extends Resource
         return __('timesheets::filament/resources/timesheet.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -89,6 +100,12 @@ class TimesheetResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\Lot;
 use Webkul\Security\Models\User;
 
+/**
+ * Lot Policy authorization policy
+ *
+ */
 class LotPolicy
 {
     use HandlesAuthorization;

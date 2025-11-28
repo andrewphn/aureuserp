@@ -7,6 +7,10 @@ use Webkul\Employee\Models\Calendar;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Calendar Factory model factory
+ *
+ */
 class CalendarFactory extends Factory
 {
     /**

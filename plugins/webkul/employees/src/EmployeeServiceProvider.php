@@ -7,10 +7,20 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Employee Service Provider service provider
+ *
+ */
 class EmployeeServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'employees';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -49,6 +59,11 @@ class EmployeeServiceProvider extends PackageServiceProvider
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         //

@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Services\MeetingTranscriptProcessor;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+
+class ProcessMeetingTranscript extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'meeting:process
+                            {file : The path to the meeting transcript JSON file}
+                            {--title= : Optional custom title for the meeting}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Process a meeting transcript JSON file and index it in the database';
+
+    private MeetingTranscriptProcessor $processor;
+
+    public function __construct(MeetingTranscriptProcessor $processor)
+    {
+        parent::__construct();
+        $this->processor = $processor;
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
+    {
+        $filePath = $this->argument('file');
+        $title = $this->option('title');
+
+        // Validate file exists
+        if (!File::exists($filePath)) {
+            $this->error("File not found: {$filePath}");
+            return Command::FAILURE;
+        }
+
+        // Validate it's a JSON file
+        if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'json') {
+            $this->error("File must be a JSON file");
+            return Command::FAILURE;
+        }
+
+        $this->info("Processing meeting transcript: {$filePath}");
+        $this->newLine();
+
+        try {
+            // Process the meeting
+            $meeting = $this->processor->process($filePath, $title);
+
+            $this->info("✓ Meeting processed successfully!");
+            $this->newLine();
+
+            // Display summary
+            $this->displaySummary($meeting);
+
+            return Command::SUCCESS;
+        } catch (\Exception $e) {
+            $this->error("Failed to process meeting: {$e->getMessage()}");
+            $this->error($e->getTraceAsString());
+            return Command::FAILURE;
+        }
+    }
+
+    private function displaySummary($meeting): void
+    {
+        $this->table(
+            ['Property', 'Value'],
+            [
+                ['ID', $meeting->id],
+                ['Title', $meeting->title],
+                ['Status', $meeting->status],
+                ['Date', $meeting->meeting_date ?? 'N/A'],
+                ['Duration', $meeting->duration_minutes . ' minutes'],
+                ['Total Sentences', $meeting->total_sentences],
+                ['Participants', count($meeting->participants)],
+                ['Topics', $meeting->topics()->count()],
+                ['Segments', $meeting->segments()->count()],
+                ['Action Items', $meeting->actionItems()->count()],
+                ['Entities', $meeting->entities()->count()],
+            ]
+        );
+
+        $this->newLine();
+        $this->info("Index files generated at: " . dirname($meeting->file_path) . '/' . pathinfo($meeting->file_path, PATHINFO_FILENAME));
+    }
+}

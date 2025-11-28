@@ -7,6 +7,10 @@ use App\Models\PdfPageAnnotation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Pdf Annotation Controller controller
+ *
+ */
 class PdfAnnotationController extends Controller
 {
     /**

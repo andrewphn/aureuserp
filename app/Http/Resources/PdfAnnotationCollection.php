@@ -5,6 +5,11 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+/**
+ * Pdf Annotation Collection class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PdfAnnotationCollection extends ResourceCollection
 {
     /**

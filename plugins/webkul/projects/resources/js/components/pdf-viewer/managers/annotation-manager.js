@@ -6,14 +6,16 @@
 import { getColorForType } from './state-manager.js';
 import { pdfToScreen } from './coordinate-transform.js';
 import { getCsrfToken } from '../utilities.js';
+import { getRoomNameById } from './entity-lookup.js';
 
 /**
  * Load annotations for current page
  * @param {Object} state - Component state
- * @param {Object} refs - Alpine.js $refs
+ * @param {Object} refs - Alpine.js $refs object
+ * @param {Object} callbacks - Callback functions (currently unused, for future extensibility)
  * @returns {Promise<void>}
  */
-export async function loadAnnotations(state, refs) {
+export async function loadAnnotations(state, refs, callbacks = {}) {
     console.log(`📥 Loading annotations for page ${state.currentPage} (pdfPageId: ${state.pdfPageId})...`);
 
     // Clear existing annotations
@@ -430,12 +432,6 @@ export function checkForDuplicateEntity(drawMode, state) {
 /**
  * Helper functions
  */
-
-function getRoomNameById(roomId, state) {
-    if (!state.tree || !roomId) return '';
-    const room = state.tree.find(r => r.id === roomId);
-    return room ? room.name : '';
-}
 
 function isAnnotationVisibleInIsolation(anno, state) {
     // This is a placeholder - actual implementation is in isolation-mode-manager.js

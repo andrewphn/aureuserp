@@ -10,6 +10,11 @@ use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource;
 use Webkul\TimeOff\Traits\TimeOffHelper;
 
+/**
+ * Edit Time Off class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditTimeOff extends EditRecord
 {
     use TimeOffHelper;
@@ -45,6 +50,12 @@ class EditTimeOff extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return $this->mutateTimeOffData($data, $this->record?->id);

@@ -39,8 +39,18 @@ use Webkul\TimeOff\Enums\CarryOverUnusedAccruals;
 use Webkul\TimeOff\Enums\Frequency;
 use Webkul\TimeOff\Enums\StartType;
 
+/**
+ * Leave Accrual Plan trait
+ *
+ */
 trait LeaveAccrualPlan
 {
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -225,6 +235,12 @@ trait LeaveAccrualPlan
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -343,6 +359,12 @@ trait LeaveAccrualPlan
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

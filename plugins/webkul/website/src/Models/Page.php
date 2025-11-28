@@ -9,6 +9,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Security\Models\User;
 use Webkul\Website\Database\Factories\PageFactory;
 
+/**
+ * Page Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $title
+ * @property string|null $content
+ * @property string|null $slug
+ * @property bool $is_published
+ * @property \Carbon\Carbon|null $published_at
+ * @property bool $is_header_visible
+ * @property bool $is_footer_visible
+ * @property string|null $meta_title
+ * @property string|null $meta_keywords
+ * @property string|null $meta_description
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Page extends Model
 {
     use HasFactory, SoftDeletes;
@@ -51,11 +72,21 @@ class Page extends Model
         'published_at'      => 'datetime',
     ];
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return PageFactory
+     */
     protected static function newFactory(): PageFactory
     {
         return PageFactory::new();

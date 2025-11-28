@@ -6,6 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Security\Models\User;
 
+/**
+ * Footer Template Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $slug
+ * @property string|null $description
+ * @property string|null $icon
+ * @property string|null $color
+ * @property array $contexts
+ * @property bool $is_active
+ * @property bool $is_system
+ * @property string|null $created_by
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class FooterTemplate extends Model
 {
     protected $fillable = [

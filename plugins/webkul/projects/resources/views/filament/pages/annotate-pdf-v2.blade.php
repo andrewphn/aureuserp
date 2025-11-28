@@ -30,9 +30,9 @@
         @vite('resources/js/app.js')
     @endonce
 
-    {{-- Load annotation system via Vite (bundles PDF.js + Alpine component) --}}
+    {{-- Load refactored PDF viewer system via Vite (includes manager-based architecture) --}}
     @once
-        @vite('resources/js/annotations.js')
+        @vite('plugins/webkul/projects/resources/js/pdf-viewer.js')
     @endonce
 
     {{-- Set active project context for global footer --}}

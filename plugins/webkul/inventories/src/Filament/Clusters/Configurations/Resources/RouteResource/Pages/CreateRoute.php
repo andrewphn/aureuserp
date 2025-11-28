@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource;
 
+/**
+ * Create Route class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateRoute extends CreateRecord
 {
     protected static string $resource = RouteResource::class;
@@ -24,6 +29,12 @@ class CreateRoute extends CreateRecord
             ->body(__('inventories::filament/clusters/configurations/resources/route/pages/create-route.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

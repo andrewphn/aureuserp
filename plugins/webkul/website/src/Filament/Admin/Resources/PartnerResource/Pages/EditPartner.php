@@ -5,6 +5,11 @@ namespace Webkul\Website\Filament\Admin\Resources\PartnerResource\Pages;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\EditPartner as BaseEditPartner;
 use Webkul\Website\Filament\Admin\Resources\PartnerResource;
 
+/**
+ * Edit Partner class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPartner extends BaseEditPartner
 {
     protected static string $resource = PartnerResource::class;

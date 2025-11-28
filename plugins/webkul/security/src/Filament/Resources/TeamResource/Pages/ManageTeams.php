@@ -7,6 +7,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Webkul\Security\Filament\Resources\TeamResource;
 
+/**
+ * Manage Teams class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTeams extends ManageRecords
 {
     protected static string $resource = TeamResource::class;

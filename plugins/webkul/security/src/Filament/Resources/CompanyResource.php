@@ -51,6 +51,15 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Company Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CompanyResource extends Resource
 {
     use HasCustomFields;
@@ -74,6 +83,12 @@ class CompanyResource extends Resource
         return ['name', 'email'];
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -82,6 +97,12 @@ class CompanyResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -102,6 +123,14 @@ class CompanyResource extends Resource
                                             ->maxLength(10)
                                             ->placeholder('e.g., TCS')
                                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: 'Short abbreviation used in project numbers and identifiers'),
+                                        TextInput::make('project_number_start')
+                                            ->label('Project Number Start')
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->step(1)
+                                            ->placeholder('e.g., 1 or 500')
+                                            ->hintIcon('heroicon-o-question-mark-circle', tooltip: 'Starting number for project numbering. E.g., 1 means TCS-001, 500 means TCS-500'),
                                         TextInput::make('registration_number')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.registration-number'))
                                             ->maxLength(255),
@@ -322,6 +351,12 @@ class CompanyResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -483,6 +518,12 @@ class CompanyResource extends Resource
             ->reorderable('sort');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -503,6 +544,11 @@ class CompanyResource extends Resource
                                             ->placeholder('—')
                                             ->badge()
                                             ->label(__('security::filament/resources/company.infolist.sections.company-information.entries.acronym')),
+                                        TextEntry::make('project_number_start')
+                                            ->icon('heroicon-o-queue-list')
+                                            ->placeholder('1')
+                                            ->label('Project Number Start')
+                                            ->numeric(decimalPlaces: 0),
                                         TextEntry::make('registration_number')
                                             ->icon('heroicon-o-document-text')
                                             ->placeholder('—')

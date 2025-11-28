@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Start Type enumeration
+ *
+ */
 enum StartType: string implements HasLabel
 {
     case DAYS = 'days';
@@ -21,6 +25,11 @@ enum StartType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

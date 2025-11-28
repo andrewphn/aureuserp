@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Day Of Week enumeration
+ *
+ */
 enum DayOfWeek: string
 {
     case Monday = 'monday';
@@ -18,6 +22,11 @@ enum DayOfWeek: string
 
     case Sunday = 'sunday';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

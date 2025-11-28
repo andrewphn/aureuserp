@@ -23,6 +23,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ApplicantCategoryResource\Pages\ListApplicantCategories;
 use Webkul\Recruitment\Models\ApplicantCategory;
 
+/**
+ * Applicant Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ApplicantCategoryResource extends Resource
 {
     protected static ?string $model = ApplicantCategory::class;
@@ -46,6 +51,12 @@ class ApplicantCategoryResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/applicant-category.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -62,6 +73,12 @@ class ApplicantCategoryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -132,6 +149,12 @@ class ApplicantCategoryResource extends Resource
             ->reorderable('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

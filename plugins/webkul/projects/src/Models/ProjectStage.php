@@ -13,6 +13,25 @@ use Webkul\Project\Database\Factories\ProjectStageFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Project Stage Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property string|null $color
+ * @property bool $is_active
+ * @property bool $is_collapsed
+ * @property string|null $sort
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $projects
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ *
+ */
 class ProjectStage extends Model implements Sortable
 {
     use HasFactory, SoftDeletes, SortableTrait;
@@ -31,6 +50,7 @@ class ProjectStage extends Model implements Sortable
      */
     protected $fillable = [
         'name',
+        'stage_key',
         'color',
         'is_active',
         'is_collapsed',
@@ -54,21 +74,41 @@ class ProjectStage extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Projects
+     *
+     * @return HasMany
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class, 'stage_id');
     }
 
+    /**
+     * New Factory
+     *
+     * @return ProjectStageFactory
+     */
     protected static function newFactory(): ProjectStageFactory
     {
         return ProjectStageFactory::new();

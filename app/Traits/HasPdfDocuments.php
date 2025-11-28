@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Has Pdf Documents trait
+ *
+ */
 trait HasPdfDocuments
 {
     /**

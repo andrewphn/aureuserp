@@ -13,6 +13,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentReso
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource\Pages\ViewDepartment;
 use Webkul\Recruitment\Models\Department;
 
+/**
+ * Department Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DepartmentResource extends BaseDepartmentResource
 {
     protected static ?string $model = Department::class;
@@ -28,11 +33,23 @@ class DepartmentResource extends BaseDepartmentResource
         return __('recruitments::filament/clusters/configurations/resources/department.navigation.group');
     }
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'departments';
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return BaseDepartmentResource::table($table)

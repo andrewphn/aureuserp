@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Product\Filament\Resources\AttributeResource;
 
+/**
+ * View Attribute class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewAttribute extends ViewRecord
 {
     protected static string $resource = AttributeResource::class;

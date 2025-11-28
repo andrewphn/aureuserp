@@ -10,6 +10,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Security\Models\User;
 use Webkul\Support\Database\Factories\UOMFactory;
 
+/**
+ * UOM Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $type
+ * @property string|null $name
+ * @property string|null $factor
+ * @property int $category_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $category
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class UOM extends Model
 {
     use HasFactory, SoftDeletes;
@@ -34,11 +50,21 @@ class UOM extends Model
         'creator_id',
     ];
 
+    /**
+     * Category
+     *
+     * @return BelongsTo
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(UOMCategory::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -55,6 +81,15 @@ class UOM extends Model
      * @return float The converted quantity
      *
      * @throws Exception If conversion fails and $raiseIfFailure is true
+     */
+    /**
+     * Compute Quantity
+     *
+     * @param mixed $qty
+     * @param mixed $toUnit
+     * @param mixed $round
+     * @param mixed $roundingMethod
+     * @param mixed $raiseIfFailure
      */
     public function computeQuantity($qty, $toUnit, $round = true, $roundingMethod = 'UP', $raiseIfFailure = true)
     {
@@ -102,6 +137,13 @@ class UOM extends Model
      * @param  string  $method  The rounding method
      * @return float The rounded value
      */
+    /**
+     * Float Round
+     *
+     * @param mixed $value The value to set
+     * @param mixed $precision
+     * @param mixed $method
+     */
     private function floatRound($value, $precision, $method = 'UP')
     {
         if ($precision == 0) {
@@ -127,6 +169,11 @@ class UOM extends Model
         }
     }
 
+    /**
+     * New Factory
+     *
+     * @return UOMFactory
+     */
     protected static function newFactory(): UOMFactory
     {
         return UOMFactory::new();

@@ -4,6 +4,11 @@ namespace Webkul\Purchase\Filament\Admin\Clusters;
 
 use Filament\Clusters\Cluster;
 
+/**
+ * Orders class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Orders extends Cluster
 {
     protected static ?string $slug = 'purchase/orders';

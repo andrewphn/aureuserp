@@ -22,6 +22,11 @@ use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\TagResource\Pag
 use Webkul\Blog\Models\Tag;
 use Webkul\Website\Filament\Admin\Clusters\Configurations;
 
+/**
+ * Tag Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
@@ -42,6 +47,12 @@ class TagResource extends Resource
         return __('blogs::filament/admin/clusters/configurations/resources/tag.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -57,6 +68,12 @@ class TagResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

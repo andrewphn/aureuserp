@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Communication Standard enumeration
+ *
+ */
 enum CommunicationStandard: string implements HasLabel
 {
     case AUREUS = 'aureus';
@@ -18,6 +22,11 @@ enum CommunicationStandard: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

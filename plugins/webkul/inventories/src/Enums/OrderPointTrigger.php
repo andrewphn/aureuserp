@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Order Point Trigger enumeration
+ *
+ */
 enum OrderPointTrigger: string implements HasLabel
 {
     case MANUAL = 'manual';

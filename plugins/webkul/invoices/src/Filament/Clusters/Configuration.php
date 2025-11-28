@@ -4,6 +4,11 @@ namespace Webkul\Invoice\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
+/**
+ * Configuration class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Configuration extends Cluster
 {
     protected static ?string $slug = 'invoices/configurations';

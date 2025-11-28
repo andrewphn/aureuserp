@@ -19,6 +19,7 @@ import * as AutocompleteManager from './managers/autocomplete-manager.js';
 import * as ZoomManager from './managers/zoom-manager.js';
 import * as ViewTypeManager from './managers/view-type-manager.js';
 import * as EntityReferenceManager from './managers/entity-reference-manager.js';
+import * as UIHelpers from './managers/ui-helpers.js';
 
 /**
  * Create PDF Annotation Viewer Alpine component
@@ -369,121 +370,16 @@ export function createPdfViewerComponent(config) {
         },
 
         handleResize(event) {
-            // Direct inline resize handler - updates annotation during drag
-            if (!this.isResizing || !this.resizeStart) return;
-
-            const deltaX = event.clientX - this.resizeStart.mouseX;
-            const deltaY = event.clientY - this.resizeStart.mouseY;
-
-            const annotation = this.annotations.find(a => a.id === this.activeAnnotationId);
-            if (!annotation) return;
-
-            let newX = this.resizeStart.annoX;
-            let newY = this.resizeStart.annoY;
-            let newWidth = this.resizeStart.annoWidth;
-            let newHeight = this.resizeStart.annoHeight;
-
-            const handle = this.resizeHandle;
-
-            // Horizontal adjustments
-            if (handle.includes('w')) {
-                newX = this.resizeStart.annoX + deltaX;
-                newWidth = this.resizeStart.annoWidth - deltaX;
-            } else if (handle.includes('e')) {
-                newWidth = this.resizeStart.annoWidth + deltaX;
-            }
-
-            // Vertical adjustments
-            if (handle.includes('n')) {
-                newY = this.resizeStart.annoY + deltaY;
-                newHeight = this.resizeStart.annoHeight - deltaY;
-            } else if (handle.includes('s')) {
-                newHeight = this.resizeStart.annoHeight + deltaY;
-            }
-
-            // Enforce minimum size
-            const minSize = 20;
-            if (newWidth < minSize || newHeight < minSize) return;
-
-            // Update annotation screen coordinates
-            annotation.screenX = newX;
-            annotation.screenY = newY;
-            annotation.screenWidth = newWidth;
-            annotation.screenHeight = newHeight;
+            ResizeMoveSystem.handleResize(event, this);
         },
 
         handleMove(event) {
-            // Direct inline move handler - updates annotation position during drag
-            if (!this.isMoving || !this.moveStart) return;
-
-            const deltaX = event.clientX - this.moveStart.mouseX;
-            const deltaY = event.clientY - this.moveStart.mouseY;
-
-            const annotation = this.annotations.find(a => a.id === this.activeAnnotationId);
-            if (!annotation) return;
-
-            // Update screen position
-            annotation.screenX = this.moveStart.annoX + deltaX;
-            annotation.screenY = this.moveStart.annoY + deltaY;
+            ResizeMoveSystem.handleMove(event, this);
         },
 
         finishResizeOrMove(event) {
-            // Finish resize or move operation - save to server
-            if (this.isResizing) {
-                // Finish resize
-                const annotation = this.annotations.find(a => a.id === this.activeAnnotationId);
-                if (annotation) {
-                    // Convert screen coordinates back to PDF coordinates
-                    const pdfTopLeft = CoordTransform.screenToPdf(
-                        annotation.screenX,
-                        annotation.screenY,
-                        this.$refs,
-                        this
-                    );
-                    const pdfBottomRight = CoordTransform.screenToPdf(
-                        annotation.screenX + annotation.screenWidth,
-                        annotation.screenY + annotation.screenHeight,
-                        this.$refs,
-                        this
-                    );
-
-                    // Update PDF coordinates
-                    annotation.pdfX = pdfTopLeft.x;
-                    annotation.pdfY = pdfTopLeft.y;
-                    annotation.pdfWidth = Math.abs(pdfBottomRight.x - pdfTopLeft.x);
-                    annotation.pdfHeight = Math.abs(pdfTopLeft.y - pdfBottomRight.y);
-                    annotation.normalizedX = pdfTopLeft.normalized.x;
-                    annotation.normalizedY = pdfTopLeft.normalized.y;
-                }
-
-                this.isResizing = false;
-                this.resizeHandle = null;
-                this.resizeStart = null;
-                this.activeAnnotationId = null;
-
-            } else if (this.isMoving) {
-                // Finish move
-                const annotation = this.annotations.find(a => a.id === this.activeAnnotationId);
-                if (annotation) {
-                    // Convert screen coordinates back to PDF coordinates
-                    const pdfPos = CoordTransform.screenToPdf(
-                        annotation.screenX,
-                        annotation.screenY,
-                        this.$refs,
-                        this
-                    );
-
-                    // Update PDF coordinates (keep width/height the same)
-                    annotation.pdfX = pdfPos.x;
-                    annotation.pdfY = pdfPos.y;
-                    annotation.normalizedX = pdfPos.normalized.x;
-                    annotation.normalizedY = pdfPos.normalized.y;
-                }
-
-                this.isMoving = false;
-                this.moveStart = null;
-                this.activeAnnotationId = null;
-            }
+            // Finish resize or move operation using manager
+            ResizeMoveSystem.finishResizeOrMove(event, this, this.$refs);
 
             // Debounced auto-save: wait 1 second after final mouseup
             if (this.autoSaveTimeout) {
@@ -598,7 +494,10 @@ export function createPdfViewerComponent(config) {
         },
 
         async refreshTree() {
-            await TreeManager.refreshTree(this, this.$refs, this.getCallbacks());
+            await TreeManager.refreshTree(this, {
+                $refs: this.$refs,
+                ...this.getCallbacks()
+            });
         },
 
         toggleNode(nodeId) {
@@ -761,45 +660,123 @@ export function createPdfViewerComponent(config) {
 
         // View Color
         getCurrentViewColor() {
-            if (this.activeViewType === 'plan') return 'var(--primary-600)';
-            if (this.activeViewType === 'elevation') return 'var(--warning-600)';
-            if (this.activeViewType === 'section') return 'var(--info-600)';
-            if (this.activeViewType === 'detail') return 'var(--success-600)';
-            return 'var(--gray-600)';
+            return ViewTypeManager.getCurrentViewColor(this);
         },
 
         // Intelligent Label Positioning
         getLabelPositionClasses(anno) {
-            const overlayRect = CoordTransform.getOverlayRect(this.$refs, this);
-            if (!overlayRect) return '-top-10 left-0';
-
-            const spaceAbove = anno.screenY;
-            const spaceBelow = overlayRect.height - (anno.screenY + anno.screenHeight);
-            const spaceLeft = anno.screenX;
-            const spaceRight = overlayRect.width - (anno.screenX + anno.screenWidth);
-
-            // Prefer above if there's room
-            if (spaceAbove >= 40) return '-top-10 left-0';
-            // Otherwise below
-            if (spaceBelow >= 40) return '-bottom-10 left-0';
-            // If no vertical space, try right
-            if (spaceRight >= 100) return 'top-0 -right-2 translate-x-full';
-            // Last resort: left
-            return 'top-0 -left-2 -translate-x-full';
+            return UIHelpers.getLabelPositionClasses(anno, this.$refs, this);
         },
 
         // Intelligent Button Positioning
         getButtonPositionClasses(anno) {
-            const overlayRect = CoordTransform.getOverlayRect(this.$refs, this);
-            if (!overlayRect) return '-top-7 right-0';
+            return UIHelpers.getButtonPositionClasses(anno, this.$refs, this);
+        },
 
-            const spaceAbove = anno.screenY;
-            const spaceRight = overlayRect.width - (anno.screenX + anno.screenWidth);
+        // Annotation Interaction Handlers
+        handleNodeClick(anno) {
+            // Handle clicking on an annotation in tree or canvas
+            this.selectedAnnotation = anno;
+            this.activeAnnotationId = anno.id;
+            console.log('👆 Node clicked:', anno.label || anno.id, 'type:', anno.type);
 
-            // Prefer top-right corner
-            if (spaceAbove >= 30) return '-top-7 right-0';
-            // Otherwise bottom-right
-            return '-bottom-7 right-0';
+            // Auto-set drawing context based on clicked node
+            DrawingSystem.setDrawingContextFromNode(anno, this);
+        },
+
+        handleAnnotationDoubleClick(anno) {
+            // Handle double-clicking an annotation on canvas - enter isolation mode
+            console.log('👆👆 Annotation double-clicked:', anno.label || anno.id);
+            IsolationMode.enterIsolationMode(anno, this, this.getCallbacks());
+        },
+
+        handleNodeDoubleClick(type, id, ...args) {
+            // Handle double-clicking a tree node - enter isolation mode
+            console.log('👆👆 Tree node double-clicked:', type, id);
+
+            // Find the annotation to isolate
+            let annoToIsolate = null;
+
+            if (type === 'room') {
+                annoToIsolate = this.annotations.find(a =>
+                    a.type === 'room' && a.roomId === id
+                );
+            } else if (type === 'room_location' || type === 'location') {
+                const [roomId] = args;
+                annoToIsolate = this.annotations.find(a =>
+                    a.type === 'location' &&
+                    a.roomLocationId === id &&
+                    a.roomId === roomId
+                );
+            } else if (type === 'cabinet_run') {
+                const [roomId, locationId] = args;
+                annoToIsolate = this.annotations.find(a =>
+                    a.type === 'cabinet_run' &&
+                    a.cabinetRunId === id &&
+                    a.roomId === roomId &&
+                    (a.locationId === locationId || a.roomLocationId === locationId)
+                );
+            } else if (type === 'cabinet') {
+                const [roomId, locationId, cabinetRunId] = args;
+                annoToIsolate = this.annotations.find(a =>
+                    a.type === 'cabinet' &&
+                    a.id === id
+                );
+            }
+
+            if (annoToIsolate) {
+                IsolationMode.enterIsolationMode(annoToIsolate, this, this.getCallbacks());
+            } else {
+                console.warn('⚠️ Could not find annotation to isolate:', type, id);
+            }
+        },
+
+        handleTreeNodeDoubleClick(type, id, label, ...args) {
+            // Alternative handler for tree node double-click with label parameter
+            console.log('👆👆 Tree node double-clicked (with label):', type, label, id);
+
+            // Build annotation object for isolation
+            let annoToIsolate = null;
+
+            if (type === 'room') {
+                annoToIsolate = {
+                    type: 'room',
+                    id: id,
+                    label: label,
+                    roomId: id
+                };
+            } else if (type === 'location') {
+                const [roomId, roomName, locationId, locationName] = args;
+                annoToIsolate = {
+                    type: 'location',
+                    id: id,
+                    label: label,
+                    roomId: roomId,
+                    roomName: roomName,
+                    roomLocationId: locationId || id,
+                    locationId: locationId || id,
+                    locationName: locationName || label
+                };
+            } else if (type === 'cabinet_run') {
+                const [roomId, roomName, locationId, locationName, cabinetRunId] = args;
+                annoToIsolate = {
+                    type: 'cabinet_run',
+                    id: id,
+                    label: label,
+                    roomId: roomId,
+                    roomName: roomName,
+                    locationId: locationId,
+                    roomLocationId: locationId,
+                    locationName: locationName,
+                    cabinetRunId: cabinetRunId || id
+                };
+            }
+
+            if (annoToIsolate) {
+                IsolationMode.enterIsolationMode(annoToIsolate, this, this.getCallbacks());
+            } else {
+                console.warn('⚠️ Could not create annotation for isolation:', type, label);
+            }
         },
 
         // Helper: Get callbacks object for manager functions

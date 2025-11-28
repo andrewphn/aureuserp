@@ -11,6 +11,33 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Product Supplier Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $sort
+ * @property string|null $delay
+ * @property string|null $product_name
+ * @property string|null $product_code
+ * @property \Carbon\Carbon|null $starts_at
+ * @property \Carbon\Carbon|null $ends_at
+ * @property string|null $min_qty
+ * @property float $price
+ * @property float $discount
+ * @property int $product_id
+ * @property int $partner_id
+ * @property int $currency_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $product
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currency
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ *
+ */
 class ProductSupplier extends Model implements Sortable
 {
     use SortableTrait;
@@ -54,26 +81,51 @@ class ProductSupplier extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Product
+     *
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Currency
+     *
+     * @return BelongsTo
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);

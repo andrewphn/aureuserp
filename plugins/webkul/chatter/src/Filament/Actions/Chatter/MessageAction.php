@@ -17,6 +17,11 @@ use Illuminate\Support\Collection;
 use Webkul\Chatter\Mail\MessageMail;
 use Webkul\Support\Services\EmailService;
 
+/**
+ * Message Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class MessageAction extends Action
 {
     protected string $mailView = 'chatter::mail.message-mail';
@@ -28,6 +33,12 @@ class MessageAction extends Action
         return 'message.action';
     }
 
+    /**
+     * Set Resource
+     *
+     * @param string $resource
+     * @return self
+     */
     public function setResource(string $resource): self
     {
         $this->resource = $resource;
@@ -35,6 +46,12 @@ class MessageAction extends Action
         return $this;
     }
 
+    /**
+     * Set Message Mail View
+     *
+     * @param ?string $mailView
+     * @return self
+     */
     public function setMessageMailView(?string $mailView): self
     {
         $mailView = $this->evaluate($mailView);
@@ -167,6 +184,13 @@ class MessageAction extends Action
             ->slideOver(false);
     }
 
+    /**
+     * Notify Follower
+     *
+     * @param mixed $record The model record
+     * @param mixed $message
+     * @return void
+     */
     private function notifyFollower(mixed $record, mixed $message): void
     {
         foreach ($record->followers as $follower) {
@@ -181,11 +205,25 @@ class MessageAction extends Action
         }
     }
 
+    /**
+     * Prepare Resource Url
+     *
+     * @param mixed $record The model record
+     * @return string
+     */
     private function prepareResourceUrl(mixed $record): string
     {
         return $this->getResource()::getUrl('view', ['record' => $record]);
     }
 
+    /**
+     * Prepare Payload
+     *
+     * @param Model $record The model record
+     * @param mixed $partner
+     * @param mixed $message
+     * @return array
+     */
     private function preparePayload(Model $record, mixed $partner, mixed $message): array
     {
         return [
@@ -203,6 +241,12 @@ class MessageAction extends Action
         ];
     }
 
+    /**
+     * Prepare Attachments
+     *
+     * @param Collection $attachments
+     * @return array
+     */
     private function prepareAttachments(Collection $attachments): array
     {
         return $attachments?->map(function ($attachment) {

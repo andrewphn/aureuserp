@@ -41,6 +41,12 @@ class SaleContextProvider implements ContextProviderInterface
         return 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z';
     }
 
+    /**
+     * Load Context
+     *
+     * @param int|string $entityId
+     * @return array
+     */
     public function loadContext(int|string $entityId): array
     {
         // Load sales order data from database
@@ -66,6 +72,13 @@ class SaleContextProvider implements ContextProviderInterface
         return $data;
     }
 
+    /**
+     * Get Field Schema
+     *
+     * @param array $data The data array
+     * @param bool $isMinimized
+     * @return array
+     */
     public function getFieldSchema(array $data, bool $isMinimized = false): array
     {
         if ($isMinimized) {
@@ -75,6 +88,12 @@ class SaleContextProvider implements ContextProviderInterface
         return $this->getExpandedSchema($data);
     }
 
+    /**
+     * Get Minimized Schema
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getMinimizedSchema(array $data): array
     {
         return [
@@ -86,6 +105,12 @@ class SaleContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Get Expanded Schema
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getExpandedSchema(array $data): array
     {
         $fields = [
@@ -154,11 +179,23 @@ class SaleContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Supports Feature
+     *
+     * @param string $feature
+     * @return bool
+     */
     public function supportsFeature(string $feature): bool
     {
         return false; // Sales orders don't have tags, timeline alerts, etc.
     }
 
+    /**
+     * Get Actions
+     *
+     * @param array $data The data array
+     * @return array
+     */
     public function getActions(array $data): array
     {
         $actions = [];
@@ -174,6 +211,12 @@ class SaleContextProvider implements ContextProviderInterface
         return $actions;
     }
 
+    /**
+     * Get Status Color
+     *
+     * @param string $status
+     * @return string
+     */
     protected function getStatusColor(string $status): string
     {
         return match(strtolower($status)) {
@@ -185,6 +228,12 @@ class SaleContextProvider implements ContextProviderInterface
         };
     }
 
+    /**
+     * Get Payment Status Color
+     *
+     * @param string $status
+     * @return string
+     */
     protected function getPaymentStatusColor(string $status): string
     {
         return match(strtolower($status)) {

@@ -8,6 +8,11 @@ use Webkul\Account\Enums\DocumentType;
 use Webkul\Account\Filament\Resources\TaxResource;
 use Webkul\Account\Traits\TaxPartition;
 
+/**
+ * Manage Distribution For Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageDistributionForRefund extends ManageRelatedRecords
 {
     use TaxPartition;

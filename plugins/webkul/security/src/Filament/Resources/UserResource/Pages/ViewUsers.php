@@ -9,6 +9,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
 
+/**
+ * View Users class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewUsers extends ViewRecord
 {
     protected static string $resource = UserResource::class;

@@ -12,6 +12,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Package;
 
+/**
+ * Edit Package class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPackage extends EditRecord
 {
     protected static string $resource = PackageResource::class;

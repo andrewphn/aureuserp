@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Quick Reference Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .card {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+            font-size: 2em;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .item {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .item-title {
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .item-content {
+            color: #475569;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #475569;
+            font-size: 0.95em;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+            color: #3b82f6;
+        }
+
+        .emergency-box {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .emergency-title {
+            color: #dc2626;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .contact-name {
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .contact-role {
+            color: #64748b;
+            font-size: 0.85em;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .card {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🛠️ TCS SHOP QUICK REFERENCE</h1>
+        <p class="subtitle">Keep this at your workbench · Updated 2025-11-21</p>
+
+        <!-- DAILY WORKFLOW -->
+        <div class="section">
+            <div class="section-title">📋 Daily Workflow Checklist</div>
+            <ul class="checklist">
+                <li>Clock in and check task assignments for the day</li>
+                <li>Review job card and drawings for your cabinet run</li>
+                <li>Gather materials from designated bay area</li>
+                <li>Verify all parts are present before starting</li>
+                <li>Complete assigned tasks following task card instructions</li>
+                <li>Update task status as work progresses</li>
+                <li>Perform quality check before moving to next step</li>
+                <li>Clean workbench and organize at end of day</li>
+                <li>Clock out and report any issues or shortages</li>
+            </ul>
+        </div>
+
+        <!-- KEY PEOPLE -->
+        <div class="section">
+            <div class="section-title">👥 Who to Ask for What</div>
+            <div class="grid-2">
+                <div class="item">
+                    <div class="item-title">🔧 Levi (Lead Craftsman)</div>
+                    <div class="item-content">
+                        Assembly questions<br>
+                        CNC issues<br>
+                        Build techniques<br>
+                        Quality standards
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-title">📦 Aiden (Warehouse)</div>
+                    <div class="item-content">
+                        Material locations<br>
+                        Inventory shortages<br>
+                        Hardware allocation<br>
+                        Job staging
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-title">👔 Bryan (Owner)</div>
+                    <div class="item-content">
+                        Design clarifications<br>
+                        Project approvals<br>
+                        Special requests<br>
+                        Major decisions
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-title">🛒 Sadie (Purchasing)</div>
+                    <div class="item-content">
+                        Ordering materials<br>
+                        Vendor questions<br>
+                        Purchase orders<br>
+                        Payroll issues
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CABINET TERMINOLOGY -->
+        <div class="section">
+            <div class="section-title">📚 Common Cabinet Terms</div>
+            <div class="grid-3">
+                <div class="item">
+                    <div class="item-title">Face Frame</div>
+                    <div class="item-content">Front wood frame on cabinet, typically 1.5" wide</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">Toe Kick</div>
+                    <div class="item-content">Recessed area at bottom of base cabinet (4.5" high)</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">Linear Feet (LF)</div>
+                    <div class="item-content">Cabinet width in feet, used for pricing</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">Inset vs Overlay</div>
+                    <div class="item-content">Door mounting: flush inside frame vs covering frame</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">Soft Close</div>
+                    <div class="item-content">Hardware that gently closes doors/drawers</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">Edge Banding</div>
+                    <div class="item-content">Thin strip covering plywood edges</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HARDWARE -->
+        <div class="section">
+            <div class="section-title">🔩 Common Hardware</div>
+            <div class="grid-2">
+                <div class="item">
+                    <div class="item-title">Blum Hinges</div>
+                    <div class="item-content">
+                        <strong>71B:</strong> Standard for most doors<br>
+                        <strong>110°:</strong> Euro style concealed<br>
+                        <strong>Inset:</strong> For flush-mount doors
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-title">Drawer Slides</div>
+                    <div class="item-content">
+                        <strong>Tandem:</strong> Blum standard slide<br>
+                        <strong>Undermount:</strong> Hidden slides<br>
+                        <strong>Lengths:</strong> 18", 21", 24" most common
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUALITY CHECKS -->
+        <div class="section">
+            <div class="section-title">✅ Quality Checkpoints</div>
+            <div class="grid-2">
+                <div class="item">
+                    <div class="item-title">Before Assembly</div>
+                    <div class="item-content">
+                        ☐ All parts cut to spec<br>
+                        ☐ Edge banding smooth<br>
+                        ☐ No chips or damage<br>
+                        ☐ Hardware pre-drilled correctly
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-title">After Assembly</div>
+                    <div class="item-content">
+                        ☐ Doors fit and close properly<br>
+                        ☐ Drawers slide smoothly<br>
+                        ☐ Cabinet is square<br>
+                        ☐ Face frame flush and tight
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAFETY -->
+        <div class="section">
+            <div class="section-title">⚠️ Safety First - Always</div>
+            <ul class="checklist">
+                <li>Wear safety glasses when cutting or using power tools</li>
+                <li>Hearing protection for CNC and loud equipment</li>
+                <li>Dust mask when sanding or in dusty areas</li>
+                <li>Keep work area clean - trip hazards cause accidents</li>
+                <li>Turn off equipment before making adjustments</li>
+                <li>Ask for help with heavy lifts - don't risk injury</li>
+                <li>Report unsafe conditions immediately to Levi or Bryan</li>
+            </ul>
+        </div>
+
+        <!-- WATCH-DO-RECORD -->
+        <div class="section">
+            <div class="section-title">🎓 Training Method: Watch → Do → Record</div>
+            <div class="grid-3">
+                <div class="item">
+                    <div class="item-title">1. WATCH</div>
+                    <div class="item-content">Levi demonstrates the task. Ask questions. Take notes.</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">2. DO</div>
+                    <div class="item-content">You perform the task with guidance. Practice until confident.</div>
+                </div>
+                <div class="item">
+                    <div class="item-title">3. RECORD</div>
+                    <div class="item-content">Document the task complete. Update task card.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMERGENCY -->
+        <div class="emergency-box">
+            <div class="emergency-title">🚨 Emergency Contacts</div>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div>
+                        <div class="contact-name">Bryan (Owner)</div>
+                        <div class="contact-role">General emergencies</div>
+                    </div>
+                    <span>[PHONE]</span>
+                </div>
+                <div class="contact-item">
+                    <div>
+                        <div class="contact-name">Levi (Lead)</div>
+                        <div class="contact-role">Production issues</div>
+                    </div>
+                    <span>[PHONE]</span>
+                </div>
+                <div class="contact-item">
+                    <div>
+                        <div class="contact-name">Emergency</div>
+                        <div class="contact-role">Life/Safety emergency</div>
+                    </div>
+                    <span><strong>911</strong></span>
+                </div>
+                <div class="contact-item">
+                    <div>
+                        <div class="contact-name">First Aid</div>
+                        <div class="contact-role">Location in shop</div>
+                    </div>
+                    <span>[LOCATION]</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #10b981;">
+            <p style="color: #166534; font-weight: bold; margin-bottom: 10px;">💡 Remember:</p>
+            <ul style="color: #166534; padding-left: 25px; line-height: 1.8;">
+                <li>Quality over speed - we do it right the first time</li>
+                <li>When in doubt, ask - never guess on client work</li>
+                <li>Keep your workspace organized - saves time and prevents mistakes</li>
+                <li>Update task status so everyone knows project progress</li>
+                <li>Take pride in your work - our reputation depends on it</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center; color: #94a3b8; font-size: 0.85em;">
+            <p>TCS Woodwork · Production Reference Card · Print and laminate for daily use</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -32,6 +32,11 @@ use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * Manage Quantities class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageQuantities extends ManageRelatedRecords
 {
     use HasTableViews;
@@ -42,6 +47,12 @@ class ManageQuantities extends ManageRelatedRecords
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-scale';
 
+    /**
+     * Can Access
+     *
+     * @param array $parameters
+     * @return bool
+     */
     public static function canAccess(array $parameters = []): bool
     {
         $canAccess = parent::canAccess($parameters);
@@ -108,6 +119,12 @@ class ManageQuantities extends ManageRelatedRecords
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -209,6 +226,12 @@ class ManageQuantities extends ManageRelatedRecords
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

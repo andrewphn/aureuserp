@@ -3,6 +3,8 @@
  * Manages annotation filtering with multiple criteria
  */
 
+import { getRoomNameById, getLocationNameById } from './entity-lookup.js';
+
 /**
  * Get filtered annotations based on all active filters
  * @param {Object} state - Component state
@@ -131,7 +133,7 @@ export function getActiveFilterChips(state) {
 
     // Room filters
     state.filters.rooms.forEach(roomId => {
-        const roomName = getRoomName(roomId, state);
+        const roomName = getRoomNameById(roomId, state);
         chips.push({
             type: 'array',
             arrayKey: 'rooms',
@@ -142,7 +144,7 @@ export function getActiveFilterChips(state) {
 
     // Location filters
     state.filters.locations.forEach(locationId => {
-        const locationName = getLocationName(locationId, state);
+        const locationName = getLocationNameById(locationId, state);
         chips.push({
             type: 'array',
             arrayKey: 'locations',
@@ -415,19 +417,4 @@ function formatViewType(viewType) {
         detail: 'Detail'
     };
     return viewNames[viewType] || viewType;
-}
-
-function getRoomName(roomId, state) {
-    if (!state.tree) return `Room ${roomId}`;
-    const room = state.tree.find(r => r.id === roomId);
-    return room ? room.name : `Room ${roomId}`;
-}
-
-function getLocationName(locationId, state) {
-    if (!state.tree) return `Location ${locationId}`;
-    for (const room of state.tree) {
-        const location = room.children?.find(l => l.id === locationId);
-        if (location) return location.name;
-    }
-    return `Location ${locationId}`;
 }

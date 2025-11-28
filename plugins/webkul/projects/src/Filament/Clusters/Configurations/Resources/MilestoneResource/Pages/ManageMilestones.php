@@ -8,6 +8,11 @@ use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\MilestoneResource;
 
+/**
+ * Manage Milestones class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageMilestones extends ManageRecords
 {
     protected static string $resource = MilestoneResource::class;

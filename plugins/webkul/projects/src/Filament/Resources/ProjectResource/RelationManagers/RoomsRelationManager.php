@@ -12,12 +12,23 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Project\Models\Room;
 
+/**
+ * Rooms Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RoomsRelationManager extends RelationManager
 {
     protected static string $relationship = 'rooms';
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -83,6 +94,12 @@ class RoomsRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

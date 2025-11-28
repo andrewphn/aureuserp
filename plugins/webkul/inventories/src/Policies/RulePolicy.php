@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\Rule;
 use Webkul\Security\Models\User;
 
+/**
+ * Rule Policy authorization policy
+ *
+ */
 class RulePolicy
 {
     use HandlesAuthorization;

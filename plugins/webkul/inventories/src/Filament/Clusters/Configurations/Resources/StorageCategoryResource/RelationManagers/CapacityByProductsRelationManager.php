@@ -17,15 +17,33 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Unique;
 
+/**
+ * Capacity By Products Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CapacityByProductsRelationManager extends RelationManager
 {
     protected static string $relationship = 'storageCategoryCapacitiesByProduct';
 
+    /**
+     * Get Title
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return string
+     */
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-products.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -59,6 +77,12 @@ class CapacityByProductsRelationManager extends RelationManager
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

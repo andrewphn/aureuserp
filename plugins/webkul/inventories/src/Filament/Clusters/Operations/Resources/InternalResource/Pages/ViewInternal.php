@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource;
 use Webkul\Inventory\Models\InternalTransfer;
 
+/**
+ * View Internal class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewInternal extends ViewRecord
 {
     protected static string $resource = InternalResource::class;

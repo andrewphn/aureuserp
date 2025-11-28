@@ -8,6 +8,10 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UtmStage;
 
+/**
+ * Utm Campaign Seeder database seeder
+ *
+ */
 class UtmCampaignSeeder extends Seeder
 {
     /**

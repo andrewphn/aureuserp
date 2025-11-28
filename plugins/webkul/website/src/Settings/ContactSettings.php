@@ -4,6 +4,10 @@ namespace Webkul\Website\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
+/**
+ * Contact Settings class
+ *
+ */
 class ContactSettings extends Settings
 {
     public ?string $email;
@@ -30,6 +34,11 @@ class ContactSettings extends Settings
 
     public ?string $slack;
 
+    /**
+     * Group
+     *
+     * @return string
+     */
     public static function group(): string
     {
         return 'website_contact';

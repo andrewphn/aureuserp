@@ -9,6 +9,11 @@ use Illuminate\Support\HtmlString;
 use Webkul\Employee\Models\CalendarLeaves;
 use Webkul\TimeOff\Models\LeaveMandatoryDay;
 
+/**
+ * Holiday Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class HolidayAction extends Action
 {
     public static function getDefaultName(): ?string

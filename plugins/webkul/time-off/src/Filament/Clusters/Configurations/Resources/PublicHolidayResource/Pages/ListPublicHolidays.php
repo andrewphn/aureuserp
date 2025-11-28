@@ -10,6 +10,11 @@ use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResou
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Public Holidays class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPublicHolidays extends ListRecords
 {
     use HasTableViews;

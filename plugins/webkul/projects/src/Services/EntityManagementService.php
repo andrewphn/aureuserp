@@ -8,6 +8,10 @@ use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 
+/**
+ * Entity Management Service service
+ *
+ */
 class EntityManagementService
 {
     /**

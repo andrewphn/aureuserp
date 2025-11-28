@@ -10,7 +10,11 @@ use Illuminate\Support\HtmlString;
 /**
  * Context Field Builder
  *
- * Helper class for building common field types used across context providers.
+ * Helper /**
+ * for class
+ *
+ */
+class for building common field types used across context providers.
  * Provides consistent styling and formatting for footer fields.
  */
 class ContextFieldBuilder

@@ -8,12 +8,23 @@ use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\DB;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Common Sizes Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CommonSizesWidget extends BaseWidget
 {
     protected static ?int $sort = 3;
 
     protected int | string | array $columnSpan = 'full';
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

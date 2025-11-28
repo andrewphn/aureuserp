@@ -7,6 +7,11 @@ use Livewire\Component;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Models\Payment;
 
+/**
+ * Confirm Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ConfirmAction extends Action
 {
     public static function getDefaultName(): ?string

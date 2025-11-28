@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * User Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $email
+ * @property string $password
+ *
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -46,6 +57,11 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * New Factory
+     *
+     * @return UserFactory
+     */
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();

@@ -20,6 +20,11 @@ use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Models\Leave;
 use Webkul\TimeOff\Traits\TimeOffHelper;
 
+/**
+ * Overview Calendar Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class OverviewCalendarWidget extends FullCalendarWidget
 {
     use TimeOffHelper;
@@ -32,6 +37,11 @@ class OverviewCalendarWidget extends FullCalendarWidget
         return __('time-off::filament/widgets/overview-calendar-widget.heading.title');
     }
 
+    /**
+     * Config
+     *
+     * @return array
+     */
     public function config(): array
     {
         return [
@@ -39,6 +49,11 @@ class OverviewCalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * Modal Actions
+     *
+     * @return array
+     */
     public function modalActions(): array
     {
         return [
@@ -74,6 +89,11 @@ class OverviewCalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * View Action
+     *
+     * @return Action
+     */
     protected function viewAction(): Action
     {
         return ViewAction::make()
@@ -83,6 +103,11 @@ class OverviewCalendarWidget extends FullCalendarWidget
             ->schema($this->infolist());
     }
 
+    /**
+     * Header Actions
+     *
+     * @return array
+     */
     protected function headerActions(): array
     {
         return [
@@ -111,6 +136,11 @@ class OverviewCalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @return array
+     */
     public function infolist(): array
     {
         return [
@@ -141,6 +171,12 @@ class OverviewCalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * Fetch Events
+     *
+     * @param array $fetchInfo
+     * @return array
+     */
     public function fetchEvents(array $fetchInfo): array
     {
         $user = Auth::user();
@@ -165,6 +201,16 @@ class OverviewCalendarWidget extends FullCalendarWidget
             ->all();
     }
 
+    /**
+     * On Date Select
+     *
+     * @param string $start
+     * @param ?string $end
+     * @param bool $allDay
+     * @param ?array $view
+     * @param ?array $resource
+     * @return void
+     */
     public function onDateSelect(string $start, ?string $end, bool $allDay, ?array $view, ?array $resource): void
     {
         $startDate = Carbon::parse($start);

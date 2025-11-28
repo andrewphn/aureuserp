@@ -11,6 +11,11 @@ use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ListInvoices as Base
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Bills class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListBills extends BaseListBills
 {
     use HasTableViews;

@@ -8,8 +8,17 @@ use Webkul\Employee\Models\EmployeeJobPosition;
 use Webkul\Recruitment\Models\Stage;
 use Webkul\Security\Models\User;
 
+/**
+ * Stage Seeder database seeder
+ *
+ */
 class StageSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         DB::table('recruitments_stages')->delete();

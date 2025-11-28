@@ -5,10 +5,21 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources\JobPosit
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource\Pages\EditJobPosition as BaseEditJobPosition;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\JobPositionResource;
 
+/**
+ * Edit Job Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditJobPosition extends BaseEditJobPosition
 {
     protected static string $resource = JobPositionResource::class;
 
+    /**
+     * Mutate Form Data Before Fill
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         return $this->prepareData($data);
@@ -19,11 +30,22 @@ class EditJobPosition extends BaseEditJobPosition
         return $this->prepareData($data);
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         $this->record->refresh();
     }
 
+    /**
+     * Prepare Data
+     *
+     * @param mixed $data The data array
+     * @return array
+     */
     public function prepareData($data): array
     {
         $model = $this->record;

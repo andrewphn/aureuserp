@@ -11,6 +11,11 @@ use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource;
 use Webkul\Inventory\Models\OperationType;
 
+/**
+ * Create Dropship class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateDropship extends CreateRecord
 {
     protected static string $resource = DropshipResource::class;
@@ -33,6 +38,11 @@ class CreateDropship extends CreateRecord
             ->body(__('inventories::filament/clusters/operations/resources/dropship/pages/create-dropship.notification.body'));
     }
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         parent::mount();
@@ -48,6 +58,12 @@ class CreateDropship extends CreateRecord
         $this->form->fill($this->data);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $operationType = OperationType::find($data['operation_type_id']);

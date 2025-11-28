@@ -23,12 +23,23 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Filament\Resources\ProjectResource\Actions\CloneProjectAction;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * View Project class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewProject extends ViewRecord
 {
     protected static string $resource = ProjectResource::class;
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(int | string $record): void
     {
         parent::mount($record);
@@ -134,6 +145,7 @@ class ViewProject extends ViewRecord
                         ->title('PDF uploaded successfully')
                         ->send();
                 }),
+            CloneProjectAction::make(),
             DeleteAction::make()
                 ->successNotification(
                     Notification::make()
@@ -154,6 +166,12 @@ class ViewProject extends ViewRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Fill
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Eager load relationships for hierarchical display
@@ -166,6 +184,12 @@ class ViewProject extends ViewRecord
         return $data;
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

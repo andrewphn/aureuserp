@@ -13,6 +13,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductCate
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductCategoryResource\Pages\ViewProductCategory;
 use Webkul\Purchase\Models\Category;
 
+/**
+ * Product Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductCategoryResource extends CategoryResource
 {
     protected static ?string $model = Category::class;
@@ -54,6 +59,12 @@ class ProductCategoryResource extends CategoryResource
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

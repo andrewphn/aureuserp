@@ -12,20 +12,44 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RuleResource;
 
+/**
+ * Rules Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RulesRelationManager extends RelationManager
 {
     protected static string $relationship = 'rules';
 
+    /**
+     * Get Title
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return string
+     */
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('inventories::filament/clusters/configurations/resources/route/relation-managers/rules.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return RuleResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return RuleResource::table($table)

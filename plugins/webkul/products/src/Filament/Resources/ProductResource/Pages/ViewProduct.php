@@ -13,6 +13,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Product\Filament\Resources\ProductResource;
 
+/**
+ * View Product class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewProduct extends ViewRecord
 {
     protected static string $resource = ProductResource::class;

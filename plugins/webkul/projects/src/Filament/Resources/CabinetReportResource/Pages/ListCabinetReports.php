@@ -10,6 +10,11 @@ use Webkul\Project\Models\CabinetSpecification;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Cabinet Reports class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListCabinetReports extends ListRecords
 {
     use HasTableViews;

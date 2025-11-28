@@ -13,6 +13,11 @@ use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryReso
 use Webkul\Invoice\Models\Category;
 use Webkul\Product\Filament\Resources\CategoryResource as BaseProductCategoryResource;
 
+/**
+ * Product Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductCategoryResource extends BaseProductCategoryResource
 {
     protected static ?string $model = Category::class;
@@ -48,6 +53,12 @@ class ProductCategoryResource extends BaseProductCategoryResource
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

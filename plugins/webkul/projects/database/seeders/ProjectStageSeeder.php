@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Project Stage Seeder database seeder
+ *
+ */
 class ProjectStageSeeder extends Seeder
 {
     /**

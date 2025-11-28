@@ -4,6 +4,10 @@ namespace Webkul\Project\Enums;
 
 use Filament\Support\Contracts;
 
+/**
+ * Task State enumeration
+ *
+ */
 enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contracts\HasLabel
 {
     case IN_PROGRESS = 'in_progress';
@@ -27,6 +31,11 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
         return self::colors()[$this->value] ?? null;
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [
@@ -38,6 +47,11 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
         ];
     }
 
+    /**
+     * Icons
+     *
+     * @return array
+     */
     public static function icons(): array
     {
         return [
@@ -49,6 +63,11 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
         ];
     }
 
+    /**
+     * Colors
+     *
+     * @return array
+     */
     public static function colors(): array
     {
         return [

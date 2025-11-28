@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\FiscalPositionResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Fiscal Positions class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListFiscalPositions extends ListRecords
 {
     use HasTableViews;

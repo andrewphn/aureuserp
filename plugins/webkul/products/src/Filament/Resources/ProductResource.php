@@ -57,6 +57,11 @@ use Webkul\Product\Models\Category;
 use Webkul\Product\Models\Product;
 use Webkul\Support\Models\UOM;
 
+/**
+ * Product Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
@@ -65,6 +70,12 @@ class ProductResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -189,6 +200,12 @@ class ProductResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -490,6 +507,12 @@ class ProductResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

@@ -52,6 +52,11 @@ use Webkul\Recruitment\Models\JobPosition;
 use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Security\Filament\Resources\UserResource;
 
+/**
+ * Job Position Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class JobPositionResource extends Resource
 {
     protected static ?string $model = JobPosition::class;
@@ -67,6 +72,12 @@ class JobPositionResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/job-position.navigation.group');
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -78,6 +89,12 @@ class JobPositionResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -245,6 +262,12 @@ class JobPositionResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -446,6 +469,12 @@ class JobPositionResource extends Resource
             ->defaultSort('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

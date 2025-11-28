@@ -11,6 +11,11 @@ use Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\L
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PaymentsResource\Pages\ViewPayments;
 use Webkul\Invoice\Models\Payment;
 
+/**
+ * Payments Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PaymentsResource extends BasePaymentsResource
 {
     protected static ?string $model = Payment::class;

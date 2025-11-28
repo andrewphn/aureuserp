@@ -18,6 +18,33 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Requisition Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property mixed $type
+ * @property mixed $state
+ * @property string|null $reference
+ * @property \Carbon\Carbon|null $starts_at
+ * @property \Carbon\Carbon|null $ends_at
+ * @property string|null $description
+ * @property int $currency_id
+ * @property int $partner_id
+ * @property int $user_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $lines
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currency
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Requisition extends Model
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes;
@@ -74,31 +101,61 @@ class Requisition extends Model
         'creator.name'  => 'Creator',
     ];
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Currency
+     *
+     * @return BelongsTo
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * User
+     *
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Lines
+     *
+     * @return HasMany
+     */
     public function lines(): HasMany
     {
         return $this->hasMany(RequisitionLine::class);
@@ -106,6 +163,11 @@ class Requisition extends Model
 
     /**
      * Bootstrap any application services.
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {
@@ -123,6 +185,10 @@ class Requisition extends Model
     /**
      * Update the full name without triggering additional events
      */
+    /**
+     * Update Name
+     *
+     */
     public function updateName()
     {
         if ($this->type == RequisitionType::BLANKET_ORDER) {
@@ -132,6 +198,11 @@ class Requisition extends Model
         }
     }
 
+    /**
+     * New Factory
+     *
+     * @return RequisitionFactory
+     */
     protected static function newFactory(): RequisitionFactory
     {
         return RequisitionFactory::new();

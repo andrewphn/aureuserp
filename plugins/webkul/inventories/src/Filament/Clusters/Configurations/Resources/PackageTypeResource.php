@@ -29,6 +29,11 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackageTypeResou
 use Webkul\Inventory\Models\PackageType;
 use Webkul\Inventory\Settings\OperationSettings;
 
+/**
+ * Package Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PackageTypeResource extends Resource
 {
     protected static ?string $model = PackageType::class;
@@ -53,6 +58,11 @@ class PackageTypeResource extends Resource
         return __('inventories::filament/clusters/configurations/resources/package-type.navigation.title');
     }
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -62,6 +72,12 @@ class PackageTypeResource extends Resource
         return app(OperationSettings::class)->enable_packages;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -126,6 +142,12 @@ class PackageTypeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -184,6 +206,12 @@ class PackageTypeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

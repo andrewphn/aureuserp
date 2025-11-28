@@ -10,6 +10,10 @@ use Webkul\Inventory\Enums\RuleAction;
 use Webkul\Inventory\Enums\RuleAuto;
 use Webkul\Security\Models\User;
 
+/**
+ * Rule Seeder database seeder
+ *
+ */
 class RuleSeeder extends Seeder
 {
     /**

@@ -34,6 +34,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Product\Enums\AttributeType;
 use Webkul\Product\Models\Attribute;
 
+/**
+ * Attribute Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AttributeResource extends Resource
 {
     protected static ?string $model = Attribute::class;
@@ -42,6 +47,12 @@ class AttributeResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -87,6 +98,12 @@ class AttributeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -207,6 +224,12 @@ class AttributeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

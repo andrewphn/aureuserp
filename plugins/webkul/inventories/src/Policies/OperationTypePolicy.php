@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Security\Models\User;
 
+/**
+ * Operation Type Policy authorization policy
+ *
+ */
 class OperationTypePolicy
 {
     use HandlesAuthorization;

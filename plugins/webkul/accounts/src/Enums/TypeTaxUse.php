@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Type Tax Use enumeration
+ *
+ */
 enum TypeTaxUse: string implements HasLabel
 {
     case SALE = 'sale';
@@ -21,6 +25,11 @@ enum TypeTaxUse: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

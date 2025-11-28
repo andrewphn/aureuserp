@@ -11,6 +11,11 @@ use Filament\Tables\Table;
 use Illuminate\Support\Arr;
 use Webkul\Product\Filament\Resources\ProductResource;
 
+/**
+ * Manage Variants class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageVariants extends ManageRelatedRecords
 {
     protected static string $resource = ProductResource::class;
@@ -29,6 +34,12 @@ class ManageVariants extends ManageRelatedRecords
         return __('products::filament/resources/product/pages/manage-variants.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return ProductResource::form($schema);
@@ -75,6 +86,12 @@ class ManageVariants extends ManageRelatedRecords
         return $table;
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return ProductResource::infolist($schema);

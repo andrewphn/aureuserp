@@ -7,6 +7,10 @@ use Filament\Forms\Contracts\HasForms;
 use Livewire\Component;
 use Webkul\Project\Models\Project;
 
+/**
+ * Production Timeline class
+ *
+ */
 class ProductionTimeline extends Component implements HasForms
 {
     use InteractsWithForms;
@@ -19,6 +23,12 @@ class ProductionTimeline extends Component implements HasForms
     public int $progress = 0;
     public string $expandedStage = '';
 
+    /**
+     * Mount
+     *
+     * @param Project $project
+     * @return void
+     */
     public function mount(Project $project): void
     {
         $this->project = $project;
@@ -26,6 +36,11 @@ class ProductionTimeline extends Component implements HasForms
         $this->loadTimelineData();
     }
 
+    /**
+     * Load Timeline Data
+     *
+     * @return void
+     */
     protected function loadTimelineData(): void
     {
         // Define production stages
@@ -67,6 +82,12 @@ class ProductionTimeline extends Component implements HasForms
         $this->progress = $this->project->progress_percentage;
     }
 
+    /**
+     * Get Milestones For Stage
+     *
+     * @param string $stageKey
+     * @return array
+     */
     protected function getMilestonesForStage(string $stageKey): array
     {
         if (!$this->project->start_date || !$this->project->desired_completion_date) {
@@ -103,6 +124,12 @@ class ProductionTimeline extends Component implements HasForms
             ->toArray();
     }
 
+    /**
+     * Change Stage
+     *
+     * @param string $stage
+     * @return void
+     */
     public function changeStage(string $stage): void
     {
         $this->project->update(['current_production_stage' => $stage]);
@@ -111,6 +138,12 @@ class ProductionTimeline extends Component implements HasForms
         $this->dispatch('stage-changed', stage: $stage);
     }
 
+    /**
+     * Toggle Stage
+     *
+     * @param string $stage
+     * @return void
+     */
     public function toggleStage(string $stage): void
     {
         if ($this->expandedStage === $stage) {
@@ -120,6 +153,10 @@ class ProductionTimeline extends Component implements HasForms
         }
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         return view('webkul-project::livewire.production-timeline');

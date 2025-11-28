@@ -12,6 +12,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Package;
 
+/**
+ * View Package class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPackage extends ViewRecord
 {
     protected static string $resource = PackageResource::class;

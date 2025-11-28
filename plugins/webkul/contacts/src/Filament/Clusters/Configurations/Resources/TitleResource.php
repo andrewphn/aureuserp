@@ -6,6 +6,11 @@ use Webkul\Contact\Filament\Clusters\Configurations;
 use Webkul\Contact\Filament\Clusters\Configurations\Resources\TitleResource\Pages\ManageTitles;
 use Webkul\Partner\Filament\Resources\TitleResource as BaseTitleResource;
 
+/**
+ * Title Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TitleResource extends BaseTitleResource
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-academic-cap';

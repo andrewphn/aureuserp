@@ -2,6 +2,10 @@
 
 namespace App\Filament\Concerns;
 
+/**
+ * Has Live Summary trait
+ *
+ */
 trait HasLiveSummary
 {
     /**

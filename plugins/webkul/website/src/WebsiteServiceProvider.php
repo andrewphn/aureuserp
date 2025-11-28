@@ -11,12 +11,22 @@ use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 use Webkul\Website\Http\Responses\LogoutResponse;
 
+/**
+ * Website Service Provider service provider
+ *
+ */
 class WebsiteServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'website';
 
     public static string $viewNamespace = 'website';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -41,6 +51,11 @@ class WebsiteServiceProvider extends PackageServiceProvider
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         $this->registerCustomCss();
@@ -52,11 +67,20 @@ class WebsiteServiceProvider extends PackageServiceProvider
         }
     }
 
+    /**
+     * Package Registered
+     *
+     * @return void
+     */
     public function packageRegistered(): void
     {
         $this->app->bind(\Filament\Auth\Http\Responses\Contracts\LogoutResponse::class, LogoutResponse::class);
     }
 
+    /**
+     * Register Custom Css
+     *
+     */
     public function registerCustomCss()
     {
         FilamentAsset::register([

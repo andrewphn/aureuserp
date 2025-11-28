@@ -14,6 +14,11 @@ use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
 use Webkul\Security\Settings\UserSettings;
 
+/**
+ * Edit User class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
@@ -73,6 +78,12 @@ class EditUser extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Fill
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $partner = $this->record->partner;

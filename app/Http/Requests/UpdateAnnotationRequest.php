@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Update Annotation Request form request
+ *
+ */
 class UpdateAnnotationRequest extends FormRequest
 {
     /**

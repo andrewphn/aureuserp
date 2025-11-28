@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\CashRoundingResource;
 
+/**
+ * View Cash Rounding class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCashRounding extends ViewRecord
 {
     protected static string $resource = CashRoundingResource::class;

@@ -7,10 +7,21 @@ use Filament\Tables\Table;
 use Webkul\Account\Filament\Resources\BankAccountResource\Pages\ListBankAccounts;
 use Webkul\Partner\Filament\Resources\BankAccountResource as BaseBankAccountResource;
 
+/**
+ * Bank Account Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BankAccountResource extends BaseBankAccountResource
 {
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $schema = BaseBankAccountResource::form($schema);
@@ -22,6 +33,12 @@ class BankAccountResource extends BaseBankAccountResource
         return $schema;
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         $table = BaseBankAccountResource::table($table);

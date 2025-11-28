@@ -9,6 +9,11 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Filament\Resources\CompanyResource;
 
+/**
+ * Edit Company class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCompany extends EditRecord
 {
     protected static string $resource = CompanyResource::class;
@@ -41,6 +46,12 @@ class EditCompany extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return [

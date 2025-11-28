@@ -10,6 +10,11 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryR
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Storage Categories class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListStorageCategories extends ListRecords
 {
     use HasTableViews;

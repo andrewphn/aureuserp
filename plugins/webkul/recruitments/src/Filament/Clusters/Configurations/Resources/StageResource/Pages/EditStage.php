@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\StageResource;
 
+/**
+ * Edit Stage class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditStage extends EditRecord
 {
     protected static string $resource = StageResource::class;

@@ -5,6 +5,10 @@ namespace Webkul\Project\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Time Settings Seeder database seeder
+ *
+ */
 class TimeSettingsSeeder extends Seeder
 {
     /**

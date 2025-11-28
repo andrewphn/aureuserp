@@ -4,8 +4,16 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
+/**
+ * Project Summary Panel class
+ *
+ */
 class ProjectSummaryPanel extends Component
 {
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         $fields = $this->getSummaryFields();

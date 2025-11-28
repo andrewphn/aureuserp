@@ -11,6 +11,11 @@ use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResourc
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Candidates class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListCandidates extends ListRecords
 {
     use HasTableViews;

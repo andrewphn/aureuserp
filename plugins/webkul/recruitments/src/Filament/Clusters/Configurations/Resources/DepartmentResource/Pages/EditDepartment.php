@@ -5,6 +5,11 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources\Departme
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\EditDepartment as BaseEditDepartment;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource;
 
+/**
+ * Edit Department class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditDepartment extends BaseEditDepartment
 {
     protected static string $resource = DepartmentResource::class;

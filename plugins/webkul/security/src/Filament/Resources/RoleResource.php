@@ -30,6 +30,11 @@ use Webkul\Security\Filament\Resources\RoleResource\Pages\ViewRole;
 use BackedEnum;
 use Illuminate\Contracts\Support\Htmlable;
 
+/**
+ * Role Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RoleResource extends RolesRoleResource
 {
     protected static ?string $recordTitleAttribute = 'name';
@@ -62,6 +67,12 @@ class RoleResource extends RolesRoleResource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -105,6 +116,12 @@ class RoleResource extends RolesRoleResource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -229,6 +246,15 @@ class RoleResource extends RolesRoleResource
             ->toArray();
     }
 
+    /**
+     * Set Permission State For Record Permissions
+     *
+     * @param Component $component
+     * @param string $operation
+     * @param array $permissions
+     * @param ?Model $record The model record
+     * @return void
+     */
     public static function setPermissionStateForRecordPermissions(Component $component, string $operation, array $permissions, ?Model $record): void
     {
         if (in_array($operation, ['edit', 'view'])) {
@@ -249,6 +275,11 @@ class RoleResource extends RolesRoleResource
         }
     }
 
+    /**
+     * Get Permissions
+     *
+     * @param mixed $record The model record
+     */
     public static function getPermissions($record)
     {
         if (! is_null(static::$permissions)) {

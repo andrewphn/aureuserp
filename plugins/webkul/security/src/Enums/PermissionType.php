@@ -2,6 +2,10 @@
 
 namespace Webkul\Security\Enums;
 
+/**
+ * Permission Type enumeration
+ *
+ */
 enum PermissionType: string
 {
     case GROUP = 'group';
@@ -10,6 +14,11 @@ enum PermissionType: string
 
     case GLOBAL = 'global';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

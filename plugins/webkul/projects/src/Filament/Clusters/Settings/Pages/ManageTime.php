@@ -11,6 +11,11 @@ use UnitEnum;
 use Webkul\Project\Settings\TimeSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Time class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTime extends SettingsPage
 {
     use HasPageShield;
@@ -40,6 +45,12 @@ class ManageTime extends SettingsPage
         return __('webkul-project::filament/clusters/settings/pages/manage-time.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

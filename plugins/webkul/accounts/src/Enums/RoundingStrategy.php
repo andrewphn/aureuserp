@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Rounding Strategy enumeration
+ *
+ */
 enum RoundingStrategy: string implements HasLabel
 {
     case BIGGEST_TAX = 'biggest_tax';
@@ -18,6 +22,11 @@ enum RoundingStrategy: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

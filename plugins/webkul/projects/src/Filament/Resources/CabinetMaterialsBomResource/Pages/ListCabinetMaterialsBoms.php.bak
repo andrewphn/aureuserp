@@ -1,0 +1,19 @@
+<?php
+
+namespace Webkul\Project\Filament\Resources\CabinetMaterialsBomResource\Pages;
+
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Webkul\Project\Filament\Resources\CabinetMaterialsBomResource;
+
+class ListCabinetMaterialsBoms extends ListRecords
+{
+    protected static string $resource = CabinetMaterialsBomResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make(),
+        ];
+    }
+}

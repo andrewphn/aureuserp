@@ -23,6 +23,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Models\Order;
 use Webkul\Website\Filament\Customer\Clusters\Account;
 
+/**
+ * Order Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
@@ -33,6 +38,12 @@ class OrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -66,6 +77,12 @@ class OrderResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

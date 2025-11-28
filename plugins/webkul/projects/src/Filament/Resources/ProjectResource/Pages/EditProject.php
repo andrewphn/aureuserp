@@ -17,19 +17,31 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Filament\Resources\ProjectResource\Actions\CloneProjectAction;
 use Webkul\Project\Models\Milestone;
 use Webkul\Project\Models\MilestoneTemplate;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * Edit Project class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditProject extends EditRecord
 {
     protected static string $resource = ProjectResource::class;
 
     public static bool $formActionsAreSticky = true;
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(int | string $record): void
     {
         parent::mount($record);
@@ -85,6 +97,11 @@ class EditProject extends EditRecord
      * Update footer with current form state
      * Called when fields are updated
      */
+    /**
+     * Update Footer
+     *
+     * @return void
+     */
     public function updateFooter(): void
     {
         // TEMPORARILY DISABLED to debug save button issue
@@ -110,6 +127,12 @@ class EditProject extends EditRecord
         // return view('filament.pages.project-sticky-footer', ['page' => $this]);
     }
 
+    /**
+     * Mutate Form Data Before Fill
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Ensure branch_id is loaded from the database
@@ -136,6 +159,11 @@ class EditProject extends EditRecord
         return $data;
     }
 
+    /**
+     * Delete Pdf
+     *
+     * @param mixed $pdfId
+     */
     public function deletePdf($pdfId)
     {
         $pdf = $this->record->pdfDocuments()->find($pdfId);
@@ -174,6 +202,11 @@ class EditProject extends EditRecord
             ->body(__('projects::filament/resources/project/pages/edit-project.notification.body'));
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         $data = $this->form->getState();
@@ -226,6 +259,9 @@ class EditProject extends EditRecord
 
         // PDF uploads are now handled exclusively through the Upload PDFs modal action
         // This ensures all PDFs are uploaded with proper metadata (document_type, notes)
+
+        // Clear tag cache when project is saved (tags may have changed)
+        Cache::forget('project_tags_most_used');
     }
 
 
@@ -310,6 +346,7 @@ class EditProject extends EditRecord
                         ->title('PDF uploaded successfully')
                         ->send();
                 }),
+            CloneProjectAction::make(),
             DeleteAction::make()
                 ->successNotification(
                     Notification::make()

@@ -8,6 +8,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 
+/**
+ * View Pdf Document class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPdfDocument extends ViewRecord
 {
     protected static string $resource = PdfDocumentResource::class;
@@ -20,6 +25,12 @@ class ViewPdfDocument extends ViewRecord
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Infolist $infolist
+     * @return Infolist
+     */
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist

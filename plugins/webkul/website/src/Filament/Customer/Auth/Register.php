@@ -27,6 +27,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * Register class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Register extends Page
 {
     use CanUseDatabaseTransactions;
@@ -40,6 +45,11 @@ class Register extends Page
 
     protected string $userModel;
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         if (Filament::auth()->check()) {
@@ -53,6 +63,11 @@ class Register extends Page
         $this->callHook('afterFill');
     }
 
+    /**
+     * Register
+     *
+     * @return ?RegistrationResponse
+     */
     public function register(): ?RegistrationResponse
     {
         try {
@@ -94,6 +109,12 @@ class Register extends Page
         return app(RegistrationResponse::class);
     }
 
+    /**
+     * Get Rate Limited Notification
+     *
+     * @param TooManyRequestsException $exception
+     * @return ?Notification
+     */
     protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
     {
         return Notification::make()
@@ -108,11 +129,23 @@ class Register extends Page
             ->danger();
     }
 
+    /**
+     * Handle Registration
+     *
+     * @param array $data The data array
+     * @return Model
+     */
     protected function handleRegistration(array $data): Model
     {
         return $this->getUserModel()::create($data);
     }
 
+    /**
+     * Send Email Verification Notification
+     *
+     * @param Model $user The user instance
+     * @return void
+     */
     protected function sendEmailVerificationNotification(Model $user): void
     {
         if (! $user instanceof MustVerifyEmail) {
@@ -135,6 +168,12 @@ class Register extends Page
         $user->notify($notification);
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema;
@@ -198,6 +237,11 @@ class Register extends Page
             ->dehydrated(false);
     }
 
+    /**
+     * Login Action
+     *
+     * @return Action
+     */
     public function loginAction(): Action
     {
         return Action::make('login')
@@ -245,11 +289,22 @@ class Register extends Page
             ->submit('register');
     }
 
+    /**
+     * Has Full Width Form Actions
+     *
+     * @return bool
+     */
     protected function hasFullWidthFormActions(): bool
     {
         return true;
     }
 
+    /**
+     * Mutate Form Data Before Register
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeRegister(array $data): array
     {
         return $data;

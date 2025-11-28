@@ -6,10 +6,21 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Products Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductsRelationManager extends RelationManager
 {
     protected static string $relationship = 'quantities';
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

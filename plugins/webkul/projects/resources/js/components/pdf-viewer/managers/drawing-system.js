@@ -7,6 +7,7 @@ import { screenToPdf } from './coordinate-transform.js';
 import { generateTempId } from '../utilities.js';
 import { getColorForType } from './state-manager.js';
 import { detectMissingHierarchy } from './hierarchy-detection-manager.js';
+import { getRoomNameById, getLocationNameById, getCabinetRunNameById } from './entity-lookup.js';
 
 /**
  * Start drawing annotation
@@ -471,4 +472,64 @@ export function clearDrawingLockout(state) {
     }
     state._drawingLockout = false;
     console.log('🔓 Drawing lockout cleared');
+}
+
+/**
+ * Set drawing context based on tree node click
+ * Automatically configures the appropriate context so newly drawn annotations
+ * are properly linked as children in the hierarchy
+ * @param {Object} anno - Annotation object from tree node
+ * @param {Object} state - Component state
+ */
+export function setDrawingContextFromNode(anno, state) {
+    if (!anno || !anno.type) return;
+
+    console.log('🎯 Setting drawing context from:', anno.type, anno.label || anno.id);
+
+    if (anno.type === 'room') {
+        // Clicked room: Set room context
+        state.activeRoomId = anno.roomId;
+        state.activeRoomName = anno.label;
+        state.roomSearchQuery = anno.label;
+        // Clear location context
+        state.activeLocationId = null;
+        state.activeLocationName = '';
+        state.locationSearchQuery = '';
+        console.log(`✓ Context set: 🏠 ${anno.label} (can now draw Locations)`);
+
+    } else if (anno.type === 'location') {
+        // Clicked location: Set room + location context
+        state.activeRoomId = anno.roomId;
+        state.activeRoomName = getRoomNameById(anno.roomId, state);
+        state.roomSearchQuery = state.activeRoomName;
+        state.activeLocationId = anno.roomLocationId || anno.id;
+        state.activeLocationName = anno.label;
+        state.locationSearchQuery = anno.label;
+        console.log(`✓ Context set: 🏠 ${state.activeRoomName} → 📍 ${anno.label} (can now draw Cabinet Runs)`);
+
+    } else if (anno.type === 'cabinet_run') {
+        // Clicked cabinet run: Set full context (room + location + cabinet run)
+        state.activeRoomId = anno.roomId;
+        state.activeRoomName = getRoomNameById(anno.roomId, state);
+        state.roomSearchQuery = state.activeRoomName;
+        state.activeLocationId = anno.locationId || anno.roomLocationId;
+        state.activeLocationName = getLocationNameById(state.activeLocationId, state);
+        state.locationSearchQuery = state.activeLocationName;
+        state.activeCabinetRunId = anno.cabinetRunId || anno.id;
+        state.activeCabinetRunName = anno.label;
+        console.log(`✓ Context set: 🏠 ${state.activeRoomName} → 📍 ${state.activeLocationName} → 🗄️ ${anno.label} (can now draw Cabinets)`);
+
+    } else if (anno.type === 'cabinet') {
+        // Clicked cabinet (leaf node): Set full context for reference only
+        // Cabinets don't have children, but set context for completeness
+        state.activeRoomId = anno.roomId;
+        state.activeRoomName = getRoomNameById(anno.roomId, state);
+        state.roomSearchQuery = state.activeRoomName;
+        state.activeLocationId = anno.locationId;
+        state.activeLocationName = getLocationNameById(anno.locationId, state);
+        state.locationSearchQuery = state.activeLocationName;
+        state.activeCabinetRunId = anno.cabinetRunId;
+        state.activeCabinetRunName = getCabinetRunNameById(anno.cabinetRunId, state);
+        console.log(`✓ Context set: 🏠 ${state.activeRoomName} → 📍 ${state.activeLocationName} → 🗄️ ${state.activeCabinetRunName} → 🗂️ ${anno.label}`);
+    }
 }

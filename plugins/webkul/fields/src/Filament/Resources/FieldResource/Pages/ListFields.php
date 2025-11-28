@@ -9,6 +9,11 @@ use Webkul\Field\Models\Field;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Fields class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListFields extends ListRecords
 {
     use HasTableViews;

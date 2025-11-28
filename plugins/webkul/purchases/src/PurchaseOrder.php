@@ -27,6 +27,10 @@ use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Settings\OrderSettings;
 use Webkul\Support\Package;
 
+/**
+ * Purchase Order class
+ *
+ */
 class PurchaseOrder
 {
 
@@ -35,6 +39,13 @@ class PurchaseOrder
         return once(fn () => app(OrderSettings::class));
     }
 
+    /**
+     * Send R F Q
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     * @return Order
+     */
     public function sendRFQ(Order $record, array $data): Order
     {
         $pdfPath = $this->generateRFQPdf($record);
@@ -68,6 +79,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Confirm Purchase Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function confirmPurchaseOrder(Order $record): Order
     {
         $record->update([
@@ -84,6 +101,13 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Send Purchase Order
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     * @return Order
+     */
     public function sendPurchaseOrder(Order $record, array $data): Order
     {
         $pdfPath = $this->generatePurchaseOrderPdf($record);
@@ -115,6 +139,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Cancel Purchase Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function cancelPurchaseOrder(Order $record): Order
     {
         $record->update([
@@ -128,6 +158,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Draft Purchase Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function draftPurchaseOrder(Order $record): Order
     {
         $record->update([
@@ -139,6 +175,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Lock Purchase Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function lockPurchaseOrder(Order $record): Order
     {
         $record->update([
@@ -150,6 +192,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Unlock Purchase Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function unlockPurchaseOrder(Order $record): Order
     {
         $record->update([
@@ -161,6 +209,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Create Purchase Order Bill
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function createPurchaseOrderBill(Order $record): Order
     {
         $this->createAccountMove($record);
@@ -170,6 +224,12 @@ class PurchaseOrder
         return $record;
     }
 
+    /**
+     * Compute Purchase Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function computePurchaseOrder(Order $record): Order
     {
         $record->untaxed_amount = 0;
@@ -235,6 +295,12 @@ class PurchaseOrder
         return $line;
     }
 
+    /**
+     * Compute Invoice Status
+     *
+     * @param Order $order
+     * @return Order
+     */
     public function computeInvoiceStatus(Order $order): Order
     {
         if (! in_array($order->state, [PurchaseEnums\OrderState::PURCHASE, PurchaseEnums\OrderState::DONE])) {
@@ -264,6 +330,12 @@ class PurchaseOrder
         return $order;
     }
 
+    /**
+     * Compute Receipt Status
+     *
+     * @param Order $order
+     * @return Order
+     */
     public function computeReceiptStatus(Order $order): Order
     {
         if (! Package::isPluginInstalled('inventories')) {
@@ -291,6 +363,12 @@ class PurchaseOrder
         return $order;
     }
 
+    /**
+     * Compute Qty Billed
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeQtyBilled(OrderLine $line): OrderLine
     {
         $qty = 0.0;
@@ -323,6 +401,12 @@ class PurchaseOrder
         return $line;
     }
 
+    /**
+     * Compute Qty Received
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeQtyReceived(OrderLine $line): OrderLine
     {
         $line->qty_received = 0.0;
@@ -380,6 +464,11 @@ class PurchaseOrder
         return $line;
     }
 
+    /**
+     * Generate R F Q Pdf
+     *
+     * @param mixed $record The model record
+     */
     public function generateRFQPdf($record)
     {
         $pdfPath = 'Request for Quotation-'.str_replace('/', '_', $record->name).'.pdf';
@@ -395,6 +484,11 @@ class PurchaseOrder
         return $pdfPath;
     }
 
+    /**
+     * Generate Purchase Order Pdf
+     *
+     * @param mixed $record The model record
+     */
     public function generatePurchaseOrderPdf($record)
     {
         $pdfPath = 'Purchase Order-'.str_replace('/', '_', $record->name).'.pdf';
@@ -410,6 +504,12 @@ class PurchaseOrder
         return $pdfPath;
     }
 
+    /**
+     * Create Inventory Receipt
+     *
+     * @param Order $record The model record
+     * @return void
+     */
     protected function createInventoryReceipt(Order $record): void
     {
         if (! in_array($record->state, [PurchaseEnums\OrderState::PURCHASE, PurchaseEnums\OrderState::DONE])) {
@@ -497,6 +597,12 @@ class PurchaseOrder
         ]);
     }
 
+    /**
+     * Cancel Inventory Operations
+     *
+     * @param Order $record The model record
+     * @return void
+     */
     protected function cancelInventoryOperations(Order $record): void
     {
         if (! Package::isPluginInstalled('inventories')) {
@@ -521,6 +627,12 @@ class PurchaseOrder
         });
     }
 
+    /**
+     * Get Inventory Operation Type
+     *
+     * @param Order $record The model record
+     * @return ?OperationType
+     */
     protected function getInventoryOperationType(Order $record): ?OperationType
     {
         $operationType = OperationType::where('type', InventoryEnums\OperationType::INCOMING)
@@ -538,11 +650,23 @@ class PurchaseOrder
         return $operationType;
     }
 
+    /**
+     * Get Final Warehouse Location
+     *
+     * @param Order $record The model record
+     * @return ?Location
+     */
     protected function getFinalWarehouseLocation(Order $record): ?Location
     {
         return $record->operationType->warehouse->lotStockLocation;
     }
 
+    /**
+     * Create Account Move
+     *
+     * @param mixed $record The model record
+     * @return void
+     */
     public function createAccountMove($record): void
     {
         $accountMove = AccountMove::create([
@@ -565,6 +689,13 @@ class PurchaseOrder
         AccountFacade::computeAccountMove($accountMove);
     }
 
+    /**
+     * Create Account Move Line
+     *
+     * @param mixed $accountMove
+     * @param mixed $orderLine
+     * @return void
+     */
     public function createAccountMoveLine($accountMove, $orderLine): void
     {
         $accountMoveLine = $accountMove->lines()->create([

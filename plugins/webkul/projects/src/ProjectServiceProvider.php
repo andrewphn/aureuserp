@@ -2,6 +2,9 @@
 
 namespace Webkul\Project;
 
+use Illuminate\Support\Facades\Event;
+use Webkul\Project\Events\ProjectStageChanged;
+use Webkul\Project\Listeners\HandleProjectStageChange;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -97,6 +100,10 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_11_21_000006_add_section_and_component_to_projects_tasks_table',
                 '2025_11_21_000007_add_product_links_to_cabinets_and_components',
                 '2025_11_26_183527_add_timestamps_to_projects_project_tag_table',
+                '2025_11_28_114137_add_warehouse_id_to_projects_table',
+                '2025_11_28_114322_create_projects_material_reservations_table',
+                '2025_11_28_114620_add_quote_tracking_columns',
+                '2025_11_28_115000_add_inventory_stages_and_stage_keys',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -132,5 +139,8 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('hierarchy-builder-modal', \Webkul\Project\Livewire\HierarchyBuilderModal::class);
         \Livewire\Livewire::component('milestone-timeline', \Webkul\Project\Livewire\MilestoneTimeline::class);
         \Livewire\Livewire::component('production-timeline', \Webkul\Project\Livewire\ProductionTimeline::class);
+
+        // Register event listeners for project stage changes
+        Event::listen(ProjectStageChanged::class, HandleProjectStageChange::class);
     }
 }

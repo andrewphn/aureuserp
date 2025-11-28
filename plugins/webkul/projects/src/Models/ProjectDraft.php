@@ -7,6 +7,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 use Carbon\Carbon;
 
+/**
+ * Project Draft Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $user_id
+ * @property int $session_id
+ * @property string|null $current_step
+ * @property array $form_data
+ * @property \Carbon\Carbon|null $expires_at
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ *
+ */
 class ProjectDraft extends Model
 {
     protected $table = 'projects_project_drafts';

@@ -10,6 +10,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Invoice Email class
+ *
+ */
 class InvoiceEmail extends Mailable
 {
     use Queueable, SerializesModels;

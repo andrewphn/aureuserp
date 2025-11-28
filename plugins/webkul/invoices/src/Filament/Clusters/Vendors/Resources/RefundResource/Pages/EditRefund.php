@@ -6,6 +6,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Webkul\Account\Filament\Resources\RefundResource\Pages\EditRefund as BaseEditRefund;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 
+/**
+ * Edit Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditRefund extends BaseEditRefund
 {
     protected static string $resource = RefundResource::class;

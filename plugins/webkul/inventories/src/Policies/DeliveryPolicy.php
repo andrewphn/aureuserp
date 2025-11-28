@@ -7,6 +7,10 @@ use Webkul\Inventory\Models\Delivery;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
+/**
+ * Delivery Policy authorization policy
+ *
+ */
 class DeliveryPolicy
 {
     use HandlesAuthorization, HasScopedPermissions;

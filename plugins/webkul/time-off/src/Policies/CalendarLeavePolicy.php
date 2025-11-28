@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\CalendarLeave;
 
+/**
+ * Calendar Leave Policy authorization policy
+ *
+ */
 class CalendarLeavePolicy
 {
     use HandlesAuthorization;

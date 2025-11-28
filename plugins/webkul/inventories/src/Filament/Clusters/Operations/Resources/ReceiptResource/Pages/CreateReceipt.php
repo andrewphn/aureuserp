@@ -12,6 +12,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
 use Webkul\Inventory\Models\OperationType;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Create Receipt class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateReceipt extends CreateRecord
 {
     use HasRepeaterColumnManager;
@@ -36,6 +41,11 @@ class CreateReceipt extends CreateRecord
             ->body(__('inventories::filament/clusters/operations/resources/receipt/pages/create-receipt.notification.body'));
     }
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         parent::mount();
@@ -51,6 +61,12 @@ class CreateReceipt extends CreateRecord
         $this->form->fill($this->data);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $operationType = OperationType::find($data['operation_type_id']);

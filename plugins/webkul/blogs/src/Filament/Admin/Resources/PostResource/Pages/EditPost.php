@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Blog\Filament\Admin\Resources\PostResource;
 use Webkul\Blog\Models\Post;
 
+/**
+ * Edit Post class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPost extends EditRecord
 {
     protected static string $resource = PostResource::class;
@@ -19,6 +24,12 @@ class EditPost extends EditRecord
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['last_editor_id'] = Auth::id();

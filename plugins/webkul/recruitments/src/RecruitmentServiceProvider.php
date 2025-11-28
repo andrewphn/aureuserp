@@ -7,12 +7,22 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Recruitment Service Provider service provider
+ *
+ */
 class RecruitmentServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'recruitments';
 
     public static string $viewNamespace = 'recruitments';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)

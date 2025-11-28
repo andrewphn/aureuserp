@@ -6,6 +6,11 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResource;
 use Webkul\Recruitment\Traits\CandidateSkillRelation;
 
+/**
+ * Manage Skill class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageSkill extends ManageRelatedRecords
 {
     use CandidateSkillRelation;

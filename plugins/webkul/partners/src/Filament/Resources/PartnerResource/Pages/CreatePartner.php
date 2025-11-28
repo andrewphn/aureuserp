@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * Create Partner class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePartner extends CreateRecord
 {
     protected static string $resource = PartnerResource::class;

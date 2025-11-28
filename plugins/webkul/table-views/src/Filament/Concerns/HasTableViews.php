@@ -16,6 +16,10 @@ use Webkul\TableViews\Filament\Components\SavedView;
 use Webkul\TableViews\Models\TableView as TableViewModel;
 use Webkul\TableViews\Models\TableViewFavorite as TableViewFavoriteModel;
 
+/**
+ * Has Table Views trait
+ *
+ */
 trait HasTableViews
 {
     use EvaluatesClosures;
@@ -37,6 +41,11 @@ trait HasTableViews
 
     protected Width|string|Closure|null $tableViewsFormWidth = null;
 
+    /**
+     * Booted Interacts With Table
+     *
+     * @return void
+     */
     public function bootedInteractsWithTable(): void
     {
         parent::bootedInteractsWithTable();
@@ -44,6 +53,11 @@ trait HasTableViews
         $this->loadDefaultActiveTableView();
     }
 
+    /**
+     * Load Default Active Table View
+     *
+     * @return void
+     */
     protected function loadDefaultActiveTableView(): void
     {
         if (filled($this->activeTableView)) {
@@ -68,6 +82,11 @@ trait HasTableViews
         return null;
     }
 
+    /**
+     * Persist Active View To Storage
+     *
+     * @return void
+     */
     protected function persistActiveViewToStorage(): void
     {
         // Dispatch event to Alpine.js to save to localStorage
@@ -77,6 +96,12 @@ trait HasTableViews
         ]);
     }
 
+    /**
+     * Load View
+     *
+     * @param mixed $tabKey
+     * @return void
+     */
     public function loadView($tabKey): void
     {
         $this->resetTableViews();
@@ -86,6 +111,11 @@ trait HasTableViews
         $this->applyTableViewFilters();
     }
 
+    /**
+     * Reset Table Views
+     *
+     * @return void
+     */
     public function resetTableViews(): void
     {
         $this->resetTable();
@@ -101,11 +131,21 @@ trait HasTableViews
         $this->activeTableView = $this->getDefaultActiveTableView();
     }
 
+    /**
+     * Reset Table Sort
+     *
+     * @return void
+     */
     public function resetTableSort(): void
     {
         $this->tableSort = null;
     }
 
+    /**
+     * Reset Table Grouping
+     *
+     * @return void
+     */
     public function resetTableGrouping(): void
     {
         $this->tableGrouping = null;
@@ -113,6 +153,11 @@ trait HasTableViews
         $this->tableGroupingDirection = null;
     }
 
+    /**
+     * Apply Table View Filters
+     *
+     * @return void
+     */
     public function applyTableViewFilters(): void
     {
         $tableViews = $this->getAllTableViews();
@@ -216,11 +261,21 @@ trait HasTableViews
         return $defaultViewKey ?? array_key_first($this->getCachedFavoriteTableViews());
     }
 
+    /**
+     * Updated Active Table View
+     *
+     * @return void
+     */
     public function updatedActiveTableView(): void
     {
         $this->resetPage();
     }
 
+    /**
+     * Is Active Table View Modified
+     *
+     * @return bool
+     */
     public function isActiveTableViewModified(): bool
     {
         $tableViews = $this->getAllTableViews();
@@ -243,6 +298,12 @@ trait HasTableViews
         ] != $tableViews[$this->activeTableView]->getRecord()->filters;
     }
 
+    /**
+     * Modify Query With Active Tab
+     *
+     * @param Builder $query The search query
+     * @return Builder
+     */
     protected function modifyQueryWithActiveTab(Builder $query): Builder
     {
         if (blank(filled($this->activeTableView))) {
@@ -258,6 +319,12 @@ trait HasTableViews
         return $tableViews[$this->activeTableView]->modifyQuery($query);
     }
 
+    /**
+     * Set Table Views Form Max Height
+     *
+     * @param string|Closure|null $height
+     * @return static
+     */
     public function setTableViewsFormMaxHeight(string|Closure|null $height): static
     {
         $this->tableViewsFormMaxHeight = $height;
@@ -265,6 +332,12 @@ trait HasTableViews
         return $this;
     }
 
+    /**
+     * Set Table Views Form Width
+     *
+     * @param Width|string|Closure|null $width
+     * @return static
+     */
     public function setTableViewsFormWidth(Width|string|Closure|null $width): static
     {
         $this->tableViewsFormWidth = $width;
@@ -297,6 +370,11 @@ trait HasTableViews
             ->modalSubmitAction(false);
     }
 
+    /**
+     * Create Table View Action
+     *
+     * @return Action
+     */
     public function createTableViewAction(): Action
     {
         return CreateViewAction::make('createTableView')
@@ -329,6 +407,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Reset Table View Action
+     *
+     * @return Action
+     */
     public function resetTableViewAction(): Action
     {
         return Action::make('resetTableView')
@@ -341,6 +424,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Apply Table View Action
+     *
+     * @return Action
+     */
     public function applyTableViewAction(): Action
     {
         return Action::make('applyTableView')
@@ -357,6 +445,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Add Table View To Favorites Action
+     *
+     * @return Action
+     */
     public function addTableViewToFavoritesAction(): Action
     {
         return Action::make('addTableViewToFavorites')
@@ -380,6 +473,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Remove Table View From Favorites Action
+     *
+     * @return Action
+     */
     public function removeTableViewFromFavoritesAction(): Action
     {
         return Action::make('removeTableViewFromFavorites')
@@ -403,6 +501,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Edit Table View Action
+     *
+     * @return Action
+     */
     public function editTableViewAction(): Action
     {
         return EditViewAction::make('editTableView')
@@ -415,6 +518,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Delete Table View Action
+     *
+     * @return Action
+     */
     public function deleteTableViewAction(): Action
     {
         return Action::make('deleteTableView')
@@ -434,6 +542,11 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Replace Table View Action
+     *
+     * @return Action
+     */
     public function replaceTableViewAction(): Action
     {
         return Action::make('replaceTableView')
@@ -458,6 +571,14 @@ trait HasTableViews
             });
     }
 
+    /**
+     * Get Table View Action Group
+     *
+     * @param string $key
+     * @param string $type
+     * @param mixed $tableView
+     * @return ActionGroup
+     */
     public function getTableViewActionGroup(string $key, string $type, mixed $tableView): ActionGroup
     {
         return ActionGroup::make([

@@ -9,6 +9,29 @@ use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Employee\Database\Factories\CalendarAttendanceFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Calendar Attendance Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $sort
+ * @property string|null $name
+ * @property string|null $day_of_week
+ * @property string|null $day_period
+ * @property string|null $week_type
+ * @property string|null $display_type
+ * @property string|null $date_from
+ * @property string|null $date_to
+ * @property string|null $hour_from
+ * @property string|null $hour_to
+ * @property string|null $duration_days
+ * @property int $calendar_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $calendar
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ *
+ */
 class CalendarAttendance extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -36,11 +59,21 @@ class CalendarAttendance extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Calendar
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function calendar()
     {
         return $this->belongsTo(Calendar::class);
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -48,6 +81,11 @@ class CalendarAttendance extends Model implements Sortable
 
     /**
      * Get the factory instance for the model.
+     */
+    /**
+     * New Factory
+     *
+     * @return CalendarAttendanceFactory
      */
     protected static function newFactory(): CalendarAttendanceFactory
     {

@@ -35,6 +35,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPrice
 use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ManageVendors;
 use Webkul\Purchase\Models\ProductSupplier;
 
+/**
+ * Vendor Price Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class VendorPriceResource extends Resource
 {
     protected static ?string $model = ProductSupplier::class;
@@ -50,6 +55,12 @@ class VendorPriceResource extends Resource
         return __('purchases::filament/admin/clusters/configurations/resources/vendor-price.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -152,6 +163,12 @@ class VendorPriceResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -400,6 +417,12 @@ class VendorPriceResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

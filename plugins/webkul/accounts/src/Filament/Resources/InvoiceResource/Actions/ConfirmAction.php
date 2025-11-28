@@ -10,6 +10,11 @@ use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Facades\Account;
 use Webkul\Account\Models\Move;
 
+/**
+ * Confirm Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ConfirmAction extends Action
 {
     public static function getDefaultName(): ?string
@@ -40,6 +45,12 @@ class ConfirmAction extends Action
             });
     }
 
+    /**
+     * Validate Move
+     *
+     * @param Move $record The model record
+     * @return bool
+     */
     private function validateMove(Move $record): bool
     {
         if (! $record->partner_id) {

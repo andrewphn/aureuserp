@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Account Type enumeration
+ *
+ */
 enum AccountType: string implements HasLabel
 {
     case ASSET_RECEIVABLE = 'asset_receivable';
@@ -49,6 +53,11 @@ enum AccountType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [
@@ -73,6 +82,11 @@ enum AccountType: string implements HasLabel
         ];
     }
 
+    /**
+     * Assets
+     *
+     * @return array
+     */
     public static function assets(): array
     {
         return [
@@ -85,6 +99,11 @@ enum AccountType: string implements HasLabel
         ];
     }
 
+    /**
+     * Liabilities
+     *
+     * @return array
+     */
     public static function liabilities(): array
     {
         return [
@@ -95,6 +114,11 @@ enum AccountType: string implements HasLabel
         ];
     }
 
+    /**
+     * Equity
+     *
+     * @return array
+     */
     public static function equity(): array
     {
         return [
@@ -111,6 +135,11 @@ enum AccountType: string implements HasLabel
         ];
     }
 
+    /**
+     * Expenses
+     *
+     * @return array
+     */
     public static function expenses(): array
     {
         return [
@@ -120,6 +149,11 @@ enum AccountType: string implements HasLabel
         ];
     }
 
+    /**
+     * Off Balance
+     *
+     * @return array
+     */
     public static function offBalance(): array
     {
         return [

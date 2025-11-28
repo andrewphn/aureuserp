@@ -5,6 +5,16 @@ namespace Webkul\Security\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Team Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property-read \Illuminate\Database\Eloquent\Collection $users
+ *
+ */
 class Team extends Model
 {
     /**

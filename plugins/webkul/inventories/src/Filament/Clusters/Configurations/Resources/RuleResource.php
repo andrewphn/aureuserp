@@ -48,6 +48,11 @@ use Webkul\Inventory\Models\Rule;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * Rule Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RuleResource extends Resource
 {
     protected static ?string $model = Rule::class;
@@ -62,6 +67,11 @@ class RuleResource extends Resource
 
     protected static bool $isGloballySearchable = false;
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -81,6 +91,12 @@ class RuleResource extends Resource
         return __('inventories::filament/clusters/configurations/resources/rule.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -233,6 +249,12 @@ class RuleResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -395,6 +417,12 @@ class RuleResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

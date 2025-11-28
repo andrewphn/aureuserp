@@ -8,8 +8,17 @@ use Webkul\Account\Enums\EarlyPayDiscount;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Payment Term Seeder database seeder
+ *
+ */
 class PaymentTermSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         DB::table('accounts_payment_terms')->delete();

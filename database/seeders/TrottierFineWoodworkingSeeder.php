@@ -6,6 +6,10 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Trottier Fine Woodworking Seeder database seeder
+ *
+ */
 class TrottierFineWoodworkingSeeder extends Seeder
 {
     /**

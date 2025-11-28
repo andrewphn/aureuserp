@@ -13,6 +13,28 @@ use Webkul\Project\Database\Factories\TaskStageFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Task Stage Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property bool $is_active
+ * @property bool $is_collapsed
+ * @property string|null $sort
+ * @property int $project_id
+ * @property int $company_id
+ * @property int $user_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $tasks
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ *
+ */
 class TaskStage extends Model implements Sortable
 {
     use HasFactory, SoftDeletes, SortableTrait;
@@ -55,31 +77,61 @@ class TaskStage extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Project
+     *
+     * @return BelongsTo
+     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * Tasks
+     *
+     * @return HasMany
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'stage_id');
     }
 
+    /**
+     * User
+     *
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return TaskStageFactory
+     */
     protected static function newFactory(): TaskStageFactory
     {
         return TaskStageFactory::new();

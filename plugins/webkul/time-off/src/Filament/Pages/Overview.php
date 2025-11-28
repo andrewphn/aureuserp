@@ -8,6 +8,11 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Webkul\TimeOff\Filament\Widgets\OverviewCalendarWidget;
 
+/**
+ * Overview class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Overview extends BaseDashboard
 {
      use HasPageShield;

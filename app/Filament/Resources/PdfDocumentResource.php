@@ -13,6 +13,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Pdf Document Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PdfDocumentResource extends Resource
 {
     protected static ?string $model = PdfDocument::class;
@@ -25,6 +30,12 @@ class PdfDocumentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    /**
+     * Define the form schema
+     *
+     * @param Form $form
+     * @return Form
+     */
     public static function form(Form $form): Form
     {
         return $form
@@ -138,6 +149,12 @@ class PdfDocumentResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

@@ -6,6 +6,10 @@ use Exception;
 use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Image Cache Controller controller
+ *
+ */
 class ImageCacheController
 {
     /**

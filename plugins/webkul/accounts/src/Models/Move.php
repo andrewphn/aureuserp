@@ -22,6 +22,101 @@ use Webkul\Support\Models\UtmCampaign;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
 
+/**
+ * Move Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $sort
+ * @property int $journal_id
+ * @property int $company_id
+ * @property int $campaign_id
+ * @property int $tax_cash_basis_origin_move_id
+ * @property int $auto_post_origin_id
+ * @property string|null $secure_sequence_number
+ * @property int $invoice_payment_term_id
+ * @property int $partner_id
+ * @property int $commercial_partner_id
+ * @property int $partner_shipping_id
+ * @property int $partner_bank_id
+ * @property int $fiscal_position_id
+ * @property int $currency_id
+ * @property int $reversed_entry_id
+ * @property int $invoice_user_id
+ * @property int $invoice_incoterm_id
+ * @property int $invoice_cash_rounding_id
+ * @property int $preferred_payment_method_line_id
+ * @property int $creator_id
+ * @property string|null $sequence_prefix
+ * @property string|null $access_token
+ * @property string|null $name
+ * @property string|null $reference
+ * @property mixed $state
+ * @property mixed $move_type
+ * @property string|null $auto_post
+ * @property string|null $inalterable_hash
+ * @property string|null $payment_reference
+ * @property string|null $qr_code_method
+ * @property mixed $payment_state
+ * @property string|null $invoice_source_email
+ * @property string|null $invoice_partner_display_name
+ * @property string|null $invoice_origin
+ * @property string|null $incoterm_location
+ * @property \Carbon\Carbon|null $date
+ * @property string|null $auto_post_until
+ * @property \Carbon\Carbon|null $invoice_date
+ * @property \Carbon\Carbon|null $invoice_date_due
+ * @property \Carbon\Carbon|null $delivery_date
+ * @property array|null $sending_data
+ * @property string|null $narration
+ * @property string|null $invoice_currency_rate
+ * @property float $amount_untaxed
+ * @property float $amount_tax
+ * @property float $amount_total
+ * @property float $amount_residual
+ * @property float $amount_untaxed_signed
+ * @property float $amount_untaxed_in_currency_signed
+ * @property float $amount_tax_signed
+ * @property float $amount_total_signed
+ * @property float $amount_total_in_currency_signed
+ * @property float $amount_residual_signed
+ * @property float $quick_edit_total_amount
+ * @property bool $is_storno
+ * @property string|null $always_tax_exigible
+ * @property string|null $checked
+ * @property string|null $posted_before
+ * @property string|null $made_sequence_gap
+ * @property bool $is_manually_modified
+ * @property bool $is_move_sent
+ * @property int $source_id
+ * @property int $medium_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $paymentTermLine
+ * @property-read \Illuminate\Database\Eloquent\Collection $lines
+ * @property-read \Illuminate\Database\Eloquent\Collection $allLines
+ * @property-read \Illuminate\Database\Eloquent\Collection $taxLines
+ * @property-read \Illuminate\Database\Eloquent\Model|null $campaign
+ * @property-read \Illuminate\Database\Eloquent\Model|null $journal
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $taxCashBasisOriginMove
+ * @property-read \Illuminate\Database\Eloquent\Model|null $autoPostOrigin
+ * @property-read \Illuminate\Database\Eloquent\Model|null $invoicePaymentTerm
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $commercialPartner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partnerShipping
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partnerBank
+ * @property-read \Illuminate\Database\Eloquent\Model|null $fiscalPosition
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currency
+ * @property-read \Illuminate\Database\Eloquent\Model|null $reversedEntry
+ * @property-read \Illuminate\Database\Eloquent\Model|null $invoiceUser
+ * @property-read \Illuminate\Database\Eloquent\Model|null $invoiceIncoterm
+ * @property-read \Illuminate\Database\Eloquent\Model|null $invoiceCashRounding
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Model|null $source
+ * @property-read \Illuminate\Database\Eloquent\Model|null $medium
+ * @property-read \Illuminate\Database\Eloquent\Model|null $paymentMethodLine
+ *
+ */
 class Move extends Model implements Sortable
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SortableTrait;
@@ -152,16 +247,31 @@ class Move extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Campaign
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function campaign()
     {
         return $this->belongsTo(UtmCampaign::class, 'campaign_id');
     }
 
+    /**
+     * Journal
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function journal()
     {
         return $this->belongsTo(Journal::class, 'journal_id');
     }
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
@@ -172,81 +282,161 @@ class Move extends Model implements Sortable
         return $this->belongsTo(Move::class, 'tax_cash_basis_origin_move_id');
     }
 
+    /**
+     * Auto Post Origin
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function autoPostOrigin()
     {
         return $this->belongsTo(Move::class, 'auto_post_origin_id');
     }
 
+    /**
+     * Invoice Payment Term
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function invoicePaymentTerm()
     {
         return $this->belongsTo(PaymentTerm::class, 'invoice_payment_term_id')->withTrashed();
     }
 
+    /**
+     * Partner
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function partner()
     {
         return $this->belongsTo(Partner::class, 'partner_id');
     }
 
+    /**
+     * Commercial Partner
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function commercialPartner()
     {
         return $this->belongsTo(Partner::class, 'commercial_partner_id');
     }
 
+    /**
+     * Partner Shipping
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function partnerShipping()
     {
         return $this->belongsTo(Partner::class, 'partner_shipping_id');
     }
 
+    /**
+     * Partner Bank
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function partnerBank()
     {
         return $this->belongsTo(BankAccount::class, 'partner_bank_id')->withTrashed();
     }
 
+    /**
+     * Fiscal Position
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function fiscalPosition()
     {
         return $this->belongsTo(FiscalPosition::class, 'fiscal_position_id');
     }
 
+    /**
+     * Currency
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currency_id');
     }
 
+    /**
+     * Reversed Entry
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function reversedEntry()
     {
         return $this->belongsTo(self::class, 'reversed_entry_id');
     }
 
+    /**
+     * Invoice User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function invoiceUser()
     {
         return $this->belongsTo(User::class, 'invoice_user_id');
     }
 
+    /**
+     * Invoice Incoterm
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function invoiceIncoterm()
     {
         return $this->belongsTo(Incoterm::class, 'invoice_incoterm_id');
     }
 
+    /**
+     * Invoice Cash Rounding
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function invoiceCashRounding()
     {
         return $this->belongsTo(CashRounding::class, 'invoice_cash_rounding_id');
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Source
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function source()
     {
         return $this->belongsTo(UTMSource::class, 'source_id');
     }
 
+    /**
+     * Medium
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function medium()
     {
         return $this->belongsTo(UTMMedium::class, 'medium_id');
     }
 
+    /**
+     * Payment Method Line
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function paymentMethodLine()
     {
         return $this->belongsTo(PaymentMethodLine::class, 'preferred_payment_method_line_id');
@@ -259,11 +449,23 @@ class Move extends Model implements Sortable
             ->sum('discount');
     }
 
+    /**
+     * Is Inbound
+     *
+     * @param mixed $includeReceipts
+     * @return bool
+     */
     public function isInbound($includeReceipts = true)
     {
         return in_array($this->move_type, $this->getInboundTypes($includeReceipts));
     }
 
+    /**
+     * Get Inbound Types
+     *
+     * @param mixed $includeReceipts
+     * @return array
+     */
     public function getInboundTypes($includeReceipts = true): array
     {
         $types = [MoveType::OUT_INVOICE, MoveType::IN_REFUND];
@@ -275,11 +477,23 @@ class Move extends Model implements Sortable
         return $types;
     }
 
+    /**
+     * Is Outbound
+     *
+     * @param mixed $includeReceipts
+     * @return bool
+     */
     public function isOutbound($includeReceipts = true)
     {
         return in_array($this->move_type, $this->getOutboundTypes($includeReceipts));
     }
 
+    /**
+     * Get Outbound Types
+     *
+     * @param mixed $includeReceipts
+     * @return array
+     */
     public function getOutboundTypes($includeReceipts = true): array
     {
         $types = [MoveType::IN_INVOICE, MoveType::OUT_REFUND];
@@ -291,39 +505,75 @@ class Move extends Model implements Sortable
         return $types;
     }
 
+    /**
+     * Lines
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function lines()
     {
         return $this->hasMany(MoveLine::class, 'move_id')
             ->where('display_type', 'product');
     }
 
+    /**
+     * All Lines
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function allLines()
     {
         return $this->hasMany(MoveLine::class, 'move_id');
     }
 
+    /**
+     * Tax Lines
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function taxLines()
     {
         return $this->hasMany(MoveLine::class, 'move_id')
             ->where('display_type', 'tax');
     }
 
+    /**
+     * Payment Term Line
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function paymentTermLine()
     {
         return $this->hasOne(MoveLine::class, 'move_id')
             ->where('display_type', 'payment_term');
     }
 
+    /**
+     * Is Invoice
+     *
+     * @param mixed $includeReceipts
+     * @return bool
+     */
     public function isInvoice($includeReceipts = false)
     {
         return $this->isSaleDocument($includeReceipts) || $this->isPurchaseDocument($includeReceipts);
     }
 
+    /**
+     * Is Entry
+     *
+     * @return bool
+     */
     public function isEntry()
     {
         return $this->move_type === MoveType::ENTRY;
     }
 
+    /**
+     * Get Sale Types
+     *
+     * @param mixed $includeReceipts
+     */
     public function getSaleTypes($includeReceipts = false)
     {
         return $includeReceipts
@@ -331,11 +581,23 @@ class Move extends Model implements Sortable
             : [MoveType::OUT_INVOICE, MoveType::OUT_REFUND];
     }
 
+    /**
+     * Is Sale Document
+     *
+     * @param mixed $includeReceipts
+     * @return bool
+     */
     public function isSaleDocument($includeReceipts = false)
     {
         return in_array($this->move_type, $this->getSaleTypes($includeReceipts));
     }
 
+    /**
+     * Is Purchase Document
+     *
+     * @param mixed $includeReceipts
+     * @return bool
+     */
     public function isPurchaseDocument($includeReceipts = false)
     {
         return in_array($this->move_type, $includeReceipts ? [
@@ -361,6 +623,11 @@ class Move extends Model implements Sortable
     /**
      * Bootstrap any application services.
      */
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
@@ -380,6 +647,10 @@ class Move extends Model implements Sortable
 
     /**
      * Update the full name without triggering additional events
+     */
+    /**
+     * Update Sequence Prefix
+     *
      */
     public function updateSequencePrefix()
     {

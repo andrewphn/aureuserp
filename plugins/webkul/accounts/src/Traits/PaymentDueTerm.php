@@ -15,8 +15,18 @@ use Filament\Tables\Table;
 use Webkul\Account\Enums\DelayType;
 use Webkul\Account\Enums\DueTermValue;
 
+/**
+ * Payment Due Term trait
+ *
+ */
 trait PaymentDueTerm
 {
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -52,6 +62,12 @@ trait PaymentDueTerm
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

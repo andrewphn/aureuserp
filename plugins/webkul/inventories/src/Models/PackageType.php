@@ -11,6 +11,28 @@ use Webkul\Inventory\Database\Factories\PackageTypeFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Package Type Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $sort
+ * @property string|null $barcode
+ * @property string|null $height
+ * @property string|null $width
+ * @property string|null $length
+ * @property string|null $base_weight
+ * @property string|null $max_weight
+ * @property string|null $shipper_package_code
+ * @property string|null $package_carrier_type
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class PackageType extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -47,16 +69,31 @@ class PackageType extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return PackageTypeFactory
+     */
     protected static function newFactory(): PackageTypeFactory
     {
         return PackageTypeFactory::new();

@@ -5,6 +5,20 @@ namespace Webkul\TableViews\Models;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Models\User;
 
+/**
+ * Table View Favorite Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property bool $is_favorite
+ * @property string|null $view_type
+ * @property string|null $view_key
+ * @property string|null $filterable_type
+ * @property int $user_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ *
+ */
 class TableViewFavorite extends Model
 {
     /**

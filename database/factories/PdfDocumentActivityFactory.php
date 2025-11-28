@@ -7,10 +7,19 @@ use App\Models\PdfDocumentActivity;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * Pdf Document Activity Factory model factory
+ *
+ */
 class PdfDocumentActivityFactory extends Factory
 {
     protected $model = PdfDocumentActivity::class;
 
+    /**
+     * Definition
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [

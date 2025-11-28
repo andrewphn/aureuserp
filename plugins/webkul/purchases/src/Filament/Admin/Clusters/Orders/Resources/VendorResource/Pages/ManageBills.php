@@ -9,6 +9,11 @@ use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource;
 
+/**
+ * Manage Bills class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageBills extends ManageRelatedRecords
 {
     protected static string $resource = VendorResource::class;
@@ -22,6 +27,12 @@ class ManageBills extends ManageRelatedRecords
         return __('purchases::filament/admin/clusters/orders/resources/vendor/pages/manage-bills.navigation.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return BillResource::table($table)

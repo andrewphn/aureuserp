@@ -5,6 +5,10 @@ namespace Webkul\Project\Tests;
 use Tests\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * Test Case class
+ *
+ */
 abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;

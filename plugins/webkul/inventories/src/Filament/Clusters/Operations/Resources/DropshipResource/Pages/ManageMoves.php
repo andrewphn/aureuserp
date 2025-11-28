@@ -5,6 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResour
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource\Pages\ManageMoves as OperationManageMoves;
 
+/**
+ * Manage Moves class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageMoves extends OperationManageMoves
 {
     protected static string $resource = DropshipResource::class;

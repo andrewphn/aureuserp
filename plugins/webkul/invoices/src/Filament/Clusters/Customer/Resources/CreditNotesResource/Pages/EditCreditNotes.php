@@ -6,6 +6,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Webkul\Account\Filament\Resources\CreditNoteResource\Pages\EditCreditNote as BaseCreditNote;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource;
 
+/**
+ * Edit Credit Notes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCreditNotes extends BaseCreditNote
 {
     protected static string $resource = CreditNotesResource::class;

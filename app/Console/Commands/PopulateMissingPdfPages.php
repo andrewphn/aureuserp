@@ -6,6 +6,10 @@ use App\Models\PdfDocument;
 use App\Models\PdfPage;
 use Illuminate\Console\Command;
 
+/**
+ * Populate Missing Pdf Pages class
+ *
+ */
 class PopulateMissingPdfPages extends Command
 {
     /**

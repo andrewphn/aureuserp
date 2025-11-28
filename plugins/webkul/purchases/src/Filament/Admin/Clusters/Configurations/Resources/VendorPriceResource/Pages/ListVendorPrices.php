@@ -12,6 +12,11 @@ use Webkul\Purchase\Models\VendorPrice;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Vendor Prices class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListVendorPrices extends ListRecords
 {
     use HasTableViews;

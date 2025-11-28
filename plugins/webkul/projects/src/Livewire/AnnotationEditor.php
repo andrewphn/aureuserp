@@ -30,6 +30,10 @@ use Webkul\Project\Services\EntityManagementService;
 use Webkul\Project\Services\ViewTypeTrackerService;
 use Webkul\Project\Utils\PositionInferenceUtil;
 
+/**
+ * Annotation Editor class
+ *
+ */
 class AnnotationEditor extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
@@ -70,11 +74,22 @@ class AnnotationEditor extends Component implements HasActions, HasForms
 
     public ?array $entityData = []; // Entity properties for create/edit
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         // Don't fill form on mount, wait for annotation data
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -1045,6 +1060,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * Check if the annotation has a linked entity
      * Uses Livewire properties instead of form->getState() to avoid infinite recursion
      */
+    /**
+     * Has Linked Entity
+     *
+     * @return bool
+     */
     protected function hasLinkedEntity(): bool
     {
         return ! empty($this->linkedRoomId)
@@ -1138,6 +1158,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return '<span class="text-gray-500 text-sm">Not linked to any entity</span>';
     }
 
+    /**
+     * Save Action
+     *
+     * @return Action
+     */
     public function saveAction(): Action
     {
         return Action::make('save')
@@ -1148,6 +1173,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ->action(fn () => $this->save()); // Directly call the save method
     }
 
+    /**
+     * Save And Next Action
+     *
+     * @return Action
+     */
     public function saveAndNextAction(): Action
     {
         return Action::make('saveAndNext')
@@ -1168,6 +1198,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     /**
      * Save annotation using AnnotationSaveService
      * Entity-centric workflow: delegates to service for all save logic
+     */
+    /**
+     * Save
+     *
+     * @return void
      */
     public function save(): void
     {
@@ -1259,6 +1294,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
     }
 
+    /**
+     * Cancel Action
+     *
+     * @return Action
+     */
     public function cancelAction(): Action
     {
         return Action::make('cancel')
@@ -1268,6 +1308,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
             ->action(fn () => $this->close());
     }
 
+    /**
+     * Delete Action
+     *
+     * @return Action
+     */
     public function deleteAction(): Action
     {
         return Action::make('delete')
@@ -1363,6 +1408,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * Get smart defaults for creating a new entity
      * Matches logic from HierarchyBuilderModal to ensure consistent entity creation
      */
+    /**
+     * Get Smart Defaults For New Entity
+     *
+     * @param array $annotation
+     * @return array
+     */
     protected function getSmartDefaultsForNewEntity(array $annotation): array
     {
         $defaults = [];
@@ -1409,12 +1460,22 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         return $defaults;
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         return view('webkul-project::livewire.annotation-editor');
     }
 
     #[On('edit-annotation')]
+    /**
+     * Handle Edit Annotation
+     *
+     * @param array $annotation
+     * @return void
+     */
     public function handleEditAnnotation(array $annotation): void
     {
         $this->originalAnnotation = $annotation;
@@ -1540,6 +1601,18 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     }
 
     #[On('update-annotation-position')]
+    /**
+     * Handle Update Annotation Position
+     *
+     * @param int|string $annotationId
+     * @param float $pdfX
+     * @param float $pdfY
+     * @param float $pdfWidth
+     * @param float $pdfHeight
+     * @param float $normalizedX
+     * @param float $normalizedY
+     * @return void
+     */
     public function handleUpdateAnnotationPosition(
         int|string $annotationId,
         float $pdfX,
@@ -1626,6 +1699,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         }
     }
 
+    /**
+     * Cancel
+     *
+     * @return void
+     */
     public function cancel(): void
     {
         $this->close();
@@ -1644,6 +1722,13 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      *
      * @param  string  $fieldName  Field name to populate (room_location_id or cabinet_run_id)
      * @param  int  $entityId  Entity ID to link to
+     */
+    /**
+     * Link To Existing Entity
+     *
+     * @param string $fieldName
+     * @param int $entityId
+     * @return void
      */
     public function linkToExistingEntity(string $fieldName, int $entityId): void
     {
@@ -1667,6 +1752,13 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      *
      * @param  callable  $get  Form get callable
      * @param  callable  $set  Form set callable
+     */
+    /**
+     * Calculate Total Price
+     *
+     * @param callable $get
+     * @param callable $set
+     * @return void
      */
     protected function calculateTotalPrice(callable $get, callable $set): void
     {
@@ -1695,6 +1787,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      *
      * @param  string|float|null  $input  The input measurement
      * @return float|null The decimal value or null if invalid
+     */
+    /**
+     * Parse Fractional Measurement
+     *
+     * @param mixed $input
+     * @return ?float
      */
     protected function parseFractionalMeasurement($input): ?float
     {
@@ -1771,6 +1869,13 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * @param  callable  $get  Form get callable
      * @param  callable  $set  Form set callable
      */
+    /**
+     * Calculate Tcs Price
+     *
+     * @param callable $get
+     * @param callable $set
+     * @return void
+     */
     protected function calculateTcsPrice(callable $get, callable $set): void
     {
         // Only calculate for cabinets
@@ -1813,6 +1918,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
      * @param  callable  $get  Form get callable
      * @return string HTML price breakdown
      */
+    /**
+     * Get Tcs Price Breakdown
+     *
+     * @param callable $get
+     * @return string
+     */
     protected function getTcsPriceBreakdown(callable $get): string
     {
         // Only show for cabinets
@@ -1840,6 +1951,11 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         );
     }
 
+    /**
+     * Close
+     *
+     * @return void
+     */
     private function close(): void
     {
         $this->showModal = false;

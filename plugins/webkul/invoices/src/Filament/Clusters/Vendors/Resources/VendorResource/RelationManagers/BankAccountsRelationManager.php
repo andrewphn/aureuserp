@@ -8,15 +8,32 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Webkul\Partner\Filament\Resources\BankAccountResource;
 
+/**
+ * Bank Accounts Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BankAccountsRelationManager extends RelationManager
 {
     protected static string $relationship = 'bankAccounts';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return BankAccountResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return BankAccountResource::table($table)

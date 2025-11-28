@@ -8,6 +8,10 @@ use Webkul\Employee\Models\EmployeeJobPosition;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Employee Job Position Factory model factory
+ *
+ */
 class EmployeeJobPositionFactory extends Factory
 {
     /**

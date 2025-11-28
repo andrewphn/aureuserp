@@ -10,6 +10,11 @@ use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 
+/**
+ * List Departure Reasons class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListDepartureReasons extends ListRecords
 {
     use HasTableViews;

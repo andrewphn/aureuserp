@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Employee Request form request
+ *
+ */
 enum EmployeeRequest: string implements HasLabel
 {
     case YES = 'yes';
@@ -18,6 +22,11 @@ enum EmployeeRequest: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

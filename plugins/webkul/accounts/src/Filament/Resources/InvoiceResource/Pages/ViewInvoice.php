@@ -9,6 +9,11 @@ use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
+/**
+ * View Invoice class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewInvoice extends ViewRecord
 {
     protected static string $resource = InvoiceResource::class;

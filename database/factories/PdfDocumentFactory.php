@@ -6,10 +6,19 @@ use App\Models\PdfDocument;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * Pdf Document Factory model factory
+ *
+ */
 class PdfDocumentFactory extends Factory
 {
     protected $model = PdfDocument::class;
 
+    /**
+     * Definition
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [

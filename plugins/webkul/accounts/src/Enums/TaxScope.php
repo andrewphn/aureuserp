@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Tax Scope enumeration
+ *
+ */
 enum TaxScope: string implements HasLabel
 {
     case SERVICE = 'service';
@@ -18,6 +22,11 @@ enum TaxScope: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

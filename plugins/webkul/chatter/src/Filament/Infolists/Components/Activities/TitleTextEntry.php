@@ -6,6 +6,11 @@ use Filament\Forms\Components\Concerns\CanAllowHtml;
 use Filament\Infolists\Components\Entry;
 use Filament\Support\Concerns\HasExtraAttributes;
 
+/**
+ * Title Text Entry class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TitleTextEntry extends Entry
 {
     use CanAllowHtml;

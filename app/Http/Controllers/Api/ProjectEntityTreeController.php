@@ -11,6 +11,10 @@ use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
 use App\Models\PdfPageAnnotation;
 
+/**
+ * Project Entity Tree Controller controller
+ *
+ */
 class ProjectEntityTreeController extends Controller
 {
     /**

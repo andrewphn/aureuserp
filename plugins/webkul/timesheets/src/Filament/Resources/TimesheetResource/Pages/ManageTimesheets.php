@@ -11,6 +11,11 @@ use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\Timesheet\Filament\Resources\TimesheetResource;
 
+/**
+ * Manage Timesheets class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTimesheets extends ManageRecords
 {
     use HasTableViews;

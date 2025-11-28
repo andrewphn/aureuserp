@@ -7,6 +7,10 @@ use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\Employee;
 use Webkul\Support\Models\Company;
 
+/**
+ * Department Factory model factory
+ *
+ */
 class DepartmentFactory extends Factory
 {
     /**

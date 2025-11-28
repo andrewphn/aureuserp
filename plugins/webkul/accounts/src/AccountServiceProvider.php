@@ -12,12 +12,22 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Account Service Provider service provider
+ *
+ */
 class AccountServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'accounts';
 
     public static string $viewNamespace = 'accounts';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -84,11 +94,21 @@ class AccountServiceProvider extends PackageServiceProvider
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         Livewire::component('invoice-summary', InvoiceSummary::class);
     }
 
+    /**
+     * Package Registered
+     *
+     * @return void
+     */
     public function packageRegistered(): void
     {
         $loader = AliasLoader::getInstance();

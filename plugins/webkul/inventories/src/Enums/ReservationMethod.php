@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Reservation Method enumeration
+ *
+ */
 enum ReservationMethod: string implements HasLabel
 {
     case AT_CONFIRM = 'at_confirm';

@@ -7,6 +7,10 @@ use Webkul\Purchase\Models\Quotation;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
+/**
+ * Quotation Policy authorization policy
+ *
+ */
 class QuotationPolicy
 {
     use HandlesAuthorization, HasScopedPermissions;

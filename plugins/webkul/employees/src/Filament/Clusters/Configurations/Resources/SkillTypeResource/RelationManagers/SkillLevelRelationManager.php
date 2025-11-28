@@ -29,12 +29,23 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Support\Filament\Tables as CustomTables;
 use Webkul\Support\Filament\Tables\Infolists\ProgressBarEntry;
 
+/**
+ * Skill Level Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SkillLevelRelationManager extends RelationManager
 {
     protected static string $relationship = 'skillLevels';
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -54,6 +65,12 @@ class SkillLevelRelationManager extends RelationManager
             ])->columns(2);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -174,6 +191,12 @@ class SkillLevelRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

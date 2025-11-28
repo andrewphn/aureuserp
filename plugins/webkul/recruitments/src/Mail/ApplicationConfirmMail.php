@@ -10,6 +10,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Application Confirm Mail class
+ *
+ */
 class ApplicationConfirmMail extends Mailable
 {
     use Queueable, SerializesModels;

@@ -9,6 +9,11 @@ use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 
+/**
+ * Check Availability Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CheckAvailabilityAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Accrual Plan Seeder database seeder
+ *
+ */
 class AccrualPlanSeeder extends Seeder
 {
     /**

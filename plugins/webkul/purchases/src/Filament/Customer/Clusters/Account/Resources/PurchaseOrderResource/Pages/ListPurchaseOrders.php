@@ -11,12 +11,23 @@ use Webkul\Purchase\Models\Order;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Purchase Orders class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPurchaseOrders extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = PurchaseOrderResource::class;
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return PurchaseOrderResource::table($table)

@@ -10,6 +10,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
 use Webkul\Inventory\Models\Location;
 
+/**
+ * View Location class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewLocation extends ViewRecord
 {
     protected static string $resource = LocationResource::class;

@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Employee\Filament\Resources\DepartmentResource;
 
+/**
+ * Edit Department class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditDepartment extends EditRecord
 {
     protected static string $resource = DepartmentResource::class;
@@ -54,6 +59,13 @@ class EditDepartment extends EditRecord
         ];
     }
 
+    /**
+     * Handle Record Update
+     *
+     * @param Model $record The model record
+     * @param array $data The data array
+     * @return Model
+     */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         try {

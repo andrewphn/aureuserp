@@ -9,6 +9,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\AccrualPlanResource;
 
+/**
+ * View Accrual Plan class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewAccrualPlan extends ViewRecord
 {
     protected static string $resource = AccrualPlanResource::class;

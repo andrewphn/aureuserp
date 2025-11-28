@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\SkillType;
 use Webkul\Security\Models\User;
 
+/**
+ * Skill Type Policy authorization policy
+ *
+ */
 class SkillTypePolicy
 {
     use HandlesAuthorization;

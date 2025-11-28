@@ -11,6 +11,10 @@ use Webkul\Partner\Models\Industry;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 
+/**
+ * Job Position Eloquent model
+ *
+ */
 class JobPosition extends BaseJobPosition
 {
     /**
@@ -38,36 +42,71 @@ class JobPosition extends BaseJobPosition
         parent::__construct($attributes);
     }
 
+    /**
+     * Address
+     *
+     * @return BelongsTo
+     */
     public function address(): BelongsTo
     {
         return $this->belongsTo(Partner::class, 'address_id')->where('sub_type', 'company');
     }
 
+    /**
+     * Skills
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function skills()
     {
         return $this->belongsToMany(Skill::class, 'job_position_skills', 'job_position_id', 'skill_id');
     }
 
+    /**
+     * Interviewers
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function interviewers()
     {
         return $this->belongsToMany(User::class, 'recruitments_job_position_interviewers', 'job_position_id', 'user_id');
     }
 
+    /**
+     * Manager
+     *
+     * @return BelongsTo
+     */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_id');
     }
 
+    /**
+     * Recruiter
+     *
+     * @return BelongsTo
+     */
     public function recruiter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recruiter_id');
     }
 
+    /**
+     * Industry
+     *
+     * @return BelongsTo
+     */
     public function industry(): BelongsTo
     {
         return $this->belongsTo(Industry::class, 'industry_id');
     }
 
+    /**
+     * No Of Employee
+     *
+     * @return Attribute
+     */
     protected function noOfEmployee(): Attribute
     {
         return Attribute::make(
@@ -81,6 +120,11 @@ class JobPosition extends BaseJobPosition
         );
     }
 
+    /**
+     * No Of Hired Employee
+     *
+     * @return Attribute
+     */
     protected function noOfHiredEmployee(): Attribute
     {
         return Attribute::make(
@@ -97,6 +141,11 @@ class JobPosition extends BaseJobPosition
         );
     }
 
+    /**
+     * Expected Employees
+     *
+     * @return Attribute
+     */
     protected function expectedEmployees(): Attribute
     {
         return Attribute::make(
@@ -108,11 +157,21 @@ class JobPosition extends BaseJobPosition
         );
     }
 
+    /**
+     * Applications
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function applications()
     {
         return $this->hasMany(Applicant::class, 'job_id');
     }
 
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();

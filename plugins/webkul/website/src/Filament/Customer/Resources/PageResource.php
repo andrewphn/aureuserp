@@ -6,6 +6,11 @@ use Filament\Resources\Resource;
 use Webkul\Website\Filament\Customer\Resources\PageResource\Pages\ViewPage;
 use Webkul\Website\Models\Page;
 
+/**
+ * Page Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PageResource extends Resource
 {
     protected static ?string $model = Page::class;

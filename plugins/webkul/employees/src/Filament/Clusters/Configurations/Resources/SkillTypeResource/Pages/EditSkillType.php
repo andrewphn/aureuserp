@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource;
 
+/**
+ * Edit Skill Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditSkillType extends EditRecord
 {
     protected static string $resource = SkillTypeResource::class;

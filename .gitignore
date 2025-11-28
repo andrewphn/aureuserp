@@ -51,3 +51,4 @@ node_modules/
 # tasks/ 
 .playwright-mcp/*.png
 .playwright-mcp/
+tests/Browser/auth-state.json

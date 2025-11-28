@@ -9,6 +9,11 @@ use Webkul\Support\Models\ActivityType;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Activity Types class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListActivityTypes extends ListRecords
 {
     use HasTableViews;

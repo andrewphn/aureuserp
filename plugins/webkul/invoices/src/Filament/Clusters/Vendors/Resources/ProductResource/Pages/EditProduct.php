@@ -6,6 +6,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource;
 use Webkul\Product\Filament\Resources\ProductResource\Pages\EditProduct as BaseEditProduct;
 
+/**
+ * Edit Product class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditProduct extends BaseEditProduct
 {
     protected static string $resource = ProductResource::class;

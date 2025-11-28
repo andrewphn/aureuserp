@@ -1,0 +1,19 @@
+<?php
+
+namespace Webkul\Inventory\Filament\Resources\WoodworkingMaterialCategoryResource\Pages;
+
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+use Webkul\Inventory\Filament\Resources\WoodworkingMaterialCategoryResource;
+
+class EditWoodworkingMaterialCategory extends EditRecord
+{
+    protected static string $resource = WoodworkingMaterialCategoryResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+}

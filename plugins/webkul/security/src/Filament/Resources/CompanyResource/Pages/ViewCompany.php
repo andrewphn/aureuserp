@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Security\Filament\Resources\CompanyResource;
 
+/**
+ * View Company class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCompany extends ViewRecord
 {
     protected static string $resource = CompanyResource::class;

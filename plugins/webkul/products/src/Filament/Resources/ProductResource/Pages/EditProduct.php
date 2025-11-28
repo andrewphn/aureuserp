@@ -13,6 +13,11 @@ use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Product\Filament\Resources\ProductResource;
 
+/**
+ * Edit Product class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditProduct extends EditRecord
 {
     protected static string $resource = ProductResource::class;
@@ -91,6 +96,11 @@ class EditProduct extends EditRecord
         ];
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         $this->getRecord()->variants->each(function ($variant) {

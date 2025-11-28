@@ -19,8 +19,18 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\DocumentType;
 use Webkul\Account\Enums\RepartitionType;
 
+/**
+ * Tax Partition trait
+ *
+ */
 trait TaxPartition
 {
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -59,6 +69,12 @@ trait TaxPartition
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Account\Filament\Resources\CashRoundingResource;
 
+/**
+ * Edit Cash Rounding class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCashRounding extends EditRecord
 {
     protected static string $resource = CashRoundingResource::class;

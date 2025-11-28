@@ -44,12 +44,23 @@ use Webkul\Security\Enums\CompanyStatus;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Branches Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BranchesRelationManager extends RelationManager
 {
     protected static string $relationship = 'branches';
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -230,6 +241,12 @@ class BranchesRelationManager extends RelationManager
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -390,6 +407,12 @@ class BranchesRelationManager extends RelationManager
             ->reorderable('sort');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

@@ -6,6 +6,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Website\Filament\Customer\Resources\PageResource;
 
+/**
+ * View Page Filament page
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPage extends ViewRecord
 {
     protected static string $resource = PageResource::class;

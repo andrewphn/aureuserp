@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\IndustryResource;
 use Webkul\Partner\Models\Industry;
 
+/**
+ * Manage Industries class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageIndustries extends ManageRecords
 {
     protected static string $resource = IndustryResource::class;

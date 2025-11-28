@@ -12,6 +12,11 @@ use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Warehouses class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListWarehouses extends ListRecords
 {
     use HasTableViews;

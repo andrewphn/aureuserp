@@ -57,6 +57,11 @@ use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
+/**
+ * Operation Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class OperationTypeResource extends Resource
 {
     protected static ?string $model = OperationType::class;
@@ -81,6 +86,12 @@ class OperationTypeResource extends Resource
         return __('inventories::filament/clusters/configurations/resources/operation-type.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -313,6 +324,12 @@ class OperationTypeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -453,6 +470,12 @@ class OperationTypeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

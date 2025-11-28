@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource;
 use Webkul\Inventory\Models\Dropship;
 
+/**
+ * View Dropship class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewDropship extends ViewRecord
 {
     protected static string $resource = DropshipResource::class;

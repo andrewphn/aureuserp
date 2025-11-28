@@ -10,12 +10,23 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Filament\Resources\RoleResource;
 use Spatie\Permission\PermissionRegistrar;
 
+/**
+ * Create Role class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateRole extends CreateRecord
 {
     protected static string $resource = RoleResource::class;
 
     public Collection $permissions;
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $this->permissions = collect($data)
@@ -32,6 +43,11 @@ class CreateRole extends CreateRecord
         ];
     }
 
+    /**
+     * After Create
+     *
+     * @return void
+     */
     protected function afterCreate(): void
     {
         DB::transaction(function () {
@@ -39,6 +55,11 @@ class CreateRole extends CreateRecord
         });
     }
 
+    /**
+     * Sync Permissions
+     *
+     * @return void
+     */
     private function syncPermissions(): void
     {
         $permissionModel = Utils::getPermissionModel();
@@ -86,6 +107,12 @@ class CreateRole extends CreateRecord
         $this->syncPermissionsByIds($allPermissionIds->unique()->values()->toArray());
     }
 
+    /**
+     * Sync Permissions By Ids
+     *
+     * @param array $permissionIds
+     * @return void
+     */
     private function syncPermissionsByIds(array $permissionIds): void
     {
         $roleId = $this->record->id;

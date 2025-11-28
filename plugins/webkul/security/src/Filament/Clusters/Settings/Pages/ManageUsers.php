@@ -12,6 +12,11 @@ use Webkul\Security\Settings\UserSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 use Webkul\Support\Models\Company;
 
+/**
+ * Manage Users class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageUsers extends SettingsPage
 {
     use HasPageShield;
@@ -44,6 +49,12 @@ class ManageUsers extends SettingsPage
         return __('security::filament/clusters/manage-users.navigation.label');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

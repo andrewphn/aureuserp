@@ -9,6 +9,11 @@ use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Filament\Resources\JournalResource;
 
+/**
+ * Create Journal class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateJournal extends CreateRecord
 {
     protected static string $resource = JournalResource::class;
@@ -26,6 +31,12 @@ class CreateJournal extends CreateRecord
             ->body(__('accounts::filament/resources/journal/pages/create-journal.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::user()->id;

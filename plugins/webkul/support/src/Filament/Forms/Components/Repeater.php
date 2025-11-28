@@ -9,6 +9,11 @@ use Filament\Support\Enums\Size;
 use Filament\Tables\Table\Concerns\HasColumnManager;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 
+/**
+ * Repeater class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Repeater extends BaseRepeater
 {
     use HasColumnManager;
@@ -26,6 +31,11 @@ class Repeater extends BaseRepeater
         return (string) parent::getDefaultView();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @return static
+     */
     public function table(array | Closure | null $columns): static
     {
         $this->isRepeaterHasTableView = true;
@@ -35,6 +45,11 @@ class Repeater extends BaseRepeater
         return $this;
     }
 
+    /**
+     * Has Table View
+     *
+     * @return bool
+     */
     public function hasTableView(): bool
     {
         return $this->evaluate($this->isRepeaterHasTableView) || filled($this->getTableColumns());
@@ -103,6 +118,11 @@ class Repeater extends BaseRepeater
         return $visibleColumns->values()->toArray();
     }
 
+    /**
+     * Has Toggleable Columns
+     *
+     * @return bool
+     */
     public function hasToggleableColumns(): bool
     {
         $columns = $this->evaluate($this->tableColumns) ?? [];
@@ -151,6 +171,12 @@ class Repeater extends BaseRepeater
         return $action;
     }
 
+    /**
+     * Apply Table Column Manager
+     *
+     * @param ?array $columns
+     * @return void
+     */
     public function applyTableColumnManager(?array $columns = null): void
     {
         if (blank($columns)) {
@@ -170,11 +196,21 @@ class Repeater extends BaseRepeater
         session([$this->getColumnManagerSessionKey() => $columnState]);
     }
 
+    /**
+     * Reset Table Column Manager
+     *
+     * @return void
+     */
     public function resetTableColumnManager(): void
     {
         session()->forget($this->getColumnManagerSessionKey());
     }
 
+    /**
+     * Has Deferred Column Manager
+     *
+     * @return bool
+     */
     public function hasDeferredColumnManager(): bool
     {
         return false;

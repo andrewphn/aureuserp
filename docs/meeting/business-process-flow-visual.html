@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Woodwork - Visual Process Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sales: #0ea5e9;
+            --design: #8b5cf6;
+            --materials: #10b981;
+            --production: #f59e0b;
+            --delivery: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .pipeline {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .column {
+            min-width: 340px;
+            background: var(--gray-100);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .column-header {
+            padding: 24px;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .column-header .icon {
+            font-size: 28px;
+        }
+
+        .column-header .count {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .column-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 400px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            cursor: grab;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 16px;
+        }
+
+        .io-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--gray-200);
+        }
+
+        .io-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .io-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .io-item {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .io-item::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .input-item {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .input-item::before {
+            background: #3b82f6;
+        }
+
+        .output-item {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .output-item::before {
+            background: #10b981;
+        }
+
+        .decision-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Column-specific colors */
+        .sales .column-header {
+            background: linear-gradient(135deg, var(--sales) 0%, #06b6d4 100%);
+        }
+        .sales .card {
+            border-left-color: var(--sales);
+        }
+
+        .design .column-header {
+            background: linear-gradient(135deg, var(--design) 0%, #a855f7 100%);
+        }
+        .design .card {
+            border-left-color: var(--design);
+        }
+
+        .materials .column-header {
+            background: linear-gradient(135deg, var(--materials) 0%, #34d399 100%);
+        }
+        .materials .card {
+            border-left-color: var(--materials);
+        }
+
+        .production .column-header {
+            background: linear-gradient(135deg, var(--production) 0%, #fb923c 100%);
+        }
+        .production .card {
+            border-left-color: var(--production);
+        }
+
+        .delivery .column-header {
+            background: linear-gradient(135deg, var(--delivery) 0%, #f87171 100%);
+        }
+        .delivery .card {
+            border-left-color: var(--delivery);
+        }
+
+        /* Flow Arrows */
+        .flow-arrow {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 32px;
+            color: rgba(255,255,255,0.5);
+            z-index: 10;
+        }
+
+        .column-header {
+            position: relative;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+        }
+
+        /* Print Button */
+        .print-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 64px;
+            height: 64px;
+            background: white;
+            color: var(--gray-800);
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .print-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+            .pipeline {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pipeline {
+                flex-direction: column;
+            }
+            .column {
+                min-width: 100%;
+            }
+            .flow-arrow {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏗️ TCS Woodwork Process Flow</h1>
+        <p>End-to-End Project Workflow | Discovery → Delivery → Installation</p>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #3b82f6;"></div>
+            <span>Inputs</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #10b981;"></div>
+            <span>Outputs</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-icon" style="background: #f59e0b;"></div>
+            <span>Decision Point</span>
+        </div>
+    </div>
+
+    <div class="pipeline">
+        <!-- SALES COLUMN -->
+        <div class="column sales">
+            <div class="column-header">
+                <span class="icon">💼</span>
+                <span>SALES</span>
+                <span class="count">4</span>
+                <span class="flow-arrow">→</span>
+            </div>
+            <div class="column-content">
+                <div class="card">
+                    <div class="card-title">
+                        <span>📞</span>
+                        Lead Generation
+                    </div>
+                    <div class="card-subtitle">Initial customer contact</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Website inquiry</div>
+                            <div class="io-item input-item">Referral</div>
+                            <div class="io-item input-item">Phone call</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Meeting scheduled</div>
+                            <div class="io-item output-item">Client info captured</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Bryan + Andrew</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>📏</span>
+                        Site Visit
+                    </div>
+                    <div class="card-subtitle">On-site measurement</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Client meeting</div>
+                            <div class="io-item input-item">Site access</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Measurements</div>
+                            <div class="io-item output-item">Photos</div>
+                            <div class="io-item output-item">Requirements doc</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Bryan</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>📋</span>
+                        Proposal
+                    </div>
+                    <div class="card-subtitle">Detailed quote & scope</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Measurements</div>
+                            <div class="io-item input-item">Client requirements</div>
+                            <div class="io-item input-item">Material costs</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Proposal PDF</div>
+                            <div class="io-item output-item">Pricing breakdown</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Bryan + Andrew</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>💰</span>
+                        Contract & Deposit
+                    </div>
+                    <div class="card-subtitle">30% down payment</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Signed contract</div>
+                            <div class="io-item input-item">Client approval</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">30% payment</div>
+                            <div class="io-item output-item">Job number</div>
+                            <div class="io-item output-item">Project folder</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ GATE: Payment required</div>
+                    <div class="owner-badge">👤 Sadie</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESIGN COLUMN -->
+        <div class="column design">
+            <div class="column-header">
+                <span class="icon">🎨</span>
+                <span>DESIGN</span>
+                <span class="count">3</span>
+                <span class="flow-arrow">→</span>
+            </div>
+            <div class="column-content">
+                <div class="card">
+                    <div class="card-title">
+                        <span>🖥️</span>
+                        Rhino 3D Model
+                    </div>
+                    <div class="card-subtitle">CAD design & layout</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Site measurements</div>
+                            <div class="io-item input-item">Client preferences</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">3D model (.3dm)</div>
+                            <div class="io-item output-item">Room layout</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Bryan</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>📐</span>
+                        Technical Drawings
+                    </div>
+                    <div class="card-subtitle">Export DWG & PDFs</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Approved 3D model</div>
+                            <div class="io-item input-item">Material selections</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">DWG files</div>
+                            <div class="io-item output-item">PDF drawings</div>
+                            <div class="io-item output-item">Initial BOM</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Bryan</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>📝</span>
+                        Detailing
+                    </div>
+                    <div class="card-subtitle">Production specs</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">DWG files</div>
+                            <div class="io-item input-item">Job specs</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Face frame specs</div>
+                            <div class="io-item output-item">Door/drawer dims</div>
+                            <div class="io-item output-item">CNC files</div>
+                            <div class="io-item output-item">Cut lists</div>
+                            <div class="io-item output-item">Job card bundle</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Aiden</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATERIALS COLUMN -->
+        <div class="column materials">
+            <div class="column-header">
+                <span class="icon">📦</span>
+                <span>MATERIALS</span>
+                <span class="count">3</span>
+                <span class="flow-arrow">→</span>
+            </div>
+            <div class="column-content">
+                <div class="card">
+                    <div class="card-title">
+                        <span>🔍</span>
+                        Inventory Check
+                    </div>
+                    <div class="card-subtitle">Stock verification</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">BOM from design</div>
+                            <div class="io-item input-item">Current inventory</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Stock status</div>
+                            <div class="io-item output-item">Purchase requests</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ In stock? → Yes/No</div>
+                    <div class="owner-badge">👤 Aiden</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>🛒</span>
+                        Purchase Orders
+                    </div>
+                    <div class="card-subtitle">Order missing items</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Stock shortages</div>
+                            <div class="io-item input-item">Vendor pricing</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Submitted PO</div>
+                            <div class="io-item output-item">Delivery schedule</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ GATE: Bryan approval</div>
+                    <div class="owner-badge">👤 Sadie + Bryan</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>📥</span>
+                        Receiving
+                    </div>
+                    <div class="card-subtitle">Label & store</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Material delivery</div>
+                            <div class="io-item input-item">Job number</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Labeled materials</div>
+                            <div class="io-item output-item">Updated inventory</div>
+                            <div class="io-item output-item">Storage locations</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Aiden</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTION COLUMN -->
+        <div class="column production">
+            <div class="column-header">
+                <span class="icon">🔨</span>
+                <span>PRODUCTION</span>
+                <span class="count">4</span>
+                <span class="flow-arrow">→</span>
+            </div>
+            <div class="column-content">
+                <div class="card">
+                    <div class="card-title">
+                        <span>⚙️</span>
+                        CNC Operations
+                    </div>
+                    <div class="card-subtitle">Machine cutting</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">CNC files</div>
+                            <div class="io-item input-item">Sheet goods</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Cut parts</div>
+                            <div class="io-item output-item">Sorted components</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Dagger + Aiden</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>🏗️</span>
+                        Assembly
+                    </div>
+                    <div class="card-subtitle">Cabinet construction</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Cut parts</div>
+                            <div class="io-item input-item">Job card</div>
+                            <div class="io-item input-item">Hardware</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Cabinet boxes</div>
+                            <div class="io-item output-item">Face frames</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Levi + Shaggy + Team</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>✅</span>
+                        QC #1
+                    </div>
+                    <div class="card-subtitle">Pre-finish inspection</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Assembled cabinets</div>
+                            <div class="io-item input-item">Specs checklist</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">QC pass/fail</div>
+                            <div class="io-item output-item">Rework list</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ GATE: Pass required</div>
+                    <div class="owner-badge">👤 Aiden</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>🎨</span>
+                        Finishing
+                    </div>
+                    <div class="card-subtitle">Stain/paint</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">QC approved units</div>
+                            <div class="io-item input-item">Finish specs</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Finished cabinets</div>
+                            <div class="io-item output-item">QC checkpoint #2</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ GATE: QC #2 pass</div>
+                    <div class="owner-badge">👤 Finishing Team</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELIVERY COLUMN -->
+        <div class="column delivery">
+            <div class="column-header">
+                <span class="icon">🚚</span>
+                <span>DELIVERY</span>
+                <span class="count">4</span>
+            </div>
+            <div class="column-content">
+                <div class="card">
+                    <div class="card-title">
+                        <span>📋</span>
+                        Bill of Lading
+                    </div>
+                    <div class="card-subtitle">Shipping manifest</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">All completed units</div>
+                            <div class="io-item input-item">Part numbers</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">BOL document</div>
+                            <div class="io-item output-item">Loading checklist</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Aiden</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>🚛</span>
+                        Transport
+                    </div>
+                    <div class="card-subtitle">Delivery to site</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Loaded trailer</div>
+                            <div class="io-item input-item">BOL</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">On-site delivery</div>
+                            <div class="io-item output-item">Signed receipt</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ Damage check</div>
+                    <div class="owner-badge">👤 Transport Team</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>🔧</span>
+                        Installation
+                    </div>
+                    <div class="card-subtitle">On-site assembly</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Delivered units</div>
+                            <div class="io-item input-item">PDF drawings</div>
+                            <div class="io-item input-item">Tools</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Installed cabinets</div>
+                            <div class="io-item output-item">Level & plumb</div>
+                        </div>
+                    </div>
+                    <div class="owner-badge">👤 Chase</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>🤝</span>
+                        Client Walkthrough
+                    </div>
+                    <div class="card-subtitle">Final acceptance</div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #3b82f6;">📥 INPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item input-item">Complete install</div>
+                            <div class="io-item input-item">Client inspection</div>
+                        </div>
+                    </div>
+                    <div class="io-section">
+                        <div class="io-label" style="color: #10b981;">📤 OUTPUTS</div>
+                        <div class="io-list">
+                            <div class="io-item output-item">Sign-off</div>
+                            <div class="io-item output-item">Final payment (70%)</div>
+                            <div class="io-item output-item">✅ PROJECT COMPLETE</div>
+                        </div>
+                    </div>
+                    <div class="decision-badge">⚠️ GATE: Client satisfied</div>
+                    <div class="owner-badge">👤 Chase + Bryan</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()" title="Print">🖨️</button>
+
+    <script>
+        // Add smooth scroll for better UX
+        document.querySelector('.pipeline').addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                document.querySelector('.pipeline').scrollLeft += e.deltaY;
+            }
+        });
+    </script>
+</body>
+</html>

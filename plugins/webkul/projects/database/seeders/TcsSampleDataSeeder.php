@@ -19,6 +19,11 @@ class TcsSampleDataSeeder extends Seeder
     protected $now;
     protected $productIds = [];
 
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         $this->now = Carbon::now();
@@ -34,6 +39,11 @@ class TcsSampleDataSeeder extends Seeder
 
     /**
      * Seed inventory products for all wood materials
+     */
+    /**
+     * Seed Inventory Products
+     *
+     * @return void
      */
     protected function seedInventoryProducts(): void
     {
@@ -221,6 +231,11 @@ class TcsSampleDataSeeder extends Seeder
     /**
      * Update material mappings with inventory product IDs
      */
+    /**
+     * Update Material Mappings
+     *
+     * @return void
+     */
     protected function updateMaterialMappings(): void
     {
         echo "\n2. Updating material mappings with product IDs...\n";
@@ -261,6 +276,11 @@ class TcsSampleDataSeeder extends Seeder
 
     /**
      * Seed sample project with rooms, locations, runs, and cabinets
+     */
+    /**
+     * Seed Sample Project
+     *
+     * @return void
      */
     protected function seedSampleProject(): void
     {
@@ -397,6 +417,14 @@ class TcsSampleDataSeeder extends Seeder
     /**
      * Seed cabinet specifications for a run
      */
+    /**
+     * Seed Cabinets
+     *
+     * @param int $runId
+     * @param int $roomId
+     * @param string $type
+     * @return void
+     */
     protected function seedCabinets(int $runId, int $roomId, string $type): void
     {
         $cabinets = match ($type) {
@@ -471,6 +499,14 @@ class TcsSampleDataSeeder extends Seeder
 
     /**
      * Calculate TCS pricing (simplified version matching service)
+     */
+    /**
+     * Calculate Tcs Price
+     *
+     * @param string $level
+     * @param string $material
+     * @param string $finish
+     * @return float
      */
     protected function calculateTcsPrice(string $level, string $material, string $finish): float
     {

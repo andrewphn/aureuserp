@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource;
 use Webkul\Inventory\Models\Dropship;
 
+/**
+ * Edit Dropship class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditDropship extends EditRecord
 {
     protected static string $resource = DropshipResource::class;
@@ -75,6 +80,11 @@ class EditDropship extends EditRecord
         ];
     }
 
+    /**
+     * Update Form
+     *
+     * @return void
+     */
     public function updateForm(): void
     {
         $this->fillForm();

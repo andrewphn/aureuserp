@@ -1,0 +1,285 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Webkul\Project\Models\Project;
+use Webkul\Project\Models\Room;
+use Webkul\Project\Models\RoomLocation;
+use Webkul\Project\Models\CabinetRun;
+use Webkul\Project\Models\CabinetSpecification;
+
+class HierarchySearchService
+{
+    /**
+     * Search across the entire project hierarchy
+     *
+     * @param string $query
+     * @param int|null $projectId Optional project filter
+     * @return Collection
+     */
+    public function search(string $query, ?int $projectId = null): Collection
+    {
+        if (strlen($query) < 2) {
+            return collect([]);
+        }
+
+        $results = collect([]);
+
+        // Search Rooms
+        $rooms = $this->searchRooms($query, $projectId);
+        $results = $results->merge($rooms);
+
+        // Search Room Locations
+        $locations = $this->searchRoomLocations($query, $projectId);
+        $results = $results->merge($locations);
+
+        // Search Cabinet Runs
+        $runs = $this->searchCabinetRuns($query, $projectId);
+        $results = $results->merge($runs);
+
+        // Search Cabinets
+        $cabinets = $this->searchCabinets($query, $projectId);
+        $results = $results->merge($cabinets);
+
+        // Sort by relevance (exact matches first, then partial matches)
+        return $results->sortByDesc(function ($item) use ($query) {
+            $searchTermLower = strtolower($query);
+            $nameLower = strtolower($item['name']);
+
+            // Exact match gets highest score
+            if ($nameLower === $searchTermLower) {
+                return 1000;
+            }
+
+            // Starts with query gets high score
+            if (str_starts_with($nameLower, $searchTermLower)) {
+                return 500;
+            }
+
+            // Contains query gets medium score
+            if (str_contains($nameLower, $searchTermLower)) {
+                return 100;
+            }
+
+            // Word boundary match
+            if (str_contains($nameLower, ' ' . $searchTermLower)) {
+                return 50;
+            }
+
+            return 0;
+        })->values();
+    }
+
+    /**
+     * Search rooms
+     */
+    protected function searchRooms(string $query, ?int $projectId = null): Collection
+    {
+        $roomsQuery = Room::with('project')
+            ->where('name', 'like', "%{$query}%");
+
+        if ($projectId) {
+            $roomsQuery->where('project_id', $projectId);
+        }
+
+        return $roomsQuery->get()->map(function ($room) {
+            return [
+                'type' => 'room',
+                'level' => 'room',
+                'name' => $room->name,
+                'project_id' => $room->project_id,
+                'project_name' => $room->project->name ?? 'Unknown Project',
+                'room_id' => $room->id,
+                'room_name' => $room->name,
+                'room_location_id' => null,
+                'location_name' => null,
+                'cabinet_run_id' => null,
+                'run_name' => null,
+                'cabinet_specification_id' => null,
+                'cabinet_number' => null,
+                'display_path' => $this->buildPath([
+                    $room->project->name ?? 'Unknown',
+                    $room->name,
+                ]),
+                'icon' => '🏠',
+            ];
+        });
+    }
+
+    /**
+     * Search room locations
+     */
+    protected function searchRoomLocations(string $query, ?int $projectId = null): Collection
+    {
+        $locationsQuery = RoomLocation::with(['room.project'])
+            ->where('name', 'like', "%{$query}%");
+
+        if ($projectId) {
+            $locationsQuery->whereHas('room', function ($q) use ($projectId) {
+                $q->where('project_id', $projectId);
+            });
+        }
+
+        return $locationsQuery->get()->map(function ($location) {
+            return [
+                'type' => 'room_location',
+                'level' => 'room_location',
+                'name' => $location->name,
+                'project_id' => $location->room->project_id ?? null,
+                'project_name' => $location->room->project->name ?? 'Unknown Project',
+                'room_id' => $location->room_id,
+                'room_name' => $location->room->name ?? 'Unknown Room',
+                'room_location_id' => $location->id,
+                'location_name' => $location->name,
+                'cabinet_run_id' => null,
+                'run_name' => null,
+                'cabinet_specification_id' => null,
+                'cabinet_number' => null,
+                'display_path' => $this->buildPath([
+                    $location->room->project->name ?? 'Unknown',
+                    $location->room->name ?? 'Unknown',
+                    $location->name,
+                ]),
+                'icon' => '📍',
+            ];
+        });
+    }
+
+    /**
+     * Search cabinet runs
+     */
+    protected function searchCabinetRuns(string $query, ?int $projectId = null): Collection
+    {
+        $runsQuery = CabinetRun::with(['roomLocation.room.project'])
+            ->where('name', 'like', "%{$query}%");
+
+        if ($projectId) {
+            $runsQuery->whereHas('roomLocation.room', function ($q) use ($projectId) {
+                $q->where('project_id', $projectId);
+            });
+        }
+
+        return $runsQuery->get()->map(function ($run) {
+            return [
+                'type' => 'cabinet_run',
+                'level' => 'cabinet_run',
+                'name' => $run->name,
+                'project_id' => $run->roomLocation->room->project_id ?? null,
+                'project_name' => $run->roomLocation->room->project->name ?? 'Unknown Project',
+                'room_id' => $run->roomLocation->room_id ?? null,
+                'room_name' => $run->roomLocation->room->name ?? 'Unknown Room',
+                'room_location_id' => $run->room_location_id,
+                'location_name' => $run->roomLocation->name ?? 'Unknown Location',
+                'cabinet_run_id' => $run->id,
+                'run_name' => $run->name,
+                'cabinet_specification_id' => null,
+                'cabinet_number' => null,
+                'display_path' => $this->buildPath([
+                    $run->roomLocation->room->project->name ?? 'Unknown',
+                    $run->roomLocation->room->name ?? 'Unknown',
+                    $run->roomLocation->name ?? 'Unknown',
+                    $run->name,
+                ]),
+                'icon' => '🔨',
+            ];
+        });
+    }
+
+    /**
+     * Search cabinets
+     */
+    protected function searchCabinets(string $query, ?int $projectId = null): Collection
+    {
+        $cabinetsQuery = CabinetSpecification::with(['cabinetRun.roomLocation.room.project', 'room.project'])
+            ->where('cabinet_number', 'like', "%{$query}%");
+
+        if ($projectId) {
+            $cabinetsQuery->where(function ($q) use ($projectId) {
+                $q->whereHas('cabinetRun.roomLocation.room', function ($subQ) use ($projectId) {
+                    $subQ->where('project_id', $projectId);
+                })->orWhere('project_id', $projectId);
+            });
+        }
+
+        return $cabinetsQuery->get()->map(function ($cabinet) {
+            $project = $cabinet->cabinetRun->roomLocation->room->project ?? $cabinet->room->project ?? null;
+            $room = $cabinet->cabinetRun->roomLocation->room ?? $cabinet->room ?? null;
+            $location = $cabinet->cabinetRun->roomLocation ?? null;
+            $run = $cabinet->cabinetRun ?? null;
+
+            return [
+                'type' => 'cabinet',
+                'level' => 'cabinet_specification',
+                'name' => $cabinet->cabinet_number,
+                'project_id' => $project->id ?? null,
+                'project_name' => $project->name ?? 'Unknown Project',
+                'room_id' => $room->id ?? null,
+                'room_name' => $room->name ?? 'Unknown Room',
+                'room_location_id' => $location->id ?? null,
+                'location_name' => $location->name ?? null,
+                'cabinet_run_id' => $run->id ?? null,
+                'run_name' => $run->name ?? null,
+                'cabinet_specification_id' => $cabinet->id,
+                'cabinet_number' => $cabinet->cabinet_number,
+                'display_path' => $this->buildPath(array_filter([
+                    $project->name ?? 'Unknown',
+                    $room->name ?? null,
+                    $location->name ?? null,
+                    $run->name ?? null,
+                    $cabinet->cabinet_number,
+                ])),
+                'icon' => '🗄️',
+            ];
+        });
+    }
+
+    /**
+     * Build display path from array of names
+     */
+    protected function buildPath(array $parts): string
+    {
+        return implode(' → ', array_filter($parts));
+    }
+
+    /**
+     * Get recently used locations from session
+     */
+    public function getRecentlyUsed(): Collection
+    {
+        return collect(session()->get('hierarchy_recent', []));
+    }
+
+    /**
+     * Add location to recently used
+     */
+    public function addToRecentlyUsed(array $location): void
+    {
+        $recent = $this->getRecentlyUsed();
+
+        // Remove if already exists to avoid duplicates
+        $recent = $recent->reject(function ($item) use ($location) {
+            return $item['room_id'] === $location['room_id'] &&
+                   $item['room_location_id'] === $location['room_location_id'] &&
+                   $item['cabinet_run_id'] === $location['cabinet_run_id'] &&
+                   $item['cabinet_specification_id'] === $location['cabinet_specification_id'];
+        });
+
+        // Add to beginning
+        $recent->prepend($location);
+
+        // Keep only last 5
+        $recent = $recent->take(5);
+
+        session()->put('hierarchy_recent', $recent->values()->toArray());
+    }
+
+    /**
+     * Clear recently used
+     */
+    public function clearRecentlyUsed(): void
+    {
+        session()->forget('hierarchy_recent');
+    }
+}

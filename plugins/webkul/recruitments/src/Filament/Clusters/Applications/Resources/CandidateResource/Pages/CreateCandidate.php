@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResource;
 
+/**
+ * Create Candidate class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateCandidate extends CreateRecord
 {
     protected static string $resource = CandidateResource::class;
@@ -24,6 +29,12 @@ class CreateCandidate extends CreateRecord
             ->body(__('recruitments::filament/clusters/applications/resources/candidate/pages/create-candidate.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = Auth::user();

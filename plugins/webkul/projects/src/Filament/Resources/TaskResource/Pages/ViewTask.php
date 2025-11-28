@@ -9,6 +9,11 @@ use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\TaskResource;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * View Task class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewTask extends ViewRecord
 {
     protected static string $resource = TaskResource::class;

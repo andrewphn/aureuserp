@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Delay Interval enumeration
+ *
+ */
 enum ActivityDelayInterval: string
 {
     case BEFORE_PLAN_DATE = 'before_plan_date';

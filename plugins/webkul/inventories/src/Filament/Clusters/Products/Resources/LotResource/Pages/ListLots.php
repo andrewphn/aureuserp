@@ -7,6 +7,11 @@ use Filament\Resources\Pages\ListRecords;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Lots class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListLots extends ListRecords
 {
     use HasTableViews;

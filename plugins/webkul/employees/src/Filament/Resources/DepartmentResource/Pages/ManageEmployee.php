@@ -7,6 +7,11 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Webkul\Employee\Filament\Resources\DepartmentResource;
 use Webkul\Employee\Traits\Resources\Department\DepartmentEmployee;
 
+/**
+ * Manage Employee class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageEmployee extends ManageRelatedRecords
 {
     use DepartmentEmployee;

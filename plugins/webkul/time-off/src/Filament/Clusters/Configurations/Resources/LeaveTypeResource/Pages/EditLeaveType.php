@@ -9,6 +9,11 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource;
 
+/**
+ * Edit Leave Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditLeaveType extends EditRecord
 {
     protected static string $resource = LeaveTypeResource::class;
@@ -40,6 +45,12 @@ class EditLeaveType extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();

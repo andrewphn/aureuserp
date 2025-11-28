@@ -21,6 +21,52 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
 
+/**
+ * Partner Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property mixed $account_type
+ * @property string|null $sub_type
+ * @property string|null $name
+ * @property string|null $avatar
+ * @property string|null $email
+ * @property string|null $job_title
+ * @property string|null $website
+ * @property int $tax_id
+ * @property string|null $phone
+ * @property string|null $mobile
+ * @property string|null $color
+ * @property string|null $company_registry
+ * @property string|null $reference
+ * @property string|null $street1
+ * @property string|null $street2
+ * @property string|null $city
+ * @property string|null $zip
+ * @property int $state_id
+ * @property int $country_id
+ * @property int $parent_id
+ * @property int $creator_id
+ * @property int $user_id
+ * @property int $title_id
+ * @property int $company_id
+ * @property int $industry_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $addresses
+ * @property-read \Illuminate\Database\Eloquent\Collection $contacts
+ * @property-read \Illuminate\Database\Eloquent\Collection $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Model|null $country
+ * @property-read \Illuminate\Database\Eloquent\Model|null $state
+ * @property-read \Illuminate\Database\Eloquent\Model|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ * @property-read \Illuminate\Database\Eloquent\Model|null $title
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $industry
+ * @property-read \Illuminate\Database\Eloquent\Collection $tags
+ *
+ */
 class Partner extends Authenticatable implements FilamentUser
 {
     use HasChatter, HasFactory, HasLogActivity, Notifiable, SoftDeletes;
@@ -97,68 +143,133 @@ class Partner extends Authenticatable implements FilamentUser
         return Storage::url($this->avatar);
     }
 
+    /**
+     * Country
+     *
+     * @return BelongsTo
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * State
+     *
+     * @return BelongsTo
+     */
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
     }
 
+    /**
+     * Parent
+     *
+     * @return BelongsTo
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * User
+     *
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Title
+     *
+     * @return BelongsTo
+     */
     public function title(): BelongsTo
     {
         return $this->belongsTo(Title::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Industry
+     *
+     * @return BelongsTo
+     */
     public function industry(): BelongsTo
     {
         return $this->belongsTo(Industry::class);
     }
 
+    /**
+     * Addresses
+     *
+     * @return HasMany
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')
             ->where('account_type', AccountType::ADDRESS);
     }
 
+    /**
+     * Contacts
+     *
+     * @return HasMany
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')
             ->where('account_type', '!=', AccountType::ADDRESS);
     }
 
+    /**
+     * Bank Accounts
+     *
+     * @return HasMany
+     */
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class);
     }
 
+    /**
+     * Tags
+     *
+     * @return BelongsToMany
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'partners_partner_tag', 'partner_id', 'tag_id');
     }
 
+    /**
+     * New Factory
+     *
+     * @return PartnerFactory
+     */
     protected static function newFactory(): PartnerFactory
     {
         return PartnerFactory::new();

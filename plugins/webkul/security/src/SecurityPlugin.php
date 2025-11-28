@@ -7,6 +7,10 @@ use Filament\Panel;
 use ReflectionClass;
 use Webkul\Security\Settings\UserSettings;
 
+/**
+ * Security Plugin class
+ *
+ */
 class SecurityPlugin implements Plugin
 {
     public function getId(): string
@@ -14,11 +18,22 @@ class SecurityPlugin implements Plugin
         return 'security';
     }
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Register
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function register(Panel $panel): void
     {
         $panel
@@ -38,11 +53,23 @@ class SecurityPlugin implements Plugin
         }
     }
 
+    /**
+     * Boot
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function boot(Panel $panel): void
     {
         //
     }
 
+    /**
+     * Get Plugin Base Path
+     *
+     * @param mixed $path
+     * @return string
+     */
     protected function getPluginBasePath($path = null): string
     {
         $reflector = new ReflectionClass(get_class($this));

@@ -9,6 +9,11 @@ use Webkul\Employee\Filament\Resources\DepartmentResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Departments class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListDepartments extends ListRecords
 {
     use HasTableViews;

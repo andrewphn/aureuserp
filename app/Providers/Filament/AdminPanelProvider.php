@@ -24,8 +24,19 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\PluginManager;
 
+/**
+ * Admin Panel Provider service provider
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AdminPanelProvider extends PanelProvider
 {
+    /**
+     * Panel
+     *
+     * @param Panel $panel
+     * @return Panel
+     */
     public function panel(Panel $panel): Panel
     {
         set_time_limit(300);
@@ -166,7 +177,10 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                AuthenticateSession::class,
+                // AuthenticateSession middleware causes issues with automated browser testing
+                // (Playwright, Selenium, etc.) because it validates session hashes and logs out
+                // automated browsers. Disable in testing environments.
+                ...((env('BROWSER_TESTING') !== true && env('BROWSER_TESTING') !== 'true') ? [AuthenticateSession::class] : []),
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,

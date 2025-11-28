@@ -29,8 +29,18 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums\ResumeDisplayType;
 
+/**
+ * Employee Resume Relation trait
+ *
+ */
 trait EmployeeResumeRelation
 {
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -90,6 +100,12 @@ trait EmployeeResumeRelation
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -233,6 +249,12 @@ trait EmployeeResumeRelation
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

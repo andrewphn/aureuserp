@@ -9,6 +9,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
 
+/**
+ * Edit Payment Term class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPaymentTerm extends EditRecord
 {
     protected static string $resource = PaymentTermResource::class;
@@ -45,6 +50,12 @@ class EditPaymentTerm extends EditRecord
             ->body(__('accounts::filament/resources/payment-term/pages/edit-payment-term.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return $data;

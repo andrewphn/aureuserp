@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\Scrap;
 use Webkul\Security\Models\User;
 
+/**
+ * Scrap Policy authorization policy
+ *
+ */
 class ScrapPolicy
 {
     use HandlesAuthorization;

@@ -21,6 +21,11 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Password;
 
+/**
+ * Request Password Reset class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RequestPasswordReset extends Page
 {
     use InteractsWithFormActions;
@@ -31,6 +36,11 @@ class RequestPasswordReset extends Page
 
     public ?array $data = [];
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         if (Filament::auth()->check()) {
@@ -40,6 +50,11 @@ class RequestPasswordReset extends Page
         $this->form->fill();
     }
 
+    /**
+     * Request
+     *
+     * @return void
+     */
     public function request(): void
     {
         try {
@@ -85,6 +100,12 @@ class RequestPasswordReset extends Page
         $this->form->fill();
     }
 
+    /**
+     * Get Rate Limited Notification
+     *
+     * @param TooManyRequestsException $exception
+     * @return ?Notification
+     */
     protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
     {
         return Notification::make()
@@ -99,6 +120,12 @@ class RequestPasswordReset extends Page
             ->danger();
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema;
@@ -127,6 +154,11 @@ class RequestPasswordReset extends Page
             ->autofocus();
     }
 
+    /**
+     * Login Action
+     *
+     * @return Action
+     */
     public function loginAction(): Action
     {
         return Action::make('login')
@@ -163,6 +195,11 @@ class RequestPasswordReset extends Page
             ->submit('request');
     }
 
+    /**
+     * Has Full Width Form Actions
+     *
+     * @return bool
+     */
     protected function hasFullWidthFormActions(): bool
     {
         return true;

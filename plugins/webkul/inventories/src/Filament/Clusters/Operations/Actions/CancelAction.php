@@ -8,6 +8,11 @@ use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 
+/**
+ * Cancel Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CancelAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -7,6 +7,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Blog\Filament\Admin\Resources\PostResource;
 
+/**
+ * View Post class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPost extends ViewRecord
 {
     protected static string $resource = PostResource::class;

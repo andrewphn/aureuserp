@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\LeaveAccrualPlan;
 
+/**
+ * Leave Accrual Plan Policy authorization policy
+ *
+ */
 class LeaveAccrualPlanPolicy
 {
     use HandlesAuthorization;

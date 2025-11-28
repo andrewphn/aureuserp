@@ -5,10 +5,20 @@ namespace Webkul\Partner;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Partner Service Provider service provider
+ *
+ */
 class PartnerServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'partners';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -26,6 +36,11 @@ class PartnerServiceProvider extends PackageServiceProvider
             ->runsMigrations();
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         //

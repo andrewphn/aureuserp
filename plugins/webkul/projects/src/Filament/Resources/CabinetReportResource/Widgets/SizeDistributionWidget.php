@@ -6,6 +6,11 @@ use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Size Distribution Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SizeDistributionWidget extends ChartWidget
 {
     protected ?string $heading = 'Cabinet Size Distribution';

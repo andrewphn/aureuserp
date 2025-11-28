@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Allocation Type enumeration
+ *
+ */
 enum AllocationType: string implements HasLabel
 {
     case REGULAR = 'regular';
@@ -18,6 +22,11 @@ enum AllocationType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

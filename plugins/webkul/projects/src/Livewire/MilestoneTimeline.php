@@ -7,6 +7,10 @@ use Filament\Forms\Contracts\HasForms;
 use Livewire\Component;
 use Webkul\Project\Models\Project;
 
+/**
+ * Milestone Timeline class
+ *
+ */
 class MilestoneTimeline extends Component implements HasForms
 {
     use InteractsWithForms;
@@ -16,6 +20,12 @@ class MilestoneTimeline extends Component implements HasForms
     public ?string $startDate = null;
     public ?string $endDate = null;
 
+    /**
+     * Mount
+     *
+     * @param Project $project
+     * @return void
+     */
     public function mount(Project $project): void
     {
         $this->project = $project;
@@ -40,6 +50,10 @@ class MilestoneTimeline extends Component implements HasForms
             ->toArray();
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         return view('webkul-project::livewire.milestone-timeline');

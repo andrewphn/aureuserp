@@ -4,6 +4,10 @@ namespace Webkul\Invoice\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Party Identification Scheme enumeration
+ *
+ */
 enum PartyIdentificationScheme: string implements HasLabel
 {
     case SIRENE = '0002';
@@ -163,6 +167,11 @@ enum PartyIdentificationScheme: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

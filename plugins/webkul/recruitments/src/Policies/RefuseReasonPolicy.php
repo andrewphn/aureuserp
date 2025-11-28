@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\RefuseReason;
 use Webkul\Security\Models\User;
 
+/**
+ * Refuse Reason Policy authorization policy
+ *
+ */
 class RefuseReasonPolicy
 {
     use HandlesAuthorization;

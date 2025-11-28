@@ -4,6 +4,10 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Reconcile Seeder database seeder
+ *
+ */
 class ReconcileSeeder extends Seeder
 {
     /**

@@ -17,6 +17,72 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UOM;
 
+/**
+ * Move Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property mixed $state
+ * @property string|null $origin
+ * @property string|null $procure_method
+ * @property string|null $reference
+ * @property string|null $description_picking
+ * @property string|null $next_serial
+ * @property float $next_serial_count
+ * @property bool $is_favorite
+ * @property string|null $product_qty
+ * @property string|null $product_uom_qty
+ * @property float $quantity
+ * @property bool $is_picked
+ * @property bool $is_scraped
+ * @property bool $is_inventory
+ * @property bool $is_refund
+ * @property \Carbon\Carbon|null $deadline
+ * @property \Carbon\Carbon|null $reservation_date
+ * @property \Carbon\Carbon|null $scheduled_at
+ * @property int $product_id
+ * @property int $uom_id
+ * @property int $source_location_id
+ * @property int $destination_location_id
+ * @property int $final_location_id
+ * @property int $partner_id
+ * @property int $operation_id
+ * @property int $rule_id
+ * @property int $operation_type_id
+ * @property int $origin_returned_move_id
+ * @property int $restrict_partner_id
+ * @property int $warehouse_id
+ * @property int $product_packaging_id
+ * @property int $scrap_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property int $purchase_order_line_id
+ * @property int $sale_order_line_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $lines
+ * @property-read \Illuminate\Database\Eloquent\Model|null $product
+ * @property-read \Illuminate\Database\Eloquent\Model|null $uom
+ * @property-read \Illuminate\Database\Eloquent\Model|null $sourceLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $destinationLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $finalLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $operation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $scrap
+ * @property-read \Illuminate\Database\Eloquent\Model|null $rule
+ * @property-read \Illuminate\Database\Eloquent\Model|null $operationType
+ * @property-read \Illuminate\Database\Eloquent\Model|null $originReturnedMove
+ * @property-read \Illuminate\Database\Eloquent\Model|null $restrictPartner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $warehouse
+ * @property-read \Illuminate\Database\Eloquent\Model|null $packageLevel
+ * @property-read \Illuminate\Database\Eloquent\Model|null $productPackaging
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $purchaseOrderLine
+ * @property-read \Illuminate\Database\Eloquent\Model|null $saleOrderLine
+ * @property-read \Illuminate\Database\Eloquent\Collection $moveDestinations
+ *
+ */
 class Move extends Model
 {
     use HasFactory;
@@ -139,46 +205,91 @@ class Move extends Model
             );
     }
 
+    /**
+     * Product
+     *
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * Uom
+     *
+     * @return BelongsTo
+     */
     public function uom(): BelongsTo
     {
         return $this->belongsTo(UOM::class);
     }
 
+    /**
+     * Source Location
+     *
+     * @return BelongsTo
+     */
     public function sourceLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class)->withTrashed();
     }
 
+    /**
+     * Destination Location
+     *
+     * @return BelongsTo
+     */
     public function destinationLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class)->withTrashed();
     }
 
+    /**
+     * Final Location
+     *
+     * @return BelongsTo
+     */
     public function finalLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class)->withTrashed();
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Operation
+     *
+     * @return BelongsTo
+     */
     public function operation(): BelongsTo
     {
         return $this->belongsTo(Operation::class);
     }
 
+    /**
+     * Scrap
+     *
+     * @return BelongsTo
+     */
     public function scrap(): BelongsTo
     {
         return $this->belongsTo(Scrap::class);
     }
 
+    /**
+     * Rule
+     *
+     * @return BelongsTo
+     */
     public function rule(): BelongsTo
     {
         return $this->belongsTo(Rule::class);
@@ -189,11 +300,21 @@ class Move extends Model
         return $this->belongsTo(OperationType::class);
     }
 
+    /**
+     * Origin Returned Move
+     *
+     * @return BelongsTo
+     */
     public function originReturnedMove(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
+    /**
+     * Restrict Partner
+     *
+     * @return BelongsTo
+     */
     public function restrictPartner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
@@ -204,46 +325,91 @@ class Move extends Model
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * Package Level
+     *
+     * @return BelongsTo
+     */
     public function packageLevel(): BelongsTo
     {
         return $this->belongsTo(PackageLevel::class);
     }
 
+    /**
+     * Product Packaging
+     *
+     * @return BelongsTo
+     */
     public function productPackaging(): BelongsTo
     {
         return $this->belongsTo(Packaging::class);
     }
 
+    /**
+     * Lines
+     *
+     * @return HasMany
+     */
     public function lines(): HasMany
     {
         return $this->hasMany(MoveLine::class);
     }
 
+    /**
+     * Move Destinations
+     *
+     * @return BelongsToMany
+     */
     public function moveDestinations(): BelongsToMany
     {
         return $this->belongsToMany(Move::class, 'inventories_move_destinations', 'origin_move_id', 'destination_move_id');
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Should Bypass Reservation
+     *
+     * @return bool
+     */
     public function shouldBypassReservation(): bool
     {
         return $this->sourceLocation->shouldBypassReservation() || ! $this->product->is_storable;
     }
 
+    /**
+     * Purchase Order Line
+     *
+     * @return BelongsTo
+     */
     public function purchaseOrderLine(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrderLine::class, 'purchase_order_line_id');
     }
 
+    /**
+     * Sale Order Line
+     *
+     * @return BelongsTo
+     */
     public function saleOrderLine(): BelongsTo
     {
         return $this->belongsTo(SaleOrderLine::class, 'sale_order_line_id');

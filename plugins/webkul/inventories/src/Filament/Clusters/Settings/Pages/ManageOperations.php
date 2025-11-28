@@ -14,6 +14,11 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Operations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageOperations extends SettingsPage
 {
     use HasPageShield;
@@ -47,6 +52,12 @@ class ManageOperations extends SettingsPage
         return __('inventories::filament/clusters/settings/pages/manage-operations.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

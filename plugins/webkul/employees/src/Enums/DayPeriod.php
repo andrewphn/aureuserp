@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Day Period enumeration
+ *
+ */
 enum DayPeriod: string
 {
     case Morning = 'morning';
@@ -12,6 +16,11 @@ enum DayPeriod: string
 
     case Night = 'night';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

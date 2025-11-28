@@ -5,6 +5,10 @@ namespace App\Observers;
 use App\Models\PdfPageAnnotation;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Pdf Page Annotation Observer class
+ *
+ */
 class PdfPageAnnotationObserver
 {
     /**

@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Activity Plan Template Seeder database seeder
+ *
+ */
 class ActivityPlanTemplateSeeder extends Seeder
 {
     /**

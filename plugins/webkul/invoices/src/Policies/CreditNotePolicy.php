@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\CreditNote;
 use Webkul\Security\Models\User;
 
+/**
+ * Credit Note Policy authorization policy
+ *
+ */
 class CreditNotePolicy
 {
     use HandlesAuthorization;

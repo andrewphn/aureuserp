@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Rule Action Filament action
+ *
+ */
 enum RuleAction: string implements HasLabel
 {
     case PULL = 'pull';

@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Recruitment\Enums\ApplicationStatus;
 use Webkul\Recruitment\Models\Stage;
 
+/**
+ * Has Application Status trait
+ *
+ */
 trait HasApplicationStatus
 {
     public function getApplicationStatusAttribute(): ApplicationStatus
@@ -29,6 +33,13 @@ trait HasApplicationStatus
         return ApplicationStatus::ONGOING;
     }
 
+    /**
+     * Scope query to Status
+     *
+     * @param Builder $query The search query
+     * @param string|array $status
+     * @return Builder
+     */
     public function scopeStatus(Builder $query, string|array $status): Builder
     {
         $statuses = is_array($status) ? $status : [$status];
@@ -49,6 +60,13 @@ trait HasApplicationStatus
         });
     }
 
+    /**
+     * Update Status
+     *
+     * @param string $status
+     * @param ?array $attributes
+     * @return bool
+     */
     public function updateStatus(string $status, ?array $attributes = []): bool
     {
         return DB::transaction(function () use ($status, $attributes) {
@@ -92,11 +110,23 @@ trait HasApplicationStatus
         });
     }
 
+    /**
+     * Scope query to With Archived
+     *
+     * @param Builder $query The search query
+     * @return Builder
+     */
     public function scopeWithArchived(Builder $query): Builder
     {
         return $query->withTrashed();
     }
 
+    /**
+     * Scope query to Only Archived
+     *
+     * @param Builder $query The search query
+     * @return Builder
+     */
     public function scopeOnlyArchived(Builder $query): Builder
     {
         return $query->onlyTrashed();

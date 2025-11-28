@@ -6,8 +6,17 @@ use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\PermissionRegistrar;
 
+/**
+ * Shield Seeder database seeder
+ *
+ */
 class ShieldSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
@@ -21,6 +30,12 @@ class ShieldSeeder extends Seeder
         $this->command->info('Shield Seeding Completed.');
     }
 
+    /**
+     * Make Roles With Permissions
+     *
+     * @param string $rolesWithPermissions
+     * @return void
+     */
     protected static function makeRolesWithPermissions(string $rolesWithPermissions): void
     {
         if (! blank($rolePlusPermissions = json_decode($rolesWithPermissions, true))) {
@@ -49,6 +64,12 @@ class ShieldSeeder extends Seeder
         }
     }
 
+    /**
+     * Make Direct Permissions
+     *
+     * @param string $directPermissions
+     * @return void
+     */
     public static function makeDirectPermissions(string $directPermissions): void
     {
         if (! blank($permissions = json_decode($directPermissions, true))) {

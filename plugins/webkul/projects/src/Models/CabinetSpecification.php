@@ -11,6 +11,44 @@ use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Cabinet Specification Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $order_line_id
+ * @property int $project_id
+ * @property int $room_id
+ * @property int $cabinet_run_id
+ * @property int $product_variant_id
+ * @property string|null $cabinet_number
+ * @property int $position_in_run
+ * @property float $wall_position_start_inches
+ * @property float $length_inches
+ * @property float $width_inches
+ * @property float $depth_inches
+ * @property float $height_inches
+ * @property float $linear_feet
+ * @property int $quantity
+ * @property float $unit_price_per_lf
+ * @property float $total_price
+ * @property string|null $cabinet_level
+ * @property string|null $material_category
+ * @property string|null $finish_option
+ * @property string|null $hardware_notes
+ * @property string|null $custom_modifications
+ * @property string|null $shop_notes
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $orderLine
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $room
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
+ * @property-read \Illuminate\Database\Eloquent\Model|null $productVariant
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class CabinetSpecification extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
@@ -85,26 +123,51 @@ class CabinetSpecification extends Model
         return $this->belongsTo(OrderLine::class, 'order_line_id');
     }
 
+    /**
+     * Project
+     *
+     * @return BelongsTo
+     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
 
+    /**
+     * Room
+     *
+     * @return BelongsTo
+     */
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class, 'room_id');
     }
 
+    /**
+     * Cabinet Run
+     *
+     * @return BelongsTo
+     */
     public function cabinetRun(): BelongsTo
     {
         return $this->belongsTo(CabinetRun::class, 'cabinet_run_id');
     }
 
+    /**
+     * Product Variant
+     *
+     * @return BelongsTo
+     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_variant_id');
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -192,6 +255,13 @@ class CabinetSpecification extends Model
     /**
      * Scope: Get specs by size range for template generation
      */
+    /**
+     * Scope query to By Size Range
+     *
+     * @param mixed $query The search query
+     * @param string $range
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeBySizeRange($query, string $range)
     {
         return match ($range) {
@@ -224,6 +294,11 @@ class CabinetSpecification extends Model
     /**
      * Auto-calculate fields before saving
      */
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
@@ -249,6 +324,10 @@ class CabinetSpecification extends Model
      *
      * Returns: Collection of template data for UI presets
      */
+    /**
+     * Generate Templates
+     *
+     */
     public static function generateTemplates()
     {
         return self::mostCommon(20)
@@ -269,6 +348,12 @@ class CabinetSpecification extends Model
     /**
      * Helper to determine size range from linear feet
      */
+    /**
+     * Determine Size Range
+     *
+     * @param float $linearFeet
+     * @return string
+     */
     private static function determineSizeRange(float $linearFeet): string
     {
         return match (true) {
@@ -287,6 +372,10 @@ class CabinetSpecification extends Model
      * Generate Bill of Materials for this cabinet
      *
      * @return \Illuminate\Support\Collection
+     */
+    /**
+     * Generate Bom
+     *
      */
     public function generateBom(): \Illuminate\Support\Collection
     {
@@ -311,6 +400,11 @@ class CabinetSpecification extends Model
      *
      * @return float
      */
+    /**
+     * Estimate Material Cost
+     *
+     * @return float
+     */
     public function estimateMaterialCost(): float
     {
         $bomService = new \Webkul\Project\Services\MaterialBomService();
@@ -320,6 +414,11 @@ class CabinetSpecification extends Model
 
     /**
      * Check if materials are available in inventory
+     *
+     * @return array
+     */
+    /**
+     * Check Material Availability
      *
      * @return array
      */
@@ -336,6 +435,11 @@ class CabinetSpecification extends Model
      * @param string $usageType box|face_frame|door
      * @return \Illuminate\Support\Collection
      */
+    /**
+     * Get Material Recommendations
+     *
+     * @param string $usageType
+     */
     public function getMaterialRecommendations(string $usageType = 'box'): \Illuminate\Support\Collection
     {
         $bomService = new \Webkul\Project\Services\MaterialBomService();
@@ -344,6 +448,11 @@ class CabinetSpecification extends Model
 
     /**
      * Check if this cabinet has material category assigned
+     *
+     * @return bool
+     */
+    /**
+     * Has Material Category
      *
      * @return bool
      */

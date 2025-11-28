@@ -16,6 +16,11 @@ use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\Addresses
 use Webkul\Partner\Filament\Resources\PartnerResource\RelationManagers\ContactsRelationManager;
 use Webkul\Partner\Models\Partner;
 
+/**
+ * Partner Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PartnerResource extends BasePartnerResource
 {
     protected static ?string $model = Partner::class;
@@ -36,6 +41,12 @@ class PartnerResource extends BasePartnerResource
         return __('contacts::filament/resources/partner.navigation.group');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

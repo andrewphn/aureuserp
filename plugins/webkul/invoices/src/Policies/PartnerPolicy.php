@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\Partner;
 use Webkul\Security\Models\User;
 
+/**
+ * Partner Policy authorization policy
+ *
+ */
 class PartnerPolicy
 {
     use HandlesAuthorization;

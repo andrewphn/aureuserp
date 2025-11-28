@@ -4,6 +4,10 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Partial Reconcile Seeder database seeder
+ *
+ */
 class PartialReconcileSeeder extends Seeder
 {
     /**

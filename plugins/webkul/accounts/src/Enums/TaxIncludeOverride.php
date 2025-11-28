@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Tax Include Override enumeration
+ *
+ */
 enum TaxIncludeOverride: string implements HasLabel
 {
     case DEFAULT = 'default';
@@ -21,6 +25,11 @@ enum TaxIncludeOverride: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

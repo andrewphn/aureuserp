@@ -7,6 +7,11 @@ use Livewire\Component;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Models\Payment;
 
+/**
+ * Reset To Draft Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ResetToDraftAction extends Action
 {
     public static function getDefaultName(): ?string

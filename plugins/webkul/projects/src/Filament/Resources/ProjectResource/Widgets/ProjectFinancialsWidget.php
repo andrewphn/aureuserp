@@ -6,6 +6,11 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Project Financials Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectFinancialsWidget extends BaseWidget
 {
     public ?Model $record = null;
@@ -36,6 +41,11 @@ class ProjectFinancialsWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Financials
+     *
+     * @return array
+     */
     protected function calculateFinancials(): array
     {
         // Calculate total quoted amount

@@ -6,6 +6,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource\Pages\CreateTimeOff as BaseCreateTimeOff;
 
+/**
+ * Create By Employee class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateByEmployee extends BaseCreateTimeOff
 {
     protected static string $resource = ByEmployeeResource::class;
@@ -15,6 +20,12 @@ class CreateByEmployee extends BaseCreateTimeOff
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data = parent::mutateFormDataBeforeCreate($data);

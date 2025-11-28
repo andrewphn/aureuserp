@@ -6,6 +6,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as BaseEditInvoice;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
 
+/**
+ * Edit Invoice class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditInvoice extends BaseEditInvoice
 {
     protected static string $resource = InvoiceResource::class;

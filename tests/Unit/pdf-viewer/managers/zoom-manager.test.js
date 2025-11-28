@@ -12,11 +12,13 @@ import {
     getZoomPercentage,
     isAtMinZoom,
     isAtMaxZoom,
+    zoomToFitAnnotation,
 } from '@pdf-viewer/managers/zoom-manager.js';
 import {
     createMockState,
     createMockRefs,
     createMockCallbacks,
+    createMockAnnotation,
     flushPromises,
 } from '../../mocks/pdf-viewer-mocks.js';
 
@@ -227,6 +229,256 @@ describe('Zoom Manager', () => {
             state.zoomMax = 3.0;
 
             expect(isAtMaxZoom(state)).toBe(true);
+        });
+    });
+
+    describe('zoomToFitAnnotation', () => {
+        beforeEach(() => {
+            // Mock container for getBoundingClientRect
+            refs.annotationOverlay.getBoundingClientRect = vi.fn(() => ({
+                width: 800,
+                height: 600,
+            }));
+        });
+
+        it('should use annotation directly when it has screen coordinates', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                label: 'Test Room',
+                screenX: 100,
+                screenY: 100,
+                screenWidth: 400,
+                screenHeight: 300,
+            });
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.displayPdf).toHaveBeenCalled();
+        });
+
+        it('should find annotation by ID when coordinates not in source', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                label: 'Test Room',
+                screenWidth: null, // Explicitly no screen coordinates in source
+                screenHeight: null,
+            });
+
+            state.annotations = [
+                createMockAnnotation({
+                    id: 1,
+                    screenX: 100,
+                    screenY: 100,
+                    screenWidth: 400,
+                    screenHeight: 300,
+                }),
+            ];
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.displayPdf).toHaveBeenCalled();
+        });
+
+        it('should find annotation by entity ID match', async () => {
+            const annotation = createMockAnnotation({
+                id: 10,
+                type: 'location',
+                label: 'Island',
+                screenWidth: null, // Explicitly no screen coordinates in source
+                screenHeight: null,
+            });
+
+            state.annotations = [
+                createMockAnnotation({
+                    id: 20,
+                    type: 'location', // Same type as source
+                    roomLocationId: 10, // Matches annotation.id
+                    screenX: 150,
+                    screenY: 150,
+                    screenWidth: 300,
+                    screenHeight: 200,
+                }),
+            ];
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.displayPdf).toHaveBeenCalled();
+        });
+
+        it('should skip zoom when annotation has no valid coordinates', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                label: 'Test Room',
+                screenWidth: null, // Explicitly no screen coordinates
+                screenHeight: null,
+            });
+
+            state.annotations = []; // No matching annotation with coordinates
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            // Should not call displayPdf when no valid coordinates found
+            expect(callbacks.displayPdf).not.toHaveBeenCalled();
+        });
+
+        it('should skip zoom when container not found', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                screenX: 100,
+                screenY: 100,
+                screenWidth: 400,
+                screenHeight: 300,
+            });
+
+            refs.annotationOverlay = null; // No container
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            // Should not call displayPdf when container not found
+            expect(callbacks.displayPdf).not.toHaveBeenCalled();
+        });
+
+        it('should calculate zoom to fit with padding', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                label: 'Test Room',
+                screenX: 100,
+                screenY: 100,
+                screenWidth: 400, // Container is 800x600, so zoom should be ~1.6 with padding
+                screenHeight: 300,
+            });
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            // Zoom should be calculated to fit 400x300 into 640x480 (80% of 800x600)
+            // zoomX = 640 / 400 = 1.6
+            // zoomY = 480 / 300 = 1.6
+            // Final zoom = min(1.6, 1.6) = 1.6
+            expect(state.zoomLevel).toBe(1.6);
+        });
+
+        it('should clamp zoom to maximum limit', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                screenX: 100,
+                screenY: 100,
+                screenWidth: 50, // Very small - would require huge zoom
+                screenHeight: 50,
+            });
+
+            state.zoomMax = 3.0;
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(state.zoomLevel).toBe(3.0); // Clamped to max
+        });
+
+        it('should clamp zoom to minimum limit', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                screenX: 100,
+                screenY: 100,
+                screenWidth: 2000, // Very large - would require tiny zoom
+                screenHeight: 2000,
+            });
+
+            state.zoomMin = 1.0;
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(state.zoomLevel).toBe(1.0); // Clamped to min
+        });
+
+        it('should call $nextTick callback', async () => {
+            const annotation = createMockAnnotation({
+                id: 1,
+                screenX: 100,
+                screenY: 100,
+                screenWidth: 400,
+                screenHeight: 300,
+            });
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.$nextTick).toHaveBeenCalled();
+        });
+
+        it('should match by roomId for room annotations', async () => {
+            const annotation = createMockAnnotation({
+                id: 100,
+                type: 'room',
+                label: 'Kitchen',
+                screenWidth: null, // No screen coordinates in source
+                screenHeight: null,
+            });
+
+            state.annotations = [
+                createMockAnnotation({
+                    id: 101,
+                    type: 'room', // Same type as source
+                    roomId: 100, // Matches annotation.id
+                    screenX: 200,
+                    screenY: 200,
+                    screenWidth: 250,
+                    screenHeight: 180,
+                }),
+            ];
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.displayPdf).toHaveBeenCalled();
+        });
+
+        it('should match by cabinetRunId for cabinet run annotations', async () => {
+            const annotation = createMockAnnotation({
+                id: 30,
+                type: 'cabinet_run',
+                label: 'Upper Cabinets',
+                screenWidth: null, // No screen coordinates in source
+                screenHeight: null,
+            });
+
+            state.annotations = [
+                createMockAnnotation({
+                    id: 40,
+                    type: 'cabinet_run', // Same type as source
+                    cabinetRunId: 30, // Matches annotation.id
+                    screenX: 220,
+                    screenY: 220,
+                    screenWidth: 180,
+                    screenHeight: 120,
+                }),
+            ];
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.displayPdf).toHaveBeenCalled();
+        });
+
+        it('should match by cabinetId for cabinet annotations', async () => {
+            const annotation = createMockAnnotation({
+                id: 40,
+                type: 'cabinet',
+                label: 'Base Cabinet B1',
+                screenWidth: null, // No screen coordinates in source
+                screenHeight: null,
+            });
+
+            state.annotations = [
+                createMockAnnotation({
+                    id: 50,
+                    type: 'cabinet', // Same type as source
+                    cabinetId: 40, // Matches annotation.id
+                    screenX: 240,
+                    screenY: 240,
+                    screenWidth: 160,
+                    screenHeight: 100,
+                }),
+            ];
+
+            await zoomToFitAnnotation(annotation, state, refs, callbacks);
+
+            expect(callbacks.displayPdf).toHaveBeenCalled();
         });
     });
 

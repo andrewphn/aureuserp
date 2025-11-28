@@ -15,6 +15,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Cabinets Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CabinetsRelationManager extends RelationManager
 {
     protected static string $relationship = 'cabinets';
@@ -23,6 +28,12 @@ class CabinetsRelationManager extends RelationManager
 
     protected static ?string $title = 'Cabinet Specifications';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -171,6 +182,12 @@ class CabinetsRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

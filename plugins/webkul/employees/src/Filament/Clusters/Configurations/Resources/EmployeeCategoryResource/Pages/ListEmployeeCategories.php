@@ -10,6 +10,11 @@ use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 
+/**
+ * List Employee Categories class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListEmployeeCategories extends ListRecords
 {
     use HasTableViews;

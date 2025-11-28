@@ -13,6 +13,11 @@ use Webkul\Project\Filament\Widgets\StatsOverviewWidget;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Tasks class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListTasks extends ListRecords
 {
     use HasTableViews;
@@ -26,6 +31,12 @@ class ListTasks extends ListRecords
         ];
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         $table = parent::table($table)

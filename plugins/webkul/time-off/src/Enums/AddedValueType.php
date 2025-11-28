@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Added Value Type enumeration
+ *
+ */
 enum AddedValueType: string implements HasLabel
 {
     case DAYS = 'days';
@@ -18,6 +22,11 @@ enum AddedValueType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

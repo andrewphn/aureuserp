@@ -4,6 +4,10 @@ namespace Webkul\Project\Services;
 
 use App\Models\PdfPageAnnotation;
 
+/**
+ * View Type Tracker Service service
+ *
+ */
 class ViewTypeTrackerService
 {
     /**

@@ -10,6 +10,10 @@ use Throwable;
 use Webkul\Security\Models\User;
 use Webkul\Support\Enums\UOMType;
 
+/**
+ * UOMSeeder database seeder
+ *
+ */
 class UOMSeeder extends Seeder
 {
     /**

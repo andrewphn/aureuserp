@@ -12,6 +12,29 @@ use Webkul\Inventory\Enums\PackageUse;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Package Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property mixed $package_use
+ * @property \Carbon\Carbon|null $pack_date
+ * @property int $package_type_id
+ * @property int $location_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $quantities
+ * @property-read \Illuminate\Database\Eloquent\Collection $moveLines
+ * @property-read \Illuminate\Database\Eloquent\Model|null $packageType
+ * @property-read \Illuminate\Database\Eloquent\Model|null $location
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection $operations
+ * @property-read \Illuminate\Database\Eloquent\Collection $moves
+ *
+ */
 class Package extends Model
 {
     use HasFactory;
@@ -48,21 +71,41 @@ class Package extends Model
         'pack_date'   => 'date',
     ];
 
+    /**
+     * Package Type
+     *
+     * @return BelongsTo
+     */
     public function packageType(): BelongsTo
     {
         return $this->belongsTo(PackageType::class);
     }
 
+    /**
+     * Location
+     *
+     * @return BelongsTo
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * Quantities
+     *
+     * @return HasMany
+     */
     public function quantities(): HasMany
     {
         return $this->hasMany(ProductQuantity::class);
     }
 
+    /**
+     * Operations
+     *
+     * @return HasManyThrough
+     */
     public function operations(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -75,6 +118,11 @@ class Package extends Model
         );
     }
 
+    /**
+     * Moves
+     *
+     * @return HasManyThrough
+     */
     public function moves(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -87,21 +135,41 @@ class Package extends Model
         );
     }
 
+    /**
+     * Move Lines
+     *
+     * @return HasMany
+     */
     public function moveLines(): HasMany
     {
         return $this->hasMany(MoveLine::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return PackageFactory
+     */
     protected static function newFactory(): PackageFactory
     {
         return PackageFactory::new();

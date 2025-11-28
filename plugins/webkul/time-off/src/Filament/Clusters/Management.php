@@ -5,10 +5,21 @@ namespace Webkul\TimeOff\Filament\Clusters;
 use Filament\Clusters\Cluster;
 use Filament\Panel;
 
+/**
+ * Management class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Management extends Cluster
 {
     protected static ?int $navigationSort = 3;
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'time-off/management';

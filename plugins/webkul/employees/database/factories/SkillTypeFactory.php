@@ -5,6 +5,10 @@ namespace Webkul\Employee\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\Employee\Models\SkillType;
 
+/**
+ * Skill Type Factory model factory
+ *
+ */
 class SkillTypeFactory extends Factory
 {
     /**

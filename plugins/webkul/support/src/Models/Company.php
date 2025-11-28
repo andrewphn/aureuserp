@@ -16,6 +16,52 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Database\Factories\CompanyFactory;
 
+/**
+ * Company Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $sort
+ * @property string|null $name
+ * @property int $company_id
+ * @property int $parent_id
+ * @property int $tax_id
+ * @property string|null $registration_number
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string|null $mobile
+ * @property string|null $street1
+ * @property string|null $street2
+ * @property string|null $city
+ * @property string|null $zip
+ * @property int $state_id
+ * @property int $country_id
+ * @property string|null $logo
+ * @property string|null $shop_capacity_per_day
+ * @property string|null $shop_capacity_per_month
+ * @property string|null $shop_capacity_per_hour
+ * @property float $working_hours_per_day
+ * @property string|null $working_days_per_month
+ * @property string|null $color
+ * @property bool $is_active
+ * @property \Carbon\Carbon|null $founded_date
+ * @property int $creator_id
+ * @property int $currency_id
+ * @property int $partner_id
+ * @property string|null $website
+ * @property string|null $acronym
+ * @property int|null $project_number_start
+ * @property-read \Illuminate\Database\Eloquent\Collection $branches
+ * @property-read \Illuminate\Database\Eloquent\Model|null $country
+ * @property-read \Illuminate\Database\Eloquent\Model|null $state
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Model|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currency
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ *
+ */
 class Company extends Model implements Sortable
 {
     use HasChatter, HasCustomFields, HasFactory, SoftDeletes, SortableTrait;
@@ -55,6 +101,7 @@ class Company extends Model implements Sortable
         'partner_id',
         'website',
         'acronym',
+        'project_number_start',
     ];
 
     public $sortable = [
@@ -62,11 +109,21 @@ class Company extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Country
+     *
+     * @return BelongsTo
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * State
+     *
+     * @return BelongsTo
+     */
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
@@ -74,6 +131,11 @@ class Company extends Model implements Sortable
 
     /**
      * Get the creator of the company
+     */
+    /**
+     * Created By
+     *
+     * @return BelongsTo
      */
     public function createdBy(): BelongsTo
     {
@@ -83,6 +145,11 @@ class Company extends Model implements Sortable
     /**
      * Get the parent company
      */
+    /**
+     * Parent
+     *
+     * @return BelongsTo
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'parent_id');
@@ -90,6 +157,11 @@ class Company extends Model implements Sortable
 
     /**
      * Get the branches (child companies)
+     */
+    /**
+     * Branches
+     *
+     * @return HasMany
      */
     public function branches(): HasMany
     {
@@ -99,6 +171,12 @@ class Company extends Model implements Sortable
     /**
      * Scope a query to only include parent companies
      */
+    /**
+     * Scope query to Parents
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeParents($query)
     {
         return $query->whereNull('parent_id');
@@ -106,6 +184,11 @@ class Company extends Model implements Sortable
 
     /**
      * Check if company is a branch
+     */
+    /**
+     * Is Branch
+     *
+     * @return bool
      */
     public function isBranch(): bool
     {
@@ -115,6 +198,11 @@ class Company extends Model implements Sortable
     /**
      * Check if company is a parent
      */
+    /**
+     * Is Parent
+     *
+     * @return bool
+     */
     public function isParent(): bool
     {
         return is_null($this->parent_id);
@@ -123,11 +211,21 @@ class Company extends Model implements Sortable
     /**
      * Get the currency associated with the company.
      */
+    /**
+     * Currency
+     *
+     * @return BelongsTo
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function partner()
     {
         return $this->belongsTo(Partner::class, 'partner_id');
@@ -136,11 +234,22 @@ class Company extends Model implements Sortable
     /**
      * Scope a query to only include active companies.
      */
+    /**
+     * Scope query to Active
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
+    /**
+     * New Factory
+     *
+     * @return CompanyFactory
+     */
     protected static function newFactory(): CompanyFactory
     {
         return CompanyFactory::new();
@@ -148,6 +257,11 @@ class Company extends Model implements Sortable
 
     /**
      * Calculate shop capacity values based on changes
+     */
+    /**
+     * Calculate Capacities
+     *
+     * @param mixed $company
      */
     protected static function calculateCapacities($company)
     {
@@ -181,6 +295,11 @@ class Company extends Model implements Sortable
 
     /**
      * Bootstrap the model and its traits.
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {

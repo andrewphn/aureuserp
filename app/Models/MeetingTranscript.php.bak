@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class MeetingTranscript extends Model
+{
+    protected $fillable = [
+        'file_path',
+        'title',
+        'meeting_date',
+        'duration_minutes',
+        'participants',
+        'status',
+        'total_sentences',
+        'summary',
+    ];
+
+    protected $casts = [
+        'participants' => 'array',
+        'meeting_date' => 'date',
+    ];
+
+    public function segments(): HasMany
+    {
+        return $this->hasMany(MeetingSegment::class);
+    }
+
+    public function topics(): HasMany
+    {
+        return $this->hasMany(MeetingTopic::class);
+    }
+
+    public function actionItems(): HasMany
+    {
+        return $this->hasMany(MeetingActionItem::class);
+    }
+
+    public function entities(): HasMany
+    {
+        return $this->hasMany(MeetingEntity::class);
+    }
+
+    public function sentences(): HasMany
+    {
+        return $this->hasMany(MeetingSentence::class);
+    }
+}

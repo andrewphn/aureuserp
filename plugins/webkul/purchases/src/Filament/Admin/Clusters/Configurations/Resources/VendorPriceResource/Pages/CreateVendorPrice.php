@@ -8,6 +8,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource;
 
+/**
+ * Create Vendor Price class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateVendorPrice extends CreateRecord
 {
     protected static string $resource = VendorPriceResource::class;
@@ -30,6 +35,12 @@ class CreateVendorPrice extends CreateRecord
             ->body(__('purchases::filament/admin/clusters/configurations/resources/vendor-price/pages/create-vendor-price.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

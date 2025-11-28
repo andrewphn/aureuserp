@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Rule Auto enumeration
+ *
+ */
 enum RuleAuto: string implements HasLabel
 {
     case MANUAL = 'manual';

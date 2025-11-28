@@ -6,6 +6,11 @@ use Filament\Actions\DeleteAction as BaseDeleteAction;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\FullCalendar\Filament\Widgets\FullCalendarWidget;
 
+/**
+ * Delete Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DeleteAction extends BaseDeleteAction
 {
     protected function setUp(): void

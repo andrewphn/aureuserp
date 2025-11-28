@@ -4,6 +4,10 @@ namespace Webkul\Purchase\Observers;
 
 use Webkul\Purchase\Models\AccountMove;
 
+/**
+ * Account Move Observer class
+ *
+ */
 class AccountMoveObserver
 {
     /**

@@ -9,6 +9,11 @@ use Webkul\TimeOff\Models\LeaveType;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Leave Types class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListLeaveTypes extends ListRecords
 {
     use HasTableViews;

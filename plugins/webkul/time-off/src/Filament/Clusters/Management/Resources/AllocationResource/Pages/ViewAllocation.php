@@ -9,6 +9,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
 
+/**
+ * View Allocation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewAllocation extends ViewRecord
 {
     protected static string $resource = AllocationResource::class;

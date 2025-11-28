@@ -15,6 +15,11 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Log Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class LogAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -6,6 +6,11 @@ use Webkul\Contact\Filament\Clusters\Configurations;
 use Webkul\Contact\Filament\Clusters\Configurations\Resources\TagResource\Pages\ManageTags;
 use Webkul\Partner\Filament\Resources\TagResource as BaseTagResource;
 
+/**
+ * Tag Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TagResource extends BaseTagResource
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';

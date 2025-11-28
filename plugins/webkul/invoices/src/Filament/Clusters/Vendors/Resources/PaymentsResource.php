@@ -15,6 +15,11 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\PaymentsResource\Pages\Vi
 use Webkul\Invoice\Models\Payment;
 use Filament\Schemas\Schema;
 
+/**
+ * Payments Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PaymentsResource extends BasePaymentsResource
 {
     protected static ?string $model = Payment::class;
@@ -42,6 +47,12 @@ class PaymentsResource extends BasePaymentsResource
         return null;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $form = parent::form($schema);
@@ -72,6 +83,12 @@ class PaymentsResource extends BasePaymentsResource
         return $form->components($components);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         $infolist = parent::infolist($schema);

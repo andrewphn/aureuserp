@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\StageResource;
 
+/**
+ * View Stages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewStages extends ViewRecord
 {
     protected static string $resource = StageResource::class;

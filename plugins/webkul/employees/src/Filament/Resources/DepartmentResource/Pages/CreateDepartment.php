@@ -6,6 +6,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Webkul\Employee\Filament\Resources\DepartmentResource;
 
+/**
+ * Create Department class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateDepartment extends CreateRecord
 {
     protected static string $resource = DepartmentResource::class;

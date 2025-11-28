@@ -9,6 +9,11 @@ use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Facades\Account;
 use Webkul\Account\Models\Move;
 
+/**
+ * Cancel Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CancelAction extends Action
 {
     public static function getDefaultName(): ?string

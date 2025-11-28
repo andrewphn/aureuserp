@@ -10,6 +10,29 @@ use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Room Location Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $room_id
+ * @property string|null $name
+ * @property string|null $location_type
+ * @property int $sequence
+ * @property string|null $elevation_reference
+ * @property string|null $notes
+ * @property int $sort_order
+ * @property string|null $cabinet_level
+ * @property string|null $material_category
+ * @property string|null $finish_option
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $cabinetRuns
+ * @property-read \Illuminate\Database\Eloquent\Model|null $room
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class RoomLocation extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
@@ -55,11 +78,21 @@ class RoomLocation extends Model
         return $this->belongsTo(Room::class, 'room_id');
     }
 
+    /**
+     * Cabinet Runs
+     *
+     * @return HasMany
+     */
     public function cabinetRuns(): HasMany
     {
         return $this->hasMany(CabinetRun::class, 'room_location_id');
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -103,6 +136,12 @@ class RoomLocation extends Model
     /**
      * Scope: Order by sort order and sequence
      */
+    /**
+     * Scope query to Ordered
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('sequence')->orderBy('name');
@@ -111,6 +150,13 @@ class RoomLocation extends Model
     /**
      * Scope: Filter by location type
      */
+    /**
+     * Scope query to By Type
+     *
+     * @param mixed $query The search query
+     * @param string $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByType($query, string $type)
     {
         return $query->where('location_type', $type);
@@ -118,6 +164,12 @@ class RoomLocation extends Model
 
     /**
      * Scope: With run and cabinet counts
+     */
+    /**
+     * Scope query to With Counts
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCounts($query)
     {

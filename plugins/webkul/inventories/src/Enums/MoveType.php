@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Move Type enumeration
+ *
+ */
 enum MoveType: string implements HasLabel
 {
     case DIRECT = 'direct';

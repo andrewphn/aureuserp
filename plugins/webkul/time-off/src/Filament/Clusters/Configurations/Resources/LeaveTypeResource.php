@@ -50,6 +50,11 @@ use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource\Pages\ViewLeaveType;
 use Webkul\TimeOff\Models\LeaveType;
 
+/**
+ * Leave Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class LeaveTypeResource extends Resource
 {
     protected static ?string $model = LeaveType::class;
@@ -65,6 +70,12 @@ class LeaveTypeResource extends Resource
         return __('time-off::filament/clusters/configurations/resources/leave-type.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -174,6 +185,12 @@ class LeaveTypeResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -326,6 +343,12 @@ class LeaveTypeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

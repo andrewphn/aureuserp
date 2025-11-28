@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Create Backorder enumeration
+ *
+ */
 enum CreateBackorder: string implements HasLabel
 {
     case ASK = 'ask';

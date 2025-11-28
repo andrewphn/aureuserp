@@ -7,6 +7,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Website\Filament\Admin\Resources\PageResource;
 
+/**
+ * View Page Filament page
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPage extends ViewRecord
 {
     protected static string $resource = PageResource::class;

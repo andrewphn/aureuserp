@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Document Type enumeration
+ *
+ */
 enum DocumentType: string implements HasLabel
 {
     case INVOICE = 'invoice';
@@ -18,6 +22,11 @@ enum DocumentType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

@@ -5,6 +5,10 @@ namespace Webkul\Support\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Database Seeder database seeder
+ *
+ */
 class DatabaseSeeder extends Seeder
 {
     /**

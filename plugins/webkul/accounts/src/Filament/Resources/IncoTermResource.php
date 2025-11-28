@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\IncoTermResource\Pages\ListIncoTerms;
 use Webkul\Account\Models\Incoterm;
 
+/**
+ * Inco Term Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class IncoTermResource extends Resource
 {
     protected static ?string $model = Incoterm::class;
@@ -30,6 +35,12 @@ class IncoTermResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -47,6 +58,12 @@ class IncoTermResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -110,6 +127,12 @@ class IncoTermResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

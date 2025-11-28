@@ -5,6 +5,11 @@ namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pa
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource;
 use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageVariants as BaseManageVariants;
 
+/**
+ * Manage Variants class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageVariants extends BaseManageVariants
 {
     protected static string $resource = ProductResource::class;

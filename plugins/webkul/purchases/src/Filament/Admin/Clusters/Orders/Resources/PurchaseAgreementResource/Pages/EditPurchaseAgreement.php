@@ -13,6 +13,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementRe
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Edit Purchase Agreement class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPurchaseAgreement extends EditRecord
 {
     use HasRepeaterColumnManager;

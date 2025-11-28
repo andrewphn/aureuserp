@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Tcs Work Location Seeder database seeder
+ *
+ */
 class TcsWorkLocationSeeder extends Seeder
 {
     /**

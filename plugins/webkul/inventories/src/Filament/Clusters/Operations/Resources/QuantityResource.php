@@ -41,6 +41,11 @@ use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
+/**
+ * Quantity Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class QuantityResource extends Resource
 {
     protected static ?string $model = ProductQuantity::class;
@@ -63,6 +68,12 @@ class QuantityResource extends Resource
         return __('inventories::filament/clusters/operations/resources/quantity.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -145,6 +156,12 @@ class QuantityResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

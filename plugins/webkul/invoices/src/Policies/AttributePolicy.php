@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\Attribute;
 use Webkul\Security\Models\User;
 
+/**
+ * Attribute Policy authorization policy
+ *
+ */
 class AttributePolicy
 {
     use HandlesAuthorization;

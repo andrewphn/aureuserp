@@ -17,6 +17,11 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource as BasePar
 use Webkul\Invoice\Models\Partner;
 use Webkul\Partner\Filament\Resources\PartnerResource as BaseVendorResource;
 
+/**
+ * Partner Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PartnerResource extends BasePartnerResource
 {
     protected static ?string $model = Partner::class;
@@ -41,6 +46,12 @@ class PartnerResource extends BasePartnerResource
         return __('invoices::filament/clusters/customers/resources/partners.navigation.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         $table = BaseVendorResource::table($table);
@@ -57,6 +68,12 @@ class PartnerResource extends BasePartnerResource
         return $table;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

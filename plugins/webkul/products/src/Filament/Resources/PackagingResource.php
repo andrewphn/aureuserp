@@ -30,12 +30,23 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Models\Packaging;
 
+/**
+ * Packaging Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PackagingResource extends Resource
 {
     protected static ?string $model = Packaging::class;
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -80,6 +91,12 @@ class PackagingResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -215,6 +232,12 @@ class PackagingResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

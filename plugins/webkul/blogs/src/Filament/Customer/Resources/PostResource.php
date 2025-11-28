@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Blog\Filament\Customer\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Post;
 
+/**
+ * Post Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PostResource extends Resource
 {
     public static ?string $parentResource = CategoryResource::class;
@@ -27,6 +32,12 @@ class PostResource extends Resource
         return ['title', 'category.name'];
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -34,6 +45,12 @@ class PostResource extends Resource
         ];
     }
 
+    /**
+     * Get Global Search Result Url
+     *
+     * @param Model $record The model record
+     * @return string
+     */
     public static function getGlobalSearchResultUrl(Model $record): string
     {
         return CategoryResource::getUrl('posts.view', ['parent' => $record->category->slug, 'record' => $record->slug]);

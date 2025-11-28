@@ -7,6 +7,10 @@ use Webkul\Employee\Models\Employee;
 use Webkul\Employee\Models\EmployeeCategory;
 use Webkul\Employee\Models\EmployeeEmployeeCategory;
 
+/**
+ * Employee Employee Category Factory model factory
+ *
+ */
 class EmployeeEmployeeCategoryFactory extends Factory
 {
     /**

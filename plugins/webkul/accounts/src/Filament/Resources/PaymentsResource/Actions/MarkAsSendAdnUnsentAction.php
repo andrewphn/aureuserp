@@ -7,6 +7,11 @@ use Livewire\Component;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Models\Payment;
 
+/**
+ * Mark As Send Adn Unsent Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class MarkAsSendAdnUnsentAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -5,8 +5,17 @@ namespace Webkul\Support\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * UTMSource Seeder database seeder
+ *
+ */
 class UTMSourceSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         DB::table('utm_sources')->delete();

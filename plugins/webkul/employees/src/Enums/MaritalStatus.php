@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Marital Status enumeration
+ *
+ */
 enum MaritalStatus: string
 {
     case Single = 'single';
@@ -12,6 +16,11 @@ enum MaritalStatus: string
 
     case Widowed = 'widowed';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

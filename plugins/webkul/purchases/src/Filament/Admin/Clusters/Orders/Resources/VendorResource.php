@@ -20,6 +20,15 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Page
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource\Pages\ViewVendor;
 use Webkul\Purchase\Models\Partner;
 
+/**
+ * Vendor Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class VendorResource extends BaseVendorResource
 {
     use HasCustomFields;
@@ -43,6 +52,12 @@ class VendorResource extends BaseVendorResource
         return __('purchases::filament/admin/clusters/orders/resources/vendor.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

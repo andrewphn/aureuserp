@@ -5,6 +5,10 @@ namespace Webkul\Inventory\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Move State enumeration
+ *
+ */
 enum MoveState: string implements HasColor, HasLabel
 {
     case DRAFT = 'draft';

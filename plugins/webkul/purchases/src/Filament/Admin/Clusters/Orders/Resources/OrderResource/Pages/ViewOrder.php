@@ -12,10 +12,21 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * View Order class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewOrder extends ViewRecord
 {
     protected static string $resource = OrderResource::class;
 
+    /**
+     * Configure Action
+     *
+     * @param Action $action
+     * @return void
+     */
     protected function configureAction(Action $action): void
     {
         if ($action instanceof ChatterAction) {

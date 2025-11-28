@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\TaskStageResource;
 use Webkul\Project\Models\TaskStage;
 
+/**
+ * Manage Task Stages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTaskStages extends ManageRecords
 {
     protected static string $resource = TaskStageResource::class;

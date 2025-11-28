@@ -47,6 +47,11 @@ use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\EmployeeJobPosition;
 use Webkul\Security\Filament\Resources\CompanyResource;
 
+/**
+ * Job Position Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class JobPositionResource extends Resource
 {
     protected static ?string $model = EmployeeJobPosition::class;
@@ -70,6 +75,12 @@ class JobPositionResource extends Resource
         return __('employees::filament/clusters/configurations/resources/job-position.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -164,6 +175,12 @@ class JobPositionResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -365,6 +382,12 @@ class JobPositionResource extends Resource
             ->defaultSort('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

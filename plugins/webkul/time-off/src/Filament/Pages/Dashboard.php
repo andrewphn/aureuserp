@@ -9,6 +9,11 @@ use Webkul\TimeOff\Filament\Clusters\MyTime;
 use Webkul\TimeOff\Filament\Widgets\CalendarWidget;
 use Webkul\TimeOff\Filament\Widgets\MyTimeOffWidget;
 
+/**
+ * Dashboard class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Dashboard extends BaseDashboard
 {
      use HasPageShield;

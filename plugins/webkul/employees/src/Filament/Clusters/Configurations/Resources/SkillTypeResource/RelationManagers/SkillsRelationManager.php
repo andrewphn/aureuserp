@@ -24,12 +24,23 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Skills Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SkillsRelationManager extends RelationManager
 {
     protected static string $relationship = 'skills';
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -42,6 +53,12 @@ class SkillsRelationManager extends RelationManager
             ])->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -129,6 +146,12 @@ class SkillsRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

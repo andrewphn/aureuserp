@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Procure Method enumeration
+ *
+ */
 enum ProcureMethod: string implements HasLabel
 {
     case MAKE_TO_STOCK = 'make_to_stock';

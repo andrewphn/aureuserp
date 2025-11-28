@@ -7,6 +7,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Cabinet Stats Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CabinetStatsWidget extends BaseWidget
 {
     protected function getStats(): array

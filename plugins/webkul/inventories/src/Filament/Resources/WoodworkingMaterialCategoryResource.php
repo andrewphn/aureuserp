@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Actions;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\QueryBuilder;
@@ -17,6 +18,11 @@ use Webkul\Inventory\Filament\Resources\WoodworkingMaterialCategoryResource\Page
 use Webkul\Inventory\Filament\Resources\WoodworkingMaterialCategoryResource\Pages\ListWoodworkingMaterialCategories;
 use Webkul\Inventory\Models\WoodworkingMaterialCategory;
 
+/**
+ * Woodworking Material Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class WoodworkingMaterialCategoryResource extends Resource
 {
     protected static ?string $model = WoodworkingMaterialCategory::class;
@@ -37,6 +43,12 @@ class WoodworkingMaterialCategoryResource extends Resource
         return 'Inventory';
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -67,6 +79,12 @@ class WoodworkingMaterialCategoryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -104,12 +122,12 @@ class WoodworkingMaterialCategoryResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -8,6 +8,10 @@ use Webkul\Inventory\Enums\DeliveryStep;
 use Webkul\Inventory\Enums\ReceptionStep;
 use Webkul\Security\Models\User;
 
+/**
+ * Warehouse Seeder database seeder
+ *
+ */
 class WarehouseSeeder extends Seeder
 {
     /**

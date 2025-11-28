@@ -5,6 +5,10 @@ namespace Webkul\Project\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Webkul\Project\Models\MilestoneTemplate;
 
+/**
+ * Milestone Template Seeder database seeder
+ *
+ */
 class MilestoneTemplateSeeder extends Seeder
 {
     /**

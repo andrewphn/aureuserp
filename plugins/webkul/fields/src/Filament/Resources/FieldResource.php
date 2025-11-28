@@ -36,6 +36,11 @@ use Webkul\Field\Filament\Resources\FieldResource\Pages\EditField;
 use Webkul\Field\Filament\Resources\FieldResource\Pages\ListFields;
 use Webkul\Field\Models\Field;
 
+/**
+ * Field Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class FieldResource extends Resource
 {
     protected static ?string $model = Field::class;
@@ -57,6 +62,11 @@ class FieldResource extends Resource
         return __('fields::filament/resources/field.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @return \Filament\Forms\Form
+     */
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
         return $schema
@@ -193,6 +203,12 @@ class FieldResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -503,6 +519,12 @@ class FieldResource extends Resource
         ];
     }
 
+    /**
+     * Get Type Form Validations
+     *
+     * @param ?string $type
+     * @return array
+     */
     public static function getTypeFormValidations(?string $type): array
     {
         if (is_null($type)) {
@@ -617,6 +639,12 @@ class FieldResource extends Resource
         return array_merge($typeValidations, $commonValidations);
     }
 
+    /**
+     * Get Type Form Settings
+     *
+     * @param ?string $type
+     * @return array
+     */
     public static function getTypeFormSettings(?string $type): array
     {
         if (is_null($type)) {
@@ -966,6 +994,12 @@ class FieldResource extends Resource
         ];
     }
 
+    /**
+     * Get Type Table Settings
+     *
+     * @param ?string $type
+     * @return array
+     */
     public static function getTypeTableSettings(?string $type): array
     {
         if (is_null($type)) {
@@ -1143,6 +1177,12 @@ class FieldResource extends Resource
         ];
     }
 
+    /**
+     * Get Type Infolist Settings
+     *
+     * @param ?string $type
+     * @return array
+     */
     public static function getTypeInfolistSettings(?string $type): array
     {
         if (is_null($type)) {

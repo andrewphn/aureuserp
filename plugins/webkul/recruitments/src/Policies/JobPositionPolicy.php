@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\JobPosition;
 use Webkul\Security\Models\User;
 
+/**
+ * Job Position Policy authorization policy
+ *
+ */
 class JobPositionPolicy
 {
     use HandlesAuthorization;

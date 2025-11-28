@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Enums\PermissionType;
 use Webkul\Security\Models\User;
 
+/**
+ * Has Scoped Permissions trait
+ *
+ */
 trait HasScopedPermissions
 {
     /**

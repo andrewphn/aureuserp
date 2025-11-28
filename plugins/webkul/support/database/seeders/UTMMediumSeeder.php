@@ -6,8 +6,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * UTMMedium Seeder database seeder
+ *
+ */
 class UTMMediumSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         DB::table('utm_mediums')->delete();

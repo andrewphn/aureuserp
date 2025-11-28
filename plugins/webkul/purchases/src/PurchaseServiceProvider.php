@@ -12,12 +12,22 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Purchase Service Provider service provider
+ *
+ */
 class PurchaseServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'purchases';
 
     public static string $viewNamespace = 'purchases';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -55,6 +65,11 @@ class PurchaseServiceProvider extends PackageServiceProvider
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         Livewire::component('order-summary', Summary::class);
@@ -64,6 +79,11 @@ class PurchaseServiceProvider extends PackageServiceProvider
         // \Webkul\Account\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
     }
 
+    /**
+     * Package Registered
+     *
+     * @return void
+     */
     public function packageRegistered(): void
     {
         $loader = AliasLoader::getInstance();

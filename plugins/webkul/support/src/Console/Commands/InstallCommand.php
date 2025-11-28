@@ -11,6 +11,10 @@ use Spatie\Permission\Models\Role;
 use Webkul\Support\Models\Plugin;
 use Webkul\Support\Package;
 
+/**
+ * Install Command console command
+ *
+ */
 class InstallCommand extends Command
 {
     protected Package $package;
@@ -39,9 +43,14 @@ class InstallCommand extends Command
 
     public $hidden = true;
 
+    /**
+     * Create a new InstallCommand instance
+     *
+     * @param Package $package
+     */
     public function __construct(Package $package)
     {
-        $this->signature = $package->shortName().':install';
+        $this->signature = $package->shortName().':install {--force : Force reseed without prompting}';
 
         $this->description = 'Install '.$package->name;
 
@@ -50,6 +59,10 @@ class InstallCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Handle
+     *
+     */
     public function handle()
     {
         if ($this->startWith) {
@@ -73,7 +86,11 @@ class InstallCommand extends Command
 
                     $this->newLine();
 
-                    $this->call($dependency.':install');
+                    $params = [];
+                    if ($this->option('force')) {
+                        $params['--force'] = true;
+                    }
+                    $this->call($dependency.':install', $params);
                 }
 
                 $this->newLine();
@@ -102,7 +119,11 @@ class InstallCommand extends Command
 
                 $this->newLine();
 
-                $this->call($dependency.':install');
+                $params = [];
+                if ($this->option('force')) {
+                    $params['--force'] = true;
+                }
+                $this->call($dependency.':install', $params);
             }
 
             $this->newLine();
@@ -174,6 +195,11 @@ class InstallCommand extends Command
         $this->info("🎉 Package <comment>{$this->package->shortName()}</comment> has been installed!");
     }
 
+    /**
+     * Publish
+     *
+     * @return self
+     */
     public function publish(string ...$tag): self
     {
         $this->publishes = array_merge($this->publishes, $tag);
@@ -181,26 +207,51 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Publish Config File
+     *
+     * @return self
+     */
     public function publishConfigFile(): self
     {
         return $this->publish('config');
     }
 
+    /**
+     * Publish Assets
+     *
+     * @return self
+     */
     public function publishAssets(): self
     {
         return $this->publish('assets');
     }
 
+    /**
+     * Publish Inertia Components
+     *
+     * @return self
+     */
     public function publishInertiaComponents(): self
     {
         return $this->publish('inertia-components');
     }
 
+    /**
+     * Publish Migrations
+     *
+     * @return self
+     */
     public function publishMigrations(): self
     {
         return $this->publish('migrations');
     }
 
+    /**
+     * Ask To Install Dependencies
+     *
+     * @return self
+     */
     public function askToInstallDependencies(): self
     {
         $this->askToInstallDependencies = true;
@@ -208,6 +259,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Ask To Run Migrations
+     *
+     * @return self
+     */
     public function askToRunMigrations(): self
     {
         $this->askToRunMigrations = true;
@@ -215,6 +271,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Ask To Run Seeders
+     *
+     * @return self
+     */
     public function askToRunSeeders(): self
     {
         $this->askToRunSeeders = true;
@@ -222,6 +283,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Install Dependencies
+     *
+     * @return self
+     */
     public function installDependencies(): self
     {
         $this->installDependencies = true;
@@ -229,6 +295,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Runs Migrations
+     *
+     * @return self
+     */
     public function runsMigrations(): self
     {
         $this->runsMigrations = true;
@@ -236,6 +307,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Runs Seeders
+     *
+     * @return self
+     */
     public function runsSeeders(): self
     {
         $this->runsSeeders = true;
@@ -243,6 +319,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Run Migrations
+     *
+     * @return self
+     */
     public function runMigrations(): self
     {
         $migrationsToRun = collect([]);
@@ -304,9 +385,14 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Run Seeders
+     *
+     * @return self
+     */
     public function runSeeders(): self
     {
-        if ($this->package->isInstalled()) {
+        if ($this->package->isInstalled() && !$this->option('force')) {
             $choice = $this->choice(
                 "This package <comment>{$this->package->shortName()}</comment> is already installed. What would you like to do?",
                 ['Reseed', 'Skip', 'Show Seeders'],
@@ -349,6 +435,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Copy And Register Service Provider In App
+     *
+     * @return self
+     */
     public function copyAndRegisterServiceProviderInApp(): self
     {
         $this->copyServiceProviderInApp = true;
@@ -356,6 +447,12 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Ask To Star Repo On Git Hub
+     *
+     * @param mixed $vendorSlashRepoName
+     * @return self
+     */
     public function askToStarRepoOnGitHub($vendorSlashRepoName): self
     {
         $this->starRepo = $vendorSlashRepoName;
@@ -363,6 +460,12 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Start With
+     *
+     * @param mixed $callable
+     * @return self
+     */
     public function startWith($callable): self
     {
         $this->startWith = $callable;
@@ -370,6 +473,12 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * End With
+     *
+     * @param mixed $callable
+     * @return self
+     */
     public function endWith($callable): self
     {
         $this->endWith = $callable;
@@ -377,6 +486,12 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Has Migration Already Run
+     *
+     * @param mixed $migrationName
+     * @return bool
+     */
     public function hasMigrationAlreadyRun($migrationName): bool
     {
         return DB::table('migrations')
@@ -384,6 +499,11 @@ class InstallCommand extends Command
             ->exists();
     }
 
+    /**
+     * Copy Service Provider In App
+     *
+     * @return self
+     */
     protected function copyServiceProviderInApp(): self
     {
         $providerName = $this->package->publishableProviderName;
@@ -431,6 +551,11 @@ class InstallCommand extends Command
         return $this;
     }
 
+    /**
+     * Regenerate Admin Panel Permissions
+     *
+     * @return void
+     */
     protected function regenerateAdminPanelPermissions(): void
     {
         $this->info('⚙️ Refreshing access controls for the admin panel...');

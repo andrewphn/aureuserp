@@ -5,6 +5,11 @@ namespace App\Filament\Forms\Components;
 use Filament\Forms\Components\Field;
 use Closure;
 
+/**
+ * Pdf Viewer Field class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PdfViewerField extends Field
 {
     protected string $view = 'filament.forms.components.pdf-viewer-field';

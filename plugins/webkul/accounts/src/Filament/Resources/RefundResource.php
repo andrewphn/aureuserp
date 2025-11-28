@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\RefundResource\Pages\ListRefunds;
 use Webkul\Account\Filament\Resources\RefundResource\Pages\ViewRefund;
 use Webkul\Account\Models\Move as AccountMove;
 
+/**
+ * Refund Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RefundResource extends BillResource
 {
     protected static ?string $model = AccountMove::class;

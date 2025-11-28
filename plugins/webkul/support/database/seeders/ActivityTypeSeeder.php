@@ -11,6 +11,10 @@ use Webkul\Support\Enums\ActivityDelayFrom;
 use Webkul\Support\Enums\ActivityDelayUnit;
 use Webkul\Support\Enums\ActivityTypeAction;
 
+/**
+ * Activity Type Seeder database seeder
+ *
+ */
 class ActivityTypeSeeder extends Seeder
 {
     /**

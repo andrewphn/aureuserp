@@ -6,6 +6,10 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Application Status enumeration
+ *
+ */
 enum ApplicationStatus: string implements HasColor, HasIcon, HasLabel
 {
     case ONGOING = 'ongoing';
@@ -43,6 +47,11 @@ enum ApplicationStatus: string implements HasColor, HasIcon, HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

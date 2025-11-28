@@ -4,6 +4,10 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+/**
+ * Plugins Install class
+ *
+ */
 class PluginsInstall extends Command
 {
     /**
@@ -11,7 +15,7 @@ class PluginsInstall extends Command
      *
      * @var string
      */
-    protected $signature = 'plugins:install';
+    protected $signature = 'plugins:install {--force : Force reseed all plugins without prompting}';
 
     /**
      * The console command description.
@@ -26,7 +30,7 @@ class PluginsInstall extends Command
      * Note: Run erp:install first to set up core tables and users
      */
     protected $pluginOrder = [
-        // Foundation plugins (must come before products)
+        // Foundation plugins
         'employees',
         'contacts',
 
@@ -38,16 +42,17 @@ class PluginsInstall extends Command
         'accounts',
         'payments',
 
-        // Sales & Invoicing (required by projects)
+        // Sales & Invoicing
         'invoices',
         'sales',
 
-        // Projects (depends on sales, products, accounts)
-        // PDF migrations are in projects plugin
+        // Projects depends on sales (sales_orders, sales_order_lines tables)
         'projects',
 
-        // Supporting modules
+        // Timesheets depends on projects
         'timesheets',
+
+        // Other supporting modules
         'time-off',
         'purchases',
         'recruitments',
@@ -72,6 +77,16 @@ class PluginsInstall extends Command
             return 1;
         }
 
+        // Check if --force option is used, otherwise ask
+        $forceReseed = $this->option('force');
+        if (!$forceReseed) {
+            $forceReseed = $this->confirm('🔄 Force reseed all plugins?', false);
+            if ($forceReseed) {
+                $this->info('   Will force reseed all plugins automatically.');
+            }
+        }
+        $this->newLine();
+
         $installed = [];
         $failed = [];
         $skipped = [];
@@ -89,9 +104,12 @@ class PluginsInstall extends Command
                     continue;
                 }
 
-                $exitCode = $this->call($command, [
-                    '--no-interaction' => true,
-                ]);
+                $params = ['--no-interaction' => true];
+                if ($forceReseed) {
+                    $params['--force'] = true;
+                }
+
+                $exitCode = $this->call($command, $params);
 
                 if ($exitCode === 0) {
                     $this->info("   ✅ {$plugin} installed successfully");

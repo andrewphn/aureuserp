@@ -11,6 +11,11 @@ use Webkul\Security\Settings\CurrencySettings;
 use Webkul\Support\Filament\Clusters\Settings;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Manage Currency class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageCurrency extends SettingsPage
 {
     use HasPageShield;
@@ -43,6 +48,12 @@ class ManageCurrency extends SettingsPage
         return __('security::filament/clusters/manage-currency.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

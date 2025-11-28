@@ -6,6 +6,10 @@ use Filament\Contracts\Plugin;
 use Filament\Panel;
 use ReflectionClass;
 
+/**
+ * Chatter Plugin class
+ *
+ */
 class ChatterPlugin implements Plugin
 {
     public function getId(): string
@@ -13,11 +17,22 @@ class ChatterPlugin implements Plugin
         return 'chatter';
     }
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Register
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function register(Panel $panel): void
     {
         $panel
@@ -27,11 +42,23 @@ class ChatterPlugin implements Plugin
             ->discoverClusters(in: $this->getPluginBasePath('/Filament/Widgets'), for: 'Webkul\\Chatter\\Filament\\Widgets');
     }
 
+    /**
+     * Boot
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function boot(Panel $panel): void
     {
         //
     }
 
+    /**
+     * Get Plugin Base Path
+     *
+     * @param mixed $path
+     * @return string
+     */
     protected function getPluginBasePath($path = null): string
     {
         $reflector = new ReflectionClass(get_class($this));

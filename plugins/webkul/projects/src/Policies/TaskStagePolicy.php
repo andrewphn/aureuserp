@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Project\Models\TaskStage;
 use Webkul\Security\Models\User;
 
+/**
+ * Task Stage Policy authorization policy
+ *
+ */
 class TaskStagePolicy
 {
     use HandlesAuthorization;

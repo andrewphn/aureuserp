@@ -11,6 +11,11 @@ use Webkul\Employee\Filament\Resources\EmployeeResource;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResource;
 use Webkul\Recruitment\Models\Candidate;
 
+/**
+ * Edit Candidate class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCandidate extends EditRecord
 {
     protected static string $resource = CandidateResource::class;

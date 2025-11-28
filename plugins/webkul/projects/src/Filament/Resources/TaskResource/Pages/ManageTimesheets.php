@@ -19,6 +19,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Resources\TaskResource;
 use Webkul\Project\Settings\TimeSettings;
 
+/**
+ * Manage Timesheets class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTimesheets extends ManageRelatedRecords
 {
     protected static string $resource = TaskResource::class;
@@ -54,6 +59,12 @@ class ManageTimesheets extends ManageRelatedRecords
         return $parameters['record']->project->allow_timesheets;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -83,6 +94,12 @@ class ManageTimesheets extends ManageRelatedRecords
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

@@ -13,6 +13,11 @@ use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\MoveLine;
 
+/**
+ * Manage Moves class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageMoves extends ManageRelatedRecords
 {
     protected static string $resource = OperationResource::class;
@@ -26,6 +31,12 @@ class ManageMoves extends ManageRelatedRecords
         return __('inventories::filament/clusters/operations/resources/operation/pages/manage-moves.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

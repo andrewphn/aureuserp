@@ -8,6 +8,11 @@ use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyTimeOffResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List My Time Offs class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListMyTimeOffs extends ListRecords
 {
     use HasTableViews;

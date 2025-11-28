@@ -14,6 +14,11 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 
+/**
+ * Labels Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class LabelsAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Leave Validation Type enumeration
+ *
+ */
 enum LeaveValidationType: string implements HasLabel
 {
     case NO_VALIDATION = 'no_validation';
@@ -24,6 +28,11 @@ enum LeaveValidationType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

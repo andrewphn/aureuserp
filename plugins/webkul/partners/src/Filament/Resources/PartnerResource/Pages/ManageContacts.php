@@ -10,6 +10,11 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * Manage Contacts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageContacts extends ManageRelatedRecords
 {
     protected static string $resource = PartnerResource::class;
@@ -23,6 +28,12 @@ class ManageContacts extends ManageRelatedRecords
         return __('partners::filament/resources/partner/pages/manage-contacts.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return PartnerResource::form($schema);

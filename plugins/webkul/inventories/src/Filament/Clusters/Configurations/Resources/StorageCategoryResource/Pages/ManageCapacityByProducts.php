@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 
+/**
+ * Manage Capacity By Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageCapacityByProducts extends ManageRelatedRecords
 {
     protected static string $resource = StorageCategoryResource::class;
@@ -30,6 +35,12 @@ class ManageCapacityByProducts extends ManageRelatedRecords
         return __('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-products.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -63,6 +74,12 @@ class ManageCapacityByProducts extends ManageRelatedRecords
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

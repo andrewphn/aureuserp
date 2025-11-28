@@ -23,6 +23,11 @@ use Webkul\Inventory\Models\Route;
 use Webkul\Inventory\Models\Rule;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
+/**
+ * Create Warehouse class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateWarehouse extends CreateRecord
 {
     protected static string $resource = WarehouseResource::class;
@@ -42,6 +47,12 @@ class CreateWarehouse extends CreateRecord
             ->body(__('inventories::filament/clusters/configurations/resources/warehouse/pages/create-warehouse.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();
@@ -63,6 +74,11 @@ class CreateWarehouse extends CreateRecord
         return $data;
     }
 
+    /**
+     * After Create
+     *
+     * @return void
+     */
     protected function afterCreate(): void
     {
         Location::withTrashed()->whereIn('id', [
@@ -94,6 +110,12 @@ class CreateWarehouse extends CreateRecord
         Rule::withTrashed()->whereIn('id', $this->routeIds)->update(['warehouse_id' => $this->getRecord()->id]);
     }
 
+    /**
+     * Create Locations
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function createLocations(array $data): array
     {
         $data['view_location_id'] = Location::create([
@@ -168,6 +190,12 @@ class CreateWarehouse extends CreateRecord
         return $data;
     }
 
+    /**
+     * Create Operation Types
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function createOperationTypes(array $data): array
     {
         $supplierLocation = Location::where('type', LocationType::SUPPLIER)->first();
@@ -376,6 +404,12 @@ class CreateWarehouse extends CreateRecord
         return $data;
     }
 
+    /**
+     * Create Routes
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function createRoutes(array $data): array
     {
         $data['reception_route_id'] = Route::create([
@@ -421,6 +455,12 @@ class CreateWarehouse extends CreateRecord
         return $data;
     }
 
+    /**
+     * Create Rules
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function createRules(array $data): array
     {
         $supplierLocation = Location::where('type', LocationType::SUPPLIER)->first();

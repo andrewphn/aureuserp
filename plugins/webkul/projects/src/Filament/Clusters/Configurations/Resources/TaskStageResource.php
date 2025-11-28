@@ -29,6 +29,11 @@ use Webkul\Project\Filament\Clusters\Configurations\Resources\TaskStageResource\
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\TaskStagesRelationManager;
 use Webkul\Project\Models\TaskStage;
 
+/**
+ * Task Stage Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TaskStageResource extends Resource
 {
     protected static ?string $model = TaskStage::class;
@@ -44,6 +49,12 @@ class TaskStageResource extends Resource
         return __('webkul-project::filament/clusters/configurations/resources/task-stage.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -71,6 +82,12 @@ class TaskStageResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

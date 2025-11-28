@@ -17,6 +17,11 @@ use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 use Webkul\Inventory\Settings\OperationSettings;
 
+/**
+ * Manage Capacity By Packages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageCapacityByPackages extends ManageRelatedRecords
 {
     protected static string $resource = StorageCategoryResource::class;
@@ -44,6 +49,12 @@ class ManageCapacityByPackages extends ManageRelatedRecords
         return __('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-packages.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -70,6 +81,12 @@ class ManageCapacityByPackages extends ManageRelatedRecords
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

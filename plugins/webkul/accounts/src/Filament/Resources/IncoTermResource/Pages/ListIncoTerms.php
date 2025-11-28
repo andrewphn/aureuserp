@@ -9,6 +9,11 @@ use Webkul\Account\Filament\Resources\IncoTermResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Inco Terms class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListIncoTerms extends ListRecords
 {
     use HasTableViews;

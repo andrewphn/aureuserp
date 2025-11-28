@@ -4,12 +4,21 @@ namespace Webkul\Purchase\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Requisition Type enumeration
+ *
+ */
 enum RequisitionType: string implements HasLabel
 {
     case BLANKET_ORDER = 'blanket_order';
 
     case PURCHASE_TEMPLATE = 'purchase_template';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

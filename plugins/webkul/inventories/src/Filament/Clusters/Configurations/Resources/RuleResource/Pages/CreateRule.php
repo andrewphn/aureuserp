@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RuleResource;
 
+/**
+ * Create Rule class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateRule extends CreateRecord
 {
     protected static string $resource = RuleResource::class;
@@ -24,6 +29,12 @@ class CreateRule extends CreateRecord
             ->body(__('inventories::filament/clusters/configurations/resources/rule/pages/create-rule.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

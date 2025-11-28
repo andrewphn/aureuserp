@@ -20,6 +20,11 @@ use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\Payment;
 use Webkul\Account\Models\PaymentRegister;
 
+/**
+ * Pay Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PayAction extends Action
 {
     public static function getDefaultName(): ?string
@@ -108,6 +113,13 @@ class PayAction extends Action
             });
     }
 
+    /**
+     * Register Payment
+     *
+     * @param Move $record The model record
+     * @param array $data The data array
+     * @return PaymentRegister
+     */
     private function registerPayment(Move $record, array $data): PaymentRegister
     {
         $paymentMethodLine = $record->paymentMethodLine()->findOrFail($data['payment_method_line_id']);
@@ -134,6 +146,13 @@ class PayAction extends Action
         return $paymentRegister;
     }
 
+    /**
+     * Create Payment
+     *
+     * @param Move $record The model record
+     * @param array $data The data array
+     * @return Payment
+     */
     private function createPayment(Move $record, array $data): Payment
     {
         $paymentMethodLine = $record->paymentMethodLine()->findOrFail($data['payment_method_line_id']);
@@ -167,6 +186,13 @@ class PayAction extends Action
         return $payment;
     }
 
+    /**
+     * Create Move
+     *
+     * @param Move $record The model record
+     * @param Payment $payment
+     * @param array $data The data array
+     */
     private function createMove(Move $record, Payment $payment, array $data)
     {
         $move = $record->replicate();
@@ -208,6 +234,14 @@ class PayAction extends Action
         return $move;
     }
 
+    /**
+     * Create Move Line
+     *
+     * @param Move $record The model record
+     * @param Move $newMove
+     * @param Payment $payment
+     * @param array $data The data array
+     */
     private function createMoveLine(Move $record, Move $newMove, Payment $payment, array $data)
     {
         MoveLine::create([

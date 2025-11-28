@@ -5,6 +5,10 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Analytic\Models\Record;
 
+/**
+ * Timesheet Eloquent model
+ *
+ */
 class Timesheet extends Record
 {
     /**
@@ -27,16 +31,30 @@ class Timesheet extends Record
         });
     }
 
+    /**
+     * Project
+     *
+     * @return BelongsTo
+     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * Task
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function task()
     {
         return $this->belongsTo(Task::class);
     }
 
+    /**
+     * Update Task Times
+     *
+     */
     public function updateTaskTimes()
     {
         if (! $this->task) {
@@ -79,6 +97,10 @@ class Timesheet extends Record
         }
     }
 
+    /**
+     * Update Task Times Old
+     *
+     */
     public function updateTaskTimesOld()
     {
         if (! $this->task) {

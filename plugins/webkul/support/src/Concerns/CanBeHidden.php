@@ -4,6 +4,10 @@ namespace Webkul\Support\Concerns;
 
 use Closure;
 
+/**
+ * Can Be Hidden trait
+ *
+ */
 trait CanBeHidden
 {
     protected bool | Closure $isHidden = false;
@@ -12,6 +16,11 @@ trait CanBeHidden
 
     protected mixed $evaluationContext = null;
 
+    /**
+     * Hidden
+     *
+     * @return static
+     */
     public function hidden(bool | Closure $condition = true): static
     {
         $this->isHidden = $condition;
@@ -19,6 +28,11 @@ trait CanBeHidden
         return $this;
     }
 
+    /**
+     * Visible
+     *
+     * @return static
+     */
     public function visible(bool | Closure $condition = true): static
     {
         $this->isVisible = $condition;
@@ -26,6 +40,12 @@ trait CanBeHidden
         return $this;
     }
 
+    /**
+     * Set Evaluation Context
+     *
+     * @param mixed $context
+     * @return static
+     */
     public function setEvaluationContext(mixed $context): static
     {
         $this->evaluationContext = $context;
@@ -33,6 +53,11 @@ trait CanBeHidden
         return $this;
     }
 
+    /**
+     * Is Hidden
+     *
+     * @return bool
+     */
     public function isHidden(): bool
     {
         if ($this->evaluateCondition($this->isHidden)) {
@@ -42,11 +67,21 @@ trait CanBeHidden
         return ! $this->evaluateCondition($this->isVisible);
     }
 
+    /**
+     * Is Visible
+     *
+     * @return bool
+     */
     public function isVisible(): bool
     {
         return ! $this->isHidden();
     }
 
+    /**
+     * Evaluate Condition
+     *
+     * @return bool
+     */
     protected function evaluateCondition(bool | Closure $condition): bool
     {
         if ($condition instanceof Closure) {

@@ -2,12 +2,21 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Chaining Type enumeration
+ *
+ */
 enum ActivityChainingType: string
 {
     case SUGGEST = 'suggest';
 
     case TRIGGER = 'trigger';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

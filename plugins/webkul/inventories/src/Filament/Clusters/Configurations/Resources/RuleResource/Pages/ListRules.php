@@ -11,6 +11,11 @@ use Webkul\Inventory\Models\Rule;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Rules class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListRules extends ListRecords
 {
     use HasTableViews;

@@ -20,6 +20,52 @@ use Webkul\Sale\Models\Order as SaleOrder;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Operation Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $origin
+ * @property mixed $move_type
+ * @property mixed $state
+ * @property bool $is_favorite
+ * @property string|null $description
+ * @property bool $has_deadline_issue
+ * @property bool $is_printed
+ * @property bool $is_locked
+ * @property \Carbon\Carbon|null $deadline
+ * @property \Carbon\Carbon|null $scheduled_at
+ * @property \Carbon\Carbon|null $closed_at
+ * @property int $user_id
+ * @property int $owner_id
+ * @property int $operation_type_id
+ * @property int $source_location_id
+ * @property int $destination_location_id
+ * @property int $back_order_id
+ * @property int $return_id
+ * @property int $partner_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property int $sale_order_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $moves
+ * @property-read \Illuminate\Database\Eloquent\Collection $moveLines
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ * @property-read \Illuminate\Database\Eloquent\Model|null $owner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $operationType
+ * @property-read \Illuminate\Database\Eloquent\Model|null $sourceLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $destinationLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $backOrderOf
+ * @property-read \Illuminate\Database\Eloquent\Model|null $returnOf
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $saleOrder
+ * @property-read \Illuminate\Database\Eloquent\Collection $purchaseOrders
+ * @property-read \Illuminate\Database\Eloquent\Collection $packages
+ *
+ */
 class Operation extends Model
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
@@ -104,46 +150,91 @@ class Operation extends Model
         'creator.name'                  => 'Creator',
     ];
 
+    /**
+     * User
+     *
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Owner
+     *
+     * @return BelongsTo
+     */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Operation Type
+     *
+     * @return BelongsTo
+     */
     public function operationType(): BelongsTo
     {
         return $this->belongsTo(OperationType::class)->withTrashed();
     }
 
+    /**
+     * Source Location
+     *
+     * @return BelongsTo
+     */
     public function sourceLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class)->withTrashed();
     }
 
+    /**
+     * Destination Location
+     *
+     * @return BelongsTo
+     */
     public function destinationLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class)->withTrashed();
     }
 
+    /**
+     * Back Order Of
+     *
+     * @return BelongsTo
+     */
     public function backOrderOf(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
+    /**
+     * Return Of
+     *
+     * @return BelongsTo
+     */
     public function returnOf(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -154,26 +245,51 @@ class Operation extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Moves
+     *
+     * @return HasMany
+     */
     public function moves(): HasMany
     {
         return $this->hasMany(Move::class, 'operation_id');
     }
 
+    /**
+     * Move Lines
+     *
+     * @return HasMany
+     */
     public function moveLines(): HasMany
     {
         return $this->hasMany(MoveLine::class, 'operation_id');
     }
 
+    /**
+     * Packages
+     *
+     * @return HasManyThrough
+     */
     public function packages(): HasManyThrough
     {
         return $this->hasManyThrough(Package::class, MoveLine::class, 'operation_id', 'id', 'id', 'result_package_id');
     }
 
+    /**
+     * Purchase Orders
+     *
+     * @return BelongsToMany
+     */
     public function purchaseOrders(): BelongsToMany
     {
         return $this->belongsToMany(PurchaseOrder::class, 'purchases_order_operations', 'inventory_operation_id', 'purchase_order_id');
     }
 
+    /**
+     * Sale Order
+     *
+     * @return BelongsTo
+     */
     public function saleOrder(): BelongsTo
     {
         return $this->belongsTo(SaleOrder::class, 'sale_order_id');
@@ -181,6 +297,11 @@ class Operation extends Model
 
     /**
      * Bootstrap any application services.
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {
@@ -204,6 +325,10 @@ class Operation extends Model
     /**
      * Update the full name without triggering additional events
      */
+    /**
+     * Update Name
+     *
+     */
     public function updateName()
     {
         if (! $this->operationType->warehouse) {
@@ -213,6 +338,11 @@ class Operation extends Model
         }
     }
 
+    /**
+     * Update Children Names
+     *
+     * @return void
+     */
     public function updateChildrenNames(): void
     {
         foreach ($this->moves as $move) {
@@ -224,6 +354,11 @@ class Operation extends Model
         }
     }
 
+    /**
+     * New Factory
+     *
+     * @return OperationFactory
+     */
     protected static function newFactory(): OperationFactory
     {
         return OperationFactory::new();

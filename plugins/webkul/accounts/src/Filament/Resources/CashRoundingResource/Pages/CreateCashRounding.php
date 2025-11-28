@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\CashRoundingResource;
 
+/**
+ * Create Cash Rounding class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateCashRounding extends CreateRecord
 {
     protected static string $resource = CashRoundingResource::class;
@@ -24,6 +29,12 @@ class CreateCashRounding extends CreateRecord
             ->body(__('accounts::filament/resources/cash-rounding/pages/create-cash-rounding.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::user()->id;

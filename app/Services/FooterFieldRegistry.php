@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+/**
+ * Footer Field Registry class
+ *
+ */
 class FooterFieldRegistry
 {
     /**

@@ -10,6 +10,25 @@ use Webkul\Partner\Database\Factories\BankAccountFactory;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Bank;
 
+/**
+ * Bank Account Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property float $account_number
+ * @property float $account_holder_name
+ * @property bool $is_active
+ * @property bool $can_send_money
+ * @property int $creator_id
+ * @property int $partner_id
+ * @property int $bank_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $bank
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class BankAccount extends Model
 {
     use HasFactory, SoftDeletes;
@@ -46,16 +65,31 @@ class BankAccount extends Model
         'can_send_money' => 'boolean',
     ];
 
+    /**
+     * Bank
+     *
+     * @return BelongsTo
+     */
     public function bank(): BelongsTo
     {
         return $this->belongsTo(Bank::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -63,6 +97,11 @@ class BankAccount extends Model
 
     /**
      * Bootstrap any application services.
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {
@@ -77,6 +116,11 @@ class BankAccount extends Model
         });
     }
 
+    /**
+     * New Factory
+     *
+     * @return BankAccountFactory
+     */
     protected static function newFactory(): BankAccountFactory
     {
         return BankAccountFactory::new();

@@ -8,6 +8,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Scraps class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListScraps extends ListRecords
 {
     use HasTableViews;

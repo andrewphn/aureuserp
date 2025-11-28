@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Annotation Entity Service service
+ *
+ */
 class AnnotationEntityService
 {
     /**

@@ -8,6 +8,16 @@ use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Product\Models\Product as BaseProduct;
 
+/**
+ * Product Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection $productTaxes
+ * @property-read \Illuminate\Database\Eloquent\Collection $supplierTaxes
+ *
+ */
 class Product extends BaseProduct
 {
     use HasChatter, HasCustomFields, HasLogActivity;
@@ -58,11 +68,21 @@ class Product extends BaseProduct
         'creator.name'  => 'Creator',
     ];
 
+    /**
+     * Product Taxes
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function productTaxes()
     {
         return $this->belongsToMany(Tax::class, 'accounts_product_taxes', 'product_id', 'tax_id');
     }
 
+    /**
+     * Supplier Taxes
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function supplierTaxes()
     {
         return $this->belongsToMany(Tax::class, 'accounts_product_supplier_taxes', 'product_id', 'tax_id');

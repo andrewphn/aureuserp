@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Models\Employee;
 use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 
+/**
+ * Create My Allocation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateMyAllocation extends CreateRecord
 {
     protected static string $resource = MyAllocationResource::class;
@@ -25,6 +30,12 @@ class CreateMyAllocation extends CreateRecord
             ->body(__('time-off::filament/clusters/my-time/resources/my-allocation/pages/create-allocation.notification.success.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $employee = Employee::where('user_id', Auth::id())->first();

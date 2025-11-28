@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Enums\PermissionType;
 
+/**
+ * User Permission Scope Eloquent model
+ *
+ */
 class UserPermissionScope implements Scope
 {
     protected $ownerRelation;

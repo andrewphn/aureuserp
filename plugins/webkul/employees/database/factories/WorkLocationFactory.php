@@ -7,6 +7,10 @@ use Webkul\Employee\Models\WorkLocation;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Work Location Factory model factory
+ *
+ */
 class WorkLocationFactory extends Factory
 {
     /**

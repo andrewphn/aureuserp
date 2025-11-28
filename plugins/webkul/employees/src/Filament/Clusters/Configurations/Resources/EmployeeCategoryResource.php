@@ -30,6 +30,11 @@ use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\EmployeeCategoryResource\Pages\ListEmployeeCategories;
 use Webkul\Employee\Models\EmployeeCategory;
 
+/**
+ * Employee Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EmployeeCategoryResource extends Resource
 {
     protected static ?string $model = EmployeeCategory::class;
@@ -53,6 +58,12 @@ class EmployeeCategoryResource extends Resource
         return __('employees::filament/clusters/configurations/resources/employee-category.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -70,6 +81,12 @@ class EmployeeCategoryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -191,6 +208,12 @@ class EmployeeCategoryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

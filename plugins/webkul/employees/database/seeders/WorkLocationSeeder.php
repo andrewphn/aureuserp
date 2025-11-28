@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Work Location Seeder database seeder
+ *
+ */
 class WorkLocationSeeder extends Seeder
 {
     /**
@@ -14,9 +18,14 @@ class WorkLocationSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('employees_work_locations')->delete();
-
         $company = Company::first();
+
+        // Skip seeding if no company exists yet (erp:install creates the company)
+        if (!$company) {
+            return;
+        }
+
+        DB::table('employees_work_locations')->delete();
 
         $user = User::first();
 

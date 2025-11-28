@@ -6,6 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Project\Models\Room;
 
+/**
+ * Pdf Page Room Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $pdf_page_id
+ * @property int $room_id
+ * @property string|null $room_number
+ * @property string|null $room_type
+ * @property-read \Illuminate\Database\Eloquent\Model|null $pdfPage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $projectRoom
+ *
+ */
 class PdfPageRoom extends Model
 {
     use HasFactory;

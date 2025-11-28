@@ -21,6 +21,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\UTMMediumResource\Pages\ListUTMMedia;
 use Webkul\Recruitment\Models\UTMMedium;
 
+/**
+ * UTMMedium Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class UTMMediumResource extends Resource
 {
     protected static ?string $model = UTMMedium::class;
@@ -44,6 +49,12 @@ class UTMMediumResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/utm-medium.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -56,6 +67,12 @@ class UTMMediumResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -123,6 +140,12 @@ class UTMMediumResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -141,6 +164,12 @@ class UTMMediumResource extends Resource
         ];
     }
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'utm-mediums';

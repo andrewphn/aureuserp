@@ -5,6 +5,11 @@ namespace App\Filament\Components;
 use Filament\Widgets\Widget;
 use Illuminate\Contracts\View\View;
 
+/**
+ * Live Summary Panel class
+ *
+ * @see \Filament\Resources\Resource
+ */
 abstract class LiveSummaryPanel extends Widget
 {
     protected string $view = 'filament.widgets.live-summary-panel';
@@ -57,6 +62,11 @@ abstract class LiveSummaryPanel extends Widget
         })->all();
     }
 
+    /**
+     * Render
+     *
+     * @return View
+     */
     public function render(): View
     {
         return view($this->view, [

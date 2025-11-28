@@ -19,6 +19,11 @@ use Webkul\Recruitment\Filament\Widgets\JobPositionStatsWidget;
 use Webkul\Recruitment\Models\Stage;
 use Webkul\Support\Models\Company;
 
+/**
+ * Recruitments class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Recruitments extends BaseDashboard
 {
      use HasPageShield;
@@ -41,6 +46,12 @@ class Recruitments extends BaseDashboard
         return null;
     }
 
+    /**
+     * Filters Form
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function filtersForm(Schema $schema): Schema
     {
         return $schema

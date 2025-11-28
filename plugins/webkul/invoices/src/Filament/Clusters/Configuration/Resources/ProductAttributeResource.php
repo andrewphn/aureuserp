@@ -10,6 +10,11 @@ use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeRes
 use Webkul\Invoice\Models\Attribute;
 use Webkul\Product\Filament\Resources\AttributeResource;
 
+/**
+ * Product Attribute Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductAttributeResource extends AttributeResource
 {
     protected static ?string $model = Attribute::class;

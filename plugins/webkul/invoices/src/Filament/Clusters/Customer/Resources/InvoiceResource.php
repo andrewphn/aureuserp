@@ -12,6 +12,11 @@ use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\Li
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages\ViewInvoice;
 use Webkul\Invoice\Models\Invoice;
 
+/**
+ * Invoice Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class InvoiceResource extends BaseInvoiceResource
 {
     protected static ?string $model = Invoice::class;
@@ -44,6 +49,12 @@ class InvoiceResource extends BaseInvoiceResource
         ];
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

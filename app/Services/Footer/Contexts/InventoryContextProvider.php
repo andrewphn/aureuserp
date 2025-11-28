@@ -41,6 +41,12 @@ class InventoryContextProvider implements ContextProviderInterface
         return 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4';
     }
 
+    /**
+     * Load Context
+     *
+     * @param int|string $entityId
+     * @return array
+     */
     public function loadContext(int|string $entityId): array
     {
         // Load inventory item data
@@ -55,6 +61,13 @@ class InventoryContextProvider implements ContextProviderInterface
         return (array) $item;
     }
 
+    /**
+     * Get Field Schema
+     *
+     * @param array $data The data array
+     * @param bool $isMinimized
+     * @return array
+     */
     public function getFieldSchema(array $data, bool $isMinimized = false): array
     {
         if ($isMinimized) {
@@ -64,6 +77,12 @@ class InventoryContextProvider implements ContextProviderInterface
         return $this->getExpandedSchema($data);
     }
 
+    /**
+     * Get Minimized Schema
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getMinimizedSchema(array $data): array
     {
         $quantity = $data['quantity'] ?? 0;
@@ -78,6 +97,12 @@ class InventoryContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Get Expanded Schema
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getExpandedSchema(array $data): array
     {
         $fields = [
@@ -148,11 +173,23 @@ class InventoryContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Supports Feature
+     *
+     * @param string $feature
+     * @return bool
+     */
     public function supportsFeature(string $feature): bool
     {
         return false;
     }
 
+    /**
+     * Get Actions
+     *
+     * @param array $data The data array
+     * @return array
+     */
     public function getActions(array $data): array
     {
         $actions = [];

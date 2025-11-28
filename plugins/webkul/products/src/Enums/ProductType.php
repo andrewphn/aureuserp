@@ -4,6 +4,10 @@ namespace Webkul\Product\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Product Type enumeration
+ *
+ */
 enum ProductType: string implements HasLabel
 {
     case GOODS = 'goods';

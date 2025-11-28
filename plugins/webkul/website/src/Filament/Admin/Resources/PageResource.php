@@ -41,6 +41,11 @@ use Webkul\Website\Filament\Admin\Resources\PageResource\Pages\ListPages;
 use Webkul\Website\Filament\Admin\Resources\PageResource\Pages\ViewPage;
 use Webkul\Website\Models\Page as PageModel;
 
+/**
+ * Page Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PageResource extends Resource
 {
     protected static ?string $model = PageModel::class;
@@ -61,6 +66,12 @@ class PageResource extends Resource
         return __('website::filament/admin/resources/page.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -114,6 +125,12 @@ class PageResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -221,6 +238,12 @@ class PageResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -305,6 +328,12 @@ class PageResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

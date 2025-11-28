@@ -11,6 +11,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Product\Filament\Resources\CategoryResource;
 use Webkul\Product\Models\Category;
 
+/**
+ * Edit Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCategory extends EditRecord
 {
     protected static string $resource = CategoryResource::class;
@@ -44,6 +49,13 @@ class EditCategory extends EditRecord
         ];
     }
 
+    /**
+     * Save
+     *
+     * @param bool $shouldRedirect
+     * @param bool $shouldSendSavedNotification
+     * @return void
+     */
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         try {

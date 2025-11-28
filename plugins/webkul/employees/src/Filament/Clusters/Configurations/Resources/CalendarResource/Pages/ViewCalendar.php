@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\CalendarResource;
 
+/**
+ * View Calendar class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCalendar extends ViewRecord
 {
     protected static string $resource = CalendarResource::class;

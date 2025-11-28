@@ -9,6 +9,11 @@ use Filament\Schemas\Schema;
 use Webkul\Invoice\Settings\ProductSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Products extends SettingsPage
 {
     use HasPageShield;
@@ -40,6 +45,12 @@ class Products extends SettingsPage
         return __('Manage Products');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

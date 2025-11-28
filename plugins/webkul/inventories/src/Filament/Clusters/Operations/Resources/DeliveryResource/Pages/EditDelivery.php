@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource;
 use Webkul\Inventory\Models\Delivery;
 
+/**
+ * Edit Delivery class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditDelivery extends EditRecord
 {
     protected static string $resource = DeliveryResource::class;
@@ -76,6 +81,11 @@ class EditDelivery extends EditRecord
         ];
     }
 
+    /**
+     * Update Form
+     *
+     * @return void
+     */
     public function updateForm(): void
     {
         $this->fillForm();

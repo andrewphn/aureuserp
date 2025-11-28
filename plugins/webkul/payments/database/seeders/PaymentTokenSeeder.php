@@ -4,6 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Payment Token Seeder database seeder
+ *
+ */
 class PaymentTokenSeeder extends Seeder
 {
     /**

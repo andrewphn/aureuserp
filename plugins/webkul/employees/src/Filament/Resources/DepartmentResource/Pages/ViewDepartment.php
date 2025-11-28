@@ -9,6 +9,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Employee\Filament\Resources\DepartmentResource;
 
+/**
+ * View Department class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewDepartment extends ViewRecord
 {
     protected static string $resource = DepartmentResource::class;

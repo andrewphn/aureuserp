@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\AttributeResource;
 
+/**
+ * Create Attribute class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateAttribute extends CreateRecord
 {
     protected static string $resource = AttributeResource::class;
@@ -24,6 +29,12 @@ class CreateAttribute extends CreateRecord
             ->body(__('products::filament/resources/attribute/pages/create-attribute.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

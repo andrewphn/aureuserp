@@ -10,6 +10,11 @@ use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Projects class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListProjects extends ListRecords
 {
     use HasTableViews;

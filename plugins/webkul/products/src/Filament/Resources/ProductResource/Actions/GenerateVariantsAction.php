@@ -15,6 +15,11 @@ use Webkul\Product\Models\Product;
 use Webkul\Product\Models\ProductAttribute;
 use Webkul\Product\Models\ProductCombination;
 
+/**
+ * Generate Variants Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class GenerateVariantsAction extends Action
 {
     use CanCustomizeProcess;
@@ -44,6 +49,11 @@ class GenerateVariantsAction extends Action
             ->hidden(fn (ManageAttributes $livewire) => $livewire->getRecord()->attributes->isEmpty());
     }
 
+    /**
+     * Generate Variants
+     *
+     * @return void
+     */
     protected function generateVariants(): void
     {
         try {
@@ -71,6 +81,12 @@ class GenerateVariantsAction extends Action
         }
     }
 
+    /**
+     * Handle Single Attribute Variants
+     *
+     * @param ProductAttribute $attribute
+     * @return void
+     */
     protected function handleSingleAttributeVariants(ProductAttribute $attribute): void
     {
         $attributeValues = $attribute->values;
@@ -114,6 +130,12 @@ class GenerateVariantsAction extends Action
         }
     }
 
+    /**
+     * Handle Multiple Attribute Variants
+     *
+     * @param Collection $attributes
+     * @return void
+     */
     protected function handleMultipleAttributeVariants(Collection $attributes): void
     {
         $existingVariants = Product::where('parent_id', $this->record->id)->get();
@@ -167,6 +189,14 @@ class GenerateVariantsAction extends Action
         }
     }
 
+    /**
+     * Generate Attribute Combinations
+     *
+     * @param Collection $attributes
+     * @param mixed $currentCombination
+     * @param mixed $index
+     * @return array
+     */
     protected function generateAttributeCombinations(Collection $attributes, $currentCombination = [], $index = 0): array
     {
         $combinations = [];
@@ -189,6 +219,13 @@ class GenerateVariantsAction extends Action
         return $combinations;
     }
 
+    /**
+     * Create Variant
+     *
+     * @param Product $parent
+     * @param array $attributeValues
+     * @return Product
+     */
     protected function createVariant(Product $parent, array $attributeValues): Product
     {
         $variantName = $parent->name.' - '.collect($attributeValues)
@@ -227,6 +264,13 @@ class GenerateVariantsAction extends Action
         return $variant;
     }
 
+    /**
+     * Update Variant
+     *
+     * @param Product $variant
+     * @param array $attributeValues
+     * @return void
+     */
     protected function updateVariant(Product $variant, array $attributeValues): void
     {
         $variantName = $this->record->name.' - '.collect($attributeValues)

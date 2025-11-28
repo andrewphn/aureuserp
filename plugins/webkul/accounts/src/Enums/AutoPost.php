@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Auto Post enumeration
+ *
+ */
 enum AutoPost: string implements HasLabel
 {
     case NO = 'no';
@@ -27,6 +31,11 @@ enum AutoPost: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

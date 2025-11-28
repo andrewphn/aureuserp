@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Accrued Gain Time enumeration
+ *
+ */
 enum AccruedGainTime: string implements HasLabel
 {
     case START = 'start';
@@ -18,6 +22,11 @@ enum AccruedGainTime: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

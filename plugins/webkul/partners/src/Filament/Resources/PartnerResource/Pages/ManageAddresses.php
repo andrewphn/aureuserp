@@ -8,6 +8,11 @@ use Filament\Tables\Table;
 use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * Manage Addresses class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageAddresses extends ManageRelatedRecords
 {
     protected static string $resource = PartnerResource::class;
@@ -21,6 +26,12 @@ class ManageAddresses extends ManageRelatedRecords
         return __('partners::filament/resources/partner/pages/manage-addresses.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return AddressResource::form($schema);

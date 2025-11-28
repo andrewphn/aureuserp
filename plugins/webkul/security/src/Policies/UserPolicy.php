@@ -5,6 +5,10 @@ namespace Webkul\Security\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 
+/**
+ * User Policy authorization policy
+ *
+ */
 class UserPolicy
 {
     use HandlesAuthorization;

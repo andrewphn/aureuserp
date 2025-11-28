@@ -6,6 +6,11 @@ use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderRe
 use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\PurchaseOrderResource\Pages\ViewPurchaseOrder;
 use Webkul\Purchase\Models\CustomerPurchaseOrder as PurchaseOrder;
 
+/**
+ * Purchase Order Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PurchaseOrderResource extends OrderResource
 {
     protected static ?string $model = PurchaseOrder::class;

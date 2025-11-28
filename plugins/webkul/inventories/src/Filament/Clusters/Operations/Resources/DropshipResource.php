@@ -28,6 +28,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource\Pag
 use Webkul\Inventory\Models\Dropship;
 use Webkul\Inventory\Settings\LogisticSettings;
 
+/**
+ * Dropship Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DropshipResource extends Resource
 {
     protected static ?string $model = Dropship::class;
@@ -42,6 +47,11 @@ class DropshipResource extends Resource
 
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -66,11 +76,23 @@ class DropshipResource extends Resource
         return __('inventories::filament/clusters/operations/resources/dropship.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return OperationResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return OperationResource::table($table)
@@ -126,11 +148,23 @@ class DropshipResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return OperationResource::infolist($schema);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

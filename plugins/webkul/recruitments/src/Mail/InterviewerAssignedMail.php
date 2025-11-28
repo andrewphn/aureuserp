@@ -10,6 +10,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Interviewer Assigned Mail class
+ *
+ */
 class InterviewerAssignedMail extends Mailable
 {
     use Queueable, SerializesModels;

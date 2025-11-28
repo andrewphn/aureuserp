@@ -10,6 +10,11 @@ use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Employee\Filament\Resources\EmployeeResource;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * Edit Employee class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditEmployee extends EditRecord
 {
     protected static string $resource = EmployeeResource::class;
@@ -48,6 +53,12 @@ class EditEmployee extends EditRecord
         return ActivityPlan::where('plugin', 'employees')->pluck('name', 'id');
     }
 
+    /**
+     * Mutate Form Data Before Fill
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $partner = $this->record->partner;
@@ -58,6 +69,12 @@ class EditEmployee extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return [

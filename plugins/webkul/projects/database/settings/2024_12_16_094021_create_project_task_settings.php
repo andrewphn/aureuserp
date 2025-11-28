@@ -2,8 +2,17 @@
 
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-return new class extends SettingsMigration
+return new /**
+ * extends class
+ *
+ */
+class extends SettingsMigration
 {
+    /**
+     * Up
+     *
+     * @return void
+     */
     public function up(): void
     {
         $this->migrator->add('task.enable_recurring_tasks', false);
@@ -12,6 +21,11 @@ return new class extends SettingsMigration
         $this->migrator->add('task.enable_milestones', true);
     }
 
+    /**
+     * Down
+     *
+     * @return void
+     */
     public function down(): void
     {
         $this->migrator->delete('task.enable_recurring_tasks');

@@ -22,6 +22,11 @@ use Webkul\Project\Models\Task;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * Manage Tasks class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTasks extends ManageRelatedRecords
 {
     use HasTableViews;
@@ -47,6 +52,12 @@ class ManageTasks extends ManageRelatedRecords
         ];
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return TaskResource::table($table)
@@ -86,6 +97,12 @@ class ManageTasks extends ManageRelatedRecords
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return TaskResource::infolist($schema);

@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * App Service Provider service provider
+ *
+ * @see \Illuminate\Support\ServiceProvider
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**

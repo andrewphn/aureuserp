@@ -9,6 +9,11 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Payment Terms class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPaymentTerms extends ListRecords
 {
     use HasTableViews;

@@ -7,6 +7,7 @@
  */
 
 import { createSVGElement } from '../utilities.js';
+import { getRoomNameById, getLocationNameById } from './entity-lookup.js';
 
 /**
  * Enter isolation mode for an annotation
@@ -32,6 +33,7 @@ export async function enterIsolationMode(annotation, state, callbacks) {
         state.isolatedLocationId = annotation.locationId || annotation.roomLocationId; // Parent: entity ID
         state.isolatedLocationName = annotation.locationName || getLocationNameById(annotation.locationId || annotation.roomLocationId, state);
         state.isolatedCabinetRunId = annotation.id; // CRITICAL: Isolated level uses annotation ID for template wrapper
+        state.isolatedCabinetRunEntityId = annotation.cabinetRunId; // Entity ID for child matching
         state.isolatedCabinetRunName = annotation.label;
 
         // Set active context
@@ -55,6 +57,7 @@ export async function enterIsolationMode(annotation, state, callbacks) {
         state.isolatedLocationId = annotation.id; // CRITICAL: Isolated level uses annotation ID for template wrapper
         state.isolatedLocationName = annotation.label;
         state.isolatedCabinetRunId = null;
+        state.isolatedCabinetRunEntityId = null;
         state.isolatedCabinetRunName = '';
 
         // Set active context
@@ -83,10 +86,11 @@ export async function enterIsolationMode(annotation, state, callbacks) {
         state.isolatedLocationId = null;
         state.isolatedLocationName = '';
         state.isolatedCabinetRunId = null;
+        state.isolatedCabinetRunEntityId = null;
         state.isolatedCabinetRunName = '';
 
         // Set active context
-        state.activeRoomId = roomAnnotationId;
+        state.activeRoomId = roomEntityId; // Use entity ID for child matching, not annotation ID
         state.activeRoomName = roomName;
         state.activeLocationId = null;
         state.activeLocationName = '';
@@ -161,6 +165,7 @@ export async function exitIsolationMode(state, callbacks) {
     state.isolatedLocationId = null;
     state.isolatedLocationName = '';
     state.isolatedCabinetRunId = null;
+    state.isolatedCabinetRunEntityId = null;
     state.isolatedCabinetRunName = '';
     state.isolationViewType = null;
     state.isolationOrientation = null;
@@ -231,14 +236,11 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         // Show the isolated room itself (template wrapper will hide it via x-show)
         if (anno.id === state.isolatedRoomId) return true;
 
-        // Show level 1: locations in this room
+        // Show level 1 ONLY: locations in this room (direct children)
         // Use entity ID for matching since child annotations reference parent by entity ID
         if (anno.type === 'location' && anno.roomId === state.isolatedRoomEntityId) return true;
 
-        // Show level 2: cabinet_runs in this room's locations
-        if (anno.type === 'cabinet_run' && anno.roomId === state.isolatedRoomEntityId) return true;
-
-        // Hide everything else
+        // Hide everything else (including cabinet_runs and cabinets - those are grandchildren)
         return false;
 
     } else if (state.isolationLevel === 'location') {
@@ -247,14 +249,12 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         // Hide the isolated location itself (container) - only show children
         // Template wrapper in tree already handles display via x-show
 
-        // Show direct children (cabinet runs in this location) - level 1
+        // Show direct children ONLY (cabinet runs in this location)
         // Use activeLocationId (entity ID) not isolatedLocationId (annotation ID)
-        if (anno.type === 'cabinet_run' && anno.locationId === state.activeLocationId) return true;
+        // Use roomLocationId field (not locationId) as that's what cabinet runs actually store
+        if (anno.type === 'cabinet_run' && anno.roomLocationId === state.activeLocationId) return true;
 
-        // Show grandchildren (cabinets within cabinet runs in this location) - level 2
-        if (anno.type === 'cabinet' && anno.locationId === state.activeLocationId) return true;
-
-        // Hide everything else
+        // Hide everything else (including cabinets - those are grandchildren)
         return false;
 
     } else if (state.isolationLevel === 'cabinet_run') {
@@ -266,7 +266,8 @@ export function isAnnotationVisibleInIsolation(anno, state) {
         // Template wrapper in tree already handles display via x-show
 
         // Show direct children (cabinets in this run)
-        if (anno.type === 'cabinet' && anno.cabinetRunId === state.isolatedCabinetRunId) return true;
+        // Use isolatedCabinetRunEntityId (entity ID) not isolatedCabinetRunId (annotation ID)
+        if (anno.type === 'cabinet' && anno.cabinetRunId === state.isolatedCabinetRunEntityId) return true;
 
         // Hide everything else
         return false;
@@ -456,21 +457,3 @@ export function getIsolationBreadcrumbs(state) {
     return breadcrumbs;
 }
 
-/**
- * Helper functions
- */
-
-function getRoomNameById(roomId, state) {
-    if (!state.tree || !roomId) return '';
-    const room = state.tree.find(r => r.id === roomId);
-    return room ? room.name : '';
-}
-
-function getLocationNameById(locationId, state) {
-    if (!state.tree || !locationId) return '';
-    for (const room of state.tree) {
-        const location = room.children?.find(l => l.id === locationId);
-        if (location) return location.name;
-    }
-    return '';
-}

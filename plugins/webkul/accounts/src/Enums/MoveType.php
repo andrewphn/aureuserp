@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Move Type enumeration
+ *
+ */
 enum MoveType: string implements HasLabel
 {
     case ENTRY = 'entry';
@@ -33,6 +37,11 @@ enum MoveType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

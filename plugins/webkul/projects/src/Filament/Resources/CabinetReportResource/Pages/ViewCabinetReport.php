@@ -6,6 +6,11 @@ use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Project\Filament\Resources\CabinetReportResource;
 
+/**
+ * View Cabinet Report class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCabinetReport extends ViewRecord
 {
     protected static string $resource = CabinetReportResource::class;

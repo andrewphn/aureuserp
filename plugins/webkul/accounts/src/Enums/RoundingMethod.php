@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Rounding Method enumeration
+ *
+ */
 enum RoundingMethod: string implements HasLabel
 {
     case UP = 'up';
@@ -21,6 +25,11 @@ enum RoundingMethod: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

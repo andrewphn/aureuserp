@@ -1,0 +1,136 @@
+# PHPDoc Comprehensive Coverage PRD
+
+## Overview
+Ensure all critical PHP files in the AureusERP codebase have complete and accurate PHPDoc documentation. The automated script has generated baseline documentation, but crucial files need manual review and enhancement.
+
+## Goals
+1. Verify PHPDoc coverage on all critical files
+2. Enhance documentation quality for core business logic
+3. Ensure all public APIs are fully documented
+4. Add meaningful descriptions beyond auto-generated content
+
+## Critical File Categories
+
+### 1. Core Models (Priority: Critical)
+Files requiring detailed PHPDoc with property types, relationships, and business context:
+- `app/Models/*.php` - Core application models (PdfDocument, PdfPage, PdfPageAnnotation, ProductionEstimate)
+- `plugins/webkul/projects/src/Models/*.php` - Project, Task, Room, Cabinet models
+- `plugins/webkul/sales/src/Models/*.php` - Order, Quotation, OrderLine models
+- `plugins/webkul/inventories/src/Models/*.php` - Product, StockMove, Warehouse models
+- `plugins/webkul/partners/src/Models/*.php` - Partner, Contact models
+- `plugins/webkul/employees/src/Models/*.php` - Employee, Department models
+- `plugins/webkul/security/src/Models/*.php` - User, Role, Permission models
+
+### 2. Filament Resources (Priority: High)
+All FilamentPHP resource classes need:
+- Class-level description of the resource purpose
+- form() method documenting all form fields
+- table() method documenting all columns
+- getPages() method documenting available pages
+- Custom actions documented with @return types
+
+### 3. Service Classes (Priority: High)
+Business logic services need comprehensive documentation:
+- `plugins/webkul/sales/src/Services/*.php` - Pricing, template rendering
+- `plugins/webkul/projects/src/Services/*.php` - Project management logic
+- `plugins/webkul/inventories/src/Services/*.php` - Stock management
+- `app/Services/*.php` - Application-wide services
+
+### 4. API Controllers (Priority: High)
+All API endpoints need:
+- @param annotations for request parameters
+- @return annotations with response structure
+- @throws annotations for possible exceptions
+- Route information in docblock
+
+### 5. Traits (Priority: Medium)
+Reusable traits need documentation:
+- `plugins/webkul/chatter/src/Traits/*.php`
+- `plugins/webkul/field/src/Traits/*.php`
+- `plugins/webkul/support/src/Traits/*.php`
+
+### 6. Migrations (Priority: Low)
+Database migrations should have:
+- Class-level description of what the migration does
+- up() and down() method descriptions
+
+## Quality Standards
+
+### Required for All Classes
+- Class-level docblock with description
+- @property annotations for all model attributes
+- @property-read for computed/relationship properties
+- @method annotations for magic methods
+
+### Required for All Methods
+- Brief description of purpose
+- @param for each parameter with type and description
+- @return with type and description
+- @throws for exceptions that can be raised
+
+### Naming Conventions
+- Use Laravel/PHP type hints where possible
+- Reference related classes with full namespace or @see
+- Use @inheritdoc for overridden methods when appropriate
+
+## Validation Tasks
+
+### Task 1: Audit Core Models PHPDoc
+Review and enhance PHPDoc for all files in:
+- app/Models/
+- plugins/webkul/projects/src/Models/
+- plugins/webkul/sales/src/Models/
+Ensure all relationships have @property-read with return type collections.
+
+### Task 2: Audit Filament Resources PHPDoc
+Review and enhance PHPDoc for all Filament resources:
+- plugins/webkul/*/src/Filament/Resources/
+- plugins/webkul/*/src/Filament/Clusters/
+Ensure all form and table methods are documented.
+
+### Task 3: Audit Service Classes PHPDoc
+Review and enhance PHPDoc for all service classes:
+- app/Services/
+- plugins/webkul/*/src/Services/
+Ensure business logic is clearly documented.
+
+### Task 4: Audit API Controllers PHPDoc
+Review and enhance PHPDoc for all API endpoints:
+- routes/api.php related controllers
+- plugins/webkul/*/src/Http/Controllers/
+Ensure request/response documentation.
+
+### Task 5: Generate PHPDoc Coverage Report
+Create a script or use tools to generate a coverage report showing:
+- Files with missing class docblocks
+- Methods with missing docblocks
+- Properties without type hints
+- Output report to docs/phpdoc-coverage-report.md
+
+### Task 6: Document Cabinet System Models
+The cabinet/woodworking system is core to TCS business:
+- CabinetSpecification model
+- CabinetRun model
+- Room and RoomLocation models
+- All cabinet-related relationships and computed properties
+
+### Task 7: Document PDF Annotation System
+The PDF annotation system is critical for project workflows:
+- PdfDocument model
+- PdfPage model
+- PdfPageAnnotation model
+- All annotation-related services and traits
+
+### Task 8: Document Sales/Quotation System
+The sales workflow is core to business operations:
+- Order and Quotation models
+- OrderLine and pricing logic
+- Template rendering services
+- All sales-related computed properties
+
+## Success Criteria
+- 100% of models have class-level docblocks
+- 100% of public methods have docblocks
+- All relationships documented with return types
+- All services have clear business context in descriptions
+- Coverage report shows >95% documentation coverage

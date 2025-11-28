@@ -11,6 +11,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource;
 use Webkul\Purchase\Models\ProductSupplier;
 
+/**
+ * Edit Vendor Price class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditVendorPrice extends EditRecord
 {
     protected static string $resource = VendorPriceResource::class;

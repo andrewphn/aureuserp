@@ -2,12 +2,21 @@
 
 namespace Webkul\Project\Enums;
 
+/**
+ * Project Visibility enumeration
+ *
+ */
 enum ProjectVisibility: string
 {
     case PRIVATE = 'private';
     case INTERNAL = 'internal';
     case PUBLIC = 'public';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [
@@ -17,6 +26,11 @@ enum ProjectVisibility: string
         ];
     }
 
+    /**
+     * Icons
+     *
+     * @return array
+     */
     public static function icons(): array
     {
         return [
@@ -26,6 +40,11 @@ enum ProjectVisibility: string
         ];
     }
 
+    /**
+     * Colors
+     *
+     * @return array
+     */
     public static function colors(): array
     {
         return [

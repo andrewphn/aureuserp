@@ -9,6 +9,11 @@ use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\TaskResource;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * Edit Task class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditTask extends EditRecord
 {
     protected static string $resource = TaskResource::class;

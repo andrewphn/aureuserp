@@ -6,6 +6,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\CreatePartner as BaseCreateVendor;
 
+/**
+ * Create Vendor class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateVendor extends BaseCreateVendor
 {
     protected static string $resource = VendorResource::class;
@@ -15,6 +20,12 @@ class CreateVendor extends BaseCreateVendor
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['sub_type'] = 'supplier';

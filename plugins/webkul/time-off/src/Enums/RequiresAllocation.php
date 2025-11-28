@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Requires Allocation enumeration
+ *
+ */
 enum RequiresAllocation: string implements HasLabel
 {
     case YES = 'yes';
@@ -18,6 +22,11 @@ enum RequiresAllocation: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

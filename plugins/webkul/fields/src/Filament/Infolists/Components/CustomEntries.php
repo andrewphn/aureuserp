@@ -12,6 +12,11 @@ use Filament\Support\Enums\TextSize;
 use Illuminate\Support\Collection;
 use Webkul\Field\Models\Field;
 
+/**
+ * Custom Entries class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CustomEntries extends Component
 {
     protected array $include = [];
@@ -25,6 +30,12 @@ class CustomEntries extends Component
         $this->resourceClass = $resource;
     }
 
+    /**
+     * Make
+     *
+     * @param string $resource
+     * @return static
+     */
     public static function make(string $resource): static
     {
         $static = app(static::class, ['resource' => $resource]);
@@ -34,6 +45,12 @@ class CustomEntries extends Component
         return $static;
     }
 
+    /**
+     * Include
+     *
+     * @param array $fields
+     * @return static
+     */
     public function include(array $fields): static
     {
         $this->include = $fields;
@@ -41,6 +58,12 @@ class CustomEntries extends Component
         return $this;
     }
 
+    /**
+     * Exclude
+     *
+     * @param array $fields
+     * @return static
+     */
     public function exclude(array $fields): static
     {
         $this->exclude = $fields;
@@ -78,6 +101,12 @@ class CustomEntries extends Component
         return $query->orderBy('sort')->get();
     }
 
+    /**
+     * Create Entry
+     *
+     * @param Field $field
+     * @return Component
+     */
     protected function createEntry(Field $field): Component
     {
         $entryClass = match ($field->type) {
@@ -102,6 +131,13 @@ class CustomEntries extends Component
         return $entry;
     }
 
+    /**
+     * Apply Setting
+     *
+     * @param Entry $column
+     * @param array $setting
+     * @return void
+     */
     protected function applySetting(Entry $column, array $setting): void
     {
         $name = $setting['setting'];

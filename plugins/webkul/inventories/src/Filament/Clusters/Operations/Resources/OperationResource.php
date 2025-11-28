@@ -64,6 +64,15 @@ use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Models\UOM;
 use Webkul\TableViews\Filament\Components\PresetView;
 
+/**
+ * Operation Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class OperationResource extends Resource
 {
     use HasCustomFields;
@@ -72,6 +81,12 @@ class OperationResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -239,6 +254,12 @@ class OperationResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -443,6 +464,12 @@ class OperationResource extends Resource
             );
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -583,6 +610,17 @@ class OperationResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Get Url
+     *
+     * @param ?string $name
+     * @param array $parameters
+     * @param bool $isAbsolute
+     * @param ?string $panel
+     * @param ?Model $tenant
+     * @param bool $shouldGuessMissingParameters
+     * @return string
+     */
     public static function getUrl(?string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
     {
         return match ($parameters['record']?->operationType->type) {
@@ -817,6 +855,12 @@ class OperationResource extends Resource
             ->addable(fn ($record): bool => ! in_array($record?->state, [OperationState::DONE, OperationState::CANCELED]));
     }
 
+    /**
+     * Get Move Lines Action
+     *
+     * @param mixed $record The model record
+     * @return Action
+     */
     public static function getMoveLinesAction($record): Action
     {
         $move = $record instanceof Move ? $record : $record->move;
@@ -1124,6 +1168,13 @@ class OperationResource extends Resource
         ];
     }
 
+    /**
+     * After Product Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -1143,6 +1194,13 @@ class OperationResource extends Resource
         $set('product_packaging_id', $packaging['packaging_id'] ?? null);
     }
 
+    /**
+     * After Product U O M Qty Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductUOMQtyUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -1158,6 +1216,13 @@ class OperationResource extends Resource
         $set('product_packaging_id', $packaging['packaging_id'] ?? null);
     }
 
+    /**
+     * After U O M Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterUOMUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -1173,6 +1238,12 @@ class OperationResource extends Resource
         $set('product_packaging_id', $packaging['packaging_id'] ?? null);
     }
 
+    /**
+     * Calculate Product Quantity
+     *
+     * @param mixed $uomId
+     * @param mixed $uomQuantity
+     */
     public static function calculateProductQuantity($uomId, $uomQuantity)
     {
         if (! $uomId) {
@@ -1190,11 +1261,23 @@ class OperationResource extends Resource
         return self::normalizeZero($quantity);
     }
 
+    /**
+     * Normalize Zero
+     *
+     * @param float $value The value to set
+     * @return float
+     */
     protected static function normalizeZero(float $value): float
     {
         return $value == 0 ? 0.0 : $value; // convert -0.0 to 0.0
     }
 
+    /**
+     * Get Best Packaging
+     *
+     * @param mixed $productId
+     * @param mixed $quantity
+     */
     private static function getBestPackaging($productId, $quantity)
     {
         $product = Product::find($productId);

@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * Nutrient Service service
+ *
+ */
 class NutrientService
 {
     protected string $licenseKey;
@@ -14,6 +18,10 @@ class NutrientService
     protected array $toolbarItems;
     protected bool $annotationsEnabled;
 
+    /**
+     * Create a new NutrientService instance
+     *
+     */
     public function __construct()
     {
         $this->licenseKey = Config::get('services.nutrient.license_key') ?? Config::get('nutrient.license_key');
@@ -30,6 +38,11 @@ class NutrientService
      * Validate the license key is properly configured
      *
      * @throws RuntimeException
+     * @return bool
+     */
+    /**
+     * Validate License Key
+     *
      * @return bool
      */
     public function validateLicenseKey(): bool
@@ -61,6 +74,12 @@ class NutrientService
      * @param array $customOptions Additional options to merge with defaults
      * @return array
      */
+    /**
+     * Get S D K Configuration
+     *
+     * @param array $customOptions
+     * @return array
+     */
     public function getSDKConfiguration(array $customOptions = []): array
     {
         $licenseKey = Config::get('services.nutrient.license_key') ?? $this->licenseKey;
@@ -86,6 +105,14 @@ class NutrientService
      * @param string $container Container element ID (default: 'standalone')
      * @param array $options Custom options for this viewer instance
      * @return string JavaScript initialization code
+     */
+    /**
+     * Create Viewer Instance
+     *
+     * @param string $documentUrl
+     * @param string $container
+     * @param array $options
+     * @return string
      */
     public function createViewerInstance(string $documentUrl, string $container = 'standalone', array $options = []): string
     {
@@ -138,6 +165,12 @@ class NutrientService
      * @param array $toolbarItems Array of toolbar item names
      * @return self
      */
+    /**
+     * Set Toolbar Items
+     *
+     * @param array $toolbarItems
+     * @return self
+     */
     public function setToolbarItems(array $toolbarItems): self
     {
         $this->toolbarItems = $toolbarItems;
@@ -150,6 +183,12 @@ class NutrientService
      * @param bool $enabled
      * @return self
      */
+    /**
+     * Set Annotations Enabled
+     *
+     * @param bool $enabled
+     * @return self
+     */
     public function setAnnotationsEnabled(bool $enabled): self
     {
         $this->annotationsEnabled = $enabled;
@@ -158,6 +197,12 @@ class NutrientService
 
     /**
      * Add custom viewer options
+     *
+     * @param array $options
+     * @return self
+     */
+    /**
+     * Set Viewer Options
      *
      * @param array $options
      * @return self
@@ -206,6 +251,13 @@ class NutrientService
      * @return bool
      * @throws InvalidArgumentException
      */
+    /**
+     * Validate File
+     *
+     * @param string $mimeType
+     * @param int $fileSize
+     * @return bool
+     */
     public function validateFile(string $mimeType, int $fileSize): bool
     {
         if (!in_array($mimeType, $this->getAllowedMimeTypes())) {
@@ -230,6 +282,14 @@ class NutrientService
      * @param string $documentUrl Document URL to load
      * @param string $containerId DOM element ID for the viewer (default: 'standalone')
      * @param array $options Custom options
+     * @return string
+     */
+    /**
+     * Get Java Script Init Code
+     *
+     * @param string $documentUrl
+     * @param string $containerId
+     * @param array $options
      * @return string
      */
     public function getJavaScriptInitCode(string $documentUrl, string $containerId = 'standalone', array $options = []): string
@@ -277,6 +337,11 @@ class NutrientService
      *
      * @return string ULID-formatted annotation ID
      */
+    /**
+     * Generate Annotation Id
+     *
+     * @return string
+     */
     public function generateAnnotationId(): string
     {
         // Generate ULID (Universally Unique Lexicographically Sortable Identifier)
@@ -294,6 +359,13 @@ class NutrientService
      * @param int $number Number to encode
      * @param int $length Target length
      * @return string Base32 encoded string
+     */
+    /**
+     * Encode Base32
+     *
+     * @param int $number
+     * @param int $length
+     * @return string
      */
     protected function encodeBase32(int $number, int $length): string
     {

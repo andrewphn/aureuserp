@@ -10,12 +10,22 @@ use Webkul\Field\Policies\FieldPolicy;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Field Service Provider service provider
+ *
+ */
 class FieldServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'fields';
 
     public static string $viewNamespace = 'fields';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -28,6 +38,11 @@ class FieldServiceProvider extends PackageServiceProvider
             ->runsMigrations();
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         $this->registerCustomCss();
@@ -35,6 +50,10 @@ class FieldServiceProvider extends PackageServiceProvider
         Gate::policy(Field::class, FieldPolicy::class);
     }
 
+    /**
+     * Register Custom Css
+     *
+     */
     public function registerCustomCss()
     {
         FilamentAsset::register([

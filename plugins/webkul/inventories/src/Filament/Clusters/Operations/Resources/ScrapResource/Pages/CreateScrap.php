@@ -11,6 +11,11 @@ use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Models\Warehouse;
 
+/**
+ * Create Scrap class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateScrap extends CreateRecord
 {
     protected static string $resource = ScrapResource::class;
@@ -25,6 +30,12 @@ class CreateScrap extends CreateRecord
         return $this->getResource()::getUrl('edit', ['record' => $this->getRecord()]);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['uom_id'] ??= Product::find($data['product_id'])->uom_id;

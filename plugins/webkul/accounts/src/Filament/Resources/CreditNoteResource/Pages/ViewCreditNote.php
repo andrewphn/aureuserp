@@ -6,6 +6,11 @@ use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ViewInvoice as ViewRecord;
 
+/**
+ * View Credit Note class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCreditNote extends ViewRecord
 {
     protected static string $resource = CreditNoteResource::class;

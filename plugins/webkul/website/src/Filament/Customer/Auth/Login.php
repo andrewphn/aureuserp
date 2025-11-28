@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Login class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Login extends Page
 {
     use InteractsWithFormActions;
@@ -32,6 +37,11 @@ class Login extends Page
 
     public ?array $data = [];
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         if (Filament::auth()->check()) {
@@ -41,6 +51,11 @@ class Login extends Page
         $this->form->fill();
     }
 
+    /**
+     * Authenticate
+     *
+     * @return ?LoginResponse
+     */
     public function authenticate(): ?LoginResponse
     {
         try {
@@ -73,6 +88,12 @@ class Login extends Page
         return app(LoginResponse::class);
     }
 
+    /**
+     * Get Rate Limited Notification
+     *
+     * @param TooManyRequestsException $exception
+     * @return ?Notification
+     */
     protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
     {
         return Notification::make()
@@ -87,6 +108,11 @@ class Login extends Page
             ->danger();
     }
 
+    /**
+     * Throw Failure Validation Exception
+     *
+     * @return never
+     */
     protected function throwFailureValidationException(): never
     {
         throw ValidationException::withMessages([
@@ -94,6 +120,12 @@ class Login extends Page
         ]);
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema;
@@ -143,6 +175,11 @@ class Login extends Page
             ->label(__('website::filament/customer/pages/auth/login.form.remember.label'));
     }
 
+    /**
+     * Register Action
+     *
+     * @return Action
+     */
     public function registerAction(): Action
     {
         return Action::make('register')
@@ -175,11 +212,22 @@ class Login extends Page
             ->submit('authenticate');
     }
 
+    /**
+     * Has Full Width Form Actions
+     *
+     * @return bool
+     */
     protected function hasFullWidthFormActions(): bool
     {
         return true;
     }
 
+    /**
+     * Get Credentials From Form Data
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getCredentialsFromFormData(array $data): array
     {
         return [

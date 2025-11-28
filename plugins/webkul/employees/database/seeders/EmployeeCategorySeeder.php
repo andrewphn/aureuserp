@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Employee Category Seeder database seeder
+ *
+ */
 class EmployeeCategorySeeder extends Seeder
 {
     /**

@@ -6,6 +6,10 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Payment Method Seeder database seeder
+ *
+ */
 class PaymentMethodSeeder extends Seeder
 {
     /**

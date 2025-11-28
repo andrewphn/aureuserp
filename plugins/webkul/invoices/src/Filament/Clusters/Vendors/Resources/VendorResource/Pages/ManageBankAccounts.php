@@ -9,6 +9,11 @@ use Filament\Tables\Table;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\BankAccountResource;
 
+/**
+ * Manage Bank Accounts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageBankAccounts extends ManageRelatedRecords
 {
     protected static string $resource = VendorResource::class;
@@ -22,11 +27,23 @@ class ManageBankAccounts extends ManageRelatedRecords
         return __('invoices::filament/clusters/vendors/resources/vendor/pages/manage-bank-account.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return BankAccountResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return BankAccountResource::table($table)

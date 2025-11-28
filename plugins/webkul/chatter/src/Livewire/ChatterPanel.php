@@ -47,6 +47,10 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\ActivityPlan;
 use Webkul\Support\Models\ActivityType;
 
+/**
+ * Chatter Panel class
+ *
+ */
 class ChatterPanel extends Component implements HasActions, HasForms, HasInfolists
 {
     use InteractsWithActions, InteractsWithForms, InteractsWithInfolists, WithFileUploads;
@@ -93,6 +97,22 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         'chatter.refresh' => 'refreshMessages',
     ];
 
+    /**
+     * Mount
+     *
+     * @param Model $record The model record
+     * @param string $resource
+     * @param mixed $activityPlans
+     * @param string|Closure|null $followerViewMail
+     * @param string|Closure|null $messageViewMail
+     * @param bool $showMessageAction
+     * @param bool $showActivityAction
+     * @param bool $showFollowerAction
+     * @param bool $showLogAction
+     * @param bool $showFileAction
+     * @param array $filters
+     * @return void
+     */
     public function mount(
         Model $record,
         string $resource = '',
@@ -129,6 +149,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         return $this->getBaseQuery()->whereNull('read_at')->count();
     }
 
+    /**
+     * Has Active Filters
+     *
+     * @return bool
+     */
     public function hasActiveFilters(): bool
     {
         return filled($this->search)
@@ -172,6 +197,12 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         return $filters;
     }
 
+    /**
+     * Remove Filter
+     *
+     * @param string $key
+     * @return void
+     */
     public function removeFilter(string $key): void
     {
         match ($key) {
@@ -182,26 +213,53 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         };
     }
 
+    /**
+     * Clear All Filters
+     *
+     * @return void
+     */
     public function clearAllFilters(): void
     {
         $this->reset(['search', 'filterType', 'dateRange', 'pinnedOnly']);
     }
 
+    /**
+     * Set View Mode
+     *
+     * @param string $mode
+     * @return void
+     */
     public function setViewMode(string $mode): void
     {
         $this->viewMode = $mode;
     }
 
+    /**
+     * Set Tab
+     *
+     * @param string $tab
+     * @return void
+     */
     public function setTab(string $tab): void
     {
         $this->tab = in_array($tab, ['messages', 'activities'], true) ? $tab : 'messages';
     }
 
+    /**
+     * Is Empty
+     *
+     * @return bool
+     */
     public function isEmpty(): bool
     {
         return $this->getFilteredQuery()->isEmpty();
     }
 
+    /**
+     * Has Filters
+     *
+     * @return bool
+     */
     public function hasFilters(): bool
     {
         return $this->hasActiveFilters();
@@ -217,11 +275,21 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         return $this->getBaseQuery()->count();
     }
 
+    /**
+     * Can View All Activities
+     *
+     * @return bool
+     */
     public function canViewAllActivities(): bool
     {
         return true;
     }
 
+    /**
+     * Filters Action
+     *
+     * @return FiltersAction
+     */
     public function filtersAction(): FiltersAction
     {
         return FiltersAction::make('filters')
@@ -287,6 +355,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         return $state;
     }
 
+    /**
+     * Apply Date Range Filter
+     *
+     * @param mixed $state
+     */
     private function applyDateRangeFilter($state)
     {
         $now = now();
@@ -306,6 +379,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         });
     }
 
+    /**
+     * Apply Sorting
+     *
+     * @param mixed $state
+     */
     private function applySorting($state)
     {
         return $state->sort(function ($a, $b) {
@@ -325,6 +403,13 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         })->values();
     }
 
+    /**
+     * Compare Priority
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return int
+     */
     private function comparePriority($a, $b): int
     {
         $priorityOrder = ['notification' => 4, 'activity' => 3, 'note' => 2, 'comment' => 1];
@@ -336,6 +421,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         return $priorityB <=> $priorityA;
     }
 
+    /**
+     * Message Action
+     *
+     * @return MessageAction
+     */
     public function messageAction(): MessageAction
     {
         return MessageAction::make('message')
@@ -345,6 +435,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ->record($this->record);
     }
 
+    /**
+     * Log Action
+     *
+     * @return LogAction
+     */
     public function logAction(): LogAction
     {
         return LogAction::make('log')
@@ -352,6 +447,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ->record($this->record);
     }
 
+    /**
+     * File Action
+     *
+     * @return FileAction
+     */
     public function fileAction(): FileAction
     {
         return FileAction::make('file')
@@ -360,6 +460,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ->record($this->record);
     }
 
+    /**
+     * Follower Action
+     *
+     * @return FollowerAction
+     */
     public function followerAction(): FollowerAction
     {
         return FollowerAction::make('follower')
@@ -369,6 +474,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ->record($this->record);
     }
 
+    /**
+     * Activity Action
+     *
+     * @return ActivityAction
+     */
     public function activityAction(): ActivityAction
     {
         return ActivityAction::make('activity')
@@ -377,6 +487,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ->record($this->record);
     }
 
+    /**
+     * Remove Follower
+     *
+     * @param mixed $partnerId
+     */
     public function removeFollower($partnerId)
     {
         $partner = Partner::findOrFail($partnerId);
@@ -391,6 +506,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         $this->dispatch('chatter.refresh');
     }
 
+    /**
+     * Refresh Messages
+     *
+     * @return void
+     */
     public function refreshMessages(): void
     {
         $this->record->refresh();
@@ -406,6 +526,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         $this->dispatch('$refresh');
     }
 
+    /**
+     * Mark As Done Action
+     *
+     * @return Action
+     */
     public function markAsDoneAction(): Action
     {
         return Action::make('markAsDone')
@@ -453,6 +578,13 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ]);
     }
 
+    /**
+     * Process Message
+     *
+     * @param int $messageId
+     * @param ?string $feedback
+     * @return void
+     */
     protected function processMessage(int $messageId, ?string $feedback): void
     {
         $message = Message::find($messageId);
@@ -474,6 +606,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         $message->delete();
     }
 
+    /**
+     * Edit Activity Action
+     *
+     * @return Action
+     */
     public function editActivityAction(): Action
     {
         return Action::make('editActivity')
@@ -590,6 +727,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             });
     }
 
+    /**
+     * Delete Message Action
+     *
+     * @return Action
+     */
     public function deleteMessageAction(): Action
     {
         return Action::make('deleteMessage')
@@ -600,6 +742,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             });
     }
 
+    /**
+     * Cancel Activity Action
+     *
+     * @return Action
+     */
     public function cancelActivityAction(): Action
     {
         return Action::make('cancelActivity')
@@ -613,6 +760,12 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             });
     }
 
+    /**
+     * Chat Infolist
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function chatInfolist(Schema $schema): Schema
     {
         $state = $this->getFilteredQuery();
@@ -633,6 +786,12 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             ]);
     }
 
+    /**
+     * Pin Message
+     *
+     * @param int $id The unique identifier
+     * @return void
+     */
     public function pinMessage(int $id): void
     {
         $message = Message::find($id);
@@ -648,6 +807,12 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         $this->refreshMessages();
     }
 
+    /**
+     * Activity Infolist
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function activityInfolist(Schema $schema): Schema
     {
         return $schema
@@ -672,6 +837,10 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
             });
     }
 
+    /**
+     * Placeholder
+     *
+     */
     public function placeholder()
     {
         return <<<'HTML'
@@ -686,6 +855,11 @@ class ChatterPanel extends Component implements HasActions, HasForms, HasInfolis
         HTML;
     }
 
+    /**
+     * Render
+     *
+     * @return View
+     */
     public function render(): View
     {
         return view('chatter::livewire.chatter-panel');

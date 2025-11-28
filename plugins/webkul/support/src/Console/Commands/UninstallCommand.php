@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Webkul\Support\Package;
 
+/**
+ * Uninstall Command console command
+ *
+ */
 class UninstallCommand extends Command
 {
     protected Package $package;
@@ -20,6 +24,11 @@ class UninstallCommand extends Command
 
     protected bool $forceUninstall = false;
 
+    /**
+     * Create a new UninstallCommand instance
+     *
+     * @param Package $package
+     */
     public function __construct(Package $package)
     {
         $this->signature = $package->shortName().':uninstall {--force : Force the operation to run without confirmation}';
@@ -31,6 +40,10 @@ class UninstallCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Handle
+     *
+     */
     public function handle()
     {
         if (! $this->package->isInstalled()) {
@@ -68,6 +81,11 @@ class UninstallCommand extends Command
         }
     }
 
+    /**
+     * Drop Tables
+     *
+     * @return void
+     */
     protected function dropTables(): void
     {
         $this->info("⚙️ Dropping database tables for <comment>{$this->package->shortName()}</comment>...");
@@ -119,6 +137,12 @@ class UninstallCommand extends Command
         $this->newLine();
     }
 
+    /**
+     * Start With
+     *
+     * @param mixed $callable
+     * @return self
+     */
     public function startWith($callable): self
     {
         $this->startWith = $callable;
@@ -126,6 +150,12 @@ class UninstallCommand extends Command
         return $this;
     }
 
+    /**
+     * End With
+     *
+     * @param mixed $callable
+     * @return self
+     */
     public function endWith($callable): self
     {
         $this->endWith = $callable;

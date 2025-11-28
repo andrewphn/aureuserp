@@ -10,6 +10,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Product\Filament\Resources\CategoryResource;
 use Webkul\Product\Models\Category;
 
+/**
+ * View Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCategory extends ViewRecord
 {
     protected static string $resource = CategoryResource::class;

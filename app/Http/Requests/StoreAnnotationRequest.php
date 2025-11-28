@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Store Annotation Request form request
+ *
+ */
 class StoreAnnotationRequest extends FormRequest
 {
     /**

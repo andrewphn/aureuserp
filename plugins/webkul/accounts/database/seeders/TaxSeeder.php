@@ -9,8 +9,17 @@ use Webkul\Account\Models\TaxGroup;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Tax Seeder database seeder
+ *
+ */
 class TaxSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         DB::table('accounts_taxes')->delete();

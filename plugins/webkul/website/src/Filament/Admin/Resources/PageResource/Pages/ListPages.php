@@ -8,6 +8,11 @@ use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\Website\Filament\Admin\Resources\PageResource;
 
+/**
+ * List Pages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPages extends ListRecords
 {
     use HasTableViews;

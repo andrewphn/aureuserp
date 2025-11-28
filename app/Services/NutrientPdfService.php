@@ -6,11 +6,19 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Nutrient Pdf Service service
+ *
+ */
 class NutrientPdfService
 {
     protected $apiKey;
     protected $baseUrl = 'https://api.nutrient.io';
 
+    /**
+     * Create a new NutrientPdfService instance
+     *
+     */
     public function __construct()
     {
         $this->apiKey = config('nutrient.cloud_api_key');
@@ -23,6 +31,14 @@ class NutrientPdfService
      * @param int $pageNumber Page number (1-indexed)
      * @param int $width Desired width in pixels (default: 800)
      * @return string|null Base64 encoded image or null on failure
+     */
+    /**
+     * Render Page As Image
+     *
+     * @param string $pdfPath
+     * @param int $pageNumber
+     * @param int $width
+     * @return ?string
      */
     public function renderPageAsImage(string $pdfPath, int $pageNumber, int $width = 800): ?string
     {
@@ -84,6 +100,14 @@ class NutrientPdfService
      * @param int $width Desired width in pixels
      * @return string|null Path to saved image or null on failure
      */
+    /**
+     * Render And Save Page
+     *
+     * @param string $pdfPath
+     * @param int $pageNumber
+     * @param int $width
+     * @return ?string
+     */
     public function renderAndSavePage(string $pdfPath, int $pageNumber, int $width = 800): ?string
     {
         $imageData = $this->renderPageAsImage($pdfPath, $pageNumber, $width);
@@ -109,6 +133,14 @@ class NutrientPdfService
      * @param int $pageNumber Page number (1-indexed)
      * @param int $width Desired width in pixels
      * @return string|null URL to image or null on failure
+     */
+    /**
+     * Get Cached Or Render Page
+     *
+     * @param string $pdfPath
+     * @param int $pageNumber
+     * @param int $width
+     * @return ?string
      */
     public function getCachedOrRenderPage(string $pdfPath, int $pageNumber, int $width = 800): ?string
     {

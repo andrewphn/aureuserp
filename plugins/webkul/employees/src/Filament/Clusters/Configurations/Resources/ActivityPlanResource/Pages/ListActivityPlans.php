@@ -11,6 +11,11 @@ use Webkul\Support\Models\ActivityPlan;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Activity Plans class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListActivityPlans extends ListRecords
 {
     use HasTableViews;

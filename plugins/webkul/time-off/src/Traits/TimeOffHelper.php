@@ -22,8 +22,20 @@ use Webkul\TimeOff\Models\Leave;
 use Webkul\TimeOff\Models\LeaveAllocation;
 use Webkul\TimeOff\Models\LeaveType;
 
+/**
+ * Time Off Helper trait
+ *
+ */
 trait TimeOffHelper
 {
+    /**
+     * Mutate Time Off Data
+     *
+     * @param array $data The data array
+     * @param ?int $excludeRecordId
+     * @param ?Action $action
+     * @return array
+     */
     public function mutateTimeOffData(array $data, ?int $excludeRecordId = null, ?Action $action = null): array
     {
         $this->updateEmployeeAndCompanyData($data);
@@ -41,6 +53,12 @@ trait TimeOffHelper
         return $data;
     }
 
+    /**
+     * Get Form Schema
+     *
+     * @param mixed $isVisible
+     * @return array
+     */
     public function getFormSchema($isVisible = null): array
     {
         return [
@@ -181,6 +199,12 @@ trait TimeOffHelper
         ];
     }
 
+    /**
+     * Get Duration Info
+     *
+     * @param array $data The data array
+     * @return array
+     */
     public function getDurationInfo(array $data): array
     {
         if (! empty($data['request_unit_half'])) {
@@ -221,6 +245,13 @@ trait TimeOffHelper
      * Overlap check
      *
      * @throws \Exception
+     */
+    /**
+     * Handle Leave Overlap
+     *
+     * @param ?int $excludeRecordId
+     * @param ?Action $action
+     * @return void
      */
     private function handleLeaveOverlap(array &$data, ?int $excludeRecordId = null, ?Action $action = null): void
     {
@@ -267,6 +298,12 @@ trait TimeOffHelper
      * Leave allocation check
      *
      * @throws \Exception
+     */
+    /**
+     * Handle Leave Allocation
+     *
+     * @param ?Action $action
+     * @return void
      */
     private function handleLeaveAllocation(array &$data, ?Action $action = null): void
     {
@@ -340,6 +377,13 @@ trait TimeOffHelper
     /**
      * Compute business days between two Carbon dates
      */
+    /**
+     * Calculate Business Days
+     *
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return int
+     */
     private function calculateBusinessDays(Carbon $start, Carbon $end): int
     {
         $days = 0;
@@ -357,6 +401,13 @@ trait TimeOffHelper
     /**
      * Compute total days inclusive
      */
+    /**
+     * Calculate Total Days
+     *
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return int
+     */
     private function calculateTotalDays(Carbon $start, Carbon $end): int
     {
         return $start->diffInDays($end) + 1;
@@ -364,6 +415,15 @@ trait TimeOffHelper
 
     /**
      * Check overlapping leave
+     */
+    /**
+     * Check For Overlapping Leave
+     *
+     * @param int $employeeId
+     * @param string $startDate
+     * @param ?string $endDate
+     * @param ?int $excludeRecordId
+     * @return bool
      */
     private function checkForOverlappingLeave(int $employeeId, string $startDate, ?string $endDate, ?int $excludeRecordId = null): bool
     {
@@ -387,6 +447,13 @@ trait TimeOffHelper
         return $query->exists();
     }
 
+    /**
+     * Update Duration Calculation
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private function updateDurationCalculation(Set $set, Get $get): void
     {
         $startDate = $get('request_date_from');
@@ -417,6 +484,11 @@ trait TimeOffHelper
     /**
      * Calculate and set duration-related values in the given data array.
      */
+    /**
+     * Calculate Business Days And Numbers
+     *
+     * @return void
+     */
     private function calculateBusinessDaysAndNumbers(array &$data): void
     {
         $info = $this->getDurationInfo($data);
@@ -428,6 +500,11 @@ trait TimeOffHelper
         $data['weekend_days'] = $info['weekend_days'];
     }
 
+    /**
+     * Update Employee And Company Data
+     *
+     * @return void
+     */
     private function updateEmployeeAndCompanyData(array &$data): void
     {
 

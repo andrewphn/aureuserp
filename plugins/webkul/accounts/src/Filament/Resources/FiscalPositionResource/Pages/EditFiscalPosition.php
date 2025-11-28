@@ -10,6 +10,11 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\FiscalPositionResource;
 
+/**
+ * Edit Fiscal Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditFiscalPosition extends EditRecord
 {
     protected static string $resource = FiscalPositionResource::class;
@@ -46,6 +51,12 @@ class EditFiscalPosition extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();

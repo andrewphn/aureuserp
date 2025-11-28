@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Inventory\Enums\LocationType;
 use Webkul\Security\Models\User;
 
+/**
+ * Location Seeder database seeder
+ *
+ */
 class LocationSeeder extends Seeder
 {
     /**

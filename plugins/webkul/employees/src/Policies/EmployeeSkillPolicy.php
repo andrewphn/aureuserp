@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Employee\Models\EmployeeSkill;
 use Webkul\Security\Models\User;
 
+/**
+ * Employee Skill Policy authorization policy
+ *
+ */
 class EmployeeSkillPolicy
 {
     use HandlesAuthorization;

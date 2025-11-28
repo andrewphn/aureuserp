@@ -5,6 +5,11 @@ namespace Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResourc
 use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource\Pages\EditTimeOff as BaseEditTimeOff;
 
+/**
+ * Edit By Employee class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditByEmployee extends BaseEditTimeOff
 {
     protected static string $resource = ByEmployeeResource::class;

@@ -10,6 +10,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * Edit Partner class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPartner extends EditRecord
 {
     protected static string $resource = PartnerResource::class;

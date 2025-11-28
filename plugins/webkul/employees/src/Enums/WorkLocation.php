@@ -6,6 +6,10 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Work Location enumeration
+ *
+ */
 enum WorkLocation: string implements HasColor, HasIcon, HasLabel
 {
     case Home = 'home';

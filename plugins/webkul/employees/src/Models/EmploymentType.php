@@ -11,6 +11,21 @@ use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Country;
 
+/**
+ * Employment Type Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property int $country_id
+ * @property int $creator_id
+ * @property string|null $code
+ * @property string|null $sort
+ * @property-read \Illuminate\Database\Eloquent\Model|null $country
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ *
+ */
 class EmploymentType extends Model implements Sortable
 {
     use HasCustomFields, HasFactory, SortableTrait;
@@ -30,11 +45,21 @@ class EmploymentType extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Country
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function country()
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -42,6 +67,11 @@ class EmploymentType extends Model implements Sortable
 
     /**
      * Get the factory instance for the model.
+     */
+    /**
+     * New Factory
+     *
+     * @return EmploymentTypeFactory
      */
     protected static function newFactory(): EmploymentTypeFactory
     {

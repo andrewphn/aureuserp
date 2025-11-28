@@ -6,6 +6,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Webkul\Security\Filament\Resources\UserResource;
 
+/**
+ * Create User class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;

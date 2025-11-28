@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Type Action Filament action
+ *
+ */
 enum ActivityTypeAction: string
 {
     case NONE = 'none';
@@ -14,6 +18,11 @@ enum ActivityTypeAction: string
 
     case MEETING = 'meeting';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

@@ -9,6 +9,11 @@ use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\EditInvoice as EditRecord;
 
+/**
+ * Edit Credit Note class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCreditNote extends EditRecord
 {
     protected static string $resource = CreditNoteResource::class;
@@ -50,6 +55,12 @@ class EditCreditNote extends EditRecord
         return $predefinedActions;
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();
@@ -65,6 +76,11 @@ class EditCreditNote extends EditRecord
         return $data;
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         Account::computeAccountMove($this->getRecord());

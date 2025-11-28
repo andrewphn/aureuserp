@@ -47,6 +47,11 @@ use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ListActivityTyp
 use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ViewActivityType;
 use Webkul\Support\Models\ActivityType;
 
+/**
+ * Activity Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityTypeResource extends Resource
 {
     protected static ?string $model = ActivityType::class;
@@ -59,6 +64,12 @@ class ActivityTypeResource extends Resource
 
     protected static ?string $pluginName = 'support';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -170,6 +181,12 @@ class ActivityTypeResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -328,6 +345,12 @@ class ActivityTypeResource extends Resource
             ->reorderable('sort');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

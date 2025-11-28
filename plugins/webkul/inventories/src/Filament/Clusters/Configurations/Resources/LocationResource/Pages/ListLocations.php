@@ -12,6 +12,11 @@ use Webkul\Inventory\Models\Location;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Locations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListLocations extends ListRecords
 {
     use HasTableViews;

@@ -7,6 +7,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
+/**
+ * Plugin Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $author
+ * @property string|null $summary
+ * @property string|null $description
+ * @property string|null $latest_version
+ * @property string|null $license
+ * @property bool $is_active
+ * @property bool $is_installed
+ * @property string|null $sort
+ * @property-read \Illuminate\Database\Eloquent\Collection $dependencies
+ * @property-read \Illuminate\Database\Eloquent\Collection $dependents
+ *
+ */
 class Plugin extends Model implements Sortable
 {
     use SortableTrait;
@@ -32,6 +51,11 @@ class Plugin extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Dependencies
+     *
+     * @return BelongsToMany
+     */
     public function dependencies(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -42,6 +66,11 @@ class Plugin extends Model implements Sortable
         );
     }
 
+    /**
+     * Dependents
+     *
+     * @return BelongsToMany
+     */
     public function dependents(): BelongsToMany
     {
         return $this->belongsToMany(

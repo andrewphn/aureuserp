@@ -6,6 +6,11 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageVariants as BaseManageVariants;
 
+/**
+ * Manage Variants class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageVariants extends BaseManageVariants
 {
     protected static string $resource = ProductResource::class;

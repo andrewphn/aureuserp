@@ -5,6 +5,11 @@ namespace Webkul\FullCalendar\Filament\Actions;
 use Filament\Actions\ViewAction as BaseViewAction;
 use Webkul\FullCalendar\Filament\Widgets\FullCalendarWidget;
 
+/**
+ * View Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewAction extends BaseViewAction
 {
     protected function setUp(): void

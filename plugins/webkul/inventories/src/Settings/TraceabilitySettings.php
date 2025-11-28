@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
+/**
+ * Traceability Settings class
+ *
+ */
 class TraceabilitySettings extends Settings
 {
     public bool $enable_lots_serial_numbers;
@@ -16,6 +20,11 @@ class TraceabilitySettings extends Settings
 
     public bool $enable_consignments;
 
+    /**
+     * Group
+     *
+     * @return string
+     */
     public static function group(): string
     {
         return 'inventories_traceability';

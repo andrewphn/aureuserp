@@ -9,6 +9,10 @@ use ReflectionClass;
 use Webkul\Invoice\Filament\Clusters\Settings\Pages\Products;
 use Webkul\Support\Package;
 
+/**
+ * Invoice Plugin class
+ *
+ */
 class InvoicePlugin implements Plugin
 {
     public function getId(): string
@@ -16,11 +20,22 @@ class InvoicePlugin implements Plugin
         return 'invoices';
     }
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Register
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function register(Panel $panel): void
     {
         if (! Package::isPluginInstalled($this->getId())) {
@@ -44,11 +59,23 @@ class InvoicePlugin implements Plugin
             });
     }
 
+    /**
+     * Boot
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function boot(Panel $panel): void
     {
         //
     }
 
+    /**
+     * Get Plugin Base Path
+     *
+     * @param mixed $path
+     * @return string
+     */
     protected function getPluginBasePath($path = null): string
     {
         $reflector = new ReflectionClass(get_class($this));

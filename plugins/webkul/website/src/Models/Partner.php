@@ -4,6 +4,10 @@ namespace Webkul\Website\Models;
 
 use Webkul\Partner\Models\Partner as BasePartner;
 
+/**
+ * Partner Eloquent model
+ *
+ */
 class Partner extends BasePartner
 {
     /**

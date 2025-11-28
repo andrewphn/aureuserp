@@ -6,6 +6,11 @@ use Filament\Actions;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Pages\ListOrders;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource;
 
+/**
+ * List Quotations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListQuotations extends ListOrders
 {
     protected static string $resource = QuotationResource::class;

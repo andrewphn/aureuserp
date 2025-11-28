@@ -10,6 +10,11 @@ use Webkul\Account\Filament\Resources\PaymentsResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Payments class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPayments extends ListRecords
 {
     use HasTableViews;

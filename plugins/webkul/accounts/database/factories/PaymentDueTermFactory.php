@@ -9,10 +9,19 @@ use Webkul\Account\Models\PaymentDueTerm;
 use Webkul\Account\Models\PaymentTerm;
 use Webkul\Security\Models\User;
 
+/**
+ * Payment Due Term Factory model factory
+ *
+ */
 class PaymentDueTermFactory extends Factory
 {
     protected $model = PaymentDueTerm::class;
 
+    /**
+     * Definition
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [

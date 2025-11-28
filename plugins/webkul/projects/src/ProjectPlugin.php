@@ -9,6 +9,10 @@ use ReflectionClass;
 use Webkul\Project\Filament\Clusters\Settings\Pages\ManageTasks;
 use Webkul\Support\Package;
 
+/**
+ * Project Plugin class
+ *
+ */
 class ProjectPlugin implements Plugin
 {
     public function getId(): string
@@ -16,11 +20,22 @@ class ProjectPlugin implements Plugin
         return 'projects';
     }
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Register
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function register(Panel $panel): void
     {
         if (! Package::isPluginInstalled($this->getId())) {
@@ -45,11 +60,23 @@ class ProjectPlugin implements Plugin
             });
     }
 
+    /**
+     * Boot
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function boot(Panel $panel): void
     {
         //
     }
 
+    /**
+     * Get Plugin Base Path
+     *
+     * @param mixed $path
+     * @return string
+     */
     protected function getPluginBasePath($path = null): string
     {
         $reflector = new ReflectionClass(get_class($this));

@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Payment Status enumeration
+ *
+ */
 enum PaymentStatus: string implements HasLabel
 {
     case DRAFT = 'draft';
@@ -30,6 +34,11 @@ enum PaymentStatus: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

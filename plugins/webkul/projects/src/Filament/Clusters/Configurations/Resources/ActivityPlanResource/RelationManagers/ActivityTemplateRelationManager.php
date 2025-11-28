@@ -32,10 +32,21 @@ use Webkul\Support\Enums\ActivityResponsibleType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource;
 use Webkul\Support\Models\ActivityType;
 
+/**
+ * Activity Template Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityTemplateRelationManager extends RelationManager
 {
     protected static string $relationship = 'activityPlanTemplates';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -125,6 +136,12 @@ class ActivityTemplateRelationManager extends RelationManager
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

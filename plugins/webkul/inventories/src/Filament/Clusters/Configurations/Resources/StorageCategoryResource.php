@@ -35,6 +35,11 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryR
 use Webkul\Inventory\Models\StorageCategory;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
+/**
+ * Storage Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class StorageCategoryResource extends Resource
 {
     protected static ?string $model = StorageCategory::class;
@@ -49,6 +54,11 @@ class StorageCategoryResource extends Resource
 
     protected static bool $isGloballySearchable = false;
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -68,6 +78,12 @@ class StorageCategoryResource extends Resource
         return __('inventories::filament/clusters/configurations/resources/storage-category.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -100,6 +116,12 @@ class StorageCategoryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -167,6 +189,12 @@ class StorageCategoryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -234,6 +262,12 @@ class StorageCategoryResource extends Resource
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

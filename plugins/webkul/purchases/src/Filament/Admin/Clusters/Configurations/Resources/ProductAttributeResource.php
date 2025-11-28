@@ -11,6 +11,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductAttr
 use Webkul\Purchase\Models\Attribute;
 use Webkul\Purchase\Settings\ProductSettings;
 
+/**
+ * Product Attribute Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductAttributeResource extends AttributeResource
 {
     protected static ?string $model = Attribute::class;
@@ -25,6 +30,11 @@ class ProductAttributeResource extends AttributeResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {

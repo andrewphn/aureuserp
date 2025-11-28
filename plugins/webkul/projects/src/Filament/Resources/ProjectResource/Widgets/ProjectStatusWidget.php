@@ -6,6 +6,11 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Project Status Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectStatusWidget extends BaseWidget
 {
     public ?Model $record = null;
@@ -29,6 +34,11 @@ class ProjectStatusWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Project Health
+     *
+     * @return array
+     */
     protected function calculateProjectHealth(): array
     {
         $warnings = [];
@@ -104,6 +114,11 @@ class ProjectStatusWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Margin
+     *
+     * @return ?float
+     */
     protected function calculateMargin(): ?float
     {
         $quoted = $this->record->cabinets()
@@ -116,7 +131,8 @@ class ProjectStatusWidget extends BaseWidget
 
         $actual = $this->record->orders()->sum('amount_total');
 
-        if ($actual === 0) {
+        // Check for division by zero - if quoted is 0, can't calculate margin
+        if ($quoted === 0 || $actual === 0) {
             return null;
         }
 

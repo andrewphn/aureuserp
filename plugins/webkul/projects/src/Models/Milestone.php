@@ -8,6 +8,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Project\Database\Factories\MilestoneFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Milestone Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property \Carbon\Carbon|null $deadline
+ * @property bool $is_completed
+ * @property \Carbon\Carbon|null $completed_at
+ * @property int $project_id
+ * @property int $creator_id
+ * @property string|null $production_stage
+ * @property bool $is_critical
+ * @property string|null $description
+ * @property int $sort_order
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Milestone extends Model
 {
     use HasFactory;
@@ -50,11 +70,21 @@ class Milestone extends Model
         'sort_order'   => 'integer',
     ];
 
+    /**
+     * Project
+     *
+     * @return BelongsTo
+     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -62,6 +92,12 @@ class Milestone extends Model
 
     /**
      * Scope to get only critical milestones
+     */
+    /**
+     * Scope query to Critical
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeCritical($query)
     {
@@ -71,6 +107,13 @@ class Milestone extends Model
     /**
      * Scope to filter milestones by production stage
      */
+    /**
+     * Scope query to By Stage
+     *
+     * @param mixed $query The search query
+     * @param string $stage
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByStage($query, string $stage)
     {
         return $query->where('production_stage', $stage);
@@ -78,6 +121,12 @@ class Milestone extends Model
 
     /**
      * Scope to get overdue milestones
+     */
+    /**
+     * Scope query to Overdue
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOverdue($query)
     {
@@ -87,6 +136,12 @@ class Milestone extends Model
 
     /**
      * Scope to get upcoming milestones (not completed, deadline in future)
+     */
+    /**
+     * Scope query to Upcoming
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUpcoming($query)
     {
@@ -133,6 +188,11 @@ class Milestone extends Model
         };
     }
 
+    /**
+     * New Factory
+     *
+     * @return MilestoneFactory
+     */
     protected static function newFactory(): MilestoneFactory
     {
         return MilestoneFactory::new();

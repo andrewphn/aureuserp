@@ -34,6 +34,11 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\RelationMa
 use Webkul\Invoice\Models\Partner;
 use Webkul\Partner\Filament\Resources\PartnerResource as BaseVendorResource;
 
+/**
+ * Vendor Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class VendorResource extends BaseVendorResource
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
@@ -65,6 +70,12 @@ class VendorResource extends BaseVendorResource
         return null;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $schema = parent::form($schema);
@@ -195,6 +206,12 @@ class VendorResource extends BaseVendorResource
         return $schema;
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         $table = parent::table($table);
@@ -224,6 +241,12 @@ class VendorResource extends BaseVendorResource
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         $schema = parent::infolist($schema);
@@ -350,6 +373,12 @@ class VendorResource extends BaseVendorResource
         return $schema;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

@@ -7,6 +7,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Webkul\Recruitment\Models\Applicant;
 
+/**
+ * Applicant Chart Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ApplicantChartWidget extends ChartWidget
 {
     protected static ?int $sort = 2;

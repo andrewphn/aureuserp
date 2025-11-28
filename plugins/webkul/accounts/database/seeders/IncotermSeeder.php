@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Incoterm Seeder database seeder
+ *
+ */
 class IncotermSeeder extends Seeder
 {
     /**

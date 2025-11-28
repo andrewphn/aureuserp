@@ -8,6 +8,11 @@ use Webkul\Account\Facades\Account;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateBaseRefund;
 use Webkul\Account\Filament\Resources\RefundResource;
 
+/**
+ * Create Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateRefund extends CreateBaseRefund
 {
     protected static string $resource = RefundResource::class;
@@ -25,6 +30,12 @@ class CreateRefund extends CreateBaseRefund
             ->body(__('accounts::filament/resources/refund/pages/create-refund.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['move_type'] ??= MoveType::IN_REFUND;
@@ -34,6 +45,11 @@ class CreateRefund extends CreateBaseRefund
         return $data;
     }
 
+    /**
+     * After Create
+     *
+     * @return void
+     */
     protected function afterCreate(): void
     {
         Account::computeAccountMove($this->getRecord());

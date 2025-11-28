@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Operation Type enumeration
+ *
+ */
 enum OperationType: string implements HasLabel
 {
     case INCOMING = 'incoming';

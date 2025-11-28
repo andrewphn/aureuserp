@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\TagResource;
 use Webkul\Blog\Models\Tag;
 
+/**
+ * Manage Tags class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTags extends ManageRecords
 {
     protected static string $resource = TagResource::class;

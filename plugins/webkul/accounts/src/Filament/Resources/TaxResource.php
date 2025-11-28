@@ -39,6 +39,11 @@ use Webkul\Account\Filament\Resources\TaxResource\Pages\ListTaxes;
 use Webkul\Account\Filament\Resources\TaxResource\Pages\ViewTax;
 use Webkul\Account\Models\Tax;
 
+/**
+ * Tax Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TaxResource extends Resource
 {
     protected static ?string $model = Tax::class;
@@ -49,6 +54,12 @@ class TaxResource extends Resource
 
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -117,6 +128,12 @@ class TaxResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -256,6 +273,12 @@ class TaxResource extends Resource
             ->reorderable('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

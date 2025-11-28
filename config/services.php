@@ -40,4 +40,8 @@ return [
         'cloud_api_key'   => env('NUTRIENT_CLOUD_API_KEY'),
     ],
 
+    'google' => [
+        'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+    ],
+
 ];

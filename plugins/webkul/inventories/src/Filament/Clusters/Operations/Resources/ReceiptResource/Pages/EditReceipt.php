@@ -14,6 +14,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
 use Webkul\Inventory\Models\Receipt;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Edit Receipt class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditReceipt extends EditRecord
 {
     use HasRepeaterColumnManager;
@@ -78,6 +83,11 @@ class EditReceipt extends EditRecord
         ];
     }
 
+    /**
+     * Update Form
+     *
+     * @return void
+     */
     public function updateForm(): void
     {
         $this->fillForm();

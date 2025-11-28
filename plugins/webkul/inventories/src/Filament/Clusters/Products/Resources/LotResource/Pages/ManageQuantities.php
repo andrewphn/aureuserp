@@ -19,6 +19,11 @@ use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
+/**
+ * Manage Quantities class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageQuantities extends ManageRelatedRecords
 {
     protected static string $resource = LotResource::class;
@@ -51,6 +56,12 @@ class ManageQuantities extends ManageRelatedRecords
         return __('inventories::filament/clusters/products/resources/lot/pages/manage-quantities.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Title Seeder database seeder
+ *
+ */
 class TitleSeeder extends Seeder
 {
     /**

@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Website Page Seeder database seeder
+ *
+ */
 class WebsitePageSeeder extends Seeder
 {
     /**

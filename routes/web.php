@@ -16,3 +16,12 @@ Route::get('/api/pdf/{pdfId}/page/{pageNumber}/render-base64', [PdfPreviewContro
 
 // NOTE: PDF Annotation API routes have been moved to routes/api.php
 // using the new App\Http\Controllers\Api\PdfAnnotationController
+Route::get('/test-auth-debug', function () {
+    return response()->json([
+        'authenticated' => auth()->check(),
+        'user_id' => auth()->id(),
+        'user_email' => auth()->user()?->email,
+        'browser_testing_env' => env('BROWSER_TESTING'),
+        'session_id' => session()->getId(),
+    ]);
+})->middleware('web');

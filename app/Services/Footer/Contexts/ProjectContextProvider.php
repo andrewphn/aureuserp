@@ -43,6 +43,12 @@ class ProjectContextProvider implements ContextProviderInterface
         return 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z';
     }
 
+    /**
+     * Load Context
+     *
+     * @param int|string $entityId
+     * @return array
+     */
     public function loadContext(int|string $entityId): array
     {
         // Load project data from database
@@ -80,6 +86,13 @@ class ProjectContextProvider implements ContextProviderInterface
         return $data;
     }
 
+    /**
+     * Get Field Schema
+     *
+     * @param array $data The data array
+     * @param bool $isMinimized
+     * @return array
+     */
     public function getFieldSchema(array $data, bool $isMinimized = false): array
     {
         // For minimized view, return only most important fields
@@ -100,6 +113,12 @@ class ProjectContextProvider implements ContextProviderInterface
 
     /**
      * Get expanded field schema (all important fields)
+     */
+    /**
+     * Get Expanded Schema
+     *
+     * @param array $data The data array
+     * @return array
      */
     protected function getExpandedSchema(array $data): array
     {
@@ -158,6 +177,12 @@ class ProjectContextProvider implements ContextProviderInterface
     /**
      * Create tags field with modal trigger
      */
+    /**
+     * Create Tags Field
+     *
+     * @param array $tags
+     * @return TextEntry
+     */
     protected function createTagsField(array $tags): TextEntry
     {
         $tagCount = count($tags);
@@ -201,11 +226,23 @@ class ProjectContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Supports Feature
+     *
+     * @param string $feature
+     * @return bool
+     */
     public function supportsFeature(string $feature): bool
     {
         return in_array($feature, ['tags', 'timeline_alerts', 'estimates']);
     }
 
+    /**
+     * Get Actions
+     *
+     * @param array $data The data array
+     * @return array
+     */
     public function getActions(array $data): array
     {
         $actions = [];
@@ -224,6 +261,13 @@ class ProjectContextProvider implements ContextProviderInterface
 
     /**
      * Calculate production estimate
+     */
+    /**
+     * Calculate Estimate
+     *
+     * @param float $linearFeet
+     * @param int $companyId
+     * @return array
      */
     protected function calculateEstimate(float $linearFeet, int $companyId): array
     {
@@ -253,6 +297,12 @@ class ProjectContextProvider implements ContextProviderInterface
     /**
      * Load project tags
      */
+    /**
+     * Load Project Tags
+     *
+     * @param int|string $projectId
+     * @return array
+     */
     protected function loadProjectTags(int|string $projectId): array
     {
         try {
@@ -275,6 +325,12 @@ class ProjectContextProvider implements ContextProviderInterface
 
     /**
      * Format project type for display
+     */
+    /**
+     * Format Project Type
+     *
+     * @param ?string $type
+     * @return string
      */
     protected function formatProjectType(?string $type): string
     {

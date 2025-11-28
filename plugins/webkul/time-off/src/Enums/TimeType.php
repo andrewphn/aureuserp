@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Time Type enumeration
+ *
+ */
 enum TimeType: string implements HasLabel
 {
     case LEAVE = 'leave';
@@ -18,6 +22,11 @@ enum TimeType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

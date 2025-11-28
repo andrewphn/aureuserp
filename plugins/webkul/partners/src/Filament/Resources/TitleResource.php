@@ -13,12 +13,23 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Partner\Models\Title;
 
+/**
+ * Title Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TitleResource extends Resource
 {
     protected static ?string $model = Title::class;
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -34,6 +45,12 @@ class TitleResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

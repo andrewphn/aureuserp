@@ -6,6 +6,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\EditPartner as BaseEditVendor;
 
+/**
+ * Edit Vendor class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditVendor extends BaseEditVendor
 {
     protected static string $resource = VendorResource::class;

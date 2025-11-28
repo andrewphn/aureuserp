@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\AccountResource;
 
+/**
+ * View Account class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewAccount extends ViewRecord
 {
     protected static string $resource = AccountResource::class;

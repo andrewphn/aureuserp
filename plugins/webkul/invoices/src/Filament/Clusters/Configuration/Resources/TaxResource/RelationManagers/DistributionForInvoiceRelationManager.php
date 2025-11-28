@@ -6,6 +6,11 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Webkul\Account\Enums\DocumentType;
 use Webkul\Account\Traits\TaxPartition;
 
+/**
+ * Distribution For Invoice Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DistributionForInvoiceRelationManager extends RelationManager
 {
     use TaxPartition;

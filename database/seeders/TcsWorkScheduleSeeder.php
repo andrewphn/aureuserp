@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Tcs Work Schedule Seeder database seeder
+ *
+ */
 class TcsWorkScheduleSeeder extends Seeder
 {
     /**

@@ -16,6 +16,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Webkul\Field\Models\Field;
 
+/**
+ * Custom Filters class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CustomFilters extends Component
 {
     protected array $include = [];
@@ -29,6 +34,12 @@ class CustomFilters extends Component
         $this->resourceClass = $resource;
     }
 
+    /**
+     * Make
+     *
+     * @param string $resource
+     * @return static
+     */
     public static function make(string $resource): static
     {
         $static = app(static::class, ['resource' => $resource]);
@@ -38,6 +49,12 @@ class CustomFilters extends Component
         return $static;
     }
 
+    /**
+     * Include
+     *
+     * @param array $fields
+     * @return static
+     */
     public function include(array $fields): static
     {
         $this->include = $fields;
@@ -45,6 +62,12 @@ class CustomFilters extends Component
         return $this;
     }
 
+    /**
+     * Exclude
+     *
+     * @param array $fields
+     * @return static
+     */
     public function exclude(array $fields): static
     {
         $this->exclude = $fields;
@@ -95,6 +118,12 @@ class CustomFilters extends Component
             ->get();
     }
 
+    /**
+     * Create Filter
+     *
+     * @param Field $field
+     * @return BaseFilter
+     */
     protected function createFilter(Field $field): BaseFilter
     {
         $filter = match ($field->type) {
@@ -163,6 +192,12 @@ class CustomFilters extends Component
         return $filter->label($field->name);
     }
 
+    /**
+     * Create Constraint
+     *
+     * @param Field $field
+     * @return Constraint
+     */
     protected function createConstraint(Field $field): Constraint
     {
         $filter = match ($field->type) {

@@ -13,6 +13,11 @@ use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Edit Bill class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditBill extends EditRecord
 {
     use HasRepeaterColumnManager;
@@ -48,6 +53,12 @@ class EditBill extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();
@@ -63,6 +74,11 @@ class EditBill extends EditRecord
         return $data;
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         Account::computeAccountMove($this->getRecord());

@@ -60,6 +60,11 @@ use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
 
+/**
+ * Scrap Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ScrapResource extends Resource
 {
     protected static ?string $model = Scrap::class;
@@ -82,6 +87,12 @@ class ScrapResource extends Resource
         return __('inventories::filament/clusters/operations/resources/scrap.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -268,6 +279,12 @@ class ScrapResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -517,6 +534,12 @@ class ScrapResource extends Resource
             );
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -630,6 +653,12 @@ class ScrapResource extends Resource
         return once(fn () => app(WarehouseSettings::class));
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

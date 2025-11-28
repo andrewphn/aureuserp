@@ -10,6 +10,10 @@ use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Models\Plugin;
 
+/**
+ * Package class
+ *
+ */
 class Package extends BasePackage
 {
     public static $plugins = [];
@@ -28,6 +32,12 @@ class Package extends BasePackage
 
     public array $seederClasses = [];
 
+    /**
+     * Has Install Command
+     *
+     * @param mixed $callable
+     * @return static
+     */
     public function hasInstallCommand($callable): static
     {
         $installCommand = new InstallCommand($this);
@@ -39,6 +49,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Uninstall Command
+     *
+     * @param mixed $callable
+     * @return static
+     */
     public function hasUninstallCommand($callable): static
     {
         $uninstallCommand = new UninstallCommand($this);
@@ -50,6 +66,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Is Core
+     *
+     * @param bool $isCore
+     * @return static
+     */
     public function isCore(bool $isCore = true): static
     {
         $this->isCore = $isCore;
@@ -57,6 +79,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Runs Settings
+     *
+     * @param bool $runsSettings
+     * @return static
+     */
     public function runsSettings(bool $runsSettings = true): static
     {
         $this->runsSettings = $runsSettings;
@@ -64,6 +92,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Setting
+     *
+     * @param string $settingFileName
+     * @return static
+     */
     public function hasSetting(string $settingFileName): static
     {
         $this->settingFileNames[] = $settingFileName;
@@ -71,6 +105,11 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Settings
+     *
+     * @return static
+     */
     public function hasSettings(...$settingFileNames): static
     {
         $this->settingFileNames = array_merge(
@@ -81,6 +120,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Runs Seeders
+     *
+     * @param bool $runsSeeders
+     * @return static
+     */
     public function runsSeeders(bool $runsSeeders = true): static
     {
         $this->runsSeeders = $runsSeeders;
@@ -88,6 +133,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Seeder
+     *
+     * @param string $seederClass
+     * @return static
+     */
     public function hasSeeder(string $seederClass): static
     {
         $this->seederClasses[] = $seederClass;
@@ -95,6 +146,11 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Seeders
+     *
+     * @return static
+     */
     public function hasSeeders(...$seederClasses): static
     {
         $this->seederClasses = array_merge(
@@ -105,6 +161,12 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Dependency
+     *
+     * @param string $dependency
+     * @return static
+     */
     public function hasDependency(string $dependency): static
     {
         $this->dependencies[] = $dependency;
@@ -112,6 +174,11 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Has Dependencies
+     *
+     * @return static
+     */
     public function hasDependencies(...$dependencies): static
     {
         $this->dependencies = array_merge(
@@ -122,6 +189,11 @@ class Package extends BasePackage
         return $this;
     }
 
+    /**
+     * Delete
+     *
+     * @return void
+     */
     public function delete(): void
     {
         Plugin::where('name', $this->name)->delete();
@@ -131,6 +203,11 @@ class Package extends BasePackage
         $this->plugin = null;
     }
 
+    /**
+     * Update Or Create
+     *
+     * @return Plugin
+     */
     public function updateOrCreate(): Plugin
     {
         $this->plugin = Plugin::updateOrCreate([
@@ -165,6 +242,12 @@ class Package extends BasePackage
         return static::isPluginInstalled($this->name);
     }
 
+    /**
+     * Get Package Plugin
+     *
+     * @param string $name
+     * @return ?Plugin
+     */
     public static function getPackagePlugin(string $name): ?Plugin
     {
         if (count(static::$plugins) == 0) {
@@ -182,6 +265,12 @@ class Package extends BasePackage
         return static::$plugins[$name] ??= Plugin::where('name', $name)->first();
     }
 
+    /**
+     * Is Plugin Installed
+     *
+     * @param string $name
+     * @return bool
+     */
     public static function isPluginInstalled(string $name): bool
     {
         try {

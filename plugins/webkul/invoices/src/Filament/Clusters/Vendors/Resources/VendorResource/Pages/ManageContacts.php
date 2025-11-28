@@ -5,6 +5,11 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Page
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ManageContacts as BaseManageContacts;
 
+/**
+ * Manage Contacts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageContacts extends BaseManageContacts
 {
     protected static string $resource = VendorResource::class;

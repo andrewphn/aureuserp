@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\MilestoneResource;
 use Webkul\Project\Filament\Resources\ProjectResource;
 
+/**
+ * Manage Milestones class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageMilestones extends ManageRelatedRecords
 {
     protected static string $resource = ProjectResource::class;
@@ -42,11 +47,23 @@ class ManageMilestones extends ManageRelatedRecords
         return __('webkul-project::filament/resources/project/pages/manage-milestones.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return MilestoneResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return MilestoneResource::table($table)

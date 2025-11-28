@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Repartition Type enumeration
+ *
+ */
 enum RepartitionType: string implements HasLabel
 {
     case BASE = 'base';
@@ -18,6 +22,11 @@ enum RepartitionType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

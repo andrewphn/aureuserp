@@ -8,6 +8,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\TaxResource;
 
+/**
+ * Create Tax class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateTax extends CreateRecord
 {
     protected static string $resource = TaxResource::class;
@@ -30,6 +35,12 @@ class CreateTax extends CreateRecord
             ->body(__('accounts::filament/resources/tax/pages/create-tax.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = Auth::user();

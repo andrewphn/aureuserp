@@ -4,6 +4,11 @@ namespace Webkul\Purchase\Filament\Admin\Clusters;
 
 use Filament\Clusters\Cluster;
 
+/**
+ * Configurations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Configurations extends Cluster
 {
     protected static ?string $slug = 'purchase/configurations';

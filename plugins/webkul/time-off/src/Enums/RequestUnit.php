@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Request Unit enumeration
+ *
+ */
 enum RequestUnit: string implements HasLabel
 {
     case DAY = 'day';
@@ -21,6 +25,11 @@ enum RequestUnit: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 
+/**
+ * Edit My Allocation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditMyAllocation extends EditRecord
 {
     protected static string $resource = MyAllocationResource::class;
@@ -43,6 +48,12 @@ class EditMyAllocation extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();

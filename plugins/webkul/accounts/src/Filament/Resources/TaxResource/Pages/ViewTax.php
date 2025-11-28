@@ -11,6 +11,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Account\Filament\Resources\TaxResource;
 use Webkul\Account\Models\Tax;
 
+/**
+ * View Tax class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewTax extends ViewRecord
 {
     protected static string $resource = TaxResource::class;

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Company Policy authorization policy
+ *
+ */
 class CompanyPolicy
 {
     use HandlesAuthorization;

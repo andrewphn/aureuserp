@@ -16,6 +16,11 @@ use Filament\Tables\Table;
 use Webkul\Security\Filament\Resources\TeamResource\Pages\ManageTeams;
 use Webkul\Security\Models\Team;
 
+/**
+ * Team Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TeamResource extends Resource
 {
     protected static ?string $model = Team::class;
@@ -32,6 +37,12 @@ class TeamResource extends Resource
         return __('security::filament/resources/team.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -43,6 +54,12 @@ class TeamResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -82,6 +99,12 @@ class TeamResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

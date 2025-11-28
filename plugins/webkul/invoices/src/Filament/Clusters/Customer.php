@@ -4,6 +4,11 @@ namespace Webkul\Invoice\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
+/**
+ * Customer class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Customer extends Cluster
 {
     public static function getNavigationLabel(): string

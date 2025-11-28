@@ -9,6 +9,11 @@ use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Models\Operation;
 
+/**
+ * Return Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ReturnAction extends Action
 {
     public static function getDefaultName(): ?string

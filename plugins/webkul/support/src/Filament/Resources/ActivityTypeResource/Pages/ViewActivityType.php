@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Support\Filament\Resources\ActivityTypeResource;
 
+/**
+ * View Activity Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewActivityType extends ViewRecord
 {
     protected static string $resource = ActivityTypeResource::class;

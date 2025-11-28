@@ -9,6 +9,11 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
+/**
+ * Chatter Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ChatterAction extends Action
 {
     protected mixed $activityPlans;
@@ -24,6 +29,12 @@ class ChatterAction extends Action
         return 'chatter.action';
     }
 
+    /**
+     * Set Activity Plans
+     *
+     * @param mixed $activityPlans
+     * @return static
+     */
     public function setActivityPlans(mixed $activityPlans): static
     {
         $this->activityPlans = $activityPlans;
@@ -31,6 +42,12 @@ class ChatterAction extends Action
         return $this;
     }
 
+    /**
+     * Set Resource
+     *
+     * @param string $resource
+     * @return static
+     */
     public function setResource(string $resource): static
     {
         if (empty($resource)) {
@@ -46,6 +63,12 @@ class ChatterAction extends Action
         return $this;
     }
 
+    /**
+     * Set Follower Mail View
+     *
+     * @param string|Closure|null $followerViewMail
+     * @return static
+     */
     public function setFollowerMailView(string|Closure|null $followerViewMail): static
     {
         $this->followerViewMail = $followerViewMail;
@@ -53,6 +76,12 @@ class ChatterAction extends Action
         return $this;
     }
 
+    /**
+     * Set Message Mail View
+     *
+     * @param string|Closure|null $followerViewMail
+     * @return static
+     */
     public function setMessageMailView(string|Closure|null $followerViewMail): static
     {
         $this->followerViewMail = $followerViewMail;

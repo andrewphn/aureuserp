@@ -9,6 +9,31 @@ use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Project\Models\Project;
 use Webkul\Support\Models\Company;
 
+/**
+ * Production Estimate Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $project_id
+ * @property int $company_id
+ * @property float $linear_feet
+ * @property float $estimated_hours
+ * @property float $estimated_days
+ * @property float $estimated_weeks
+ * @property float $estimated_months
+ * @property float $shop_capacity_per_day
+ * @property float $shop_capacity_per_hour
+ * @property int $working_hours_per_day
+ * @property int $working_days_per_week
+ * @property int $working_days_per_month
+ * @property string|null $company_acronym
+ * @property string|null $formatted_estimate
+ * @property bool $is_current
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ *
+ */
 class ProductionEstimate extends Model
 {
     use HasChatter, HasLogActivity;

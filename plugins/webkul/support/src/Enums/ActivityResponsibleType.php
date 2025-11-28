@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Responsible Type enumeration
+ *
+ */
 enum ActivityResponsibleType: string
 {
     case ON_DEMAND = 'on_demand';

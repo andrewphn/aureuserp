@@ -8,6 +8,11 @@ use Webkul\Account\Facades\Account;
 use Webkul\Account\Filament\Resources\CreditNoteResource;
 use Webkul\Account\Filament\Resources\InvoiceResource\Pages\CreateInvoice as CreateRecord;
 
+/**
+ * Create Credit Note class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateCreditNote extends CreateRecord
 {
     protected static string $resource = CreditNoteResource::class;
@@ -25,6 +30,12 @@ class CreateCreditNote extends CreateRecord
             ->body(__('accounts::filament/resources/credit-note/pages/create-credit-note.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['move_type'] ??= MoveType::OUT_REFUND;
@@ -34,6 +45,11 @@ class CreateCreditNote extends CreateRecord
         return $data;
     }
 
+    /**
+     * After Create
+     *
+     * @return void
+     */
     protected function afterCreate(): void
     {
         Account::computeAccountMove($this->getRecord());

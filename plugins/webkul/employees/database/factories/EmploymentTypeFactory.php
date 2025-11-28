@@ -7,6 +7,10 @@ use Webkul\Employee\Models\EmploymentType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Country;
 
+/**
+ * Employment Type Factory model factory
+ *
+ */
 class EmploymentTypeFactory extends Factory
 {
     /**

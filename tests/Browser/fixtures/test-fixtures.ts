@@ -28,24 +28,29 @@ export const test = base.extend<TestFixtures>({
    * Automatically handles login/logout flow.
    */
   authenticatedPage: async ({ page }, use) => {
-    // Navigate to login page
-    await page.goto('/login');
+    // Check if already authenticated (from global setup)
+    await page.goto('/admin/dashboard');
 
-    // Fill in login credentials
-    await page.fill('input[name="email"]', process.env.TEST_USER_EMAIL || 'test@example.com');
-    await page.fill('input[name="password"]', process.env.TEST_USER_PASSWORD || 'password');
+    const currentUrl = page.url();
 
-    // Submit login form
-    await page.click('button[type="submit"]');
+    // If redirected to login, authenticate
+    if (currentUrl.includes('/login')) {
+      // Fill in login credentials
+      await page.fill('input[name="email"]', process.env.TEST_USER_EMAIL || 'info@tcswoodwork.com');
+      await page.fill('input[name="password"]', process.env.TEST_USER_PASSWORD || 'Lola2024!');
 
-    // Wait for navigation to dashboard
-    await page.waitForURL('/admin/dashboard', { timeout: 10000 });
+      // Submit login form
+      await page.click('button[type="submit"]');
+
+      // Wait for navigation to dashboard
+      await page.waitForURL('/admin/dashboard', { timeout: 10000 });
+    }
 
     // Use the authenticated page
     await use(page);
 
-    // Cleanup: Logout after test
-    await page.goto('/logout');
+    // Cleanup: Browser context will be destroyed automatically by Playwright
+    // No need to manually logout - this was causing GET /logout errors
   },
 
   /**
@@ -80,33 +85,21 @@ export const test = base.extend<TestFixtures>({
   /**
    * Fixture: Test Document
    *
-   * Creates a test PDF document in the database and provides its details.
-   * Automatically cleans up after the test.
+   * Uses existing PDF document from Project 9 for testing.
+   * NOTE: Multi-user tests should navigate to the annotation viewer URL, not the document list.
+   * The correct URL is: /admin/project/projects/{projectId}/annotate-v2/{pdfPageId}?pdf={pdfDocId}
    */
   testDocument: async ({ authenticatedPage }, use) => {
-    // Create test document via API
-    const response = await authenticatedPage.request.post('/api/pdf-documents', {
-      data: {
-        title: 'Test PDF Document',
-        description: 'Automated test document',
-        file_path: 'test-pdfs/sample.pdf',
-        tags: ['test', 'automated'],
-        is_public: true,
-      },
-    });
+    // Use existing PDF document from Project 9
+    // Maps to: Project 9, PDF Page 1, PDF Document 1
+    const document = {
+      id: '/admin/project/projects/9/annotate-v2/1?pdf=1', // Full annotation viewer URL
+      title: 'Test PDF Document - Project 9 Page 1',
+      filePath: '/storage/pdf-documents/01K823HKYN0NFEK8RVG8947083.pdf',
+    };
 
-    const documentData = await response.json();
-    const document = documentData.data;
-
-    // Use the test document
-    await use({
-      id: document.id,
-      title: document.attributes.title,
-      filePath: document.attributes.file_path,
-    });
-
-    // Cleanup: Delete test document
-    await authenticatedPage.request.delete(`/api/pdf-documents/${document.id}`);
+    // Use the test document (no cleanup needed since we're using existing doc)
+    await use(document);
   },
 });
 

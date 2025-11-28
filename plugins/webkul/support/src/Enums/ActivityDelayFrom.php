@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Delay From enumeration
+ *
+ */
 enum ActivityDelayFrom: string
 {
     case PREVIOUS_ACTIVITY = 'previous_activity';

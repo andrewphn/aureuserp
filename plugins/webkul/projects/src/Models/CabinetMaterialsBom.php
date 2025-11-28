@@ -9,6 +9,49 @@ use Webkul\Product\Models\Product;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Cabinet Materials Bom Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $cabinet_specification_id
+ * @property int $cabinet_run_id
+ * @property int $product_id
+ * @property string|null $component_name
+ * @property float $quantity_required
+ * @property string|null $unit_of_measure
+ * @property float $waste_factor_percentage
+ * @property float $quantity_with_waste
+ * @property float $component_width_inches
+ * @property float $component_height_inches
+ * @property int $quantity_of_components
+ * @property float $sqft_per_component
+ * @property float $total_sqft_required
+ * @property float $linear_feet_per_component
+ * @property float $total_linear_feet
+ * @property float $board_feet_required
+ * @property float $unit_cost
+ * @property float $total_material_cost
+ * @property string|null $grain_direction
+ * @property bool $requires_edge_banding
+ * @property string|null $edge_banding_sides
+ * @property float $edge_banding_lf
+ * @property string|null $cnc_notes
+ * @property string|null $machining_operations
+ * @property bool $material_allocated
+ * @property \Carbon\Carbon|null $material_allocated_at
+ * @property bool $material_issued
+ * @property \Carbon\Carbon|null $material_issued_at
+ * @property int $substituted_product_id
+ * @property string|null $substitution_notes
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
+ * @property-read \Illuminate\Database\Eloquent\Model|null $product
+ * @property-read \Illuminate\Database\Eloquent\Model|null $substitutedProduct
+ *
+ */
 class CabinetMaterialsBom extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
@@ -91,16 +134,31 @@ class CabinetMaterialsBom extends Model
         return $this->belongsTo(CabinetSpecification::class, 'cabinet_specification_id');
     }
 
+    /**
+     * Cabinet Run
+     *
+     * @return BelongsTo
+     */
     public function cabinetRun(): BelongsTo
     {
         return $this->belongsTo(CabinetRun::class, 'cabinet_run_id');
     }
 
+    /**
+     * Product
+     *
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /**
+     * Substituted Product
+     *
+     * @return BelongsTo
+     */
     public function substitutedProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'substituted_product_id');
@@ -109,21 +167,46 @@ class CabinetMaterialsBom extends Model
     /**
      * Scopes
      */
+    /**
+     * Scope query to Allocated
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeAllocated($query)
     {
         return $query->where('material_allocated', true);
     }
 
+    /**
+     * Scope query to Issued
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeIssued($query)
     {
         return $query->where('material_issued', true);
     }
 
+    /**
+     * Scope query to Pending
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopePending($query)
     {
         return $query->where('material_allocated', false);
     }
 
+    /**
+     * Scope query to By Component
+     *
+     * @param mixed $query The search query
+     * @param string $component
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByComponent($query, string $component)
     {
         return $query->where('component_name', $component);
@@ -131,6 +214,11 @@ class CabinetMaterialsBom extends Model
 
     /**
      * Auto-calculate fields before saving
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {

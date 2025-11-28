@@ -11,6 +11,11 @@ use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Settings\LogisticSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Logistics class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageLogistics extends SettingsPage
 {
     use HasPageShield;
@@ -44,6 +49,12 @@ class ManageLogistics extends SettingsPage
         return __('inventories::filament/clusters/settings/pages/manage-logistics.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -54,6 +65,11 @@ class ManageLogistics extends SettingsPage
             ]);
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         OperationType::withTrashed()->where('type', Enums\OperationType::DROPSHIP)->update(['deleted_at' => $this->data['enable_dropshipping'] ? null : now()]);

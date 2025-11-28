@@ -6,6 +6,11 @@ use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductCategoryResource;
 use Webkul\Product\Filament\Resources\CategoryResource\Pages\ViewCategory;
 
+/**
+ * View Product Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewProductCategory extends ViewCategory
 {
     protected static string $resource = ProductCategoryResource::class;

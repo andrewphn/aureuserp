@@ -19,10 +19,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Settings\TimeSettings;
 
+/**
+ * Timesheets Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TimesheetsRelationManager extends RelationManager
 {
     protected static string $relationship = 'timesheets';
 
+    /**
+     * Can View For Record
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return bool
+     */
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         if (! app(TimeSettings::class)->enable_timesheets) {
@@ -36,6 +48,12 @@ class TimesheetsRelationManager extends RelationManager
         return $ownerRecord->project->allow_timesheets;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -65,6 +83,12 @@ class TimesheetsRelationManager extends RelationManager
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

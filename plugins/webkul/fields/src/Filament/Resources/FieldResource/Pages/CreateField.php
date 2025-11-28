@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Webkul\Field\FieldsColumnManager;
 use Webkul\Field\Filament\Resources\FieldResource;
 
+/**
+ * Create Field class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateField extends CreateRecord
 {
     protected static string $resource = FieldResource::class;
@@ -19,6 +24,11 @@ class CreateField extends CreateRecord
             ->body(__('fields::filament/resources/field/pages/create-field.notification.body'));
     }
 
+    /**
+     * After Create
+     *
+     * @return void
+     */
     protected function afterCreate(): void
     {
         FieldsColumnManager::createColumn($this->record);

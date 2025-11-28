@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Carryover Day enumeration
+ *
+ */
 enum CarryoverDay: string implements HasLabel
 {
     case LAST = 'last';
@@ -47,6 +51,11 @@ enum CarryoverDay: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         $options = [

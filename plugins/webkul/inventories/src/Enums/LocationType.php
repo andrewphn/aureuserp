@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Location Type enumeration
+ *
+ */
 enum LocationType: string implements HasLabel
 {
     case SUPPLIER = 'supplier';

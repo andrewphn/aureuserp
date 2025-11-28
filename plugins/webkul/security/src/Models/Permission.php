@@ -6,6 +6,10 @@ use Spatie\Permission\Models\Permission as BasePermission;
 use Webkul\Security\PermissionRegistrar;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Permission Eloquent model
+ *
+ */
 class Permission extends BasePermission
 {
     /**

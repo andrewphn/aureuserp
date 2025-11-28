@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TableViews\Models\TableView;
 
+/**
+ * Table View Policy authorization policy
+ *
+ */
 class TableViewPolicy
 {
     use HandlesAuthorization;

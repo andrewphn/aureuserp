@@ -4,8 +4,18 @@ namespace Webkul\Chatter\Filament\Infolists\Components\Activities;
 
 use Filament\Infolists\Components\RepeatableEntry;
 
+/**
+ * Activities Repeatable Entry class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivitiesRepeatableEntry extends RepeatableEntry
 {
+    /**
+     * Setup
+     *
+     * @return void
+     */
     protected function setup(): void
     {
         parent::setup();
@@ -13,6 +23,11 @@ class ActivitiesRepeatableEntry extends RepeatableEntry
         $this->configureRepeatableEntry();
     }
 
+    /**
+     * Configure Repeatable Entry
+     *
+     * @return void
+     */
     private function configureRepeatableEntry(): void
     {
         $this

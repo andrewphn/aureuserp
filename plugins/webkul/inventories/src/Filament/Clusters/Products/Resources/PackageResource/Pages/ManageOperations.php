@@ -15,6 +15,11 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Operation;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * Manage Operations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageOperations extends ManageRelatedRecords
 {
     use HasTableViews;
@@ -35,6 +40,12 @@ class ManageOperations extends ManageRelatedRecords
         return OperationResource::getPresetTableViews();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return OperationResource::table($table)

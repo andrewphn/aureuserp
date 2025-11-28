@@ -5,6 +5,11 @@ namespace Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\Produ
 use Webkul\Product\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\ProductCategoryResource;
 
+/**
+ * Create Product Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateProductCategory extends CreateCategory
 {
     protected static string $resource = ProductCategoryResource::class;

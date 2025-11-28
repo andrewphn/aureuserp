@@ -15,6 +15,11 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Scrap;
 
+/**
+ * Edit Scrap class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditScrap extends EditRecord
 {
     protected static string $resource = ScrapResource::class;

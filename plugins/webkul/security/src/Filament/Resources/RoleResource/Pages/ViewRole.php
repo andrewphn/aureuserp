@@ -6,6 +6,11 @@ use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Security\Filament\Resources\RoleResource;
 
+/**
+ * View Role class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewRole extends ViewRecord
 {
     protected static string $resource = RoleResource::class;

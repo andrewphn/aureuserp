@@ -7,6 +7,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 
+/**
+ * View Warehouse class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewWarehouse extends ViewRecord
 {
     protected static string $resource = WarehouseResource::class;

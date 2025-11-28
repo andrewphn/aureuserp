@@ -19,6 +19,11 @@ use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * Manage Moves class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageMoves extends ManageRelatedRecords
 {
     use HasTableViews;
@@ -73,6 +78,12 @@ class ManageMoves extends ManageRelatedRecords
         ];
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

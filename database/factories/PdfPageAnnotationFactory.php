@@ -7,10 +7,19 @@ use App\Models\PdfPageAnnotation;
 use Webkul\Security\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * Pdf Page Annotation Factory model factory
+ *
+ */
 class PdfPageAnnotationFactory extends Factory
 {
     protected $model = PdfPageAnnotation::class;
 
+    /**
+     * Definition
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [
@@ -52,6 +61,11 @@ class PdfPageAnnotationFactory extends Factory
     /**
      * State for a cabinet run annotation (top-level)
      */
+    /**
+     * Cabinet Run
+     *
+     * @return static
+     */
     public function cabinetRun(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -63,6 +77,11 @@ class PdfPageAnnotationFactory extends Factory
     /**
      * State for a cabinet annotation (child of cabinet run)
      */
+    /**
+     * Cabinet
+     *
+     * @return static
+     */
     public function cabinet(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -73,6 +92,11 @@ class PdfPageAnnotationFactory extends Factory
 
     /**
      * State for a room boundary annotation
+     */
+    /**
+     * Room Boundary
+     *
+     * @return static
      */
     public function roomBoundary(): static
     {

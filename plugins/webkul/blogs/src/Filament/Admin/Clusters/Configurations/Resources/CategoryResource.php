@@ -25,6 +25,11 @@ use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResourc
 use Webkul\Blog\Models\Category;
 use Webkul\Website\Filament\Admin\Clusters\Configurations;
 
+/**
+ * Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
@@ -45,6 +50,12 @@ class CategoryResource extends Resource
         return __('blogs::filament/admin/clusters/configurations/resources/category.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -70,6 +81,12 @@ class CategoryResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

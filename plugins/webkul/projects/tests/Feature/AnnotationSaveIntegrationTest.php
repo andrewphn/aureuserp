@@ -12,6 +12,10 @@ use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Annotation Save Integration Test test case
+ *
+ */
 class AnnotationSaveIntegrationTest extends TestCase
 {
     use RefreshDatabase;

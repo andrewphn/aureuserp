@@ -7,6 +7,10 @@ use Webkul\Partner\Models\Bank;
 use Webkul\Security\Models\User;
 
 
+/**
+ * Bank Policy authorization policy
+ *
+ */
 class BankPolicy
 {
     use HandlesAuthorization;

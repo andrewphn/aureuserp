@@ -10,6 +10,11 @@ use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Packages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPackages extends ListRecords
 {
     use HasTableViews;

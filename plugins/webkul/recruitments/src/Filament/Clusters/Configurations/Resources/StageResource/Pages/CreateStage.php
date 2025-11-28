@@ -6,6 +6,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\StageResource;
 
+/**
+ * Create Stage class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateStage extends CreateRecord
 {
     protected static string $resource = StageResource::class;

@@ -9,6 +9,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyTimeOffResource;
 
+/**
+ * View My Time Off class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewMyTimeOff extends ViewRecord
 {
     protected static string $resource = MyTimeOffResource::class;

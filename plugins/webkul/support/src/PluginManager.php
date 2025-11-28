@@ -7,6 +7,10 @@ use Filament\Panel;
 
 use function Illuminate\Filesystem\join_paths;
 
+/**
+ * Plugin Manager class
+ *
+ */
 class PluginManager implements Plugin
 {
     public function getId(): string
@@ -14,6 +18,12 @@ class PluginManager implements Plugin
         return 'plugin-manager';
     }
 
+    /**
+     * Register
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function register(Panel $panel): void
     {
         $plugins = $this->getPlugins();
@@ -23,13 +33,29 @@ class PluginManager implements Plugin
         }
     }
 
+    /**
+     * Boot
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function boot(Panel $panel): void {}
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Get
+     *
+     * @return static
+     */
     public static function get(): static
     {
         /** @var static $plugin */

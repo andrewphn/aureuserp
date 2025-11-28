@@ -19,6 +19,11 @@ use Webkul\Inventory\Filament\Clusters\Products;
 use Webkul\Project\Filament\Resources\CabinetReportResource\Pages;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Cabinet Report Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CabinetReportResource extends Resource
 {
     protected static ?string $model = CabinetSpecification::class;
@@ -35,6 +40,12 @@ class CabinetReportResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([]);
@@ -130,6 +141,12 @@ class CabinetReportResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

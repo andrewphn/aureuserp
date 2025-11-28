@@ -8,6 +8,11 @@ use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Models\Move;
 use Webkul\Support\Traits\PDFHandler;
 
+/**
+ * Preview Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PreviewAction extends Action
 {
     use PDFHandler;
@@ -24,6 +29,12 @@ class PreviewAction extends Action
         return (string) $this->template;
     }
 
+    /**
+     * Set Template
+     *
+     * @param string $template
+     * @return static
+     */
     public function setTemplate(string $template): static
     {
         if (! view()->exists($template)) {

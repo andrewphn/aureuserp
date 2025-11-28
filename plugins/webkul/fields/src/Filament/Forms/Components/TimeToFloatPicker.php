@@ -5,6 +5,11 @@ namespace Webkul\Field\Filament\Forms\Components;
 use Carbon\Carbon;
 use Filament\Forms\Components\TimePicker;
 
+/**
+ * Time To Float Picker class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TimeToFloatPicker extends TimePicker
 {
     protected function setUp(): void

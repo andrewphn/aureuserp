@@ -11,6 +11,36 @@ use Illuminate\Support\Facades\Storage;
 use Webkul\Blog\Database\Factories\PostFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Post Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $title
+ * @property string|null $sub_title
+ * @property string|null $content
+ * @property string|null $slug
+ * @property string|null $image
+ * @property string|null $author_name
+ * @property bool $is_published
+ * @property \Carbon\Carbon|null $published_at
+ * @property string|null $visits
+ * @property string|null $meta_title
+ * @property string|null $meta_keywords
+ * @property string|null $meta_description
+ * @property int $category_id
+ * @property int $author_id
+ * @property int $creator_id
+ * @property int $last_editor_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $category
+ * @property-read \Illuminate\Database\Eloquent\Model|null $author
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $lastEditor
+ * @property-read \Illuminate\Database\Eloquent\Collection $tags
+ *
+ */
 class Post extends Model
 {
     use HasFactory, SoftDeletes;
@@ -79,31 +109,61 @@ class Post extends Model
         return $minutes.' min read';
     }
 
+    /**
+     * Tags
+     *
+     * @return BelongsToMany
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'blogs_post_tags', 'post_id', 'tag_id');
     }
 
+    /**
+     * Category
+     *
+     * @return BelongsTo
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Author
+     *
+     * @return BelongsTo
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Last Editor
+     *
+     * @return BelongsTo
+     */
     public function lastEditor(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return PostFactory
+     */
     protected static function newFactory(): PostFactory
     {
         return PostFactory::new();

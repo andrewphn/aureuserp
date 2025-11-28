@@ -9,6 +9,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Internals class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListInternals extends ListRecords
 {
     use HasTableViews;

@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('projects_tasks', function (Blueprint $table) {
+            $table->foreignId('room_id')->nullable()->after('project_id')->constrained('projects_rooms')->nullOnDelete();
+            $table->foreignId('room_location_id')->nullable()->after('room_id')->constrained('projects_room_locations')->nullOnDelete();
+            $table->foreignId('cabinet_run_id')->nullable()->after('room_location_id')->constrained('projects_cabinet_runs')->nullOnDelete();
+            $table->foreignId('cabinet_specification_id')->nullable()->after('cabinet_run_id')->constrained('projects_cabinet_specifications')->nullOnDelete();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('projects_tasks', function (Blueprint $table) {
+            $table->dropForeign(['room_id']);
+            $table->dropForeign(['room_location_id']);
+            $table->dropForeign(['cabinet_run_id']);
+            $table->dropForeign(['cabinet_specification_id']);
+
+            $table->dropColumn(['room_id', 'room_location_id', 'cabinet_run_id', 'cabinet_specification_id']);
+        });
+    }
+};

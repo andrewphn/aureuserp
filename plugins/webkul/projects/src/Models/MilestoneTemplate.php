@@ -4,6 +4,21 @@ namespace Webkul\Project\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Milestone Template Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $production_stage
+ * @property bool $is_critical
+ * @property string|null $description
+ * @property int $relative_days
+ * @property int $sort_order
+ * @property bool $is_active
+ *
+ */
 class MilestoneTemplate extends Model
 {
     /**
