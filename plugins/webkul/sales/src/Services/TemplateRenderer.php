@@ -6,6 +6,10 @@ use Webkul\Sale\Models\DocumentTemplate;
 use Webkul\Sale\Models\Order;
 use Carbon\Carbon;
 
+/**
+ * Template Renderer class
+ *
+ */
 class TemplateRenderer
 {
     /**
@@ -22,6 +26,9 @@ class TemplateRenderer
         if (! $content) {
             return '';
         }
+
+        // Process line items loop first
+        $content = $this->processLineItemsLoop($content, $order);
 
         $variables = $this->extractVariables($order);
 
@@ -139,6 +146,21 @@ class TemplateRenderer
             $variables['FEET_TYPE'] = $this->extractSpec($product, 'feet_type', '');
         }
 
+        // Add invoice-specific aliases for backward compatibility with invoice templates
+        $variables['INVOICE_NUMBER'] = $variables['PROPOSAL_NUMBER'];
+        $variables['ORDER_DATE'] = $variables['PROJECT_DATE'];
+        $variables['INVOICE_DATE'] = $variables['PROJECT_DATE'];
+        $variables['DUE_DATE'] = Carbon::parse($order->date_order)->addDays(30)->format('F j, Y');
+        $variables['CLIENT_ADDRESS'] = $variables['CLIENT_STREET'];
+        $variables['CLIENT_CITY_STATE_ZIP'] = trim($variables['CLIENT_CITY'] . ', ' . $variables['CLIENT_STATE'] . ' ' . $variables['CLIENT_ZIP']);
+        $variables['TAX_RATE'] = number_format(($order->amount_tax / ($order->amount_untaxed ?: 1)) * 100, 2);
+        $variables['TOTAL_AMOUNT'] = $variables['TOTAL_PRICE'];
+        $variables['AMOUNT_PAID'] = number_format($order->amount_paid ?? 0, 2);
+        $variables['BALANCE_DUE'] = $variables['BALANCE_AMOUNT'];
+        $variables['PAYMENT_TERMS'] = 'Net 30 days';
+        $variables['NOTES'] = $variables['PROJECT_NOTES'];
+        $variables['PO_NUMBER'] = $order->client_order_ref ?? '';
+
         return $variables;
     }
 
@@ -223,6 +245,57 @@ class TemplateRenderer
         }
 
         return $content;
+    }
+
+    /**
+     * Process the ITEM_LINES loop in the template
+     *
+     * @param string $content
+     * @param Order $order
+     * @return string
+     */
+    protected function processLineItemsLoop(string $content, Order $order): string
+    {
+        // Find the loop section
+        $pattern = '/<!-- LOOP START: \{\{ITEM_LINES\}\} -->(.*?)<!-- LOOP END -->/s';
+
+        if (!preg_match($pattern, $content, $matches)) {
+            return $content; // No loop found, return content unchanged
+        }
+
+        $loopTemplate = $matches[1];
+        $generatedRows = '';
+
+        // Get order lines
+        $lines = $order->lines;
+
+        foreach ($lines as $index => $line) {
+            $rowHtml = $loopTemplate;
+
+            // Replace item variables in this row
+            $product = $line->product;
+            $rowHtml = str_replace('{{ITEM_NAME}}', $product?->name ?? 'Item', $rowHtml);
+
+            // For description, use line name (which includes attribute selections)
+            // Fall back to product name only if line name is empty
+            // Avoid showing generic product descriptions like "Custom cabinet - configure..."
+            $description = $line->name ?: ($product?->name ?? '');
+            $rowHtml = str_replace('{{ITEM_DESCRIPTION}}', $description, $rowHtml);
+
+            // Format values
+            $qty = number_format($line->product_uom_qty ?? 0, 0);
+            $rate = number_format($line->price_unit ?? 0, 2);
+            $amount = number_format($line->price_total ?? 0, 2);
+
+            $rowHtml = str_replace('{{ITEM_QTY}}', $qty, $rowHtml);
+            $rowHtml = str_replace('{{ITEM_RATE}}', $rate, $rowHtml);
+            $rowHtml = str_replace('{{ITEM_AMOUNT}}', $amount, $rowHtml);
+
+            $generatedRows .= $rowHtml;
+        }
+
+        // Replace the entire loop section with generated rows
+        return preg_replace($pattern, $generatedRows, $content);
     }
 
     /**

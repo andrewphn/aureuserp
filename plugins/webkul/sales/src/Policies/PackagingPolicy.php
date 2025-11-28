@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Sale\Models\Packaging;
 use Webkul\Security\Models\User;
 
+/**
+ * Packaging Policy authorization policy
+ *
+ */
 class PackagingPolicy
 {
     use HandlesAuthorization;

@@ -9,6 +9,40 @@ use Webkul\Product\Models\Product;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Sales Order Line Item Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $sales_order_id
+ * @property int $room_id
+ * @property int $room_location_id
+ * @property int $cabinet_run_id
+ * @property int $cabinet_specification_id
+ * @property int $product_id
+ * @property string|null $line_item_type
+ * @property string|null $description
+ * @property float $quantity
+ * @property float $linear_feet
+ * @property float $base_rate_per_lf
+ * @property float $material_rate_per_lf
+ * @property float $combined_rate_per_lf
+ * @property float $unit_price
+ * @property float $subtotal
+ * @property float $discount_percentage
+ * @property float $discount_amount
+ * @property float $line_total
+ * @property int $sequence
+ * @property-read \Illuminate\Database\Eloquent\Model|null $salesOrder
+ * @property-read \Illuminate\Database\Eloquent\Model|null $room
+ * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $product
+ *
+ */
 class SalesOrderLineItem extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
@@ -75,26 +109,51 @@ class SalesOrderLineItem extends Model
         return $this->belongsTo(Order::class, 'sales_order_id');
     }
 
+    /**
+     * Room
+     *
+     * @return BelongsTo
+     */
     public function room(): BelongsTo
     {
         return $this->belongsTo(\Webkul\Project\Models\Room::class, 'room_id');
     }
 
+    /**
+     * Room Location
+     *
+     * @return BelongsTo
+     */
     public function roomLocation(): BelongsTo
     {
         return $this->belongsTo(\Webkul\Project\Models\RoomLocation::class, 'room_location_id');
     }
 
+    /**
+     * Cabinet Run
+     *
+     * @return BelongsTo
+     */
     public function cabinetRun(): BelongsTo
     {
         return $this->belongsTo(\Webkul\Project\Models\CabinetRun::class, 'cabinet_run_id');
     }
 
+    /**
+     * Cabinet Specification
+     *
+     * @return BelongsTo
+     */
     public function cabinetSpecification(): BelongsTo
     {
         return $this->belongsTo(\Webkul\Project\Models\CabinetSpecification::class, 'cabinet_specification_id');
     }
 
+    /**
+     * Product
+     *
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
@@ -103,26 +162,56 @@ class SalesOrderLineItem extends Model
     /**
      * Scopes
      */
+    /**
+     * Scope query to Cabinets
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeCabinets($query)
     {
         return $query->where('line_item_type', 'cabinet');
     }
 
+    /**
+     * Scope query to Countertops
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeCountertops($query)
     {
         return $query->where('line_item_type', 'countertop');
     }
 
+    /**
+     * Scope query to Additional
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeAdditional($query)
     {
         return $query->where('line_item_type', 'additional');
     }
 
+    /**
+     * Scope query to Discount
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeDiscount($query)
     {
         return $query->where('line_item_type', 'discount');
     }
 
+    /**
+     * Scope query to Ordered
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeOrdered($query)
     {
         return $query->orderBy('sequence');
@@ -130,6 +219,11 @@ class SalesOrderLineItem extends Model
 
     /**
      * Auto-calculate fields before saving
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {

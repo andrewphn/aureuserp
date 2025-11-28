@@ -4,6 +4,10 @@ namespace Webkul\Sale\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Sale Order class
+ *
+ */
 class SaleOrder extends Facade
 {
     /**

@@ -11,12 +11,22 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Quotations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListQuotations extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = QuotationResource::class;
 
+    /**
+     * Get the header actions for the list page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -25,6 +35,11 @@ class ListQuotations extends ListRecords
         ];
     }
 
+    /**
+     * Get preset table views for filtering quotations
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

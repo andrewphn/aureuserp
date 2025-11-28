@@ -4,6 +4,10 @@ namespace Webkul\Sale\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
+/**
+ * Quotation And Order Settings class
+ *
+ */
 class QuotationAndOrderSettings extends Settings
 {
     public int $default_quotation_validity;
@@ -14,6 +18,11 @@ class QuotationAndOrderSettings extends Settings
 
     public string $sales_order_prefix;
 
+    /**
+     * Group
+     *
+     * @return string
+     */
     public static function group(): string
     {
         return 'sales_quotation_and_orders';

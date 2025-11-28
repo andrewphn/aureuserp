@@ -40,6 +40,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\R
 use Webkul\Sale\Models\ActivityPlan;
 use Webkul\Security\Filament\Resources\CompanyResource;
 
+/**
+ * Activity Plan Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityPlanResource extends Resource
 {
     protected static ?string $model = ActivityPlan::class;
@@ -48,16 +53,32 @@ class ActivityPlanResource extends Resource
 
     protected static ?string $cluster = Configuration::class;
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/activity-plan.navigation.title');
     }
 
+    /**
+     * Get the navigation group
+     *
+     * @return string|null
+     */
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/activity-plan.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -84,6 +105,12 @@ class ActivityPlanResource extends Resource
                 ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -269,6 +296,12 @@ class ActivityPlanResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -300,6 +333,11 @@ class ActivityPlanResource extends Resource
                 ->columns(1);
     }
 
+    /**
+     * Get the relation managers for this resource
+     *
+     * @return array<class-string>
+     */
     public static function getRelations(): array
     {
         return [
@@ -307,6 +345,11 @@ class ActivityPlanResource extends Resource
         ];
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

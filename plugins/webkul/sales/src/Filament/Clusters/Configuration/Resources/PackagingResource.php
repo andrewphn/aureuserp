@@ -8,6 +8,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\PackagingResource\Page
 use Webkul\Sale\Models\Packaging;
 use Webkul\Sale\Settings\ProductSettings;
 
+/**
+ * Packaging Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PackagingResource extends BasePackagingResource
 {
     protected static ?string $model = Packaging::class;
@@ -18,6 +23,11 @@ class PackagingResource extends BasePackagingResource
 
     protected static ?string $cluster = Configuration::class;
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -27,16 +37,31 @@ class PackagingResource extends BasePackagingResource
         return app(ProductSettings::class)->enable_packagings;
     }
 
+    /**
+     * Get the navigation group
+     *
+     * @return string
+     */
     public static function getNavigationGroup(): string
     {
         return __('Packagings');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('Products');
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

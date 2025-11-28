@@ -18,6 +18,11 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\Pages\ViewOrder
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource\RelationManagers\LineItemsRelationManager;
 use Webkul\Sale\Models\Order;
 
+/**
+ * Order Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
@@ -30,21 +35,43 @@ class OrderResource extends Resource
 
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
+    /**
+     * Get the model label
+     *
+     * @return string
+     */
     public static function getModelLabel(): string
     {
         return __('sales::filament/clusters/orders/resources/order.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/orders/resources/order.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return QuotationResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return QuotationResource::table($table)
@@ -53,11 +80,23 @@ class OrderResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return QuotationResource::infolist($schema);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
@@ -68,6 +107,11 @@ class OrderResource extends Resource
         ]);
     }
 
+    /**
+     * Get the relation managers for this resource
+     *
+     * @return array<class-string>
+     */
     public static function getRelations(): array
     {
         return [
@@ -75,6 +119,11 @@ class OrderResource extends Resource
         ];
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

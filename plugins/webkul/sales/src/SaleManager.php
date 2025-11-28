@@ -34,13 +34,28 @@ use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Package;
 use Webkul\Support\Services\EmailService;
 
+/**
+ * Sale Manager class
+ *
+ */
 class SaleManager
 {
+    /**
+     * Create a new SaleManager instance
+     *
+     */
     public function __construct(
         protected QuotationAndOrderSettings $quotationAndOrderSettings,
         protected InvoiceSettings $invoiceSettings,
     ) {}
 
+    /**
+     * Send Quotation Or Order By Email
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     * @return array
+     */
     public function sendQuotationOrOrderByEmail(Order $record, array $data = []): array
     {
         $result = $this->sendByEmail($record, $data);
@@ -52,6 +67,12 @@ class SaleManager
         return $result;
     }
 
+    /**
+     * Lock And Unlock
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function lockAndUnlock(Order $record): Order
     {
         $record->update(['locked' => ! $record->locked]);
@@ -61,6 +82,12 @@ class SaleManager
         return $record;
     }
 
+    /**
+     * Confirm Sale Order
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function confirmSaleOrder(Order $record): Order
     {
         $this->applyPullRules($record);
@@ -76,6 +103,12 @@ class SaleManager
         return $record;
     }
 
+    /**
+     * Back To Quotation
+     *
+     * @param Order $record The model record
+     * @return Order
+     */
     public function backToQuotation(Order $record): Order
     {
         $record->update([
@@ -88,6 +121,13 @@ class SaleManager
         return $record;
     }
 
+    /**
+     * Cancel Sale Order
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     * @return Order
+     */
     public function cancelSaleOrder(Order $record, array $data = []): Order
     {
         $record->update([
@@ -106,6 +146,12 @@ class SaleManager
         return $record;
     }
 
+    /**
+     * Create Invoice
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     */
     public function createInvoice(Order $record, array $data = [])
     {
         DB::transaction(function () use ($record, $data) {
@@ -166,6 +212,12 @@ class SaleManager
     /**
      * Compute the sale order line.
      */
+    /**
+     * Compute Sale Order Line
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeSaleOrderLine(OrderLine $line): OrderLine
     {
         $line = $this->computeQtyInvoiced($line);
@@ -219,6 +271,12 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Compute Qty Invoiced
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeQtyInvoiced(OrderLine $line): OrderLine
     {
         $qtyInvoiced = 0.000;
@@ -243,6 +301,12 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Compute Qty Delivered
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeQtyDelivered(OrderLine $line): OrderLine
     {
         if ($line->qty_delivered_method == QtyDeliveredMethod::MANUAL) {
@@ -276,6 +340,12 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Compute Warehouse Id
+     *
+     * @param Order $order
+     * @return Order
+     */
     public function computeWarehouseId(Order $order): Order
     {
         if (! Package::isPluginInstalled('inventories')) {
@@ -292,6 +362,12 @@ class SaleManager
         return $order;
     }
 
+    /**
+     * Compute Delivery Status
+     *
+     * @param Order $order
+     * @return Order
+     */
     public function computeDeliveryStatus(Order $order): Order
     {
         if (! Package::isPluginInstalled('inventories')) {
@@ -319,6 +395,12 @@ class SaleManager
         return $order;
     }
 
+    /**
+     * Compute Invoice Status
+     *
+     * @param Order $order
+     * @return Order
+     */
     public function computeInvoiceStatus(Order $order): Order
     {
         if ($order->state != OrderState::SALE) {
@@ -346,6 +428,12 @@ class SaleManager
         return $order;
     }
 
+    /**
+     * Compute Order Line Delivery Method
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeOrderLineDeliveryMethod(OrderLine $line): OrderLine
     {
         if ($line->is_expense) {
@@ -357,6 +445,12 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Compute Order Line Invoice Status
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeOrderLineInvoiceStatus(OrderLine $line): OrderLine
     {
         if ($line->state !== OrderState::SALE) {
@@ -394,6 +488,12 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Compute Order Line Untaxed Amount To Invoice
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function computeOrderLineUntaxedAmountToInvoice(OrderLine $line): OrderLine
     {
         if ($line->state !== OrderState::SALE) {
@@ -419,6 +519,12 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Untaxed Order Line Amount To Invoiced
+     *
+     * @param OrderLine $line
+     * @return OrderLine
+     */
     public function untaxedOrderLineAmountToInvoiced(OrderLine $line): OrderLine
     {
         $amountInvoiced = 0.0;
@@ -441,6 +547,13 @@ class SaleManager
         return $line;
     }
 
+    /**
+     * Send By Email
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     * @return array
+     */
     public function sendByEmail(Order $record, array $data): array
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
@@ -505,6 +618,13 @@ class SaleManager
         ];
     }
 
+    /**
+     * Cancel And Send Email
+     *
+     * @param Order $record The model record
+     * @param array $data The data array
+     * @return bool
+     */
     public function cancelAndSendEmail(Order $record, array $data)
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
@@ -537,6 +657,12 @@ class SaleManager
         }
     }
 
+    /**
+     * Get Outgoing Incoming Moves
+     *
+     * @param OrderLine $orderLine
+     * @param bool $strict
+     */
     public function getOutgoingIncomingMoves(OrderLine $orderLine, bool $strict = true)
     {
         $outgoingMoveIds = [];
@@ -593,6 +719,12 @@ class SaleManager
         ];
     }
 
+    /**
+     * Create Account Move
+     *
+     * @param Order $record The model record
+     * @return AccountMove
+     */
     private function createAccountMove(Order $record): AccountMove
     {
         $accountMove = AccountMove::create([
@@ -617,6 +749,13 @@ class SaleManager
         return $accountMove;
     }
 
+    /**
+     * Create Account Move Line
+     *
+     * @param AccountMove $accountMove
+     * @param OrderLine $orderLine
+     * @return void
+     */
     private function createAccountMoveLine(AccountMove $accountMove, OrderLine $orderLine): void
     {
         $productInvoicePolicy = $orderLine->product?->invoice_policy;
@@ -646,6 +785,12 @@ class SaleManager
 
     /**
      * Apply push rules for the operation.
+     */
+    /**
+     * Apply Pull Rules
+     *
+     * @param Order $record The model record
+     * @return void
      */
     public function applyPullRules(Order $record): void
     {
@@ -687,6 +832,12 @@ class SaleManager
         }
     }
 
+    /**
+     * Cancel Inventory Operation
+     *
+     * @param Order $record The model record
+     * @return void
+     */
     protected function cancelInventoryOperation(Order $record): void
     {
         if (! Package::isPluginInstalled('inventories')) {
@@ -711,6 +862,14 @@ class SaleManager
 
     /**
      * Create a new operation based on a push rule and assign moves to it.
+     */
+    /**
+     * Create Pull Operation
+     *
+     * @param Order $record The model record
+     * @param Rule $rule
+     * @param array $moves
+     * @return void
      */
     private function createPullOperation(Order $record, Rule $rule, array $moves): void
     {
@@ -742,6 +901,12 @@ class SaleManager
 
     /**
      * Run a pull rule on a line.
+     */
+    /**
+     * Run Pull Rule
+     *
+     * @param Rule $rule
+     * @param OrderLine $line
      */
     public function runPullRule(Rule $rule, OrderLine $line)
     {
@@ -787,6 +952,12 @@ class SaleManager
     /**
      * Traverse up the location tree to find a matching pull rule.
      */
+    /**
+     * Get Pull Rule
+     *
+     * @param OrderLine $line
+     * @param array $filters
+     */
     public function getPullRule(OrderLine $line, array $filters = [])
     {
         $foundRule = null;
@@ -813,6 +984,14 @@ class SaleManager
 
     /**
      * Search for a pull rule based on the provided filters.
+     */
+    /**
+     * Search Pull Rule
+     *
+     * @param mixed $productPackaging
+     * @param mixed $product
+     * @param mixed $warehouse
+     * @param array $filters
      */
     public function searchPullRule($productPackaging, $product, $warehouse, array $filters)
     {

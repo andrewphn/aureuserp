@@ -11,6 +11,11 @@ use Livewire\Livewire;
 use Webkul\Account\Filament\Resources\InvoiceResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 
+/**
+ * Manage Invoices class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageInvoices extends ManageRelatedRecords
 {
     protected static string $resource = QuotationResource::class;
@@ -19,21 +24,43 @@ class ManageInvoices extends ManageRelatedRecords
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
+    /**
+     * Get the sub-navigation position
+     *
+     * @return \Filament\Pages\Enums\SubNavigationPosition
+     */
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('Invoices');
     }
 
+    /**
+     * Get the navigation badge
+     *
+     * @param mixed $parameters
+     * @return ?string
+     */
     public static function getNavigationBadge($parameters = []): ?string
     {
         return Livewire::current()->getRecord()->accountMoves()->count();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return InvoiceResource::table($table)

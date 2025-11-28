@@ -14,13 +14,28 @@ use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Facades\SaleOrder as SalesFacade;
 use Webkul\Sale\Models\Order;
 
+/**
+ * Create Invoice Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateInvoiceAction extends Action
 {
+    /**
+     * Get the default name for this action
+     *
+     * @return string|null Action identifier
+     */
     public static function getDefaultName(): ?string
     {
         return 'orders.sales.create-invoice';
     }
 
+    /**
+     * Configure the action to create an invoice from the order
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();

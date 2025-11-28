@@ -8,12 +8,22 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Teams class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListTeams extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = TeamResource::class;
 
+    /**
+     * Get the header actions for the list page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -22,6 +32,11 @@ class ListTeams extends ListRecords
         ];
     }
 
+    /**
+     * Get preset table views for filtering teams
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

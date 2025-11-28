@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Sale\Models\Tag;
 use Webkul\Security\Models\User;
 
+/**
+ * Tag Policy authorization policy
+ *
+ */
 class TagPolicy
 {
     use HandlesAuthorization;

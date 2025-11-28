@@ -5,6 +5,10 @@ namespace Webkul\Sale\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Order State enumeration
+ *
+ */
 enum OrderState: string implements HasColor, HasLabel
 {
     case DRAFT = 'draft';
@@ -15,6 +19,11 @@ enum OrderState: string implements HasColor, HasLabel
 
     case CANCEL = 'cancel';
 
+    /**
+     * Get the human-readable label for this order state
+     *
+     * @return string Translated label
+     */
     public function getLabel(): string
     {
         return match ($this) {
@@ -25,6 +34,11 @@ enum OrderState: string implements HasColor, HasLabel
         };
     }
 
+    /**
+     * Get all order states as key-value options for form selects
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [
@@ -35,6 +49,11 @@ enum OrderState: string implements HasColor, HasLabel
         ];
     }
 
+    /**
+     * Get the color associated with this order state for UI display
+     *
+     * @return string|null Filament color name
+     */
     public function getColor(): ?string
     {
         return match ($this) {

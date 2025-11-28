@@ -10,6 +10,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResour
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ViewProductAttribute;
 use Webkul\Sale\Models\Attribute;
 
+/**
+ * Product Attribute Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductAttributeResource extends BaseProductAttributeResource
 {
     protected static ?string $model = Attribute::class;
@@ -22,16 +27,31 @@ class ProductAttributeResource extends BaseProductAttributeResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Get the navigation group
+     *
+     * @return string
+     */
     public static function getNavigationGroup(): string
     {
         return __('sales::filament/clusters/configurations/resources/product-attribute.navigation.group');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/product-attribute.navigation.title');
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

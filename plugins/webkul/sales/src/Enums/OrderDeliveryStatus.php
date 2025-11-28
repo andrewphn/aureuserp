@@ -5,6 +5,10 @@ namespace Webkul\Sale\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Order Delivery Status enumeration
+ *
+ */
 enum OrderDeliveryStatus: string implements HasColor, HasLabel
 {
     case NO = 'no';
@@ -15,6 +19,11 @@ enum OrderDeliveryStatus: string implements HasColor, HasLabel
 
     case FULL = 'full';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [
@@ -25,6 +34,11 @@ enum OrderDeliveryStatus: string implements HasColor, HasLabel
         ];
     }
 
+    /**
+     * Get the human-readable label for this delivery status
+     *
+     * @return string Translated label
+     */
     public function getLabel(): string
     {
         return match ($this) {
@@ -35,6 +49,11 @@ enum OrderDeliveryStatus: string implements HasColor, HasLabel
         };
     }
 
+    /**
+     * Get the color associated with this delivery status for UI display
+     *
+     * @return string Filament color name
+     */
     public function getColor(): string
     {
         return match ($this) {

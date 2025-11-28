@@ -4,7 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,18 +18,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sales_orders', function (Blueprint $table) {
-            // Project Linkage (already exists but may need index)
-            // Note: project_id column already added in previous migration
-            // $table->foreignId('project_id')->nullable()->constrained('projects_projects');
+        // Skip if columns already exist (idempotent migration)
+        if (Schema::hasColumn('sales_orders', 'woodworking_order_type')) {
+            return;
+        }
 
+        Schema::table('sales_orders', function (Blueprint $table) {
             // Room-level linking (for room-specific invoices/quotes)
-            $table->foreignId('room_id')->nullable()
-                ->comment('Link to specific room if invoice is room-specific');
-            $table->foreign('room_id')
-                ->references('id')
-                ->on('projects_rooms')
-                ->onDelete('set null');
+            if (!Schema::hasColumn('sales_orders', 'room_id')) {
+                $table->unsignedBigInteger('room_id')->nullable()
+                    ->comment('Link to specific room if invoice is room-specific');
+            }
 
             // Woodworking-specific order types
             $table->string('woodworking_order_type', 50)->nullable()
@@ -78,12 +81,8 @@ return new class extends Migration
             // Change Order Tracking
             $table->boolean('is_change_order')->default(false)
                 ->comment('This is a change order vs original scope');
-            $table->foreignId('original_order_id')->nullable()
+            $table->unsignedBigInteger('original_order_id')->nullable()
                 ->comment('Reference to original order if change order');
-            $table->foreign('original_order_id')
-                ->references('id')
-                ->on('sales_orders')
-                ->onDelete('set null');
             $table->text('change_order_description')->nullable()
                 ->comment('What changed from original scope');
 
@@ -92,11 +91,42 @@ return new class extends Migration
                 ->comment('Notes visible to client on invoice/proposal');
             $table->text('internal_notes')->nullable()
                 ->comment('Internal notes not visible to client');
+        });
 
-            // Indexes for common queries
-            $table->index(['project_id', 'room_id'], 'idx_order_project_room');
-            $table->index(['proposal_status', 'proposal_sent_at'], 'idx_order_proposal');
-            $table->index(['production_authorized', 'production_authorized_at'], 'idx_order_production');
+        // Add foreign keys and indexes in separate schema call
+        Schema::table('sales_orders', function (Blueprint $table) {
+            // Foreign key for room_id only if projects_rooms exists
+            if (Schema::hasTable('projects_rooms')) {
+                try {
+                    $table->foreign('room_id')
+                        ->references('id')
+                        ->on('projects_rooms')
+                        ->onDelete('set null');
+                } catch (\Exception $e) {
+                    // Ignore if constraint already exists
+                }
+            }
+
+            // Self-reference for change orders
+            try {
+                $table->foreign('original_order_id')
+                    ->references('id')
+                    ->on('sales_orders')
+                    ->onDelete('set null');
+            } catch (\Exception $e) {
+                // Ignore if constraint already exists
+            }
+
+            // Indexes for common queries (only if columns exist)
+            try {
+                if (Schema::hasColumn('sales_orders', 'project_id') && Schema::hasColumn('sales_orders', 'room_id')) {
+                    $table->index(['project_id', 'room_id'], 'idx_order_project_room');
+                }
+                $table->index(['proposal_status', 'proposal_sent_at'], 'idx_order_proposal');
+                $table->index(['production_authorized', 'production_authorized_at'], 'idx_order_production');
+            } catch (\Exception $e) {
+                // Ignore if indexes already exist
+            }
         });
     }
 

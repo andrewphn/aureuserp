@@ -13,22 +13,42 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions as BaseActions;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Edit Quotation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditQuotation extends EditRecord
 {
     use HasRepeaterColumnManager;
 
     protected static string $resource = QuotationResource::class;
 
+    /**
+     * Get the redirect URL after saving
+     *
+     * @return string
+     */
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('edit', ['record' => $this->getRecord()]);
     }
 
+    /**
+     * Get the sub-navigation position
+     *
+     * @return \Filament\Pages\Enums\SubNavigationPosition
+     */
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get the notification to display after saving
+     *
+     * @return \Filament\Notifications\Notification|null
+     */
     protected function getSavedNotification(): ?Notification
     {
         return Notification::make()
@@ -37,6 +57,11 @@ class EditQuotation extends EditRecord
             ->body(__('sales::filament/clusters/orders/resources/quotation/pages/edit-quotation.notification.body'));
     }
 
+    /**
+     * Get the header actions for this page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -45,6 +70,8 @@ class EditQuotation extends EditRecord
             BaseActions\BackToQuotationAction::make(),
             BaseActions\CancelQuotationAction::make(),
             BaseActions\ConfirmAction::make(),
+            BaseActions\ConvertToOrderAction::make(),
+            BaseActions\ImportFromProjectAction::make(),
             BaseActions\CreateInvoiceAction::make(),
             BaseActions\PreviewAction::make(),
             BaseActions\SendByEmailAction::make(),
@@ -60,6 +87,11 @@ class EditQuotation extends EditRecord
         ];
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         SaleOrder::computeSaleOrder($this->getRecord());

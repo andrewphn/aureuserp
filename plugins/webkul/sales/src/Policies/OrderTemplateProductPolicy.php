@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Sale\Models\OrderTemplateProduct;
 use Webkul\Security\Models\User;
 
+/**
+ * Order Template Product Policy authorization policy
+ *
+ */
 class OrderTemplateProductPolicy
 {
     use HandlesAuthorization;

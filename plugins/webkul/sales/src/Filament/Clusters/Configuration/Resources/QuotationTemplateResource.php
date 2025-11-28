@@ -25,6 +25,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResou
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages\ViewQuotationTemplate;
 use Webkul\Sale\Models\OrderTemplate;
 
+/**
+ * Quotation Template Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class QuotationTemplateResource extends Resource
 {
     protected static ?string $model = OrderTemplate::class;
@@ -35,31 +40,62 @@ class QuotationTemplateResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
+    /**
+     * Can View Any
+     *
+     * @return bool
+     */
     public static function canViewAny(): bool
     {
         return true;
     }
 
+    /**
+     * Determine if the user can create records
+     *
+     * @return bool
+     */
     public static function canCreate(): bool
     {
         return true;
     }
 
+    /**
+     * Get the model label
+     *
+     * @return string
+     */
     public static function getModelLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/quotation-template.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/quotation-template.navigation.title');
     }
 
+    /**
+     * Get the navigation group
+     *
+     * @return string|null
+     */
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/quotation-template.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -116,6 +152,12 @@ class QuotationTemplateResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -174,6 +216,11 @@ class QuotationTemplateResource extends Resource
             ]);
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [
@@ -184,6 +231,12 @@ class QuotationTemplateResource extends Resource
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

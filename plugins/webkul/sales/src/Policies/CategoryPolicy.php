@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Sale\Models\Category;
 use Webkul\Security\Models\User;
 
+/**
+ * Category Policy authorization policy
+ *
+ */
 class CategoryPolicy
 {
     use HandlesAuthorization;

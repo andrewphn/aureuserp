@@ -6,6 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Security\Models\User;
 
+/**
+ * Document Template Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $type
+ * @property string|null $template_content
+ * @property string|null $template_path
+ * @property string|null $description
+ * @property bool $is_default
+ * @property array $variables
+ * @property string|null $created_by
+ * @property string|null $updated_by
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $updater
+ *
+ */
 class DocumentTemplate extends Model
 {
     protected $fillable = [

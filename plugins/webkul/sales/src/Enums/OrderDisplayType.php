@@ -4,12 +4,21 @@ namespace Webkul\Sale\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Order Display Type enumeration
+ *
+ */
 enum OrderDisplayType: string implements HasLabel
 {
     case SECTION = 'section';
 
     case NOTE = 'note';
 
+    /**
+     * Get the label for this display type
+     *
+     * @return string
+     */
     public function getLabel(): string
     {
         return match ($this) {
@@ -18,6 +27,11 @@ enum OrderDisplayType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public function options(): array
     {
         return [

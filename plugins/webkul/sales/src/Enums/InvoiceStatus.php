@@ -4,6 +4,10 @@ namespace Webkul\Sale\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Invoice Status enumeration
+ *
+ */
 enum InvoiceStatus: string implements HasLabel
 {
     case UP_SELLING = 'up_selling';
@@ -14,6 +18,11 @@ enum InvoiceStatus: string implements HasLabel
 
     case NO = 'no';
 
+    /**
+     * Get the human-readable label for this invoice status
+     *
+     * @return string Translated label
+     */
     public function getLabel(): string
     {
         return match ($this) {
@@ -24,6 +33,11 @@ enum InvoiceStatus: string implements HasLabel
         };
     }
 
+    /**
+     * Get all invoice statuses as key-value options for form selects
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

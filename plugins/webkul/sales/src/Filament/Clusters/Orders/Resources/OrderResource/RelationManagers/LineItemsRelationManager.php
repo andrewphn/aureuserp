@@ -12,12 +12,23 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+/**
+ * Line Items Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class LineItemsRelationManager extends RelationManager
 {
     protected static string $relationship = 'lineItems';
 
     protected static ?string $recordTitleAttribute = 'description';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -176,6 +187,12 @@ class LineItemsRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

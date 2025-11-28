@@ -14,13 +14,28 @@ use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Models\Order;
 
+/**
+ * Cancel Quotation Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CancelQuotationAction extends Action
 {
+    /**
+     * Get the default name for this action
+     *
+     * @return string|null Action identifier
+     */
     public static function getDefaultName(): ?string
     {
         return 'orders.sales.cancel';
     }
 
+    /**
+     * Configure the action to cancel a quotation with optional email notification
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();
