@@ -10,6 +10,11 @@ use Webkul\Account\Filament\Resources\PaymentsResource;
 use Webkul\Account\Filament\Resources\PaymentsResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
+/**
+ * Edit Payments class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPayments extends EditRecord
 {
     protected static string $resource = PaymentsResource::class;

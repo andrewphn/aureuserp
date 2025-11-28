@@ -22,6 +22,11 @@ use Webkul\Employee\Models\Employee;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Models\Room;
 
+/**
+ * Review Pdf And Price class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ReviewPdfAndPrice extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -44,6 +49,12 @@ class ReviewPdfAndPrice extends Page implements HasForms
     #[Url]
     public $pdf;
 
+    /**
+     * Mount
+     *
+     * @param int|string $record The model record
+     * @return void
+     */
     public function mount(int|string $record): void
     {
         // Resolve the Project model using InteractsWithRecord trait
@@ -100,6 +111,12 @@ class ReviewPdfAndPrice extends Page implements HasForms
         return $this->pdfDocument->page_count ?? 1;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $form
+     * @return Schema
+     */
     public function form(Schema $form): Schema
     {
         return $form
@@ -476,11 +493,21 @@ class ReviewPdfAndPrice extends Page implements HasForms
         return Storage::disk('public')->url($this->pdfDocument->file_path);
     }
 
+    /**
+     * Next Page
+     *
+     * @return void
+     */
     public function nextPage(): void
     {
         $this->currentPage++;
     }
 
+    /**
+     * Previous Page
+     *
+     * @return void
+     */
     public function previousPage(): void
     {
         if ($this->currentPage > 1) {
@@ -488,6 +515,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
         }
     }
 
+    /**
+     * Create Sales Order
+     *
+     * @return void
+     */
     public function createSalesOrder(): void
     {
         $data = $this->form->getState();
@@ -629,6 +661,12 @@ class ReviewPdfAndPrice extends Page implements HasForms
         $this->redirect(ProjectResource::getUrl('view', ['record' => $this->record]));
     }
 
+    /**
+     * Get Cabinet Product
+     *
+     * @param int $level
+     * @return ?array
+     */
     protected function getCabinetProduct(int $level = 2): ?array
     {
         $product = \DB::table('products_products')
@@ -665,6 +703,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
         ];
     }
 
+    /**
+     * Try Automatic
+     *
+     * @return void
+     */
     public function tryAutomatic(): void
     {
         try {
@@ -750,6 +793,12 @@ class ReviewPdfAndPrice extends Page implements HasForms
     /**
      * Get PDF page ID with caching to avoid N+1 queries
      */
+    /**
+     * Get Pdf Page Id
+     *
+     * @param int $pageNumber
+     * @return ?int
+     */
     protected function getPdfPageId(int $pageNumber): ?int
     {
         if (! isset($this->pdfPageIdCache[$pageNumber])) {
@@ -768,6 +817,13 @@ class ReviewPdfAndPrice extends Page implements HasForms
      * - Level 4/5 complexity → Levi (Production Lead)
      * - Ferry/Island delivery → JG (Delivery Coordinator)
      * - Premium materials ($185+/LF) → Purchasing Manager
+     */
+    /**
+     * Send Project Alerts
+     *
+     * @param int $salesOrderId
+     * @param array $formData
+     * @return void
      */
     protected function sendProjectAlerts(int $salesOrderId, array $formData): void
     {
@@ -828,6 +884,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
     /**
      * Alert Levi (Production Lead) about high complexity project
      */
+    /**
+     * Send Complexity Alert
+     *
+     * @return void
+     */
     protected function sendComplexityAlert(): void
     {
         $levi = Employee::where('company_id', $this->record->company_id)
@@ -864,6 +925,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     /**
      * Alert JG (Delivery Coordinator) about ferry delivery requirement
+     */
+    /**
+     * Send Ferry Delivery Alert
+     *
+     * @return void
      */
     protected function sendFerryDeliveryAlert(): void
     {
@@ -902,6 +968,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     /**
      * Alert Purchasing Manager about premium materials requirement
+     */
+    /**
+     * Send Premium Materials Alert
+     *
+     * @return void
      */
     protected function sendPremiumMaterialsAlert(): void
     {
@@ -942,6 +1013,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
      *
      * @return string 'v1' or 'v2'
      */
+    /**
+     * Annotation System Version
+     *
+     * @return string
+     */
     public function annotationSystemVersion(): string
     {
         // Check user preference (can be set via settings)
@@ -957,6 +1033,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     /**
      * Check if V2 annotation system should be used
+     */
+    /**
+     * Use Annotation System V2
+     *
+     * @return bool
      */
     public function useAnnotationSystemV2(): bool
     {

@@ -20,6 +20,11 @@ use Webkul\Account\Models\MoveReversal;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource;
 use Webkul\Support\Traits\PDFHandler;
 
+/**
+ * Credit Note Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreditNoteAction extends Action
 {
     use PDFHandler;
@@ -78,6 +83,13 @@ class CreditNoteAction extends Action
         });
     }
 
+    /**
+     * Create Move
+     *
+     * @param MoveReversal $creditNote
+     * @param Move $record The model record
+     * @return Move
+     */
     private function createMove(MoveReversal $creditNote, Move $record): Move
     {
         $newMove = $record->replicate()->fill([
@@ -101,6 +113,13 @@ class CreditNoteAction extends Action
         return $newMove;
     }
 
+    /**
+     * Create Move Lines
+     *
+     * @param Move $newMove
+     * @param Move $record The model record
+     * @return void
+     */
     private function createMoveLines(Move $newMove, Move $record): void
     {
         $record->lines->each(function (MoveLine $line) use ($newMove, $record) {

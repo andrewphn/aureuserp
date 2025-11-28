@@ -1,0 +1,183 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * Creates pullouts table for specialty pullout components.
+     *
+     * Meeting Reference: "It has to be at the component level." (01:20:30)
+     *
+     * Pullouts are typically purchased from manufacturers (Rev-A-Shelf, Lemans, etc.)
+     * and installed into cabinets. Includes trash pullouts, spice racks, lazy susans, etc.
+     */
+    public function up(): void
+    {
+        Schema::create('projects_pullouts', function (Blueprint $table) {
+            $table->id();
+
+            // Relationships
+            $table->foreignId('cabinet_specification_id')
+                ->constrained('projects_cabinet_specifications')
+                ->onDelete('cascade')
+                ->comment('Parent cabinet');
+
+            $table->foreignId('section_id')
+                ->nullable()
+                ->constrained('projects_cabinet_sections')
+                ->onDelete('set null')
+                ->comment('Parent section (optional)');
+
+            // ========================================
+            // IDENTIFICATION
+            // ========================================
+
+            $table->integer('pullout_number')->default(1)
+                ->comment('Pullout position (1, 2, 3...)');
+
+            $table->string('pullout_name', 100)->nullable()
+                ->comment('Pullout name: P1, P2, etc.');
+
+            $table->integer('sort_order')->default(0)
+                ->comment('Display order within cabinet/section');
+
+            // ========================================
+            // PULLOUT TYPE & DETAILS
+            // ========================================
+
+            $table->string('pullout_type', 100)
+                ->comment('trash, spice_rack, tray_divider, lazy_susan, hamper, wine_rack');
+
+            $table->string('manufacturer', 100)->nullable()
+                ->comment('Rev-a-Shelf, Lemans, etc.');
+
+            $table->string('model_number', 100)->nullable()
+                ->comment('Manufacturer model/part number');
+
+            $table->text('description')->nullable()
+                ->comment('Detailed description');
+
+            // ========================================
+            // DIMENSIONS
+            // ========================================
+
+            $table->decimal('width_inches', 8, 3)->nullable()
+                ->comment('Pullout width');
+
+            $table->decimal('height_inches', 8, 3)->nullable()
+                ->comment('Pullout height');
+
+            $table->decimal('depth_inches', 8, 3)->nullable()
+                ->comment('Pullout depth');
+
+            // ========================================
+            // MOUNTING & HARDWARE
+            // ========================================
+
+            $table->string('mounting_type', 100)->nullable()
+                ->comment('bottom_mount, side_mount, door_mount');
+
+            $table->string('slide_type', 100)->nullable()
+                ->comment('blum_tandem, full_extension (if slide-mounted)');
+
+            $table->string('slide_model', 100)->nullable()
+                ->comment('Specific slide model number');
+
+            $table->decimal('slide_length_inches', 5, 2)->nullable()
+                ->comment('18", 21", 24" typical');
+
+            $table->integer('slide_quantity')->nullable()
+                ->comment('Pairs of slides (usually 1)');
+
+            $table->boolean('soft_close')->default(false)
+                ->comment('Soft close slides');
+
+            $table->integer('weight_capacity_lbs')->nullable()
+                ->comment('Weight rating');
+
+            // ========================================
+            // PROCUREMENT
+            // ========================================
+
+            $table->decimal('unit_cost', 10, 2)->nullable()
+                ->comment('Cost per unit for specialty items');
+
+            $table->integer('quantity')->default(1)
+                ->comment('Number of units (usually 1)');
+
+            // ========================================
+            // PRODUCTION TRACKING
+            // ========================================
+
+            // Ordering Phase (for purchased pullouts)
+            $table->timestamp('ordered_at')->nullable()
+                ->comment('When ordered from manufacturer');
+
+            $table->timestamp('received_at')->nullable()
+                ->comment('When received from vendor');
+
+            // Installation Phase
+            $table->timestamp('hardware_installed_at')->nullable()
+                ->comment('When slides/mounting hardware installed in cabinet');
+
+            $table->timestamp('installed_in_cabinet_at')->nullable()
+                ->comment('When pullout installed into cabinet');
+
+            // ========================================
+            // QUALITY CONTROL
+            // ========================================
+
+            $table->boolean('qc_passed')->nullable()
+                ->comment('Passed quality control inspection');
+
+            $table->text('qc_notes')->nullable()
+                ->comment('QC findings and issues');
+
+            $table->timestamp('qc_inspected_at')->nullable()
+                ->comment('When QC inspection performed');
+
+            $table->foreignId('qc_inspector_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who performed QC');
+
+            // ========================================
+            // NOTES
+            // ========================================
+
+            $table->text('notes')->nullable()
+                ->comment('Pullout-specific notes');
+
+            // ========================================
+            // METADATA
+            // ========================================
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            // ========================================
+            // INDEXES
+            // ========================================
+
+            $table->index('cabinet_specification_id', 'idx_pullouts_cabinet');
+            $table->index('section_id', 'idx_pullouts_section');
+            $table->index('pullout_type', 'idx_pullouts_type');
+            $table->index(['ordered_at', 'received_at'], 'idx_pullouts_procurement');
+            $table->index('qc_passed', 'idx_pullouts_qc');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('projects_pullouts');
+    }
+};

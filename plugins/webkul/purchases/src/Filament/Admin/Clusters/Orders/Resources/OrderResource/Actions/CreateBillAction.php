@@ -9,6 +9,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Create Bill Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateBillAction extends Action
 {
     public static function getDefaultName(): ?string

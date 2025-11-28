@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\ApplicantCategory;
 use Webkul\Security\Models\User;
 
+/**
+ * Applicant Category Policy authorization policy
+ *
+ */
 class ApplicantCategoryPolicy
 {
     use HandlesAuthorization;

@@ -7,10 +7,19 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Payment Term Factory model factory
+ *
+ */
 class PaymentTermFactory extends Factory
 {
     protected $model = PaymentTerm::class;
 
+    /**
+     * Definition
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [

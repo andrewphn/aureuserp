@@ -19,7 +19,7 @@ export default defineConfig({
                 'vendor/',
             ],
         },
-        include: ['tests/Unit/**/*.test.js'],
+        include: ['tests/Unit/**/*.test.js', 'tests/Integration/**/*.test.js'],
     },
     resolve: {
         alias: {

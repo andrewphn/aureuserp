@@ -17,8 +17,19 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Webkul\Support\PluginManager;
 
+/**
+ * Customer Panel Provider service provider
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CustomerPanelProvider extends PanelProvider
 {
+    /**
+     * Panel
+     *
+     * @param Panel $panel
+     * @return Panel
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel

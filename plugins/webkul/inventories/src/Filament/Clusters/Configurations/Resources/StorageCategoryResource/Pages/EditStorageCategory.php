@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 
+/**
+ * Edit Storage Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditStorageCategory extends EditRecord
 {
     protected static string $resource = StorageCategoryResource::class;

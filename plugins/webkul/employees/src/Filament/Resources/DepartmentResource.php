@@ -49,6 +49,15 @@ use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\ManageEmployee;
 use Webkul\Employee\Models\Department;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 
+/**
+ * Department Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DepartmentResource extends Resource
 {
     use HasCustomFields;
@@ -72,6 +81,12 @@ class DepartmentResource extends Resource
         return ['name', 'manager.name', 'company.name'];
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -83,6 +98,12 @@ class DepartmentResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -152,6 +173,12 @@ class DepartmentResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -300,6 +327,12 @@ class DepartmentResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -341,6 +374,12 @@ class DepartmentResource extends Resource
             ]);
     }
 
+    /**
+     * Build Hierarchy Tree
+     *
+     * @param Department $currentDepartment
+     * @return string
+     */
     protected static function buildHierarchyTree(Department $currentDepartment): string
     {
         $rootDepartment = static::findRootDepartment($currentDepartment);
@@ -348,6 +387,12 @@ class DepartmentResource extends Resource
         return static::renderDepartmentTree($rootDepartment, $currentDepartment);
     }
 
+    /**
+     * Find Root Department
+     *
+     * @param Department $department
+     * @return Department
+     */
     protected static function findRootDepartment(Department $department): Department
     {
         $current = $department;
@@ -359,6 +404,16 @@ class DepartmentResource extends Resource
         return $current;
     }
 
+    /**
+     * Render Department Tree
+     *
+     * @param Department $department
+     * @param Department $currentDepartment
+     * @param int $depth
+     * @param bool $isLast
+     * @param array $parentIsLast
+     * @return string
+     */
     protected static function renderDepartmentTree(
         Department $department,
         Department $currentDepartment,
@@ -398,6 +453,16 @@ class DepartmentResource extends Resource
         return $output;
     }
 
+    /**
+     * Format Department Line
+     *
+     * @param Department $department
+     * @param int $depth
+     * @param bool $isActive
+     * @param bool $isLast
+     * @param array $parentIsLast
+     * @return string
+     */
     protected static function formatDepartmentLine(
         Department $department,
         int $depth,
@@ -437,11 +502,23 @@ class DepartmentResource extends Resource
         );
     }
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'employees/departments';
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

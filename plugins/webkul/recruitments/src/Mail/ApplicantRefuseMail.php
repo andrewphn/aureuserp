@@ -10,6 +10,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Applicant Refuse Mail class
+ *
+ */
 class ApplicantRefuseMail extends Mailable
 {
     use Queueable, SerializesModels;

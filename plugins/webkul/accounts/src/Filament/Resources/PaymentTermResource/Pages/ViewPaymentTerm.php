@@ -9,6 +9,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
 
+/**
+ * View Payment Term class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPaymentTerm extends ViewRecord
 {
     protected static string $resource = PaymentTermResource::class;

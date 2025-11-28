@@ -5,6 +5,10 @@ namespace Webkul\Support\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\Support\Models\UOM;
 
+/**
+ * UOMFactory model factory
+ *
+ */
 class UOMFactory extends Factory
 {
     /**

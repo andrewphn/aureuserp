@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Schema;
 use Throwable;
 use Webkul\Security\Models\User;
 
+/**
+ * UOMCategory Seeder database seeder
+ *
+ */
 class UOMCategorySeeder extends Seeder
 {
     /**

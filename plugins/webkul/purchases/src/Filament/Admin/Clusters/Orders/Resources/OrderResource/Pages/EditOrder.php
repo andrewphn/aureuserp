@@ -15,6 +15,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource\Actio
 use Webkul\Purchase\Models\Order;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Edit Order class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditOrder extends EditRecord
 {
     use HasRepeaterColumnManager;
@@ -34,6 +39,12 @@ class EditOrder extends EditRecord
             ->body(__('purchases::filament/admin/clusters/orders/resources/order/pages/edit-order.notification.body'));
     }
 
+    /**
+     * Configure Action
+     *
+     * @param Action $action
+     * @return void
+     */
     protected function configureAction(Action $action): void
     {
         if ($action instanceof ChatterAction) {
@@ -91,6 +102,12 @@ class EditOrder extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if (! empty($data['ordered_at'])) {
@@ -105,6 +122,11 @@ class EditOrder extends EditRecord
         PurchaseOrder::computePurchaseOrder($this->getRecord());
     }
 
+    /**
+     * Update Form
+     *
+     * @return void
+     */
     public function updateForm(): void
     {
         $this->fillForm();

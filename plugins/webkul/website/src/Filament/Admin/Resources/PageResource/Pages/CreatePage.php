@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Website\Filament\Admin\Resources\PageResource;
 
+/**
+ * Create Page Filament page
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePage extends CreateRecord
 {
     protected static string $resource = PageResource::class;
@@ -24,6 +29,12 @@ class CreatePage extends CreateRecord
             ->body(__('website::filament/admin/resources/page/pages/create-record.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

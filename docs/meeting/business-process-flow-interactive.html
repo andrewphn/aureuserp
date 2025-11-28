@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Woodwork - Interactive Process Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--gray-900);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: var(--gray-50);
+            border-bottom: 2px solid var(--gray-200);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-600);
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            background: white;
+            border-bottom-color: var(--primary);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 32px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Swimlane Layout */
+        .swimlane-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .swimlane {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--gray-50);
+        }
+
+        .swimlane-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 16px 24px;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .swimlane-header .icon {
+            font-size: 24px;
+        }
+
+        .swimlane-content {
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            min-height: 200px;
+        }
+
+        /* Process Cards */
+        .process-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 320px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .process-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .process-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .process-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .process-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .process-card .subtitle {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        .io-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .io-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .io-label.input {
+            color: var(--primary);
+        }
+
+        .io-label.output {
+            color: var(--success);
+        }
+
+        .io-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .io-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .io-tag.input {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .io-tag.output {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.required {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.optional {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Decision Tree */
+        .decision-tree {
+            margin-top: 32px;
+        }
+
+        .decision-node {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--warning);
+        }
+
+        .decision-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .decision-header:hover {
+            color: var(--primary);
+        }
+
+        .decision-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--warning) 0%, #fb923c 100%);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .decision-title {
+            flex: 1;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s;
+        }
+
+        .decision-node.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .decision-content {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+            display: none;
+        }
+
+        .decision-node.expanded .decision-content {
+            display: block;
+        }
+
+        .decision-branch {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .branch-option {
+            flex: 1;
+            padding: 16px;
+            border-radius: 10px;
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .branch-option:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .branch-option.yes {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .branch-option.no {
+            border-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .branch-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .branch-label.yes { color: var(--success); }
+        .branch-label.no { color: var(--danger); }
+
+        .branch-action {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        /* Pipeline View */
+        .pipeline-stage {
+            margin-bottom: 32px;
+        }
+
+        .stage-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stage-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .stage-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stage-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        /* Metrics Dashboard */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, white 0%, var(--gray-50) 100%);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .swimlane-content {
+                flex-direction: column;
+            }
+
+            .process-card {
+                min-width: 100%;
+            }
+
+            .decision-branch {
+                flex-direction: column;
+            }
+
+            .stage-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Color schemes for different departments */
+        .sales .swimlane-header { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .design .swimlane-header { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); }
+        .production .swimlane-header { background: linear-gradient(135deg, #f59e0b 0%, #fb923c 100%); }
+        .materials .swimlane-header { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .delivery .swimlane-header { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+
+        .sales .process-icon { background: #dbeafe; color: #0369a1; }
+        .design .process-icon { background: #f3e8ff; color: #7c3aed; }
+        .production .process-icon { background: #fef3c7; color: #d97706; }
+        .materials .process-icon { background: #d1fae5; color: #059669; }
+        .delivery .process-icon { background: #fee2e2; color: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏗️ TCS Woodwork - Interactive Process Flow</h1>
+            <p>Visual workflow management system with clear inputs, outputs, and decision trees</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('swimlane')">🏊 Swimlane View</button>
+            <button class="tab" onclick="showTab('pipeline')">📊 Pipeline View</button>
+            <button class="tab" onclick="showTab('decisions')">🔀 Decision Trees</button>
+            <button class="tab" onclick="showTab('metrics')">📈 Metrics</button>
+        </div>
+
+        <!-- Tab Content: Swimlane View -->
+        <div id="swimlane" class="tab-content active">
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">Complete Workflow by Department</h2>
+
+            <div class="swimlane-container">
+                <!-- Sales & Client Management -->
+                <div class="swimlane sales">
+                    <div class="swimlane-header">
+                        <span class="icon">💼</span>
+                        <span>SALES & CLIENT MANAGEMENT</span>
+                        <span style="margin-left: auto; opacity: 0.8;">Bryan + Andrew</span>
+                    </div>
+                    <div class="swimlane-content">
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📞</div>
+                                <div>
+                                    <h3>Lead Generation & Inquiry</h3>
+                                    <p class="subtitle">Initial customer contact</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Website inquiry</span>
+                                    <span class="io-tag input">Referral</span>
+                                    <span class="io-tag input">Phone call</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Meeting scheduled</span>
+                                    <span class="io-tag output">Client info captured</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📏</div>
+                                <div>
+                                    <h3>Site Visit & Measurement</h3>
+                                    <p class="subtitle">On-site assessment</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Client meeting</span>
+                                    <span class="io-tag input">Site access</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Measurements</span>
+                                    <span class="io-tag output">Photos</span>
+                                    <span class="io-tag output">Requirements doc</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📋</div>
+                                <div>
+                                    <h3>Proposal Creation</h3>
+                                    <p class="subtitle">Detailed quote & scope</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Measurements</span>
+                                    <span class="io-tag input">Client requirements</span>
+                                    <span class="io-tag input">Material costs</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Proposal PDF</span>
+                                    <span class="io-tag output">Pricing breakdown</span>
+                                    <span class="io-tag output">Timeline estimate</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">💰</div>
+                                <div>
+                                    <h3>Contract & Deposit</h3>
+                                    <p class="subtitle">30% down payment</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Signed contract</span>
+                                    <span class="io-tag input">Client approval</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">30% payment</span>
+                                    <span class="io-tag output">Job number</span>
+                                    <span class="io-tag output">Project folder</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Design & Engineering -->
+                <div class="swimlane design">
+                    <div class="swimlane-header">
+                        <span class="icon">🎨</span>
+                        <span>DESIGN & ENGINEERING</span>
+                        <span style="margin-left: auto; opacity: 0.8;">Bryan</span>
+                    </div>
+                    <div class="swimlane-content">
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🖥️</div>
+                                <div>
+                                    <h3>Rhino 3D Design</h3>
+                                    <p class="subtitle">CAD modeling & layout</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Site measurements</span>
+                                    <span class="io-tag input">Client preferences</span>
+                                    <span class="io-tag input">Job specs</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">3D model (.3dm)</span>
+                                    <span class="io-tag output">Room layout</span>
+                                    <span class="io-tag output">Cabinet designs</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📐</div>
+                                <div>
+                                    <h3>Technical Drawings</h3>
+                                    <p class="subtitle">Export DWG & PDFs</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Approved 3D model</span>
+                                    <span class="io-tag input">Material selections</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">DWG files</span>
+                                    <span class="io-tag output">PDF drawings</span>
+                                    <span class="io-tag output">Initial BOM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📝</div>
+                                <div>
+                                    <h3>Detailing</h3>
+                                    <p class="subtitle">Production specifications</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">DWG files</span>
+                                    <span class="io-tag input">Job specs</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Face frame specs</span>
+                                    <span class="io-tag output">Door/drawer dims</span>
+                                    <span class="io-tag output">CNC files</span>
+                                    <span class="io-tag output">Cut lists</span>
+                                    <span class="io-tag output">Job card bundle</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materials & Inventory -->
+                <div class="swimlane materials">
+                    <div class="swimlane-header">
+                        <span class="icon">📦</span>
+                        <span>MATERIALS & INVENTORY</span>
+                        <span style="margin-left: auto; opacity: 0.8;">Aiden + Sadie</span>
+                    </div>
+                    <div class="swimlane-content">
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🔍</div>
+                                <div>
+                                    <h3>Inventory Check</h3>
+                                    <p class="subtitle">Stock verification</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">BOM from design</span>
+                                    <span class="io-tag input">Current inventory</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Stock status</span>
+                                    <span class="io-tag output">Purchase requests</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge optional">As Needed</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🛒</div>
+                                <div>
+                                    <h3>Purchase Orders</h3>
+                                    <p class="subtitle">Order missing materials</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Stock shortages</span>
+                                    <span class="io-tag input">Vendor pricing</span>
+                                    <span class="io-tag input">Bryan approval</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Submitted PO</span>
+                                    <span class="io-tag output">Delivery schedule</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📥</div>
+                                <div>
+                                    <h3>Receiving & Allocation</h3>
+                                    <p class="subtitle">Label & store materials</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Material delivery</span>
+                                    <span class="io-tag input">Job number</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Labeled materials</span>
+                                    <span class="io-tag output">Updated inventory</span>
+                                    <span class="io-tag output">Storage locations</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Production -->
+                <div class="swimlane production">
+                    <div class="swimlane-header">
+                        <span class="icon">🔨</span>
+                        <span>PRODUCTION & FABRICATION</span>
+                        <span style="margin-left: auto; opacity: 0.8;">Levi + Shaggy + Team</span>
+                    </div>
+                    <div class="swimlane-content">
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">⚙️</div>
+                                <div>
+                                    <h3>CNC Operations</h3>
+                                    <p class="subtitle">Machine cutting</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">CNC files</span>
+                                    <span class="io-tag input">Sheet goods</span>
+                                    <span class="io-tag input">V-Carve program</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Cut parts</span>
+                                    <span class="io-tag output">Sorted components</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🏗️</div>
+                                <div>
+                                    <h3>Cabinet Assembly</h3>
+                                    <p class="subtitle">Box construction</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Cut parts</span>
+                                    <span class="io-tag input">Job card</span>
+                                    <span class="io-tag input">Hardware</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Cabinet boxes</span>
+                                    <span class="io-tag output">Face frames</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">✅</div>
+                                <div>
+                                    <h3>Quality Control #1</h3>
+                                    <p class="subtitle">Pre-finish inspection</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Assembled cabinets</span>
+                                    <span class="io-tag input">Specs checklist</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">QC pass/fail</span>
+                                    <span class="io-tag output">Rework list</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🎨</div>
+                                <div>
+                                    <h3>Finishing</h3>
+                                    <p class="subtitle">Stain/paint application</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">QC approved units</span>
+                                    <span class="io-tag input">Finish specs</span>
+                                    <span class="io-tag input">Materials</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Finished cabinets</span>
+                                    <span class="io-tag output">QC checkpoint #2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery & Installation -->
+                <div class="swimlane delivery">
+                    <div class="swimlane-header">
+                        <span class="icon">🚚</span>
+                        <span>DELIVERY & INSTALLATION</span>
+                        <span style="margin-left: auto; opacity: 0.8;">Chase + Transport Team</span>
+                    </div>
+                    <div class="swimlane-content">
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">📋</div>
+                                <div>
+                                    <h3>Bill of Lading</h3>
+                                    <p class="subtitle">Shipping manifest</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">All completed units</span>
+                                    <span class="io-tag input">Part numbers</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">BOL document</span>
+                                    <span class="io-tag output">Loading checklist</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🚛</div>
+                                <div>
+                                    <h3>Transport</h3>
+                                    <p class="subtitle">Delivery to site</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Loaded trailer</span>
+                                    <span class="io-tag input">BOL</span>
+                                    <span class="io-tag input">Site address</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">On-site delivery</span>
+                                    <span class="io-tag output">Signed receipt</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🔧</div>
+                                <div>
+                                    <h3>Installation</h3>
+                                    <p class="subtitle">On-site assembly</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Delivered units</span>
+                                    <span class="io-tag input">PDF drawings</span>
+                                    <span class="io-tag input">Tools</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Installed cabinets</span>
+                                    <span class="io-tag output">Level & plumb</span>
+                                    <span class="io-tag output">Final adjustments</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="process-card">
+                            <span class="status-badge required">Required</span>
+                            <div class="process-card-header">
+                                <div class="process-icon">🤝</div>
+                                <div>
+                                    <h3>Client Walkthrough</h3>
+                                    <p class="subtitle">Final acceptance</p>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label input">📥 INPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag input">Complete install</span>
+                                    <span class="io-tag input">Client inspection</span>
+                                </div>
+                            </div>
+                            <div class="io-section">
+                                <div class="io-label output">📤 OUTPUTS</div>
+                                <div class="io-tags">
+                                    <span class="io-tag output">Punch list (if any)</span>
+                                    <span class="io-tag output">Sign-off</span>
+                                    <span class="io-tag output">Final payment</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Pipeline View -->
+        <div id="pipeline" class="tab-content">
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">End-to-End Pipeline Stages</h2>
+
+            <div class="pipeline-stage">
+                <div class="stage-header">
+                    <div class="stage-number">1</div>
+                    <div class="stage-title">Discovery & Sales</div>
+                </div>
+                <div class="stage-cards">
+                    <div class="process-card">
+                        <div class="process-card-header">
+                            <div class="process-icon" style="background: #dbeafe; color: #0369a1;">💼</div>
+                            <div>
+                                <h3>Lead → Proposal → Contract</h3>
+                                <p class="subtitle">Revenue: $0 → $X (30% deposit)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-stage">
+                <div class="stage-header">
+                    <div class="stage-number">2</div>
+                    <div class="stage-title">Design & Engineering</div>
+                </div>
+                <div class="stage-cards">
+                    <div class="process-card">
+                        <div class="process-card-header">
+                            <div class="process-icon" style="background: #f3e8ff; color: #7c3aed;">🎨</div>
+                            <div>
+                                <h3>3D Model → Drawings → Specs</h3>
+                                <p class="subtitle">Deliverable: Job card bundle ready</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-stage">
+                <div class="stage-header">
+                    <div class="stage-number">3</div>
+                    <div class="stage-title">Materials Sourcing</div>
+                </div>
+                <div class="stage-cards">
+                    <div class="process-card">
+                        <div class="process-card-header">
+                            <div class="process-icon" style="background: #d1fae5; color: #059669;">📦</div>
+                            <div>
+                                <h3>Check Stock → Order → Receive → Allocate</h3>
+                                <p class="subtitle">Gate: All BOM items accounted for</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-stage">
+                <div class="stage-header">
+                    <div class="stage-number">4</div>
+                    <div class="stage-title">Production</div>
+                </div>
+                <div class="stage-cards">
+                    <div class="process-card">
+                        <div class="process-card-header">
+                            <div class="process-icon" style="background: #fef3c7; color: #d97706;">🔨</div>
+                            <div>
+                                <h3>CNC → Assemble → QC #1 → Finish → QC #2</h3>
+                                <p class="subtitle">Gate: Pass both quality checkpoints</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-stage">
+                <div class="stage-header">
+                    <div class="stage-number">5</div>
+                    <div class="stage-title">Delivery & Installation</div>
+                </div>
+                <div class="stage-cards">
+                    <div class="process-card">
+                        <div class="process-card-header">
+                            <div class="process-icon" style="background: #fee2e2; color: #dc2626;">🚚</div>
+                            <div>
+                                <h3>BOL → Transport → Install → Walkthrough</h3>
+                                <p class="subtitle">Revenue: Collect remaining 70%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Decision Trees -->
+        <div id="decisions" class="tab-content">
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">Critical Decision Points</h2>
+
+            <div class="decision-tree">
+                <div class="decision-node">
+                    <div class="decision-header" onclick="toggleDecision(this)">
+                        <div class="decision-icon">❓</div>
+                        <div class="decision-title">Deposit Received?</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="decision-content">
+                        <p style="margin-bottom: 12px; color: var(--gray-600);">Financial gate before design work begins</p>
+                        <div class="decision-branch">
+                            <div class="branch-option yes">
+                                <div class="branch-label yes">✅ YES</div>
+                                <div class="branch-action">→ Proceed to Rhino Design phase</div>
+                                <div class="branch-action">→ Create project folder</div>
+                                <div class="branch-action">→ Assign job number</div>
+                            </div>
+                            <div class="branch-option no">
+                                <div class="branch-label no">❌ NO</div>
+                                <div class="branch-action">→ Follow up on payment</div>
+                                <div class="branch-action">→ Do not start design work</div>
+                                <div class="branch-action">→ Update CRM status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-header" onclick="toggleDecision(this)">
+                        <div class="decision-icon">❓</div>
+                        <div class="decision-title">Material In Stock?</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="decision-content">
+                        <p style="margin-bottom: 12px; color: var(--gray-600);">Inventory availability check for each BOM item</p>
+                        <div class="decision-branch">
+                            <div class="branch-option yes">
+                                <div class="branch-label yes">✅ YES</div>
+                                <div class="branch-action">→ Allocate to job</div>
+                                <div class="branch-action">→ Label with job ID</div>
+                                <div class="branch-action">→ Update master inventory</div>
+                            </div>
+                            <div class="branch-option no">
+                                <div class="branch-label no">❌ NO</div>
+                                <div class="branch-action">→ Create purchase order request</div>
+                                <div class="branch-action">→ Sadie adds pricing</div>
+                                <div class="branch-action">→ Bryan reviews & approves</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-header" onclick="toggleDecision(this)">
+                        <div class="decision-icon">❓</div>
+                        <div class="decision-title">QC Checkpoint #1 Pass?</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="decision-content">
+                        <p style="margin-bottom: 12px; color: var(--gray-600);">Pre-finish quality inspection by Aiden</p>
+                        <div class="decision-branch">
+                            <div class="branch-option yes">
+                                <div class="branch-label yes">✅ YES</div>
+                                <div class="branch-action">→ Send to finishing</div>
+                                <div class="branch-action">→ Generate quantity list</div>
+                                <div class="branch-action">→ Update task status</div>
+                            </div>
+                            <div class="branch-option no">
+                                <div class="branch-label no">❌ NO</div>
+                                <div class="branch-action">→ Identify issues</div>
+                                <div class="branch-action">→ Rework if fixable</div>
+                                <div class="branch-action">→ Rebuild if necessary</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-header" onclick="toggleDecision(this)">
+                        <div class="decision-icon">❓</div>
+                        <div class="decision-title">QC Checkpoint #2 Pass?</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="decision-content">
+                        <p style="margin-bottom: 12px; color: var(--gray-600);">Post-finish quality inspection by Aiden</p>
+                        <div class="decision-branch">
+                            <div class="branch-option yes">
+                                <div class="branch-label yes">✅ YES</div>
+                                <div class="branch-action">→ Stage for delivery</div>
+                                <div class="branch-action">→ Store in warehouse</div>
+                                <div class="branch-action">→ Wait for job completion</div>
+                            </div>
+                            <div class="branch-option no">
+                                <div class="branch-label no">❌ NO</div>
+                                <div class="branch-action">→ Touch up if minor</div>
+                                <div class="branch-action">→ Strip & redo if major</div>
+                                <div class="branch-action">→ Re-inspect after fix</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-header" onclick="toggleDecision(this)">
+                        <div class="decision-icon">❓</div>
+                        <div class="decision-title">Delivery Damage Check?</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="decision-content">
+                        <p style="margin-bottom: 12px; color: var(--gray-600);">On-site inspection after delivery</p>
+                        <div class="decision-branch">
+                            <div class="branch-option yes">
+                                <div class="branch-label yes">✅ NO DAMAGE</div>
+                                <div class="branch-action">→ Begin installation</div>
+                                <div class="branch-action">→ Use PDF drawings for placement</div>
+                            </div>
+                            <div class="branch-option no">
+                                <div class="branch-label no">❌ DAMAGE FOUND</div>
+                                <div class="branch-action">→ Document with photos</div>
+                                <div class="branch-action">→ Contact Bryan</div>
+                                <div class="branch-action">→ Repair on-site OR order replacement</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-header" onclick="toggleDecision(this)">
+                        <div class="decision-icon">❓</div>
+                        <div class="decision-title">Client Satisfied?</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="decision-content">
+                        <p style="margin-bottom: 12px; color: var(--gray-600);">Final walkthrough with Chase</p>
+                        <div class="decision-branch">
+                            <div class="branch-option yes">
+                                <div class="branch-label yes">✅ YES</div>
+                                <div class="branch-action">→ Collect final payment (70%)</div>
+                                <div class="branch-action">→ Project complete!</div>
+                                <div class="branch-action">→ Schedule 30-day follow-up</div>
+                            </div>
+                            <div class="branch-option no">
+                                <div class="branch-label no">❌ NO</div>
+                                <div class="branch-action">→ Create punch list</div>
+                                <div class="branch-action">→ Fix identified issues</div>
+                                <div class="branch-action">→ Re-schedule walkthrough</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Metrics -->
+        <div id="metrics" class="tab-content">
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">Key Performance Indicators</h2>
+
+            <div class="metrics-grid">
+                <div class="metric-card" style="border-left-color: #0ea5e9;">
+                    <div class="metric-value" style="color: #0ea5e9;">~4-12</div>
+                    <div class="metric-label">Weeks: Total Project Duration</div>
+                </div>
+
+                <div class="metric-card" style="border-left-color: #10b981;">
+                    <div class="metric-value" style="color: #10b981;">30%</div>
+                    <div class="metric-label">Deposit Required to Start</div>
+                </div>
+
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <div class="metric-value" style="color: #f59e0b;">2</div>
+                    <div class="metric-label">Mandatory QC Checkpoints</div>
+                </div>
+
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <div class="metric-value" style="color: #ef4444;">6</div>
+                    <div class="metric-label">Critical Decision Gates</div>
+                </div>
+
+                <div class="metric-card" style="border-left-color: #8b5cf6;">
+                    <div class="metric-value" style="color: #8b5cf6;">10</div>
+                    <div class="metric-label">Major Process Stages</div>
+                </div>
+
+                <div class="metric-card" style="border-left-color: #06b6d4;">
+                    <div class="metric-value" style="color: #06b6d4;">28</div>
+                    <div class="metric-label">Total Decision Points</div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 20px; font-weight: 700; margin: 48px 0 24px 0;">Success Metrics by Stage</h3>
+
+            <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: var(--shadow-md); margin-top: 24px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--gray-200);">
+                            <th style="padding: 12px; text-align: left; font-weight: 700;">Stage</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 700;">Key Metric</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 700;">Target</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 700;">Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--gray-100);">
+                            <td style="padding: 12px; font-weight: 600;">Sales</td>
+                            <td style="padding: 12px;">Lead → Contract conversion</td>
+                            <td style="padding: 12px; color: var(--success);">40%+</td>
+                            <td style="padding: 12px;">Bryan</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--gray-100);">
+                            <td style="padding: 12px; font-weight: 600;">Design</td>
+                            <td style="padding: 12px;">Design time per job</td>
+                            <td style="padding: 12px; color: var(--success);">3-5 days</td>
+                            <td style="padding: 12px;">Bryan</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--gray-100);">
+                            <td style="padding: 12px; font-weight: 600;">Materials</td>
+                            <td style="padding: 12px;">Stock availability</td>
+                            <td style="padding: 12px; color: var(--success);">80%+</td>
+                            <td style="padding: 12px;">Aiden/Sadie</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--gray-100);">
+                            <td style="padding: 12px; font-weight: 600;">Production</td>
+                            <td style="padding: 12px;">First-time QC pass rate</td>
+                            <td style="padding: 12px; color: var(--success);">95%+</td>
+                            <td style="padding: 12px;">Levi/Shaggy</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--gray-100);">
+                            <td style="padding: 12px; font-weight: 600;">Delivery</td>
+                            <td style="padding: 12px;">On-time installation</td>
+                            <td style="padding: 12px; color: var(--success);">90%+</td>
+                            <td style="padding: 12px;">Chase</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-weight: 600;">Overall</td>
+                            <td style="padding: 12px;">Client satisfaction</td>
+                            <td style="padding: 12px; color: var(--success);">95%+</td>
+                            <td style="padding: 12px;">All</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="window.print()" title="Print">🖨️</button>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function toggleDecision(header) {
+            const node = header.parentElement;
+            node.classList.toggle('expanded');
+        }
+
+        // Auto-expand first decision node on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstDecision = document.querySelector('.decision-node');
+            if (firstDecision) {
+                firstDecision.classList.add('expanded');
+            }
+        });
+
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

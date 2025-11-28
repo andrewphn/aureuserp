@@ -23,8 +23,18 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Models\SkillType;
 use Webkul\Support\Filament\Tables as CustomTables;
 
+/**
+ * Candidate Skill Relation trait
+ *
+ */
 trait CandidateSkillRelation
 {
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -60,6 +70,12 @@ trait CandidateSkillRelation
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -161,6 +177,12 @@ trait CandidateSkillRelation
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

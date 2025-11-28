@@ -10,6 +10,11 @@ use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
 
+/**
+ * Edit Allocation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditAllocation extends EditRecord
 {
     protected static string $resource = AllocationResource::class;

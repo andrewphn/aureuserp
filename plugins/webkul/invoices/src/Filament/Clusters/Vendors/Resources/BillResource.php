@@ -12,6 +12,11 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\ListBi
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource\Pages\ViewBill;
 use Webkul\Invoice\Models\Bill;
 
+/**
+ * Bill Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BillResource extends BaseBillResource
 {
     protected static ?string $model = Bill::class;
@@ -41,6 +46,12 @@ class BillResource extends BaseBillResource
         return __('invoices::filament/clusters/vendors/resources/bill.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

@@ -178,6 +178,14 @@ class GlobalContextFooter extends Widget implements HasSchemas
      * Set active context (called from JavaScript/Livewire events).
      */
     #[On('set-active-context')]
+    /**
+     * Set Active Context
+     *
+     * @param string $entityType
+     * @param int|string $entityId
+     * @param ?array $data The data array
+     * @return void
+     */
     public function setActiveContext(string $entityType, int|string $entityId, ?array $data = null): void
     {
         $this->contextType = $entityType;
@@ -208,6 +216,11 @@ class GlobalContextFooter extends Widget implements HasSchemas
     /**
      * Clear active context.
      */
+    /**
+     * Clear Context
+     *
+     * @return void
+     */
     public function clearContext(): void
     {
         $this->contextType = null;
@@ -225,6 +238,12 @@ class GlobalContextFooter extends Widget implements HasSchemas
      * Handle entity updates from JavaScript.
      */
     #[On('entity-updated')]
+    /**
+     * Handle Entity Update
+     *
+     * @param array $detail
+     * @return void
+     */
     public function handleEntityUpdate(array $detail): void
     {
         if (
@@ -240,6 +259,11 @@ class GlobalContextFooter extends Widget implements HasSchemas
     /**
      * Check if currently on an edit page.
      */
+    /**
+     * Is On Edit Page
+     *
+     * @return bool
+     */
     protected function isOnEditPage(): bool
     {
         return str_contains(request()->path(), '/edit');
@@ -249,6 +273,11 @@ class GlobalContextFooter extends Widget implements HasSchemas
      * Open project selector modal.
      * Dispatches event to JavaScript.
      */
+    /**
+     * Open Project Selector
+     *
+     * @return void
+     */
     public function openProjectSelector(): void
     {
         $this->dispatch('open-project-selector');
@@ -257,6 +286,11 @@ class GlobalContextFooter extends Widget implements HasSchemas
     /**
      * Save current form (triggers Filament's save button).
      * This is handled by Alpine.js component.
+     */
+    /**
+     * Save Current Form
+     *
+     * @return void
      */
     public function saveCurrentForm(): void
     {

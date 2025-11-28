@@ -7,6 +7,11 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Project Timeline Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectTimelineWidget extends BaseWidget
 {
     public ?Model $record = null;
@@ -37,6 +42,11 @@ class ProjectTimelineWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Timeline
+     *
+     * @return array
+     */
     protected function calculateTimeline(): array
     {
         $startDate = $this->record->start_date;

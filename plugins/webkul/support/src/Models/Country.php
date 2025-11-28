@@ -6,6 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Country Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $currency_id
+ * @property string|null $phone_code
+ * @property string|null $code
+ * @property string|null $name
+ * @property bool $state_required
+ * @property bool $zip_required
+ * @property-read \Illuminate\Database\Eloquent\Collection $states
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currency
+ *
+ */
 class Country extends Model
 {
     /**

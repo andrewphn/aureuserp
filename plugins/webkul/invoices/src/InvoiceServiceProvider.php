@@ -7,10 +7,20 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Invoice Service Provider service provider
+ *
+ */
 class InvoiceServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'invoices';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)

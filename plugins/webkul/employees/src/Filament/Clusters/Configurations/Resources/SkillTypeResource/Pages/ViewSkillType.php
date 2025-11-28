@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource;
 
+/**
+ * View Skill Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewSkillType extends ViewRecord
 {
     protected static string $resource = SkillTypeResource::class;

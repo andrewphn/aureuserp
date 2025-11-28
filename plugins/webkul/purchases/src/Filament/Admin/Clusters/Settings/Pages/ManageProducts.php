@@ -12,6 +12,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\PackagingRe
 use Webkul\Purchase\Settings\ProductSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageProducts extends SettingsPage
 {
     use HasPageShield;
@@ -45,6 +50,12 @@ class ManageProducts extends SettingsPage
         return __('purchases::filament/admin/clusters/settings/pages/manage-products.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

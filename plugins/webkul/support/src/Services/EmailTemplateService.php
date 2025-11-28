@@ -9,8 +9,18 @@ use Webkul\Support\Mail\DynamicEmail;
 use Webkul\Support\Models\EmailLog;
 use Webkul\Support\Models\EmailTemplate;
 
+/**
+ * Email Template Service service
+ *
+ */
 class EmailTemplateService
 {
+    /**
+     * Get Template
+     *
+     * @param string $templateCode
+     * @param string $locale
+     */
     public function getTemplate(string $templateCode, string $locale = 'en')
     {
         return EmailTemplate::where('code', $templateCode)
@@ -18,6 +28,13 @@ class EmailTemplateService
             ->firstOrFail();
     }
 
+    /**
+     * Replace Variables
+     *
+     * @param string $content
+     * @param array $variables
+     * @return string
+     */
     public function replaceVariables(string $content, array $variables): string
     {
         return preg_replace_callback('/\{\{(.*?)\}\}/', function ($matches) use ($variables) {
@@ -27,6 +44,13 @@ class EmailTemplateService
         }, $content);
     }
 
+    /**
+     * Compose Email
+     *
+     * @param string $templateCode
+     * @param array $variables
+     * @param string $locale
+     */
     public function composeEmail(string $templateCode, array $variables = [], string $locale = 'en')
     {
         $template = $this->getTemplate($templateCode, $locale);
@@ -41,6 +65,16 @@ class EmailTemplateService
         return $composedEmail;
     }
 
+    /**
+     * Send
+     *
+     * @param string $templateCode
+     * @param string $recipientEmail
+     * @param string $recipientName
+     * @param array $variables
+     * @param string $locale
+     * @param array $attachments
+     */
     public function send(string $templateCode, string $recipientEmail, string $recipientName, array $variables = [], string $locale = 'en', array $attachments = [])
     {
         $emailData = $this->composeEmail($templateCode, $variables, $locale);
@@ -61,6 +95,17 @@ class EmailTemplateService
         }
     }
 
+    /**
+     * Log Email
+     *
+     * @param int $templateId
+     * @param string $recipientEmail
+     * @param string $recipientName
+     * @param string $subject
+     * @param array $variables
+     * @param string $status
+     * @param ?string $errorMessage
+     */
     protected function logEmail(int $templateId, string $recipientEmail, string $recipientName, string $subject, array $variables, string $status, ?string $errorMessage = null)
     {
         EmailLog::create([

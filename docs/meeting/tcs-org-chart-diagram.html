@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Woodwork - Organizational Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 60px;
+            color: #1a1a1a;
+        }
+
+        /* Org Chart Grid */
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .org-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+            margin-bottom: 80px;
+        }
+
+        .org-row:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Box Styles */
+        .box {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px 24px;
+            min-width: 180px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .box.owner {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+            border-color: #7c3aed;
+            font-weight: 700;
+        }
+
+        .box.external {
+            background: white;
+            border: 2px dashed #0ea5e9;
+            border-color: #0ea5e9;
+        }
+
+        .box.dept-head {
+            background: #f0f9ff;
+            border-color: #0369a1;
+        }
+
+        .box.team-lead {
+            background: #fffbeb;
+            border-color: #d97706;
+        }
+
+        .box.staff {
+            background: #fef3c7;
+            border-color: #92400e;
+        }
+
+        .name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .box.owner .name {
+            font-size: 18px;
+        }
+
+        .role {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .box.owner .role {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .box.external .role {
+            color: #0369a1;
+        }
+
+        .badge {
+            margin-top: 8px;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .box.owner .badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .box.external .badge {
+            background: #dbeafe;
+            color: #0369a1;
+        }
+
+        /* Connection Lines */
+        .vertical-line {
+            position: absolute;
+            width: 2px;
+            background: #333;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .horizontal-line {
+            position: absolute;
+            height: 2px;
+            background: #333;
+        }
+
+        /* Level 1 - Owner */
+        .level-1 {
+            gap: 120px;
+        }
+
+        .level-1 .vertical-line {
+            width: 2px;
+            height: 40px;
+            top: 100%;
+            left: 50%;
+        }
+
+        /* Level 2 - Department Heads */
+        .level-2 {
+            gap: 40px;
+            padding-top: 40px;
+        }
+
+        .level-2::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: #333;
+        }
+
+        .level-2 .box::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 40px;
+            background: #333;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Level 3 - Team Leads & Staff */
+        .level-3-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+            width: 100%;
+            padding-top: 40px;
+        }
+
+        .dept-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+        }
+
+        .dept-column::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 40px;
+            background: #333;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .sub-team {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            margin-top: 20px;
+            padding-left: 20px;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        .team-member {
+            background: #fafafa;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #666;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: #7c3aed;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+        }
+
+        @media print {
+            body { background: white; padding: 20px; }
+            .print-btn { display: none; }
+            .container { box-shadow: none; }
+        }
+
+        @media (max-width: 1400px) {
+            .level-3-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">TCS Woodwork Organizational Chart</div>
+
+        <div class="org-chart">
+            <!-- LEVEL 1: OWNER & EXTERNAL -->
+            <div class="org-row level-1">
+                <div class="box external">
+                    <div class="name">Andrew Phan</div>
+                    <div class="role">Systems Consultant</div>
+                    <div class="badge">External</div>
+                </div>
+
+                <div class="box owner">
+                    <div class="name">Bryan Patton</div>
+                    <div class="role">Owner & Operations Manager</div>
+                    <div class="vertical-line"></div>
+                </div>
+            </div>
+
+            <!-- LEVEL 2: DEPARTMENT HEADS -->
+            <div class="org-row level-2">
+                <div class="box dept-head">
+                    <div class="name">Aiden</div>
+                    <div class="role">Warehouse & QC<br>Manager</div>
+                </div>
+
+                <div class="box dept-head">
+                    <div class="name">Sadie</div>
+                    <div class="role">Purchasing &<br>Finance Manager</div>
+                </div>
+
+                <div class="box dept-head">
+                    <div class="name">Chase</div>
+                    <div class="role">Installation<br>Lead</div>
+                </div>
+            </div>
+
+            <!-- LEVEL 3: PRODUCTION TEAM -->
+            <div class="org-row">
+                <div class="level-3-container">
+                    <!-- PRODUCTION COLUMN 1 -->
+                    <div class="dept-column">
+                        <div class="box team-lead">
+                            <div class="name">Levi</div>
+                            <div class="role">Production Team Lead</div>
+                            <div class="badge">Team A</div>
+                        </div>
+                        <div class="sub-team">
+                            <div class="team-member">👷 Cabinet Builders</div>
+                            <div class="team-member">🎨 Finishing Team</div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCTION COLUMN 2 -->
+                    <div class="dept-column">
+                        <div class="box team-lead">
+                            <div class="name">Shaggy</div>
+                            <div class="role">Production Team Lead</div>
+                            <div class="badge">Team B</div>
+                        </div>
+                        <div class="sub-team">
+                            <div class="team-member">👷 Cabinet Builders</div>
+                            <div class="team-member">🎨 Finishing Team</div>
+                        </div>
+
+                        <div class="box staff">
+                            <div class="name">Shane</div>
+                            <div class="role">CNC Operator</div>
+                        </div>
+
+                        <div class="box staff">
+                            <div class="name">Alina</div>
+                            <div class="role">Production Helper</div>
+                        </div>
+                    </div>
+
+                    <!-- INSTALLATION COLUMN -->
+                    <div class="dept-column">
+                        <div class="team-member">🚚 Transport Team</div>
+                        <div class="team-member">🔧 Installation Crew</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">🖨️</button>
+</body>
+</html>

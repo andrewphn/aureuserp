@@ -4,6 +4,10 @@ namespace Webkul\Product\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Price Rule Type enumeration
+ *
+ */
 enum PriceRuleType: string implements HasLabel
 {
     case PERCENTAGE = 'percentage';

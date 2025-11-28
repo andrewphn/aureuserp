@@ -21,6 +21,11 @@ use Webkul\Project\Filament\Resources\TaskResource;
 use Webkul\Project\Models\Task;
 use Webkul\Project\Models\TaskStage;
 
+/**
+ * Manage Sub Tasks class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageSubTasks extends ManageRelatedRecords
 {
     protected static string $resource = TaskResource::class;
@@ -34,6 +39,12 @@ class ManageSubTasks extends ManageRelatedRecords
         return __('webkul-project::filament/resources/task/pages/manage-sub-tasks.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return TaskResource::form($schema);
@@ -109,6 +120,12 @@ class ManageSubTasks extends ManageRelatedRecords
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return TaskResource::infolist($schema);

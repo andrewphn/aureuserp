@@ -9,6 +9,10 @@ use App\Models\PdfDocumentActivity;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Pdf Document Seeder database seeder
+ *
+ */
 class PdfDocumentSeeder extends Seeder
 {
     /**

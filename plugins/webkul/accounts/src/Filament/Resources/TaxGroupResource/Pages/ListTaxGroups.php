@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\TaxGroupResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Tax Groups class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListTaxGroups extends ListRecords
 {
     use HasTableViews;

@@ -9,6 +9,11 @@ use Filament\Tables\Table;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource;
 
+/**
+ * Manage Purchases class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManagePurchases extends ManageRelatedRecords
 {
     protected static string $resource = VendorResource::class;
@@ -22,6 +27,12 @@ class ManagePurchases extends ManageRelatedRecords
         return __('purchases::filament/admin/clusters/orders/resources/vendor/pages/manage-purchases.navigation.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return QuotationResource::table($table)

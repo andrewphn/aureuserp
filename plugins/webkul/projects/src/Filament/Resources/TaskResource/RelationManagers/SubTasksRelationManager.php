@@ -21,10 +21,21 @@ use Webkul\Project\Filament\Resources\TaskResource;
 use Webkul\Project\Models\Task;
 use Webkul\Project\Models\TaskStage;
 
+/**
+ * Sub Tasks Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SubTasksRelationManager extends RelationManager
 {
     protected static string $relationship = 'subTasks';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return TaskResource::form($schema);
@@ -100,6 +111,12 @@ class SubTasksRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return TaskResource::infolist($schema);

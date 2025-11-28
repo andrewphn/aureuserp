@@ -50,6 +50,11 @@ use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
+/**
+ * Bill Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BillResource extends Resource
 {
     protected static ?string $model = AccountMove::class;
@@ -58,6 +63,12 @@ class BillResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -68,6 +79,12 @@ class BillResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -255,11 +272,23 @@ class BillResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return InvoiceResource::table($table);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -601,6 +630,13 @@ class BillResource extends Resource
             ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $record) => static::mutateProductRelationship($data, $record));
     }
 
+    /**
+     * Mutate Product Relationship
+     *
+     * @param array $data The data array
+     * @param mixed $record The model record
+     * @return array
+     */
     public static function mutateProductRelationship(array $data, $record): array
     {
         $data['currency_id'] = $record->currency_id;
@@ -608,6 +644,13 @@ class BillResource extends Resource
         return $data;
     }
 
+    /**
+     * After Product Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -631,6 +674,13 @@ class BillResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * After Product Qty Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductQtyUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -644,6 +694,13 @@ class BillResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * After U O M Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterUOMUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -663,6 +720,12 @@ class BillResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * Calculate Unit Quantity
+     *
+     * @param mixed $uomId
+     * @param mixed $quantity
+     */
     private static function calculateUnitQuantity($uomId, $quantity)
     {
         if (! $uomId) {
@@ -674,6 +737,12 @@ class BillResource extends Resource
         return (float) ($quantity ?? 0) / $uom->factor;
     }
 
+    /**
+     * Calculate Unit Price
+     *
+     * @param mixed $uomId
+     * @param mixed $price
+     */
     private static function calculateUnitPrice($uomId, $price)
     {
         if (! $uomId) {
@@ -685,6 +754,13 @@ class BillResource extends Resource
         return (float) ($price / $uom->factor);
     }
 
+    /**
+     * Calculate Line Totals
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function calculateLineTotals(Set $set, Get $get): void
     {
         if (! $get('product_id')) {

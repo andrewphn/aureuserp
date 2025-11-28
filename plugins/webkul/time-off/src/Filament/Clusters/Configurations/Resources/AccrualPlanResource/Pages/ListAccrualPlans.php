@@ -8,6 +8,11 @@ use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\AccrualPlanResourc
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Accrual Plans class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListAccrualPlans extends ListRecords
 {
     use HasTableViews;

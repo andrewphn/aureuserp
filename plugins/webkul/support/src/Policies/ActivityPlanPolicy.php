@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * Activity Plan Policy authorization policy
+ *
+ */
 class ActivityPlanPolicy
 {
     use HandlesAuthorization;

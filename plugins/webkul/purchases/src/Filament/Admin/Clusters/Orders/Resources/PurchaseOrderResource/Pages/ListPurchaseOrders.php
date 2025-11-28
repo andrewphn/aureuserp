@@ -10,6 +10,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResour
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Purchase Orders class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPurchaseOrders extends ListOrders
 {
     use HasTableViews;

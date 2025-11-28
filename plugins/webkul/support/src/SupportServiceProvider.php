@@ -15,12 +15,22 @@ use Webkul\Security\Models\Role;
 use Webkul\Security\Policies\RolePolicy;
 use Webkul\Support\Console\Commands\InstallERP;
 
+/**
+ * Support Service Provider service provider
+ *
+ */
 class SupportServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'support';
 
     public static string $viewNamespace = 'support';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -60,6 +70,11 @@ class SupportServiceProvider extends PackageServiceProvider
             ]);
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         include __DIR__ . '/helpers.php';
@@ -85,6 +100,11 @@ class SupportServiceProvider extends PackageServiceProvider
         $this->app->make(PermissionManager::class)->managePermissions();
     }
 
+    /**
+     * Package Registered
+     *
+     * @return void
+     */
     public function packageRegistered(): void
     {
         $this->registerHooks();
@@ -92,6 +112,11 @@ class SupportServiceProvider extends PackageServiceProvider
         $this->app->singleton(PermissionManager::class, fn () => new PermissionManager());
     }
 
+    /**
+     * Register Hooks
+     *
+     * @return void
+     */
     protected function registerHooks(): void
     {
         $version = '1.1.0';

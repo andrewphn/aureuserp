@@ -11,6 +11,10 @@ use Webkul\Chatter\Models\Follower;
 use Webkul\Chatter\Models\Message;
 use Webkul\Partner\Models\Partner;
 
+/**
+ * Has Chatter trait
+ *
+ */
 trait HasChatter
 {
     /**

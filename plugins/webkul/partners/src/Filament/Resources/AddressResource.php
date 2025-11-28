@@ -6,6 +6,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use App\Forms\Components\AddressAutocomplete;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,12 +24,23 @@ use Webkul\Partner\Enums\AddressType;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ManageAddresses;
 use Webkul\Partner\Models\Partner;
 
+/**
+ * Address Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AddressResource extends Resource
 {
     protected static ?string $model = Partner::class;
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -62,7 +74,7 @@ class AddressResource extends Resource
             TextInput::make('mobile')
                 ->label(__('partners::filament/resources/address.form.mobile'))
                 ->tel(),
-            TextInput::make('street1')
+            AddressAutocomplete::make('street1')
                 ->label(__('partners::filament/resources/address.form.street1'))
                 ->maxLength(255),
             TextInput::make('street2')
@@ -119,6 +131,12 @@ class AddressResource extends Resource
             ->columns(2);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

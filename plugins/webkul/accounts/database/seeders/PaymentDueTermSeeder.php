@@ -8,8 +8,16 @@ use Webkul\Account\Enums\DelayType;
 use Webkul\Account\Enums\DueTermValue;
 use Webkul\Security\Models\User;
 
+/**
+ * Payment Due Term Seeder database seeder
+ *
+ */
 class PaymentDueTermSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     */
     public function run()
     {
         DB::table('accounts_payment_due_terms')->delete();

@@ -1,0 +1,112 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * Links inventory products to cabinets and components for:
+     * - Material tracking (what product was used)
+     * - Cost tracking (actual cost from inventory)
+     * - Inventory depletion (track usage)
+     * - Reordering triggers (when materials run low)
+     *
+     * Examples:
+     * - Cabinet linked to "Shaker Style Base Cabinet - 36x34.5x24"
+     * - Door linked to "Shaker Door Blank - 3/4" Maple"
+     * - Drawer linked to "Drawer Front - 5 Piece Shaker"
+     * - Shelf linked to "3/4" Birch Plywood Sheet"
+     * - Pullout linked to "Rev-A-Shelf 5149-18DM-217 Trash Pullout"
+     */
+    public function up(): void
+    {
+        // Link cabinets to products
+        Schema::table('projects_cabinet_specifications', function (Blueprint $table) {
+            $table->foreignId('product_id')
+                ->nullable()
+                ->after('id')
+                ->constrained('products_products')
+                ->onDelete('set null')
+                ->comment('Linked inventory product (cabinet style/model)');
+        });
+
+        // Link doors to products
+        Schema::table('projects_doors', function (Blueprint $table) {
+            $table->foreignId('product_id')
+                ->nullable()
+                ->after('id')
+                ->constrained('products_products')
+                ->onDelete('set null')
+                ->comment('Linked inventory product (door blank, pre-made door)');
+        });
+
+        // Link drawers to products
+        Schema::table('projects_drawers', function (Blueprint $table) {
+            $table->foreignId('product_id')
+                ->nullable()
+                ->after('id')
+                ->constrained('products_products')
+                ->onDelete('set null')
+                ->comment('Linked inventory product (drawer front, drawer box)');
+        });
+
+        // Link shelves to products
+        Schema::table('projects_shelves', function (Blueprint $table) {
+            $table->foreignId('product_id')
+                ->nullable()
+                ->after('id')
+                ->constrained('products_products')
+                ->onDelete('set null')
+                ->comment('Linked inventory product (shelf blank, plywood)');
+        });
+
+        // Link pullouts to products
+        Schema::table('projects_pullouts', function (Blueprint $table) {
+            $table->foreignId('product_id')
+                ->nullable()
+                ->after('id')
+                ->constrained('products_products')
+                ->onDelete('set null')
+                ->comment('Linked inventory product (Rev-A-Shelf, lazy susan, etc.)');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('projects_cabinet_specifications', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+            $table->dropColumn('product_id');
+        });
+
+        Schema::table('projects_doors', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+            $table->dropColumn('product_id');
+        });
+
+        Schema::table('projects_drawers', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+            $table->dropColumn('product_id');
+        });
+
+        Schema::table('projects_shelves', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+            $table->dropColumn('product_id');
+        });
+
+        Schema::table('projects_pullouts', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+            $table->dropColumn('product_id');
+        });
+    }
+};

@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Package Use enumeration
+ *
+ */
 enum PackageUse: string implements HasLabel
 {
     case DISPOSABLE = 'disposable';

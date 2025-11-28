@@ -5,8 +5,17 @@ namespace Webkul\FullCalendar\Concerns;
 use Illuminate\Support\Arr;
 use Webkul\FullCalendar\FullCalendarPlugin;
 
+/**
+ * Can Be Configured trait
+ *
+ */
 trait CanBeConfigured
 {
+    /**
+     * Config
+     *
+     * @return array
+     */
     public function config(): array
     {
         return [];
@@ -20,6 +29,13 @@ trait CanBeConfigured
         );
     }
 
+    /**
+     * Merge Config
+     *
+     * @param array $base
+     * @param array $override
+     * @return array
+     */
     protected static function mergeConfig(array $base, array $override): array
     {
         foreach ($override as $key => $value) {

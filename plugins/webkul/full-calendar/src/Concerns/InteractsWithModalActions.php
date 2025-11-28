@@ -6,15 +6,29 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use InvalidArgumentException;
 
+/**
+ * Interacts With Modal Actions trait
+ *
+ */
 trait InteractsWithModalActions
 {
     protected array $cachedModalActions = [];
 
+    /**
+     * Booted Interacts With Modal Actions
+     *
+     * @return void
+     */
     public function bootedInteractsWithModalActions(): void
     {
         $this->cacheModalActions();
     }
 
+    /**
+     * Cache Modal Actions
+     *
+     * @return void
+     */
     protected function cacheModalActions(): void
     {
         foreach ($this->modalActions() as $action) {
@@ -49,6 +63,11 @@ trait InteractsWithModalActions
         return $this->cachedModalActions;
     }
 
+    /**
+     * Modal Actions
+     *
+     * @return array
+     */
     public function modalActions(): array
     {
         return [];

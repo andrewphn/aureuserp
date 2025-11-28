@@ -6,6 +6,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Webkul\Field\Models\Field;
 
+/**
+ * Fields Column Manager class
+ *
+ */
 class FieldsColumnManager
 {
     /**

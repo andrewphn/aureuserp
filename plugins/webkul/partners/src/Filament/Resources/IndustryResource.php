@@ -18,6 +18,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Partner\Models\Industry;
 
+/**
+ * Industry Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class IndustryResource extends Resource
 {
     protected static ?string $model = Industry::class;
@@ -29,6 +34,12 @@ class IndustryResource extends Resource
         return __('partners::filament/resources/industry.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -46,6 +57,12 @@ class IndustryResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

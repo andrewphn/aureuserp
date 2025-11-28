@@ -10,6 +10,11 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\AccrualPlanResource;
 
+/**
+ * Edit Accrual Plan class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditAccrualPlan extends EditRecord
 {
     protected static string $resource = AccrualPlanResource::class;
@@ -46,6 +51,12 @@ class EditAccrualPlan extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();

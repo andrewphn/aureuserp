@@ -9,6 +9,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Print RFQAction Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PrintRFQAction extends Action
 {
     public static function getDefaultName(): ?string

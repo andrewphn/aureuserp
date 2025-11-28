@@ -11,6 +11,11 @@ use Flowframe\Trend\TrendValue;
 use Illuminate\Support\Carbon;
 use Webkul\Project\Models\Task;
 
+/**
+ * Stats Overview Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class StatsOverviewWidget extends BaseWidget
 {
     use HasWidgetShield, InteractsWithPageFilters;
@@ -78,6 +83,14 @@ class StatsOverviewWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Period Stats
+     *
+     * @param mixed $query The search query
+     * @param mixed $startDate
+     * @param mixed $endDate
+     * @return array
+     */
     protected function calculatePeriodStats($query, $startDate, $endDate): array
     {
         $taskStats = $query->whereBetween('created_at', [$startDate, $endDate])
@@ -101,6 +114,16 @@ class StatsOverviewWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Generate Trend Data
+     *
+     * @param mixed $query The search query
+     * @param mixed $aggregate
+     * @param mixed $column
+     * @param mixed $startDate
+     * @param mixed $endDate
+     * @return array
+     */
     protected function generateTrendData($query, $aggregate, $column, $startDate, $endDate): array
     {
         $trend = Trend::query($query)
@@ -114,6 +137,13 @@ class StatsOverviewWidget extends BaseWidget
         return $trend->map(fn (TrendValue $value) => round((float) $value->aggregate, 2))->toArray();
     }
 
+    /**
+     * Calculate Percentage Change
+     *
+     * @param mixed $current
+     * @param mixed $previous
+     * @return array
+     */
     protected function calculatePercentageChange($current, $previous): array
     {
         if ($previous == 0) {

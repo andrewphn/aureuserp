@@ -4,6 +4,11 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+/**
+ * Install All Plugins class
+ *
+ * Combines erp:install + plugins:install for a complete ERP installation.
+ */
 class InstallAllPlugins extends Command
 {
     /**
@@ -11,55 +16,14 @@ class InstallAllPlugins extends Command
      *
      * @var string
      */
-    protected $signature = 'install:all {--fresh : Wipe database and start fresh}';
+    protected $signature = 'install:all {--fresh : Wipe database and start fresh} {--force : Force reseed all plugins without prompting}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Install all ERP plugins in the correct dependency order';
-
-    /**
-     * Plugin installation order (respects dependencies)
-     *
-     * IMPORTANT: Do NOT run erp:install separately!
-     * This command handles the complete installation in the correct order.
-     */
-    protected $pluginOrder = [
-        // Core ERP first
-        'erp',
-
-        // Foundation plugins (must come before products)
-        'employees',
-        'partners',
-        'contacts',
-
-        // Product & Inventory (required by sales)
-        'products',
-        'inventories',
-
-        // Accounting (required by sales)
-        'accounts',
-        'payments',
-
-        // Sales & Invoicing (required by projects)
-        'invoices',
-        'sales',
-
-        // Projects (depends on sales, products, accounts)
-        // PDF migrations are in projects plugin
-        'projects',
-
-        // Supporting modules
-        'timesheets',
-        'time-off',
-        'purchases',
-        'recruitments',
-        'analytics',
-        'blogs',
-        'website',
-    ];
+    protected $description = 'Install ERP core and all plugins (erp:install + plugins:install)';
 
     /**
      * Execute the console command.
@@ -69,26 +33,15 @@ class InstallAllPlugins extends Command
         $this->info('🚀 Starting full ERP installation...');
         $this->newLine();
 
-        // Check if already installed
-        if (!$this->option('fresh') && $this->isAlreadyInstalled()) {
-            $this->warn('⚠️  ERP appears to be already installed.');
-            $this->warn('   Running individual plugin installs may cause dependency issues.');
-            $this->newLine();
-
-            if (!$this->confirm('Continue anyway?', false)) {
-                $this->info('💡 Tip: Use --fresh flag for a clean installation:');
-                $this->info('   php artisan install:all --fresh');
-                return 0;
-            }
-            $this->newLine();
-        }
-
         // Check if fresh install requested
         if ($this->option('fresh')) {
-            $this->warn('⚠️  This will wipe your database!');
-            if (!$this->confirm('Are you sure you want to continue?', false)) {
-                $this->error('Installation cancelled.');
-                return 1;
+            // Skip confirmation if --force is used
+            if (!$this->option('force')) {
+                $this->warn('⚠️  This will wipe your database!');
+                if (!$this->confirm('Are you sure you want to continue?', false)) {
+                    $this->error('Installation cancelled.');
+                    return 1;
+                }
             }
 
             $this->info('🗑️  Wiping database...');
@@ -96,94 +49,49 @@ class InstallAllPlugins extends Command
             $this->newLine();
         }
 
-        $installed = [];
-        $failed = [];
-        $skipped = [];
+        // Step 1: Install ERP core
+        $this->info('📦 Step 1: Installing ERP core...');
+        $this->newLine();
 
-        foreach ($this->pluginOrder as $plugin) {
-            $command = "{$plugin}:install";
+        $erpParams = [
+            '--admin-name' => 'Admin',
+            '--admin-email' => 'info@tcswoodwork.com',
+            '--admin-password' => 'Lola2024!',
+        ];
 
-            $this->info("📦 Installing {$plugin}...");
-
-            try {
-                // Check if command exists
-                if (!$this->commandExists($command)) {
-                    $this->warn("   ⊘ Command '{$command}' not found, skipping...");
-                    $skipped[] = $plugin;
-                    continue;
-                }
-
-                // Special handling for erp:install when running fresh
-                $params = ['--no-interaction' => true];
-                if ($plugin === 'erp' && $this->option('fresh')) {
-                    $params['--force'] = true;
-                    $params['--admin-name'] = 'Admin';
-                    $params['--admin-email'] = 'info@tcswoodwork.com';
-                    $params['--admin-password'] = 'Lola2024!';
-                }
-
-                $exitCode = $this->call($command, $params);
-
-                if ($exitCode === 0) {
-                    $this->info("   ✅ {$plugin} installed successfully");
-                    $installed[] = $plugin;
-                } else {
-                    $this->error("   ❌ {$plugin} installation failed");
-                    $failed[] = $plugin;
-                }
-            } catch (\Exception $e) {
-                $this->error("   ❌ {$plugin} installation error: " . $e->getMessage());
-                $failed[] = $plugin;
-            }
-
-            $this->newLine();
+        if ($this->option('force')) {
+            $erpParams['--force'] = true;
         }
 
-        // Summary
-        $this->info('📊 Installation Summary:');
-        $this->table(
-            ['Status', 'Count', 'Plugins'],
-            [
-                ['✅ Installed', count($installed), implode(', ', $installed)],
-                ['❌ Failed', count($failed), implode(', ', $failed) ?: 'None'],
-                ['⊘ Skipped', count($skipped), implode(', ', $skipped) ?: 'None'],
-            ]
-        );
+        $exitCode = $this->call('erp:install', $erpParams);
 
-        if (count($failed) > 0) {
-            $this->error('Some plugins failed to install. Please check the errors above.');
+        if ($exitCode !== 0) {
+            $this->error('❌ ERP core installation failed');
+            return 1;
+        }
+
+        $this->info('✅ ERP core installed successfully');
+        $this->newLine();
+
+        // Step 2: Install all plugins
+        $this->info('📦 Step 2: Installing plugins...');
+        $this->newLine();
+
+        $pluginsParams = [];
+        if ($this->option('force')) {
+            $pluginsParams['--force'] = true;
+        }
+
+        $exitCode = $this->call('plugins:install', $pluginsParams);
+
+        if ($exitCode !== 0) {
+            $this->error('❌ Some plugins failed to install');
             return 1;
         }
 
         $this->newLine();
-        $this->info('🎉 All plugins installed successfully!');
+        $this->info('🎉 Full ERP installation completed successfully!');
 
         return 0;
-    }
-
-    /**
-     * Check if artisan command exists
-     */
-    protected function commandExists(string $command): bool
-    {
-        try {
-            $commands = array_keys($this->getApplication()->all());
-            return in_array($command, $commands);
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Check if ERP is already installed
-     */
-    protected function isAlreadyInstalled(): bool
-    {
-        try {
-            // Check if migrations table exists and has entries
-            return \DB::table('migrations')->count() > 0;
-        } catch (\Exception $e) {
-            return false;
-        }
     }
 }

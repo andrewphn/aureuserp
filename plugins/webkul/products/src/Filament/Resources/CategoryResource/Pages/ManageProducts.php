@@ -13,6 +13,11 @@ use Webkul\Product\Filament\Resources\CategoryResource;
 use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\Support\Models\UOM;
 
+/**
+ * Manage Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageProducts extends ManageRelatedRecords
 {
     protected static string $resource = CategoryResource::class;
@@ -26,6 +31,12 @@ class ManageProducts extends ManageRelatedRecords
         return __('products::filament/resources/category/pages/manage-products.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return ProductResource::form($schema);

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Employee\Models\DepartureReason;
 use Webkul\Security\Models\User;
 
+/**
+ * Departure Reason Policy authorization policy
+ *
+ */
 class DepartureReasonPolicy
 {
     use HandlesAuthorization;

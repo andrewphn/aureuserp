@@ -7,6 +7,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * PDFHandler trait
+ *
+ */
 trait PDFHandler
 {
     /**

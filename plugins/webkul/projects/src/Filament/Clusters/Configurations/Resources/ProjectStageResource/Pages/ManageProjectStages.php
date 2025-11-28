@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ProjectStageResource;
 use Webkul\Project\Models\ProjectStage;
 
+/**
+ * Manage Project Stages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageProjectStages extends ManageRecords
 {
     protected static string $resource = ProjectStageResource::class;

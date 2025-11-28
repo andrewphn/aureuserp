@@ -9,12 +9,22 @@ use Webkul\Chatter\Livewire\ChatterPanel;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Chatter Service Provider service provider
+ *
+ */
 class ChatterServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'chatter';
 
     public static string $viewNamespace = 'chatter';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -30,12 +40,22 @@ class ChatterServiceProvider extends PackageServiceProvider
             ->runsMigrations();
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         $this->registerCustomCss();
         $this->registerLivewireComponents();
     }
 
+    /**
+     * Register Livewire Components
+     *
+     * @return void
+     */
     protected function registerLivewireComponents(): void
     {
         // Register Livewire component for FilamentPHP v4
@@ -45,6 +65,10 @@ class ChatterServiceProvider extends PackageServiceProvider
         Livewire::component('webkul.chatter.chatter-panel', ChatterPanel::class);
     }
 
+    /**
+     * Register Custom Css
+     *
+     */
     public function registerCustomCss()
     {
         FilamentAsset::register([

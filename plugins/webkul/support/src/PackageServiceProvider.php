@@ -9,12 +9,20 @@ use Spatie\LaravelPackageTools\Exceptions\InvalidPackage;
 use Spatie\LaravelPackageTools\Package as BasePackage;
 use Spatie\LaravelPackageTools\PackageServiceProvider as BasePackageServiceProvider;
 
+/**
+ * Package Service Provider service provider
+ *
+ */
 abstract class PackageServiceProvider extends BasePackageServiceProvider
 {
     protected BasePackage $package;
 
     abstract public function configureCustomPackage(Package $package): void;
 
+    /**
+     * Register
+     *
+     */
     public function register()
     {
         $this->registeringPackage();
@@ -38,13 +46,29 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
         return $this;
     }
 
+    /**
+     * New Package
+     *
+     * @return Package
+     */
     public function newPackage(): Package
     {
         return new Package;
     }
 
+    /**
+     * Configure Package
+     *
+     * @param BasePackage $package
+     * @return void
+     */
     public function configurePackage(BasePackage $package): void {}
 
+    /**
+     * Boot
+     *
+     * @return void
+     */
     public function boot()
     {
         $this->bootingPackage();
@@ -182,6 +206,13 @@ abstract class PackageServiceProvider extends BasePackageServiceProvider
         return $this;
     }
 
+    /**
+     * Generate Setting Name
+     *
+     * @param string $settingFileName
+     * @param Carbon $now
+     * @return string
+     */
     public static function generateSettingName(string $settingFileName, Carbon $now): string
     {
         $settingsPath = 'settings/'.dirname($settingFileName).'/';

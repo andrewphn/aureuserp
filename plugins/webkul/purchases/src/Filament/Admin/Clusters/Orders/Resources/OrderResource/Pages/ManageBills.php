@@ -10,6 +10,11 @@ use Livewire\Livewire;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 
+/**
+ * Manage Bills class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageBills extends ManageRelatedRecords
 {
     protected static string $resource = OrderResource::class;
@@ -23,11 +28,23 @@ class ManageBills extends ManageRelatedRecords
         return __('purchases::filament/admin/clusters/orders/resources/order/pages/manage-bills.navigation.title');
     }
 
+    /**
+     * Get the navigation badge
+     *
+     * @param mixed $parameters
+     * @return ?string
+     */
     public static function getNavigationBadge($parameters = []): ?string
     {
         return Livewire::current()->getRecord()->accountMoves()->count();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return BillResource::table($table)

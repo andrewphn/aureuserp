@@ -8,6 +8,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Project\Models\Room;
 use Webkul\Chatter\Traits\HasChatter;
 
+/**
+ * Pdf Page Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $document_id
+ * @property string|null $page_number
+ * @property string|null $page_type
+ * @property string|null $width
+ * @property string|null $height
+ * @property string|null $rotation
+ * @property string|null $thumbnail_path
+ * @property string|null $extracted_text
+ * @property array $page_metadata
+ * @property-read \Illuminate\Database\Eloquent\Collection $rooms
+ * @property-read \Illuminate\Database\Eloquent\Collection $annotations
+ * @property-read \Illuminate\Database\Eloquent\Model|null $pdfDocument
+ *
+ */
 class PdfPage extends Model
 {
     use HasFactory, HasChatter;

@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Account Seeder database seeder
+ *
+ */
 class AccountSeeder extends Seeder
 {
     /**

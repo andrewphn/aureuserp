@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyTimeOffResource;
 use Webkul\TimeOff\Traits\TimeOffHelper;
 
+/**
+ * Create My Time Off class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateMyTimeOff extends CreateRecord
 {
     use TimeOffHelper;
@@ -26,6 +31,12 @@ class CreateMyTimeOff extends CreateRecord
             ->body(__('time-off::filament/clusters/my-time/resources/my-time-off/pages/create-time-off.notification.success.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         return $this->mutateTimeOffData($data, $this->record?->id);

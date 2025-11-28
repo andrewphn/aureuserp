@@ -6,6 +6,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Webkul\Account\Filament\Resources\BillResource\Pages\EditBill as BaseEditBill;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\BillResource;
 
+/**
+ * Edit Bill class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditBill extends BaseEditBill
 {
     protected static string $resource = BillResource::class;

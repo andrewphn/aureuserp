@@ -27,6 +27,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource\Pag
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource\Pages\ViewDelivery;
 use Webkul\Inventory\Models\Delivery;
 
+/**
+ * Delivery Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DeliveryResource extends Resource
 {
     protected static ?string $model = Delivery::class;
@@ -56,11 +61,23 @@ class DeliveryResource extends Resource
         return __('inventories::filament/clusters/operations/resources/delivery.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return OperationResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return OperationResource::table($table)
@@ -116,11 +133,23 @@ class DeliveryResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return OperationResource::infolist($schema);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

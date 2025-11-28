@@ -14,6 +14,11 @@ use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource;
 
+/**
+ * Manage Moves class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageMoves extends ManageRelatedRecords
 {
     protected static string $resource = ProductResource::class;
@@ -32,6 +37,12 @@ class ManageMoves extends ManageRelatedRecords
         return __('invoices::filament/clusters/vendors/resources/product/pages/manage-moves.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

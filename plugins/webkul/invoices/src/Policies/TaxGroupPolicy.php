@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\TaxGroup;
 use Webkul\Security\Models\User;
 
+/**
+ * Tax Group Policy authorization policy
+ *
+ */
 class TaxGroupPolicy
 {
     use HandlesAuthorization;

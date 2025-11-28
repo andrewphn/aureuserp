@@ -4,6 +4,10 @@ namespace Webkul\Partner\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Address Type enumeration
+ *
+ */
 enum AddressType: string implements HasLabel
 {
     case PERMANENT = 'permanent';

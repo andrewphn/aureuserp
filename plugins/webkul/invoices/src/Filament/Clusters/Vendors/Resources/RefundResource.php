@@ -12,6 +12,11 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages\List
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Pages\ViewRefund;
 use Webkul\Invoice\Models\Refund;
 
+/**
+ * Refund Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RefundResource extends BaseRefundResource
 {
     protected static ?string $model = Refund::class;
@@ -39,6 +44,12 @@ class RefundResource extends BaseRefundResource
         return __('invoices::filament/clusters/vendors/resources/refund.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

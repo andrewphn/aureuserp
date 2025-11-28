@@ -5,12 +5,21 @@ namespace Webkul\Inventory\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Scrap State enumeration
+ *
+ */
 enum ScrapState: string implements HasColor, HasLabel
 {
     case DRAFT = 'draft';
 
     case DONE = 'done';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

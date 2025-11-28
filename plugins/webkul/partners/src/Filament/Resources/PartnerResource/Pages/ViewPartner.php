@@ -10,6 +10,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * View Partner class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPartner extends ViewRecord
 {
     protected static string $resource = PartnerResource::class;

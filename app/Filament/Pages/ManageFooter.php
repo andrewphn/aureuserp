@@ -14,6 +14,11 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
+/**
+ * Manage Footer class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageFooter extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -34,18 +39,33 @@ class ManageFooter extends Page implements HasForms
 
     public $templates = [];
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         $this->loadUserPreferences();
         $this->loadTemplates();
     }
 
+    /**
+     * Load Templates
+     *
+     * @return void
+     */
     protected function loadTemplates(): void
     {
         $service = app(FooterPreferenceService::class);
         $this->templates = $service->getAvailableTemplates()->toArray();
     }
 
+    /**
+     * Load User Preferences
+     *
+     * @return void
+     */
     protected function loadUserPreferences(): void
     {
         $service = app(FooterPreferenceService::class);
@@ -67,6 +87,12 @@ class ManageFooter extends Page implements HasForms
         $this->form->fill($this->data);
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         $registry = app(FooterFieldRegistry::class);
@@ -95,6 +121,13 @@ class ManageFooter extends Page implements HasForms
             ->statePath('data');
     }
 
+    /**
+     * Get Context Fields Schema
+     *
+     * @param string $contextType
+     * @param FooterFieldRegistry $registry
+     * @return array
+     */
     protected function getContextFieldsSchema(string $contextType, FooterFieldRegistry $registry): array
     {
         $fields = $registry->getAvailableFields($contextType);
@@ -150,11 +183,22 @@ class ManageFooter extends Page implements HasForms
     /**
      * Apply a template by slug (called from blade view)
      */
+    /**
+     * Apply Template
+     *
+     * @param string $slug
+     * @return void
+     */
     public function applyTemplate(string $slug): void
     {
         $this->applyPersonaTemplate($slug);
     }
 
+    /**
+     * Save Preferences
+     *
+     * @return void
+     */
     public function savePreferences(): void
     {
         try {
@@ -189,6 +233,12 @@ class ManageFooter extends Page implements HasForms
         }
     }
 
+    /**
+     * Apply Persona Template
+     *
+     * @param string $persona
+     * @return void
+     */
     public function applyPersonaTemplate(string $persona = 'owner'): void
     {
         $service = app(FooterPreferenceService::class);
@@ -205,6 +255,11 @@ class ManageFooter extends Page implements HasForms
             ->send();
     }
 
+    /**
+     * Reset To Defaults
+     *
+     * @return void
+     */
     public function resetToDefaults(): void
     {
         $service = app(FooterPreferenceService::class);

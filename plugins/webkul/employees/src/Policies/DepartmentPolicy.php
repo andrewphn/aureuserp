@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Employee\Models\Department;
 use Webkul\Security\Models\User;
 
+/**
+ * Department Policy authorization policy
+ *
+ */
 class DepartmentPolicy
 {
     use HandlesAuthorization;

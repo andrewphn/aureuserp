@@ -12,6 +12,11 @@ use UnitEnum;
 use Webkul\Support\Filament\Clusters\Settings;
 use Webkul\Website\Settings\ContactSettings;
 
+/**
+ * Manage Contacts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageContacts extends SettingsPage
 {
     use HasPageShield;
@@ -45,6 +50,12 @@ class ManageContacts extends SettingsPage
         return __('website::filament/admin/clusters/settings/pages/manage-contacts.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

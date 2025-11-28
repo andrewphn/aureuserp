@@ -7,6 +7,11 @@ use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\IncoTermResource\Pages\ListIncoTerms;
 use Webkul\Invoice\Models\Incoterm;
 
+/**
+ * Inco Term Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class IncoTermResource extends BaseIncoTermResource
 {
     protected static ?string $model = Incoterm::class;

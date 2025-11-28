@@ -4,6 +4,10 @@ namespace Webkul\Invoice\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Invoice Format enumeration
+ *
+ */
 enum InvoiceFormat: string implements HasLabel
 {
     case FACTURX_X_CII = 'facturx';
@@ -30,6 +34,11 @@ enum InvoiceFormat: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

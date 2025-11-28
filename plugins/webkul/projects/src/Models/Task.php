@@ -24,6 +24,58 @@ use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\CabinetSpecification;
 
+/**
+ * Task Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $title
+ * @property string|null $description
+ * @property string|null $color
+ * @property bool $priority
+ * @property mixed $state
+ * @property string|null $sort
+ * @property bool $is_active
+ * @property bool $is_recurring
+ * @property \Carbon\Carbon|null $deadline
+ * @property float $working_hours_open
+ * @property float $working_hours_close
+ * @property float $allocated_hours
+ * @property float $remaining_hours
+ * @property float $effective_hours
+ * @property float $total_hours_spent
+ * @property float $subtask_effective_hours
+ * @property float $overtime
+ * @property string|null $progress
+ * @property int $stage_id
+ * @property int $project_id
+ * @property int $partner_id
+ * @property int $parent_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property int $room_id
+ * @property int $room_location_id
+ * @property int $cabinet_run_id
+ * @property int $cabinet_specification_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $subTasks
+ * @property-read \Illuminate\Database\Eloquent\Collection $timesheets
+ * @property-read \Illuminate\Database\Eloquent\Model|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $milestone
+ * @property-read \Illuminate\Database\Eloquent\Model|null $stage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $room
+ * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Collection $users
+ * @property-read \Illuminate\Database\Eloquent\Collection $tags
+ *
+ */
 class Task extends Model implements Sortable
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes, SortableTrait;
@@ -122,81 +174,161 @@ class Task extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Parent
+     *
+     * @return BelongsTo
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
+    /**
+     * Sub Tasks
+     *
+     * @return HasMany
+     */
     public function subTasks(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
     }
 
+    /**
+     * Project
+     *
+     * @return BelongsTo
+     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * Milestone
+     *
+     * @return BelongsTo
+     */
     public function milestone(): BelongsTo
     {
         return $this->belongsTo(Milestone::class);
     }
 
+    /**
+     * Stage
+     *
+     * @return BelongsTo
+     */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(TaskStage::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Users
+     *
+     * @return BelongsToMany
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projects_task_users');
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Tags
+     *
+     * @return BelongsToMany
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'projects_task_tag', 'task_id', 'tag_id');
     }
 
+    /**
+     * Timesheets
+     *
+     * @return HasMany
+     */
     public function timesheets(): HasMany
     {
         return $this->hasMany(Timesheet::class);
     }
 
+    /**
+     * Room
+     *
+     * @return BelongsTo
+     */
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class);
     }
 
+    /**
+     * Room Location
+     *
+     * @return BelongsTo
+     */
     public function roomLocation(): BelongsTo
     {
         return $this->belongsTo(RoomLocation::class);
     }
 
+    /**
+     * Cabinet Run
+     *
+     * @return BelongsTo
+     */
     public function cabinetRun(): BelongsTo
     {
         return $this->belongsTo(CabinetRun::class);
     }
 
+    /**
+     * Cabinet Specification
+     *
+     * @return BelongsTo
+     */
     public function cabinetSpecification(): BelongsTo
     {
         return $this->belongsTo(CabinetSpecification::class);
     }
 
+    /**
+     * Booted
+     *
+     * @return void
+     */
     protected static function booted()
     {
         static::addGlobalScope(new UserPermissionScope('users'));
@@ -204,6 +336,11 @@ class Task extends Model implements Sortable
 
     /**
      * Bootstrap any application services.
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {
@@ -218,6 +355,11 @@ class Task extends Model implements Sortable
         });
     }
 
+    /**
+     * New Factory
+     *
+     * @return TaskFactory
+     */
     protected static function newFactory(): TaskFactory
     {
         return TaskFactory::new();

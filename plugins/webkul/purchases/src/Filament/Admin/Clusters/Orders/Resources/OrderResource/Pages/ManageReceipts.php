@@ -11,6 +11,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\OrderResource;
 use Webkul\Support\Package;
 
+/**
+ * Manage Receipts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageReceipts extends ManageRelatedRecords
 {
     protected static string $resource = OrderResource::class;
@@ -38,11 +43,23 @@ class ManageReceipts extends ManageRelatedRecords
         return __('purchases::filament/admin/clusters/orders/resources/order/pages/manage-receipts.navigation.title');
     }
 
+    /**
+     * Get the navigation badge
+     *
+     * @param mixed $parameters
+     * @return ?string
+     */
     public static function getNavigationBadge($parameters = []): ?string
     {
         return Livewire::current()->getRecord()->operations()->count();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return OperationResource::table($table)

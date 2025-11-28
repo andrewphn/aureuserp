@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Communication Type enumeration
+ *
+ */
 enum CommunicationType: string implements HasLabel
 {
     case NONE = 'open';
@@ -21,6 +25,11 @@ enum CommunicationType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

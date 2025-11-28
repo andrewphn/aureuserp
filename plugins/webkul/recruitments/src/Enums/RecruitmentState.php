@@ -6,6 +6,10 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Recruitment State enumeration
+ *
+ */
 enum RecruitmentState: string implements HasColor, HasIcon, HasLabel
 {
     case NORMAL = 'normal';
@@ -39,6 +43,11 @@ enum RecruitmentState: string implements HasColor, HasIcon, HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

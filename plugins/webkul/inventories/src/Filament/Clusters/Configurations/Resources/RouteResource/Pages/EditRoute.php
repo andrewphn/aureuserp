@@ -7,6 +7,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource;
 
+/**
+ * Edit Route class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditRoute extends EditRecord
 {
     protected static string $resource = RouteResource::class;

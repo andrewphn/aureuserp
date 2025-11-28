@@ -13,6 +13,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementRe
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Purchase Agreements class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPurchaseAgreements extends ListRecords
 {
     use HasTableViews;

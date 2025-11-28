@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Woodwork - Business Process Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: #1565C0;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .success-box h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #1e3c72;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .nav, .print-btn {
+                display: none;
+            }
+            .section {
+                display: block !important;
+                page-break-after: always;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+            .nav-btn {
+                font-size: 12px;
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 TCS Woodwork</h1>
+            <p>Complete Business Process Flow Documentation</p>
+        </div>
+
+        <div class="nav">
+            <button class="nav-btn active" onclick="showSection('overview')">📊 Overview</button>
+            <button class="nav-btn" onclick="showSection('complete-flow')">🔄 Complete Flow</button>
+            <button class="nav-btn" onclick="showSection('interfaces')">🔗 Interfaces</button>
+            <button class="nav-btn" onclick="showSection('dependencies')">📈 Dependencies</button>
+            <button class="nav-btn" onclick="showSection('ownership')">👥 Ownership</button>
+            <button class="nav-btn" onclick="showSection('metrics')">📊 Metrics</button>
+            <button class="nav-btn" onclick="showSection('checklists')">✅ Checklists</button>
+        </div>
+
+        <div class="content">
+            <!-- Overview Section -->
+            <div id="overview" class="section active">
+                <h2>📊 Business Process Overview</h2>
+
+                <div class="info-box">
+                    <h3>🎯 Purpose</h3>
+                    <p>This document provides a comprehensive view of all business processes at TCS Woodwork, from initial customer inquiry through project completion and closeout.</p>
+                </div>
+
+                <div class="success-box">
+                    <h3>✅ Key Business Processes</h3>
+                    <ul>
+                        <li><strong>Sales & Client Management</strong> - Lead generation through contract signing</li>
+                        <li><strong>Financial Management</strong> - Deposit collection, budget tracking, cost management</li>
+                        <li><strong>Design & Engineering</strong> - 3D modeling, client approval, technical drawings</li>
+                        <li><strong>Detailing & Planning</strong> - Specifications, job cards, CNC files</li>
+                        <li><strong>Procurement & Inventory</strong> - Material sourcing, receiving, allocation</li>
+                        <li><strong>Production Operations</strong> - CNC cutting, assembly, quality control</li>
+                        <li><strong>Finishing Operations</strong> - Surface preparation, staining, final inspection</li>
+                        <li><strong>Logistics & Delivery</strong> - Transportation scheduling, loading, shipping</li>
+                        <li><strong>Installation Services</strong> - On-site installation, client walkthrough</li>
+                        <li><strong>Project Closeout</strong> - Final payment, follow-up, documentation</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h3>⚠️ Critical Success Factors</h3>
+                    <ul>
+                        <li>✅ <strong>Deposit before design</strong> - Protects time investment</li>
+                        <li>✅ <strong>Complete BOM before production</strong> - Prevents delays</li>
+                        <li>✅ <strong>QC at 2 checkpoints</strong> - Ensures quality</li>
+                        <li>✅ <strong>Client approval at milestones</strong> - Prevents rework</li>
+                        <li>✅ <strong>Materials ready before production</strong> - Smooth workflow</li>
+                        <li>✅ <strong>Budget monitoring</strong> - Protects profitability</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Complete Flow Section -->
+            <div id="complete-flow" class="section">
+                <h2>🔄 Complete Business Process Flow</h2>
+
+                <div class="info-box">
+                    <h3>About This Diagram</h3>
+                    <p>This comprehensive diagram shows all 10 major business processes and how they interconnect. Follow the flow from top to bottom to see the complete customer journey.</p>
+                </div>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart TD
+    subgraph Sales["💼 SALES & CLIENT MANAGEMENT"]
+        S1[Lead Generation] --> S2[Initial Inquiry]
+        S2 --> S3[Qualification]
+        S3 --> S4{Qualified?}
+        S4 -->|No| S5[Decline]
+        S4 -->|Yes| S6[Schedule Consultation]
+        S6 --> S7[Site Visit]
+        S7 --> S8[Proposal Creation]
+        S8 --> S9[Client Review]
+        S9 --> S10{Approves?}
+        S10 -->|No| S11[Revise]
+        S11 --> S9
+        S10 -->|Yes| S12[Contract Signed]
+    end
+
+    subgraph Finance["💰 FINANCIAL MANAGEMENT"]
+        F1[Collect 30% Deposit] --> F2[Record in System]
+        F2 --> F3[Allocate Budget]
+        F3 --> F4[Track Costs]
+        F4 --> F8[Monitor Budget]
+        F8 --> F9{Over Budget?}
+        F9 -->|Yes| F10[Alert & Review]
+        F9 -->|No| F11[Continue]
+    end
+
+    subgraph Design["🎨 DESIGN & ENGINEERING"]
+        D1[Create Project] --> D2[Import Data]
+        D2 --> D3[3D Modeling]
+        D3 --> D4[Room Layout]
+        D4 --> D5[Cabinet Design]
+        D5 --> D6[Materials]
+        D6 --> D7[Hardware]
+        D7 --> D8[Generate Drawings]
+        D8 --> D9{Client Approves?}
+        D9 -->|No| D11[Revisions]
+        D11 --> D3
+        D9 -->|Yes| D12[Finalize]
+        D12 --> D13[Export Files]
+        D13 --> D14[Create BOM]
+    end
+
+    subgraph Production["🔨 PRODUCTION"]
+        PR1[Schedule] --> PR2[Assign Runs]
+        PR2 --> PR3[Verify Materials]
+        PR3 --> PR5{Available?}
+        PR5 -->|No| PR6[Request]
+        PR5 -->|Yes| PR7[CNC Program]
+        PR7 --> PR8[CNC Cut]
+        PR8 --> PR10[Assembly]
+        PR10 --> PR11[Face Frames]
+        PR11 --> PR12[Doors/Drawers]
+        PR12 --> PR13[Hardware]
+        PR13 --> PR17[QC #1]
+        PR17 --> PR18{Pass?}
+        PR18 -->|No| PR16[Rework]
+        PR16 --> PR17
+        PR18 -->|Yes| PR20[To Finishing]
+    end
+
+    subgraph Finishing["🎨 FINISHING"]
+        FN1[Receive] --> FN2[Check Specs]
+        FN2 --> FN5[Prep Surface]
+        FN5 --> FN6[Apply Finish]
+        FN6 --> FN7[Dry]
+        FN7 --> FN10[QC #2]
+        FN10 --> FN11{Pass?}
+        FN11 -->|No| FN12[Refinish]
+        FN12 --> FN5
+        FN11 -->|Yes| FN13[Stage Delivery]
+    end
+
+    subgraph Logistics["🚚 LOGISTICS"]
+        L1[Complete] --> L2[Generate BOL]
+        L2 --> L3[Schedule Transport]
+        L3 --> L5[Load]
+        L5 --> L7{Complete?}
+        L7 -->|No| L8[Find Missing]
+        L8 --> L5
+        L7 -->|Yes| L10[Depart]
+    end
+
+    subgraph Install["🏗️ INSTALLATION"]
+        I1[Arrive] --> I2[Unload]
+        I2 --> I3{Damage?}
+        I3 -->|Yes| I4[Document]
+        I4 --> I5[Repair]
+        I3 -->|No| I6[Install]
+        I6 --> I7[Layout]
+        I7 --> I8[Secure]
+        I8 --> I10[Final]
+        I10 --> I11[Walkthrough]
+        I11 --> I12{Satisfied?}
+        I12 -->|No| I13[Punch List]
+        I13 --> I11
+        I12 -->|Yes| I15[Complete]
+    end
+
+    S12 --> F1
+    S12 --> D1
+    F1 --> D1
+    D14 --> PR1
+    PR20 --> FN1
+    FN13 --> L1
+    L10 --> I1
+
+    style S12 fill:#90EE90
+    style F1 fill:#90EE90
+    style D12 fill:#FFD700
+    style PR18 fill:#FFD700
+    style FN13 fill:#90EE90
+    style I15 fill:#90EE90
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interfaces Section -->
+            <div id="interfaces" class="section">
+                <h2>🔗 Key Process Interfaces</h2>
+
+                <div class="info-box">
+                    <h3>Understanding Process Interfaces</h3>
+                    <p>This diagram shows how inputs flow through core processes, with support from enabling functions, to create business outputs.</p>
+                </div>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart LR
+    subgraph Input["INPUTS"]
+        I1[Customer Needs]
+        I2[Market Demand]
+        I3[Raw Materials]
+        I4[Labor]
+        I5[Equipment]
+    end
+
+    subgraph Core["CORE PROCESSES"]
+        C1[Sales]
+        C2[Design]
+        C3[Production]
+        C4[Delivery]
+    end
+
+    subgraph Support["SUPPORT"]
+        S1[Finance]
+        S2[HR]
+        S3[IT]
+        S4[Maintenance]
+        S5[Quality]
+    end
+
+    subgraph Output["OUTPUTS"]
+        O1[Custom Cabinets]
+        O2[Installed Projects]
+        O3[Satisfied Clients]
+        O4[Revenue]
+        O5[Reputation]
+    end
+
+    I1 --> C1
+    I2 --> C1
+    I3 --> C3
+    I4 --> C3
+    I5 --> C3
+
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+
+    S1 -.->|Enables| C1
+    S1 -.->|Enables| C3
+    S2 -.->|Staffs| C3
+    S3 -.->|Systems| C2
+    S3 -.->|Systems| C3
+    S4 -.->|Maintains| C3
+    S5 -.->|Ensures| C3
+
+    C4 --> O1
+    O1 --> O2
+    O2 --> O3
+    O3 --> O4
+    O3 --> O5
+    O4 --> I3
+    O5 --> I1
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dependencies Section -->
+            <div id="dependencies" class="section">
+                <h2>📈 Process Dependencies</h2>
+
+                <div class="warning-box">
+                    <h3>⚠️ Critical Gates</h3>
+                    <p>Red boxes indicate critical gates where the process cannot proceed without completion. These are mandatory checkpoints.</p>
+                </div>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart TD
+    A[Sales Contract] --> B[30% Deposit]
+    B --> C[Design Start]
+    C --> D[Design Approval]
+    D --> E[Detailing Start]
+    E --> F[BOM Complete]
+    F --> G[Materials Sourced]
+    G --> H[Production Start]
+    H --> I[QC #1 Pass]
+    I --> J[Finishing Start]
+    J --> K[QC #2 Pass]
+    K --> L[All Items Complete]
+    L --> M[Delivery Scheduled]
+    M --> N[Installation Start]
+    N --> O[Client Approval]
+    O --> P[Final Payment]
+    P --> Q[Project Complete]
+
+    style B fill:#FFB6C1
+    style D fill:#FFB6C1
+    style G fill:#FFB6C1
+    style I fill:#FFB6C1
+    style K fill:#FFB6C1
+    style O fill:#FFB6C1
+    style Q fill:#90EE90
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <h3>✅ Cannot Proceed Without:</h3>
+                    <ul>
+                        <li>30% Deposit - Financial protection</li>
+                        <li>Design Approval - Client alignment</li>
+                        <li>Materials Sourced - Production readiness</li>
+                        <li>QC #1 Pass - Quality assurance</li>
+                        <li>QC #2 Pass - Finish quality</li>
+                        <li>Client Approval - Customer satisfaction</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ownership Section -->
+            <div id="ownership" class="section">
+                <h2>👥 Process Ownership Matrix</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Owner</th>
+                            <th>Backup</th>
+                            <th>Key Metrics</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Sales & Client Management</strong></td>
+                            <td>Bryan</td>
+                            <td>-</td>
+                            <td>Win rate, response time</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Financial Management</strong></td>
+                            <td>Sadie</td>
+                            <td>Bryan</td>
+                            <td>Budget variance, cash flow</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Design & Engineering</strong></td>
+                            <td>Bryan</td>
+                            <td>-</td>
+                            <td>Design revisions, approval time</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Detailing & Planning</strong></td>
+                            <td>Aiden</td>
+                            <td>Bryan</td>
+                            <td>Job card accuracy, completeness</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Procurement & Inventory</strong></td>
+                            <td>Aiden/Sadie</td>
+                            <td>-</td>
+                            <td>On-time delivery, accuracy</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Production Operations</strong></td>
+                            <td>Levi/Shaggy</td>
+                            <td>-</td>
+                            <td>Production time, QC pass rate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Finishing Operations</strong></td>
+                            <td>Finishing Team</td>
+                            <td>-</td>
+                            <td>Finish quality, rework rate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Logistics & Delivery</strong></td>
+                            <td>Aiden/Chase</td>
+                            <td>-</td>
+                            <td>On-time delivery, damage rate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Installation Services</strong></td>
+                            <td>Chase</td>
+                            <td>-</td>
+                            <td>Install time, satisfaction</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Project Closeout</strong></td>
+                            <td>Bryan</td>
+                            <td>-</td>
+                            <td>Payment collection, satisfaction</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quality Management</strong></td>
+                            <td>Aiden</td>
+                            <td>Bryan</td>
+                            <td>Defect rate, rework %</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Metrics Section -->
+            <div id="metrics" class="section">
+                <h2>📊 Process Performance Metrics</h2>
+
+                <div class="info-box">
+                    <h3>📈 Sales Process KPIs</h3>
+                    <ul>
+                        <li>Lead response time: &lt; 24 hours</li>
+                        <li>Proposal turnaround: 3-5 days</li>
+                        <li>Win rate: 40-60%</li>
+                        <li>Average project value: Track monthly</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>🔨 Operations KPIs</h3>
+                    <ul>
+                        <li>On-time production: &gt; 90%</li>
+                        <li>QC pass rate (first time): &gt; 95%</li>
+                        <li>Material waste: &lt; 5%</li>
+                        <li>Rework rate: &lt; 3%</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>💰 Financial KPIs</h3>
+                    <ul>
+                        <li>Deposit collection: 100% before design</li>
+                        <li>Budget variance: ± 5%</li>
+                        <li>Cash flow: Positive monthly</li>
+                        <li>Profitability: Track actual vs estimate</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>⭐ Quality KPIs</h3>
+                    <ul>
+                        <li>Customer satisfaction: &gt; 90%</li>
+                        <li>Defect rate: &lt; 2%</li>
+                        <li>Warranty claims: &lt; 1%</li>
+                        <li>Repeat customer rate: &gt; 30%</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>🚚 Delivery KPIs</h3>
+                    <ul>
+                        <li>On-time delivery: &gt; 95%</li>
+                        <li>Damage rate: &lt; 1%</li>
+                        <li>Complete shipments: &gt; 98%</li>
+                        <li>Installation time: Per estimate</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Checklists Section -->
+            <div id="checklists" class="section">
+                <h2>✅ Process Checklists by Role</h2>
+
+                <div class="success-box">
+                    <h3>👔 Bryan (Operations Manager)</h3>
+                    <ul>
+                        <li>☐ Review and approve all proposals</li>
+                        <li>☐ Complete design in Rhino</li>
+                        <li>☐ Approve all purchase orders</li>
+                        <li>☐ Assign cabinet runs to production leads</li>
+                        <li>☐ Review project budgets weekly</li>
+                        <li>☐ Handle client communications</li>
+                        <li>☐ Resolve design issues</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h3>📋 Aiden (Detailer/Warehouse/QC)</h3>
+                    <ul>
+                        <li>☐ Create detailed specifications</li>
+                        <li>☐ Generate CNC files and cut lists</li>
+                        <li>☐ Check inventory levels (weekly)</li>
+                        <li>☐ Create purchase requests</li>
+                        <li>☐ Receive and label materials</li>
+                        <li>☐ Perform QC inspections (2x per job)</li>
+                        <li>☐ Organize warehouse (Fridays)</li>
+                        <li>☐ Stage materials for production</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h3>💰 Sadie (Inventory/Purchasing/Finance)</h3>
+                    <ul>
+                        <li>☐ Process approved purchase orders</li>
+                        <li>☐ Track vendor deliveries</li>
+                        <li>☐ Monitor project budgets</li>
+                        <li>☐ Record deposits and payments</li>
+                        <li>☐ Weekly PO review with Bryan (Mondays)</li>
+                        <li>☐ Maintain vendor relationships</li>
+                        <li>☐ Update financial records</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h3>👷 Levi/Shaggy (Production Leads)</h3>
+                    <ul>
+                        <li>☐ Receive cabinet run assignments</li>
+                        <li>☐ Verify materials available</li>
+                        <li>☐ Assign tasks to crew</li>
+                        <li>☐ Build cabinets per specifications</li>
+                        <li>☐ Self-check quality before QC</li>
+                        <li>☐ Update task status</li>
+                        <li>☐ Train new team members</li>
+                        <li>☐ Report issues to Bryan/Aiden</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h3>🖥️ Dagger (CNC Operator)</h3>
+                    <ul>
+                        <li>☐ Load CNC files from USB</li>
+                        <li>☐ Program CNC in V-Carve</li>
+                        <li>☐ Run CNC machine</li>
+                        <li>☐ Quality check cut parts</li>
+                        <li>☐ Draw files while machine runs</li>
+                        <li>☐ Coordinate with production team</li>
+                        <li>☐ Maintain CNC equipment</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h3>🔧 Chase (Installation Lead)</h3>
+                    <ul>
+                        <li>☐ Receive delivery on-site</li>
+                        <li>☐ Inspect for damage</li>
+                        <li>☐ Layout cabinets per drawings</li>
+                        <li>☐ Install and secure cabinets</li>
+                        <li>☐ Install countertops</li>
+                        <li>☐ Client walkthrough</li>
+                        <li>☐ Create punch list if needed</li>
+                        <li>☐ Collect final payment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>TCS Woodwork - Business Process Documentation</strong></p>
+            <p>Last Updated: November 21, 2025</p>
+        </div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

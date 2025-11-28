@@ -4,6 +4,11 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 
+/**
+ * Test Footer class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TestFooter extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-adjustments-horizontal';

@@ -26,6 +26,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Models\Bank;
 
+/**
+ * Bank Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BankResource extends Resource
 {
     protected static ?string $model = Bank::class;
@@ -42,6 +47,12 @@ class BankResource extends Resource
         return __('partners::filament/resources/bank.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -102,6 +113,12 @@ class BankResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

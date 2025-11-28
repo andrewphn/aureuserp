@@ -5,6 +5,11 @@ namespace Webkul\TimeOff\Filament\Clusters\Configurations\Resources\ActivityType
 use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\CreateActivityType as BaseCreateActivityType;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\ActivityTypeResource;
 
+/**
+ * Create Activity Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateActivityType extends BaseCreateActivityType
 {
     protected static string $resource = ActivityTypeResource::class;

@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Applicability enumeration
+ *
+ */
 enum Applicability: string implements HasLabel
 {
     case ACCOUNT = 'percent';
@@ -21,6 +25,11 @@ enum Applicability: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

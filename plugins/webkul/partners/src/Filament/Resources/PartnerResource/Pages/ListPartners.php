@@ -11,6 +11,11 @@ use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Partners class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPartners extends ListRecords
 {
     use HasTableViews;

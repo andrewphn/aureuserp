@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Support\Filament\Resources\ActivityTypeResource;
 
+/**
+ * Edit Activity Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditActivityType extends EditRecord
 {
     protected static string $resource = ActivityTypeResource::class;
@@ -46,6 +51,12 @@ class EditActivityType extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['plugin'] = static::getPluginName();

@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Account\Filament\Resources\AccountResource;
 
+/**
+ * Edit Account class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditAccount extends EditRecord
 {
     protected static string $resource = AccountResource::class;

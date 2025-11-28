@@ -9,6 +9,11 @@ use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Employee\Filament\Resources\EmployeeResource;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * View Employee class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewEmployee extends ViewRecord
 {
     protected static string $resource = EmployeeResource::class;
@@ -34,6 +39,12 @@ class ViewEmployee extends ViewRecord
         return ActivityPlan::where('plugin', 'employees')->pluck('name', 'id');
     }
 
+    /**
+     * Mutate Form Data Before Fill
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $partner = $this->record->partner;

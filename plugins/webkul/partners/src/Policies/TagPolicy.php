@@ -7,6 +7,10 @@ use Webkul\Partner\Models\Tag;
 use Webkul\Security\Models\User;
 
 
+/**
+ * tag Policy authorization policy
+ *
+ */
 class tagPolicy
 {
     use HandlesAuthorization;

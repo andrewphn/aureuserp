@@ -12,6 +12,11 @@ use Webkul\TimeOff\Filament\Clusters\Reporting\Resources\ByEmployeeResource\Page
 use Webkul\TimeOff\Models\Leave;
 
 
+/**
+ * By Employee Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ByEmployeeResource extends BaseByEmployeeResource
 {
     protected static ?string $model = Leave::class;
@@ -30,6 +35,12 @@ class ByEmployeeResource extends BaseByEmployeeResource
         return __('time-off::filament/clusters/reporting/resources/by-employee.navigation.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return parent::table($table)

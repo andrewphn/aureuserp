@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Move State enumeration
+ *
+ */
 enum MoveState: string implements HasLabel
 {
     case DRAFT = 'draft';
@@ -21,6 +25,11 @@ enum MoveState: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

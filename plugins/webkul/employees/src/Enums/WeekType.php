@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Week Type enumeration
+ *
+ */
 enum WeekType: string
 {
     case All = 'all';
@@ -10,6 +14,11 @@ enum WeekType: string
 
     case Odd = 'odd';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

@@ -11,6 +11,27 @@ use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Tax Partition Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $account_id
+ * @property int $tax_id
+ * @property int $company_id
+ * @property string|null $sort
+ * @property string|null $repartition_type
+ * @property string|null $document_type
+ * @property string|null $use_in_tax_closing
+ * @property string|null $factor_percent
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Model|null $account
+ * @property-read \Illuminate\Database\Eloquent\Model|null $tax
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ *
+ */
 class TaxPartition extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -34,26 +55,52 @@ class TaxPartition extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Account
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function account()
     {
         return $this->belongsTo(Account::class, 'account_id');
     }
 
+    /**
+     * Tax
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function tax()
     {
         return $this->belongsTo(Tax::class, 'tax_id');
     }
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
 
+    /**
+     * Validate Repartition Lines
+     *
+     * @param mixed $invoices
+     * @param mixed $refunds
+     */
     public static function validateRepartitionLines($invoices, $refunds)
     {
         if ($invoices->count() !== $refunds->count()) {
@@ -88,6 +135,11 @@ class TaxPartition extends Model implements Sortable
         }
     }
 
+    /**
+     * Boot
+     *
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();

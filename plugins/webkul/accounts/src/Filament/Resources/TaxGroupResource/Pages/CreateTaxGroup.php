@@ -6,6 +6,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Webkul\Account\Filament\Resources\TaxGroupResource;
 
+/**
+ * Create Tax Group class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateTaxGroup extends CreateRecord
 {
     protected static string $resource = TaxGroupResource::class;

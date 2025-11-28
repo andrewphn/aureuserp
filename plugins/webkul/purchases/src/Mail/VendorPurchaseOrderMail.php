@@ -9,6 +9,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Vendor Purchase Order Mail class
+ *
+ */
 class VendorPurchaseOrderMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -19,6 +23,13 @@ class VendorPurchaseOrderMail extends Mailable
 
     public $pdfPath;
 
+    /**
+     * Create a new VendorPurchaseOrderMail instance
+     *
+     * @param mixed $subject
+     * @param mixed $message
+     * @param mixed $pdfPath
+     */
     public function __construct($subject, $message, $pdfPath)
     {
         $this->subject = $subject;
@@ -31,6 +42,11 @@ class VendorPurchaseOrderMail extends Mailable
     /**
      * Get the message envelope.
      */
+    /**
+     * Envelope
+     *
+     * @return Envelope
+     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -40,6 +56,11 @@ class VendorPurchaseOrderMail extends Mailable
 
     /**
      * Get the message content definition.
+     */
+    /**
+     * Content
+     *
+     * @return Content
      */
     public function content(): Content
     {
@@ -52,6 +73,11 @@ class VendorPurchaseOrderMail extends Mailable
      * Get the attachments for the message.
      *
      * @return array<int, Attachment>
+     */
+    /**
+     * Attachments
+     *
+     * @return array
      */
     public function attachments(): array
     {

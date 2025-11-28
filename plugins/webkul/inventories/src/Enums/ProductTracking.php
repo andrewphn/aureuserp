@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Product Tracking enumeration
+ *
+ */
 enum ProductTracking: string implements HasLabel
 {
     case SERIAL = 'serial';

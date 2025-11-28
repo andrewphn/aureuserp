@@ -7,6 +7,11 @@ use Webkul\Account\Filament\Resources\RefundResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Refunds class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListRefunds extends ListRecords
 {
     use HasTableViews;

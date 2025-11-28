@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
 use Webkul\Inventory\Models\Receipt;
 
+/**
+ * View Receipt class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewReceipt extends ViewRecord
 {
     protected static string $resource = ReceiptResource::class;

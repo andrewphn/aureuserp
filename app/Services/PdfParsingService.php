@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser as PdfParser;
 
+/**
+ * Pdf Parsing Service service
+ *
+ */
 class PdfParsingService
 {
     /**

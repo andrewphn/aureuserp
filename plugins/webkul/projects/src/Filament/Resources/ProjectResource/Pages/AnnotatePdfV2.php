@@ -15,6 +15,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Url;
 
+/**
+ * Annotate Pdf V2 class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AnnotatePdfV2 extends Page implements HasForms
 {
     use InteractsWithRecord;
@@ -38,14 +43,22 @@ class AnnotatePdfV2 extends Page implements HasForms
     #[Url]
     public $pdf;
 
-    public function mount(int|string $record): void
+    /**
+     * Mount
+     *
+     * @param int|string $record The model record
+     * @param ?int $page Page number
+     * @return void
+     */
+    public function mount(int|string $record, ?int $page = null): void
     {
         $this->record = $this->resolveRecord($record);
         $this->projectId = $this->record->id;
 
-        // Get page number from route parameter (Livewire will bind it automatically)
+        // Get page number from route parameter
         // If not set, default to 1
-        if (!isset($this->pageNumber) || $this->pageNumber < 1) {
+        $this->pageNumber = $page ?? 1;
+        if ($this->pageNumber < 1) {
             $this->pageNumber = 1;
         }
 
@@ -139,6 +152,12 @@ class AnnotatePdfV2 extends Page implements HasForms
 
     /**
      * Define a minimal form schema to trigger Filament asset loading
+     */
+    /**
+     * Define the form schema
+     *
+     * @param Schema $form
+     * @return Schema
      */
     public function form(Schema $form): Schema
     {

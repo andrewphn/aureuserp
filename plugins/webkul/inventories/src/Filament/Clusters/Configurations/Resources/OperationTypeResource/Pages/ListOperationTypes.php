@@ -11,6 +11,11 @@ use Webkul\Inventory\Models\OperationType;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Operation Types class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListOperationTypes extends ListRecords
 {
     use HasTableViews;

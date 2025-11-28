@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource;
 use Webkul\Inventory\Models\Delivery;
 
+/**
+ * View Delivery class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewDelivery extends ViewRecord
 {
     protected static string $resource = DeliveryResource::class;

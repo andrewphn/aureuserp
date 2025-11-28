@@ -6,8 +6,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Refuse Reason Seeder database seeder
+ *
+ */
 class RefuseReasonSeeder extends Seeder
 {
+    /**
+     * Run
+     *
+     * @return void
+     */
     public function run(): void
     {
         DB::table('recruitments_refuse_reasons')->delete();

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\ActivityType;
 
+/**
+ * Activity Type Policy authorization policy
+ *
+ */
 class ActivityTypePolicy
 {
     use HandlesAuthorization;

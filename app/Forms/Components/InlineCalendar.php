@@ -5,6 +5,10 @@ namespace App\Forms\Components;
 use Filament\Forms\Components\ViewField;
 use Webkul\Project\Models\Project;
 
+/**
+ * Inline Calendar class
+ *
+ */
 class InlineCalendar extends ViewField
 {
     protected string $view = 'forms.components.inline-calendar';

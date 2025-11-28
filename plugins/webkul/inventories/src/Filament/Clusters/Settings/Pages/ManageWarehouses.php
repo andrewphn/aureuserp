@@ -18,6 +18,11 @@ use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Warehouses class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageWarehouses extends SettingsPage
 {
     use HasPageShield;
@@ -51,6 +56,12 @@ class ManageWarehouses extends SettingsPage
         return __('inventories::filament/clusters/settings/pages/manage-warehouses.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -86,6 +97,11 @@ class ManageWarehouses extends SettingsPage
             ]);
     }
 
+    /**
+     * Before Save
+     *
+     * @return void
+     */
     protected function beforeSave(): void
     {
         if (Warehouse::count() > 1) {
@@ -101,6 +117,11 @@ class ManageWarehouses extends SettingsPage
         }
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         foreach (Warehouse::all() as $warehouse) {

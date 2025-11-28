@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\PaymentTermResource;
 
+/**
+ * Create Payment Term class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePaymentTerm extends CreateRecord
 {
     protected static string $resource = PaymentTermResource::class;
@@ -24,6 +29,12 @@ class CreatePaymentTerm extends CreateRecord
             ->body(__('accounts::filament/resources/payment-term/pages/create-payment-term.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = Auth::user();

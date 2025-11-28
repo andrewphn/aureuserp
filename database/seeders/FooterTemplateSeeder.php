@@ -5,6 +5,10 @@ namespace Database\Seeders;
 use App\Models\FooterTemplate;
 use Illuminate\Database\Seeder;
 
+/**
+ * Footer Template Seeder database seeder
+ *
+ */
 class FooterTemplateSeeder extends Seeder
 {
     /**

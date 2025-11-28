@@ -9,6 +9,11 @@ use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 
+/**
+ * Todo Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TodoAction extends Action
 {
     public static function getDefaultName(): ?string

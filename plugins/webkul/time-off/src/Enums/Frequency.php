@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Frequency enumeration
+ *
+ */
 enum Frequency: string implements HasLabel
 {
     case HOURLY = 'hourly';
@@ -33,6 +37,11 @@ enum Frequency: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

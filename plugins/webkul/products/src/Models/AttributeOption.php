@@ -10,6 +10,22 @@ use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Product\Database\Factories\AttributeOptionFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Attribute Option Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $color
+ * @property float $extra_price
+ * @property string|null $sort
+ * @property int $attribute_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $attribute
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class AttributeOption extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -40,16 +56,31 @@ class AttributeOption extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Attribute
+     *
+     * @return BelongsTo
+     */
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return AttributeOptionFactory
+     */
     protected static function newFactory(): AttributeOptionFactory
     {
         return AttributeOptionFactory::new();

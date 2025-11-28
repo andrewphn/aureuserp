@@ -46,6 +46,11 @@ use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResourc
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResource\RelationManagers\SkillsRelationManager;
 use Webkul\Recruitment\Models\Candidate;
 
+/**
+ * Candidate Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CandidateResource extends Resource
 {
     protected static ?string $model = Candidate::class;
@@ -79,6 +84,12 @@ class CandidateResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -165,6 +176,12 @@ class CandidateResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -298,6 +315,12 @@ class CandidateResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -409,6 +432,12 @@ class CandidateResource extends Resource
             ]);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

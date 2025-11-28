@@ -15,6 +15,49 @@ use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Pdf Page Annotation Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $pdf_page_id
+ * @property int $parent_annotation_id
+ * @property string|null $annotation_type
+ * @property string|null $label
+ * @property float $x
+ * @property float $y
+ * @property float $width
+ * @property float $height
+ * @property string|null $room_type
+ * @property string|null $color
+ * @property int $room_id
+ * @property int $room_location_id
+ * @property int $cabinet_run_id
+ * @property int $cabinet_specification_id
+ * @property array $visual_properties
+ * @property int $nutrient_annotation_id
+ * @property array $nutrient_data
+ * @property string|null $notes
+ * @property array $metadata
+ * @property string|null $created_by
+ * @property int $creator_id
+ * @property string|null $view_type
+ * @property string|null $view_orientation
+ * @property float $view_scale
+ * @property string|null $inferred_position
+ * @property string|null $vertical_zone
+ * @property-read \Illuminate\Database\Eloquent\Collection $childAnnotations
+ * @property-read \Illuminate\Database\Eloquent\Model|null $pdfPage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $parentAnnotation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $room
+ * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class PdfPageAnnotation extends Model
 {
     use HasFactory, SoftDeletes, HasChatter, HasLogActivity;
@@ -87,36 +130,71 @@ class PdfPageAnnotation extends Model
         return $this->belongsTo(PdfPage::class, 'pdf_page_id');
     }
 
+    /**
+     * Parent Annotation
+     *
+     * @return BelongsTo
+     */
     public function parentAnnotation(): BelongsTo
     {
         return $this->belongsTo(PdfPageAnnotation::class, 'parent_annotation_id');
     }
 
+    /**
+     * Child Annotations
+     *
+     * @return HasMany
+     */
     public function childAnnotations(): HasMany
     {
         return $this->hasMany(PdfPageAnnotation::class, 'parent_annotation_id');
     }
 
+    /**
+     * Room
+     *
+     * @return BelongsTo
+     */
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class, 'room_id');
     }
 
+    /**
+     * Room Location
+     *
+     * @return BelongsTo
+     */
     public function roomLocation(): BelongsTo
     {
         return $this->belongsTo(RoomLocation::class, 'room_location_id');
     }
 
+    /**
+     * Cabinet Run
+     *
+     * @return BelongsTo
+     */
     public function cabinetRun(): BelongsTo
     {
         return $this->belongsTo(CabinetRun::class, 'cabinet_run_id');
     }
 
+    /**
+     * Cabinet Specification
+     *
+     * @return BelongsTo
+     */
     public function cabinetSpecification(): BelongsTo
     {
         return $this->belongsTo(CabinetSpecification::class, 'cabinet_specification_id');
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -125,18 +203,37 @@ class PdfPageAnnotation extends Model
     /**
      * Scopes
      */
+    /**
+     * Scope query to Cabinet Run Annotations
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeCabinetRunAnnotations($query)
     {
         return $query->where('annotation_type', 'cabinet_run')
             ->whereNull('parent_annotation_id');
     }
 
+    /**
+     * Scope query to Cabinet Annotations
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeCabinetAnnotations($query)
     {
         return $query->where('annotation_type', 'cabinet')
             ->whereNotNull('parent_annotation_id');
     }
 
+    /**
+     * Scope query to By Page
+     *
+     * @param mixed $query The search query
+     * @param int $pdfPageId
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByPage($query, int $pdfPageId)
     {
         return $query->where('pdf_page_id', $pdfPageId);
@@ -149,6 +246,11 @@ class PdfPageAnnotation extends Model
     /**
      * Check if this is a top-level (cabinet run) annotation
      */
+    /**
+     * Is Top Level
+     *
+     * @return bool
+     */
     public function isTopLevel(): bool
     {
         return $this->parent_annotation_id === null;
@@ -156,6 +258,11 @@ class PdfPageAnnotation extends Model
 
     /**
      * Check if this annotation is a plan view
+     */
+    /**
+     * Is Plan View
+     *
+     * @return bool
      */
     public function isPlanView(): bool
     {
@@ -165,6 +272,11 @@ class PdfPageAnnotation extends Model
     /**
      * Check if this annotation is an elevation view
      */
+    /**
+     * Is Elevation View
+     *
+     * @return bool
+     */
     public function isElevationView(): bool
     {
         return $this->view_type === 'elevation';
@@ -173,6 +285,11 @@ class PdfPageAnnotation extends Model
     /**
      * Check if this annotation is a section view
      */
+    /**
+     * Is Section View
+     *
+     * @return bool
+     */
     public function isSectionView(): bool
     {
         return $this->view_type === 'section';
@@ -180,6 +297,11 @@ class PdfPageAnnotation extends Model
 
     /**
      * Check if this annotation is a detail view
+     */
+    /**
+     * Is Detail View
+     *
+     * @return bool
      */
     public function isDetailView(): bool
     {
@@ -202,6 +324,10 @@ class PdfPageAnnotation extends Model
     /**
      * Get entity references as collection (uses existing foreign key columns)
      * Returns format compatible with form: [['entity_type' => 'room', 'entity_id' => 5, 'reference_type' => 'primary'], ...]
+     */
+    /**
+     * Entity References
+     *
      */
     public function entityReferences()
     {
@@ -249,6 +375,12 @@ class PdfPageAnnotation extends Model
     /**
      * Sync entity references from form data (updates foreign key columns)
      * @param array $references Format: [['entity_type' => 'room', 'entity_id' => 5], ...]
+     */
+    /**
+     * Sync Entity References
+     *
+     * @param array $references
+     * @return void
      */
     public function syncEntityReferences(array $references): void
     {
@@ -306,6 +438,14 @@ class PdfPageAnnotation extends Model
     /**
      * Add a single entity reference (updates appropriate foreign key column)
      */
+    /**
+     * Add Entity Reference
+     *
+     * @param string $entityType
+     * @param int $entityId
+     * @param string $referenceType
+     * @return void
+     */
     public function addEntityReference(string $entityType, int $entityId, string $referenceType = 'primary'): void
     {
         match ($entityType) {
@@ -321,6 +461,11 @@ class PdfPageAnnotation extends Model
 
     /**
      * Export to Nutrient Instant JSON format with custom data
+     */
+    /**
+     * To Nutrient Annotation
+     *
+     * @return array
      */
     public function toNutrientAnnotation(): array
     {
@@ -350,6 +495,14 @@ class PdfPageAnnotation extends Model
 
     /**
      * Create from Nutrient annotation data
+     */
+    /**
+     * Create From Nutrient
+     *
+     * @param int $pdfPageId
+     * @param array $nutrientAnnotation
+     * @param ?int $creatorId
+     * @return self
      */
     public static function createFromNutrient(int $pdfPageId, array $nutrientAnnotation, ?int $creatorId = null): self
     {

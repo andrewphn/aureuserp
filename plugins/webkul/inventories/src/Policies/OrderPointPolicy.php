@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\OrderPoint;
 use Webkul\Security\Models\User;
 
+/**
+ * Order Point Policy authorization policy
+ *
+ */
 class OrderPointPolicy
 {
     use HandlesAuthorization;

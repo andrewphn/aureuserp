@@ -13,6 +13,11 @@ use Webkul\TimeOff\Models\Leave;
 use Webkul\TimeOff\Models\LeaveAllocation;
 use Webkul\TimeOff\Models\LeaveType;
 
+/**
+ * My Time Off Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class MyTimeOffWidget extends BaseWidget
 {
      use HasWidgetShield;
@@ -47,6 +52,13 @@ class MyTimeOffWidget extends BaseWidget
         return $stats;
     }
 
+    /**
+     * Calculate Available Days
+     *
+     * @param mixed $employeeId
+     * @param mixed $leaveTypeId
+     * @param mixed $endDate
+     */
     protected function calculateAvailableDays($employeeId, $leaveTypeId, $endDate)
     {
         $totalAllocated = LeaveAllocation::where('employee_id', $employeeId)
@@ -74,6 +86,11 @@ class MyTimeOffWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Pending Requests
+     *
+     * @param mixed $employeeId
+     */
     protected function calculatePendingRequests($employeeId)
     {
         return Leave::where('employee_id', $employeeId)

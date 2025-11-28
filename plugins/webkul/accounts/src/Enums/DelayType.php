@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Delay Type enumeration
+ *
+ */
 enum DelayType: string implements HasLabel
 {
     case DAYS_AFTER = 'days_after';
@@ -24,6 +28,11 @@ enum DelayType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

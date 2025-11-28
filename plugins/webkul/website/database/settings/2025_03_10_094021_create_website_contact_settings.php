@@ -2,8 +2,17 @@
 
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-return new class extends SettingsMigration
+return new /**
+ * extends class
+ *
+ */
+class extends SettingsMigration
 {
+    /**
+     * Up
+     *
+     * @return void
+     */
     public function up(): void
     {
         $this->migrator->add('website_contact.email', 'support@example.com');
@@ -20,6 +29,11 @@ return new class extends SettingsMigration
         $this->migrator->add('website_contact.youtube', 'username');
     }
 
+    /**
+     * Down
+     *
+     * @return void
+     */
     public function down(): void
     {
         $this->migrator->deleteIfExists('website_contact.email');

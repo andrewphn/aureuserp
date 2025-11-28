@@ -6,6 +6,11 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Webkul\Employee\Filament\Resources\EmployeeResource;
 use Webkul\Employee\Traits\Resources\Employee\EmployeeSkillRelation;
 
+/**
+ * Manage Skill class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageSkill extends ManageRelatedRecords
 {
     use EmployeeSkillRelation;

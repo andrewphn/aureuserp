@@ -19,6 +19,10 @@ use Webkul\Support\Models\Currency;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
+/**
+ * Install ERP class
+ *
+ */
 class InstallERP extends Command
 {
     /**
@@ -387,6 +391,11 @@ class InstallERP extends Command
         $this->info('✅ Storage directory linked successfully.');
     }
 
+    /**
+     * Backfill Missing Creator Ids
+     *
+     * @param mixed $user The user instance
+     */
     public function backfillMissingCreatorIds($user)
     {
         $mappings = [
@@ -406,6 +415,11 @@ class InstallERP extends Command
 
     /**
      * Resolve default settings for the user.
+     */
+    /**
+     * Sync Default Settings
+     *
+     * @param mixed $user The user instance
      */
     private function syncDefaultSettings($user)
     {

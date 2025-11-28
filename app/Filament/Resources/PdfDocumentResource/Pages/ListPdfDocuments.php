@@ -6,6 +6,11 @@ use App\Filament\Resources\PdfDocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/**
+ * List Pdf Documents class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPdfDocuments extends ListRecords
 {
     protected static string $resource = PdfDocumentResource::class;

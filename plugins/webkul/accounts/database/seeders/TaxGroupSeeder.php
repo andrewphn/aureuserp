@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Tax Group Seeder database seeder
+ *
+ */
 class TaxGroupSeeder extends Seeder
 {
     /**

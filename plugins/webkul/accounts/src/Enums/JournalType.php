@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Journal Type enumeration
+ *
+ */
 enum JournalType: string implements HasLabel
 {
     case SALE = 'sale';
@@ -25,6 +29,11 @@ enum JournalType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

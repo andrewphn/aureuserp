@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\JournalResource;
 
+/**
+ * View Journal class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewJournal extends ViewRecord
 {
     protected static string $resource = JournalResource::class;

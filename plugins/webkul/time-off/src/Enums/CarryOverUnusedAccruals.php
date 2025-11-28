@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Carry Over Unused Accruals enumeration
+ *
+ */
 enum CarryOverUnusedAccruals: string implements HasLabel
 {
     case ACCRUED_TIME_RESET_TO_ZERO = 'lost';
@@ -21,6 +25,11 @@ enum CarryOverUnusedAccruals: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

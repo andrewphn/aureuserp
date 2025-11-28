@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Due Term Value enumeration
+ *
+ */
 enum DueTermValue: string implements HasLabel
 {
     case PERCENT = 'percent';
@@ -18,6 +22,11 @@ enum DueTermValue: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

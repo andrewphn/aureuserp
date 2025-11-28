@@ -8,6 +8,11 @@ use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\PackagingResource;
 
+/**
+ * Manage Packagings class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManagePackagings extends ManageRecords
 {
     protected static string $resource = PackagingResource::class;

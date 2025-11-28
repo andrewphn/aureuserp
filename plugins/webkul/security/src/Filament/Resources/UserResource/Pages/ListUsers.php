@@ -17,6 +17,11 @@ use Webkul\Security\Settings\UserSettings;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Users class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListUsers extends ListRecords
 {
     use HasTableViews;

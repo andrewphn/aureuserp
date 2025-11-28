@@ -64,6 +64,15 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Support\Package;
 
+/**
+ * Order Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class OrderResource extends Resource
 {
     use HasCustomFields;
@@ -74,6 +83,12 @@ class OrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -283,6 +298,12 @@ class OrderResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -509,6 +530,12 @@ class OrderResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -934,6 +961,13 @@ class OrderResource extends Resource
             });
     }
 
+    /**
+     * After Product Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -963,6 +997,13 @@ class OrderResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * After Product Qty Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductQtyUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -982,6 +1023,13 @@ class OrderResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * After U O M Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterUOMUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -1005,6 +1053,13 @@ class OrderResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * After Product Packaging Qty Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductPackagingQtyUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -1030,6 +1085,13 @@ class OrderResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * After Product Packaging Updated
+     *
+     * @param Set $set
+     * @param Get $get
+     * @return void
+     */
     private static function afterProductPackagingUpdated(Set $set, Get $get): void
     {
         if (! $get('product_id')) {
@@ -1053,6 +1115,12 @@ class OrderResource extends Resource
         self::calculateLineTotals($set, $get);
     }
 
+    /**
+     * Calculate Unit Quantity
+     *
+     * @param mixed $uomId
+     * @param mixed $quantity
+     */
     private static function calculateUnitQuantity($uomId, $quantity)
     {
         if (! $uomId) {
@@ -1064,6 +1132,11 @@ class OrderResource extends Resource
         return (float) ($quantity ?? 0) / $uom->factor;
     }
 
+    /**
+     * Calculate Unit Price
+     *
+     * @param mixed $get
+     */
     private static function calculateUnitPrice($get)
     {
         $product = Product::find($get('product_id'));
@@ -1091,6 +1164,12 @@ class OrderResource extends Resource
         return (float) ($vendorPrice / $uom->factor);
     }
 
+    /**
+     * Get Best Packaging
+     *
+     * @param mixed $productId
+     * @param mixed $quantity
+     */
     private static function getBestPackaging($productId, $quantity)
     {
         $packagings = Packaging::where('product_id', $productId)
@@ -1109,6 +1188,14 @@ class OrderResource extends Resource
         return null;
     }
 
+    /**
+     * Calculate Line Totals
+     *
+     * @param Set $set
+     * @param Get $get
+     * @param ?string $prefix
+     * @return void
+     */
     private static function calculateLineTotals(Set $set, Get $get, ?string $prefix = ''): void
     {
         if (! $get($prefix.'product_id')) {

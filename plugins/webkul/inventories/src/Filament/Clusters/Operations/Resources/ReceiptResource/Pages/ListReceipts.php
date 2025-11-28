@@ -9,6 +9,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Receipts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListReceipts extends ListRecords
 {
     use HasTableViews;

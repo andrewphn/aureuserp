@@ -29,6 +29,11 @@ use Webkul\TimeOff\Filament\Clusters\Configurations;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\PublicHolidayResource\Pages\ListPublicHolidays;
 use Webkul\TimeOff\Models\CalendarLeave;
 
+/**
+ * Public Holiday Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PublicHolidayResource extends Resource
 {
     protected static ?string $model = CalendarLeave::class;
@@ -51,6 +56,12 @@ class PublicHolidayResource extends Resource
         return __('time-off::filament/clusters/configurations/resources/public-holiday.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -105,6 +116,12 @@ class PublicHolidayResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -193,6 +210,12 @@ class PublicHolidayResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

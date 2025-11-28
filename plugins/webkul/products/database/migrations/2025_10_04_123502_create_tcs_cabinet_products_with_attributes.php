@@ -5,7 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -30,10 +34,16 @@ return new class extends Migration
             $categoryId = DB::getPdo()->lastInsertId();
         }
 
-        // Get TCS company
+        // Get TCS company (or first available company)
         $companyId = DB::table('companies')->where('acronym', 'TCS')->value('id')
             ?? DB::table('companies')->where('name', 'The Carpenter\'s Son')->value('id')
-            ?? 1;
+            ?? DB::table('companies')->value('id');
+
+        // Skip if no company exists yet
+        if (!$companyId) {
+            echo "Skipping Cabinet product creation - no company exists yet\n";
+            return;
+        }
 
         // Get all attribute IDs (including Cabinet Type)
         $attributes = DB::table('products_attributes')

@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\Employee\Models\EmployeeCategory;
 use Webkul\Security\Models\User;
 
+/**
+ * Employee Category Factory model factory
+ *
+ */
 class EmployeeCategoryFactory extends Factory
 {
     /**

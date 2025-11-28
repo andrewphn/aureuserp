@@ -11,6 +11,11 @@ use Filament\Schemas\Schema;
 use Webkul\Security\Settings\UserSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Activity class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageActivity extends SettingsPage
 {
     use HasPageShield;
@@ -43,6 +48,12 @@ class ManageActivity extends SettingsPage
         return __('security::filament/clusters/manage-activity.navigation.label');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

@@ -110,3 +110,16 @@ export function getCurrentViewLabel(state) {
 
     return 'Unknown View';
 }
+
+/**
+ * Get color CSS variable for current view type
+ * @param {Object} state - Component state
+ * @returns {string} CSS color variable
+ */
+export function getCurrentViewColor(state) {
+    if (state.activeViewType === 'plan') return 'var(--primary-600)';
+    if (state.activeViewType === 'elevation') return 'var(--warning-600)';
+    if (state.activeViewType === 'section') return 'var(--info-600)';
+    if (state.activeViewType === 'detail') return 'var(--success-600)';
+    return 'var(--gray-600)';
+}

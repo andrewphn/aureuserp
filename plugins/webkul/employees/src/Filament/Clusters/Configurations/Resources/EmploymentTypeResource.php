@@ -28,6 +28,11 @@ use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\EmploymentTypeResource\Pages\ListEmploymentTypes;
 use Webkul\Employee\Models\EmploymentType;
 
+/**
+ * Employment Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EmploymentTypeResource extends Resource
 {
     protected static ?string $model = EmploymentType::class;
@@ -51,6 +56,12 @@ class EmploymentTypeResource extends Resource
 
     protected static ?string $cluster = Configurations::class;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -73,6 +84,12 @@ class EmploymentTypeResource extends Resource
             ->columns(2);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -212,6 +229,12 @@ class EmploymentTypeResource extends Resource
             ->defaultSort('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

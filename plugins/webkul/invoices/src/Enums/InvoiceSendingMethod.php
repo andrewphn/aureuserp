@@ -4,6 +4,10 @@ namespace Webkul\Invoice\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Invoice Sending Method enumeration
+ *
+ */
 enum InvoiceSendingMethod: string implements HasLabel
 {
     case DOWNLOAD = 'manual';
@@ -21,6 +25,11 @@ enum InvoiceSendingMethod: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

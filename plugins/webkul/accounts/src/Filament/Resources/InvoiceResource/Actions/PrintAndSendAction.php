@@ -14,6 +14,11 @@ use Webkul\Account\Models\Move;
 use Webkul\Account\Models\Partner;
 use Webkul\Support\Traits\PDFHandler;
 
+/**
+ * Print And Send Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PrintAndSendAction extends Action
 {
     use PDFHandler;
@@ -93,6 +98,12 @@ class PrintAndSendAction extends Action
         });
     }
 
+    /**
+     * Prepare Invoice
+     *
+     * @param Move $record The model record
+     * @return ?string
+     */
     private function prepareInvoice(Move $record): ?string
     {
         return $this->savePDF(

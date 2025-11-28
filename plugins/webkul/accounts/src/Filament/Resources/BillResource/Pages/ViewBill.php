@@ -10,6 +10,11 @@ use Webkul\Account\Filament\Resources\BillResource\Actions\CreditNoteAction;
 use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
+/**
+ * View Bill class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewBill extends ViewRecord
 {
     protected static string $resource = BillResource::class;

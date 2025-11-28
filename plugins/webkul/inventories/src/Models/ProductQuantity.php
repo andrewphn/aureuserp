@@ -12,6 +12,40 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Product Quantity Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property float $quantity
+ * @property float $reserved_quantity
+ * @property float $counted_quantity
+ * @property float $difference_quantity
+ * @property float $inventory_diff_quantity
+ * @property bool $inventory_quantity_set
+ * @property \Carbon\Carbon|null $scheduled_at
+ * @property \Carbon\Carbon|null $incoming_at
+ * @property int $product_id
+ * @property int $location_id
+ * @property int $storage_category_id
+ * @property int $lot_id
+ * @property int $package_id
+ * @property int $partner_id
+ * @property int $user_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $product
+ * @property-read \Illuminate\Database\Eloquent\Model|null $location
+ * @property-read \Illuminate\Database\Eloquent\Model|null $storageCategory
+ * @property-read \Illuminate\Database\Eloquent\Model|null $lot
+ * @property-read \Illuminate\Database\Eloquent\Model|null $package
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class ProductQuantity extends Model
 {
     use HasFactory;
@@ -59,46 +93,91 @@ class ProductQuantity extends Model
         'incoming_at'            => 'datetime',
     ];
 
+    /**
+     * Product
+     *
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * Location
+     *
+     * @return BelongsTo
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * Storage Category
+     *
+     * @return BelongsTo
+     */
     public function storageCategory(): BelongsTo
     {
         return $this->belongsTo(StorageCategory::class);
     }
 
+    /**
+     * Lot
+     *
+     * @return BelongsTo
+     */
     public function lot(): BelongsTo
     {
         return $this->belongsTo(Lot::class);
     }
 
+    /**
+     * Package
+     *
+     * @return BelongsTo
+     */
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * User
+     *
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -112,6 +191,11 @@ class ProductQuantity extends Model
     /**
      * Bootstrap any application services.
      */
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
@@ -123,6 +207,10 @@ class ProductQuantity extends Model
 
     /**
      * Update the scheduled_at attribute
+     */
+    /**
+     * Update Scheduled At
+     *
      */
     public function updateScheduledAt()
     {
@@ -138,6 +226,11 @@ class ProductQuantity extends Model
         }
     }
 
+    /**
+     * New Factory
+     *
+     * @return ProductQuantityFactory
+     */
     protected static function newFactory(): ProductQuantityFactory
     {
         return ProductQuantityFactory::new();

@@ -7,6 +7,10 @@ use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Tag;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Project Tags Loader class
+ *
+ */
 class ProjectTagsLoader extends Component
 {
     public $projectId;
@@ -17,6 +21,10 @@ class ProjectTagsLoader extends Component
 
     protected $listeners = ['refreshTags' => '$refresh'];
 
+    /**
+     * Mount
+     *
+     */
     public function mount()
     {
         if ($this->projectId) {
@@ -30,6 +38,11 @@ class ProjectTagsLoader extends Component
         $this->expandedSections = ['common' => true];
     }
 
+    /**
+     * Toggle Tag
+     *
+     * @param mixed $tagId
+     */
     public function toggleTag($tagId)
     {
         if (in_array($tagId, $this->selectedTags)) {
@@ -39,6 +52,11 @@ class ProjectTagsLoader extends Component
         }
     }
 
+    /**
+     * Toggle Section
+     *
+     * @param mixed $section
+     */
     public function toggleSection($section)
     {
         if (isset($this->expandedSections[$section]) && $this->expandedSections[$section]) {
@@ -48,6 +66,10 @@ class ProjectTagsLoader extends Component
         }
     }
 
+    /**
+     * Save Tags
+     *
+     */
     public function saveTags()
     {
         if (!$this->projectId) {
@@ -84,6 +106,10 @@ class ProjectTagsLoader extends Component
         return $query->orderBy('type')->orderBy('name')->get()->groupBy('type');
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         $allTags = $this->filteredTags;

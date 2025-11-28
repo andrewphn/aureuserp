@@ -10,6 +10,23 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Price List Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $sort
+ * @property int $currency_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property string|null $name
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currency
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class PriceList extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -30,16 +47,31 @@ class PriceList extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Currency
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function currency()
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function creator()
     {
         return $this->belongsTo(User::class);

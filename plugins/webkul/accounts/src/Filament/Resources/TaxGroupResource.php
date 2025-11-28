@@ -26,6 +26,11 @@ use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\ListTaxGroups;
 use Webkul\Account\Filament\Resources\TaxGroupResource\Pages\ViewTaxGroup;
 use Webkul\Account\Models\TaxGroup;
 
+/**
+ * Tax Group Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TaxGroupResource extends Resource
 {
     protected static ?string $model = TaxGroup::class;
@@ -34,6 +39,12 @@ class TaxGroupResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -61,6 +72,12 @@ class TaxGroupResource extends Resource
             ])->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -160,6 +177,12 @@ class TaxGroupResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

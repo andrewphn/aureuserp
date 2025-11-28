@@ -20,6 +20,11 @@ use Webkul\Inventory\Models\Category;
 use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Filament\Resources\CategoryResource;
 
+/**
+ * Product Category Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductCategoryResource extends CategoryResource
 {
     protected static ?string $model = Category::class;
@@ -46,6 +51,12 @@ class ProductCategoryResource extends CategoryResource
         return __('inventories::filament/clusters/configurations/resources/product-category.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $schema = CategoryResource::form($schema);
@@ -76,6 +87,12 @@ class ProductCategoryResource extends CategoryResource
         return $schema;
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         $schema = CategoryResource::infolist($schema);
@@ -126,6 +143,12 @@ class ProductCategoryResource extends CategoryResource
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

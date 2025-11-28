@@ -20,6 +20,11 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\ActivityPlan;
 use Webkul\Support\Models\ActivityType;
 
+/**
+ * Activity Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityAction extends Action
 {
     protected mixed $activityPlans;
@@ -29,6 +34,11 @@ class ActivityAction extends Action
         return 'activity.action';
     }
 
+    /**
+     * Set Activity Plans
+     *
+     * @param mixed $activityPlans
+     */
     public function setActivityPlans(mixed $activityPlans)
     {
         $this->activityPlans = $activityPlans;

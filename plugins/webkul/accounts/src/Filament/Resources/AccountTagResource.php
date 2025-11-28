@@ -28,6 +28,11 @@ use Webkul\Account\Enums\Applicability;
 use Webkul\Account\Filament\Resources\AccountTagResource\Pages\ListAccountTags;
 use Webkul\Account\Models\Tag;
 
+/**
+ * Account Tag Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AccountTagResource extends Resource
 {
     protected static ?string $model = Tag::class;
@@ -36,6 +41,12 @@ class AccountTagResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -70,6 +81,12 @@ class AccountTagResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -146,6 +163,12 @@ class AccountTagResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

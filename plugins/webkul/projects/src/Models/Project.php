@@ -22,6 +22,64 @@ use Webkul\Security\Models\Scopes\UserPermissionScope;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Project Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property string|null $project_number
+ * @property string|null $project_type
+ * @property string|null $project_type_other
+ * @property string|null $lead_source
+ * @property string|null $budget_range
+ * @property int|null $complexity_score
+ * @property string|null $tasks_label
+ * @property string|null $description
+ * @property string|null $visibility
+ * @property string|null $color
+ * @property string|null $sort
+ * @property \Carbon\Carbon|null $start_date
+ * @property \Carbon\Carbon|null $end_date
+ * @property \Carbon\Carbon|null $desired_completion_date
+ * @property float $allocated_hours
+ * @property string|null $estimated_linear_feet
+ * @property bool $allow_timesheets
+ * @property bool $allow_milestones
+ * @property bool $allow_task_dependencies
+ * @property bool $is_active
+ * @property int $stage_id
+ * @property int $partner_id
+ * @property string|null $use_customer_address
+ * @property int $company_id
+ * @property int $branch_id
+ * @property int $user_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $currentProductionEstimate
+ * @property-read \Illuminate\Database\Eloquent\Collection $taskStages
+ * @property-read \Illuminate\Database\Eloquent\Collection $milestones
+ * @property-read \Illuminate\Database\Eloquent\Collection $addresses
+ * @property-read \Illuminate\Database\Eloquent\Collection $productionEstimates
+ * @property-read \Illuminate\Database\Eloquent\Collection $tasks
+ * @property-read \Illuminate\Database\Eloquent\Collection $orders
+ * @property-read \Illuminate\Database\Eloquent\Collection $rooms
+ * @property-read \Illuminate\Database\Eloquent\Collection $cabinets
+ * @property-read \Illuminate\Database\Eloquent\Collection $cabinetSpecifications
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ * @property-read \Illuminate\Database\Eloquent\Model|null $stage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $branch
+ * @property-read \Illuminate\Database\Eloquent\Collection $favoriteUsers
+ * @property-read \Illuminate\Database\Eloquent\Collection $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection $roomLocations
+ * @property-read \Illuminate\Database\Eloquent\Collection $cabinetRuns
+ * @property-read \Illuminate\Database\Eloquent\Collection $pdfDocuments
+ *
+ */
 class Project extends Model implements Sortable
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes, SortableTrait;
@@ -43,6 +101,9 @@ class Project extends Model implements Sortable
         'project_number',
         'project_type',
         'project_type_other',
+        'lead_source',
+        'budget_range',
+        'complexity_score',
         'tasks_label',
         'description',
         'visibility',
@@ -61,6 +122,8 @@ class Project extends Model implements Sortable
         'partner_id',
         'use_customer_address',
         'company_id',
+        'warehouse_id',
+        'source_quote_id',
         'branch_id',
         'user_id',
         'creator_id',
@@ -118,31 +181,61 @@ class Project extends Model implements Sortable
         );
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * User
+     *
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Stage
+     *
+     * @return BelongsTo
+     */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(ProjectStage::class);
     }
 
+    /**
+     * Task Stages
+     *
+     * @return HasMany
+     */
     public function taskStages(): HasMany
     {
         return $this->hasMany(TaskStage::class);
     }
 
+    /**
+     * Favorite Users
+     *
+     * @return BelongsToMany
+     */
     public function favoriteUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projects_user_project_favorites', 'project_id', 'user_id');
@@ -162,61 +255,152 @@ class Project extends Model implements Sortable
         return $this->allocated_hours - $this->tasks->sum('remaining_hours');
     }
 
+    /**
+     * Milestones
+     *
+     * @return HasMany
+     */
     public function milestones(): HasMany
     {
         return $this->hasMany(Milestone::class);
     }
 
+    /**
+     * Addresses
+     *
+     * @return HasMany
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(ProjectAddress::class);
     }
 
+    /**
+     * Production Estimates
+     *
+     * @return HasMany
+     */
     public function productionEstimates(): HasMany
     {
         return $this->hasMany(\App\Models\ProductionEstimate::class);
     }
 
+    /**
+     * Current Production Estimate
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function currentProductionEstimate()
     {
         return $this->hasOne(\App\Models\ProductionEstimate::class)->where('is_current', true);
     }
 
+    /**
+     * Tasks
+     *
+     * @return HasMany
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * Orders
+     *
+     * @return HasMany
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(\Webkul\Sale\Models\Order::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Branch
+     *
+     * @return BelongsTo
+     */
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'branch_id');
     }
 
-    public function tags(): BelongsToMany
+    /**
+     * Warehouse
+     *
+     * @return BelongsTo
+     */
+    public function warehouse(): BelongsTo
     {
-        return $this->belongsToMany(Tag::class, 'projects_project_tag', 'project_id', 'tag_id');
+        return $this->belongsTo(\Webkul\Inventory\Models\Warehouse::class);
     }
 
+    /**
+     * Source Quote (the quote that originated this project)
+     *
+     * @return BelongsTo
+     */
+    public function sourceQuote(): BelongsTo
+    {
+        return $this->belongsTo(\Webkul\Sale\Models\Order::class, 'source_quote_id');
+    }
+
+    /**
+     * Material Reservations
+     *
+     * @return HasMany
+     */
+    public function materialReservations(): HasMany
+    {
+        return $this->hasMany(MaterialReservation::class);
+    }
+
+    /**
+     * Tags
+     *
+     * @return BelongsToMany
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'projects_project_tag', 'project_id', 'tag_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Pdf Documents
+     *
+     * @return MorphMany
+     */
     public function pdfDocuments(): MorphMany
     {
         return $this->morphMany(\App\Models\PdfDocument::class, 'module');
     }
 
+    /**
+     * Rooms
+     *
+     * @return HasMany
+     */
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class);
     }
 
+    /**
+     * Room Locations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
     public function roomLocations()
     {
         return $this->hasManyThrough(
@@ -229,16 +413,31 @@ class Project extends Model implements Sortable
         );
     }
 
+    /**
+     * Cabinets
+     *
+     * @return HasMany
+     */
     public function cabinets(): HasMany
     {
         return $this->hasMany(CabinetSpecification::class);
     }
 
+    /**
+     * Cabinet Specifications
+     *
+     * @return HasMany
+     */
     public function cabinetSpecifications(): HasMany
     {
         return $this->hasMany(CabinetSpecification::class);
     }
 
+    /**
+     * Cabinet Runs
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
     public function cabinetRuns()
     {
         // Note: This relationship doesn't work correctly for hasManyThrough across 3 levels
@@ -263,10 +462,47 @@ class Project extends Model implements Sortable
                 $project->generateProjectNumber();
             }
         });
+
+        // Fire event when stage changes
+        // Use static property to avoid persisting temp value to database
+        static $originalStageIds = [];
+
+        static::updating(function ($project) use (&$originalStageIds) {
+            // Store original stage_id before update
+            if ($project->isDirty('stage_id')) {
+                $originalStageIds[$project->id] = $project->getOriginal('stage_id');
+            }
+        });
+
+        static::updated(function ($project) use (&$originalStageIds) {
+            // Fire stage changed event if stage_id was modified
+            if (isset($originalStageIds[$project->id]) && $project->wasChanged('stage_id')) {
+                $previousStage = $originalStageIds[$project->id]
+                    ? ProjectStage::find($originalStageIds[$project->id])
+                    : null;
+                $newStage = $project->stage;
+
+                if ($newStage) {
+                    event(new \Webkul\Project\Events\ProjectStageChanged(
+                        $project,
+                        $previousStage,
+                        $newStage
+                    ));
+                }
+
+                // Clean up
+                unset($originalStageIds[$project->id]);
+            }
+        });
     }
 
     /**
      * Generate unique project number based on company acronym and street address
+     */
+    /**
+     * Generate Project Number
+     *
+     * @return void
      */
     protected function generateProjectNumber(): void
     {
@@ -293,11 +529,12 @@ class Project extends Model implements Sortable
             ->orderBy('id', 'desc')
             ->value('project_number');
 
-        // Calculate next number (starting from 001)
+        // Calculate next number (using company's project_number_start setting, default 1)
         // Pattern matches: TCS-001-MapleAve (extracts 001)
-        $nextNumber = 1;
+        $startNumber = $this->company->project_number_start ?? 1;
+        $nextNumber = $startNumber;
         if ($lastProjectNumber && preg_match('/^[A-Z]+-(\d+)-/', $lastProjectNumber, $matches)) {
-            $nextNumber = intval($matches[1]) + 1;
+            $nextNumber = max(intval($matches[1]) + 1, $startNumber);
         }
 
         // Format: TCS-001-MapleAve, TCS-002-FriendshipLane, etc.
@@ -308,6 +545,11 @@ class Project extends Model implements Sortable
         $this->saveQuietly();
     }
 
+    /**
+     * New Factory
+     *
+     * @return ProjectFactory
+     */
     protected static function newFactory(): ProjectFactory
     {
         return ProjectFactory::new();

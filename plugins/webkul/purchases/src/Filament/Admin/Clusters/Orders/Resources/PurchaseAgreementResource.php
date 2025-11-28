@@ -62,6 +62,15 @@ use Webkul\Purchase\Settings\ProductSettings;
 use Webkul\Support\Filament\Forms\Components\Repeater;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 
+/**
+ * Purchase Agreement Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PurchaseAgreementResource extends Resource
 {
     use HasCustomFields;
@@ -85,6 +94,11 @@ class PurchaseAgreementResource extends Resource
         return __('purchases::filament/admin/clusters/orders/resources/purchase-agreement.navigation.title');
     }
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -94,6 +108,12 @@ class PurchaseAgreementResource extends Resource
         return static::getOrderSettings()->enable_purchase_agreements;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -301,6 +321,12 @@ class PurchaseAgreementResource extends Resource
             ->columns($columns);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -507,6 +533,12 @@ class PurchaseAgreementResource extends Resource
             );
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -643,6 +675,12 @@ class PurchaseAgreementResource extends Resource
         return once(fn () => app(ProductSettings::class));
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

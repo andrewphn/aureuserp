@@ -3,7 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     private $userId;
     private $attributeIds = [];

@@ -42,6 +42,11 @@ use Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\SkillTypeResource\RelationManagers\SkillsRelationManager;
 use Webkul\Employee\Models\SkillType;
 
+/**
+ * Skill Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SkillTypeResource extends Resource
 {
     protected static ?string $model = SkillType::class;
@@ -69,6 +74,12 @@ class SkillTypeResource extends Resource
         return __('employees::filament/clusters/configurations/resources/skill-type.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -100,6 +111,12 @@ class SkillTypeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -287,6 +304,12 @@ class SkillTypeResource extends Resource
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

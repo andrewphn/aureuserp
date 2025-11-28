@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Colors enumeration
+ *
+ */
 enum Colors: string
 {
     case Danger = 'danger';
@@ -14,6 +18,11 @@ enum Colors: string
 
     case Warning = 'warning';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

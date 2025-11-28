@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Decoration Type enumeration
+ *
+ */
 enum ActivityDecorationType: string
 {
     case ALERT = 'alert';

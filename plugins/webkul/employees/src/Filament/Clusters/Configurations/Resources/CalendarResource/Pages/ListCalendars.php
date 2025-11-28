@@ -10,6 +10,11 @@ use Webkul\Employee\Models\Calendar;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Calendars class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListCalendars extends ListRecords
 {
     use HasTableViews;

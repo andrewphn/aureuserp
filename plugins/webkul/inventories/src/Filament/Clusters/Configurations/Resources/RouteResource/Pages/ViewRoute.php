@@ -7,6 +7,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource;
 
+/**
+ * View Route class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewRoute extends ViewRecord
 {
     protected static string $resource = RouteResource::class;

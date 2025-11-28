@@ -13,6 +13,10 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
 
+/**
+ * Employee Factory model factory
+ *
+ */
 class EmployeeFactory extends Factory
 {
     /**

@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Blog\Filament\Admin\Resources\PostResource;
 
+/**
+ * Create Post class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePost extends CreateRecord
 {
     protected static string $resource = PostResource::class;
@@ -24,6 +29,12 @@ class CreatePost extends CreateRecord
             ->body(__('blogs::filament/admin/resources/post/pages/create-post.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

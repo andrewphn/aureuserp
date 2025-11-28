@@ -40,6 +40,11 @@ use Webkul\Account\Filament\Resources\PaymentTermResource\Pages\ViewPaymentTerm;
 use Webkul\Account\Filament\Resources\PaymentTermResource\RelationManagers\PaymentDueTermRelationManager;
 use Webkul\Account\Models\PaymentTerm;
 
+/**
+ * Payment Term Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PaymentTermResource extends Resource
 {
     protected static ?string $model = PaymentTerm::class;
@@ -50,6 +55,12 @@ class PaymentTermResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -104,6 +115,12 @@ class PaymentTermResource extends Resource
             ])->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -203,6 +220,12 @@ class PaymentTermResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -243,6 +266,12 @@ class PaymentTermResource extends Resource
             ])->columns(1);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

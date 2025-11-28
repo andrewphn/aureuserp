@@ -1,0 +1,455 @@
+🚀 Running global setup - authenticating...
+🔐 Logging in...
+✅ Login successful
+💾 Authentication state saved to: /Users/andrewphan/tcsadmin/aureuserp/tests/Browser/auth-state.json
+
+Running 14 tests using 1 worker
+
+[1A[2K[1/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:73:5 › Isolation Mode & CRUD Operations › should enter isolation mode by double-clicking tree node
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:73:5 › Isolation Mode & CRUD Operations › should enter isolation mode by double-clicking tree node
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K🔒 Testing isolation mode entry...
+
+[1A[2K🔒 Isolation state: { isolationMode: [33mtrue[39m, isolationLevel: [32m'room'[39m, isolatedRoomName: [32m'K1'[39m }
+
+[1A[2K[2/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:110:5 › Isolation Mode & CRUD Operations › should exit isolation mode
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:110:5 › Isolation Mode & CRUD Operations › should exit isolation mode
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K🔓 Exited isolation mode: [33mtrue[39m
+
+[1A[2K[3/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:144:5 › Isolation Mode & CRUD Operations › should navigate pages while in isolation mode
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:144:5 › Isolation Mode & CRUD Operations › should navigate pages while in isolation mode
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K📄 Page navigation in isolation: { isolationMode: [33mtrue[39m, currentPage: [33m3[39m }
+
+[1A[2K[4/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:174:5 › Isolation Mode & CRUD Operations › should test annotation visibility toggle (Read operation)
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:174:5 › Isolation Mode & CRUD Operations › should test annotation visibility toggle (Read operation)
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K👁️ Testing READ operation - visibility check...
+
+[1A[2K📊 Found annotations: [33m3[39m
+
+[1A[2K👁️ Visible annotations: [33m3[39m
+
+[1A[2K[5/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:198:5 › Isolation Mode & CRUD Operations › should toggle annotation visibility (Update operation)
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:198:5 › Isolation Mode & CRUD Operations › should toggle annotation visibility (Update operation)
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K✏️ Testing UPDATE operation - visibility toggle...
+
+[1A[2K📍 Initial visibility: [33mtrue[39m
+
+[1A[2K📍 New visibility: [33mfalse[39m
+
+[1A[2K[6/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:240:5 › Isolation Mode & CRUD Operations › should open annotation editor (Edit operation)
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:240:5 › Isolation Mode & CRUD Operations › should open annotation editor (Edit operation)
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K  1) [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:240:5 › Isolation Mode & CRUD Operations › should open annotation editor (Edit operation) 
+
+    TimeoutError: page.waitForURL: Timeout 20000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      23 |             // Submit form by pressing Enter (more reliable than button click)
+      24 |             await Promise.all([
+    > 25 |                 page.waitForURL(url => !url.toString().includes('/login'), { timeout: 20000 }),
+         |                      ^
+      26 |                 page.press('input[type="password"]', 'Enter')
+      27 |             ]);
+      28 |
+        at /Users/andrewphan/tcsadmin/aureuserp/tests/Browser/test-isolation-and-crud.spec.ts:25:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/test-isolation-and-crud-Is-e2630-tion-editor-Edit-operation--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/test-isolation-and-crud-Is-e2630-tion-editor-Edit-operation--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/test-isolation-and-crud-Is-e2630-tion-editor-Edit-operation--chromium/error-context.md
+
+
+[1A[2K[7/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:274:5 › Isolation Mode & CRUD Operations › should test filter functionality
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:274:5 › Isolation Mode & CRUD Operations › should test filter functionality
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K  2) [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:274:5 › Isolation Mode & CRUD Operations › should test filter functionality 
+
+    TimeoutError: page.waitForURL: Timeout 20000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      23 |             // Submit form by pressing Enter (more reliable than button click)
+      24 |             await Promise.all([
+    > 25 |                 page.waitForURL(url => !url.toString().includes('/login'), { timeout: 20000 }),
+         |                      ^
+      26 |                 page.press('input[type="password"]', 'Enter')
+      27 |             ]);
+      28 |
+        at /Users/andrewphan/tcsadmin/aureuserp/tests/Browser/test-isolation-and-crud.spec.ts:25:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/test-isolation-and-crud-Is-c3aaa-d-test-filter-functionality-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/test-isolation-and-crud-Is-c3aaa-d-test-filter-functionality-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/test-isolation-and-crud-Is-c3aaa-d-test-filter-functionality-chromium/error-context.md
+
+
+[1A[2K[8/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:288:5 › Isolation Mode & CRUD Operations › should test undo/redo functionality
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:288:5 › Isolation Mode & CRUD Operations › should test undo/redo functionality
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K↩️ Testing undo/redo...
+
+[1A[2K↩️ Undo available: [33mfalse[39m
+
+[1A[2K✅ Undo operation attempted
+
+[1A[2K[9/14] [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:316:5 › Isolation Mode & CRUD Operations › should test zoom functionality
+[1A[2K[chromium] › tests/Browser/test-isolation-and-crud.spec.ts:316:5 › Isolation Mode & CRUD Operations › should test zoom functionality
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K🔍 Testing zoom...
+
+[1A[2K📍 Initial zoom: [33m1[39m
+
+[1A[2K📍 New zoom: [33m1.25[39m
+
+[1A[2K[10/14] [chromium] › tests/Browser/test-page2-interactions.spec.ts:73:5 › Page 2 Interactions & Tree Tests › should verify page 2 annotations are loaded
+[1A[2K[chromium] › tests/Browser/test-page2-interactions.spec.ts:73:5 › Page 2 Interactions & Tree Tests › should verify page 2 annotations are loaded
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Re-authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K📍 Current page: [33m2[39m
+
+[1A[2K📊 Annotations on page 2: [33m3[39m
+
+[1A[2K[11/14] [chromium] › tests/Browser/test-page2-interactions.spec.ts:96:5 › Page 2 Interactions & Tree Tests › should expand tree and verify room structure
+[1A[2K[chromium] › tests/Browser/test-page2-interactions.spec.ts:96:5 › Page 2 Interactions & Tree Tests › should expand tree and verify room structure
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Re-authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K🏗️ Tree structure: { annotations: [33m3[39m, rooms: [33m1[39m, locations: [33m1[39m, cabinetRuns: [33m1[39m }
+
+[1A[2K✅ Expanded K1 room node
+
+[1A[2K[12/14] [chromium] › tests/Browser/test-page2-interactions.spec.ts:129:5 › Page 2 Interactions & Tree Tests › should click on tree node and highlight annotation
+[1A[2K[chromium] › tests/Browser/test-page2-interactions.spec.ts:129:5 › Page 2 Interactions & Tree Tests › should click on tree node and highlight annotation
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K✅ Re-authenticated, now at: http://aureuserp.test/admin/project/projects/9/annotate-v2/2?pdf=1
+
+[1A[2K⏳ Waiting for page to stabilize...
+
+[1A[2K⏳ Checking for Alpine.js...
+
+[1A[2K✓ Alpine.js loaded: [33mtrue[39m
+
+[1A[2K⏳ Checking for component...
+
+[1A[2K✓ Component exists: [33mtrue[39m
+
+[1A[2K⏳ Waiting for systemReady...
+
+[1A[2K⏳ Waiting for annotations to load...
+
+[1A[2K✅ Test setup complete
+
+[1A[2K🎯 Selected annotation: { type: [32m'room'[39m, id: [33m17[39m, label: [32m'K1'[39m, roomId: [33m17[39m }
+
+[1A[2K[13/14] [chromium] › tests/Browser/test-page2-interactions.spec.ts:149:5 › Page 2 Interactions & Tree Tests › should interact with page 2 annotations
+[1A[2K[chromium] › tests/Browser/test-page2-interactions.spec.ts:149:5 › Page 2 Interactions & Tree Tests › should interact with page 2 annotations
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K  3) [chromium] › tests/Browser/test-page2-interactions.spec.ts:149:5 › Page 2 Interactions & Tree Tests › should interact with page 2 annotations 
+
+    TimeoutError: page.waitForURL: Timeout 20000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      23 |             // Submit form by pressing Enter (more reliable than button click)
+      24 |             await Promise.all([
+    > 25 |                 page.waitForURL(url => !url.toString().includes('/login'), { timeout: 20000 }),
+         |                      ^
+      26 |                 page.press('input[type="password"]', 'Enter')
+      27 |             ]);
+      28 |
+        at /Users/andrewphan/tcsadmin/aureuserp/tests/Browser/test-page2-interactions.spec.ts:25:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/test-page2-interactions-Pa-54b79-act-with-page-2-annotations-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/test-page2-interactions-Pa-54b79-act-with-page-2-annotations-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/test-page2-interactions-Pa-54b79-act-with-page-2-annotations-chromium/error-context.md
+
+
+[1A[2K[14/14] [chromium] › tests/Browser/test-page2-interactions.spec.ts:198:5 › Page 2 Interactions & Tree Tests › should toggle annotation visibility
+[1A[2K[chromium] › tests/Browser/test-page2-interactions.spec.ts:198:5 › Page 2 Interactions & Tree Tests › should toggle annotation visibility
+🔄 Starting test setup...
+
+[1A[2K📍 Current URL: http://aureuserp.test/admin/login
+
+[1A[2K⚠️ Redirected to login, authenticating...
+
+[1A[2K  4) [chromium] › tests/Browser/test-page2-interactions.spec.ts:198:5 › Page 2 Interactions & Tree Tests › should toggle annotation visibility 
+
+    TimeoutError: page.waitForURL: Timeout 20000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+      23 |             // Submit form by pressing Enter (more reliable than button click)
+      24 |             await Promise.all([
+    > 25 |                 page.waitForURL(url => !url.toString().includes('/login'), { timeout: 20000 }),
+         |                      ^
+      26 |                 page.press('input[type="password"]', 'Enter')
+      27 |             ]);
+      28 |
+        at /Users/andrewphan/tcsadmin/aureuserp/tests/Browser/test-page2-interactions.spec.ts:25:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/test-page2-interactions-Pa-c8fb9-oggle-annotation-visibility-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/test-page2-interactions-Pa-c8fb9-oggle-annotation-visibility-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/test-page2-interactions-Pa-c8fb9-oggle-annotation-visibility-chromium/error-context.md
+
+
+[1A[2K  4 failed
+    [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:240:5 › Isolation Mode & CRUD Operations › should open annotation editor (Edit operation) 
+    [chromium] › tests/Browser/test-isolation-and-crud.spec.ts:274:5 › Isolation Mode & CRUD Operations › should test filter functionality 
+    [chromium] › tests/Browser/test-page2-interactions.spec.ts:149:5 › Page 2 Interactions & Tree Tests › should interact with page 2 annotations 
+    [chromium] › tests/Browser/test-page2-interactions.spec.ts:198:5 › Page 2 Interactions & Tree Tests › should toggle annotation visibility 
+  10 passed (2.6m)

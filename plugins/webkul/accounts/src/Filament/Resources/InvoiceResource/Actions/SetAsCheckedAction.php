@@ -7,6 +7,11 @@ use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Facades\Account;
 use Webkul\Account\Models\Move;
 
+/**
+ * Set As Checked Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SetAsCheckedAction extends Action
 {
     public static function getDefaultName(): ?string

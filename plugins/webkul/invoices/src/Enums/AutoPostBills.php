@@ -4,6 +4,10 @@ namespace Webkul\Invoice\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Auto Post Bills enumeration
+ *
+ */
 enum AutoPostBills: string implements HasLabel
 {
     case ALWAYS = 'always';
@@ -21,6 +25,11 @@ enum AutoPostBills: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

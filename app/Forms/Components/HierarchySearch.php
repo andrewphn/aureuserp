@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Forms\Components;
+
+use Filament\Forms\Components\Field;
+
+/**
+ * Hierarchy Search class
+ *
+ */
+class HierarchySearch extends Field
+{
+    protected string $view = 'forms.components.hierarchy-search';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->afterStateHydrated(function (HierarchySearch $component, $state): void {
+            // The state might be a JSON string or array containing all hierarchy IDs
+            if (is_string($state)) {
+                $state = json_decode($state, true);
+            }
+
+            if (is_array($state)) {
+                $component->state($state);
+            }
+        });
+
+        $this->dehydrateStateUsing(function ($state): ?array {
+            if (is_array($state)) {
+                return $state;
+            }
+            return null;
+        });
+    }
+}

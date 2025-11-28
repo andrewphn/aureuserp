@@ -13,6 +13,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource;
 use Webkul\Inventory\Models\InternalTransfer;
 
+/**
+ * Edit Internal class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditInternal extends EditRecord
 {
     protected static string $resource = InternalResource::class;
@@ -76,6 +81,11 @@ class EditInternal extends EditRecord
         ];
     }
 
+    /**
+     * Update Form
+     *
+     * @return void
+     */
     public function updateForm(): void
     {
         $this->fillForm();

@@ -36,6 +36,15 @@ use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 
+/**
+ * Product Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductResource extends BaseProductResource
 {
     use HasCustomFields;
@@ -59,6 +68,12 @@ class ProductResource extends BaseProductResource
         return __('inventories::filament/clusters/products/resources/product.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $schema = BaseProductResource::form($schema);
@@ -176,11 +191,23 @@ class ProductResource extends BaseProductResource
         return $schema;
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return BaseProductResource::table($table);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         $schema = BaseProductResource::infolist($schema);
@@ -275,6 +302,12 @@ class ProductResource extends BaseProductResource
         return $schema;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
@@ -301,6 +334,14 @@ class ProductResource extends BaseProductResource
         ];
     }
 
+    /**
+     * Create Move
+     *
+     * @param mixed $record The model record
+     * @param mixed $currentQuantity
+     * @param mixed $sourceLocationId
+     * @param mixed $destinationLocationId
+     */
     public static function createMove($record, $currentQuantity, $sourceLocationId, $destinationLocationId)
     {
         $move = Move::create([

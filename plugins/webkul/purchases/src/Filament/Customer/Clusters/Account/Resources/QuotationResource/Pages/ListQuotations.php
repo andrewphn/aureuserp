@@ -11,12 +11,23 @@ use Webkul\Purchase\Models\Order;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Quotations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListQuotations extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = QuotationResource::class;
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return QuotationResource::table($table)

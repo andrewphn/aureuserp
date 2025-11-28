@@ -4,15 +4,29 @@ namespace Webkul\FullCalendar\Concerns;
 
 use Filament\Actions\ActionGroup;
 
+/**
+ * Interacts With Header Actions trait
+ *
+ */
 trait InteractsWithHeaderActions
 {
     protected array $cachedHeaderActions = [];
 
+    /**
+     * Booted Interacts With Header Actions
+     *
+     * @return void
+     */
     public function bootedInteractsWithHeaderActions(): void
     {
         $this->cacheHeaderActions();
     }
 
+    /**
+     * Cache Header Actions
+     *
+     * @return void
+     */
     protected function cacheHeaderActions(): void
     {
         $actions = $this->headerActions();
@@ -49,6 +63,11 @@ trait InteractsWithHeaderActions
         return $this->cachedHeaderActions;
     }
 
+    /**
+     * Header Actions
+     *
+     * @return array
+     */
     protected function headerActions(): array
     {
         return [];

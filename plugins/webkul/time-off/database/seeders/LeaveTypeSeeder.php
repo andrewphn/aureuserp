@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Leave Type Seeder database seeder
+ *
+ */
 class LeaveTypeSeeder extends Seeder
 {
     /**

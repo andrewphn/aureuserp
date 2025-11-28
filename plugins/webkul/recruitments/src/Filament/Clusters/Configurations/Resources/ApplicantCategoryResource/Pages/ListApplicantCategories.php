@@ -11,6 +11,11 @@ use Webkul\Recruitment\Models\ApplicantCategory;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Applicant Categories class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListApplicantCategories extends ListRecords
 {
     use HasTableViews;

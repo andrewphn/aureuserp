@@ -10,6 +10,11 @@ use Illuminate\Support\Carbon;
 use Webkul\Employee\Models\EmployeeJobPosition;
 use Webkul\Recruitment\Models\Applicant;
 
+/**
+ * Job Position Stats Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class JobPositionStatsWidget extends BaseWidget
 {
     use HasWidgetShield, InteractsWithPageFilters;
@@ -71,6 +76,15 @@ class JobPositionStatsWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Calculate Period Stats
+     *
+     * @param mixed $query The search query
+     * @param mixed $applicantQuery
+     * @param mixed $startDate
+     * @param mixed $endDate
+     * @return array
+     */
     protected function calculatePeriodStats($query, $applicantQuery, $startDate, $endDate): array
     {
         $jobStats = $query->whereBetween('created_at', [$startDate, $endDate])
@@ -95,6 +109,14 @@ class JobPositionStatsWidget extends BaseWidget
         ];
     }
 
+    /**
+     * Generate Chart Data
+     *
+     * @param mixed $query The search query
+     * @param mixed $startDate
+     * @param mixed $endDate
+     * @return array
+     */
     protected function generateChartData($query, $startDate, $endDate): array
     {
         $data = [];
@@ -109,6 +131,13 @@ class JobPositionStatsWidget extends BaseWidget
         return $data;
     }
 
+    /**
+     * Calculate Percentage Change
+     *
+     * @param mixed $current
+     * @param mixed $previous
+     * @return array
+     */
     protected function calculatePercentageChange($current, $previous): array
     {
         if ($previous == 0) {

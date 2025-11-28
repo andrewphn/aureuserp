@@ -5,6 +5,10 @@ namespace Webkul\Field\Traits;
 use Exception;
 use Webkul\Field\Models\Field;
 
+/**
+ * Has Custom Fields trait
+ *
+ */
 trait HasCustomFields
 {
     protected static mixed $customFillable;

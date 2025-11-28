@@ -11,6 +11,11 @@ use Webkul\Inventory\Enums\ScrapState;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ScrapResource;
 use Webkul\Inventory\Models\Scrap;
 
+/**
+ * View Scrap class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewScrap extends ViewRecord
 {
     protected static string $resource = ScrapResource::class;

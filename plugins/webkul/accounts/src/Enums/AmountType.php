@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Amount Type enumeration
+ *
+ */
 enum AmountType: string implements HasLabel
 {
     case FIXED = 'fixed';
@@ -27,6 +31,11 @@ enum AmountType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

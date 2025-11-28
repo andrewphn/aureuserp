@@ -5,6 +5,10 @@ namespace Webkul\Inventory\Enums;
 use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Reception Step enumeration
+ *
+ */
 enum ReceptionStep: string implements HasDescription, HasLabel
 {
     case ONE_STEP = 'one_step';

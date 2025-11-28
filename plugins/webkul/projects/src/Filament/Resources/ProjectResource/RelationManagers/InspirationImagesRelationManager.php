@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Inspiration Images Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class InspirationImagesRelationManager extends RelationManager
 {
     protected static string $relationship = 'inspirationImages';
@@ -20,6 +25,12 @@ class InspirationImagesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'file_name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -60,6 +71,12 @@ class InspirationImagesRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Skill Level Seeder database seeder
+ *
+ */
 class SkillLevelSeeder extends Seeder
 {
     /**

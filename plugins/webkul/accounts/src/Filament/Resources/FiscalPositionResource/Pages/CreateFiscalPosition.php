@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Filament\Resources\FiscalPositionResource;
 
+/**
+ * Create Fiscal Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateFiscalPosition extends CreateRecord
 {
     protected static string $resource = FiscalPositionResource::class;
@@ -24,6 +29,12 @@ class CreateFiscalPosition extends CreateRecord
             ->body(__('accounts::filament/resources/fiscal-position/pages/create-fiscal-position.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = Auth::user();

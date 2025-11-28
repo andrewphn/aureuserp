@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RuleResource;
 
+/**
+ * Edit Rule class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditRule extends EditRecord
 {
     protected static string $resource = RuleResource::class;

@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Filament\Support\get_model_label;
 
+/**
+ * Interacts With Record trait
+ *
+ */
 trait InteractsWithRecord
 {
     public Model|string|null $model = null;
@@ -18,6 +22,12 @@ trait InteractsWithRecord
 
     protected static ?string $recordRouteKeyName = null;
 
+    /**
+     * Resolve Record
+     *
+     * @param int|string $key
+     * @return Model
+     */
     protected function resolveRecord(int|string $key): Model
     {
         $record = $this->resolveRecordRouteBinding($key);
@@ -44,6 +54,11 @@ trait InteractsWithRecord
         return null;
     }
 
+    /**
+     * Has Record
+     *
+     * @return bool
+     */
     public function hasRecord(): bool
     {
         return filled($this->getRecord());
@@ -64,6 +79,12 @@ trait InteractsWithRecord
         return null;
     }
 
+    /**
+     * Resolve Record Route Binding
+     *
+     * @param int|string $key
+     * @return ?Model
+     */
     public function resolveRecordRouteBinding(int|string $key): ?Model
     {
         return app($this->getModel())

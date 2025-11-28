@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\PackageTypeResource;
 
+/**
+ * Create Package Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePackageType extends CreateRecord
 {
     protected static string $resource = PackageTypeResource::class;
@@ -24,6 +29,12 @@ class CreatePackageType extends CreateRecord
             ->body(__('inventories::filament/clusters/configurations/resources/package-type/pages/create-package-type.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

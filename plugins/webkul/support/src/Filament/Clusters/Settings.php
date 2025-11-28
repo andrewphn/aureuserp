@@ -4,6 +4,11 @@ namespace Webkul\Support\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
+/**
+ * Settings class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Settings extends Cluster
 {
     protected static ?int $navigationSort = 1000;

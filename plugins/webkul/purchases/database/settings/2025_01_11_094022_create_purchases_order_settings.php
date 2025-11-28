@@ -2,8 +2,17 @@
 
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-return new class extends SettingsMigration
+return new /**
+ * extends class
+ *
+ */
+class extends SettingsMigration
 {
+    /**
+     * Up
+     *
+     * @return void
+     */
     public function up(): void
     {
         $this->migrator->add('purchases_order.enable_order_approval', false);
@@ -12,6 +21,11 @@ return new class extends SettingsMigration
         $this->migrator->add('purchases_order.enable_purchase_agreements', false);
     }
 
+    /**
+     * Down
+     *
+     * @return void
+     */
     public function down(): void
     {
         $this->migrator->deleteIfExists('purchases_order.enable_order_approval');

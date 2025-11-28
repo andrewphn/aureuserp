@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Product\Filament\Resources\AttributeResource;
 
+/**
+ * Edit Attribute class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditAttribute extends EditRecord
 {
     protected static string $resource = AttributeResource::class;

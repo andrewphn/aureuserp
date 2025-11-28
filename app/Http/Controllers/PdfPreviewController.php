@@ -7,10 +7,19 @@ use App\Services\NutrientPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Pdf Preview Controller controller
+ *
+ */
 class PdfPreviewController extends Controller
 {
     protected $nutrientService;
 
+    /**
+     * Create a new PdfPreviewController instance
+     *
+     * @param NutrientPdfService $nutrientService
+     */
     public function __construct(NutrientPdfService $nutrientService)
     {
         $this->nutrientService = $nutrientService;
@@ -23,6 +32,13 @@ class PdfPreviewController extends Controller
      * @param int $pdfId
      * @param int $pageNumber
      * @return \Illuminate\Http\Response
+     */
+    /**
+     * Render Page
+     *
+     * @param Request $request The incoming request
+     * @param int $pdfId
+     * @param int $pageNumber
      */
     public function renderPage(Request $request, int $pdfId, int $pageNumber)
     {
@@ -55,6 +71,13 @@ class PdfPreviewController extends Controller
      * @param int $pdfId
      * @param int $pageNumber
      * @return \Illuminate\Http\Response
+     */
+    /**
+     * Render Page Base64
+     *
+     * @param Request $request The incoming request
+     * @param int $pdfId
+     * @param int $pageNumber
      */
     public function renderPageBase64(Request $request, int $pdfId, int $pageNumber)
     {

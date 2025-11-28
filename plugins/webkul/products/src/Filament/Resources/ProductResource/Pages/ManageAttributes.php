@@ -21,6 +21,11 @@ use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\Product\Filament\Resources\ProductResource\Actions\GenerateVariantsAction;
 use Webkul\Product\Models\ProductAttribute;
 
+/**
+ * Manage Attributes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageAttributes extends ManageRelatedRecords
 {
     protected static string $resource = ProductResource::class;
@@ -39,6 +44,12 @@ class ManageAttributes extends ManageRelatedRecords
         return __('products::filament/resources/product/pages/manage-attributes.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -79,6 +90,12 @@ class ManageAttributes extends ManageRelatedRecords
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -136,6 +153,12 @@ class ManageAttributes extends ManageRelatedRecords
             ->paginated(false);
     }
 
+    /**
+     * Update Or Create Variants
+     *
+     * @param ProductAttribute $record The model record
+     * @return void
+     */
     protected function updateOrCreateVariants(ProductAttribute $record): void
     {
         $record->values->each(function ($value) use ($record) {

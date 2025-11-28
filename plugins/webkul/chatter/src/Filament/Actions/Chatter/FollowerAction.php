@@ -13,6 +13,11 @@ use Webkul\Chatter\Mail\FollowerMail;
 use Webkul\Partner\Models\Partner;
 use Webkul\Support\Services\EmailService;
 
+/**
+ * Follower Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class FollowerAction extends Action
 {
     protected string $mailView = 'chatter::mail.follower-mail';
@@ -24,6 +29,12 @@ class FollowerAction extends Action
         return 'add.followers.action';
     }
 
+    /**
+     * Set Resource
+     *
+     * @param string $resource
+     * @return self
+     */
     public function setResource(string $resource): self
     {
         $this->resource = $resource;
@@ -31,6 +42,12 @@ class FollowerAction extends Action
         return $this;
     }
 
+    /**
+     * Set Follower Mail View
+     *
+     * @param ?string $mailView
+     * @return self
+     */
     public function setFollowerMailView(?string $mailView): self
     {
         $mailView = $this->evaluate($mailView);
@@ -175,6 +192,14 @@ class FollowerAction extends Action
             );
     }
 
+    /**
+     * Notify Follower
+     *
+     * @param Model $record The model record
+     * @param Partner $partner
+     * @param array $data The data array
+     * @return void
+     */
     private function notifyFollower(Model $record, Partner $partner, array $data): void
     {
         app(EmailService::class)->send(
@@ -184,11 +209,25 @@ class FollowerAction extends Action
         );
     }
 
+    /**
+     * Prepare Resource Url
+     *
+     * @param mixed $record The model record
+     * @return string
+     */
     private function prepareResourceUrl(mixed $record): string
     {
         return $this->getResource()::getUrl('view', ['record' => $record]);
     }
 
+    /**
+     * Prepare Payload
+     *
+     * @param Model $record The model record
+     * @param Partner $partner
+     * @param mixed $data The data array
+     * @return array
+     */
     public function preparePayload(Model $record, Partner $partner, $data): array
     {
         return [

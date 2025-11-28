@@ -5,6 +5,11 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources\Activity
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityTypeResource;
 use Webkul\Support\Filament\Resources\ActivityTypeResource\Pages\ListActivityTypes as BaseListActivityTypes;
 
+/**
+ * List Activity Types class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListActivityTypes extends BaseListActivityTypes
 {
     protected static string $resource = ActivityTypeResource::class;

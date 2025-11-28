@@ -10,6 +10,11 @@ use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResour
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Activity Plans class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListActivityPlans extends ListRecords
 {
     use HasTableViews;

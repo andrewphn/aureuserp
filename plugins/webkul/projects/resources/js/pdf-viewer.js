@@ -3,7 +3,14 @@
  * Vite bundle entry for PDF annotation viewer
  */
 
+import * as pdfjsLib from 'pdfjs-dist';
 import { createPdfViewerComponent } from './components/pdf-viewer/pdf-viewer-core.js';
+
+// Configure PDF.js worker path
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdf.worker.min.js';
+
+// Export PDF.js globally for component use
+window.pdfjsLib = pdfjsLib;
 import * as AnnotationManager from './components/pdf-viewer/managers/annotation-manager.js';
 import * as TreeManager from './components/pdf-viewer/managers/tree-manager.js';
 import * as CoordTransform from './components/pdf-viewer/managers/coordinate-transform.js';

@@ -4,8 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
+    /**
+     * Up
+     *
+     */
     public function up()
     {
         Schema::create('settings', function (Blueprint $table): void {

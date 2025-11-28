@@ -9,6 +9,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Unlock Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class UnlockAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -6,6 +6,11 @@ use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
 
+/**
+ * View Job Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewJobPosition extends ViewRecord
 {
     protected static string $resource = JobPositionResource::class;

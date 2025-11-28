@@ -12,6 +12,11 @@ use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Page
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\CreditNotesResource\Pages\ViewCreditNote;
 use Webkul\Invoice\Models\CreditNote;
 
+/**
+ * Credit Notes Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreditNotesResource extends BaseCreditNoteResource
 {
     protected static ?string $model = CreditNote::class;
@@ -39,6 +44,12 @@ class CreditNotesResource extends BaseCreditNoteResource
         return __('invoices::filament/clusters/customers/resources/credit-note.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

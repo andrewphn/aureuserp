@@ -11,6 +11,11 @@ use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * File Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class FileAction extends Action
 {
     public static function getDefaultName(): ?string

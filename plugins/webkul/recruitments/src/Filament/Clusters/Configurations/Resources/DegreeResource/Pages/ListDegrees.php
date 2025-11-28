@@ -10,6 +10,11 @@ use Webkul\Recruitment\Models\Degree;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Degrees class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListDegrees extends ListRecords
 {
     use HasTableViews;

@@ -6,6 +6,11 @@ use Webkul\Contact\Filament\Clusters\Configurations;
 use Webkul\Contact\Filament\Clusters\Configurations\Resources\BankResource\Pages\ManageBanks;
 use Webkul\Partner\Filament\Resources\BankResource as BaseBankResource;
 
+/**
+ * Bank Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BankResource extends BaseBankResource
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-library';

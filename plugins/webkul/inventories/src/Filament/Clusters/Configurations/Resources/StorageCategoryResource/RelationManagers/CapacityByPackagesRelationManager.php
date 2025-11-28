@@ -17,20 +17,45 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Settings\OperationSettings;
 
+/**
+ * Capacity By Packages Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CapacityByPackagesRelationManager extends RelationManager
 {
     protected static string $relationship = 'storageCategoryCapacitiesByPackageType';
 
+    /**
+     * Can View For Record
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return bool
+     */
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return app(OperationSettings::class)->enable_packages;
     }
 
+    /**
+     * Get Title
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return string
+     */
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-packages.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -57,6 +82,12 @@ class CapacityByPackagesRelationManager extends RelationManager
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

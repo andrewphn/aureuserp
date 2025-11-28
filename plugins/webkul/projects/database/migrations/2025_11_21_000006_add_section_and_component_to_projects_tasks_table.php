@@ -1,0 +1,93 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * Extends tasks table to support the complete 7-level cabinet hierarchy:
+     * Project → Room → Room Location → Cabinet Run → Cabinet → Section → Component
+     *
+     * Tasks can now be assigned to:
+     * - Entire projects (e.g., "Design review")
+     * - Specific rooms (e.g., "Kitchen inspection")
+     * - Room locations (e.g., "Install island outlets")
+     * - Cabinet runs (e.g., "Cut all bases for north wall")
+     * - Individual cabinets (e.g., "Assemble B36")
+     * - Cabinet sections (e.g., "Install drawer stack in upper section")
+     * - Individual components (e.g., "CNC cut door D1", "Install drawer slide DR2")
+     *
+     * Meeting Reference: Task assignment should work at any level of the hierarchy
+     */
+    public function up(): void
+    {
+        Schema::table('projects_tasks', function (Blueprint $table) {
+            // ========================================
+            // SECTION ASSIGNMENT
+            // ========================================
+
+            $table->foreignId('section_id')
+                ->nullable()
+                ->after('cabinet_specification_id')
+                ->constrained('projects_cabinet_sections')
+                ->onDelete('set null')
+                ->comment('Assigned to specific cabinet section (drawer stack, door opening, etc.)');
+
+            // ========================================
+            // COMPONENT ASSIGNMENT (Polymorphic)
+            // ========================================
+
+            $table->string('component_type', 50)
+                ->nullable()
+                ->after('section_id')
+                ->comment('Component type: door, drawer, shelf, pullout');
+
+            $table->unsignedBigInteger('component_id')
+                ->nullable()
+                ->after('component_type')
+                ->comment('Assigned to specific component ID (polymorphic)');
+
+            // ========================================
+            // INDEXES FOR HIERARCHY QUERIES
+            // ========================================
+
+            // Section-level task queries
+            $table->index('section_id', 'idx_tasks_section');
+
+            // Component-level task queries (polymorphic)
+            $table->index(['component_type', 'component_id'], 'idx_tasks_component');
+
+            // Combined hierarchy queries (find all tasks for a cabinet including sections/components)
+            $table->index(['cabinet_specification_id', 'section_id'], 'idx_tasks_cabinet_section');
+            $table->index(['cabinet_specification_id', 'component_id'], 'idx_tasks_cabinet_component');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('projects_tasks', function (Blueprint $table) {
+            // Drop indexes first
+            $table->dropIndex('idx_tasks_section');
+            $table->dropIndex('idx_tasks_component');
+            $table->dropIndex('idx_tasks_cabinet_section');
+            $table->dropIndex('idx_tasks_cabinet_component');
+
+            // Drop foreign key
+            $table->dropForeign(['section_id']);
+
+            // Drop columns
+            $table->dropColumn(['section_id', 'component_type', 'component_id']);
+        });
+    }
+};

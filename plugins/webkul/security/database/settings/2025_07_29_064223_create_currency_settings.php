@@ -3,7 +3,11 @@
 use Illuminate\Support\Facades\Schema;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-return new class extends SettingsMigration
+return new /**
+ * extends class
+ *
+ */
+class extends SettingsMigration
 {
     /**
      * Run the migrations.

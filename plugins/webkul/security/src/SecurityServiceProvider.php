@@ -5,12 +5,22 @@ namespace Webkul\Security;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Security Service Provider service provider
+ *
+ */
 class SecurityServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'security';
 
     public static string $viewNamespace = 'security';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -35,6 +45,11 @@ class SecurityServiceProvider extends PackageServiceProvider
             ->runsSettings();
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         $this->app->singleton(PermissionRegistrar::class);

@@ -17,6 +17,57 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UTMMedium;
 use Webkul\Support\Models\UTMSource;
 
+/**
+ * Applicant Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $source_id
+ * @property int $medium_id
+ * @property int $candidate_id
+ * @property int $stage_id
+ * @property int $last_stage_id
+ * @property int $company_id
+ * @property int $recruiter_id
+ * @property int $job_id
+ * @property int $department_id
+ * @property int $refuse_reason_id
+ * @property string|null $state
+ * @property int $creator_id
+ * @property string|null $email_cc
+ * @property string|null $priority
+ * @property string|null $salary_proposed_extra
+ * @property string|null $salary_expected_extra
+ * @property array $applicant_properties
+ * @property string|null $applicant_notes
+ * @property bool $is_active
+ * @property \Carbon\Carbon|null $create_date
+ * @property \Carbon\Carbon|null $date_closed
+ * @property \Carbon\Carbon|null $date_opened
+ * @property \Carbon\Carbon|null $date_last_stage_updated
+ * @property \Carbon\Carbon|null $refuse_date
+ * @property float $probability
+ * @property float $salary_proposed
+ * @property float $salary_expected
+ * @property float $delay_close
+ * @property-read \Illuminate\Database\Eloquent\Model|null $source
+ * @property-read \Illuminate\Database\Eloquent\Model|null $medium
+ * @property-read \Illuminate\Database\Eloquent\Model|null $candidate
+ * @property-read \Illuminate\Database\Eloquent\Model|null $stage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $lastStage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $recruiter
+ * @property-read \Illuminate\Database\Eloquent\Model|null $job
+ * @property-read \Illuminate\Database\Eloquent\Model|null $department
+ * @property-read \Illuminate\Database\Eloquent\Model|null $refuseReason
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Collection $interviewer
+ * @property-read \Illuminate\Database\Eloquent\Collection $categories
+ * @property-read \Illuminate\Database\Eloquent\Collection $skills
+ *
+ */
 class Applicant extends Model
 {
     use HasApplicationStatus, HasChatter, HasLogActivity, SoftDeletes;
@@ -72,21 +123,41 @@ class Applicant extends Model
         'application_status',
     ];
 
+    /**
+     * Source
+     *
+     * @return BelongsTo
+     */
     public function source(): BelongsTo
     {
         return $this->belongsTo(UTMSource::class);
     }
 
+    /**
+     * Medium
+     *
+     * @return BelongsTo
+     */
     public function medium(): BelongsTo
     {
         return $this->belongsTo(UTMMedium::class);
     }
 
+    /**
+     * Candidate
+     *
+     * @return BelongsTo
+     */
     public function candidate(): BelongsTo
     {
         return $this->belongsTo(Candidate::class);
     }
 
+    /**
+     * Skills
+     *
+     * @return HasManyThrough
+     */
     public function skills(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -99,16 +170,31 @@ class Applicant extends Model
         );
     }
 
+    /**
+     * Stage
+     *
+     * @return BelongsTo
+     */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(Stage::class);
     }
 
+    /**
+     * Last Stage
+     *
+     * @return BelongsTo
+     */
     public function lastStage(): BelongsTo
     {
         return $this->belongsTo(Stage::class, 'last_stage_id');
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -119,31 +205,61 @@ class Applicant extends Model
         return $this->belongsTo(User::class, 'recruiter_id');
     }
 
+    /**
+     * Interviewer
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function interviewer()
     {
         return $this->belongsToMany(User::class, 'recruitments_applicant_interviewers', 'applicant_id', 'interviewer_id');
     }
 
+    /**
+     * Categories
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function categories()
     {
         return $this->belongsToMany(ApplicantCategory::class, 'recruitments_applicant_applicant_categories', 'applicant_id', 'category_id');
     }
 
+    /**
+     * Job
+     *
+     * @return BelongsTo
+     */
     public function job(): BelongsTo
     {
         return $this->belongsTo(JobPosition::class, 'job_id');
     }
 
+    /**
+     * Department
+     *
+     * @return BelongsTo
+     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * Refuse Reason
+     *
+     * @return BelongsTo
+     */
     public function refuseReason(): BelongsTo
     {
         return $this->belongsTo(RefuseReason::class);
     }
 
+    /**
+     * Created By
+     *
+     * @return BelongsTo
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -159,6 +275,12 @@ class Applicant extends Model
         return $this->updateStatus(ApplicationStatus::HIRED->value);
     }
 
+    /**
+     * Set As Refused
+     *
+     * @param int $refuseReasonId
+     * @return bool
+     */
     public function setAsRefused(int $refuseReasonId): bool
     {
         return $this->updateStatus(ApplicationStatus::REFUSED->value, [
@@ -171,11 +293,22 @@ class Applicant extends Model
         return $this->updateStatus(ApplicationStatus::ARCHIVED->value);
     }
 
+    /**
+     * Reopen
+     *
+     * @return bool
+     */
     public function reopen(): bool
     {
         return $this->updateStatus(ApplicationStatus::ONGOING->value);
     }
 
+    /**
+     * Update Stage
+     *
+     * @param array $data The data array
+     * @return bool
+     */
     public function updateStage(array $data): bool
     {
         return $this->update($data);
@@ -194,6 +327,11 @@ class Applicant extends Model
         }
     }
 
+    /**
+     * Create Employee
+     *
+     * @return ?Employee
+     */
     public function createEmployee(): ?Employee
     {
         if (! $this->candidate?->partner_id) {

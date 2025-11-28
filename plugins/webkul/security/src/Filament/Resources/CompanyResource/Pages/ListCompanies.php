@@ -9,6 +9,11 @@ use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Support\Models\Company;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Companies class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListCompanies extends ListRecords
 {
     use HasTableViews;

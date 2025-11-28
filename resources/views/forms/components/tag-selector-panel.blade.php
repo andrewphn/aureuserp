@@ -1,411 +1,511 @@
+@php
+    use Webkul\Project\Models\Tag;
+    use Illuminate\Support\Facades\Cache;
+
+    // $field is the component instance in Filament blade views
+    // Get all tags grouped by type
+    $allTags = Tag::all()->groupBy('type');
+
+    // Get most used tags
+    $mostUsedTags = $field->getMostUsedTags(5);
+
+    // Type labels with emojis
+    $typeLabels = $field->getTypeLabels();
+
+    // Category groups for browse popover
+    $categoryGroups = $field->getCategoryGroups();
+
+    // Prepare all tags as JSON for Alpine.js search
+    $allTagsJson = $field->getAllTagsJson();
+
+    // Prepare most used tags as JSON
+    $mostUsedTagsJson = $field->getMostUsedTagsJson(5);
+
+    // Calculate tag counts per category
+    $categoryCounts = [];
+    foreach ($categoryGroups as $catKey => $catInfo) {
+        $count = 0;
+        foreach ($catInfo['types'] as $type) {
+            $count += $allTags->get($type, collect())->count();
+        }
+        $categoryCounts[$catKey] = $count;
+    }
+@endphp
+
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     <div
         x-data="{
-            state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$getStatePath()}')") }} || [],
+            // State
+            isDropdownOpen: false,
+            isBrowseOpen: false,
             searchQuery: '',
-            expandedSections: {},
-            viewMode: localStorage.getItem('tagSelectorViewMode') || 'accordion',
+            highlightedIndex: 0,
+            filteredTags: [],
+
+            // Data from PHP
+            allTags: {{ Js::from(json_decode($allTagsJson, true)) }},
+            mostUsedTags: {{ Js::from(json_decode($mostUsedTagsJson, true)) }},
+            typeLabels: {{ Js::from($typeLabels) }},
+            categoryGroups: {{ Js::from($categoryGroups) }},
+
+            // Browse state
+            selectedCategory: 'general',
             selectedType: null,
-            selectedTag: null,
 
+            init() {
+                if (!Array.isArray($wire.{{ $getStatePath() }})) {
+                    $wire.{{ $getStatePath() }} = [];
+                }
+
+                // Close dropdown when clicking outside
+                this.$watch('isDropdownOpen', value => {
+                    if (value) {
+                        this.highlightedIndex = 0;
+                    }
+                });
+            },
+
+            // Get current selection
+            getState() {
+                return $wire.{{ $getStatePath() }} || [];
+            },
+
+            // Get selected tag objects
+            getSelectedTags() {
+                const selectedIds = this.getState();
+                return this.allTags.filter(tag => selectedIds.includes(tag.id));
+            },
+
+            // Toggle tag selection
             toggleTag(tagId) {
-                // Ensure state is always an array
-                if (!Array.isArray(this.state)) {
-                    this.state = [];
-                }
-
-                if (this.state.includes(tagId)) {
-                    this.state = this.state.filter(id => id !== tagId)
+                const state = this.getState();
+                if (state.includes(tagId)) {
+                    $wire.{{ $getStatePath() }} = state.filter(id => id !== tagId);
                 } else {
-                    this.state = [...this.state, tagId]
+                    $wire.{{ $getStatePath() }} = [...state, tagId];
+                }
+                // Clear search after selection
+                this.searchQuery = '';
+                this.isDropdownOpen = false;
+            },
+
+            // Check if tag is selected
+            isSelected(tagId) {
+                return this.getState().includes(tagId);
+            },
+
+            // Remove a specific tag
+            removeTag(tagId) {
+                $wire.{{ $getStatePath() }} = this.getState().filter(id => id !== tagId);
+            },
+
+            // Clear all tags
+            clearAll() {
+                $wire.{{ $getStatePath() }} = [];
+            },
+
+            // Search/filter tags
+            search(query) {
+                this.searchQuery = query;
+                if (query.trim() === '') {
+                    this.filteredTags = [];
+                    return;
+                }
+
+                const q = query.toLowerCase();
+                this.filteredTags = this.allTags
+                    .filter(tag =>
+                        tag.name.toLowerCase().includes(q) ||
+                        (tag.type && tag.type.toLowerCase().includes(q)) ||
+                        (tag.description && tag.description.toLowerCase().includes(q))
+                    )
+                    .slice(0, 10);
+
+                // Sort by relevance (starts with > contains)
+                this.filteredTags.sort((a, b) => {
+                    const aStarts = a.name.toLowerCase().startsWith(q);
+                    const bStarts = b.name.toLowerCase().startsWith(q);
+                    if (aStarts && !bStarts) return -1;
+                    if (!aStarts && bStarts) return 1;
+                    return 0;
+                });
+
+                this.highlightedIndex = 0;
+            },
+
+            // Get tags to display in dropdown
+            getDropdownTags() {
+                if (this.searchQuery.trim() !== '') {
+                    return this.filteredTags;
+                }
+                return this.mostUsedTags;
+            },
+
+            // Handle input focus
+            handleFocus() {
+                this.isDropdownOpen = true;
+            },
+
+            // Handle input blur (with delay to allow click)
+            handleBlur() {
+                setTimeout(() => {
+                    if (!this.isBrowseOpen) {
+                        this.isDropdownOpen = false;
+                    }
+                }, 200);
+            },
+
+            // Keyboard navigation
+            handleKeydown(event) {
+                const tags = this.getDropdownTags();
+
+                switch(event.key) {
+                    case '/':
+                        if (this.searchQuery === '') {
+                            event.preventDefault();
+                            this.openBrowse();
+                        }
+                        break;
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        if (!this.isDropdownOpen) {
+                            this.isDropdownOpen = true;
+                        } else {
+                            this.highlightedIndex = Math.min(this.highlightedIndex + 1, tags.length - 1);
+                        }
+                        break;
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                        break;
+                    case 'Enter':
+                        event.preventDefault();
+                        if (this.isDropdownOpen && tags[this.highlightedIndex]) {
+                            this.toggleTag(tags[this.highlightedIndex].id);
+                        }
+                        break;
+                    case 'Tab':
+                        if (this.isDropdownOpen && tags[this.highlightedIndex]) {
+                            event.preventDefault();
+                            this.toggleTag(tags[this.highlightedIndex].id);
+                        }
+                        break;
+                    case 'Escape':
+                        this.isDropdownOpen = false;
+                        this.isBrowseOpen = false;
+                        break;
+                    case 'Backspace':
+                        if (this.searchQuery === '' && this.getState().length > 0) {
+                            // Remove last tag
+                            const state = this.getState();
+                            $wire.{{ $getStatePath() }} = state.slice(0, -1);
+                        }
+                        break;
                 }
             },
 
-            toggleSection(type) {
-                this.expandedSections[type] = !this.expandedSections[type]
+            // Open browse popover
+            openBrowse() {
+                this.isBrowseOpen = true;
+                this.isDropdownOpen = false;
+                this.selectedCategory = 'general';
+                this.selectedType = null;
             },
 
-            toggleViewMode() {
-                this.viewMode = this.viewMode === 'accordion' ? 'columns' : 'accordion';
-                localStorage.setItem('tagSelectorViewMode', this.viewMode);
+            // Close browse popover
+            closeBrowse() {
+                this.isBrowseOpen = false;
             },
 
-            filteredTags(tags) {
-                if (!this.searchQuery) return tags;
-                const query = this.searchQuery.toLowerCase();
-                return tags.filter(tag =>
-                    tag.name.toLowerCase().includes(query) ||
-                    (tag.type && tag.type.toLowerCase().includes(query))
-                );
+            // Select category in browse
+            selectCategory(category) {
+                this.selectedCategory = category;
+                this.selectedType = null;
             },
 
-            hasSearchResults(tags) {
-                if (!this.searchQuery) return false;
-                return this.filteredTags(tags).length > 0;
-            },
-
-            getTagName(tagId) {
-                @foreach($getTagsByType() as $type => $tags)
-                    @foreach($tags as $tag)
-                        if (tagId === {{ $tag['id'] }}) return {{ \Illuminate\Support\Js::from($tag['name']) }};
-                    @endforeach
-                @endforeach
-                return 'Tag #' + tagId;
-            },
-
-            // Columns view functions
+            // Select type in browse
             selectType(type) {
                 this.selectedType = type;
-                this.selectedTag = null;
             },
 
-            selectTagForPreview(tag) {
-                this.selectedTag = tag;
-            },
-
-            getTypeData() {
-                return @json($getTagsByType());
-            },
-
-            getTypeInfo(type) {
-                const labels = @json($getTypeLabels());
-                return labels[type] || { label: type, icon: '📌' };
-            },
-
-            getTagsForSelectedType() {
+            // Get tags for current browse view
+            getBrowseTags() {
                 if (!this.selectedType) return [];
-                const typeData = this.getTypeData();
-                return typeData[this.selectedType] || [];
+                return this.allTags.filter(tag => tag.type === this.selectedType);
             },
 
-            getTagCount(type) {
-                const typeData = this.getTypeData();
-                return (typeData[type] || []).length;
+            // Get types for current category
+            getCategoryTypes() {
+                if (!this.selectedCategory) return [];
+                const category = this.categoryGroups[this.selectedCategory];
+                if (!category) return [];
+                return category.types.map(type => ({
+                    key: type,
+                    ...this.typeLabels[type] || { label: type, icon: '📌' },
+                    count: this.allTags.filter(t => t.type === type).length
+                }));
             }
         }"
+        class="relative"
+        @keydown.escape.window="isBrowseOpen = false"
     >
-        <!-- Search Bar and View Switcher -->
-        <div class="mb-3 flex gap-2">
-            <input
-                type="text"
-                x-model="searchQuery"
-                placeholder="🔍 Search tags..."
-                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
-            >
-            <button
-                type="button"
-                @click="toggleViewMode()"
-                class="px-3 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:hover:bg-gray-800 transition-colors"
-                :title="viewMode === 'accordion' ? 'Switch to Columns View' : 'Switch to Accordion View'"
-            >
-                <svg x-show="viewMode === 'accordion'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
-                <svg x-show="viewMode === 'columns'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Selected Tags -->
-        <div x-show="state && state.length > 0" class="mb-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
-            <div class="flex flex-wrap gap-1">
-                <template x-for="tagId in (state || [])" :key="tagId">
-                    <button
-                        type="button"
-                        @click="toggleTag(tagId)"
-                        class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-md hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-200 dark:hover:bg-primary-800 transition-colors"
+        {{-- Selected Tags (Above Input) --}}
+        <div x-show="getState().length > 0" class="mb-2">
+            <div class="flex flex-wrap items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                <template x-for="tag in getSelectedTags()" :key="tag.id">
+                    <span
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                        :style="`background-color: ${tag.color || '#6B7280'}20; color: ${tag.color || '#6B7280'}; border: 1px solid ${tag.color || '#6B7280'}40;`"
                     >
-                        <span x-text="getTagName(tagId)"></span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+                        <span
+                            x-show="tag.color"
+                            class="w-2 h-2 rounded-full"
+                            :style="`background-color: ${tag.color}`"
+                        ></span>
+                        <span x-text="tag.name"></span>
+                        <button
+                            type="button"
+                            @click="removeTag(tag.id)"
+                            class="ml-0.5 hover:opacity-70 focus:outline-none"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </span>
                 </template>
+
+                {{-- Clear All Button --}}
+                <button
+                    type="button"
+                    @click="clearAll()"
+                    class="text-xs text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                >
+                    × Clear All
+                </button>
             </div>
         </div>
 
-        <!-- Helper text -->
-        <div class="mb-3 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between" x-show="!searchQuery">
-            <p>💡 Browse by category below, or search to filter tags</p>
-            <span class="text-xs font-medium" x-text="viewMode === 'accordion' ? 'Accordion View' : 'Columns View'"></span>
-        </div>
-
-        <!-- Tags by Category - Accordion View -->
-        <div x-show="viewMode === 'accordion'" class="space-y-2 max-h-96 overflow-y-auto">
-            @foreach($getTagsByType() as $type => $tags)
-                @php
-                    $typeInfo = $getTypeLabels()[$type] ?? ['label' => $type, 'icon' => '📌'];
-                @endphp
-
-                @php
-                    $tagsJson = json_encode($tags);
-                @endphp
-
-                <div
-                    x-data="{
-                        open: false,
-                        init() {
-                            // Watch for search query changes
-                            this.$watch('searchQuery', value => {
-                                if (value && hasSearchResults({{ $tagsJson }})) {
-                                    this.open = true;
-                                } else if (!value) {
-                                    this.open = false;
-                                }
-                            });
-                        }
-                    }"
-                    x-show="!searchQuery || hasSearchResults({{ $tagsJson }})"
+        {{-- Search Input --}}
+        <div class="relative">
+            <div class="relative flex items-center">
+                <span class="absolute left-3 text-gray-400 pointer-events-none">
+                    🏷️
+                </span>
+                <input
+                    type="text"
+                    x-model="searchQuery"
+                    @input="search($event.target.value)"
+                    @focus="handleFocus()"
+                    @blur="handleBlur()"
+                    @keydown="handleKeydown($event)"
+                    placeholder="Search tags..."
+                    class="w-full pl-10 pr-24 py-2.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                />
+                <button
+                    type="button"
+                    @click="openBrowse()"
+                    class="absolute right-2 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                 >
-                    <button
-                        type="button"
-                        @click="open = !open"
-                        x-show="!searchQuery"
-                        class="w-full flex items-center justify-between text-left mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wide dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                    >
-                        <span class="flex items-center gap-2">
-                            <span>{{ $typeInfo['icon'] }} {{ $typeInfo['label'] }}</span>
-                            <span x-show="!open" class="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium bg-gray-200 text-gray-700 rounded dark:bg-gray-700 dark:text-gray-300">
-                                {{ count($tags) }}
-                            </span>
-                        </span>
-                        <svg x-show="!open" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                        <svg x-show="open" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                        </svg>
-                    </button>
+                    Browse <span class="text-gray-400">/</span>
+                </button>
+            </div>
 
-                    <!-- Show category label when searching -->
-                    <div x-show="searchQuery" class="mb-2 text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wide">
-                        {{ $typeInfo['icon'] }} {{ $typeInfo['label'] }}
+            {{-- Hint Text --}}
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                💡 Press <kbd class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded">/</kbd> to browse, or type to search
+            </p>
+
+            {{-- Autocomplete Dropdown --}}
+            <div
+                x-show="isDropdownOpen && !isBrowseOpen"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                @click.outside="isDropdownOpen = false"
+            >
+                {{-- Section Header --}}
+                <div class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <span x-show="searchQuery.trim() === ''" class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        ⭐ Most Used
+                    </span>
+                    <span x-show="searchQuery.trim() !== ''" class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        🔍 Search Results
+                    </span>
+                </div>
+
+                {{-- Tags List --}}
+                <div class="py-1">
+                    <template x-for="(tag, index) in getDropdownTags()" :key="tag.id">
+                        <button
+                            type="button"
+                            @click="toggleTag(tag.id)"
+                            @mouseenter="highlightedIndex = index"
+                            :class="{
+                                'bg-primary-50 dark:bg-primary-900/20': highlightedIndex === index,
+                                'bg-gray-50 dark:bg-gray-700/50': isSelected(tag.id) && highlightedIndex !== index
+                            }"
+                            class="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="w-3 h-3 rounded-full flex-shrink-0"
+                                    :style="`background-color: ${tag.color || '#6B7280'}`"
+                                ></span>
+                                <span class="text-sm text-gray-900 dark:text-white" x-text="tag.name"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500 dark:text-gray-400" x-text="tag.typeLabel"></span>
+                                <svg x-show="isSelected(tag.id)" class="w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </button>
+                    </template>
+
+                    {{-- Empty State --}}
+                    <div
+                        x-show="searchQuery.trim() !== '' && filteredTags.length === 0"
+                        class="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+                    >
+                        No tags found matching "<span x-text="searchQuery"></span>"
                     </div>
 
-                    <div x-show="open || searchQuery" x-collapse>
-                        <div class="flex flex-wrap gap-1 mb-3">
-                            <template x-for="tag in filteredTags({{ $tagsJson }})" :key="tag.id">
+                    <div
+                        x-show="searchQuery.trim() === '' && mostUsedTags.length === 0"
+                        class="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400 italic"
+                    >
+                        No frequently used tags yet
+                    </div>
+                </div>
+            </div>
+
+            {{-- Browse Popover (3-Column) --}}
+            <div
+                x-show="isBrowseOpen"
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden"
+                @click.outside="closeBrowse()"
+            >
+                {{-- Browse Header --}}
+                <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Browse Tags</span>
+                    <button
+                        type="button"
+                        @click="closeBrowse()"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- 3-Column Browser --}}
+                <div class="flex h-72 divide-x divide-gray-200 dark:divide-gray-700">
+                    {{-- Column 1: Categories --}}
+                    <div class="w-1/4 overflow-y-auto">
+                        <div class="py-1">
+                            @foreach($categoryGroups as $catKey => $catInfo)
                                 <button
                                     type="button"
-                                    @click="toggleTag(tag.id)"
+                                    @click="selectCategory('{{ $catKey }}')"
                                     :class="{
-                                        'bg-primary-500 text-white ring-2 ring-primary-500': state && state.includes(tag.id),
-                                        'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700': !state || !state.includes(tag.id)
+                                        'bg-primary-50 dark:bg-primary-900/20 border-l-4 border-l-primary-600': selectedCategory === '{{ $catKey }}',
+                                        'border-l-4 border-l-transparent hover:bg-gray-100 dark:hover:bg-gray-700': selectedCategory !== '{{ $catKey }}'
                                     }"
-                                    class="px-2 py-1 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded-md transition-all"
-                                    :style="tag.color ? 'border-left: 3px solid ' + tag.color : ''"
-                                    :title="tag.description"
-                                    x-text="tag.name"
-                                ></button>
+                                    class="w-full px-3 py-2.5 flex items-center justify-between text-left transition-colors"
+                                >
+                                    <span class="flex items-center gap-2">
+                                        <span class="text-base">{{ $catInfo['icon'] }}</span>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $catInfo['label'] }}</span>
+                                    </span>
+                                    <span class="text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">{{ $categoryCounts[$catKey] }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Column 2: Types --}}
+                    <div class="w-1/3 overflow-y-auto">
+                        <div class="py-1">
+                            <template x-for="typeInfo in getCategoryTypes()" :key="typeInfo.key">
+                                <button
+                                    type="button"
+                                    @click="selectType(typeInfo.key)"
+                                    :class="{
+                                        'bg-primary-50 dark:bg-primary-900/20 border-l-4 border-l-primary-600': selectedType === typeInfo.key,
+                                        'border-l-4 border-l-transparent hover:bg-gray-100 dark:hover:bg-gray-700': selectedType !== typeInfo.key
+                                    }"
+                                    class="w-full px-3 py-2.5 flex items-center justify-between text-left transition-colors"
+                                >
+                                    <span class="flex items-center gap-2">
+                                        <span class="text-base" x-text="typeInfo.icon"></span>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300" x-text="typeInfo.label"></span>
+                                    </span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded" x-text="typeInfo.count"></span>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </div>
+                                </button>
                             </template>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
 
-        <!-- Tags by Category - Columns View (Mac Finder Style) -->
-        <div
-            x-show="viewMode === 'columns'"
-            class="max-h-96 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
-        >
-            <!-- Mac-Style Column Layout -->
-            <div class="flex h-96 overflow-x-auto">
-
-                <!-- Column 1: Tag Types -->
-                <div class="min-w-[200px] w-1/3 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto">
-                    <div class="p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                        <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                            Categories
-                        </div>
-                    </div>
-                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                        @foreach($getTagsByType() as $type => $tags)
-                            @php
-                                $typeInfo = $getTypeLabels()[$type] ?? ['label' => $type, 'icon' => '📌'];
-                            @endphp
-                            <button
-                                type="button"
-                                @click="selectType('{{ $type }}')"
-                                :class="{
-                                    'bg-primary-50 dark:bg-primary-900/20 border-l-2 border-primary-500': selectedType === '{{ $type }}',
-                                    'hover:bg-gray-50 dark:hover:bg-gray-700': selectedType !== '{{ $type }}'
-                                }"
-                                class="w-full px-3 py-2.5 text-left transition-colors"
-                            >
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2 flex-1 min-w-0">
-                                        <span class="text-base">{{ $typeInfo['icon'] }}</span>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                {{ $typeInfo['label'] }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2 ml-2">
-                                        <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded dark:bg-gray-700 dark:text-gray-300">
-                                            {{ count($tags) }}
-                                        </span>
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </div>
+                    {{-- Column 3: Tags --}}
+                    <div class="flex-1 overflow-y-auto">
+                        <template x-if="selectedType">
+                            <div class="p-3">
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="tag in getBrowseTags()" :key="tag.id">
+                                        <button
+                                            type="button"
+                                            @click="toggleTag(tag.id)"
+                                            :class="{
+                                                'ring-2 ring-primary-500 ring-offset-1': isSelected(tag.id),
+                                            }"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105"
+                                            :style="`background-color: ${tag.color || '#6B7280'}20; color: ${tag.color || '#6B7280'}; border: 1px solid ${tag.color || '#6B7280'}40;`"
+                                        >
+                                            <span
+                                                x-show="tag.color"
+                                                class="w-2 h-2 rounded-full"
+                                                :style="`background-color: ${tag.color}`"
+                                            ></span>
+                                            <span x-text="tag.name"></span>
+                                            <svg x-show="isSelected(tag.id)" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                    </template>
                                 </div>
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
+                            </div>
+                        </template>
 
-                <!-- Column 2: Tags in Selected Type -->
-                <div
-                    x-show="selectedType"
-                    class="min-w-[250px] w-1/3 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto"
-                >
-                    <div class="p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                        <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                            <span x-text="selectedType ? getTypeInfo(selectedType).label : 'Tags'"></span>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                        <template x-for="tag in getTagsForSelectedType()" :key="tag.id">
-                            <button
-                                type="button"
-                                @click="toggleTag(tag.id); selectTagForPreview(tag)"
-                                :class="{
-                                    'bg-primary-50 dark:bg-primary-900/20': selectedTag && selectedTag.id === tag.id,
-                                    'bg-primary-100 dark:bg-primary-900/40 ring-2 ring-inset ring-primary-500': state && state.includes(tag.id),
-                                    'hover:bg-gray-50 dark:hover:bg-gray-700': (!selectedTag || selectedTag.id !== tag.id) && (!state || !state.includes(tag.id))
-                                }"
-                                class="w-full px-3 py-2.5 text-left transition-colors relative"
-                            >
-                                <!-- Selection Indicator -->
-                                <div
-                                    x-show="state && state.includes(tag.id)"
-                                    class="absolute left-0 top-0 bottom-0 w-1 bg-primary-500"
-                                ></div>
-
-                                <div class="flex items-start gap-2 pl-2">
-                                    <!-- Color Indicator -->
-                                    <div
-                                        x-show="tag.color"
-                                        class="w-3 h-3 rounded-full mt-0.5 flex-shrink-0"
-                                        :style="tag.color ? 'background-color: ' + tag.color : ''"
-                                    ></div>
-
-                                    <div class="flex-1 min-w-0">
-                                        <div
-                                            class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                            x-text="tag.name"
-                                        ></div>
-                                        <div
-                                            x-show="tag.description"
-                                            class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1"
-                                            x-text="tag.description"
-                                        ></div>
-                                    </div>
-
-                                    <!-- Selected Checkmark -->
-                                    <div
-                                        x-show="state && state.includes(tag.id)"
-                                        class="flex-shrink-0"
-                                    >
-                                        <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </div>
+                        {{-- Empty State --}}
+                        <template x-if="!selectedType">
+                            <div class="flex items-center justify-center h-full text-gray-400 dark:text-gray-500">
+                                <div class="text-center">
+                                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                    </svg>
+                                    <p class="text-sm">Select a type to view tags</p>
                                 </div>
-                            </button>
+                            </div>
                         </template>
                     </div>
                 </div>
-
-                <!-- Column 3: Tag Preview/Details -->
-                <div
-                    x-show="selectedTag"
-                    class="min-w-[250px] w-1/3 bg-gray-50 dark:bg-gray-900 overflow-y-auto"
-                >
-                    <div class="p-4">
-                        <div class="mb-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <div
-                                    x-show="selectedTag && selectedTag.color"
-                                    class="w-4 h-4 rounded-full flex-shrink-0"
-                                    :style="selectedTag && selectedTag.color ? 'background-color: ' + selectedTag.color : ''"
-                                ></div>
-                                <h3
-                                    class="text-base font-semibold text-gray-900 dark:text-gray-100"
-                                    x-text="selectedTag ? selectedTag.name : ''"
-                                ></h3>
-                            </div>
-
-                            <div
-                                x-show="selectedTag && selectedTag.description"
-                                class="text-sm text-gray-600 dark:text-gray-400 mt-2"
-                                x-text="selectedTag ? selectedTag.description : ''"
-                            ></div>
-                        </div>
-
-                        <!-- Tag Actions -->
-                        <div class="space-y-2">
-                            <button
-                                type="button"
-                                @click="selectedTag && toggleTag(selectedTag.id)"
-                                :class="{
-                                    'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30': selectedTag && state && state.includes(selectedTag.id),
-                                    'bg-primary-50 text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30': !selectedTag || !state || !state.includes(selectedTag.id)
-                                }"
-                                class="w-full px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2"
-                            >
-                                <template x-if="selectedTag && state && state.includes(selectedTag.id)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </template>
-                                <template x-if="!selectedTag || !state || !state.includes(selectedTag.id)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                </template>
-                                <span x-text="selectedTag && state && state.includes(selectedTag.id) ? 'Remove Tag' : 'Add Tag'"></span>
-                            </button>
-                        </div>
-
-                        <!-- Tag Metadata -->
-                        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <dl class="space-y-2">
-                                <div>
-                                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Type</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100" x-text="selectedTag ? selectedTag.type : ''"></dd>
-                                </div>
-                                <div x-show="selectedTag && selectedTag.color">
-                                    <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Color</dt>
-                                    <dd class="mt-1 flex items-center gap-2">
-                                        <div
-                                            class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
-                                            :style="selectedTag && selectedTag.color ? 'background-color: ' + selectedTag.color : ''"
-                                        ></div>
-                                        <span class="text-xs text-gray-600 dark:text-gray-400" x-text="selectedTag ? selectedTag.color : ''"></span>
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Empty State for Column 2 -->
-                <div
-                    x-show="!selectedType"
-                    class="min-w-[250px] w-1/3 bg-white dark:bg-gray-800 flex items-center justify-center"
-                >
-                    <div class="text-center p-8">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Select a category to view tags</p>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>

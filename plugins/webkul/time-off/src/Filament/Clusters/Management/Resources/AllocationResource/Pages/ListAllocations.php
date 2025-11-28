@@ -11,6 +11,11 @@ use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
 
+/**
+ * List Allocations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListAllocations extends ListRecords
 {
     use HasTableViews;

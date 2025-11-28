@@ -9,6 +9,11 @@ use Webkul\Employee\Filament\Clusters\Configurations\Resources\WorkLocationResou
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Work Locations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListWorkLocations extends ListRecords
 {
     use HasTableViews;

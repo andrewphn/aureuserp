@@ -8,6 +8,11 @@ use Filament\Resources\Pages\EditRecord;
 use Webkul\Field\FieldsColumnManager;
 use Webkul\Field\Filament\Resources\FieldResource;
 
+/**
+ * Edit Field class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditField extends EditRecord
 {
     protected static string $resource = FieldResource::class;
@@ -27,6 +32,11 @@ class EditField extends EditRecord
         ];
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         FieldsColumnManager::updateColumn($this->record);

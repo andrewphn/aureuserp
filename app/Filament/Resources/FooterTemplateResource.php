@@ -12,6 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
+/**
+ * Footer Template Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class FooterTemplateResource extends Resource
 {
     protected static ?string $model = FooterTemplate::class;
@@ -24,6 +29,12 @@ class FooterTemplateResource extends Resource
 
     protected static ?int $navigationSort = 100;
 
+    /**
+     * Define the form schema
+     *
+     * @param Form $form
+     * @return Form
+     */
     public static function form(Form $form): Form
     {
         $fieldRegistry = app(FooterFieldRegistry::class);
@@ -159,6 +170,13 @@ class FooterTemplateResource extends Resource
             ]);
     }
 
+    /**
+     * Get Field Options
+     *
+     * @param FooterFieldRegistry $registry
+     * @param string $contextType
+     * @return array
+     */
     protected static function getFieldOptions(FooterFieldRegistry $registry, string $contextType): array
     {
         $fields = $registry->getAvailableFields($contextType);
@@ -168,6 +186,12 @@ class FooterTemplateResource extends Resource
         })->toArray();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

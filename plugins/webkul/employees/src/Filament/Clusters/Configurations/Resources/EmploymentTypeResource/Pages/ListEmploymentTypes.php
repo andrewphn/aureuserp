@@ -10,6 +10,11 @@ use Webkul\Employee\Filament\Clusters\Configurations\Resources\EmploymentTypeRes
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Employment Types class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListEmploymentTypes extends ListRecords
 {
     use HasTableViews;

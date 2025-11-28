@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\BankResource;
 use Webkul\Support\Models\Bank;
 
+/**
+ * Manage Banks class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageBanks extends ManageRecords
 {
     protected static string $resource = BankResource::class;

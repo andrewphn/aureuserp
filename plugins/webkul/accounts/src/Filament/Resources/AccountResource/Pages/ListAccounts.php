@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\AccountResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Accounts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListAccounts extends ListRecords
 {
     use HasTableViews;

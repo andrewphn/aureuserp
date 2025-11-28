@@ -4,6 +4,10 @@ namespace Webkul\Product\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Product Combination Seeder database seeder
+ *
+ */
 class ProductCombinationSeeder extends Seeder
 {
     /**

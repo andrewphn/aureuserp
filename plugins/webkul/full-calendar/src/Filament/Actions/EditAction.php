@@ -5,6 +5,11 @@ namespace Webkul\FullCalendar\Filament\Actions;
 use Filament\Actions\EditAction as BaseEditAction;
 use Webkul\FullCalendar\Filament\Widgets\FullCalendarWidget;
 
+/**
+ * Edit Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditAction extends BaseEditAction
 {
     protected function setUp(): void

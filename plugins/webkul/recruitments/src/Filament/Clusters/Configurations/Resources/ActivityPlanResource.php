@@ -31,6 +31,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityPlanRe
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityPlanResource\Pages\ViewActivityPlan;
 use Webkul\Recruitment\Models\ActivityPlan;
 
+/**
+ * Activity Plan Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityPlanResource extends BaseActivityPlanResource
 {
     protected static ?string $model = ActivityPlan::class;
@@ -42,6 +47,12 @@ class ActivityPlanResource extends BaseActivityPlanResource
         return __('recruitments::filament/clusters/configurations/resources/activity-plan.navigation.group');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

@@ -35,6 +35,11 @@ use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource\Pag
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource\Pages\ViewAllocation;
 use Webkul\TimeOff\Models\LeaveAllocation;
 
+/**
+ * Allocation Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AllocationResource extends Resource
 {
     protected static ?string $model = LeaveAllocation::class;
@@ -55,6 +60,12 @@ class AllocationResource extends Resource
         return __('time-off::filament/clusters/management/resources/allocation.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -140,6 +151,12 @@ class AllocationResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -249,6 +266,12 @@ class AllocationResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

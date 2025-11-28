@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Models;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Invoice\Models\Product as BaseProduct;
 
+/**
+ * Product Eloquent model
+ *
+ */
 class Product extends BaseProduct
 {
     /**
@@ -23,6 +27,11 @@ class Product extends BaseProduct
         parent::__construct($attributes);
     }
 
+    /**
+     * Supplier Information
+     *
+     * @return HasMany
+     */
     public function supplierInformation(): HasMany
     {
         if ($this->is_configurable) {

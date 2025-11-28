@@ -9,6 +9,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Partner\Database\Factories\IndustryFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Industry Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property string|null $description
+ * @property bool $is_active
+ * @property bool $can_send_money
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Industry extends Model
 {
     use HasFactory, SoftDeletes;
@@ -42,11 +57,21 @@ class Industry extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return IndustryFactory
+     */
     protected static function newFactory(): IndustryFactory
     {
         return IndustryFactory::new();

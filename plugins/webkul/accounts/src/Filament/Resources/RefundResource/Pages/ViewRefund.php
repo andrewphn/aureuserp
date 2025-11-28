@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Filament\Resources\RefundResource;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
+/**
+ * View Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewRefund extends ViewRecord
 {
     protected static string $resource = RefundResource::class;

@@ -6,6 +6,10 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Payment Type enumeration
+ *
+ */
 enum PaymentType: string implements HasColor, HasIcon, HasLabel
 {
     case SEND = 'outbound';
@@ -20,6 +24,11 @@ enum PaymentType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

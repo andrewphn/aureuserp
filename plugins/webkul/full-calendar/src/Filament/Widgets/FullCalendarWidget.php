@@ -25,6 +25,11 @@ use Webkul\FullCalendar\Contracts\HasModalActions;
 use Webkul\FullCalendar\Contracts\HasRawJs;
 use Webkul\FullCalendar\Contracts\HasRecords;
 
+/**
+ * Full Calendar Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class FullCalendarWidget extends Widget implements HasActions, HasConfigurations, HasEvents, HasForms, HasHeaderActions, HasModalActions, HasRawJs, HasRecords
 {
     use CanBeConfigured;
@@ -40,6 +45,11 @@ class FullCalendarWidget extends Widget implements HasActions, HasConfigurations
 
     protected int|string|array $columnSpan = 'full';
 
+    /**
+     * Header Actions
+     *
+     * @return array
+     */
     protected function headerActions(): array
     {
         return [
@@ -47,6 +57,11 @@ class FullCalendarWidget extends Widget implements HasActions, HasConfigurations
         ];
     }
 
+    /**
+     * Modal Actions
+     *
+     * @return array
+     */
     protected function modalActions(): array
     {
         return [
@@ -55,11 +70,22 @@ class FullCalendarWidget extends Widget implements HasActions, HasConfigurations
         ];
     }
 
+    /**
+     * View Action
+     *
+     * @return Action
+     */
     protected function viewAction(): Action
     {
         return ViewAction::make();
     }
 
+    /**
+     * Fetch Events
+     *
+     * @param array $info
+     * @return array
+     */
     public function fetchEvents(array $info): array
     {
         return [];

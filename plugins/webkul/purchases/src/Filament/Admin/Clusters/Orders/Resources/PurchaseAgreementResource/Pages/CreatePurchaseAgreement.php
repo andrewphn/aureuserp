@@ -10,6 +10,11 @@ use Webkul\Purchase\Enums\RequisitionState;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
+/**
+ * Create Purchase Agreement class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePurchaseAgreement extends CreateRecord
 {
     use HasRepeaterColumnManager;
@@ -34,6 +39,12 @@ class CreatePurchaseAgreement extends CreateRecord
             ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/create-purchase-agreement.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

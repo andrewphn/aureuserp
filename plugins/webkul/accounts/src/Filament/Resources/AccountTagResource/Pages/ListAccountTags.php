@@ -10,6 +10,11 @@ use Webkul\Account\Filament\Resources\AccountTagResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Account Tags class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListAccountTags extends ListRecords
 {
     use HasTableViews;

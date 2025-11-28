@@ -10,6 +10,11 @@ use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
 use Webkul\Inventory\Models\Location;
 
+/**
+ * Edit Location class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditLocation extends EditRecord
 {
     protected static string $resource = LocationResource::class;
@@ -50,6 +55,12 @@ class EditLocation extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['next_inventory_date'] = isset($data['cyclic_inventory_frequency']) && $data['cyclic_inventory_frequency']

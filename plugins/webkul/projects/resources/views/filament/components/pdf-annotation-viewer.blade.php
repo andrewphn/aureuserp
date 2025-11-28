@@ -14,7 +14,7 @@
 @endphp
 
 @once
-    @vite(['resources/css/pdf-annotation-viewer.css'], 'plugins/webkul/projects')
+    @vite('plugins/webkul/projects/resources/css/pdf-annotation-viewer.css')
 @endonce
 
 <div

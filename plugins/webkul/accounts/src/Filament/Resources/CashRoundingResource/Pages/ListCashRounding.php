@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\CashRoundingResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Cash Rounding class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListCashRounding extends ListRecords
 {
     use HasTableViews;

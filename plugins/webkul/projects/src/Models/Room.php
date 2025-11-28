@@ -10,6 +10,33 @@ use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Room Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $project_id
+ * @property string|null $name
+ * @property string|null $room_type
+ * @property string|null $floor_number
+ * @property int $pdf_page_number
+ * @property string|null $pdf_room_label
+ * @property string|null $pdf_detail_number
+ * @property string|null $pdf_notes
+ * @property string|null $notes
+ * @property int $sort_order
+ * @property string|null $cabinet_level
+ * @property string|null $material_category
+ * @property string|null $finish_option
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $locations
+ * @property-read \Illuminate\Database\Eloquent\Collection $cabinets
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Room extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
@@ -31,6 +58,9 @@ class Room extends Model
         'material_category',
         'finish_option',
         'creator_id',
+        'quoted_price',
+        'estimated_project_value',
+        'estimated_cabinet_value',
     ];
 
     protected $casts = [
@@ -59,16 +89,31 @@ class Room extends Model
         return $this->belongsTo(Project::class, 'project_id');
     }
 
+    /**
+     * Locations
+     *
+     * @return HasMany
+     */
     public function locations(): HasMany
     {
         return $this->hasMany(RoomLocation::class, 'room_id');
     }
 
+    /**
+     * Cabinets
+     *
+     * @return HasMany
+     */
     public function cabinets(): HasMany
     {
         return $this->hasMany(CabinetSpecification::class, 'room_id');
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -123,6 +168,12 @@ class Room extends Model
     /**
      * Scope: Order by sort order
      */
+    /**
+     * Scope query to Ordered
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('name');
@@ -130,6 +181,13 @@ class Room extends Model
 
     /**
      * Scope: Filter by room type
+     */
+    /**
+     * Scope query to By Type
+     *
+     * @param mixed $query The search query
+     * @param string $type
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByType($query, string $type)
     {
@@ -139,6 +197,13 @@ class Room extends Model
     /**
      * Scope: Filter by floor number
      */
+    /**
+     * Scope query to By Floor
+     *
+     * @param mixed $query The search query
+     * @param string $floor
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByFloor($query, string $floor)
     {
         return $query->where('floor_number', $floor);
@@ -147,6 +212,13 @@ class Room extends Model
     /**
      * Scope: Rooms on specific PDF page
      */
+    /**
+     * Scope query to On Page
+     *
+     * @param mixed $query The search query
+     * @param int $pageNumber
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeOnPage($query, int $pageNumber)
     {
         return $query->where('pdf_page_number', $pageNumber);
@@ -154,6 +226,12 @@ class Room extends Model
 
     /**
      * Scope: With cabinet and location counts
+     */
+    /**
+     * Scope query to With Counts
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCounts($query)
     {

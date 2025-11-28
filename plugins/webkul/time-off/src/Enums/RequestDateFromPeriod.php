@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Request Date From Period enumeration
+ *
+ */
 enum RequestDateFromPeriod: string implements HasLabel
 {
     case MORNING = 'morning';
@@ -18,6 +22,11 @@ enum RequestDateFromPeriod: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

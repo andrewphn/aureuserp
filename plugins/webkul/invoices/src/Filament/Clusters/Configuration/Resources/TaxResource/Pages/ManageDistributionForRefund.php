@@ -5,6 +5,11 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource\P
 use Webkul\Account\Filament\Resources\TaxResource\Pages\ManageDistributionForRefund as BaseManageDistributionForRefund;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\TaxResource;
 
+/**
+ * Manage Distribution For Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageDistributionForRefund extends BaseManageDistributionForRefund
 {
     protected static string $resource = TaxResource::class;

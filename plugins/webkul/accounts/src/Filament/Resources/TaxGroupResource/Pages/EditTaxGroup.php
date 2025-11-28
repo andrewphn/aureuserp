@@ -10,6 +10,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Account\Filament\Resources\TaxGroupResource;
 use Webkul\Account\Models\TaxGroup;
 
+/**
+ * Edit Tax Group class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditTaxGroup extends EditRecord
 {
     protected static string $resource = TaxGroupResource::class;

@@ -13,6 +13,39 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Candidate Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $message_bounced
+ * @property int $company_id
+ * @property int $partner_id
+ * @property int $degree_id
+ * @property int $manager_id
+ * @property int $employee_id
+ * @property int $creator_id
+ * @property string|null $email_cc
+ * @property string|null $name
+ * @property string|null $email_from
+ * @property string|null $priority
+ * @property string|null $phone
+ * @property string|null $linkedin_profile
+ * @property \Carbon\Carbon|null $availability_date
+ * @property array $candidate_properties
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection $skills
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $degree
+ * @property-read \Illuminate\Database\Eloquent\Model|null $manager
+ * @property-read \Illuminate\Database\Eloquent\Model|null $employee
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Collection $categories
+ *
+ */
 class Candidate extends Model
 {
     use HasChatter, HasLogActivity, SoftDeletes;
@@ -60,6 +93,11 @@ class Candidate extends Model
         'candidate_properties' => 'array',
     ];
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
@@ -70,11 +108,21 @@ class Candidate extends Model
         return $this->belongsTo(Partner::class, 'partner_id');
     }
 
+    /**
+     * Degree
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function degree()
     {
         return $this->belongsTo(Degree::class, 'degree_id');
     }
 
+    /**
+     * Manager
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id');
@@ -85,21 +133,40 @@ class Candidate extends Model
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Categories
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function categories()
     {
         return $this->belongsToMany(ApplicantCategory::class, 'recruitments_candidate_applicant_categories', 'candidate_id', 'category_id');
     }
 
+    /**
+     * Skills
+     *
+     * @return HasMany
+     */
     public function skills(): HasMany
     {
         return $this->hasMany(CandidateSkill::class, 'candidate_id');
     }
 
+    /**
+     * Create Employee
+     *
+     */
     public function createEmployee()
     {
         $employee = $this->employee()->create([
@@ -124,6 +191,11 @@ class Candidate extends Model
     /**
      * Bootstrap the model and its traits.
      */
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
@@ -139,6 +211,11 @@ class Candidate extends Model
 
     /**
      * Handle the creation of a partner.
+     */
+    /**
+     * Handle Partner Creation
+     *
+     * @param self $candidate
      */
     private function handlePartnerCreation(self $candidate)
     {
@@ -157,6 +234,11 @@ class Candidate extends Model
 
     /**
      * Handle the updation of a partner.
+     */
+    /**
+     * Handle Partner Updation
+     *
+     * @param self $candidate
      */
     private function handlePartnerUpdation(self $candidate)
     {

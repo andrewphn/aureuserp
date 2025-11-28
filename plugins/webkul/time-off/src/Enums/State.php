@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * State enumeration
+ *
+ */
 enum State: string implements HasLabel
 {
     case CONFIRM = 'confirm';
@@ -24,6 +28,11 @@ enum State: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

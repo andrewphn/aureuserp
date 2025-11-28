@@ -4,6 +4,10 @@ namespace Webkul\Product\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Attribute Type enumeration
+ *
+ */
 enum AttributeType: string implements HasLabel
 {
     case RADIO = 'radio';

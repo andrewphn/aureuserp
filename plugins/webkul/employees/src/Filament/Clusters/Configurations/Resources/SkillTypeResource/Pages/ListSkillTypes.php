@@ -10,6 +10,11 @@ use Webkul\Employee\Models\SkillType;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Skill Types class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListSkillTypes extends ListRecords
 {
     use HasTableViews;

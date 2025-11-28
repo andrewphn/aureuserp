@@ -4,6 +4,11 @@ namespace Webkul\Chatter\Filament\Actions\Chatter\ActivityActions;
 
 use Filament\Actions\Action;
 
+/**
+ * Mark As Done Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class MarkAsDoneAction extends Action
 {
     public static function getDefaultName(): ?string

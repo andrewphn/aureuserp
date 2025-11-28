@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
+/**
+ * Operation Settings class
+ *
+ */
 class OperationSettings extends Settings
 {
     public bool $enable_packages;
@@ -16,6 +20,11 @@ class OperationSettings extends Settings
 
     public int $annual_inventory_month;
 
+    /**
+     * Group
+     *
+     * @return string
+     */
     public static function group(): string
     {
         return 'inventories_operation';

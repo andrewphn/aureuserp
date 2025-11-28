@@ -8,6 +8,11 @@ use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Facades\Account;
 use Webkul\Account\Models\Move;
 
+/**
+ * Reset To Draft Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ResetToDraftAction extends Action
 {
     public static function getDefaultName(): ?string

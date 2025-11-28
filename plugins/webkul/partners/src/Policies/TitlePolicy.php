@@ -7,6 +7,10 @@ use Webkul\Partner\Models\Title;
 use Webkul\Security\Models\User;
 
 
+/**
+ * Title Policy authorization policy
+ *
+ */
 class TitlePolicy
 {
     use HandlesAuthorization;

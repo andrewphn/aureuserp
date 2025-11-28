@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Calendar Display Type enumeration
+ *
+ */
 enum CalendarDisplayType: string
 {
     case Working = 'working';
@@ -10,6 +14,11 @@ enum CalendarDisplayType: string
 
     case Holiday = 'holiday';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

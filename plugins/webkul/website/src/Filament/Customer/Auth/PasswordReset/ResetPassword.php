@@ -45,6 +45,13 @@ class ResetPassword extends Page
     #[Locked]
     public ?string $token = null;
 
+    /**
+     * Mount
+     *
+     * @param ?string $email
+     * @param ?string $token
+     * @return void
+     */
     public function mount(?string $email = null, ?string $token = null): void
     {
         if (Filament::auth()->check()) {
@@ -58,6 +65,11 @@ class ResetPassword extends Page
         ]);
     }
 
+    /**
+     * Reset Password
+     *
+     * @return ?PasswordResetResponse
+     */
     public function resetPassword(): ?PasswordResetResponse
     {
         try {
@@ -102,6 +114,12 @@ class ResetPassword extends Page
         return null;
     }
 
+    /**
+     * Get Rate Limited Notification
+     *
+     * @param TooManyRequestsException $exception
+     * @return ?Notification
+     */
     protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
     {
         return Notification::make()
@@ -116,6 +134,12 @@ class ResetPassword extends Page
             ->danger();
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -183,6 +207,11 @@ class ResetPassword extends Page
             ->submit('resetPassword');
     }
 
+    /**
+     * Has Full Width Form Actions
+     *
+     * @return bool
+     */
     protected function hasFullWidthFormActions(): bool
     {
         return true;

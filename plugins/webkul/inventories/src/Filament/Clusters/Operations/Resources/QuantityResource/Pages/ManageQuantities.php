@@ -10,6 +10,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\QuantityResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * Manage Quantities class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageQuantities extends ManageRecords
 {
     use HasTableViews;

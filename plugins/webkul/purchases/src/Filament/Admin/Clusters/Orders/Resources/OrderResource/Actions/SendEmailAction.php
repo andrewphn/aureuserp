@@ -17,6 +17,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Send Email Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SendEmailAction extends Action
 {
     public static function getDefaultName(): ?string

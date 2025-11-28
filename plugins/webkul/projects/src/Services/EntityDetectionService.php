@@ -8,6 +8,10 @@ use Illuminate\Support\HtmlString;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\RoomLocation;
 
+/**
+ * Entity Detection Service service
+ *
+ */
 class EntityDetectionService
 {
     /**

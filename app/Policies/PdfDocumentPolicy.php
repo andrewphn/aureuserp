@@ -6,6 +6,10 @@ use App\Models\PdfDocument;
 use Webkul\Security\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Pdf Document Policy authorization policy
+ *
+ */
 class PdfDocumentPolicy
 {
     use HandlesAuthorization;

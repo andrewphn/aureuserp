@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\Stage;
 use Webkul\Security\Models\User;
 
+/**
+ * Stage Policy authorization policy
+ *
+ */
 class StagePolicy
 {
     use HandlesAuthorization;

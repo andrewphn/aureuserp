@@ -24,6 +24,11 @@ use Webkul\Project\Filament\Resources\HardwareRequirementResource\Pages\EditHard
 use Webkul\Project\Filament\Resources\HardwareRequirementResource\Pages\ListHardwareRequirements;
 use Webkul\Project\Models\HardwareRequirement;
 
+/**
+ * Hardware Requirement Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class HardwareRequirementResource extends Resource
 {
     protected static ?string $model = HardwareRequirement::class;
@@ -44,6 +49,12 @@ class HardwareRequirementResource extends Resource
         return 'Projects';
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -357,6 +368,12 @@ class HardwareRequirementResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

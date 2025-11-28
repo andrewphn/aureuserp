@@ -4,6 +4,10 @@ namespace Webkul\Partner\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Account Type enumeration
+ *
+ */
 enum AccountType: string implements HasLabel
 {
     case INDIVIDUAL = 'individual';
@@ -12,6 +16,11 @@ enum AccountType: string implements HasLabel
 
     case ADDRESS = 'address';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

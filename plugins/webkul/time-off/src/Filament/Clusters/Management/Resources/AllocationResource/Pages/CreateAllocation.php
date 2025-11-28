@@ -6,6 +6,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\AllocationResource;
 
+/**
+ * Create Allocation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateAllocation extends CreateRecord
 {
     protected static string $resource = AllocationResource::class;

@@ -23,12 +23,23 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\PdfPage;
 use App\Models\PdfPageAnnotation;
 
+/**
+ * Pdf Documents Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PdfDocumentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'pdfDocuments';
 
     protected static ?string $recordTitleAttribute = 'file_name';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -133,6 +144,12 @@ class PdfDocumentsRelationManager extends RelationManager
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -365,6 +382,12 @@ class PdfDocumentsRelationManager extends RelationManager
     /**
      * Create PdfPage records for each page in the uploaded PDF
      */
+    /**
+     * Create Pdf Pages
+     *
+     * @param PdfDocument $pdfDocument
+     * @return void
+     */
     protected function createPdfPages(PdfDocument $pdfDocument): void
     {
         try {
@@ -410,6 +433,13 @@ class PdfDocumentsRelationManager extends RelationManager
 
     /**
      * Migrate annotations from old version to new version
+     */
+    /**
+     * Migrate Annotations
+     *
+     * @param PdfDocument $oldVersion
+     * @param PdfDocument $newVersion
+     * @return void
      */
     protected function migrateAnnotations(PdfDocument $oldVersion, PdfDocument $newVersion): void
     {

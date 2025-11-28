@@ -26,6 +26,11 @@ use Webkul\Account\Filament\Resources\CashRoundingResource\Pages\ListCashRoundin
 use Webkul\Account\Filament\Resources\CashRoundingResource\Pages\ViewCashRounding;
 use Webkul\Account\Models\CashRounding;
 
+/**
+ * Cash Rounding Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CashRoundingResource extends Resource
 {
     protected static ?string $model = CashRounding::class;
@@ -34,6 +39,12 @@ class CashRoundingResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -68,6 +79,12 @@ class CashRoundingResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -129,6 +146,12 @@ class CashRoundingResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

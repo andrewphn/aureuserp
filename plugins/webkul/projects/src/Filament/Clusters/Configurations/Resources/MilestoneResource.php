@@ -28,6 +28,11 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\Milestone
 use Webkul\Project\Models\Milestone;
 use Webkul\Project\Settings\TaskSettings;
 
+/**
+ * Milestone Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class MilestoneResource extends Resource
 {
     protected static ?string $model = Milestone::class;
@@ -43,6 +48,11 @@ class MilestoneResource extends Resource
         return __('webkul-project::filament/clusters/configurations/resources/milestone.navigation.title');
     }
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -52,6 +62,12 @@ class MilestoneResource extends Resource
         return app(TaskSettings::class)->enable_milestones;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -119,6 +135,12 @@ class MilestoneResource extends Resource
             ->columns(2);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

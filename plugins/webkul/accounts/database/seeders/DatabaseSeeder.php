@@ -4,6 +4,10 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Database Seeder database seeder
+ *
+ */
 class DatabaseSeeder extends Seeder
 {
     /**

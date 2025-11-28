@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Installment Mode enumeration
+ *
+ */
 enum InstallmentMode: string implements HasLabel
 {
     case NEXT = 'next';
@@ -24,6 +28,11 @@ enum InstallmentMode: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

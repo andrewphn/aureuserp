@@ -5,8 +5,17 @@ namespace Webkul\Support;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Illuminate\Support\Str;
 
+/**
+ * Permission Manager class
+ *
+ */
 class PermissionManager
 {
+    /**
+     * Manage Permissions
+     *
+     * @return void
+     */
     public function managePermissions(): void
     {
         FilamentShield::buildPermissionKeyUsing(function (string $entity, string $affix, string $subject): string {

@@ -9,6 +9,11 @@ use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResour
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Job Positions class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListJobPositions extends ListRecords
 {
     use HasTableViews;

@@ -6,6 +6,10 @@ use Exception;
 use GuzzleHttp\Client;
 use Webkul\Security\Models\User;
 
+/**
+ * Installer class
+ *
+ */
 class Installer
 {
     /**

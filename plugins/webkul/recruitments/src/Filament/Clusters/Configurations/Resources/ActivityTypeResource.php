@@ -10,6 +10,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityTypeRe
 use Webkul\Recruitment\Models\ActivityType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
+/**
+ * Activity Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityTypeResource extends BaseActivityTypeResource
 {
     protected static ?string $model = ActivityType::class;

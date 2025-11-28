@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Week enumeration
+ *
+ */
 enum Week: string
 {
     case SUNDAY = 'sunday';
@@ -18,6 +22,11 @@ enum Week: string
 
     case SATURDAY = 'saturday';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

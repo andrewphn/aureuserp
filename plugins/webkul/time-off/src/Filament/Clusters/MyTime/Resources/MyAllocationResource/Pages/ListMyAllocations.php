@@ -8,6 +8,11 @@ use Webkul\TimeOff\Filament\Clusters\MyTime\Resources\MyAllocationResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List My Allocations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListMyAllocations extends ListRecords
 {
     use HasTableViews;

@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Product Category Seeder database seeder
+ *
+ */
 class ProductCategorySeeder extends Seeder
 {
     /**

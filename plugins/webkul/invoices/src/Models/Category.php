@@ -7,10 +7,19 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Product\Models\Category as BaseCategory;
 use Webkul\Security\Models\User;
 
+/**
+ * Category Eloquent model
+ *
+ */
 class Category extends BaseCategory
 {
     use HasChatter;
 
+    /**
+     * Create a new Category instance
+     *
+     * @param array $attributes
+     */
     public function __construct(array $attributes = [])
     {
         $this->mergeFillable([
@@ -23,11 +32,21 @@ class Category extends BaseCategory
         parent::__construct($attributes);
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Products
+     *
+     * @return HasMany
+     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

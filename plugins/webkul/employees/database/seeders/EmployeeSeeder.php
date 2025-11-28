@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Employee\Models\Employee;
 use Webkul\Security\Models\User;
 
+/**
+ * Employee Seeder database seeder
+ *
+ */
 class EmployeeSeeder extends Seeder
 {
     /**

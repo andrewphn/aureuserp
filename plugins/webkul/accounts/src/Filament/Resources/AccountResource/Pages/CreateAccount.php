@@ -6,6 +6,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Webkul\Account\Filament\Resources\AccountResource;
 
+/**
+ * Create Account class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateAccount extends CreateRecord
 {
     protected static string $resource = AccountResource::class;

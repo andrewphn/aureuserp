@@ -5,6 +5,10 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Currency Seeder database seeder
+ *
+ */
 class CurrencySeeder extends Seeder
 {
     /**

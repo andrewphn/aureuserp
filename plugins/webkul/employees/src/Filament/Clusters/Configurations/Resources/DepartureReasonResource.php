@@ -26,6 +26,11 @@ use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\DepartureReasonResource\Pages\ListDepartureReasons;
 use Webkul\Employee\Models\DepartureReason;
 
+/**
+ * Departure Reason Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DepartureReasonResource extends Resource
 {
     protected static ?string $model = DepartureReason::class;
@@ -49,6 +54,12 @@ class DepartureReasonResource extends Resource
         return __('employees::filament/clusters/configurations/resources/departure-reason.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -61,6 +72,12 @@ class DepartureReasonResource extends Resource
             ])->columns(1);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -71,6 +88,12 @@ class DepartureReasonResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

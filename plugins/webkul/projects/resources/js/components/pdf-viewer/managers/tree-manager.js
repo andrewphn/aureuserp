@@ -33,17 +33,19 @@ export async function loadTree(state) {
  * Refresh the project tree (lockout-aware wrapper for loadTree)
  * Defers refresh if resize/move operations are in progress
  * @param {Object} state - Component state
- * @param {Object} refs - Alpine.js $refs (optional)
- * @param {Object} callbacks - Callback functions (optional)
+ * @param {Object} callbacks - Callback functions
+ * @param {Object} [callbacks.$refs] - Optional Alpine.js $refs object
+ * @param {Function} [callbacks.$nextTick] - Optional Vue/Alpine $nextTick function
+ * @param {Function} [callbacks.syncOverlayToCanvas] - Optional callback to sync overlay to canvas
  * @returns {Promise<void>}
  */
-export async function refreshTree(state, refs = null, callbacks = null) {
+export async function refreshTree(state, callbacks = {}) {
     // CRITICAL: Don't refresh during active resize/move operations
     if (state._resizeLockout || state.isResizing || state.isMoving) {
         console.log('⏳ Tree refresh deferred - resize/move in progress');
 
         // Retry after lockout clears (poll every 100ms)
-        setTimeout(() => refreshTree(state, refs, callbacks), 100);
+        setTimeout(() => refreshTree(state, callbacks), 100);
         return;
     }
 
@@ -52,7 +54,8 @@ export async function refreshTree(state, refs = null, callbacks = null) {
 
     // After tree refresh, recalculate annotation positions
     // Tree refresh can cause DOM layout shifts that misalign annotations
-    if (refs && callbacks) {
+    const refs = callbacks.$refs || null;
+    if (refs) {
         // Wait for tree to render
         if (callbacks.$nextTick) {
             await callbacks.$nextTick();
@@ -474,31 +477,4 @@ export function getPageGroupedAnnotations(state) {
 
     // Convert to array and sort by page number
     return Array.from(pages.values()).sort((a, b) => a.pageNumber - b.pageNumber);
-}
-
-/**
- * Get room name by ID from tree
- * @param {Number|String} roomId - Room ID to lookup
- * @param {Object} state - Component state
- * @returns {String} Room name or empty string
- */
-export function getRoomNameById(roomId, state) {
-    if (!state.tree || !roomId) return '';
-    const room = state.tree.find(r => r.id === roomId);
-    return room ? room.name : '';
-}
-
-/**
- * Get location name by ID from tree
- * @param {Number|String} locationId - Location ID to lookup
- * @param {Object} state - Component state
- * @returns {String} Location name or empty string
- */
-export function getLocationNameById(locationId, state) {
-    if (!state.tree || !locationId) return '';
-    for (const room of state.tree) {
-        const location = room.children?.find(l => l.id === locationId);
-        if (location) return location.name;
-    }
-    return '';
 }

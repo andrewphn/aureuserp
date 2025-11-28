@@ -6,6 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Product\Models\Product;
 
+/**
+ * Woodworking Material Category Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $code
+ * @property string|null $description
+ * @property int $sort_order
+ * @property-read \Illuminate\Database\Eloquent\Collection $products
+ *
+ */
 class WoodworkingMaterialCategory extends Model
 {
     protected $table = 'woodworking_material_categories';

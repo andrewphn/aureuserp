@@ -4,6 +4,10 @@ namespace Webkul\Support\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * UOMType enumeration
+ *
+ */
 enum UOMType: string implements HasLabel
 {
     case REFERENCE = 'reference';

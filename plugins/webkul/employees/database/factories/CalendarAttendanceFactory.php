@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\Employee\Models\CalendarAttendance;
 use Webkul\Security\Models\User;
 
+/**
+ * Calendar Attendance Factory model factory
+ *
+ */
 class CalendarAttendanceFactory extends Factory
 {
     /**

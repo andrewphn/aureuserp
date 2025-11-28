@@ -6,6 +6,11 @@ use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Blog\Filament\Customer\Resources\PostResource;
 
+/**
+ * View Post class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPost extends ViewRecord
 {
     protected static string $resource = PostResource::class;

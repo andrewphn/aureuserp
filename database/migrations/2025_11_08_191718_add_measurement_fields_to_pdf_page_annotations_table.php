@@ -4,7 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,6 +18,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table doesn't exist yet (created by projects plugin)
+        if (!Schema::hasTable('pdf_page_annotations')) {
+            return;
+        }
+
         Schema::table('pdf_page_annotations', function (Blueprint $table) {
             $table->decimal('measurement_width', 10, 2)
                 ->nullable()

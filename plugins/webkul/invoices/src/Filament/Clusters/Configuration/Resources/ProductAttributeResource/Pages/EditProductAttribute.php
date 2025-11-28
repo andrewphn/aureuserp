@@ -5,6 +5,11 @@ namespace Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttrib
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource;
 use Webkul\Product\Filament\Resources\AttributeResource\Pages\EditAttribute;
 
+/**
+ * Edit Product Attribute class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditProductAttribute extends EditAttribute
 {
     protected static string $resource = ProductAttributeResource::class;

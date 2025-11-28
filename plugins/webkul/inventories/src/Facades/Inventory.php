@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Inventory class
+ *
+ */
 class Inventory extends Facade
 {
     /**

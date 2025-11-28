@@ -7,6 +7,11 @@ use Filament\Panel;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Website\Models\Page as PageModel;
 
+/**
+ * Homepage class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Homepage extends Page
 {
     protected static string $routePath = '/';
@@ -23,6 +28,12 @@ class Homepage extends Page
         return 'Home';
     }
 
+    /**
+     * Get Route Path
+     *
+     * @param Panel $panel
+     * @return string
+     */
     public static function getRoutePath(Panel $panel): string
     {
         return static::$routePath;

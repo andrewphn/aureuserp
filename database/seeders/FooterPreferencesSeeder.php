@@ -7,6 +7,10 @@ use App\Services\FooterPreferenceService;
 use Illuminate\Database\Seeder;
 use Webkul\Security\Models\User;
 
+/**
+ * Footer Preferences Seeder database seeder
+ *
+ */
 class FooterPreferencesSeeder extends Seeder
 {
     /**

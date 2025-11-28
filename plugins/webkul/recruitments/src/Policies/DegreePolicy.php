@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\Degree;
 use Webkul\Security\Models\User;
 
+/**
+ * Degree Policy authorization policy
+ *
+ */
 class DegreePolicy
 {
     use HandlesAuthorization;

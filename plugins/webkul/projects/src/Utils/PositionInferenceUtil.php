@@ -2,6 +2,10 @@
 
 namespace Webkul\Project\Utils;
 
+/**
+ * Position Inference Util class
+ *
+ */
 class PositionInferenceUtil
 {
     /**

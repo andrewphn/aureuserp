@@ -28,6 +28,11 @@ use Webkul\Project\Filament\Clusters\Configurations\Resources\ProjectStageResour
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
 
+/**
+ * Project Stage Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectStageResource extends Resource
 {
     protected static ?string $model = ProjectStage::class;
@@ -43,6 +48,11 @@ class ProjectStageResource extends Resource
         return __('webkul-project::filament/clusters/configurations/resources/project-stage.navigation.title');
     }
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -52,6 +62,12 @@ class ProjectStageResource extends Resource
         return app(TaskSettings::class)->enable_project_stages;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -70,6 +86,12 @@ class ProjectStageResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

@@ -8,6 +8,11 @@ use Livewire\Component;
 use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 
+/**
+ * Return Slip Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ReturnSlipAction extends Action
 {
     public static function getDefaultName(): ?string

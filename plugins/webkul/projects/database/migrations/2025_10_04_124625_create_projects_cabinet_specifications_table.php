@@ -4,7 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -22,26 +26,26 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('projects_cabinet_specifications')) {
+            return;
+        }
+
         Schema::create('projects_cabinet_specifications', function (Blueprint $table) {
             $table->id();
 
-            // Links to order/quote
-            $table->foreignId('order_line_id')
+            // Links to order/quote (no FK constraint - sales_order_lines may not exist)
+            $table->unsignedBigInteger('order_line_id')
                 ->nullable()
-                ->constrained('sales_order_lines')
-                ->onDelete('cascade')
                 ->comment('Links to order line item (for quotes/orders)');
 
-            $table->foreignId('project_id')
+            // Project reference (no FK constraint at create time for flexibility)
+            $table->unsignedBigInteger('project_id')
                 ->nullable()
-                ->constrained('projects_projects')
-                ->onDelete('cascade')
                 ->comment('Optional direct link to project');
 
             // Product variant selected (for pricing/attributes)
-            $table->foreignId('product_variant_id')
-                ->constrained('products_products')
-                ->onDelete('restrict')
+            $table->unsignedBigInteger('product_variant_id')
+                ->nullable()
                 ->comment('Selected cabinet variant (determines price/LF and attributes)');
 
             // Physical Dimensions (what shop needs to build)

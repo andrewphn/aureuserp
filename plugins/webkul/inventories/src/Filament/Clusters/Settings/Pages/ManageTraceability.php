@@ -16,6 +16,11 @@ use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Traceability class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTraceability extends SettingsPage
 {
     use HasPageShield;
@@ -49,6 +54,12 @@ class ManageTraceability extends SettingsPage
         return __('inventories::filament/clusters/settings/pages/manage-traceability.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -75,6 +86,11 @@ class ManageTraceability extends SettingsPage
             ]);
     }
 
+    /**
+     * Before Save
+     *
+     * @return void
+     */
     protected function beforeSave(): void
     {
         if (Product::whereIn('tracking', [ProductTracking::SERIAL, ProductTracking::LOT])->exists()) {

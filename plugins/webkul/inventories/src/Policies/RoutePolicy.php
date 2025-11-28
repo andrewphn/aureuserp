@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\Route;
 use Webkul\Security\Models\User;
 
+/**
+ * Route Policy authorization policy
+ *
+ */
 class RoutePolicy
 {
     use HandlesAuthorization;

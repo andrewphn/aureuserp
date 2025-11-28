@@ -6,6 +6,11 @@ use Closure;
 use Filament\Schemas\Components\Tabs\Tab;
 use Webkul\TableViews\Models\TableViewFavorite;
 
+/**
+ * Preset View class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PresetView extends Tab
 {
     protected string|Closure|null $id = null;
@@ -36,6 +41,12 @@ class PresetView extends Tab
         return self::$cachedFavoriteTableViews ??= $this->getFavoriteTableViews();
     }
 
+    /**
+     * Color
+     *
+     * @param string|Closure|null $color
+     * @return static
+     */
     public function color(string|Closure|null $color): static
     {
         $this->color = $color;
@@ -48,6 +59,12 @@ class PresetView extends Tab
         return null;
     }
 
+    /**
+     * Favorite
+     *
+     * @param bool|Closure $condition
+     * @return static
+     */
     public function favorite(bool|Closure $condition = true): static
     {
         $this->isFavorite = $condition;
@@ -55,6 +72,12 @@ class PresetView extends Tab
         return $this;
     }
 
+    /**
+     * Set As Default
+     *
+     * @param bool|Closure $condition
+     * @return static
+     */
     public function setAsDefault(bool|Closure $condition = true): static
     {
         $this->isDefault = $condition;
@@ -62,11 +85,22 @@ class PresetView extends Tab
         return $this;
     }
 
+    /**
+     * Is Default
+     *
+     * @return bool
+     */
     public function isDefault(): bool
     {
         return (bool) $this->evaluate($this->isDefault);
     }
 
+    /**
+     * Is Favorite
+     *
+     * @param string|int|null $id The unique identifier
+     * @return bool
+     */
     public function isFavorite(string|int|null $id = null): bool
     {
         $tableViewFavorite = $this->getCachedFavoriteTableViews()
@@ -77,16 +111,31 @@ class PresetView extends Tab
         return (bool) ($tableViewFavorite?->is_favorite ?? $this->evaluate($this->isFavorite));
     }
 
+    /**
+     * Is Editable
+     *
+     * @return bool
+     */
     public function isEditable(): bool
     {
         return $this->isEditable;
     }
 
+    /**
+     * Is Replaceable
+     *
+     * @return bool
+     */
     public function isReplaceable(): bool
     {
         return $this->isReplaceable;
     }
 
+    /**
+     * Is Deletable
+     *
+     * @return bool
+     */
     public function isDeletable(): bool
     {
         return $this->isDeletable;

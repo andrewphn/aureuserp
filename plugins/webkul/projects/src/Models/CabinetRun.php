@@ -10,6 +10,30 @@ use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 
+/**
+ * Cabinet Run Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property int $room_location_id
+ * @property string|null $name
+ * @property string|null $run_type
+ * @property float $total_linear_feet
+ * @property float $start_wall_measurement
+ * @property float $end_wall_measurement
+ * @property string|null $notes
+ * @property int $sort_order
+ * @property string|null $cabinet_level
+ * @property string|null $material_category
+ * @property string|null $finish_option
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $cabinets
+ * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class CabinetRun extends Model
 {
     use SoftDeletes, HasChatter, HasLogActivity;
@@ -60,11 +84,21 @@ class CabinetRun extends Model
         return $this->belongsTo(RoomLocation::class, 'room_location_id');
     }
 
+    /**
+     * Cabinets
+     *
+     * @return HasMany
+     */
     public function cabinets(): HasMany
     {
         return $this->hasMany(CabinetSpecification::class, 'cabinet_run_id');
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -124,6 +158,12 @@ class CabinetRun extends Model
     /**
      * Scope: Order by sort order
      */
+    /**
+     * Scope query to Ordered
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('name');
@@ -131,6 +171,13 @@ class CabinetRun extends Model
 
     /**
      * Scope: Filter by run type
+     */
+    /**
+     * Scope query to By Type
+     *
+     * @param mixed $query The search query
+     * @param string $type
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByType($query, string $type)
     {
@@ -140,6 +187,12 @@ class CabinetRun extends Model
     /**
      * Scope: With cabinet count
      */
+    /**
+     * Scope query to With Counts
+     *
+     * @param mixed $query The search query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeWithCounts($query)
     {
         return $query->withCount('cabinets');
@@ -147,6 +200,11 @@ class CabinetRun extends Model
 
     /**
      * Auto-calculate fields before saving
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {
@@ -172,6 +230,10 @@ class CabinetRun extends Model
      *
      * @return \Illuminate\Support\Collection
      */
+    /**
+     * Generate Bom
+     *
+     */
     public function generateBom(): \Illuminate\Support\Collection
     {
         $bomService = new \Webkul\Project\Services\MaterialBomService();
@@ -195,6 +257,11 @@ class CabinetRun extends Model
      *
      * @return float
      */
+    /**
+     * Estimate Material Cost
+     *
+     * @return float
+     */
     public function estimateMaterialCost(): float
     {
         $bomService = new \Webkul\Project\Services\MaterialBomService();
@@ -204,6 +271,11 @@ class CabinetRun extends Model
 
     /**
      * Check if materials are available in inventory for this run
+     *
+     * @return array
+     */
+    /**
+     * Check Material Availability
      *
      * @return array
      */

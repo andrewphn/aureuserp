@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Carryover Date enumeration
+ *
+ */
 enum CarryoverDate: string implements HasLabel
 {
     case YEAR_START = 'year_start';
@@ -21,6 +25,11 @@ enum CarryoverDate: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

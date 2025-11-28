@@ -15,6 +15,10 @@ use Webkul\Security\Models\Invitation;
 use Webkul\Security\Models\User;
 use Webkul\Security\Settings\UserSettings;
 
+/**
+ * Accept Invitation class
+ *
+ */
 class AcceptInvitation extends SimplePage
 {
     use InteractsWithFormActions;
@@ -28,6 +32,11 @@ class AcceptInvitation extends SimplePage
 
     public ?array $data = [];
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         $this->invitationModel = Invitation::findOrFail($this->invitation);
@@ -37,6 +46,12 @@ class AcceptInvitation extends SimplePage
         ]);
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -65,6 +80,11 @@ class AcceptInvitation extends SimplePage
             ->statePath('data');
     }
 
+    /**
+     * Create
+     *
+     * @return void
+     */
     public function create(): void
     {
         $this->invitationModel = Invitation::find($this->invitation);
@@ -105,6 +125,11 @@ class AcceptInvitation extends SimplePage
         return 'Accept Invitation';
     }
 
+    /**
+     * Has Logo
+     *
+     * @return bool
+     */
     public function hasLogo(): bool
     {
         return false;

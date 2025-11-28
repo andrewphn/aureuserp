@@ -10,6 +10,11 @@ use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\ActivityTypeResour
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\ActivityTypeResource\Pages\ViewActivityType;
 use Webkul\TimeOff\Models\ActivityType;
 
+/**
+ * Activity Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityTypeResource extends BaseActivityTypeResource
 {
     protected static ?string $model = ActivityType::class;

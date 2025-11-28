@@ -9,6 +9,11 @@ use Filament\Resources\Pages\EditRecord;
 use Webkul\Website\Filament\Admin\Resources\PageResource;
 use Webkul\Website\Models\Page;
 
+/**
+ * Edit Page Filament page
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPage extends EditRecord
 {
     protected static string $resource = PageResource::class;

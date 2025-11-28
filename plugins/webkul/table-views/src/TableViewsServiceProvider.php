@@ -11,12 +11,22 @@ use Illuminate\Contracts\View\View;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Table Views Service Provider service provider
+ *
+ */
 class TableViewsServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'table-views';
 
     public static string $viewNamespace = 'table-views';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -30,12 +40,21 @@ class TableViewsServiceProvider extends PackageServiceProvider
             ->runsMigrations();
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         $this->registerCustomCss();
         $this->registerCustomJs();
     }
 
+    /**
+     * Package Registered
+     *
+     */
     public function packageRegistered()
     {
         FilamentView::registerRenderHook(
@@ -49,6 +68,10 @@ class TableViewsServiceProvider extends PackageServiceProvider
         );
     }
 
+    /**
+     * Register Custom Css
+     *
+     */
     public function registerCustomCss()
     {
         FilamentAsset::register([
@@ -56,6 +79,10 @@ class TableViewsServiceProvider extends PackageServiceProvider
         ], 'table-views');
     }
 
+    /**
+     * Register Custom Js
+     *
+     */
     public function registerCustomJs()
     {
         FilamentAsset::register([

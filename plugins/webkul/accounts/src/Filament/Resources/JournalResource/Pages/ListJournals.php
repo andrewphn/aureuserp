@@ -8,6 +8,11 @@ use Webkul\Account\Filament\Resources\JournalResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Journals class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListJournals extends ListRecords
 {
     use HasTableViews;

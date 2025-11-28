@@ -7,6 +7,10 @@ use Webkul\Employee\Models\Employee;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
+/**
+ * Employee Policy authorization policy
+ *
+ */
 class EmployeePolicy
 {
     use HandlesAuthorization, HasScopedPermissions;

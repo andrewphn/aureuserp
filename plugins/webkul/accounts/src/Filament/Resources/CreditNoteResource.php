@@ -9,12 +9,23 @@ use Webkul\Account\Filament\Resources\CreditNoteResource\Pages\ListCreditNotes;
 use Webkul\Account\Filament\Resources\CreditNoteResource\Pages\ViewCreditNote;
 use Webkul\Account\Models\Move as AccountMove;
 
+/**
+ * Credit Note Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreditNoteResource extends InvoiceResource
 {
     protected static ?string $model = AccountMove::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [

@@ -11,6 +11,11 @@ use Webkul\Employee\Filament\Resources\EmployeeResource;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\CandidateResource;
 use Webkul\Recruitment\Models\Candidate;
 
+/**
+ * View Candidate class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCandidate extends ViewRecord
 {
     protected static string $resource = CandidateResource::class;

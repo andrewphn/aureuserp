@@ -17,6 +17,11 @@ use Filament\Schemas\Components\Component;
 use Illuminate\Support\Collection;
 use Webkul\Field\Models\Field;
 
+/**
+ * Custom Fields class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CustomFields extends Component
 {
     protected array $include = [];
@@ -30,6 +35,12 @@ class CustomFields extends Component
         $this->resourceClass = $resource;
     }
 
+    /**
+     * Make
+     *
+     * @param string $resource
+     * @return static
+     */
     public static function make(string $resource): static
     {
         $static = app(static::class, ['resource' => $resource]);
@@ -39,6 +50,12 @@ class CustomFields extends Component
         return $static;
     }
 
+    /**
+     * Include
+     *
+     * @param array $fields
+     * @return static
+     */
     public function include(array $fields): static
     {
         $this->include = $fields;
@@ -46,6 +63,12 @@ class CustomFields extends Component
         return $this;
     }
 
+    /**
+     * Exclude
+     *
+     * @param array $fields
+     * @return static
+     */
     public function exclude(array $fields): static
     {
         $this->exclude = $fields;
@@ -83,6 +106,12 @@ class CustomFields extends Component
         return $query->orderBy('sort')->get();
     }
 
+    /**
+     * Create Field
+     *
+     * @param Field $field
+     * @return Component
+     */
     protected function createField(Field $field): Component
     {
         $componentClass = match ($field->type) {
@@ -138,6 +167,13 @@ class CustomFields extends Component
         return $component;
     }
 
+    /**
+     * Apply Validation
+     *
+     * @param Component $component
+     * @param array $validation
+     * @return void
+     */
     protected function applyValidation(Component $component, array $validation): void
     {
         $rule = $validation['validation'];
@@ -159,6 +195,13 @@ class CustomFields extends Component
         }
     }
 
+    /**
+     * Apply Setting
+     *
+     * @param Component $component
+     * @param array $setting
+     * @return void
+     */
     protected function applySetting(Component $component, array $setting): void
     {
         $name = $setting['setting'];

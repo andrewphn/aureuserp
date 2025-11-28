@@ -6,6 +6,11 @@ use Webkul\Contact\Filament\Clusters\Configurations;
 use Webkul\Contact\Filament\Clusters\Configurations\Resources\IndustryResource\Pages\ManageIndustries;
 use Webkul\Partner\Filament\Resources\IndustryResource as BaseIndustryResource;
 
+/**
+ * Industry Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class IndustryResource extends BaseIndustryResource
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office';

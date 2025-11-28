@@ -81,6 +81,15 @@ use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Country;
 
+/**
+ * Employee Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EmployeeResource extends Resource
 {
     use HasCustomFields;
@@ -116,6 +125,12 @@ class EmployeeResource extends Resource
         ];
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -126,6 +141,12 @@ class EmployeeResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -815,6 +836,12 @@ class EmployeeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -1367,6 +1394,12 @@ class EmployeeResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['categories']));
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -1798,6 +1831,12 @@ class EmployeeResource extends Resource
         ];
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
@@ -1824,6 +1863,12 @@ class EmployeeResource extends Resource
         return $relations;
     }
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'employees/employees';

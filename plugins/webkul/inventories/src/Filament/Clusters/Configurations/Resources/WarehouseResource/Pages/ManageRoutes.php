@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\RouteResource;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\WarehouseResource;
 
+/**
+ * Manage Routes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageRoutes extends ManageRelatedRecords
 {
     protected static string $resource = WarehouseResource::class;
@@ -24,6 +29,12 @@ class ManageRoutes extends ManageRelatedRecords
         return __('inventories::filament/clusters/configurations/resources/warehouse/pages/manage-routes.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return RouteResource::form($schema);

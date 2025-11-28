@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource;
 
+/**
+ * Edit Operation Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditOperationType extends EditRecord
 {
     protected static string $resource = OperationTypeResource::class;

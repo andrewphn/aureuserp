@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Blog\Models\Post;
 use Webkul\Security\Models\User;
 
+/**
+ * Post Policy authorization policy
+ *
+ */
 class PostPolicy
 {
     use HandlesAuthorization;

@@ -5,6 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCat
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource;
 use Webkul\Product\Filament\Resources\CategoryResource\Pages\ManageProducts as BaseManageProducts;
 
+/**
+ * Manage Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageProducts extends BaseManageProducts
 {
     protected static string $resource = ProductCategoryResource::class;

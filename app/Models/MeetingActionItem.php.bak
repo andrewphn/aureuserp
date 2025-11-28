@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class MeetingActionItem extends Model
+{
+    protected $fillable = [
+        'meeting_transcript_id',
+        'assignee',
+        'task',
+        'due_date',
+        'priority',
+        'status',
+        'mentioned_at_time',
+        'context',
+    ];
+
+    protected $casts = [
+        'due_date' => 'date',
+    ];
+
+    public function meetingTranscript(): BelongsTo
+    {
+        return $this->belongsTo(MeetingTranscript::class);
+    }
+}

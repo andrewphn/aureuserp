@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Employee\Models\Calendar;
 use Webkul\Security\Models\User;
 
+/**
+ * Calendar Attendance Seeder database seeder
+ *
+ */
 class CalendarAttendanceSeeder extends Seeder
 {
     /**

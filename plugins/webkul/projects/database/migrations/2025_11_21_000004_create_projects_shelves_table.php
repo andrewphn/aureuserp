@@ -1,0 +1,204 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * Creates shelves table for all shelf components.
+     *
+     * Meeting Reference: "It has to be at the component level." (01:20:30)
+     *
+     * Tracks both fixed and adjustable shelves with production timeline.
+     */
+    public function up(): void
+    {
+        Schema::create('projects_shelves', function (Blueprint $table) {
+            $table->id();
+
+            // Relationships
+            $table->foreignId('cabinet_specification_id')
+                ->constrained('projects_cabinet_specifications')
+                ->onDelete('cascade')
+                ->comment('Parent cabinet');
+
+            $table->foreignId('section_id')
+                ->nullable()
+                ->constrained('projects_cabinet_sections')
+                ->onDelete('set null')
+                ->comment('Parent section (optional)');
+
+            // ========================================
+            // IDENTIFICATION
+            // ========================================
+
+            $table->integer('shelf_number')->default(1)
+                ->comment('Shelf position (1, 2, 3...)');
+
+            $table->string('shelf_name', 100)->nullable()
+                ->comment('Shelf name: S1, S2, etc.');
+
+            $table->integer('sort_order')->default(0)
+                ->comment('Display order within cabinet/section');
+
+            // ========================================
+            // DIMENSIONS
+            // ========================================
+
+            $table->decimal('width_inches', 8, 3)
+                ->comment('Shelf width');
+
+            $table->decimal('depth_inches', 8, 3)
+                ->comment('Shelf depth');
+
+            $table->decimal('thickness_inches', 5, 3)
+                ->comment('Material thickness');
+
+            // ========================================
+            // SHELF TYPE & CONFIGURATION
+            // ========================================
+
+            $table->string('shelf_type', 50)
+                ->comment('adjustable, fixed, pullout');
+
+            $table->string('material', 100)->nullable()
+                ->comment('plywood, solid_edge, melamine');
+
+            $table->string('edge_treatment', 100)->nullable()
+                ->comment('edge_banded, solid_edge, exposed');
+
+            // ========================================
+            // ADJUSTABLE SHELF SPECIFIC
+            // ========================================
+
+            $table->decimal('pin_hole_spacing', 5, 3)->nullable()
+                ->comment('1.25" or 32mm typical');
+
+            $table->integer('number_of_positions')->nullable()
+                ->comment('Adjustment positions available');
+
+            // ========================================
+            // PULLOUT SHELF SPECIFIC
+            // ========================================
+
+            $table->string('slide_type', 100)->nullable()
+                ->comment('blum_tandem, blum_undermount, full_extension');
+
+            $table->string('slide_model', 100)->nullable()
+                ->comment('Specific slide model number');
+
+            $table->decimal('slide_length_inches', 5, 2)->nullable()
+                ->comment('18", 21", 24" typical');
+
+            $table->boolean('soft_close')->default(false)
+                ->comment('Soft close slides');
+
+            $table->integer('weight_capacity_lbs')->nullable()
+                ->comment('Weight rating');
+
+            // ========================================
+            // FINISH & APPEARANCE
+            // ========================================
+
+            $table->string('finish_type', 100)->nullable()
+                ->comment('Inherits from cabinet if NULL: painted, stained, clear_coat');
+
+            $table->string('paint_color', 100)->nullable()
+                ->comment('Paint color if different from cabinet');
+
+            $table->string('stain_color', 100)->nullable()
+                ->comment('Stain color if different from cabinet');
+
+            // ========================================
+            // PRODUCTION TRACKING
+            // ========================================
+
+            // Cutting Phase
+            $table->timestamp('cnc_cut_at')->nullable()
+                ->comment('When CNC cut this shelf');
+
+            $table->timestamp('manually_cut_at')->nullable()
+                ->comment('When manually cut');
+
+            $table->timestamp('edge_banded_at')->nullable()
+                ->comment('When edge banding completed');
+
+            // Assembly Phase (for pullout shelves)
+            $table->timestamp('assembled_at')->nullable()
+                ->comment('When shelf assembled (if pullout with hardware)');
+
+            $table->timestamp('sanded_at')->nullable()
+                ->comment('When sanding completed');
+
+            // Finishing Phase
+            $table->timestamp('finished_at')->nullable()
+                ->comment('When finish applied and cured');
+
+            // Installation Phase
+            $table->timestamp('hardware_installed_at')->nullable()
+                ->comment('When slides/pins installed (pullout/adjustable)');
+
+            $table->timestamp('installed_in_cabinet_at')->nullable()
+                ->comment('When installed into cabinet');
+
+            // ========================================
+            // QUALITY CONTROL
+            // ========================================
+
+            $table->boolean('qc_passed')->nullable()
+                ->comment('Passed quality control inspection');
+
+            $table->text('qc_notes')->nullable()
+                ->comment('QC findings and issues');
+
+            $table->timestamp('qc_inspected_at')->nullable()
+                ->comment('When QC inspection performed');
+
+            $table->foreignId('qc_inspector_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who performed QC');
+
+            // ========================================
+            // NOTES
+            // ========================================
+
+            $table->text('notes')->nullable()
+                ->comment('Shelf-specific notes');
+
+            // ========================================
+            // METADATA
+            // ========================================
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            // ========================================
+            // INDEXES
+            // ========================================
+
+            $table->index('cabinet_specification_id', 'idx_shelves_cabinet');
+            $table->index('section_id', 'idx_shelves_section');
+            $table->index('shelf_type', 'idx_shelves_type');
+            $table->index(['cnc_cut_at', 'finished_at'], 'idx_shelves_production');
+            $table->index('qc_passed', 'idx_shelves_qc');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('projects_shelves');
+    }
+};

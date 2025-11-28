@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Livewire;
 use Filament\Pages\SimplePage;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Respond Quotation class
+ *
+ */
 class RespondQuotation extends SimplePage
 {
     protected string $view = 'purchases::livewire.respond-quotation';
@@ -13,6 +17,11 @@ class RespondQuotation extends SimplePage
 
     public string $action;
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         $order = Order::findOrFail($this->order);

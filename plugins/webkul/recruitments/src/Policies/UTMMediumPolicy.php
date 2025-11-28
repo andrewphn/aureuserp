@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\UTMMedium;
 use Webkul\Security\Models\User;
 
+/**
+ * UTMMedium Policy authorization policy
+ *
+ */
 class UTMMediumPolicy
 {
     use HandlesAuthorization;

@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Filament\Resources\RoleResource;
 use Spatie\Permission\PermissionRegistrar;
 
+/**
+ * Edit Role class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
@@ -25,6 +30,12 @@ class EditRole extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $this->permissions = collect($data)
@@ -41,6 +52,11 @@ class EditRole extends EditRecord
         ];
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         DB::transaction(function () {
@@ -48,6 +64,11 @@ class EditRole extends EditRecord
         });
     }
 
+    /**
+     * Sync Permissions
+     *
+     * @return void
+     */
     private function syncPermissions(): void
     {
         $permissionModel = Utils::getPermissionModel();
@@ -95,6 +116,12 @@ class EditRole extends EditRecord
         $this->syncPermissionsByIds($allPermissionIds->unique()->values()->toArray());
     }
 
+    /**
+     * Sync Permissions By Ids
+     *
+     * @param array $permissionIds
+     * @return void
+     */
     private function syncPermissionsByIds(array $permissionIds): void
     {
         $roleId = $this->record->id;

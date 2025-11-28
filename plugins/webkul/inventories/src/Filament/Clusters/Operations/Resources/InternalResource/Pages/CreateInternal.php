@@ -11,6 +11,11 @@ use Webkul\Inventory\Enums\OperationState;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource;
 use Webkul\Inventory\Models\OperationType;
 
+/**
+ * Create Internal class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateInternal extends CreateRecord
 {
     protected static string $resource = InternalResource::class;
@@ -33,6 +38,11 @@ class CreateInternal extends CreateRecord
             ->body(__('inventories::filament/clusters/operations/resources/internal/pages/create-internal.notification.body'));
     }
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         parent::mount();
@@ -48,6 +58,12 @@ class CreateInternal extends CreateRecord
         $this->form->fill($this->data);
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $operationType = OperationType::find($data['operation_type_id']);

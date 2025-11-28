@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Webkul\Partner\Models\Partner;
 use Webkul\Project\Models\Project;
 
+/**
+ * Footer Api Controller controller
+ *
+ */
 class FooterApiController extends Controller
 {
     /**

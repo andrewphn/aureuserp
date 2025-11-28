@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource;
 
+/**
+ * View Leave Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewLeaveType extends ViewRecord
 {
     protected static string $resource = LeaveTypeResource::class;

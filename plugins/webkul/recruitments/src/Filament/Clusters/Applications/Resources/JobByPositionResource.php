@@ -18,6 +18,11 @@ use Webkul\Recruitment\Filament\Clusters\Applications;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\JobByPositionResource\Pages\ListJobByPositions;
 use Webkul\Recruitment\Models\JobPosition;
 
+/**
+ * Job By Position Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class JobByPositionResource extends Resource
 {
     protected static ?string $model = JobPosition::class;
@@ -40,11 +45,23 @@ class JobByPositionResource extends Resource
         return __('recruitments::filament/clusters/applications/resources/job-by-application.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return JobPositionResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -169,6 +186,12 @@ class JobByPositionResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return JobPositionResource::infolist($schema);

@@ -2,8 +2,17 @@
 
 namespace Webkul\FullCalendar\Concerns;
 
+/**
+ * Interacts With Raw JS trait
+ *
+ */
 trait InteractsWithRawJS
 {
+    /**
+     * Event Class Names
+     *
+     * @return string
+     */
     public function eventClassNames(): string
     {
         return <<<'JS'
@@ -11,6 +20,11 @@ trait InteractsWithRawJS
         JS;
     }
 
+    /**
+     * Event Content
+     *
+     * @return string
+     */
     public function eventContent(): string
     {
         return <<<'JS'
@@ -18,6 +32,11 @@ trait InteractsWithRawJS
         JS;
     }
 
+    /**
+     * Event Did Mount
+     *
+     * @return string
+     */
     public function eventDidMount(): string
     {
         return <<<'JS'
@@ -25,6 +44,11 @@ trait InteractsWithRawJS
         JS;
     }
 
+    /**
+     * Event Will Unmount
+     *
+     * @return string
+     */
     public function eventWillUnmount(): string
     {
         return <<<'JS'

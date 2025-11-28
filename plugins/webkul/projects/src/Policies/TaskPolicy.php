@@ -7,6 +7,10 @@ use Webkul\Project\Models\Task;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
+/**
+ * Task Policy authorization policy
+ *
+ */
 class TaskPolicy
 {
     use HandlesAuthorization, HasScopedPermissions;

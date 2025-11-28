@@ -17,6 +17,43 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\UOM;
 
+/**
+ * Scrap Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $origin
+ * @property mixed $state
+ * @property string|null $qty
+ * @property bool $should_replenish
+ * @property \Carbon\Carbon|null $closed_at
+ * @property int $product_id
+ * @property int $uom_id
+ * @property int $lot_id
+ * @property int $package_id
+ * @property int $partner_id
+ * @property int $operation_id
+ * @property int $source_location_id
+ * @property int $destination_location_id
+ * @property int $company_id
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $moves
+ * @property-read \Illuminate\Database\Eloquent\Model|null $product
+ * @property-read \Illuminate\Database\Eloquent\Model|null $uom
+ * @property-read \Illuminate\Database\Eloquent\Model|null $lot
+ * @property-read \Illuminate\Database\Eloquent\Model|null $package
+ * @property-read \Illuminate\Database\Eloquent\Model|null $operation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $sourceLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $destinationLocation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $partner
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection $moveLines
+ *
+ */
 class Scrap extends Model
 {
     use HasChatter, HasFactory, HasLogActivity;
@@ -82,66 +119,131 @@ class Scrap extends Model
         'closed_at'        => 'datetime',
     ];
 
+    /**
+     * Product
+     *
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withTrashed();
     }
 
+    /**
+     * Uom
+     *
+     * @return BelongsTo
+     */
     public function uom(): BelongsTo
     {
         return $this->belongsTo(UOM::class);
     }
 
+    /**
+     * Lot
+     *
+     * @return BelongsTo
+     */
     public function lot(): BelongsTo
     {
         return $this->belongsTo(Lot::class);
     }
 
+    /**
+     * Package
+     *
+     * @return BelongsTo
+     */
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
     }
 
+    /**
+     * Operation
+     *
+     * @return BelongsTo
+     */
     public function operation(): BelongsTo
     {
         return $this->belongsTo(Operation::class);
     }
 
+    /**
+     * Source Location
+     *
+     * @return BelongsTo
+     */
     public function sourceLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * Destination Location
+     *
+     * @return BelongsTo
+     */
     public function destinationLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * Partner
+     *
+     * @return BelongsTo
+     */
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Tags
+     *
+     * @return BelongsToMany
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'inventories_scrap_tags', 'scrap_id', 'tag_id');
     }
 
+    /**
+     * Moves
+     *
+     * @return HasMany
+     */
     public function moves(): HasMany
     {
         return $this->hasMany(Move::class);
     }
 
+    /**
+     * Move Lines
+     *
+     * @return HasManyThrough
+     */
     public function moveLines(): HasManyThrough
     {
         return $this->hasManyThrough(MoveLine::class, Move::class);
@@ -149,6 +251,11 @@ class Scrap extends Model
 
     /**
      * Bootstrap any application services.
+     */
+    /**
+     * Boot
+     *
+     * @return void
      */
     protected static function boot()
     {
@@ -162,11 +269,20 @@ class Scrap extends Model
     /**
      * Update the full name without triggering additional events
      */
+    /**
+     * Update Name
+     *
+     */
     public function updateName()
     {
         $this->name = 'SP/'.$this->id;
     }
 
+    /**
+     * New Factory
+     *
+     * @return ScrapFactory
+     */
     protected static function newFactory(): ScrapFactory
     {
         return ScrapFactory::new();

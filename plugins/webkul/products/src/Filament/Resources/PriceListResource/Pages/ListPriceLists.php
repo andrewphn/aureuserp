@@ -8,6 +8,11 @@ use Webkul\Product\Filament\Resources\PriceListResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Price Lists class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPriceLists extends ListRecords
 {
     use HasTableViews;

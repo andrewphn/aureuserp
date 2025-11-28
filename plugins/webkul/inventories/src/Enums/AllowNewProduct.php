@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Allow New Product enumeration
+ *
+ */
 enum AllowNewProduct: string implements HasLabel
 {
     case EMPTY = 'empty';

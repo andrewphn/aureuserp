@@ -5,6 +5,10 @@ namespace Webkul\TimeOff\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\TimeOff\Models\LeaveType;
 
+/**
+ * Leave Type Factory model factory
+ *
+ */
 class LeaveTypeFactory extends Factory
 {
     /**

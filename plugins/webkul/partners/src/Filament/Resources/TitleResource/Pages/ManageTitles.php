@@ -8,6 +8,11 @@ use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\TitleResource;
 
+/**
+ * Manage Titles class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTitles extends ManageRecords
 {
     protected static string $resource = TitleResource::class;

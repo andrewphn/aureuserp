@@ -10,6 +10,11 @@ use Webkul\Recruitment\Models\RefuseReason;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Refuse Reasons class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListRefuseReasons extends ListRecords
 {
     use HasTableViews;

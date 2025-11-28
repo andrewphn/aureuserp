@@ -22,8 +22,18 @@ use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
 use Webkul\Sale\Facades\SaleOrder as SaleFacade;
 use Webkul\Support\Package;
 
+/**
+ * Inventory Manager class
+ *
+ */
 class InventoryManager
 {
+    /**
+     * Check Transfer Availability
+     *
+     * @param Operation $record The model record
+     * @return Operation
+     */
     public function checkTransferAvailability(Operation $record): Operation
     {
         return $this->computeTransfer($record);
@@ -34,6 +44,12 @@ class InventoryManager
         return $this->computeTransfer($record);
     }
 
+    /**
+     * Validate Transfer
+     *
+     * @param Operation $record The model record
+     * @return Operation
+     */
     public function validateTransfer(Operation $record): Operation
     {
         $record = $this->computeTransfer($record);
@@ -64,6 +80,12 @@ class InventoryManager
         return $record;
     }
 
+    /**
+     * Validate Transfer Move
+     *
+     * @param Move $move
+     * @return Move
+     */
     public function validateTransferMove(Move $move): Move
     {
         $move->update([
@@ -78,6 +100,12 @@ class InventoryManager
         return $move;
     }
 
+    /**
+     * Validate Transfer Move Line
+     *
+     * @param MoveLine $moveLine
+     * @return MoveLine
+     */
     public function validateTransferMoveLine(MoveLine $moveLine): MoveLine
     {
         $moveLine->update(['state' => MoveState::DONE]);
@@ -166,6 +194,12 @@ class InventoryManager
         return $moveLine;
     }
 
+    /**
+     * Cancel Transfer
+     *
+     * @param Operation $record The model record
+     * @return Operation
+     */
     public function cancelTransfer(Operation $record): Operation
     {
         foreach ($record->moves as $move) {
@@ -184,6 +218,12 @@ class InventoryManager
         return $record;
     }
 
+    /**
+     * Return Transfer
+     *
+     * @param Operation $record The model record
+     * @return Operation
+     */
     public function returnTransfer(Operation $record): Operation
     {
         $newOperation = $record->replicate()->fill([
@@ -243,6 +283,12 @@ class InventoryManager
 
     /**
      * Process back order for the operation.
+     */
+    /**
+     * Create Back Order
+     *
+     * @param Operation $record The model record
+     * @return void
      */
     public function createBackOrder(Operation $record): void
     {
@@ -306,6 +352,12 @@ class InventoryManager
         ]);
     }
 
+    /**
+     * Compute Transfer
+     *
+     * @param Operation $record The model record
+     * @return Operation
+     */
     public function computeTransfer(Operation $record): Operation
     {
         if (in_array($record->state, [OperationState::DONE, OperationState::CANCELED])) {
@@ -323,6 +375,12 @@ class InventoryManager
         return $record;
     }
 
+    /**
+     * Compute Transfer Move
+     *
+     * @param Move $record The model record
+     * @return Move
+     */
     public function computeTransferMove(Move $record): Move
     {
         $lines = $record->lines()->orderBy('created_at')->get();
@@ -501,6 +559,12 @@ class InventoryManager
         return $record;
     }
 
+    /**
+     * Compute Transfer State
+     *
+     * @param Operation $record The model record
+     * @return Operation
+     */
     public function computeTransferState(Operation $record): Operation
     {
         $record->refresh();
@@ -527,6 +591,12 @@ class InventoryManager
     /**
      * Check if a back order can be processed.
      */
+    /**
+     * Can Create Back Order
+     *
+     * @param Operation $record The model record
+     * @return bool
+     */
     public function canCreateBackOrder(Operation $record): bool
     {
         if ($record->operationType->create_backorder === CreateBackorder::NEVER) {
@@ -539,6 +609,13 @@ class InventoryManager
     /**
      * Calculate reserved quantity for a location.
      */
+    /**
+     * Calculate Reserved Qty
+     *
+     * @param mixed $location
+     * @param mixed $qty
+     * @return int
+     */
     private function calculateReservedQty($location, $qty): int
     {
         if ($location->type === LocationType::INTERNAL && ! $location->is_stock_location) {
@@ -550,6 +627,12 @@ class InventoryManager
 
     /**
      * Apply push rules for the operation.
+     */
+    /**
+     * Apply Push Rules
+     *
+     * @param Operation $record The model record
+     * @return void
      */
     public function applyPushRules(Operation $record): void
     {
@@ -588,6 +671,14 @@ class InventoryManager
     /**
      * Create a new operation based on a push rule and assign moves to it.
      */
+    /**
+     * Create Push Operation
+     *
+     * @param Operation $record The model record
+     * @param Rule $rule
+     * @param array $moves
+     * @return void
+     */
     private function createPushOperation(Operation $record, Rule $rule, array $moves): void
     {
         $newOperation = Operation::create([
@@ -616,6 +707,12 @@ class InventoryManager
 
     /**
      * Run a push rule on a move.
+     */
+    /**
+     * Run Push Rule
+     *
+     * @param Rule $rule
+     * @param Move $move
      */
     public function runPushRule(Rule $rule, Move $move)
     {
@@ -660,6 +757,12 @@ class InventoryManager
     /**
      * Traverse up the location tree to find a matching push rule.
      */
+    /**
+     * Get Push Rule
+     *
+     * @param Move $move
+     * @param array $filters
+     */
     public function getPushRule(Move $move, array $filters = [])
     {
         $foundRule = null;
@@ -686,6 +789,14 @@ class InventoryManager
 
     /**
      * Search for a push rule based on the provided filters.
+     */
+    /**
+     * Search Push Rule
+     *
+     * @param mixed $productPackaging
+     * @param mixed $product
+     * @param mixed $warehouse
+     * @param array $filters
      */
     public function searchPushRule($productPackaging, $product, $warehouse, array $filters)
     {

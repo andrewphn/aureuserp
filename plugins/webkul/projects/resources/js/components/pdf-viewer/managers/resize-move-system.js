@@ -589,3 +589,137 @@ export function clearResizeLockout(state) {
         console.log('🔓 Resize lockout cleared (save complete)');
     }
 }
+
+/**
+ * Handle real-time resize updates during drag
+ * @param {MouseEvent} event - Mouse move event
+ * @param {Object} state - Component state
+ */
+export function handleResize(event, state) {
+    // Direct inline resize handler - updates annotation during drag
+    if (!state.isResizing || !state.resizeStart) return;
+
+    const deltaX = event.clientX - state.resizeStart.mouseX;
+    const deltaY = event.clientY - state.resizeStart.mouseY;
+
+    const annotation = state.annotations.find(a => a.id === state.activeAnnotationId);
+    if (!annotation) return;
+
+    let newX = state.resizeStart.annoX;
+    let newY = state.resizeStart.annoY;
+    let newWidth = state.resizeStart.annoWidth;
+    let newHeight = state.resizeStart.annoHeight;
+
+    const handle = state.resizeHandle;
+
+    // Horizontal adjustments
+    if (handle.includes('w')) {
+        newX = state.resizeStart.annoX + deltaX;
+        newWidth = state.resizeStart.annoWidth - deltaX;
+    } else if (handle.includes('e')) {
+        newWidth = state.resizeStart.annoWidth + deltaX;
+    }
+
+    // Vertical adjustments
+    if (handle.includes('n')) {
+        newY = state.resizeStart.annoY + deltaY;
+        newHeight = state.resizeStart.annoHeight - deltaY;
+    } else if (handle.includes('s')) {
+        newHeight = state.resizeStart.annoHeight + deltaY;
+    }
+
+    // Enforce minimum size
+    const minSize = 20;
+    if (newWidth < minSize || newHeight < minSize) return;
+
+    // Update annotation screen coordinates
+    annotation.screenX = newX;
+    annotation.screenY = newY;
+    annotation.screenWidth = newWidth;
+    annotation.screenHeight = newHeight;
+}
+
+/**
+ * Handle real-time move updates during drag
+ * @param {MouseEvent} event - Mouse move event
+ * @param {Object} state - Component state
+ */
+export function handleMove(event, state) {
+    // Direct inline move handler - updates annotation position during drag
+    if (!state.isMoving || !state.moveStart) return;
+
+    const deltaX = event.clientX - state.moveStart.mouseX;
+    const deltaY = event.clientY - state.moveStart.mouseY;
+
+    const annotation = state.annotations.find(a => a.id === state.activeAnnotationId);
+    if (!annotation) return;
+
+    // Update screen position
+    annotation.screenX = state.moveStart.annoX + deltaX;
+    annotation.screenY = state.moveStart.annoY + deltaY;
+}
+
+/**
+ * Finish resize or move operation and save changes
+ * @param {MouseEvent} event - Mouse up event
+ * @param {Object} state - Component state
+ * @param {Object} refs - Alpine.js $refs
+ */
+export function finishResizeOrMove(event, state, refs) {
+    // Finish resize or move operation - save to server
+    if (state.isResizing) {
+        // Finish resize
+        const annotation = state.annotations.find(a => a.id === state.activeAnnotationId);
+        if (annotation) {
+            // Convert screen coordinates back to PDF coordinates
+            const pdfTopLeft = screenToPdf(
+                annotation.screenX,
+                annotation.screenY,
+                refs,
+                state
+            );
+            const pdfBottomRight = screenToPdf(
+                annotation.screenX + annotation.screenWidth,
+                annotation.screenY + annotation.screenHeight,
+                refs,
+                state
+            );
+
+            // Update PDF coordinates
+            annotation.pdfX = pdfTopLeft.x;
+            annotation.pdfY = pdfTopLeft.y;
+            annotation.pdfWidth = Math.abs(pdfBottomRight.x - pdfTopLeft.x);
+            annotation.pdfHeight = Math.abs(pdfTopLeft.y - pdfBottomRight.y);
+            annotation.normalizedX = pdfTopLeft.normalized.x;
+            annotation.normalizedY = pdfTopLeft.normalized.y;
+        }
+
+        state.isResizing = false;
+        state.resizeHandle = null;
+        state.resizeStart = null;
+        state.activeAnnotationId = null;
+
+    } else if (state.isMoving) {
+        // Finish move
+        const annotation = state.annotations.find(a => a.id === state.activeAnnotationId);
+        if (annotation) {
+            // Convert screen coordinates back to PDF coordinates
+            const pdfPos = screenToPdf(
+                annotation.screenX,
+                annotation.screenY,
+                refs,
+                state
+            );
+
+            // Update PDF coordinates (keep width/height the same)
+            annotation.pdfX = pdfPos.x;
+            annotation.pdfY = pdfPos.y;
+            annotation.normalizedX = pdfPos.normalized.x;
+            annotation.normalizedY = pdfPos.normalized.y;
+        }
+
+        state.isMoving = false;
+        state.moveStart = null;
+        state.activeAnnotationId = null;
+    }
+}

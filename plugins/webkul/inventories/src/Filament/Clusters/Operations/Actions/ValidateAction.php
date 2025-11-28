@@ -12,6 +12,11 @@ use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
 
+/**
+ * Validate Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ValidateAction extends Action
 {
     public static function getDefaultName(): ?string
@@ -79,6 +84,12 @@ class ValidateAction extends Action
             });
     }
 
+    /**
+     * Has Move Errors
+     *
+     * @param Operation $record The model record
+     * @return bool
+     */
     protected function hasMoveErrors(Operation $record): bool
     {
         $record = Inventory::computeTransfer($record);
@@ -96,6 +107,12 @@ class ValidateAction extends Action
      * Check if the move lines are valid.
      *
      * @return bool Returns false if a validation warning is triggered.
+     */
+    /**
+     * Has Move Line Errors
+     *
+     * @param mixed $move
+     * @return bool
      */
     private function hasMoveLineErrors($move): bool
     {
@@ -172,6 +189,14 @@ class ValidateAction extends Action
 
     /**
      * Send a notification with the given title, body and type.
+     */
+    /**
+     * Send Notification
+     *
+     * @param string $titleKey
+     * @param string $bodyKey
+     * @param string $type
+     * @return void
      */
     private function sendNotification(string $titleKey, string $bodyKey, string $type = 'info'): void
     {

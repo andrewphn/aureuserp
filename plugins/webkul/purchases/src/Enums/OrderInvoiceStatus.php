@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Order Invoice Status enumeration
+ *
+ */
 enum OrderInvoiceStatus: string implements HasColor, HasLabel
 {
     case NO = 'no';
@@ -13,6 +17,11 @@ enum OrderInvoiceStatus: string implements HasColor, HasLabel
 
     case INVOICED = 'invoiced';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

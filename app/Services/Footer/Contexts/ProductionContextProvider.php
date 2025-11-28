@@ -41,6 +41,12 @@ class ProductionContextProvider implements ContextProviderInterface
         return 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z';
     }
 
+    /**
+     * Load Context
+     *
+     * @param int|string $entityId
+     * @return array
+     */
     public function loadContext(int|string $entityId): array
     {
         // Load production job data
@@ -75,6 +81,13 @@ class ProductionContextProvider implements ContextProviderInterface
         return $data;
     }
 
+    /**
+     * Get Field Schema
+     *
+     * @param array $data The data array
+     * @param bool $isMinimized
+     * @return array
+     */
     public function getFieldSchema(array $data, bool $isMinimized = false): array
     {
         if ($isMinimized) {
@@ -84,6 +97,12 @@ class ProductionContextProvider implements ContextProviderInterface
         return $this->getExpandedSchema($data);
     }
 
+    /**
+     * Get Minimized Schema
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getMinimizedSchema(array $data): array
     {
         return [
@@ -95,6 +114,12 @@ class ProductionContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Get Expanded Schema
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function getExpandedSchema(array $data): array
     {
         $fields = [
@@ -166,11 +191,23 @@ class ProductionContextProvider implements ContextProviderInterface
         ];
     }
 
+    /**
+     * Supports Feature
+     *
+     * @param string $feature
+     * @return bool
+     */
     public function supportsFeature(string $feature): bool
     {
         return false;
     }
 
+    /**
+     * Get Actions
+     *
+     * @param array $data The data array
+     * @return array
+     */
     public function getActions(array $data): array
     {
         $actions = [];
@@ -186,6 +223,12 @@ class ProductionContextProvider implements ContextProviderInterface
         return $actions;
     }
 
+    /**
+     * Get Status Color
+     *
+     * @param string $status
+     * @return string
+     */
     protected function getStatusColor(string $status): string
     {
         return match(strtolower($status)) {

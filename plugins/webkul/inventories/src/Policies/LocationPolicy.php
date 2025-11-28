@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\Location;
 use Webkul\Security\Models\User;
 
+/**
+ * Location Policy authorization policy
+ *
+ */
 class LocationPolicy
 {
     use HandlesAuthorization;

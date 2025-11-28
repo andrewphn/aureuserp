@@ -5,6 +5,11 @@ namespace Webkul\Contact\Filament\Clusters\Configurations\Resources\BankResource
 use Webkul\Contact\Filament\Clusters\Configurations\Resources\BankResource;
 use Webkul\Partner\Filament\Resources\BankResource\Pages\ManageBanks as BaseManageBanks;
 
+/**
+ * Manage Banks class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageBanks extends BaseManageBanks
 {
     protected static string $resource = BankResource::class;

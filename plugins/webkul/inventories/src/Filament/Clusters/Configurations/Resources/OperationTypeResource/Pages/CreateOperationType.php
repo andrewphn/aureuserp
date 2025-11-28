@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Enums\ReservationMethod;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\OperationTypeResource;
 
+/**
+ * Create Operation Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateOperationType extends CreateRecord
 {
     protected static string $resource = OperationTypeResource::class;
@@ -25,6 +30,12 @@ class CreateOperationType extends CreateRecord
             ->body(__('inventories::filament/clusters/configurations/resources/operation-type/pages/create-operation-type.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['reservation_method'] = ReservationMethod::AT_CONFIRM;

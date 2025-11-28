@@ -10,6 +10,11 @@ use Webkul\Recruitment\Models\UTMSource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List UTMSources class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListUTMSources extends ListRecords
 {
     use HasTableViews;

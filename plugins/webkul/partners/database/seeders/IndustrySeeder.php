@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Industry Seeder database seeder
+ *
+ */
 class IndustrySeeder extends Seeder
 {
     /**

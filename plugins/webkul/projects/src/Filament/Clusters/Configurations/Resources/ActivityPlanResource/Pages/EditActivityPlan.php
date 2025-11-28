@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResource;
 
+/**
+ * Edit Activity Plan class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditActivityPlan extends EditRecord
 {
     protected static string $resource = ActivityPlanResource::class;

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Recruitment\Models\UTMSource;
 use Webkul\Security\Models\User;
 
+/**
+ * UTMSource Policy authorization policy
+ *
+ */
 class UTMSourcePolicy
 {
     use HandlesAuthorization;

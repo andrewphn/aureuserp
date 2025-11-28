@@ -7,8 +7,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Webkul\Support\Models\EmailLog;
 
+/**
+ * Email Service service
+ *
+ */
 class EmailService
 {
+    /**
+     * Send
+     *
+     * @param string $view
+     * @param string $mailClass
+     * @param array $payload
+     * @param array $attachments
+     */
     public function send(string $view, string $mailClass, array $payload, array $attachments = [])
     {
         try {
@@ -34,6 +46,15 @@ class EmailService
         }
     }
 
+    /**
+     * Log Email
+     *
+     * @param string $recipientEmail
+     * @param string $recipientName
+     * @param string $subject
+     * @param string $status
+     * @param ?string $errorMessage
+     */
     protected function logEmail(string $recipientEmail, string $recipientName, string $subject, string $status, ?string $errorMessage = null)
     {
         EmailLog::create([

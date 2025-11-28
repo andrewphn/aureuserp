@@ -5,6 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions\Print;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 
+/**
+ * Picking Operation Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PickingOperationAction extends Action
 {
     public static function getDefaultName(): ?string

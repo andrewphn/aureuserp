@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\User;
 use Webkul\TimeOff\Models\LeaveAllocation;
 
+/**
+ * Leave Allocation Policy authorization policy
+ *
+ */
 class LeaveAllocationPolicy
 {
     use HandlesAuthorization;

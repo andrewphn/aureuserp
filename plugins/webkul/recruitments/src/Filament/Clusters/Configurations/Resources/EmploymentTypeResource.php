@@ -7,6 +7,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\EmploymentTypeResource\Pages\ListEmploymentTypes;
 use Webkul\Recruitment\Models\EmploymentType;
 
+/**
+ * Employment Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EmploymentTypeResource extends BaseEmploymentTypeResource
 {
     protected static ?string $model = EmploymentType::class;

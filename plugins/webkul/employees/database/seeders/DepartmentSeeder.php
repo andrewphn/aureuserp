@@ -8,6 +8,10 @@ use Webkul\Employee\Models\Employee;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Department Seeder database seeder
+ *
+ */
 class DepartmentSeeder extends Seeder
 {
     /**

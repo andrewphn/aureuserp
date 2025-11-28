@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
 use Webkul\Inventory\Models\Location;
 
+/**
+ * Create Location class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateLocation extends CreateRecord
 {
     protected static string $resource = LocationResource::class;
@@ -25,6 +30,12 @@ class CreateLocation extends CreateRecord
             ->body(__('inventories::filament/clusters/configurations/resources/location/pages/create-location.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();

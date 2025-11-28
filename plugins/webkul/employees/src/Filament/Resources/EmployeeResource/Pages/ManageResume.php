@@ -6,6 +6,11 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Webkul\Employee\Filament\Resources\EmployeeResource;
 use Webkul\Employee\Traits\Resources\Employee\EmployeeResumeRelation;
 
+/**
+ * Manage Resume class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageResume extends ManageRelatedRecords
 {
     use EmployeeResumeRelation;

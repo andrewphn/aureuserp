@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Order Receipt Status enumeration
+ *
+ */
 enum OrderReceiptStatus: string implements HasColor, HasLabel
 {
     case NO = 'no';
@@ -15,6 +19,11 @@ enum OrderReceiptStatus: string implements HasColor, HasLabel
 
     case FULL = 'full';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

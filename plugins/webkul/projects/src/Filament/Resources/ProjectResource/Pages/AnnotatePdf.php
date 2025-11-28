@@ -15,6 +15,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Url;
 
+/**
+ * Annotate Pdf class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AnnotatePdf extends Page implements HasForms
 {
     use InteractsWithRecord;
@@ -38,6 +43,12 @@ class AnnotatePdf extends Page implements HasForms
     #[Url]
     public $pdf;
 
+    /**
+     * Mount
+     *
+     * @param int|string $record The model record
+     * @return void
+     */
     public function mount(int|string $record): void
     {
         $this->record = $this->resolveRecord($record);
@@ -134,6 +145,12 @@ class AnnotatePdf extends Page implements HasForms
 
     /**
      * Define a minimal form schema to trigger Filament asset loading
+     */
+    /**
+     * Define the form schema
+     *
+     * @param Schema $form
+     * @return Schema
      */
     public function form(Schema $form): Schema
     {

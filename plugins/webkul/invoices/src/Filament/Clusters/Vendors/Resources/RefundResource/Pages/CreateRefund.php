@@ -5,6 +5,11 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource\Page
 use Webkul\Account\Filament\Resources\RefundResource\Pages\CreateRefund as BaseCreateRefund;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\RefundResource;
 
+/**
+ * Create Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateRefund extends BaseCreateRefund
 {
     protected static string $resource = RefundResource::class;

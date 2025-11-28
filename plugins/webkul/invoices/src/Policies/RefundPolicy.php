@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\Refund;
 use Webkul\Security\Models\User;
 
+/**
+ * Refund Policy authorization policy
+ *
+ */
 class RefundPolicy
 {
     use HandlesAuthorization;

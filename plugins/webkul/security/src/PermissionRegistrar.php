@@ -14,6 +14,10 @@ use Spatie\Permission\Contracts\PermissionsTeamResolver;
 use Spatie\Permission\Contracts\Role;
 use Spatie\Permission\DefaultTeamResolver;
 
+/**
+ * Permission Registrar class
+ *
+ */
 class PermissionRegistrar
 {
     protected Repository $cache;
@@ -63,6 +67,11 @@ class PermissionRegistrar
         $this->initializeCache();
     }
 
+    /**
+     * Initialize Cache
+     *
+     * @return void
+     */
     public function initializeCache(): void
     {
         $this->cacheExpirationTime = config('permission.cache.expiration_time') ?: \DateInterval::createFromDateString('24 hours');
@@ -102,6 +111,12 @@ class PermissionRegistrar
      *
      * @param  int|string|\Illuminate\Database\Eloquent\Model|null  $id
      */
+    /**
+     * Set Permissions Team Id
+     *
+     * @param mixed $id The unique identifier
+     * @return void
+     */
     public function setPermissionsTeamId($id): void
     {
         $this->teamResolver->setPermissionsTeamId($id);
@@ -118,6 +133,12 @@ class PermissionRegistrar
     /**
      * Register the permission check method on the gate.
      * We resolve the Gate fresh here, for benefit of long-running instances.
+     */
+    /**
+     * Register Permissions
+     *
+     * @param Gate $gate
+     * @return bool
      */
     public function registerPermissions(Gate $gate): bool
     {
@@ -136,6 +157,10 @@ class PermissionRegistrar
     /**
      * Flush the cache.
      */
+    /**
+     * Forget Cached Permissions
+     *
+     */
     public function forgetCachedPermissions()
     {
         $this->permissions = null;
@@ -144,6 +169,12 @@ class PermissionRegistrar
         return $this->cache->forget($this->cacheKey);
     }
 
+    /**
+     * Forget Wildcard Permission Index
+     *
+     * @param ?Model $record The model record
+     * @return void
+     */
     public function forgetWildcardPermissionIndex(?Model $record = null): void
     {
         if ($record) {
@@ -155,6 +186,12 @@ class PermissionRegistrar
         $this->wildcardPermissionsIndex = [];
     }
 
+    /**
+     * Get Wildcard Permission Index
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public function getWildcardPermissionIndex(Model $record): array
     {
         if (isset($this->wildcardPermissionsIndex[get_class($record)][$record->getKey()])) {
@@ -169,6 +206,11 @@ class PermissionRegistrar
      * This is only intended to be called by the PermissionServiceProvider on boot,
      * so that long-running instances like Octane or Swoole don't keep old data in memory.
      */
+    /**
+     * Clear Permissions Collection
+     *
+     * @return void
+     */
     public function clearPermissionsCollection(): void
     {
         $this->permissions = null;
@@ -180,6 +222,10 @@ class PermissionRegistrar
      *
      * @alias of clearPermissionsCollection()
      */
+    /**
+     * Clear Class Permissions
+     *
+     */
     public function clearClassPermissions()
     {
         $this->clearPermissionsCollection();
@@ -188,6 +234,11 @@ class PermissionRegistrar
     /**
      * Load permissions from cache
      * And turns permissions array into a \Illuminate\Database\Eloquent\Collection
+     */
+    /**
+     * Load Permissions
+     *
+     * @return void
      */
     private function loadPermissions(): void
     {
@@ -210,6 +261,13 @@ class PermissionRegistrar
 
     /**
      * Get the permissions based on the passed params.
+     */
+    /**
+     * Get Permissions
+     *
+     * @param array $params
+     * @param bool $onlyOne
+     * @return Collection
      */
     public function getPermissions(array $params = [], bool $onlyOne = false): Collection
     {
@@ -250,6 +308,11 @@ class PermissionRegistrar
         return $this->permissionClass;
     }
 
+    /**
+     * Set Permission Class
+     *
+     * @param mixed $permissionClass
+     */
     public function setPermissionClass($permissionClass)
     {
         $this->permissionClass = $permissionClass;
@@ -264,6 +327,11 @@ class PermissionRegistrar
         return $this->roleClass;
     }
 
+    /**
+     * Set Role Class
+     *
+     * @param mixed $roleClass
+     */
     public function setRoleClass($roleClass)
     {
         $this->roleClass = $roleClass;
@@ -291,6 +359,12 @@ class PermissionRegistrar
     /**
      * Changes array keys with alias
      */
+    /**
+     * Aliased Array
+     *
+     * @param mixed $model The model instance
+     * @return array
+     */
     private function aliasedArray($model): array
     {
         return collect(is_array($model) ? $model : $model->getAttributes())->except($this->except)
@@ -300,6 +374,12 @@ class PermissionRegistrar
 
     /**
      * Array for cache alias
+     */
+    /**
+     * Alias Model Fields
+     *
+     * @param mixed $newKeys
+     * @return void
      */
     private function aliasModelFields($newKeys = []): void
     {
@@ -336,6 +416,12 @@ class PermissionRegistrar
         return ['alias' => array_flip($this->alias)] + compact('permissions', 'roles');
     }
 
+    /**
+     * Get Serialized Role Relation
+     *
+     * @param mixed $permission
+     * @return array
+     */
     private function getSerializedRoleRelation($permission): array
     {
         if (! $permission->roles->count()) {
@@ -381,6 +467,12 @@ class PermissionRegistrar
         ));
     }
 
+    /**
+     * Get Hydrated Role Collection
+     *
+     * @param array $roles
+     * @return Collection
+     */
     private function getHydratedRoleCollection(array $roles): Collection
     {
         return Collection::make(array_values(
@@ -388,6 +480,11 @@ class PermissionRegistrar
         ));
     }
 
+    /**
+     * Hydrate Roles Cache
+     *
+     * @return void
+     */
     private function hydrateRolesCache(): void
     {
         $roleInstance = (new ($this->getRoleClass())())->newInstance([], true);
@@ -401,6 +498,12 @@ class PermissionRegistrar
         $this->permissions['roles'] = [];
     }
 
+    /**
+     * Is Uid
+     *
+     * @param mixed $value The value to set
+     * @return bool
+     */
     public static function isUid($value): bool
     {
         if (! is_string($value) || empty(trim($value))) {

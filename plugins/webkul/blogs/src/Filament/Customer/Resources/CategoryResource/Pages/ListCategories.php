@@ -13,6 +13,11 @@ use Webkul\Blog\Models\Post;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Categories class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListCategories extends ListRecords
 {
     use HasTableViews;

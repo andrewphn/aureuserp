@@ -10,6 +10,10 @@ use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\CabinetSpecification;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Hierarchy Builder Modal class
+ *
+ */
 class HierarchyBuilderModal extends Component
 {
     // Modal state
@@ -32,6 +36,14 @@ class HierarchyBuilderModal extends Component
      * Listen for event to open hierarchy builder
      */
     #[On('open-hierarchy-builder')]
+    /**
+     * Open Hierarchy Builder
+     *
+     * @param array $annotation
+     * @param array $missingLevels
+     * @param array $context
+     * @return void
+     */
     public function openHierarchyBuilder(array $annotation, array $missingLevels, array $context): void
     {
         Log::info('🏗️ Opening Hierarchy Builder', [
@@ -58,6 +70,11 @@ class HierarchyBuilderModal extends Component
     /**
      * Initialize form state for each missing level
      */
+    /**
+     * Initialize Level Forms
+     *
+     * @return void
+     */
     protected function initializeLevelForms(): void
     {
         $this->levelForms = [];
@@ -78,6 +95,12 @@ class HierarchyBuilderModal extends Component
 
     /**
      * Get smart defaults for creating an entity
+     */
+    /**
+     * Get Defaults For Level
+     *
+     * @param string $entityType
+     * @return array
      */
     protected function getDefaultsForLevel(string $entityType): array
     {
@@ -130,6 +153,12 @@ class HierarchyBuilderModal extends Component
     /**
      * Get existing entities that can be linked
      */
+    /**
+     * Get Existing Options For Level
+     *
+     * @param string $entityType
+     * @return array
+     */
     protected function getExistingOptionsForLevel(string $entityType): array
     {
         $options = [];
@@ -175,6 +204,11 @@ class HierarchyBuilderModal extends Component
 
     /**
      * Save the hierarchy and create/link all entities
+     */
+    /**
+     * Save Hierarchy
+     *
+     * @return void
      */
     public function saveHierarchy(): void
     {
@@ -229,6 +263,14 @@ class HierarchyBuilderModal extends Component
     /**
      * Create entity based on type
      */
+    /**
+     * Create Entity
+     *
+     * @param string $entityType
+     * @param array $data The data array
+     * @param array $createdIds
+     * @return int
+     */
     protected function createEntity(string $entityType, array $data, array $createdIds): int
     {
         Log::info("Creating $entityType", ['data' => $data]);
@@ -258,6 +300,12 @@ class HierarchyBuilderModal extends Component
     /**
      * Update context IDs as we create entities
      */
+    /**
+     * Update Context From Created Ids
+     *
+     * @param array $createdIds
+     * @return void
+     */
     protected function updateContextFromCreatedIds(array $createdIds): void
     {
         if (isset($createdIds['room'])) {
@@ -274,6 +322,11 @@ class HierarchyBuilderModal extends Component
     /**
      * Close modal
      */
+    /**
+     * Close Modal
+     *
+     * @return void
+     */
     public function closeModal(): void
     {
         $this->showModal = false;
@@ -282,6 +335,12 @@ class HierarchyBuilderModal extends Component
 
     /**
      * Get display name for entity type
+     */
+    /**
+     * Get Entity Display Name
+     *
+     * @param string $entityType
+     * @return string
      */
     public function getEntityDisplayName(string $entityType): string
     {
@@ -294,6 +353,10 @@ class HierarchyBuilderModal extends Component
         };
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         return view('webkul-project::livewire.hierarchy-builder-modal');

@@ -7,12 +7,22 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Time Off Service Provider service provider
+ *
+ */
 class TimeOffServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'time-off';
 
     public static string $viewNamespace = 'time-off';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)

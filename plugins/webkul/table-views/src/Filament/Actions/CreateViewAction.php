@@ -11,6 +11,11 @@ use Guava\IconPicker\Forms\Components\IconPicker;
 use Webkul\TableViews\Models\TableView;
 use Webkul\TableViews\Models\TableViewFavorite;
 
+/**
+ * Create View Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateViewAction extends Action
 {
     use CanCustomizeProcess;

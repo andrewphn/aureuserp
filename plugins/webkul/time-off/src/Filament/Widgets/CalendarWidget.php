@@ -23,6 +23,11 @@ use Webkul\TimeOff\Filament\Actions\HolidayAction;
 use Webkul\TimeOff\Models\Leave;
 use Webkul\TimeOff\Traits\TimeOffHelper;
 
+/**
+ * Calendar Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CalendarWidget extends FullCalendarWidget
 {
     use TimeOffHelper;
@@ -35,6 +40,11 @@ class CalendarWidget extends FullCalendarWidget
         return __('time-off::filament/widgets/calendar-widget.heading.title');
     }
 
+    /**
+     * Config
+     *
+     * @return array
+     */
     public function config(): array
     {
         return [
@@ -99,6 +109,11 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * Modal Actions
+     *
+     * @return array
+     */
     public function modalActions(): array
     {
         return [
@@ -138,6 +153,11 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * View Action
+     *
+     * @return Action
+     */
     protected function viewAction(): Action
     {
         return ViewAction::make()
@@ -149,6 +169,11 @@ class CalendarWidget extends FullCalendarWidget
             ->schema($this->infolist());
     }
 
+    /**
+     * Header Actions
+     *
+     * @return array
+     */
     protected function headerActions(): array
     {
         return [
@@ -176,6 +201,11 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @return array
+     */
     public function infolist(): array
     {
         return [
@@ -257,6 +287,12 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
+    /**
+     * Fetch Events
+     *
+     * @param array $fetchInfo
+     * @return array
+     */
     public function fetchEvents(array $fetchInfo): array
     {
         $user = Auth::user();
@@ -311,6 +347,12 @@ class CalendarWidget extends FullCalendarWidget
             ->all();
     }
 
+    /**
+     * Get Event Priority
+     *
+     * @param State $state
+     * @return string
+     */
     private function getEventPriority(State $state): string
     {
         return match ($state) {
@@ -322,6 +364,12 @@ class CalendarWidget extends FullCalendarWidget
         };
     }
 
+    /**
+     * Get State Label
+     *
+     * @param State $state
+     * @return string
+     */
     private function getStateLabel(State $state): string
     {
         return match ($state) {
@@ -332,6 +380,12 @@ class CalendarWidget extends FullCalendarWidget
         };
     }
 
+    /**
+     * Get State Icon
+     *
+     * @param State $state
+     * @return string
+     */
     private function getStateIcon(State $state): string
     {
         return match ($state) {
@@ -343,6 +397,13 @@ class CalendarWidget extends FullCalendarWidget
         };
     }
 
+    /**
+     * Get State Color
+     *
+     * @param mixed $state
+     * @param mixed $isFilament
+     * @return string
+     */
     private function getStateColor($state, $isFilament = false): string
     {
         if ($isFilament) {
@@ -364,6 +425,16 @@ class CalendarWidget extends FullCalendarWidget
         };
     }
 
+    /**
+     * On Date Select
+     *
+     * @param string $start
+     * @param ?string $end
+     * @param bool $allDay
+     * @param ?array $view
+     * @param ?array $resource
+     * @return void
+     */
     public function onDateSelect(string $start, ?string $end, bool $allDay, ?array $view, ?array $resource): void
     {
         $startDate = Carbon::parse($start);

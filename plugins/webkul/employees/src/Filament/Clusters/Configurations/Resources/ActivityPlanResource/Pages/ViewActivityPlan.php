@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource;
 
+/**
+ * View Activity Plan class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewActivityPlan extends ViewRecord
 {
     protected static string $resource = ActivityPlanResource::class;

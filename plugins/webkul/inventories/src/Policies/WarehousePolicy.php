@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Security\Models\User;
 
+/**
+ * Warehouse Policy authorization policy
+ *
+ */
 class WarehousePolicy
 {
     use HandlesAuthorization;

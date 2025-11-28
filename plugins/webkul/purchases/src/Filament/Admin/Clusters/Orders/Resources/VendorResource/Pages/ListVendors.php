@@ -11,6 +11,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\VendorResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Vendors class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListVendors extends BaseListVendors
 {
     use HasTableViews;
@@ -22,6 +27,12 @@ class ListVendors extends BaseListVendors
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         $table = parent::table($table)

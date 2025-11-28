@@ -4,6 +4,10 @@ namespace Webkul\Product\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Price Rule Apply To enumeration
+ *
+ */
 enum PriceRuleApplyTo: string implements HasLabel
 {
     case PRODUCT = 'product';

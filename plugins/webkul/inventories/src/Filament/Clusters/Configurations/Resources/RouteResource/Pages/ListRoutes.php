@@ -11,6 +11,11 @@ use Webkul\Inventory\Models\Route;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Routes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListRoutes extends ListRecords
 {
     use HasTableViews;

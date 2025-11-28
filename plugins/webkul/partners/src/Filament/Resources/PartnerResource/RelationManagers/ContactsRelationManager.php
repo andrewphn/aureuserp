@@ -10,10 +10,21 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 
+/**
+ * Contacts Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ContactsRelationManager extends RelationManager
 {
     protected static string $relationship = 'contacts';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return PartnerResource::form($schema);

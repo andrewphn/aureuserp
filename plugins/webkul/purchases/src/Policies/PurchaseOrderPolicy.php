@@ -7,6 +7,10 @@ use Webkul\Purchase\Models\PurchaseOrder;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
+/**
+ * Purchase Order Policy authorization policy
+ *
+ */
 class PurchaseOrderPolicy
 {
     use HandlesAuthorization, HasScopedPermissions;

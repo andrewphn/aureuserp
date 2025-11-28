@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Account\Models\MoveLine;
 
+/**
+ * Account Move Line Eloquent model
+ *
+ */
 class AccountMoveLine extends MoveLine
 {
     /**
@@ -21,11 +25,21 @@ class AccountMoveLine extends MoveLine
         parent::__construct($attributes);
     }
 
+    /**
+     * Move
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function move()
     {
         return $this->belongsTo(AccountMove::class);
     }
 
+    /**
+     * Purchase Order Line
+     *
+     * @return BelongsTo
+     */
     public function purchaseOrderLine(): BelongsTo
     {
         return $this->belongsTo(OrderLine::class, 'purchase_order_line_id');

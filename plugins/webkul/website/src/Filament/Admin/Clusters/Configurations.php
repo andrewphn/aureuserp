@@ -5,6 +5,11 @@ namespace Webkul\Website\Filament\Admin\Clusters;
 use BackedEnum;
 use Filament\Clusters\Cluster;
 
+/**
+ * Configurations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Configurations extends Cluster
 {
     protected static ?string $slug = 'website/configurations';

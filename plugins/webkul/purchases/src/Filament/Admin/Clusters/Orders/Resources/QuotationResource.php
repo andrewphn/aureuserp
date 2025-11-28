@@ -13,6 +13,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource\P
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource\Pages\ViewQuotation;
 use Webkul\Purchase\Models\Quotation;
 
+/**
+ * Quotation Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class QuotationResource extends OrderResource
 {
     protected static ?string $model = Quotation::class;
@@ -39,6 +44,12 @@ class QuotationResource extends OrderResource
         return __('purchases::filament/admin/clusters/orders/resources/quotation.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

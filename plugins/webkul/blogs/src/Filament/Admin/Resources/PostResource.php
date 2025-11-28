@@ -44,6 +44,11 @@ use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\ListPosts;
 use Webkul\Blog\Filament\Admin\Resources\PostResource\Pages\ViewPost;
 use Webkul\Blog\Models\Post;
 
+/**
+ * Post Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
@@ -64,6 +69,12 @@ class PostResource extends Resource
         return __('blogs::filament/admin/resources/post.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -151,6 +162,12 @@ class PostResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -276,6 +293,12 @@ class PostResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -371,6 +394,12 @@ class PostResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

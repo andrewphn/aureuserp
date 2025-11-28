@@ -10,6 +10,10 @@ use Webkul\Inventory\Enums\OperationType;
 use Webkul\Inventory\Enums\ReservationMethod;
 use Webkul\Security\Models\User;
 
+/**
+ * Operation Type Seeder database seeder
+ *
+ */
 class OperationTypeSeeder extends Seeder
 {
     /**

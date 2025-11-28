@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Webkul\Product\Models\Packaging as BasePackaging;
 
+/**
+ * Packaging Eloquent model
+ *
+ */
 class Packaging extends BasePackaging
 {
     /**
@@ -25,11 +29,21 @@ class Packaging extends BasePackaging
         ]);
     }
 
+    /**
+     * Package Type
+     *
+     * @return BelongsTo
+     */
     public function packageType(): BelongsTo
     {
         return $this->belongsTo(PackageType::class);
     }
 
+    /**
+     * Routes
+     *
+     * @return BelongsToMany
+     */
     public function routes(): BelongsToMany
     {
         return $this->belongsToMany(Route::class, 'inventories_route_packagings', 'packaging_id', 'route_id');

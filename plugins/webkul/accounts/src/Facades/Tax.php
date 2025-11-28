@@ -4,6 +4,10 @@ namespace Webkul\Account\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Tax class
+ *
+ */
 class Tax extends Facade
 {
     /**

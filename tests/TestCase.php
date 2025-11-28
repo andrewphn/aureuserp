@@ -7,18 +7,53 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 abstract class TestCase extends BaseTestCase
 {
     /**
-     * Define database migrations for tests
+     * The migration paths for plugins.
+     *
+     * @var array<string>
      */
-    protected function defineDatabaseMigrations(): void
-    {
-        // Load migrations from all plugin directories
-        $pluginPaths = glob(base_path('plugins/webkul/*/database/migrations'));
+    protected array $pluginMigrationPaths = [];
 
-        foreach ($pluginPaths as $path) {
-            $this->loadMigrationsFrom($path);
+    /**
+     * Setup the test environment.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Collect plugin migration paths
+        $this->pluginMigrationPaths = glob(base_path('plugins/webkul/*/database/migrations')) ?: [];
+    }
+
+    /**
+     * The parameters that should be used when running "migrate:fresh".
+     * Override to include plugin migration paths.
+     *
+     * @return array
+     */
+    protected function migrateFreshUsing()
+    {
+        // Get all plugin migration paths
+        $paths = glob(base_path('plugins/webkul/*/database/migrations')) ?: [];
+
+        // Add core migrations path
+        $paths[] = database_path('migrations');
+
+        $seeder = property_exists($this, 'seeder') ? $this->seeder : false;
+        $shouldSeed = property_exists($this, 'seed') ? $this->seed : false;
+
+        $params = [
+            '--drop-views' => property_exists($this, 'dropViews') ? $this->dropViews : false,
+            '--drop-types' => property_exists($this, 'dropTypes') ? $this->dropTypes : false,
+            '--path' => $paths,
+            '--realpath' => true,
+        ];
+
+        if ($seeder) {
+            $params['--seeder'] = $seeder;
+        } else {
+            $params['--seed'] = $shouldSeed;
         }
 
-        // Also load core database migrations
-        $this->loadMigrationsFrom(database_path('migrations'));
+        return $params;
     }
 }

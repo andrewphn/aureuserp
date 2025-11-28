@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Filament\Resources\PaymentsResource;
 
+/**
+ * Create Payments class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePayments extends CreateRecord
 {
     protected static string $resource = PaymentsResource::class;
@@ -25,6 +30,12 @@ class CreatePayments extends CreateRecord
             ->body(__('accounts::filament/resources/payment/pages/create-payment.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['state'] = PaymentStatus::DRAFT->value;

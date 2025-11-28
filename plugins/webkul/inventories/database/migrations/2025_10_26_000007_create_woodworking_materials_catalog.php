@@ -5,7 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -181,12 +185,19 @@ return new class extends Migration
         $plywoodCategoryId = DB::table('woodworking_material_categories')->where('code', 'PLYWOOD')->value('id');
         $hardwoodCategoryId = DB::table('woodworking_material_categories')->where('code', 'HARDWOOD')->value('id');
 
-        // Map woodworking UOM codes to database IDs
+        // Map woodworking UOM codes to database IDs (dynamically lookup)
+        $defaultUomId = DB::table('unit_of_measures')->value('id'); // Get first UOM as fallback
+
+        if (!$defaultUomId) {
+            echo "Skipping material seeding - no UOMs exist yet\n";
+            return;
+        }
+
         $uomMap = [
-            'SHEET' => 1,  // Units
-            'BF' => 1,     // Board Feet (using Units as reference)
-            'LF' => 27,    // Linear Foot
-            'SQFT' => 28,  // Square Foot
+            'SHEET' => DB::table('unit_of_measures')->where('name', 'Units')->value('id') ?? $defaultUomId,
+            'BF' => DB::table('unit_of_measures')->where('name', 'Units')->value('id') ?? $defaultUomId,
+            'LF' => DB::table('unit_of_measures')->where('name', 'Linear Foot')->value('id') ?? $defaultUomId,
+            'SQFT' => DB::table('unit_of_measures')->where('name', 'Square Foot')->value('id') ?? $defaultUomId,
         ];
 
         $materials = [
@@ -281,13 +292,19 @@ return new class extends Migration
             ],
         ];
 
+        // Get first available category_id and user for creator
+        $categoryId = DB::table('products_categories')->value('id');
+        $creatorId = DB::table('users')->value('id');
+
+        if (!$categoryId) {
+            echo "Skipping material seeding - no product categories exist yet\n";
+            return;
+        }
+
         foreach ($materials as $material) {
             // Map woodworking_uom to uom_id
             $uomCode = $material['woodworking_uom'] ?? 'SHEET';
-            $uomId = $uomMap[$uomCode] ?? 1; // Default to Units if not found
-
-            // Get first available category_id
-            $categoryId = DB::table('products_categories')->first()->id ?? 1;
+            $uomId = $uomMap[$uomCode] ?? $defaultUomId;
 
             DB::table('products_products')->insert(array_merge($material, [
                 'category_id' => $categoryId,
@@ -295,7 +312,7 @@ return new class extends Migration
                 'uom_po_id' => $uomId, // Use same UOM for purchase orders
                 'tracking' => 'lots',
                 'is_storable' => true,
-                'creator_id' => 1,
+                'creator_id' => $creatorId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]));

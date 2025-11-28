@@ -11,6 +11,11 @@ use Illuminate\Support\Carbon;
 use Webkul\Project\Enums\TaskState;
 use Webkul\Project\Models\Task;
 
+/**
+ * Task By State Chart class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TaskByStateChart extends ChartWidget
 {
     use HasWidgetShield, InteractsWithPageFilters;
@@ -84,6 +89,12 @@ class TaskByStateChart extends ChartWidget
         ];
     }
 
+    /**
+     * Apply Date Filters
+     *
+     * @param mixed $query The search query
+     * @return void
+     */
     private function applyDateFilters($query): void
     {
         $startDate = $this->pageFilters['startDate'] ?? null;

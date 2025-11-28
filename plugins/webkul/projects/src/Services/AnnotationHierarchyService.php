@@ -5,6 +5,10 @@ namespace Webkul\Project\Services;
 use App\Models\PdfPage;
 use App\Models\PdfPageAnnotation;
 
+/**
+ * Annotation Hierarchy Service service
+ *
+ */
 class AnnotationHierarchyService
 {
     /**

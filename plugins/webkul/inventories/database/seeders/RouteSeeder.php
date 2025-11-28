@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Route Seeder database seeder
+ *
+ */
 class RouteSeeder extends Seeder
 {
     /**

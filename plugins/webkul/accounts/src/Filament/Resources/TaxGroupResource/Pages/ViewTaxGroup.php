@@ -10,6 +10,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Account\Filament\Resources\TaxGroupResource;
 use Webkul\Account\Models\TaxGroup;
 
+/**
+ * View Tax Group class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewTaxGroup extends ViewRecord
 {
     protected static string $resource = TaxGroupResource::class;

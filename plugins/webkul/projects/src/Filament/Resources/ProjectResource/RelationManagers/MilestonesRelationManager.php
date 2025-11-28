@@ -13,20 +13,44 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Clusters\Configurations\Resources\MilestoneResource;
 use Webkul\Project\Settings\TaskSettings;
 
+/**
+ * Milestones Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class MilestonesRelationManager extends RelationManager
 {
     protected static string $relationship = 'milestones';
 
+    /**
+     * Can View For Record
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return bool
+     */
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return ProjectResource::getTaskSettings()->enable_milestones && $ownerRecord->allow_milestones;
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return MilestoneResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return MilestoneResource::table($table)

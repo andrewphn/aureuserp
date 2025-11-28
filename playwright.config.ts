@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * Playwright Configuration for AureusERP PDF Viewer Testing
@@ -6,6 +8,11 @@ import { defineConfig, devices } from '@playwright/test';
  * Tests the Nutrient Web SDK PDF viewer integration across multiple browsers
  * with focus on annotation functionality and real-time synchronization.
  */
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const authStatePath = path.join(__dirname, 'tests/Browser/auth-state.json');
+
 export default defineConfig({
   // Test directory
   testDir: './tests/Browser',
@@ -19,6 +26,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
 
+  // Global setup - runs BEFORE any tests
+  globalSetup: './tests/Browser/global-setup.ts',
+
   // Reporter configuration
   reporter: [
     ['html', { outputFolder: 'tests/Browser/reports/html' }],
@@ -29,7 +39,7 @@ export default defineConfig({
   // Shared settings for all projects
   use: {
     // Base URL for tests
-    baseURL: process.env.APP_URL || 'http://localhost',
+    baseURL: process.env.APP_URL || 'http://aureuserp.test',
 
     // Collect trace on failure for debugging
     trace: 'on-first-retry',
@@ -59,6 +69,8 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        // Use authenticated state (created by globalSetup)
+        storageState: authStatePath,
         // Chromium-specific settings
         launchOptions: {
           args: ['--disable-web-security'], // Allow cross-origin for PDF tests
@@ -70,6 +82,8 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Use authenticated state
+        storageState: authStatePath,
         // Firefox-specific settings
         launchOptions: {
           firefoxUserPrefs: {
@@ -84,6 +98,8 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
+        // Use authenticated state
+        storageState: authStatePath,
         // WebKit-specific settings
       },
     },
@@ -93,6 +109,8 @@ export default defineConfig({
       name: 'mobile-chrome',
       use: {
         ...devices['Pixel 5'],
+        // Use authenticated state
+        storageState: authStatePath,
       },
     },
 
@@ -100,15 +118,13 @@ export default defineConfig({
       name: 'mobile-safari',
       use: {
         ...devices['iPhone 12'],
+        // Use authenticated state
+        storageState: authStatePath,
       },
     },
   ],
 
-  // Web server configuration (optional, for local testing)
-  webServer: process.env.CI ? undefined : {
-    command: 'php artisan serve --port=8000',
-    port: 8000,
-    timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
-  },
+  // Web server configuration - Disabled because Laravel Herd is already running
+  // Laravel is served via Herd at aureuserp.test (see baseURL above)
+  webServer: undefined,
 });

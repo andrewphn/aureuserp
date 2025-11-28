@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Profile class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Profile extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -36,6 +41,11 @@ class Profile extends Page implements HasForms
 
     public ?array $passwordData = [];
 
+    /**
+     * Mount
+     *
+     * @return void
+     */
     public function mount(): void
     {
         $this->fillForms();
@@ -49,6 +59,12 @@ class Profile extends Page implements HasForms
         ];
     }
 
+    /**
+     * Edit Profile Form
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function editProfileForm(Schema $schema): Schema
     {
         return $schema
@@ -110,6 +126,12 @@ class Profile extends Page implements HasForms
             ->operation('edit');
     }
 
+    /**
+     * Edit Password Form
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function editPasswordForm(Schema $schema): Schema
     {
         return $schema
@@ -158,6 +180,11 @@ class Profile extends Page implements HasForms
             ->operation('edit');
     }
 
+    /**
+     * Update Profile
+     *
+     * @return void
+     */
     public function updateProfile(): void
     {
         try {
@@ -207,6 +234,11 @@ class Profile extends Page implements HasForms
         }
     }
 
+    /**
+     * Update Password
+     *
+     * @return mixed
+     */
     public function updatePassword(): mixed
     {
         try {
@@ -265,12 +297,22 @@ class Profile extends Page implements HasForms
         return $user;
     }
 
+    /**
+     * Fill Forms
+     *
+     * @return void
+     */
     protected function fillForms(): void
     {
         $this->fillProfileForm();
         $this->fillPasswordForm();
     }
 
+    /**
+     * Fill Profile Form
+     *
+     * @return void
+     */
     protected function fillProfileForm(): void
     {
         $user = $this->getUser();
@@ -282,6 +324,11 @@ class Profile extends Page implements HasForms
         $this->editProfileForm->fill($userData);
     }
 
+    /**
+     * Fill Password Form
+     *
+     * @return void
+     */
     protected function fillPasswordForm(): void
     {
         $this->editPasswordForm->fill([

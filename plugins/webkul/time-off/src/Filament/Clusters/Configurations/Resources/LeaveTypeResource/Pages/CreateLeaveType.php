@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource;
 
+/**
+ * Create Leave Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateLeaveType extends CreateRecord
 {
     protected static string $resource = LeaveTypeResource::class;
@@ -24,6 +29,12 @@ class CreateLeaveType extends CreateRecord
             ->body(__('time-off::filament/clusters/configurations/resources/leave-type/pages/create-leave-type.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = Auth::user();

@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Invoice\Models\Tax;
 use Webkul\Security\Models\User;
 
+/**
+ * Tax Policy authorization policy
+ *
+ */
 class TaxPolicy
 {
     use HandlesAuthorization;

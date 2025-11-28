@@ -8,6 +8,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\PackagingRe
 use Webkul\Purchase\Models\Packaging;
 use Webkul\Purchase\Settings\ProductSettings;
 
+/**
+ * Packaging Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PackagingResource extends BasePackagingResource
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-gift';
@@ -22,6 +27,11 @@ class PackagingResource extends BasePackagingResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {

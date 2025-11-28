@@ -10,7 +10,11 @@ use Webkul\TimeOff\Enums\CarryOverUnusedAccruals;
 use Webkul\TimeOff\Enums\Frequency;
 use Webkul\TimeOff\Enums\StartType;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.

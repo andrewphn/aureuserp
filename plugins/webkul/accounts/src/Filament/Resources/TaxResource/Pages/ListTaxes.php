@@ -11,6 +11,11 @@ use Webkul\Account\Filament\Resources\TaxResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Taxes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListTaxes extends ListRecords
 {
     use HasTableViews;

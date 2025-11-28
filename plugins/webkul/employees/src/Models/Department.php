@@ -15,6 +15,31 @@ use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Department Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property int $manager_id
+ * @property int $company_id
+ * @property int $parent_id
+ * @property int $master_department_id
+ * @property string|null $complete_name
+ * @property string|null $parent_path
+ * @property int $creator_id
+ * @property string|null $color
+ * @property-read \Illuminate\Database\Eloquent\Collection $jobPositions
+ * @property-read \Illuminate\Database\Eloquent\Collection $employees
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Model|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Model|null $masterDepartment
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $manager
+ *
+ */
 class Department extends Model
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes;
@@ -33,46 +58,91 @@ class Department extends Model
         'color',
     ];
 
+    /**
+     * Created By
+     *
+     * @return BelongsTo
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Parent
+     *
+     * @return BelongsTo
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'parent_id');
     }
 
+    /**
+     * Master Department
+     *
+     * @return BelongsTo
+     */
     public function masterDepartment(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'master_department_id');
     }
 
+    /**
+     * Job Positions
+     *
+     * @return HasMany
+     */
     public function jobPositions(): HasMany
     {
         return $this->hasMany(EmployeeJobPosition::class);
     }
 
+    /**
+     * Employees
+     *
+     * @return HasMany
+     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
     }
 
+    /**
+     * Company
+     *
+     * @return BelongsTo
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /**
+     * Manager
+     *
+     * @return BelongsTo
+     */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_id');
     }
 
+    /**
+     * New Factory
+     *
+     * @return DepartmentFactory
+     */
     protected static function newFactory(): DepartmentFactory
     {
         return DepartmentFactory::new();
     }
 
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
@@ -94,6 +164,11 @@ class Department extends Model
         });
     }
 
+    /**
+     * Validate No Recursion
+     *
+     * @param mixed $department
+     */
     protected static function validateNoRecursion($department)
     {
         if (! $department->parent_id) {
@@ -125,6 +200,11 @@ class Department extends Model
         return true;
     }
 
+    /**
+     * Handle Department Data
+     *
+     * @param mixed $department
+     */
     protected static function handleDepartmentData($department)
     {
         if ($department->parent_id) {
@@ -140,6 +220,11 @@ class Department extends Model
         $department->complete_name = static::getCompleteName($department);
     }
 
+    /**
+     * Find Top Level Parent Id
+     *
+     * @param mixed $department
+     */
     protected static function findTopLevelParentId($department)
     {
         $currentDepartment = $department;
@@ -151,6 +236,11 @@ class Department extends Model
         return $currentDepartment->id;
     }
 
+    /**
+     * Get Complete Name
+     *
+     * @param mixed $department
+     */
     protected static function getCompleteName($department)
     {
         $names = [];

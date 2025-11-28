@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Inventory\Models\StorageCategory;
 use Webkul\Security\Models\User;
 
+/**
+ * Storage Category Policy authorization policy
+ *
+ */
 class StorageCategoryPolicy
 {
     use HandlesAuthorization;

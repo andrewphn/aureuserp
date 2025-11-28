@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Filament\Resources\CompanyResource;
 
+/**
+ * Create Company class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateCompany extends CreateRecord
 {
     protected static string $resource = CompanyResource::class;
@@ -24,6 +29,12 @@ class CreateCompany extends CreateRecord
             ->body(__('security::filament/resources/company/pages/create-company.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         return [

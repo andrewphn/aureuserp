@@ -13,6 +13,10 @@ use Filament\Tables\Table;
 use Livewire\Component;
 use Webkul\Purchase\Models\OrderLine;
 
+/**
+ * List Products class
+ *
+ */
 class ListProducts extends Component implements HasActions, HasForms, HasTable
 {
     use InteractsWithActions;
@@ -21,6 +25,11 @@ class ListProducts extends Component implements HasActions, HasForms, HasTable
 
     public $record;
 
+    /**
+     * Mount
+     *
+     * @param mixed $record The model record
+     */
     public function mount($record)
     {
         $this->record = $record;
@@ -55,6 +64,10 @@ class ListProducts extends Component implements HasActions, HasForms, HasTable
             ->paginated(false);
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         return view('purchases::livewire.customer.account.clusters.order.pages.view-record.products');

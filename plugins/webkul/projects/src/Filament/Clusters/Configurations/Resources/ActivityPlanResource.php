@@ -33,6 +33,11 @@ use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResour
 use Webkul\Project\Filament\Clusters\Configurations\Resources\ActivityPlanResource\RelationManagers\ActivityTemplateRelationManager;
 use Webkul\Support\Models\ActivityPlan;
 
+/**
+ * Activity Plan Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityPlanResource extends Resource
 {
     protected static ?string $model = ActivityPlan::class;
@@ -48,6 +53,12 @@ class ActivityPlanResource extends Resource
         return __('webkul-project::filament/clusters/configurations/resources/activity-plan.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -66,6 +77,12 @@ class ActivityPlanResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -182,6 +199,12 @@ class ActivityPlanResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

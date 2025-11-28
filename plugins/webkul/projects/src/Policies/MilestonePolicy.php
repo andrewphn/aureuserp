@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Project\Models\Milestone;
 use Webkul\Security\Models\User;
 
+/**
+ * Milestone Policy authorization policy
+ *
+ */
 class MilestonePolicy
 {
     use HandlesAuthorization;

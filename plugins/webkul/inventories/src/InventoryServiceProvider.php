@@ -11,12 +11,22 @@ use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Inventory Service Provider service provider
+ *
+ */
 class InventoryServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'inventories';
 
     public static string $viewNamespace = 'inventories';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -110,11 +120,21 @@ class InventoryServiceProvider extends PackageServiceProvider
             });
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         //
     }
 
+    /**
+     * Package Registered
+     *
+     * @return void
+     */
     public function packageRegistered(): void
     {
         $loader = AliasLoader::getInstance();

@@ -35,6 +35,11 @@ use Webkul\Account\Filament\Resources\PaymentsResource\Pages\ViewPayments;
 use Webkul\Account\Models\Payment;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 
+/**
+ * Payments Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PaymentsResource extends Resource
 {
     protected static ?string $model = Payment::class;
@@ -43,6 +48,12 @@ class PaymentsResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -121,6 +132,12 @@ class PaymentsResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -330,6 +347,12 @@ class PaymentsResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

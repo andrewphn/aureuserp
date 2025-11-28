@@ -10,6 +10,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Follower Mail class
+ *
+ */
 class FollowerMail extends Mailable
 {
     use Queueable, SerializesModels;

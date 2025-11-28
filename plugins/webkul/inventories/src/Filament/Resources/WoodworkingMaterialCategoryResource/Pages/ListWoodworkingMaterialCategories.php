@@ -6,6 +6,11 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Webkul\Inventory\Filament\Resources\WoodworkingMaterialCategoryResource;
 
+/**
+ * List Woodworking Material Categories class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListWoodworkingMaterialCategories extends ListRecords
 {
     protected static string $resource = WoodworkingMaterialCategoryResource::class;

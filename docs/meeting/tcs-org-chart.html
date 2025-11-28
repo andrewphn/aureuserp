@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Woodwork - Organizational Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* Org Chart Structure */
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .org-level {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            width: 100%;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .org-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* Employee Card */
+        .employee-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            min-width: 280px;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            position: relative;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+
+        .employee-card.executive {
+            border-color: #8b5cf6;
+            background: linear-gradient(135deg, #faf5ff 0%, white 100%);
+        }
+
+        .employee-card.management {
+            border-color: #0ea5e9;
+            background: linear-gradient(135deg, #f0f9ff 0%, white 100%);
+        }
+
+        .employee-card.operations {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, white 100%);
+        }
+
+        .employee-card.production {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, white 100%);
+        }
+
+        .employee-card.installation {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, white 100%);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .avatar.executive { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); }
+        .avatar.management { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .avatar.operations { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .avatar.production { background: linear-gradient(135deg, #f59e0b 0%, #fb923c 100%); }
+        .avatar.installation { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+
+        .employee-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--gray-900);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .employee-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-600);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .employee-dept {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            text-align: center;
+            padding: 6px 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .dept-executive { background: #f3e8ff; color: #7c3aed; }
+        .dept-management { background: #dbeafe; color: #0369a1; }
+        .dept-operations { background: #d1fae5; color: #065f46; }
+        .dept-production { background: #fef3c7; color: #92400e; }
+        .dept-installation { background: #fee2e2; color: #991b1b; }
+
+        .responsibilities {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px dashed var(--gray-200);
+        }
+
+        .resp-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-600);
+            margin-bottom: 8px;
+        }
+
+        .resp-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .resp-list li {
+            font-size: 13px;
+            color: var(--gray-700);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .resp-list li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Connection Lines */
+        .connector {
+            width: 3px;
+            height: 30px;
+            background: linear-gradient(to bottom, #d1d5db, transparent);
+            margin: 0 auto;
+        }
+
+        .connector-horizontal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            height: 30px;
+        }
+
+        .connector-line {
+            height: 3px;
+            background: #d1d5db;
+            flex: 1;
+        }
+
+        .connector-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px white;
+        }
+
+        /* Team Section */
+        .team-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .team-header {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .team-members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .team-member {
+            padding: 8px 16px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Legend */
+        .legend {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 48px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .legend-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 3px solid;
+        }
+
+        .legend-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        /* Print Button */
+        .print-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 64px;
+            height: 64px;
+            background: white;
+            color: var(--gray-800);
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .print-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .org-level {
+                flex-direction: column;
+                align-items: center;
+            }
+            .employee-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ TCS Woodwork</h1>
+            <p>Organizational Chart | Custom Woodworking & Cabinetry</p>
+        </div>
+
+        <div class="org-chart">
+            <!-- LEVEL 1: Executive Leadership -->
+            <div class="org-level">
+                <div class="employee-card executive">
+                    <div class="avatar executive">BP</div>
+                    <div class="employee-name">Bryan Patton</div>
+                    <div class="employee-title">Owner & Operations Manager</div>
+                    <div class="employee-dept dept-executive">Executive Leadership</div>
+                    <div class="responsibilities">
+                        <div class="resp-title">Key Responsibilities</div>
+                        <ul class="resp-list">
+                            <li>Strategic planning & vision</li>
+                            <li>Client relations & sales</li>
+                            <li>Design & Rhino 3D modeling</li>
+                            <li>Final approvals (budget, PO, design)</li>
+                            <li>Team leadership & assignments</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connector"></div>
+
+            <!-- LEVEL 2: Management & Consulting -->
+            <div class="org-level">
+                <div class="employee-card management">
+                    <div class="avatar management">AP</div>
+                    <div class="employee-name">Andrew Phan</div>
+                    <div class="employee-title">Systems Consultant</div>
+                    <div class="employee-dept dept-management">Business Systems</div>
+                    <div class="responsibilities">
+                        <div class="resp-title">Key Responsibilities</div>
+                        <ul class="resp-list">
+                            <li>Proposal creation & pricing</li>
+                            <li>ERP system design & management</li>
+                            <li>Process optimization</li>
+                            <li>Business intelligence & reporting</li>
+                            <li>Technology implementation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connector"></div>
+
+            <!-- LEVEL 3: Department Heads -->
+            <div class="org-level">
+                <div class="employee-card operations">
+                    <div class="avatar operations">AD</div>
+                    <div class="employee-name">Aiden</div>
+                    <div class="employee-title">Warehouse & QC Manager</div>
+                    <div class="employee-dept dept-operations">Operations</div>
+                    <div class="responsibilities">
+                        <div class="resp-title">Key Responsibilities</div>
+                        <ul class="resp-list">
+                            <li>Detailing & job card creation</li>
+                            <li>Inventory management</li>
+                            <li>Quality control (QC #1 & #2)</li>
+                            <li>Material receiving & allocation</li>
+                            <li>Part sorting & organization</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="employee-card operations">
+                    <div class="avatar operations">SD</div>
+                    <div class="employee-name">Sadie</div>
+                    <div class="employee-title">Purchasing & Finance Manager</div>
+                    <div class="employee-dept dept-operations">Operations</div>
+                    <div class="responsibilities">
+                        <div class="resp-title">Key Responsibilities</div>
+                        <ul class="resp-list">
+                            <li>Purchase order processing</li>
+                            <li>Vendor management & pricing</li>
+                            <li>Financial tracking</li>
+                            <li>Inventory purchasing</li>
+                            <li>Payment collection</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="employee-card installation">
+                    <div class="avatar installation">CH</div>
+                    <div class="employee-name">Chase</div>
+                    <div class="employee-title">Installation Lead</div>
+                    <div class="employee-dept dept-installation">Installation</div>
+                    <div class="responsibilities">
+                        <div class="resp-title">Key Responsibilities</div>
+                        <ul class="resp-list">
+                            <li>On-site installation management</li>
+                            <li>Delivery coordination</li>
+                            <li>Client walkthrough</li>
+                            <li>Final adjustments & punch lists</li>
+                            <li>Customer satisfaction</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connector"></div>
+
+            <!-- LEVEL 4: Production Team -->
+            <div class="org-level">
+                <div class="org-group">
+                    <div class="employee-card production">
+                        <div class="avatar production">LV</div>
+                        <div class="employee-name">Levi</div>
+                        <div class="employee-title">Production Team Lead</div>
+                        <div class="employee-dept dept-production">Shop Floor</div>
+                        <div class="responsibilities">
+                            <div class="resp-title">Key Responsibilities</div>
+                            <ul class="resp-list">
+                                <li>Cabinet assembly oversight</li>
+                                <li>Team mentoring & training</li>
+                                <li>Quality standards enforcement</li>
+                                <li>Task assignment & coordination</li>
+                                <li>Technical problem-solving</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="team-section">
+                        <div class="team-header">
+                            <span>👥</span>
+                            <span>Reports to Levi</span>
+                        </div>
+                        <div class="team-members">
+                            <div class="team-member">
+                                <span>👷</span>
+                                <span>Production Team Members</span>
+                            </div>
+                            <div class="team-member">
+                                <span>🔨</span>
+                                <span>Cabinet Builders</span>
+                            </div>
+                            <div class="team-member">
+                                <span>🎨</span>
+                                <span>Finishing Team</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="org-group">
+                    <div class="employee-card production">
+                        <div class="avatar production">SH</div>
+                        <div class="employee-name">Shaggy</div>
+                        <div class="employee-title">Production Team Lead</div>
+                        <div class="employee-dept dept-production">Shop Floor</div>
+                        <div class="responsibilities">
+                            <div class="resp-title">Key Responsibilities</div>
+                            <ul class="resp-list">
+                                <li>Cabinet assembly oversight</li>
+                                <li>Team mentoring & training</li>
+                                <li>Quality standards enforcement</li>
+                                <li>Task assignment & coordination</li>
+                                <li>Technical problem-solving</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="team-section">
+                        <div class="team-header">
+                            <span>👥</span>
+                            <span>Reports to Shaggy</span>
+                        </div>
+                        <div class="team-members">
+                            <div class="team-member">
+                                <span>👷</span>
+                                <span>Production Team Members</span>
+                            </div>
+                            <div class="team-member">
+                                <span>🔨</span>
+                                <span>Cabinet Builders</span>
+                            </div>
+                            <div class="team-member">
+                                <span>🎨</span>
+                                <span>Finishing Team</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="org-group">
+                    <div class="employee-card production">
+                        <div class="avatar production">SN</div>
+                        <div class="employee-name">Shane</div>
+                        <div class="employee-title">CNC Operator</div>
+                        <div class="employee-dept dept-production">CNC Operations</div>
+                        <div class="responsibilities">
+                            <div class="resp-title">Key Responsibilities</div>
+                            <ul class="resp-list">
+                                <li>CNC machine operation</li>
+                                <li>V-Carve programming</li>
+                                <li>Sheet goods preparation</li>
+                                <li>Part cutting & quality</li>
+                                <li>Machine maintenance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="org-group">
+                    <div class="employee-card production">
+                        <div class="avatar production">AL</div>
+                        <div class="employee-name">Alina</div>
+                        <div class="employee-title">Production Helper</div>
+                        <div class="employee-dept dept-production">Shop Floor</div>
+                        <div class="responsibilities">
+                            <div class="resp-title">Key Responsibilities</div>
+                            <ul class="resp-list">
+                                <li>Cabinet assembly support</li>
+                                <li>Material organization</li>
+                                <li>Shop floor assistance</li>
+                                <li>Quality control support</li>
+                                <li>General production tasks</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-title">Department Legend</div>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #faf5ff; border-color: #8b5cf6;"></div>
+                    <div class="legend-label">Executive Leadership</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f0f9ff; border-color: #0ea5e9;"></div>
+                    <div class="legend-label">Business Systems</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f0fdf4; border-color: #10b981;"></div>
+                    <div class="legend-label">Operations</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fffbeb; border-color: #f59e0b;"></div>
+                    <div class="legend-label">Production</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fef2f2; border-color: #ef4444;"></div>
+                    <div class="legend-label">Installation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()" title="Print">🖨️</button>
+</body>
+</html>

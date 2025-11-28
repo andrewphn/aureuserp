@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Departure Reason Seeder database seeder
+ *
+ */
 class DepartureReasonSeeder extends Seeder
 {
     /**

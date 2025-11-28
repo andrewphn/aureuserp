@@ -4,6 +4,10 @@ namespace Webkul\Account;
 
 use Webkul\Account\Models\Tax;
 
+/**
+ * Tax Manager class
+ *
+ */
 class TaxManager
 {
     /**

@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Livewire;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
+/**
+ * Summary class
+ *
+ */
 class Summary extends Component
 {
     #[Reactive]
@@ -14,6 +18,12 @@ class Summary extends Component
 
     public $currency = null;
 
+    /**
+     * Mount
+     *
+     * @param mixed $products
+     * @param mixed $currency
+     */
     public function mount($products, $currency = null)
 
     {
@@ -22,6 +32,10 @@ class Summary extends Component
         $this->currency = $currency;
     }
 
+    /**
+     * Render
+     *
+     */
     public function render()
     {
         return view('purchases::livewire/summary', [

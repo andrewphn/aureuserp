@@ -7,6 +7,11 @@ use Webkul\Invoice\Filament\Clusters\Configuration;
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\BankAccountResource\Pages\ListBankAccounts;
 use Webkul\Invoice\Models\BankAccount;
 
+/**
+ * Bank Account Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BankAccountResource extends BaseBankAccountResource
 {
     protected static ?string $model = BankAccount::class;

@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Carryover Month enumeration
+ *
+ */
 enum CarryoverMonth: string implements HasLabel
 {
     case JAN = 'jan';
@@ -37,6 +41,11 @@ enum CarryoverMonth: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [
@@ -55,6 +64,11 @@ enum CarryoverMonth: string implements HasLabel
         ];
     }
 
+    /**
+     * To Number
+     *
+     * @return int
+     */
     public function toNumber(): int
     {
         return match ($this) {

@@ -9,6 +9,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\SkillTypeResou
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\SkillTypeResource\Pages\ViewSkillType;
 use Webkul\Recruitment\Models\SkillType;
 
+/**
+ * Skill Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SkillTypeResource extends BaseSkillTypeResource
 {
     protected static ?string $model = SkillType::class;

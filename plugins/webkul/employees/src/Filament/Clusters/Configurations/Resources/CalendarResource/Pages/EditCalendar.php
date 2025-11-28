@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\CalendarResource;
 
+/**
+ * Edit Calendar class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditCalendar extends EditRecord
 {
     protected static string $resource = CalendarResource::class;
@@ -39,6 +44,12 @@ class EditCalendar extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return $data;

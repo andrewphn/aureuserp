@@ -8,6 +8,11 @@ use Livewire\Component;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Confirm Receipt Date Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ConfirmReceiptDateAction extends Action
 {
     public static function getDefaultName(): ?string

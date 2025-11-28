@@ -13,6 +13,11 @@ use Webkul\Project\Filament\Clusters\Configurations\Resources\TaskStageResource;
 use Webkul\Project\Settings\TaskSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Tasks class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageTasks extends SettingsPage
 {
     use HasPageShield;
@@ -42,6 +47,12 @@ class ManageTasks extends SettingsPage
         return __('webkul-project::filament/clusters/settings/pages/manage-tasks.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

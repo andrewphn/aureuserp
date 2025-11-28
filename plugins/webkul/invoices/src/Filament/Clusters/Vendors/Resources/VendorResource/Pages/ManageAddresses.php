@@ -5,6 +5,11 @@ namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Page
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource;
 use Webkul\Partner\Filament\Resources\PartnerResource\Pages\ManageAddresses as BaseManageAddresses;
 
+/**
+ * Manage Addresses class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageAddresses extends BaseManageAddresses
 {
     protected static string $resource = VendorResource::class;

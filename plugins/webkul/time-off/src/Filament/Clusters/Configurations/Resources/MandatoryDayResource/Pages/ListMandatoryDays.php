@@ -10,6 +10,11 @@ use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\MandatoryDayResour
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Mandatory Days class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListMandatoryDays extends ListRecords
 {
     use HasTableViews;

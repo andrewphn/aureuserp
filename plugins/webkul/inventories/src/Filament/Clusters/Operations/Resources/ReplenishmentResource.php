@@ -15,6 +15,11 @@ use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReplenishmentResource\Pages\ManageReplenishment;
 use Webkul\Inventory\Models\OrderPoint;
 
+/**
+ * Replenishment Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ReplenishmentResource extends Resource
 {
     protected static ?string $model = OrderPoint::class;
@@ -40,6 +45,12 @@ class ReplenishmentResource extends Resource
         return __('inventories::filament/clusters/operations/resources/replenishment.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -48,6 +59,12 @@ class ReplenishmentResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

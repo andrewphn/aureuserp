@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Employee\Models\EmploymentType;
 use Webkul\Security\Models\User;
 
+/**
+ * Employment Type Policy authorization policy
+ *
+ */
 class EmploymentTypePolicy
 {
     use HandlesAuthorization;

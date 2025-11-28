@@ -10,6 +10,11 @@ use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Facades\PurchaseOrder;
 use Webkul\Purchase\Models\Order;
 
+/**
+ * Cancel Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CancelAction extends Action
 {
     public static function getDefaultName(): ?string

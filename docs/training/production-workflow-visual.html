@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Production Workflow - Training Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .workflow {
+            position: relative;
+        }
+
+        .phase {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .phase:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .phase-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-right: 20px;
+            color: white;
+        }
+
+        .phase-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .phase-description {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .responsibilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .responsibility-card {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+
+        .responsibility-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .responsibility-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .responsibility-card li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .responsibility-card li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Phase Colors */
+        .phase-1 {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .phase-1 .phase-number {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .phase-1 .responsibility-card {
+            border-left-color: #10b981;
+        }
+
+        .phase-2 {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .phase-2 .phase-number {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .phase-2 .responsibility-card {
+            border-left-color: #3b82f6;
+        }
+
+        .phase-3 {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .phase-3 .phase-number {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .phase-3 .responsibility-card {
+            border-left-color: #f59e0b;
+        }
+
+        .phase-4 {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .phase-4 .phase-number {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .phase-4 .responsibility-card {
+            border-left-color: #8b5cf6;
+        }
+
+        .phase-5 {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            color: white;
+        }
+
+        .phase-5 .phase-number {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .phase-5 .responsibility-card {
+            border-left-color: #ec4899;
+        }
+
+        .phase-6 {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+
+        .phase-6 .phase-number {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .phase-6 .responsibility-card {
+            border-left-color: #06b6d4;
+        }
+
+        .connector {
+            text-align: center;
+            font-size: 2em;
+            color: #cbd5e0;
+            margin: 15px 0;
+        }
+
+        .key-person {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .timeline-indicator {
+            background: rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 20px;
+            }
+
+            .phase {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .responsibilities {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 TCS Production Workflow</h1>
+        <p class="subtitle">Complete Process from Design to Delivery</p>
+
+        <div class="workflow">
+            <!-- PHASE 1: DESIGN & SOURCING -->
+            <div class="phase phase-1">
+                <div class="phase-header">
+                    <div class="phase-number">1</div>
+                    <div class="phase-title">📐 Design & Material Sourcing</div>
+                </div>
+                <div class="phase-description">
+                    Project starts here. Design is finalized, materials are identified and ordered.
+                </div>
+
+                <div class="responsibilities">
+                    <div class="responsibility-card">
+                        <h4>👤 Bryan (Owner)</h4>
+                        <ul>
+                            <li>Review architectural PDFs</li>
+                            <li>Create project in system</li>
+                            <li>Define rooms and locations</li>
+                            <li>Approve overall design</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>👤 Designer/Dagger</h4>
+                        <ul>
+                            <li>Create Rhino drawings</li>
+                            <li>Specify cabinet details</li>
+                            <li>Generate CNC files</li>
+                            <li>Prepare cut lists</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>👤 Sadie (Purchasing)</h4>
+                        <ul>
+                            <li>Review Bill of Materials</li>
+                            <li>Check inventory</li>
+                            <li>Create purchase orders</li>
+                            <li>Contact vendors</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-indicator">
+                    ⏱️ Timeline: 1-2 weeks
+                </div>
+            </div>
+
+            <div class="connector">⬇️</div>
+
+            <!-- PHASE 2: RECEIVING & PREP -->
+            <div class="phase phase-2">
+                <div class="phase-header">
+                    <div class="phase-number">2</div>
+                    <div class="phase-title">📦 Material Receiving & Preparation</div>
+                </div>
+                <div class="phase-description">
+                    Materials arrive and are organized for production. Hardware is allocated, sheets are labeled.
+                </div>
+
+                <div class="responsibilities">
+                    <div class="responsibility-card">
+                        <h4>👤 Aiden (Warehouse)</h4>
+                        <ul>
+                            <li>Receive shipments</li>
+                            <li>Label sheet goods by job</li>
+                            <li>Allocate hardware to job boxes</li>
+                            <li>Update master inventory</li>
+                            <li>Update project BOM</li>
+                            <li>Report shortages to Sadie</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>👤 Quality Control</h4>
+                        <ul>
+                            <li>Check material quality</li>
+                            <li>Verify quantities</li>
+                            <li>Flag damaged items</li>
+                            <li>Match to purchase order</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-person">📍 Location: Bay Area (Organized by Job)</div>
+                <div class="timeline-indicator">
+                    ⏱️ Timeline: Same day or next day after delivery
+                </div>
+            </div>
+
+            <div class="connector">⬇️</div>
+
+            <!-- PHASE 3: CNC & CUTTING -->
+            <div class="phase phase-3">
+                <div class="phase-header">
+                    <div class="phase-number">3</div>
+                    <div class="phase-title">⚙️ CNC Cutting & Part Fabrication</div>
+                </div>
+                <div class="phase-description">
+                    Cabinet parts are cut on CNC machine. Doors, drawer fronts, and cabinet boxes prepared.
+                </div>
+
+                <div class="responsibilities">
+                    <div class="responsibility-card">
+                        <h4>👤 Levi (Lead Craftsman)</h4>
+                        <ul>
+                            <li>Load CNC program</li>
+                            <li>Set up sheet goods</li>
+                            <li>Run CNC cutting</li>
+                            <li>Organize cut parts</li>
+                            <li>Edge band as needed</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>👤 Alina (Production Helper)</h4>
+                        <ul>
+                            <li>Assist with material handling</li>
+                            <li>Edge banding</li>
+                            <li>Sort parts by cabinet</li>
+                            <li>Quality check cuts</li>
+                            <li>Prep for assembly</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-person">🎯 Output: All parts cut and ready for assembly</div>
+                <div class="timeline-indicator">
+                    ⏱️ Timeline: 1-3 days depending on job size
+                </div>
+            </div>
+
+            <div class="connector">⬇️</div>
+
+            <!-- PHASE 4: ASSEMBLY -->
+            <div class="phase phase-4">
+                <div class="phase-header">
+                    <div class="phase-number">4</div>
+                    <div class="phase-title">🔨 Cabinet Assembly</div>
+                </div>
+                <div class="phase-description">
+                    Cabinet boxes are assembled. Face frames attached. Drawers built. Everything comes together.
+                </div>
+
+                <div class="responsibilities">
+                    <div class="responsibility-card">
+                        <h4>👤 Levi (Lead Build)</h4>
+                        <ul>
+                            <li>Build cabinet boxes</li>
+                            <li>Attach face frames</li>
+                            <li>Build drawer boxes</li>
+                            <li>Install hardware</li>
+                            <li>Fit doors and drawers</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>👤 Alina (Helper)</h4>
+                        <ul>
+                            <li>Pre-drill for hardware</li>
+                            <li>Glue and clamp</li>
+                            <li>Drawer assembly</li>
+                            <li>Hardware installation</li>
+                            <li>Keep workbench organized</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>🎓 Training Focus</h4>
+                        <ul>
+                            <li>Watch → Do → Record</li>
+                            <li>Floating shelves</li>
+                            <li>Crown blocks</li>
+                            <li>Cabinet assembly basics</li>
+                            <li>Edge banding technique</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-indicator">
+                    ⏱️ Timeline: 3-7 days depending on complexity
+                </div>
+            </div>
+
+            <div class="connector">⬇️</div>
+
+            <!-- PHASE 5: FINISHING -->
+            <div class="phase phase-5">
+                <div class="phase-header">
+                    <div class="phase-number">5</div>
+                    <div class="phase-title">🎨 Sanding & Finishing</div>
+                </div>
+                <div class="phase-description">
+                    Cabinets are sanded smooth, primed, painted or stained, and finished to client specs.
+                </div>
+
+                <div class="responsibilities">
+                    <div class="responsibility-card">
+                        <h4>👤 Finishing Team</h4>
+                        <ul>
+                            <li>Sand all surfaces</li>
+                            <li>Fill and repair defects</li>
+                            <li>Apply primer (paint grade)</li>
+                            <li>Apply topcoats</li>
+                            <li>Quality inspection</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>⚠️ Critical Checkpoints</h4>
+                        <ul>
+                            <li>Match finish to sample</li>
+                            <li>Even coat application</li>
+                            <li>No drips or runs</li>
+                            <li>Proper cure time</li>
+                            <li>Touch-up as needed</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-person">🎯 Output: Fully finished, cured cabinets</div>
+                <div class="timeline-indicator">
+                    ⏱️ Timeline: 3-5 days (includes drying time)
+                </div>
+            </div>
+
+            <div class="connector">⬇️</div>
+
+            <!-- PHASE 6: QC & DELIVERY -->
+            <div class="phase phase-6">
+                <div class="phase-header">
+                    <div class="phase-number">6</div>
+                    <div class="phase-title">✅ Quality Control & Delivery Prep</div>
+                </div>
+                <div class="phase-description">
+                    Final inspection, hardware attachment, packaging, and preparation for delivery/installation.
+                </div>
+
+                <div class="responsibilities">
+                    <div class="responsibility-card">
+                        <h4>👤 Aiden (QC & Shipping)</h4>
+                        <ul>
+                            <li>Final QC inspection</li>
+                            <li>Attach hardware to cabinets</li>
+                            <li>Package in boxes/crates</li>
+                            <li>Load delivery trailer</li>
+                            <li>Create packing list</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>✓ QC Checklist</h4>
+                        <ul>
+                            <li>All doors fit properly</li>
+                            <li>Drawers slide smoothly</li>
+                            <li>Finish is even and smooth</li>
+                            <li>Hardware installed correctly</li>
+                            <li>No damage or defects</li>
+                        </ul>
+                    </div>
+
+                    <div class="responsibility-card">
+                        <h4>📋 Documentation</h4>
+                        <ul>
+                            <li>Mark cabinet run as complete</li>
+                            <li>Update project status</li>
+                            <li>Create delivery notes</li>
+                            <li>Installation instructions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-person">🎯 Output: Ready for delivery & installation</div>
+                <div class="timeline-indicator">
+                    ⏱️ Timeline: 1-2 days
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; padding: 30px; background: #f0fdf4; border-radius: 15px; border-left: 5px solid #10b981;">
+            <h2 style="color: #1e293b; margin-bottom: 15px;">🎓 Training Path for Alina</h2>
+            <div style="color: #475569; font-size: 1.1em; line-height: 1.8;">
+                <strong>Week 1:</strong> Material handling, edge banding, basic assembly assistance<br>
+                <strong>Week 2:</strong> Drawer assembly, hardware installation, floating shelves<br>
+                <strong>Week 3:</strong> Cabinet box assembly, face frame attachment<br>
+                <strong>Week 4:</strong> Quality control basics, complete small cabinets independently
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: #fffbeb; border-radius: 15px; border-left: 5px solid #f59e0b;">
+            <h3 style="color: #1e293b; margin-bottom: 10px;">💡 Key Success Factors</h3>
+            <ul style="color: #475569; font-size: 1.05em; line-height: 1.6; padding-left: 20px;">
+                <li><strong>Communication:</strong> Update task status as work progresses</li>
+                <li><strong>Organization:</strong> Keep materials organized by job/cabinet</li>
+                <li><strong>Quality:</strong> Check work against drawings and specs</li>
+                <li><strong>Safety:</strong> Follow shop safety protocols at all times</li>
+                <li><strong>Questions:</strong> Ask when unsure - better to clarify than assume</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,6 +4,10 @@ namespace Webkul\Product\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Product Removal enumeration
+ *
+ */
 enum ProductRemoval: string implements HasLabel
 {
     case FIFO = 'fifo';

@@ -17,8 +17,18 @@ use Webkul\Account\Models\Partner;
 use Webkul\Account\Models\Tax;
 use Webkul\Support\Services\EmailService;
 
+/**
+ * Account Manager class
+ *
+ */
 class AccountManager
 {
+    /**
+     * Cancel
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function cancel(AccountMove $record): AccountMove
     {
         $record->state = MoveState::CANCEL;
@@ -30,6 +40,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Confirm
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function confirm(AccountMove $record): AccountMove
     {
         $record->state = MoveState::POSTED;
@@ -41,6 +57,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Set As Checked
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function setAsChecked(AccountMove $record): AccountMove
     {
         $record->checked = true;
@@ -52,6 +74,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Reset To Draft
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function resetToDraft(AccountMove $record): AccountMove
     {
         $record->state = MoveState::DRAFT;
@@ -65,6 +93,13 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Print And Send
+     *
+     * @param AccountMove $record The model record
+     * @param array $data The data array
+     * @return AccountMove
+     */
     public function printAndSend(AccountMove $record, array $data): AccountMove
     {
         $partners = Partner::whereIn('id', $data['partners'])->get();
@@ -114,6 +149,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Compute Account Move
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function computeAccountMove(AccountMove $record): AccountMove
     {
         $record->amount_untaxed = 0;
@@ -173,6 +214,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Compute Partner Display Info
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function computePartnerDisplayInfo(AccountMove $record): AccountMove
     {
         $vendorDisplayName = $record->partner?->name;
@@ -190,6 +237,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Compute Invoice Currency Rate
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function computeInvoiceCurrencyRate(AccountMove $record): AccountMove
     {
         $record->invoice_currency_rate = 1;
@@ -197,6 +250,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Compute Journal Id
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function computeJournalId(AccountMove $record): AccountMove
     {
         if (! in_array($record->journal?->type, $record->getValidJournalTypes())) {
@@ -206,6 +265,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Search Default Journal
+     *
+     * @param AccountMove $record The model record
+     * @return ?Journal
+     */
     public function searchDefaultJournal(AccountMove $record): ?Journal
     {
         $validJournalTypes = $record->getValidJournalTypes();
@@ -215,6 +280,12 @@ class AccountManager
             ->first();
     }
 
+    /**
+     * Compute Commercial Partner Id
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function computeCommercialPartnerId(AccountMove $record): AccountMove
     {
         $record->commercial_partner_id = $record->partner_id;
@@ -222,6 +293,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Compute Partner Shipping Id
+     *
+     * @param AccountMove $record The model record
+     * @return AccountMove
+     */
     public function computePartnerShippingId(AccountMove $record): AccountMove
     {
         $record->partner_shipping_id = $record->partner_id;
@@ -229,6 +306,12 @@ class AccountManager
         return $record;
     }
 
+    /**
+     * Compute Invoice Date Due
+     *
+     * @param AccountMove $move
+     * @return AccountMove
+     */
     public static function computeInvoiceDateDue(AccountMove $move): AccountMove
     {
         $dateMaturity = now();
@@ -269,6 +352,13 @@ class AccountManager
     /**
      * Collect line totals and tax information
      */
+    /**
+     * Compute Move Line
+     *
+     * @param AccountMove $move
+     * @param MoveLine $line
+     * @return MoveLine
+     */
     public function computeMoveLine(AccountMove $move, MoveLine $line): MoveLine
     {
         $line->move_name = $move->name;
@@ -299,6 +389,12 @@ class AccountManager
 
     /**
      * Collect line totals and tax information
+     */
+    /**
+     * Compute Move Line Totals
+     *
+     * @param MoveLine $line
+     * @return array
      */
     public function computeMoveLineTotals(MoveLine $line, array &$newTaxEntries): array
     {
@@ -350,6 +446,12 @@ class AccountManager
     /**
      * Compute line balance based on document type
      */
+    /**
+     * Compute Move Line Balance
+     *
+     * @param MoveLine $line
+     * @return MoveLine
+     */
     private function computeMoveLineBalance(MoveLine $line): MoveLine
     {
         $line->balance = $line->move->isInbound()
@@ -361,6 +463,12 @@ class AccountManager
 
     /**
      * Compute debit and credit based on balance and move type
+     */
+    /**
+     * Compute Move Line Credit And Debit
+     *
+     * @param MoveLine $line
+     * @return MoveLine
      */
     private function computeMoveLineCreditAndDebit(MoveLine $line): MoveLine
     {
@@ -378,6 +486,12 @@ class AccountManager
     /**
      * Compute amount in currency
      */
+    /**
+     * Compute Move Line Amount Currency
+     *
+     * @param MoveLine $line
+     * @return MoveLine
+     */
     private function computeMoveLineAmountCurrency(MoveLine $line): MoveLine
     {
         if (is_null($line->amount_currency)) {
@@ -393,6 +507,13 @@ class AccountManager
 
     /**
      * Update tax lines for the move
+     */
+    /**
+     * Compute Tax Lines
+     *
+     * @param AccountMove $move
+     * @param array $newTaxEntries
+     * @return void
      */
     private function computeTaxLines(AccountMove $move, array $newTaxEntries): void
     {
@@ -460,6 +581,12 @@ class AccountManager
     /**
      * Update or create the payment term line
      */
+    /**
+     * Compute Payment Term Line
+     *
+     * @param mixed $move
+     * @return void
+     */
     private function computePaymentTermLine($move): void
     {
         $amount = abs($move->amount_total);
@@ -500,6 +627,13 @@ class AccountManager
         ]);
     }
 
+    /**
+     * Prepare Payload For Send By Email
+     *
+     * @param mixed $record The model record
+     * @param mixed $partner
+     * @param mixed $data The data array
+     */
     private function preparePayloadForSendByEmail($record, $partner, $data)
     {
         return [
@@ -516,6 +650,12 @@ class AccountManager
 
     /**
      * Get sign multiplier based on document type
+     */
+    /**
+     * Get Sign Multiplier
+     *
+     * @param AccountMove $record The model record
+     * @return int
      */
     private function getSignMultiplier(AccountMove $record): int
     {

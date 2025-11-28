@@ -6,8 +6,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\Account\Enums\Applicability;
 use Webkul\Security\Models\User;
 
+/**
+ * Account Tag Factory model factory
+ *
+ */
 class AccountTagFactory extends Factory
 {
+    /**
+     * Definition
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [

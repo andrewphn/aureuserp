@@ -7,6 +7,11 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Edit Pdf Document class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditPdfDocument extends EditRecord
 {
     protected static string $resource = PdfDocumentResource::class;
@@ -19,6 +24,12 @@ class EditPdfDocument extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         // Update file size if file was changed

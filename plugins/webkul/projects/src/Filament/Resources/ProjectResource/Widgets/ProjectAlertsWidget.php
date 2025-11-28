@@ -6,6 +6,11 @@ use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\View\View;
 
+/**
+ * Project Alerts Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectAlertsWidget extends Widget
 {
     public ?Model $record = null;

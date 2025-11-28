@@ -21,6 +21,10 @@ class ContextRegistry
      */
     protected Collection $providers;
 
+    /**
+     * Create a new ContextRegistry instance
+     *
+     */
     public function __construct()
     {
         $this->providers = collect();
@@ -28,6 +32,12 @@ class ContextRegistry
 
     /**
      * Register a single context provider.
+     *
+     * @param ContextProviderInterface $provider
+     * @return self
+     */
+    /**
+     * Register
      *
      * @param ContextProviderInterface $provider
      * @return self
@@ -45,6 +55,12 @@ class ContextRegistry
      * @param array<ContextProviderInterface> $providers
      * @return self
      */
+    /**
+     * Register Many
+     *
+     * @param array $providers
+     * @return self
+     */
     public function registerMany(array $providers): self
     {
         foreach ($providers as $provider) {
@@ -60,6 +76,12 @@ class ContextRegistry
      * @param string $contextType
      * @return ContextProviderInterface|null
      */
+    /**
+     * Get
+     *
+     * @param string $contextType
+     * @return ?ContextProviderInterface
+     */
     public function get(string $contextType): ?ContextProviderInterface
     {
         return $this->providers->get($contextType);
@@ -67,6 +89,12 @@ class ContextRegistry
 
     /**
      * Check if a context provider exists.
+     *
+     * @param string $contextType
+     * @return bool
+     */
+    /**
+     * Has
      *
      * @param string $contextType
      * @return bool
@@ -80,6 +108,11 @@ class ContextRegistry
      * Get all registered context providers.
      *
      * @return Collection<string, ContextProviderInterface>
+     */
+    /**
+     * All
+     *
+     * @return Collection
      */
     public function all(): Collection
     {
@@ -102,6 +135,12 @@ class ContextRegistry
      * @param string $contextType
      * @return self
      */
+    /**
+     * Remove
+     *
+     * @param string $contextType
+     * @return self
+     */
     public function remove(string $contextType): self
     {
         $this->providers->forget($contextType);
@@ -111,6 +150,11 @@ class ContextRegistry
 
     /**
      * Clear all registered providers.
+     *
+     * @return self
+     */
+    /**
+     * Clear
      *
      * @return self
      */

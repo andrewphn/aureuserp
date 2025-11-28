@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Field\Models\Field;
 use Webkul\Security\Models\User;
 
+/**
+ * Field Policy authorization policy
+ *
+ */
 class FieldPolicy
 {
     use HandlesAuthorization;

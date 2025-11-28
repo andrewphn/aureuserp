@@ -12,6 +12,49 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\TimeOff\Enums\AllocationType;
 
+/**
+ * Leave Allocation Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $holiday_status_id
+ * @property int $employee_id
+ * @property int $employee_company_id
+ * @property int $manager_id
+ * @property int $approver_id
+ * @property int $second_approver_id
+ * @property int $department_id
+ * @property int $accrual_plan_id
+ * @property int $creator_id
+ * @property string|null $name
+ * @property string|null $state
+ * @property mixed $allocation_type
+ * @property string|null $date_from
+ * @property string|null $date_to
+ * @property \Carbon\Carbon|null $last_executed_carryover_date
+ * @property string|null $last_called
+ * @property string|null $actual_last_called
+ * @property string|null $next_call
+ * @property \Carbon\Carbon|null $carried_over_days_expiration_date
+ * @property string|null $notes
+ * @property string|null $already_accrued
+ * @property string|null $number_of_days
+ * @property float $number_of_hours_display
+ * @property float $yearly_accrued_amount
+ * @property string|null $expiring_carryover_days
+ * @property-read \Illuminate\Database\Eloquent\Model|null $employee
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $employeeCompany
+ * @property-read \Illuminate\Database\Eloquent\Model|null $manager
+ * @property-read \Illuminate\Database\Eloquent\Model|null $approver
+ * @property-read \Illuminate\Database\Eloquent\Model|null $secondApprover
+ * @property-read \Illuminate\Database\Eloquent\Model|null $department
+ * @property-read \Illuminate\Database\Eloquent\Model|null $accrualPlan
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Model|null $holidayStatus
+ *
+ */
 class LeaveAllocation extends Model
 {
     use HasChatter, HasFactory, HasLogActivity;
@@ -79,51 +122,101 @@ class LeaveAllocation extends Model
         'allocation_type' => AllocationType::class,
     ];
 
+    /**
+     * Employee
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function employee()
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'employee_company_id');
     }
 
+    /**
+     * Employee Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function employeeCompany()
     {
         return $this->belongsTo(Company::class, 'employee_company_id');
     }
 
+    /**
+     * Manager
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function manager()
     {
         return $this->belongsTo(Employee::class, 'manager_id');
     }
 
+    /**
+     * Approver
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function approver()
     {
         return $this->belongsTo(Employee::class, 'approver_id');
     }
 
+    /**
+     * Second Approver
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function secondApprover()
     {
         return $this->belongsTo(Employee::class, 'second_approver_id');
     }
 
+    /**
+     * Department
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
+    /**
+     * Accrual Plan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function accrualPlan()
     {
         return $this->belongsTo(LeaveAccrualPlan::class, 'accrual_plan_id');
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Holiday Status
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function holidayStatus()
     {
         return $this->belongsTo(LeaveType::class, 'holiday_status_id');

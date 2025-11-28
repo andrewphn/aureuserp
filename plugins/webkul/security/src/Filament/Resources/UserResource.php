@@ -44,6 +44,11 @@ use Webkul\Security\Filament\Resources\UserResource\Pages\ViewUsers;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * User Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -65,6 +70,12 @@ class UserResource extends Resource
         return ['name', 'email'];
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -73,6 +84,12 @@ class UserResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -219,6 +236,12 @@ class UserResource extends Resource
                 ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -381,6 +404,12 @@ class UserResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -475,6 +504,12 @@ class UserResource extends Resource
                 ->columns(1);
     }
 
+    /**
+     * Can Delete User
+     *
+     * @param User $record The model record
+     * @return bool
+     */
     public static function canDeleteUser(User $record): bool
     {
         return ! $record->is_default;

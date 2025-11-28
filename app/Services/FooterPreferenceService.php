@@ -6,14 +6,29 @@ use App\Models\FooterPreference;
 use App\Models\FooterTemplate;
 use Webkul\Security\Models\User;
 
+/**
+ * Footer Preference Service service
+ *
+ */
 class FooterPreferenceService
 {
+    /**
+     * Create a new FooterPreferenceService instance
+     *
+     */
     public function __construct(
         protected FooterFieldRegistry $fieldRegistry
     ) {}
 
     /**
      * Get user preferences for a specific context.
+     */
+    /**
+     * Get User Preferences
+     *
+     * @param User $user The user instance
+     * @param string $contextType
+     * @return array
      */
     public function getUserPreferences(User $user, string $contextType): array
     {
@@ -33,6 +48,12 @@ class FooterPreferenceService
     /**
      * Get all user preferences for all contexts.
      */
+    /**
+     * Get All User Preferences
+     *
+     * @param User $user The user instance
+     * @return array
+     */
     public function getAllUserPreferences(User $user): array
     {
         $contexts = ['project', 'sale', 'inventory', 'production'];
@@ -47,6 +68,14 @@ class FooterPreferenceService
 
     /**
      * Save user preferences for a specific context.
+     */
+    /**
+     * Save User Preferences
+     *
+     * @param User $user The user instance
+     * @param string $contextType
+     * @param array $data The data array
+     * @return FooterPreference
      */
     public function saveUserPreferences(User $user, string $contextType, array $data): FooterPreference
     {
@@ -67,6 +96,13 @@ class FooterPreferenceService
     /**
      * Delete user preferences for a specific context.
      */
+    /**
+     * Delete User Preferences
+     *
+     * @param User $user The user instance
+     * @param string $contextType
+     * @return bool
+     */
     public function deleteUserPreferences(User $user, string $contextType): bool
     {
         return FooterPreference::where('user_id', $user->id)
@@ -77,6 +113,13 @@ class FooterPreferenceService
     /**
      * Reset to default preferences for a context.
      */
+    /**
+     * Reset To Defaults
+     *
+     * @param User $user The user instance
+     * @param string $contextType
+     * @return FooterPreference
+     */
     public function resetToDefaults(User $user, string $contextType): FooterPreference
     {
         $defaults = $this->getDefaultPreferences($contextType);
@@ -86,6 +129,12 @@ class FooterPreferenceService
 
     /**
      * Get default preferences for a context type.
+     */
+    /**
+     * Get Default Preferences
+     *
+     * @param string $contextType
+     * @return array
      */
     public function getDefaultPreferences(string $contextType): array
     {
@@ -151,6 +200,13 @@ class FooterPreferenceService
 
     /**
      * Get persona-based default preferences from database templates.
+     */
+    /**
+     * Get Persona Defaults
+     *
+     * @param string $persona
+     * @param string $contextType
+     * @return array
      */
     public function getPersonaDefaults(string $persona, string $contextType): array
     {
@@ -225,6 +281,13 @@ class FooterPreferenceService
 
     /**
      * Apply persona template to user.
+     */
+    /**
+     * Apply Persona Template
+     *
+     * @param User $user The user instance
+     * @param string $persona
+     * @return array
      */
     public function applyPersonaTemplate(User $user, string $persona): array
     {

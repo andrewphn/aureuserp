@@ -9,6 +9,11 @@ use Webkul\Recruitment\Models\Stage;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Stages class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListStages extends ListRecords
 {
     use HasTableViews;

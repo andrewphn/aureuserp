@@ -17,6 +17,15 @@ use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\P
 use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource\Pages\ViewProduct;
 use Webkul\Purchase\Models\Product;
 
+/**
+ * Product Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductResource extends BaseProductResource
 {
     use HasCustomFields;
@@ -40,6 +49,12 @@ class ProductResource extends BaseProductResource
         return __('purchases::filament/admin/clusters/products/resources/product.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $schema = BaseProductResource::form($schema);
@@ -51,6 +66,12 @@ class ProductResource extends BaseProductResource
         return $schema;
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         $schema = BaseProductResource::infolist($schema);
@@ -62,6 +83,12 @@ class ProductResource extends BaseProductResource
         return $schema;
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

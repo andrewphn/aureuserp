@@ -7,6 +7,10 @@ use Webkul\Recruitment\Models\Applicant;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasScopedPermissions;
 
+/**
+ * Applicant Policy authorization policy
+ *
+ */
 class ApplicantPolicy
 {
     use HandlesAuthorization, HasScopedPermissions;

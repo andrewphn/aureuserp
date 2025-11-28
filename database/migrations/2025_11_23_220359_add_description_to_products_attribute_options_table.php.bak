@@ -1,0 +1,77 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // Skip if table doesn't exist yet (created by products plugin)
+        if (!Schema::hasTable('products_attribute_options')) {
+            return;
+        }
+
+        Schema::table('products_attribute_options', function (Blueprint $table) {
+            $table->text('description')->nullable()->after('name');
+        });
+
+        // Add descriptions for existing pricing levels
+        $pricingLevels = [
+            'Level 1 - Basic ($138/LF)' => 'Basic quality cabinets with standard construction. Includes face frame construction, plywood box, basic hardware, and standard finish options.',
+            'Level 2 - Standard ($168/LF)' => 'Standard quality cabinets with enhanced construction. Includes upgraded hardware, soft-close hinges, plywood construction throughout, and premium finish options.',
+            'Level 3 - Enhanced ($192/LF)' => 'Enhanced quality cabinets with superior construction. Includes full-extension soft-close drawer slides, premium hinges, hardwood face frames, and specialty finish options.',
+            'Level 4 - Premium ($210/LF)' => 'Premium quality cabinets with exceptional construction. Includes luxury hardware, dovetail drawer boxes, hardwood throughout, and custom finish capabilities.',
+            'Level 5 - Custom ($225/LF)' => 'Custom cabinets with highest-quality construction. Includes hand-selected materials, custom hardware, specialty joinery, and fully customizable finishes.'
+        ];
+
+        foreach ($pricingLevels as $name => $description) {
+            DB::table('products_attribute_options')
+                ->where('name', $name)
+                ->update(['description' => $description]);
+        }
+
+        // Add descriptions for material categories
+        $materialCategories = [
+            'Plywood Box' => 'Cabinet box constructed from plywood for durability and stability.',
+            'MDF Face Frame' => 'Medium-density fiberboard face frame, ideal for painted finishes.',
+            'Hardwood Face Frame' => 'Solid hardwood face frame for natural wood appearance and premium quality.',
+            'All Hardwood' => 'Entire cabinet constructed from solid hardwood for maximum quality and longevity.'
+        ];
+
+        foreach ($materialCategories as $name => $description) {
+            DB::table('products_attribute_options')
+                ->where('name', $name)
+                ->update(['description' => $description]);
+        }
+
+        // Add descriptions for finish options
+        $finishOptions = [
+            'Paint Grade' => 'Smooth surface prepared for painted finish. Ideal for solid color applications.',
+            'Stain Grade' => 'Natural wood grain visible for staining. Shows wood character and pattern.',
+            'Premium Stain' => 'Premium wood species selected for exceptional grain patterns and color variation.',
+            'Custom Finish' => 'Fully customizable finish to match specific design requirements and preferences.'
+        ];
+
+        foreach ($finishOptions as $name => $description) {
+            DB::table('products_attribute_options')
+                ->where('name', $name)
+                ->update(['description' => $description]);
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('products_attribute_options', function (Blueprint $table) {
+            $table->dropColumn('description');
+        });
+    }
+};

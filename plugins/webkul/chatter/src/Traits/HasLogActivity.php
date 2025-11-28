@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * Has Log Activity trait
+ *
+ */
 trait HasLogActivity
 {
     /**
@@ -180,6 +184,14 @@ trait HasLogActivity
         return null;
     }
 
+    /**
+     * Get Direct Attribute Changes
+     *
+     * @param string $key
+     * @param array $original
+     * @param array $current
+     * @return ?array
+     */
     protected function getDirectAttributeChanges(string $key, array $original, array $current): ?array
     {
         if (array_key_exists($key, $current)) {
@@ -200,6 +212,12 @@ trait HasLogActivity
 
     /**
      * Determine changes in the model
+     */
+    /**
+     * Determine Changes
+     *
+     * @param string $event
+     * @return ?array
      */
     protected function determineChanges(string $event): ?array
     {
@@ -282,6 +300,13 @@ trait HasLogActivity
     /**
      * Format attribute value
      */
+    /**
+     * Format Attribute Value
+     *
+     * @param string $key
+     * @param mixed $value The value to set
+     * @return mixed
+     */
     protected function formatAttributeValue(string $key, $value): mixed
     {
         if (is_bool($value)) {
@@ -335,6 +360,10 @@ trait HasLogActivity
     /**
      * Sort array recursively
      */
+    /**
+     * Ksort Recursive
+     *
+     */
     protected static function ksortRecursive(&$array)
     {
         if (! is_array($array)) {
@@ -352,6 +381,12 @@ trait HasLogActivity
 
     /**
      * Generate activity description
+     */
+    /**
+     * Generate Activity Description
+     *
+     * @param string $event
+     * @return string
      */
     protected function generateActivityDescription(string $event): string
     {

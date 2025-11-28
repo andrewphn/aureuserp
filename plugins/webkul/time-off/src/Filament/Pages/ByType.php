@@ -7,6 +7,11 @@ use Filament\Pages\Dashboard as BaseDashboard;
 use Webkul\TimeOff\Filament\Clusters\Reporting;
 use Webkul\TimeOff\Filament\Widgets\LeaveTypeWidget;
 
+/**
+ * By Type class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ByType extends BaseDashboard
 {
      use HasPageShield;

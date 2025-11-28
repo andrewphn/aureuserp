@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Purchase\Models\ProductSupplier;
 use Webkul\Security\Models\User;
 
+/**
+ * Product Supplier Policy authorization policy
+ *
+ */
 class ProductSupplierPolicy
 {
     use HandlesAuthorization;

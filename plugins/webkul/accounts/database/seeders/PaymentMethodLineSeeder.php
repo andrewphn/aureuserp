@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Payment Method Line Seeder database seeder
+ *
+ */
 class PaymentMethodLineSeeder extends Seeder
 {
     /**

@@ -16,6 +16,11 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResour
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseOrderResource\Pages\ViewPurchaseOrder;
 use Webkul\Purchase\Models\PurchaseOrder;
 
+/**
+ * Purchase Order Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PurchaseOrderResource extends OrderResource
 {
     protected static ?string $model = PurchaseOrder::class;
@@ -42,6 +47,12 @@ class PurchaseOrderResource extends OrderResource
         return __('purchases::filament/admin/clusters/orders/resources/purchase-order.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
@@ -52,6 +63,12 @@ class PurchaseOrderResource extends OrderResource
         ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return parent::table($table)

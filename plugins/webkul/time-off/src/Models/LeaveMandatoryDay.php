@@ -7,6 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Leave Mandatory Day Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $company_id
+ * @property int $creator_id
+ * @property string|null $color
+ * @property string|null $name
+ * @property \Carbon\Carbon|null $start_date
+ * @property \Carbon\Carbon|null $end_date
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ *
+ */
 class LeaveMandatoryDay extends Model
 {
     use HasFactory;
@@ -27,6 +43,11 @@ class LeaveMandatoryDay extends Model
         'end_date',
     ];
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');

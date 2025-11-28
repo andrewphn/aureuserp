@@ -10,6 +10,10 @@ use Throwable;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Currency;
 
+/**
+ * Company Seeder database seeder
+ *
+ */
 class CompanySeeder extends Seeder
 {
     /**

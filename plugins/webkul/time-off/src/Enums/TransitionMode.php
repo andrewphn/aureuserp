@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Transition Mode enumeration
+ *
+ */
 enum TransitionMode: string implements HasLabel
 {
     case IMMEDIATELY = 'immediately';
@@ -18,6 +22,11 @@ enum TransitionMode: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

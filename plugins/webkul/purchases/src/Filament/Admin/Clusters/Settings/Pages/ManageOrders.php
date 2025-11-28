@@ -12,6 +12,11 @@ use Filament\Schemas\Schema;
 use Webkul\Purchase\Settings\OrderSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Orders class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageOrders extends SettingsPage
 {
     use HasPageShield;
@@ -45,6 +50,12 @@ class ManageOrders extends SettingsPage
         return __('purchases::filament/admin/clusters/settings/pages/manage-orders.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

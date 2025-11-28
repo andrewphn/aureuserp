@@ -5,6 +5,11 @@ namespace Webkul\FullCalendar\Filament\Actions;
 use Filament\Actions\CreateAction as BaseCreateAction;
 use Webkul\FullCalendar\Filament\Widgets\FullCalendarWidget;
 
+/**
+ * Create Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateAction extends BaseCreateAction
 {
     protected function setUp(): void

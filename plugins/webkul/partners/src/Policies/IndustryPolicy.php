@@ -7,6 +7,10 @@ use Webkul\Partner\Models\Industry;
 use Webkul\Security\Models\User;
 
 
+/**
+ * Industry Policy authorization policy
+ *
+ */
 class IndustryPolicy
 {
     use HandlesAuthorization;

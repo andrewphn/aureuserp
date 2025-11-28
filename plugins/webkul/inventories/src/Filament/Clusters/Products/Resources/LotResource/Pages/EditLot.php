@@ -11,6 +11,11 @@ use Illuminate\Database\QueryException;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Models\Lot;
 
+/**
+ * Edit Lot class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditLot extends EditRecord
 {
     protected static string $resource = LotResource::class;

@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Employee Job Position Seeder database seeder
+ *
+ */
 class EmployeeJobPositionSeeder extends Seeder
 {
     /**

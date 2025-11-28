@@ -21,6 +21,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\RefuseReasonResource\Pages\ListRefuseReasons;
 use Webkul\Recruitment\Models\RefuseReason;
 
+/**
+ * Refuse Reason Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class RefuseReasonResource extends Resource
 {
     protected static ?string $model = RefuseReason::class;
@@ -44,6 +49,12 @@ class RefuseReasonResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/refuse-reason.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -63,6 +74,12 @@ class RefuseReasonResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -135,6 +152,12 @@ class RefuseReasonResource extends Resource
             ->reorderable('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

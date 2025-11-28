@@ -4,6 +4,10 @@ namespace Webkul\Purchase\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Qty Received Method enumeration
+ *
+ */
 enum QtyReceivedMethod: string implements HasLabel
 {
     case MANUAL = 'manual';

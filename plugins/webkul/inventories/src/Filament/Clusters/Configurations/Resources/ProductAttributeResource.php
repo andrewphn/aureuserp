@@ -11,6 +11,11 @@ use Webkul\Inventory\Models\Attribute;
 use Webkul\Inventory\Settings\ProductSettings;
 use Webkul\Product\Filament\Resources\AttributeResource;
 
+/**
+ * Product Attribute Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductAttributeResource extends AttributeResource
 {
     protected static ?string $model = Attribute::class;
@@ -27,6 +32,11 @@ class ProductAttributeResource extends AttributeResource
 
     protected static bool $isGloballySearchable = false;
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {

@@ -8,6 +8,11 @@ use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\TimeOff\Models\Leave;
 
+/**
+ * Leave Type Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class LeaveTypeWidget extends ChartWidget
 {
      use HasWidgetShield;

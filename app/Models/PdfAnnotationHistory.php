@@ -8,6 +8,26 @@ use Webkul\Project\Models\PdfAnnotation;
 use Webkul\Project\Models\PdfPage;
 use Webkul\User\Models\User;
 
+/**
+ * Pdf Annotation History Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $annotation_id
+ * @property int $pdf_page_id
+ * @property string|null $action
+ * @property int $user_id
+ * @property array $before_data
+ * @property array $after_data
+ * @property array $metadata
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property-read \Illuminate\Database\Eloquent\Model|null $annotation
+ * @property-read \Illuminate\Database\Eloquent\Model|null $pdfPage
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ *
+ */
 class PdfAnnotationHistory extends Model
 {
     /**

@@ -9,6 +9,30 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Security\Models\User;
 
+/**
+ * Activity Plan Template Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $sort
+ * @property int $plan_id
+ * @property int $activity_type_id
+ * @property int $responsible_id
+ * @property int $creator_id
+ * @property float $delay_count
+ * @property string|null $delay_unit
+ * @property string|null $delay_from
+ * @property string|null $summary
+ * @property string|null $responsible_type
+ * @property string|null $note
+ * @property-read \Illuminate\Database\Eloquent\Model|null $activityPlan
+ * @property-read \Illuminate\Database\Eloquent\Model|null $activityType
+ * @property-read \Illuminate\Database\Eloquent\Model|null $responsible
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Model|null $assignedUser
+ *
+ */
 class ActivityPlanTemplate extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -42,21 +66,41 @@ class ActivityPlanTemplate extends Model implements Sortable
         return $this->belongsTo(ActivityPlan::class, 'plan_id');
     }
 
+    /**
+     * Activity Type
+     *
+     * @return BelongsTo
+     */
     public function activityType(): BelongsTo
     {
         return $this->belongsTo(ActivityType::class, 'activity_type_id');
     }
 
+    /**
+     * Responsible
+     *
+     * @return BelongsTo
+     */
     public function responsible(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_id');
     }
 
+    /**
+     * Created By
+     *
+     * @return BelongsTo
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Assigned User
+     *
+     * @return BelongsTo
+     */
     public function assignedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

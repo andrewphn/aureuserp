@@ -21,6 +21,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\UTMSourceResource\Pages\ListUTMSources;
 use Webkul\Recruitment\Models\UTMSource;
 
+/**
+ * UTMSource Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class UTMSourceResource extends Resource
 {
     protected static ?string $model = UTMSource::class;
@@ -44,6 +49,12 @@ class UTMSourceResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/utm-source.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -56,6 +67,12 @@ class UTMSourceResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -123,6 +140,12 @@ class UTMSourceResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -134,6 +157,12 @@ class UTMSourceResource extends Resource
             ]);
     }
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'utm-source';

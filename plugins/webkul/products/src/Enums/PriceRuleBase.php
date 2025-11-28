@@ -4,6 +4,10 @@ namespace Webkul\Product\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Price Rule Base enumeration
+ *
+ */
 enum PriceRuleBase: string implements HasLabel
 {
     case LIST_PRICE = 'list_price';

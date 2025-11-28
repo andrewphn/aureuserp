@@ -5,8 +5,18 @@ namespace Webkul\FullCalendar\Concerns;
 use Carbon\Carbon;
 use Webkul\FullCalendar\FullCalendarPlugin;
 
+/**
+ * Interacts With Events trait
+ *
+ */
 trait InteractsWithEvents
 {
+    /**
+     * On Event Click
+     *
+     * @param array $event
+     * @return void
+     */
     public function onEventClick(array $event): void
     {
         if ($this->getModel()) {
@@ -19,6 +29,17 @@ trait InteractsWithEvents
         ]);
     }
 
+    /**
+     * On Event Drop
+     *
+     * @param array $event
+     * @param array $oldEvent
+     * @param array $relatedEvents
+     * @param array $delta
+     * @param ?array $oldResource
+     * @param ?array $newResource
+     * @return bool
+     */
     public function onEventDrop(array $event, array $oldEvent, array $relatedEvents, array $delta, ?array $oldResource, ?array $newResource): bool
     {
         if ($this->getModel()) {
@@ -38,6 +59,16 @@ trait InteractsWithEvents
         return false;
     }
 
+    /**
+     * On Event Resize
+     *
+     * @param array $event
+     * @param array $oldEvent
+     * @param array $relatedEvents
+     * @param array $startDelta
+     * @param array $endDelta
+     * @return bool
+     */
     public function onEventResize(array $event, array $oldEvent, array $relatedEvents, array $startDelta, array $endDelta): bool
     {
         if ($this->getModel()) {
@@ -56,6 +87,16 @@ trait InteractsWithEvents
         return false;
     }
 
+    /**
+     * On Date Select
+     *
+     * @param string $start
+     * @param ?string $end
+     * @param bool $allDay
+     * @param ?array $view
+     * @param ?array $resource
+     * @return void
+     */
     public function onDateSelect(string $start, ?string $end, bool $allDay, ?array $view, ?array $resource): void
     {
         [$start, $end] = $this->calculateTimezoneOffset($start, $end, $allDay);
@@ -69,6 +110,11 @@ trait InteractsWithEvents
         ]);
     }
 
+    /**
+     * Refresh Records
+     *
+     * @return void
+     */
     public function refreshRecords(): void
     {
         $this->records = null;
@@ -76,6 +122,14 @@ trait InteractsWithEvents
         $this->dispatch('full-calendar--refresh');
     }
 
+    /**
+     * Calculate Timezone Offset
+     *
+     * @param string $start
+     * @param ?string $end
+     * @param bool $allDay
+     * @return array
+     */
     protected function calculateTimezoneOffset(string $start, ?string $end, bool $allDay): array
     {
         $timezone = FullCalendarPlugin::make()->getTimezone();

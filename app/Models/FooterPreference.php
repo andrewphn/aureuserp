@@ -6,6 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Security\Models\User;
 
+/**
+ * Footer Preference Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $user_id
+ * @property string|null $context_type
+ * @property array $minimized_fields
+ * @property array $expanded_fields
+ * @property array $field_order
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Model|null $user
+ *
+ */
 class FooterPreference extends Model
 {
     /**

@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Partner\Database\Factories\TitleFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Title Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property string|null $short_name
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Title extends Model
 {
     use HasFactory;
@@ -30,11 +42,21 @@ class Title extends Model
         'creator_id',
     ];
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return TitleFactory
+     */
     protected static function newFactory(): TitleFactory
     {
         return TitleFactory::new();

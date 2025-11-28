@@ -13,6 +13,42 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 
+/**
+ * Tax Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $sort
+ * @property int $company_id
+ * @property int $tax_group_id
+ * @property int $cash_basis_transition_account_id
+ * @property int $country_id
+ * @property int $creator_id
+ * @property string|null $type_tax_use
+ * @property string|null $tax_scope
+ * @property float $amount_type
+ * @property float $price_include_override
+ * @property string|null $tax_exigibility
+ * @property string|null $name
+ * @property string|null $description
+ * @property string|null $invoice_label
+ * @property string|null $invoice_legal_notes
+ * @property float $amount
+ * @property bool $is_active
+ * @property float $include_base_amount
+ * @property bool $is_base_affected
+ * @property string|null $analytic
+ * @property-read \Illuminate\Database\Eloquent\Collection $distributionForInvoice
+ * @property-read \Illuminate\Database\Eloquent\Collection $distributionForRefund
+ * @property-read \Illuminate\Database\Eloquent\Model|null $company
+ * @property-read \Illuminate\Database\Eloquent\Model|null $taxGroup
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cashBasisTransitionAccount
+ * @property-read \Illuminate\Database\Eloquent\Model|null $country
+ * @property-read \Illuminate\Database\Eloquent\Model|null $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Collection $parentTaxes
+ *
+ */
 class Tax extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
@@ -47,6 +83,11 @@ class Tax extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
@@ -57,21 +98,41 @@ class Tax extends Model implements Sortable
         return $this->belongsTo(TaxGroup::class, 'tax_group_id');
     }
 
+    /**
+     * Cash Basis Transition Account
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function cashBasisTransitionAccount()
     {
         return $this->belongsTo(Account::class, 'cash_basis_transition_account_id');
     }
 
+    /**
+     * Country
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');
     }
 
+    /**
+     * Created By
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Distribution For Invoice
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function distributionForInvoice()
     {
         return $this->hasMany(TaxPartition::class, 'tax_id');
@@ -82,11 +143,21 @@ class Tax extends Model implements Sortable
         return $this->hasMany(TaxPartition::class, 'tax_id');
     }
 
+    /**
+     * Parent Taxes
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function parentTaxes()
     {
         return $this->belongsToMany(self::class, 'accounts_tax_taxes', 'child_tax_id', 'parent_tax_id');
     }
 
+    /**
+     * Boot
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
@@ -97,6 +168,11 @@ class Tax extends Model implements Sortable
         });
     }
 
+    /**
+     * Attach Distribution For Invoice
+     *
+     * @param self $tax
+     */
     private function attachDistributionForInvoice(self $tax)
     {
         $distributionForInvoices = [
@@ -131,6 +207,11 @@ class Tax extends Model implements Sortable
         DB::table('accounts_tax_partition_lines')->insert($distributionForInvoices);
     }
 
+    /**
+     * Attach Distribution For Refund
+     *
+     * @param self $tax
+     */
     private function attachDistributionForRefund(self $tax)
     {
         $distributionForRefunds = [

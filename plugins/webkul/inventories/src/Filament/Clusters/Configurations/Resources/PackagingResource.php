@@ -19,6 +19,11 @@ use Webkul\Inventory\Settings\WarehouseSettings;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Filament\Resources\PackagingResource as BasePackagingResource;
 
+/**
+ * Packaging Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PackagingResource extends BasePackagingResource
 {
     protected static ?string $model = Packaging::class;
@@ -35,6 +40,11 @@ class PackagingResource extends BasePackagingResource
 
     protected static bool $isGloballySearchable = false;
 
+    /**
+     * Is Discovered
+     *
+     * @return bool
+     */
     public static function isDiscovered(): bool
     {
         if (app()->runningInConsole()) {
@@ -54,6 +64,12 @@ class PackagingResource extends BasePackagingResource
         return __('inventories::filament/clusters/configurations/resources/packaging.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         $schema = BasePackagingResource::form($schema);
@@ -91,6 +107,12 @@ class PackagingResource extends BasePackagingResource
         return $schema;
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         $table = BasePackagingResource::table($table);
@@ -119,6 +141,12 @@ class PackagingResource extends BasePackagingResource
         return $table;
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         $schema = BasePackagingResource::infolist($schema);

@@ -5,6 +5,11 @@ namespace Webkul\Support\Filament\Tables\Columns;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Concerns\HasColor;
 
+/**
+ * Progress Bar Entry class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProgressBarEntry extends Column
 {
     use HasColor {
@@ -15,6 +20,11 @@ class ProgressBarEntry extends Column
 
     protected string $view = 'support::tables.columns.progress-bar-entry';
 
+    /**
+     * Hide Progress Value
+     *
+     * @param mixed $canShow
+     */
     public function hideProgressValue($canShow = false)
     {
         $this->canShow = $canShow;

@@ -11,6 +11,11 @@ use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\TimeOff\Enums\State;
 use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource;
 
+/**
+ * List Time Off class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListTimeOff extends ListRecords
 {
     use HasTableViews;

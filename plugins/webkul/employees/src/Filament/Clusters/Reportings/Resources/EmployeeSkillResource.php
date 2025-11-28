@@ -22,6 +22,11 @@ use Webkul\Employee\Filament\Clusters\Reportings\Resources\EmployeeSkillResource
 use Webkul\Employee\Models\EmployeeSkill;
 use Webkul\Support\Filament\Tables as CustomTables;
 
+/**
+ * Employee Skill Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EmployeeSkillResource extends Resource
 {
     protected static ?string $model = EmployeeSkill::class;
@@ -42,6 +47,12 @@ class EmployeeSkillResource extends Resource
         return __('employees::filament/clusters/reportings/resources/employee-skill.navigation.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -174,6 +185,12 @@ class EmployeeSkillResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -212,6 +229,12 @@ class EmployeeSkillResource extends Resource
             ]);
     }
 
+    /**
+     * Get Slug
+     *
+     * @param ?Panel $panel
+     * @return string
+     */
     public static function getSlug(?Panel $panel = null): string
     {
         return 'employees/skills';

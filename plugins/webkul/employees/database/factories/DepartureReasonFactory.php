@@ -5,6 +5,10 @@ namespace Webkul\Employee\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Webkul\Employee\Models\DepartureReason;
 
+/**
+ * Departure Reason Factory model factory
+ *
+ */
 class DepartureReasonFactory extends Factory
 {
     /**

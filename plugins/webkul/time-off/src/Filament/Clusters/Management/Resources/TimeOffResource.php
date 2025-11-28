@@ -29,6 +29,11 @@ use Webkul\TimeOff\Filament\Clusters\Management\Resources\TimeOffResource\Pages\
 use Webkul\TimeOff\Models\Leave;
 use Webkul\TimeOff\Traits\TimeOffHelper;
 
+/**
+ * Time Off Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TimeOffResource extends Resource
 {
     use TimeOffHelper;
@@ -51,11 +56,23 @@ class TimeOffResource extends Resource
         return __('time-off::filament/clusters/management/resources/time-off.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema->schema((new self)->getFormSchema(true));
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -173,6 +190,12 @@ class TimeOffResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

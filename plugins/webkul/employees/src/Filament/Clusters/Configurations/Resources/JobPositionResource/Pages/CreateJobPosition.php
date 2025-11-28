@@ -7,6 +7,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
 
+/**
+ * Create Job Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateJobPosition extends CreateRecord
 {
     protected static string $resource = JobPositionResource::class;
@@ -24,6 +29,12 @@ class CreateJobPosition extends CreateRecord
             ->body(__('employees::filament/clusters/configurations/resources/job-position/pages/create-job-position.notification.body'));
     }
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::user()->id;

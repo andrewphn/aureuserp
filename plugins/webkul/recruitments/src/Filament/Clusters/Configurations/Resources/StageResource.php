@@ -39,6 +39,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\StageResource\
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\StageResource\Pages\ViewStages;
 use Webkul\Recruitment\Models\Stage;
 
+/**
+ * Stage Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class StageResource extends Resource
 {
     protected static ?string $model = Stage::class;
@@ -64,6 +69,12 @@ class StageResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/stage.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -134,6 +145,12 @@ class StageResource extends Resource
             ->columns(1);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table->columns([
@@ -295,6 +312,12 @@ class StageResource extends Resource
             ->reorderable('sort', 'Desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

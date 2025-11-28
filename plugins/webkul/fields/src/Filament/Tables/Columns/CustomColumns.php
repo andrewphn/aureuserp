@@ -12,6 +12,11 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Collection;
 use Webkul\Field\Models\Field;
 
+/**
+ * Custom Columns class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CustomColumns extends Component
 {
     protected array $include = [];
@@ -25,6 +30,12 @@ class CustomColumns extends Component
         $this->resourceClass = $resource;
     }
 
+    /**
+     * Make
+     *
+     * @param string $resource
+     * @return static
+     */
     public static function make(string $resource): static
     {
         $static = app(static::class, ['resource' => $resource]);
@@ -34,6 +45,12 @@ class CustomColumns extends Component
         return $static;
     }
 
+    /**
+     * Include
+     *
+     * @param array $fields
+     * @return static
+     */
     public function include(array $fields): static
     {
         $this->include = $fields;
@@ -41,6 +58,12 @@ class CustomColumns extends Component
         return $this;
     }
 
+    /**
+     * Exclude
+     *
+     * @param array $fields
+     * @return static
+     */
     public function exclude(array $fields): static
     {
         $this->exclude = $fields;
@@ -79,6 +102,12 @@ class CustomColumns extends Component
         return $this->resourceClass;
     }
 
+    /**
+     * Create Column
+     *
+     * @param Field $field
+     * @return Column
+     */
     protected function createColumn(Field $field): Column
     {
         $columnClass = match ($field->type) {
@@ -103,6 +132,13 @@ class CustomColumns extends Component
         return $column;
     }
 
+    /**
+     * Apply Setting
+     *
+     * @param Column $column
+     * @param array $setting
+     * @return void
+     */
     protected function applySetting(Column $column, array $setting): void
     {
         $name = $setting['setting'];

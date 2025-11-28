@@ -9,6 +9,11 @@ use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Purchase\Enums\RequisitionState;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource;
 
+/**
+ * View Purchase Agreement class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewPurchaseAgreement extends ViewRecord
 {
     protected static string $resource = PurchaseAgreementResource::class;

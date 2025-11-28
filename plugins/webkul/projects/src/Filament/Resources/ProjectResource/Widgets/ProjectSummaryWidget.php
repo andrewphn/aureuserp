@@ -6,8 +6,18 @@ use Filament\Widgets\Widget;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 
+/**
+ * Project Summary Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectSummaryWidget extends Widget
 {
+    /**
+     * Render
+     *
+     * @return View
+     */
     public function render(): View
     {
         return view('filament.widgets.project-summary');

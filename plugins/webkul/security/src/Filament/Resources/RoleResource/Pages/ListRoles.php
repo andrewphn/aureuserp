@@ -8,6 +8,11 @@ use Webkul\Security\Filament\Resources\RoleResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Roles class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListRoles extends ListRecords
 {
     use HasTableViews;

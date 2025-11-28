@@ -3,8 +3,8 @@ import type { Page, Locator } from '@playwright/test';
 /**
  * PDF Viewer Test Helpers
  *
- * Utility functions for interacting with the Nutrient Web SDK PDF viewer
- * in browser tests.
+ * Utility functions for interacting with the TCS PDF Annotation System (V3)
+ * which uses Alpine.js + Canvas rendering (NOT PSPDFKit/Nutrient SDK).
  */
 
 export class PdfViewerHelpers {
@@ -12,25 +12,32 @@ export class PdfViewerHelpers {
 
   /**
    * Wait for PDF viewer to be fully loaded and ready
+   * The TCS annotation system uses Alpine.js with a 'systemReady' state
    */
-  async waitForViewerReady(timeout: number = 20000): Promise<void> {
-    // Wait for PSPDFKit global object
-    await this.page.waitForFunction(
-      () => window.hasOwnProperty('PSPDFKit'),
-      { timeout }
-    );
+  async waitForViewerReady(timeout: number = 30000): Promise<void> {
+    console.log('[waitForViewerReady] Waiting for TCS annotation system...');
 
-    // Wait for viewer container
-    await this.page.waitForSelector('[data-pdf-viewer]', { timeout });
-
-    // Wait for document to be loaded
+    // First wait for the loading skeleton to disappear (systemReady = true in Alpine)
+    // The loading skeleton has text "Loading PDF Viewer"
     await this.page.waitForFunction(
       () => {
-        const instance = (window as any).pdfViewerInstance;
-        return instance && instance.totalPageCount > 0;
+        // Check if loading skeleton is hidden (systemReady = true)
+        const loadingSkeleton = document.querySelector('h3');
+        if (loadingSkeleton?.textContent?.includes('Loading PDF Viewer')) {
+          // Still loading
+          return false;
+        }
+        // Also check for the canvas element which indicates PDF is rendered
+        const canvas = document.querySelector('canvas');
+        return canvas !== null;
       },
       { timeout }
     );
+
+    console.log('[waitForViewerReady] Canvas detected, system appears ready');
+
+    // Additional wait for Alpine component to be fully initialized
+    await this.page.waitForTimeout(1000);
   }
 
   /**

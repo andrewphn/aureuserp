@@ -9,6 +9,11 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Account\Filament\Resources\FiscalPositionResource;
 
+/**
+ * View Fiscal Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewFiscalPosition extends ViewRecord
 {
     protected static string $resource = FiscalPositionResource::class;

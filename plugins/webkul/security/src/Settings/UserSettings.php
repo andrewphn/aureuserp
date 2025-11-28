@@ -4,6 +4,10 @@ namespace Webkul\Security\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
+/**
+ * User Settings class
+ *
+ */
 class UserSettings extends Settings
 {
     public bool $enable_user_invitation;
@@ -14,6 +18,11 @@ class UserSettings extends Settings
 
     public ?int $default_company_id;
 
+    /**
+     * Group
+     *
+     * @return string
+     */
     public static function group(): string
     {
         return 'general';

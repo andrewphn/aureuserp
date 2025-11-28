@@ -11,6 +11,11 @@ use Webkul\Blog\Filament\Customer\Resources\CategoryResource;
 use Webkul\Blog\Models\Category;
 use Webkul\Blog\Models\Post;
 
+/**
+ * View Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewCategory extends ViewRecord
 {
     protected static string $resource = CategoryResource::class;

@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Early Pay Discount enumeration
+ *
+ */
 enum EarlyPayDiscount: string implements HasLabel
 {
     case INCLUDED = 'on_early_payment';
@@ -21,6 +25,11 @@ enum EarlyPayDiscount: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

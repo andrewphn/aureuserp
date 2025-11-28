@@ -2,6 +2,10 @@
 
 namespace Webkul\Support\Enums;
 
+/**
+ * Activity Delay Unit enumeration
+ *
+ */
 enum ActivityDelayUnit: string
 {
     case MINUTES = 'minutes';

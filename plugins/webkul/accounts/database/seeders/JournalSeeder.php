@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Journal Seeder database seeder
+ *
+ */
 class JournalSeeder extends Seeder
 {
     /**

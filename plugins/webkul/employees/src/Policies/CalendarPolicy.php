@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Employee\Models\Calendar;
 use Webkul\Security\Models\User;
 
+/**
+ * Calendar Policy authorization policy
+ *
+ */
 class CalendarPolicy
 {
     use HandlesAuthorization;

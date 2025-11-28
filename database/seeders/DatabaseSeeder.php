@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Webkul\Security\Database\Seeders\DatabaseSeeder as SecurityDatabaseSeeder;
 use Webkul\Support\Database\Seeders\DatabaseSeeder as SupportDatabaseSeeder;
 
+/**
+ * Database Seeder database seeder
+ *
+ */
 class DatabaseSeeder extends Seeder
 {
     /**

@@ -27,6 +27,11 @@ use Webkul\Recruitment\Models\RefuseReason;
 use Webkul\Security\Models\User;
 use Webkul\Support\Services\EmailService;
 
+/**
+ * Edit Applicant class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditApplicant extends EditRecord
 {
     protected static string $resource = ApplicantResource::class;
@@ -205,6 +210,12 @@ class EditApplicant extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $record = $this->record->load('interviewer');
@@ -237,6 +248,11 @@ class EditApplicant extends EditRecord
         return $data;
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         if (! empty($this->notificationData)) {
@@ -250,6 +266,11 @@ class EditApplicant extends EditRecord
         }
     }
 
+    /**
+     * Send Application Confirmation Notification
+     *
+     * @return void
+     */
     protected function sendApplicationConfirmationNotification(): void
     {
         $data = $this->prepareCandidateNotificationPayload();
@@ -271,6 +292,11 @@ class EditApplicant extends EditRecord
         $this->record->addMessage($messageData, Auth::user()->id);
     }
 
+    /**
+     * Send Interviewer Assignment Notification
+     *
+     * @return void
+     */
     protected function sendInterviewerAssignmentNotification(): void
     {
         $oldInterviewers = collect($this->interviewerChanges['old']);
@@ -297,6 +323,11 @@ class EditApplicant extends EditRecord
         }
     }
 
+    /**
+     * Prepare Candidate Notification Payload
+     *
+     * @return array
+     */
     private function prepareCandidateNotificationPayload(): array
     {
         return [
@@ -312,6 +343,12 @@ class EditApplicant extends EditRecord
         ];
     }
 
+    /**
+     * Prepare Interviewer Notification Payload
+     *
+     * @param mixed $interviewer
+     * @return array
+     */
     private function prepareInterviewerNotificationPayload($interviewer): array
     {
         return [
@@ -327,6 +364,12 @@ class EditApplicant extends EditRecord
         ];
     }
 
+    /**
+     * Prepare Applicant Refuse Notification Payload
+     *
+     * @param array $data The data array
+     * @return array
+     */
     private function prepareApplicantRefuseNotificationPayload(array $data): array
     {
         return [

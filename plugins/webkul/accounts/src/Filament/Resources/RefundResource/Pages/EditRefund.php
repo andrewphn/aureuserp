@@ -11,6 +11,11 @@ use Webkul\Account\Filament\Resources\InvoiceResource\Actions as BaseActions;
 use Webkul\Account\Filament\Resources\RefundResource;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 
+/**
+ * Edit Refund class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditRefund extends EditRecord
 {
     protected static string $resource = RefundResource::class;
@@ -42,6 +47,12 @@ class EditRefund extends EditRecord
         ];
     }
 
+    /**
+     * Mutate Form Data Before Save
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $user = Auth::user();
@@ -57,6 +68,11 @@ class EditRefund extends EditRecord
         return $data;
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         Account::computeAccountMove($this->getRecord());

@@ -20,6 +20,11 @@ use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DegreeResource\Pages\ListDegrees;
 use Webkul\Recruitment\Models\Degree;
 
+/**
+ * Degree Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DegreeResource extends Resource
 {
     protected static ?string $model = Degree::class;
@@ -43,6 +48,12 @@ class DegreeResource extends Resource
         return __('recruitments::filament/clusters/configurations/resources/degree.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -55,6 +66,12 @@ class DegreeResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -123,6 +140,12 @@ class DegreeResource extends Resource
             ->reorderable('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

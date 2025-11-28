@@ -7,6 +7,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 
+/**
+ * Manage Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageProducts extends ManageRelatedRecords
 {
     protected static string $resource = PackageResource::class;
@@ -20,6 +25,12 @@ class ManageProducts extends ManageRelatedRecords
         return __('inventories::filament/clusters/products/resources/package/pages/manage-products.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table

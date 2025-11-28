@@ -7,6 +7,11 @@ use Livewire\Component;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Models\Payment;
 
+/**
+ * Cancel Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CancelAction extends Action
 {
     public static function getDefaultName(): ?string

@@ -4,6 +4,10 @@ namespace Webkul\Invoice\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Invoice Policy authorization policy
+ *
+ */
 enum InvoicePolicy: string implements HasLabel
 {
     case ORDER = 'order';
@@ -18,6 +22,11 @@ enum InvoicePolicy: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public function options(): array
     {
         return [

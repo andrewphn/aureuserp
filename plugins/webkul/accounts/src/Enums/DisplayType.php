@@ -4,6 +4,10 @@ namespace Webkul\Account\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Display Type enumeration
+ *
+ */
 enum DisplayType: string implements HasLabel
 {
     case PRODUCT = 'product';
@@ -39,6 +43,11 @@ enum DisplayType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

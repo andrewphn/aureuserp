@@ -14,6 +14,11 @@ use Webkul\Product\Models\ProductSupplier;
 use Webkul\Purchase\Filament\Admin\Clusters\Configurations\Resources\VendorPriceResource;
 use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource;
 
+/**
+ * Manage Vendors class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageVendors extends ManageRelatedRecords
 {
     protected static string $resource = ProductResource::class;
@@ -27,6 +32,12 @@ class ManageVendors extends ManageRelatedRecords
         return __('purchases::filament/admin/clusters/products/resources/product/pages/manage-vendors.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         $schema = VendorPriceResource::form($schema);
@@ -60,6 +71,12 @@ class ManageVendors extends ManageRelatedRecords
         return $schema;
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return VendorPriceResource::table($table)

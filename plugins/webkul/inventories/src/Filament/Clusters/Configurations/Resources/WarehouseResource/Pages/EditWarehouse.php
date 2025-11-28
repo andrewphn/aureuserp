@@ -14,6 +14,11 @@ use Webkul\Inventory\Models\OperationType;
 use Webkul\Inventory\Models\Route;
 use Webkul\Inventory\Models\Rule;
 
+/**
+ * Edit Warehouse class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditWarehouse extends EditRecord
 {
     protected static string $resource = WarehouseResource::class;
@@ -39,6 +44,11 @@ class EditWarehouse extends EditRecord
         ];
     }
 
+    /**
+     * After Save
+     *
+     * @return void
+     */
     protected function afterSave(): void
     {
         $warehouse = $this->getRecord();
@@ -309,6 +319,13 @@ class EditWarehouse extends EditRecord
         );
     }
 
+    /**
+     * Update Locations
+     *
+     * @param string $stepType
+     * @param array $steps
+     * @return void
+     */
     private function updateLocations(string $stepType, array $steps): void
     {
         $currentStep = $this->data[$stepType] ?? null;
@@ -328,6 +345,13 @@ class EditWarehouse extends EditRecord
         }
     }
 
+    /**
+     * Update Operation Types
+     *
+     * @param string $stepType
+     * @param array $steps
+     * @return void
+     */
     private function updateOperationTypes(string $stepType, array $steps): void
     {
         $currentStep = $this->data[$stepType] ?? null;
@@ -351,6 +375,13 @@ class EditWarehouse extends EditRecord
         }
     }
 
+    /**
+     * Update Rules
+     *
+     * @param string $stepType
+     * @param array $steps
+     * @return void
+     */
     private function updateRules(string $stepType, array $steps): void
     {
         $currentStep = $this->data[$stepType] ?? null;

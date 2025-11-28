@@ -11,6 +11,11 @@ use Webkul\Product\Models\Attribute;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Attributes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListAttributes extends ListRecords
 {
     use HasTableViews;

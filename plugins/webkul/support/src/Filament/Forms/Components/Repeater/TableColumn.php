@@ -13,6 +13,11 @@ use Filament\Support\Concerns\CanWrapHeader;
 use Filament\Support\Concerns\HasAlignment;
 use Filament\Support\Concerns\HasWidth;
 
+/**
+ * Table Column class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TableColumn extends Component
 {
     use CanBeHidden;
@@ -34,6 +39,11 @@ class TableColumn extends Component
         $this->name($name);
     }
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(string | Closure $name): static
     {
         $columnClass = static::class;
@@ -50,6 +60,11 @@ class TableColumn extends Component
         return $static;
     }
 
+    /**
+     * Hidden Header Label
+     *
+     * @return static
+     */
     public function hiddenHeaderLabel(bool | Closure $condition = true): static
     {
         $this->isHeaderLabelHidden = $condition;
@@ -57,11 +72,21 @@ class TableColumn extends Component
         return $this;
     }
 
+    /**
+     * Is Header Label Hidden
+     *
+     * @return bool
+     */
     public function isHeaderLabelHidden(): bool
     {
         return (bool) $this->evaluate($this->isHeaderLabelHidden);
     }
 
+    /**
+     * Mark As Required
+     *
+     * @return static
+     */
     public function markAsRequired(bool | Closure $condition = true): static
     {
         $this->isMarkedAsRequired = $condition;
@@ -69,6 +94,11 @@ class TableColumn extends Component
         return $this;
     }
 
+    /**
+     * Is Marked As Required
+     *
+     * @return bool
+     */
     public function isMarkedAsRequired(): bool
     {
         return (bool) $this->evaluate($this->isMarkedAsRequired);

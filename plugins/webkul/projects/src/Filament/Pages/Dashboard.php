@@ -21,6 +21,11 @@ use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Tag;
 use Webkul\Security\Models\User;
 
+/**
+ * Dashboard class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Dashboard extends BaseDashboard
 {
      use HasPageShield;
@@ -43,6 +48,12 @@ class Dashboard extends BaseDashboard
         return null;
     }
 
+    /**
+     * Filters Form
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function filtersForm(Schema $schema): Schema
     {
         return $schema

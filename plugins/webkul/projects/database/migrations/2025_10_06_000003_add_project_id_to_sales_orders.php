@@ -4,7 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +17,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if column already exists
+        if (Schema::hasColumn('sales_orders', 'project_id')) {
+            return;
+        }
+
         Schema::table('sales_orders', function (Blueprint $table) {
             $table->foreignId('project_id')
                 ->nullable()

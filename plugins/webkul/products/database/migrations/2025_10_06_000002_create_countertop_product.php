@@ -3,7 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +17,13 @@ return new class extends Migration
     public function up(): void
     {
         $now = now();
+        $creatorId = DB::table('users')->value('id'); // Get first user ID
+
+        // Skip if no users exist yet
+        if (!$creatorId) {
+            echo "No users exist yet, skipping Countertop product creation\n";
+            return;
+        }
 
         // Get or create Square Foot UOM
         $sqftUom = DB::table('unit_of_measures')->where('name', 'Square Foot')->first();
@@ -26,7 +37,7 @@ return new class extends Migration
             if (!$surfaceCategoryId) {
                 DB::table('unit_of_measure_categories')->insert([
                     'name' => 'Surface',
-                    'creator_id' => 1,
+                    'creator_id' => $creatorId,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
@@ -39,7 +50,7 @@ return new class extends Migration
                 'type' => 'bigger',
                 'factor' => 1,
                 'rounding' => 0.01,
-                'creator_id' => 1,
+                'creator_id' => $creatorId,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -58,7 +69,13 @@ return new class extends Migration
         // Get TCS company
         $companyId = DB::table('companies')->where('acronym', 'TCS')->value('id')
             ?? DB::table('companies')->where('name', 'The Carpenter\'s Son')->value('id')
-            ?? 1;
+            ?? DB::table('companies')->value('id');
+
+        // Skip if no company exists
+        if (!$companyId) {
+            echo "No company exists yet, skipping Countertop product creation\n";
+            return;
+        }
 
         // Create Countertop product
         $countertopProduct = [
@@ -72,7 +89,7 @@ return new class extends Migration
             'company_id' => $companyId,
             'uom_id' => $sqftUomId,
             'uom_po_id' => $sqftUomId,
-            'creator_id' => 1,
+            'creator_id' => $creatorId,
             'created_at' => $now,
             'updated_at' => $now,
         ];
@@ -115,7 +132,7 @@ return new class extends Migration
                     'sort' => $sort++,
                     'product_id' => $productId,
                     'attribute_id' => $attributeId,
-                    'creator_id' => 1,
+                    'creator_id' => $creatorId,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];

@@ -9,6 +9,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\DropshipResource;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Dropships class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListDropships extends ListRecords
 {
     use HasTableViews;

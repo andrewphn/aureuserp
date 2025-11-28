@@ -5,6 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCat
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\ProductCategoryResource;
 use Webkul\Product\Filament\Resources\CategoryResource\Pages\ViewCategory;
 
+/**
+ * View Product Category class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewProductCategory extends ViewCategory
 {
     protected static string $resource = ProductCategoryResource::class;

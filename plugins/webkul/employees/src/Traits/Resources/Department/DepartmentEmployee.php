@@ -6,8 +6,18 @@ use Filament\Actions\CreateAction;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Resources\EmployeeResource;
 
+/**
+ * Department Employee trait
+ *
+ */
 trait DepartmentEmployee
 {
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         $table = EmployeeResource::table($table);

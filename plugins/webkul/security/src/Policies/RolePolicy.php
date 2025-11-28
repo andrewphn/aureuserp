@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Security\Models\Role;
 use Webkul\Security\Models\User;
 
+/**
+ * Role Policy authorization policy
+ *
+ */
 class RolePolicy
 {
     use HandlesAuthorization;

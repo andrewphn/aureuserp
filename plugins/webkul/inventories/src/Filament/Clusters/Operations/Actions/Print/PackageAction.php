@@ -5,6 +5,11 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions\Print;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 
+/**
+ * Package Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PackageAction extends Action
 {
     public static function getDefaultName(): ?string

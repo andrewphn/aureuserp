@@ -12,6 +12,11 @@ use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
+/**
+ * Manage Locations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageLocations extends ManageRelatedRecords
 {
     protected static string $resource = StorageCategoryResource::class;
@@ -39,11 +44,23 @@ class ManageLocations extends ManageRelatedRecords
         return __('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-locations.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return LocationResource::form($schema);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return LocationResource::table($table)

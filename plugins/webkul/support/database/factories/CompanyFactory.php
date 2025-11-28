@@ -7,6 +7,10 @@ use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\State;
 
+/**
+ * Company Factory model factory
+ *
+ */
 class CompanyFactory extends Factory
 {
     /**

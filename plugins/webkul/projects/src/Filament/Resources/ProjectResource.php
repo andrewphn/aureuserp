@@ -14,6 +14,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use App\Forms\Components\AddressAutocomplete;
 use App\Forms\Components\TagSelectorPanel;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -76,6 +77,15 @@ use Webkul\Project\Settings\TimeSettings;
 use Webkul\Security\Filament\Resources\CompanyResource;
 use Webkul\Security\Filament\Resources\UserResource;
 
+/**
+ * Project Resource Filament resource
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectResource extends Resource
 {
     use HasCustomFields;
@@ -108,6 +118,12 @@ class ProjectResource extends Resource
         return ['name', 'user.name', 'partner.name'];
     }
 
+    /**
+     * Get Global Search Result Details
+     *
+     * @param Model $record The model record
+     * @return array
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
@@ -116,6 +132,12 @@ class ProjectResource extends Resource
         ];
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -182,6 +204,20 @@ class ProjectResource extends Resource
                                         })
                                         ->visible(fn (callable $get) => $get('company_id') !== null)
                                         ->helperText('Optional: Select a specific branch if applicable'),
+                                    Select::make('warehouse_id')
+                                        ->label('Warehouse')
+                                        ->options(function (callable $get) {
+                                            $companyId = $get('company_id');
+                                            if (!$companyId) {
+                                                return \Webkul\Inventory\Models\Warehouse::pluck('name', 'id');
+                                            }
+                                            return \Webkul\Inventory\Models\Warehouse::where('company_id', $companyId)->pluck('name', 'id');
+                                        })
+                                        ->searchable()
+                                        ->preload()
+                                        ->live(onBlur: true)
+                                        ->visible(fn (callable $get) => $get('company_id') !== null)
+                                        ->helperText('Warehouse for material allocation'),
                                     Select::make('partner_id')
                                         ->label(__('webkul-project::filament/resources/project.form.sections.additional.fields.customer'))
                                         ->relationship('partner', 'name', fn ($query) => $query->where('sub_type', 'customer'))
@@ -296,8 +332,12 @@ class ProjectResource extends Resource
                                     })
                                     ->inline()
                                     ->columnSpanFull(),
-                                TextInput::make('project_address.street1')
+                                AddressAutocomplete::make('project_address.street1')
                                     ->label('Street Address Line 1')
+                                    ->cityField('project_address.city')
+                                    ->stateField('project_address.state_id')
+                                    ->zipField('project_address.zip')
+                                    ->countryField('project_address.country_id')
                                     ->disabled(fn (callable $get) => $get('use_customer_address'))
                                     ->dehydrated()
                                     ->live(onBlur: true)
@@ -344,6 +384,7 @@ class ProjectResource extends Resource
                                         })
                                         ->searchable()
                                         ->preload()
+                                        ->live() // Enable reactivity for address autocomplete updates
                                         ->disabled(fn (callable $get) => $get('use_customer_address'))
                                         ->dehydrated(),
                                     TextInput::make('project_address.zip')
@@ -585,6 +626,12 @@ class ProjectResource extends Resource
             ->columns(3);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -915,6 +962,9 @@ class ProjectResource extends Resource
                                 $record->tags()->syncWithoutDetaching($data['tags']);
                             }
 
+                            // Clear tag cache after bulk tag assignment
+                            \Illuminate\Support\Facades\Cache::forget('project_tags_most_used');
+
                             Notification::make()
                                 ->success()
                                 ->title('Tags added')
@@ -941,6 +991,12 @@ class ProjectResource extends Resource
             });
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -1143,6 +1199,12 @@ class ProjectResource extends Resource
         return once(fn () => app(TimeSettings::class));
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         // Hide sub-navigation on annotation pages
@@ -1186,6 +1248,14 @@ class ProjectResource extends Resource
         ];
     }
 
+    /**
+     * Calculate Estimated Production Time
+     *
+     * @param mixed $linearFeet
+     * @param callable $get
+     * @param callable $set
+     * @return void
+     */
     protected static function calculateEstimatedProductionTime($linearFeet, callable $get, callable $set): void
     {
         // Calculate estimated linear feet from date range if dates are set
@@ -1228,6 +1298,13 @@ class ProjectResource extends Resource
         }
     }
 
+    /**
+     * Update Project Name
+     *
+     * @param callable $get
+     * @param callable $set
+     * @return void
+     */
     protected static function updateProjectName(callable $get, callable $set): void
     {
         // Only generate name if we have both street address and project type
@@ -1256,6 +1333,14 @@ class ProjectResource extends Resource
         $set('name', $projectName);
     }
 
+    /**
+     * Update Project Number Preview
+     *
+     * @param ?int $companyId
+     * @param callable $get
+     * @param callable $set
+     * @return void
+     */
     protected static function updateProjectNumberPreview(?int $companyId, callable $get, callable $set): void
     {
         // DISABLED on edit pages to prevent circular update loops

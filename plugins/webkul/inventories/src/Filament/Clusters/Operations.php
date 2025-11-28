@@ -4,6 +4,11 @@ namespace Webkul\Inventory\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
+/**
+ * Operations class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class Operations extends Cluster
 {
     protected static ?string $slug = 'inventory/operations';

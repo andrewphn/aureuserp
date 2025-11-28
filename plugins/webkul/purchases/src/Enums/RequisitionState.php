@@ -5,6 +5,10 @@ namespace Webkul\Purchase\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Requisition State enumeration
+ *
+ */
 enum RequisitionState: string implements HasColor, HasLabel
 {
     case DRAFT = 'draft';
@@ -15,6 +19,11 @@ enum RequisitionState: string implements HasColor, HasLabel
 
     case CANCELED = 'canceled';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

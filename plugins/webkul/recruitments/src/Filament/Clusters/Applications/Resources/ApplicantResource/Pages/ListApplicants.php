@@ -20,6 +20,11 @@ use Webkul\Recruitment\Filament\Widgets\JobPositionStatsWidget;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Applicants class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListApplicants extends ListRecords
 {
     use HasTableViews;

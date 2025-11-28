@@ -3,7 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,11 +18,19 @@ return new class extends Migration
     public function up(): void
     {
         $now = now();
+        $creatorId = DB::table('users')->value('id'); // Get first user ID
+
+        // Skip if no users exist yet
+        if (!$creatorId) {
+            echo "No users exist yet, skipping Pricing Level attribute creation\n";
+            return;
+        }
 
         // Create Pricing Level attribute
         DB::table('products_attributes')->insert([
             'name' => 'Pricing Level',
-            'creator_id' => 1,
+            'type' => 'select',
+            'creator_id' => $creatorId,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -39,7 +51,7 @@ return new class extends Migration
                 'attribute_id' => $pricingLevelAttrId,
                 'name' => $level['name'],
                 'extra_price' => $level['extra_price'],
-                'creator_id' => 1,
+                'creator_id' => $creatorId,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -73,7 +85,7 @@ return new class extends Migration
                 'sort' => $maxSort + 1,
                 'product_id' => $cabinetProduct->id,
                 'attribute_id' => $pricingLevelAttrId,
-                'creator_id' => 1,
+                'creator_id' => $creatorId,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -118,6 +130,16 @@ return new class extends Migration
 
         echo "\n✓ Cabinet product now has Pricing Level attribute with 5 tiers\n";
         echo "✓ PDF parsing can now map 'Tier 2' to 'Level 2', 'Tier 4' to 'Level 4', etc.\n";
+
+        // Fix existing database if migration was already run
+        $fixedCount = DB::table('products_attributes')
+            ->where('name', 'Pricing Level')
+            ->where('type', '')
+            ->update(['type' => 'select']);
+
+        if ($fixedCount > 0) {
+            echo "✓ Fixed Pricing Level attribute type for {$fixedCount} existing record(s)\n";
+        }
     }
 
     /**

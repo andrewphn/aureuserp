@@ -11,12 +11,23 @@ use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListProducts extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = ProductResource::class;
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return parent::table($table)

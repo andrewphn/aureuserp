@@ -2,6 +2,10 @@
 
 namespace Webkul\Employee\Enums;
 
+/**
+ * Gender enumeration
+ *
+ */
 enum Gender: string
 {
     case Male = 'male';
@@ -10,6 +14,11 @@ enum Gender: string
 
     case Other = 'other';
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

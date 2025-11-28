@@ -8,10 +8,21 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Create Pdf Document class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreatePdfDocument extends CreateRecord
 {
     protected static string $resource = PdfDocumentResource::class;
 
+    /**
+     * Mutate Form Data Before Create
+     *
+     * @param array $data The data array
+     * @return array
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Set uploaded_by to current user

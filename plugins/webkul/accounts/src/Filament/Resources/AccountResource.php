@@ -29,6 +29,11 @@ use Webkul\Account\Filament\Resources\AccountResource\Pages\ListAccounts;
 use Webkul\Account\Filament\Resources\AccountResource\Pages\ViewAccount;
 use Webkul\Account\Models\Account;
 
+/**
+ * Account Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class AccountResource extends Resource
 {
     protected static ?string $model = Account::class;
@@ -37,6 +42,12 @@ class AccountResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -100,6 +111,12 @@ class AccountResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -150,6 +167,12 @@ class AccountResource extends Resource
             ]);
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

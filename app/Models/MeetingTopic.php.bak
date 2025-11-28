@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class MeetingTopic extends Model
+{
+    protected $fillable = [
+        'meeting_transcript_id',
+        'topic_name',
+        'description',
+        'first_mention_time',
+        'keywords',
+        'mention_count',
+    ];
+
+    protected $casts = [
+        'keywords' => 'array',
+    ];
+
+    public function meetingTranscript(): BelongsTo
+    {
+        return $this->belongsTo(MeetingTranscript::class);
+    }
+}

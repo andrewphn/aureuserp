@@ -4,6 +4,10 @@ namespace Webkul\TimeOff\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Accrual Validity Type enumeration
+ *
+ */
 enum AccrualValidityType: string implements HasLabel
 {
     case DAYS = 'days';
@@ -18,6 +22,11 @@ enum AccrualValidityType: string implements HasLabel
         };
     }
 
+    /**
+     * Options
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

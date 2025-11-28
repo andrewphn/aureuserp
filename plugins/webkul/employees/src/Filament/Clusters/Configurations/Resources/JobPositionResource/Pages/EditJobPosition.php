@@ -8,6 +8,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
 
+/**
+ * Edit Job Position class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditJobPosition extends EditRecord
 {
     protected static string $resource = JobPositionResource::class;

@@ -14,6 +14,11 @@ use Webkul\Invoice\Filament\Clusters\Customer\Resources\ProductResource\Pages\Vi
 use Webkul\Invoice\Models\Product;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 
+/**
+ * Product Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProductResource extends BaseProductResource
 {
     protected static ?string $model = Product::class;
@@ -36,6 +41,12 @@ class ProductResource extends BaseProductResource
         return __('invoices::filament/clusters/customers/resources/products.navigation.title');
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

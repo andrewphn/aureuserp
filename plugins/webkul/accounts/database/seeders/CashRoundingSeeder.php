@@ -4,6 +4,10 @@ namespace Webkul\Account\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Cash Rounding Seeder database seeder
+ *
+ */
 class CashRoundingSeeder extends Seeder
 {
     /**

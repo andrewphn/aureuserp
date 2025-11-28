@@ -4,6 +4,10 @@ namespace Webkul\Inventory\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Group Propagation enumeration
+ *
+ */
 enum GroupPropagation: string implements HasLabel
 {
     case NONE = 'none';

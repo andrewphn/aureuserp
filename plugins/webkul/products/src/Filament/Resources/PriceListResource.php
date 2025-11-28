@@ -15,6 +15,11 @@ use Webkul\Product\Filament\Resources\PriceListResource\Pages\ListPriceLists;
 use Webkul\Product\Filament\Resources\PriceListResource\Pages\ViewPriceList;
 use Webkul\Product\Models\PriceList;
 
+/**
+ * Price List Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class PriceListResource extends Resource
 {
     protected static ?string $model = PriceList::class;
@@ -28,6 +33,12 @@ class PriceListResource extends Resource
         return 'Price Lists';
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -36,6 +47,12 @@ class PriceListResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

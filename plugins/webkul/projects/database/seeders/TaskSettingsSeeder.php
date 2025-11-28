@@ -5,6 +5,10 @@ namespace Webkul\Project\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Task Settings Seeder database seeder
+ *
+ */
 class TaskSettingsSeeder extends Seeder
 {
     /**

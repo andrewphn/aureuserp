@@ -5,6 +5,11 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources\Departme
 use Webkul\Employee\Filament\Resources\DepartmentResource\Pages\CreateDepartment as BaseCreateDepartment;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\DepartmentResource;
 
+/**
+ * Create Department class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CreateDepartment extends BaseCreateDepartment
 {
     protected static string $resource = DepartmentResource::class;

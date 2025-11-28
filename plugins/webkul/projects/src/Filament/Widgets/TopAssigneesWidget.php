@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Webkul\Project\Models\Timesheet;
 
+/**
+ * Top Assignees Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TopAssigneesWidget extends BaseWidget
 {
     use HasWidgetShield, InteractsWithPageFilters;
@@ -25,11 +30,22 @@ class TopAssigneesWidget extends BaseWidget
         return __('webkul-project::filament/widgets/top-assignees.heading.title');
     }
     
+    /**
+     * Get Table Record Key
+     *
+     * @return string
+     */
     public function getTableRecordKey(Model | array $record): string
     {
         return 'id';
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         $query = Timesheet::query();

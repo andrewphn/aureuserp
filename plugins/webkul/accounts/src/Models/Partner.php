@@ -4,8 +4,17 @@ namespace Webkul\Account\Models;
 
 use Webkul\Partner\Models\Partner as BasePartner;
 
+/**
+ * Partner Eloquent model
+ *
+ */
 class Partner extends BasePartner
 {
+    /**
+     * Create a new Partner instance
+     *
+     * @param array $attributes
+     */
     public function __construct(array $attributes = [])
     {
         $this->mergeFillable([
@@ -39,36 +48,71 @@ class Partner extends BasePartner
         parent::__construct($attributes);
     }
 
+    /**
+     * Property Account Payable
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertyAccountPayable()
     {
         return $this->belongsTo(Account::class, 'property_account_payable_id');
     }
 
+    /**
+     * Property Account Receivable
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertyAccountReceivable()
     {
         return $this->belongsTo(Account::class, 'property_account_receivable_id');
     }
 
+    /**
+     * Property Account Position
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertyAccountPosition()
     {
         return $this->belongsTo(Account::class, 'property_account_position_id');
     }
 
+    /**
+     * Property Payment Term
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertyPaymentTerm()
     {
         return $this->belongsTo(PaymentTerm::class, 'property_payment_term_id');
     }
 
+    /**
+     * Property Supplier Payment Term
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertySupplierPaymentTerm()
     {
         return $this->belongsTo(PaymentTerm::class, 'property_supplier_payment_term_id');
     }
 
+    /**
+     * Property Outbound Payment Method Line
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertyOutboundPaymentMethodLine()
     {
         return $this->belongsTo(PaymentMethodLine::class, 'property_outbound_payment_method_line_id');
     }
 
+    /**
+     * Property Inbound Payment Method Line
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function propertyInboundPaymentMethodLine()
     {
         return $this->belongsTo(PaymentMethodLine::class, 'property_inbound_payment_method_line_id');

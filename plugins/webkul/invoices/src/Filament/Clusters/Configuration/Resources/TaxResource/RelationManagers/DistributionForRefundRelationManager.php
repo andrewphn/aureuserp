@@ -6,6 +6,11 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Webkul\Account\Enums\DocumentType;
 use Webkul\Account\Traits\TaxPartition;
 
+/**
+ * Distribution For Refund Relation Manager class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class DistributionForRefundRelationManager extends RelationManager
 {
     use TaxPartition;

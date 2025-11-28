@@ -7,6 +7,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
 
+/**
+ * Project Address Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property int $project_id
+ * @property string|null $type
+ * @property string|null $street1
+ * @property string|null $street2
+ * @property string|null $city
+ * @property string|null $zip
+ * @property int $state_id
+ * @property int $country_id
+ * @property string|null $notes
+ * @property bool $is_primary
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $state
+ * @property-read \Illuminate\Database\Eloquent\Model|null $country
+ *
+ */
 class ProjectAddress extends Model
 {
     /**

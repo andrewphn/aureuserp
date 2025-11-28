@@ -6,6 +6,11 @@ use App\Filament\Resources\FooterTemplateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/**
+ * Edit Footer Template class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class EditFooterTemplate extends EditRecord
 {
     protected static string $resource = FooterTemplateResource::class;

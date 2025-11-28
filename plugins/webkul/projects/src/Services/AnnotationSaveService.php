@@ -12,12 +12,20 @@ use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Utils\PositionInferenceUtil;
 
+/**
+ * Annotation Save Service service
+ *
+ */
 class AnnotationSaveService
 {
     protected EntityManagementService $entityManagement;
 
     protected AnnotationSyncService $annotationSync;
 
+    /**
+     * Create a new AnnotationSaveService instance
+     *
+     */
     public function __construct()
     {
         $this->entityManagement = new EntityManagementService;
@@ -36,6 +44,17 @@ class AnnotationSaveService
      * @return PdfPageAnnotation The created or updated annotation
      *
      * @throws \Exception If save fails
+     */
+    /**
+     * Save Annotation
+     *
+     * @param array $formData
+     * @param array $originalAnnotation
+     * @param int $projectId
+     * @param int $pdfPageId
+     * @param string $linkMode
+     * @param ?int $linkedEntityId
+     * @return PdfPageAnnotation
      */
     public function saveAnnotation(
         array $formData,
@@ -66,6 +85,13 @@ class AnnotationSaveService
      *
      * @param  array  $formData  The form data
      * @param  array  $originalAnnotation  The original annotation
+     */
+    /**
+     * Validate Duplicate View
+     *
+     * @param array $formData
+     * @param array $originalAnnotation
+     * @return void
      */
     protected function validateDuplicateView(array $formData, array $originalAnnotation): void
     {
@@ -113,6 +139,18 @@ class AnnotationSaveService
 
     /**
      * Create a new annotation
+     */
+    /**
+     * Create Annotation
+     *
+     * @param array $formData
+     * @param array $originalAnnotation
+     * @param int $projectId
+     * @param int $pdfPageId
+     * @param string $annotationType
+     * @param string $linkMode
+     * @param ?int $linkedEntityId
+     * @return PdfPageAnnotation
      */
     protected function createAnnotation(
         array $formData,
@@ -210,6 +248,17 @@ class AnnotationSaveService
     /**
      * Update an existing annotation
      */
+    /**
+     * Update Annotation
+     *
+     * @param int $annotationId
+     * @param array $formData
+     * @param array $originalAnnotation
+     * @param string $annotationType
+     * @param string $linkMode
+     * @param ?int $linkedEntityId
+     * @return PdfPageAnnotation
+     */
     protected function updateAnnotation(
         int $annotationId,
         array $formData,
@@ -278,6 +327,17 @@ class AnnotationSaveService
     /**
      * Handle entity linking or creation for new annotations
      */
+    /**
+     * Handle Entity Linking
+     *
+     * @param array $formData
+     * @param string $annotationType
+     * @param int $projectId
+     * @param ?int $parentAnnotationId
+     * @param string $linkMode
+     * @param ?int $linkedEntityId
+     * @return array
+     */
     protected function handleEntityLinking(
         array $formData,
         string $annotationType,
@@ -329,6 +389,16 @@ class AnnotationSaveService
 
     /**
      * Handle entity updates for existing annotations
+     */
+    /**
+     * Handle Entity Update
+     *
+     * @param PdfPageAnnotation $annotation
+     * @param array $formData
+     * @param string $annotationType
+     * @param string $linkMode
+     * @param ?int $linkedEntityId
+     * @return array
      */
     protected function handleEntityUpdate(
         PdfPageAnnotation $annotation,
@@ -385,6 +455,14 @@ class AnnotationSaveService
      * Helper method to link annotation to existing entity
      * Consolidates duplicate logic from handleEntityLinking and handleEntityUpdate
      */
+    /**
+     * Link To Existing Entity
+     *
+     * @param string $annotationType
+     * @param int $entityId
+     * @param array $result
+     * @return array
+     */
     protected function linkToExistingEntity(string $annotationType, int $entityId, array $result): array
     {
         $entity = $this->entityManagement->loadEntity($annotationType, $entityId);
@@ -434,6 +512,14 @@ class AnnotationSaveService
     /**
      * Update cabinet entity with hierarchy IDs from annotation context
      * This ensures cabinet entities have proper parent relationships for tree display
+     */
+    /**
+     * Update Cabinet Hierarchy
+     *
+     * @param int $cabinetId
+     * @param PdfPageAnnotation $annotation
+     * @param array $formData
+     * @return void
      */
     protected function updateCabinetHierarchy(int $cabinetId, PdfPageAnnotation $annotation, array $formData): void
     {
@@ -494,6 +580,13 @@ class AnnotationSaveService
     /**
      * Get parent entity ID for annotation type
      */
+    /**
+     * Get Parent Entity Id
+     *
+     * @param string $annotationType
+     * @param ?int $parentAnnotationId
+     * @return ?int
+     */
     protected function getParentEntityId(string $annotationType, ?int $parentAnnotationId): ?int
     {
         return match ($annotationType) {
@@ -506,6 +599,20 @@ class AnnotationSaveService
 
     /**
      * Auto-create cabinet_run if cabinet is created directly under a location
+     */
+    /**
+     * Auto Create Cabinet Run
+     *
+     * @param int $parentAnnotationId
+     * @param array $formData
+     * @param array $originalAnnotation
+     * @param int $pdfPageId
+     * @param ?int $roomId
+     * @param float $normalizedY
+     * @param float $normalizedWidth
+     * @param float $normalizedHeight
+     * @param array $positionData
+     * @return int
      */
     protected function autoCreateCabinetRun(
         int $parentAnnotationId,

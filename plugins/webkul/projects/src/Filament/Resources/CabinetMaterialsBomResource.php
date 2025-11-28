@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
@@ -23,6 +24,11 @@ use Webkul\Project\Filament\Resources\CabinetMaterialsBomResource\Pages\EditCabi
 use Webkul\Project\Filament\Resources\CabinetMaterialsBomResource\Pages\ListCabinetMaterialsBoms;
 use Webkul\Project\Models\CabinetMaterialsBom;
 
+/**
+ * Cabinet Materials Bom Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CabinetMaterialsBomResource extends Resource
 {
     protected static ?string $model = CabinetMaterialsBom::class;
@@ -43,6 +49,12 @@ class CabinetMaterialsBomResource extends Resource
         return 'Projects';
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -272,6 +284,12 @@ class CabinetMaterialsBomResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table

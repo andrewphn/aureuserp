@@ -7,6 +7,11 @@ use Webkul\Partner\Filament\Resources\BankAccountResource\Pages\ManageBankAccoun
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Bank Accounts class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListBankAccounts extends BaseManageBankAccounts
 {
     use HasTableViews;

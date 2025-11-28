@@ -11,6 +11,25 @@ use Illuminate\Support\Facades\Storage;
 use Webkul\Blog\Database\Factories\CategoryFactory;
 use Webkul\Security\Models\User;
 
+/**
+ * Category Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property string|null $name
+ * @property string|null $sub_title
+ * @property string|null $slug
+ * @property string|null $image
+ * @property string|null $meta_title
+ * @property string|null $meta_keywords
+ * @property string|null $meta_description
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Collection $posts
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class Category extends Model
 {
     use HasFactory, SoftDeletes;
@@ -52,16 +71,31 @@ class Category extends Model
         return Storage::url($this->image);
     }
 
+    /**
+     * Posts
+     *
+     * @return HasMany
+     */
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
     }
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return CategoryFactory
+     */
     protected static function newFactory(): CategoryFactory
     {
         return CategoryFactory::new();

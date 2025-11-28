@@ -6,6 +6,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 
+/**
+ * Utm Stage Seeder database seeder
+ *
+ */
 class UtmStageSeeder extends Seeder
 {
     /**

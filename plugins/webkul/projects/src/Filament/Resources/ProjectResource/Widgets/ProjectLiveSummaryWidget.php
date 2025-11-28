@@ -4,6 +4,11 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Widgets;
 
 use App\Filament\Components\LiveSummaryPanel;
 
+/**
+ * Project Live Summary Widget Filament widget
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ProjectLiveSummaryWidget extends LiveSummaryPanel
 {
     public string $heading = 'Project Summary';

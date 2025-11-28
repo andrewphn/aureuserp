@@ -4,9 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Webkul\Product\Models\Product;
-use Webkul\Product\Models\ProductCategory;
 
+/**
+ * Tcs Service Products Seeder database seeder
+ *
+ */
 class TcsServiceProductsSeeder extends Seeder
 {
     /**
@@ -16,11 +18,19 @@ class TcsServiceProductsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get or create "Services" category
-        $servicesCategory = ProductCategory::firstOrCreate(
-            ['name' => 'Woodwork Services'],
-            ['name' => 'Woodwork Services', 'creator_id' => 1]
-        );
+        // Get or create "Services" category in products_categories table
+        $categoryId = DB::table('products_categories')
+            ->where('name', 'Woodwork Services')
+            ->value('id');
+
+        if (!$categoryId) {
+            $categoryId = DB::table('products_categories')->insertGetId([
+                'name' => 'Woodwork Services',
+                'creator_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         // Get TCS company
         $company = DB::table('companies')->where('name', 'The Carpenter\'s Son')->first();
@@ -39,10 +49,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 138.00,
                 'cost' => 0,
                 'reference' => 'CAB-L1',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -53,10 +64,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 168.00,
                 'cost' => 0,
                 'reference' => 'CAB-L2',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -67,10 +79,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 192.00,
                 'cost' => 0,
                 'reference' => 'CAB-L3',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -81,10 +94,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 210.00,
                 'cost' => 0,
                 'reference' => 'CAB-L4',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -95,10 +109,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 225.00,
                 'cost' => 0,
                 'reference' => 'CAB-L5',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -111,10 +126,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 138.00,
                 'cost' => 0,
                 'reference' => 'MAT-PAINT',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -125,10 +141,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 156.00,
                 'cost' => 0,
                 'reference' => 'MAT-STAIN',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -139,10 +156,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 185.00,
                 'cost' => 0,
                 'reference' => 'MAT-PREMIUM',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -155,10 +173,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 167.44,
                 'cost' => 75.44,
                 'reference' => 'CLOSET-PAINT',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -169,10 +188,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 188.38,
                 'cost' => 96.38,
                 'reference' => 'CLOSET-STAIN',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -183,10 +203,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 28.00,
                 'cost' => 0,
                 'reference' => 'CLOSET-SHELF',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -199,10 +220,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 18.00,
                 'cost' => 0,
                 'reference' => 'SHELF-PAINT',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -213,10 +235,58 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 24.00,
                 'cost' => 0,
                 'reference' => 'SHELF-PREMIUM',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+
+            // FINISH UPGRADES
+            [
+                'name' => 'Finish Upgrade - Unfinished',
+                'description' => 'No finish applied - raw wood ready for customer finishing. No additional charge.',
+                'type' => 'service',
+                'price' => 0.00,
+                'cost' => 0,
+                'reference' => 'FINISH-UNFINISHED',
+                'category_id' => $categoryId,
+                'company_id' => $company->id ?? 1,
+                'creator_id' => 1,
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Finish Upgrade - Natural Stain',
+                'description' => 'Natural stain finish with polyurethane protection. Add to base cabinet price.',
+                'type' => 'service',
+                'price' => 65.00,
+                'cost' => 0,
+                'reference' => 'FINISH-NATURAL',
+                'category_id' => $categoryId,
+                'company_id' => $company->id ?? 1,
+                'creator_id' => 1,
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Finish Upgrade - Custom Stain',
+                'description' => 'Custom color stain with polyurethane protection. Add to base cabinet price.',
+                'type' => 'service',
+                'price' => 125.00,
+                'cost' => 0,
+                'reference' => 'FINISH-CUSTOM',
+                'category_id' => $categoryId,
+                'company_id' => $company->id ?? 1,
+                'creator_id' => 1,
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -229,10 +299,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 3.00,
                 'cost' => 0,
                 'reference' => 'CUSTOM-DEPTH',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -243,10 +314,11 @@ class TcsServiceProductsSeeder extends Seeder
                 'price' => 2.00,
                 'cost' => 0,
                 'reference' => 'CUSTOM-LENGTH',
-                'category_id' => $servicesCategory->id,
+                'category_id' => $categoryId,
                 'company_id' => $company->id ?? 1,
                 'creator_id' => 1,
-                'unit' => 'linear_foot',
+                'uom_id' => 27, // Linear Foot
+                'uom_po_id' => 27, // Purchase order UOM (Linear Foot)
                 'created_at' => $now,
                 'updated_at' => $now,
             ],

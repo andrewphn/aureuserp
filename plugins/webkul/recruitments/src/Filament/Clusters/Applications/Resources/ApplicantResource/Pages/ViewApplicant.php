@@ -21,6 +21,11 @@ use Webkul\Recruitment\Models\Applicant;
 use Webkul\Recruitment\Models\RefuseReason;
 use Webkul\Support\Services\EmailService;
 
+/**
+ * View Applicant class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewApplicant extends ViewRecord
 {
     protected static string $resource = ApplicantResource::class;
@@ -174,6 +179,12 @@ class ViewApplicant extends ViewRecord
         ];
     }
 
+    /**
+     * Prepare Applicant Refuse Notification Payload
+     *
+     * @param array $data The data array
+     * @return array
+     */
     private function prepareApplicantRefuseNotificationPayload(array $data): array
     {
         return [

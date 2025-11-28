@@ -7,6 +7,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\PartnerResource;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\VendorResource\Pages\ListVendors as BaseListPartners;
 
+/**
+ * List Partners class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListPartners extends BaseListPartners
 {
     protected static string $resource = PartnerResource::class;

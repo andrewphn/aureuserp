@@ -36,17 +36,35 @@ use Webkul\Employee\Enums\DayOfWeek;
 use Webkul\Employee\Enums\DayPeriod;
 use Webkul\Employee\Enums\WeekType;
 
+/**
+ * Calendar Attendance class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CalendarAttendance extends RelationManager
 {
     protected static string $relationship = 'attendance';
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * Get Title
+     *
+     * @param Model $ownerRecord
+     * @param string $pageClass
+     * @return string
+     */
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('employees::filament/clusters/configurations/resources/calendar/relation-managers/working-hours.modal.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -117,6 +135,12 @@ class CalendarAttendance extends RelationManager
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -241,6 +265,12 @@ class CalendarAttendance extends RelationManager
             ->reorderable('sort');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function infolist(Schema $schema): Schema
     {
         return $schema

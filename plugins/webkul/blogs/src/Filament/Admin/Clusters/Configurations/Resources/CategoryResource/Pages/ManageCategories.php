@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Blog\Filament\Admin\Clusters\Configurations\Resources\CategoryResource;
 use Webkul\Blog\Models\Category;
 
+/**
+ * Manage Categories class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageCategories extends ManageRecords
 {
     protected static string $resource = CategoryResource::class;

@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Security\Models\User;
 use Webkul\Support\Database\Factories\UOMCategoryFactory;
 
+/**
+ * UOMCategory Eloquent model
+ *
+ * @property int $id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property string|null $name
+ * @property int $creator_id
+ * @property-read \Illuminate\Database\Eloquent\Model|null $creator
+ *
+ */
 class UOMCategory extends Model
 {
     use HasFactory;
@@ -29,11 +40,21 @@ class UOMCategory extends Model
         'creator_id',
     ];
 
+    /**
+     * Creator
+     *
+     * @return BelongsTo
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * New Factory
+     *
+     * @return UOMCategoryFactory
+     */
     protected static function newFactory(): UOMCategoryFactory
     {
         return UOMCategoryFactory::new();
