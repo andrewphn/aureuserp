@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 
+/**
+ * Sales Team Seeder database seeder
+ *
+ */
 class SalesTeamSeeder extends Seeder
 {
     /**

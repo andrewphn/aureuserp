@@ -5,6 +5,11 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttribute
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ListProductAttributes as BaseListProductAttributes;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource;
 
+/**
+ * List Product Attributes class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListProductAttributes extends BaseListProductAttributes
 {
     protected static string $resource = ProductAttributeResource::class;

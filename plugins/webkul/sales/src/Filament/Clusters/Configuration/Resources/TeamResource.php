@@ -41,6 +41,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pages\Lis
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource\Pages\ViewTeam;
 use Webkul\Sale\Models\Team;
 
+/**
+ * Team Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TeamResource extends Resource
 {
     protected static ?string $model = Team::class;
@@ -51,16 +56,32 @@ class TeamResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Get the model label
+     *
+     * @return string
+     */
     public static function getModelLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/team.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/team.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -113,6 +134,12 @@ class TeamResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -265,6 +292,12 @@ class TeamResource extends Resource
             ->reorderable('sort', 'desc');
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -305,6 +338,11 @@ class TeamResource extends Resource
             ]);
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

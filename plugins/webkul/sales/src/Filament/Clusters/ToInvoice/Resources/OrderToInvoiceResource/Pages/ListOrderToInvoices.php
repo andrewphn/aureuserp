@@ -9,17 +9,32 @@ use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToInvoiceResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Order To Invoices class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListOrderToInvoices extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = OrderToInvoiceResource::class;
 
+    /**
+     * Get the header actions for the list page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [];
     }
 
+    /**
+     * Get preset table views for filtering invoiceable orders
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

@@ -8,10 +8,20 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource;
 
+/**
+ * View Activity Plan class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewActivityPlan extends ViewRecord
 {
     protected static string $resource = ActivityPlanResource::class;
 
+    /**
+     * Get the header actions for viewing an activity plan
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [

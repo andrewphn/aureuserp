@@ -5,6 +5,10 @@ namespace Webkul\Sale\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Webkul\Sale\Models\DocumentTemplate;
 
+/**
+ * Document Template Seeder database seeder
+ *
+ */
 class DocumentTemplateSeeder extends Seeder
 {
     /**

@@ -10,13 +10,28 @@ use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\OrderResource;
 
+/**
+ * Confirm Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ConfirmAction extends Action
 {
+    /**
+     * Get the default name for this action
+     *
+     * @return string|null Action identifier
+     */
     public static function getDefaultName(): ?string
     {
         return 'orders.sales.confirm';
     }
 
+    /**
+     * Configure the action to confirm a quotation and convert it to a sale order
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();

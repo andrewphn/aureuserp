@@ -10,6 +10,11 @@ use Filament\Schemas\Schema;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Quotation And Order class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageQuotationAndOrder extends SettingsPage
 {
     use HasPageShield;
@@ -26,6 +31,11 @@ class ManageQuotationAndOrder extends SettingsPage
 
     protected static ?string $cluster = Settings::class;
 
+    /**
+     * Get the breadcrumb items for this page
+     *
+     * @return array<string>
+     */
     public function getBreadcrumbs(): array
     {
         return [
@@ -33,16 +43,32 @@ class ManageQuotationAndOrder extends SettingsPage
         ];
     }
 
+    /**
+     * Get the page title
+     *
+     * @return string
+     */
     public function getTitle(): string
     {
         return __('sales::filament/clusters/settings/pages/manage-quotation-and-order.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/settings/pages/manage-quotation-and-order.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

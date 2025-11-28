@@ -6,17 +6,28 @@ use Illuminate\Foundation\AliasLoader;
 use Livewire\Livewire;
 use Webkul\Sale\Facades\SaleOrder as SaleOrderFacade;
 use Webkul\Sale\Livewire\Summary;
+use Webkul\Sale\Livewire\QuotationPreviewPanel;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
 use Webkul\Support\PackageServiceProvider;
 
+/**
+ * Sale Service Provider service provider
+ *
+ */
 class SaleServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'sales';
 
     public static string $viewNamespace = 'sales';
 
+    /**
+     * Configure Custom Package
+     *
+     * @param Package $package
+     * @return void
+     */
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
@@ -68,11 +79,22 @@ class SaleServiceProvider extends PackageServiceProvider
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }
 
+    /**
+     * Package Booted
+     *
+     * @return void
+     */
     public function packageBooted(): void
     {
         Livewire::component('summary', Summary::class);
+        Livewire::component('quotation-preview-panel', QuotationPreviewPanel::class);
     }
 
+    /**
+     * Package Registered
+     *
+     * @return void
+     */
     public function packageRegistered(): void
     {
         $loader = AliasLoader::getInstance();

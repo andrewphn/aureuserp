@@ -4,6 +4,10 @@ namespace Webkul\Sale\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+/**
+ * Advanced Payment enumeration
+ *
+ */
 enum AdvancedPayment: string implements HasLabel
 {
     case DELIVERED = 'delivered';
@@ -12,6 +16,11 @@ enum AdvancedPayment: string implements HasLabel
 
     case FIXED = 'fixed';
 
+    /**
+     * Get the human-readable label for this payment type
+     *
+     * @return string Translated label
+     */
     public function getLabel(): string
     {
         return match ($this) {
@@ -21,6 +30,11 @@ enum AdvancedPayment: string implements HasLabel
         };
     }
 
+    /**
+     * Get all payment types as key-value options for form selects
+     *
+     * @return array
+     */
     public static function options(): array
     {
         return [

@@ -4,7 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new /**
+ * extends class
+ *
+ */
+class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +19,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('sales_order_line_items')) {
+            return;
+        }
+
         Schema::create('sales_order_line_items', function (Blueprint $table) {
             $table->id();
 
@@ -22,40 +30,21 @@ return new class extends Migration
             $table->foreignId('sales_order_id')->constrained('sales_orders')->onDelete('cascade');
 
             // Linkage to Project Entities (one of these will be filled)
-            $table->foreignId('project_id')->nullable()
+            // Note: Foreign keys are not enforced - projects plugin may not be installed
+            $table->unsignedBigInteger('project_id')->nullable()
                 ->comment('Project this line item belongs to');
-            $table->foreign('project_id')
-                ->references('id')
-                ->on('projects_projects')
-                ->onDelete('cascade');
 
-            $table->foreignId('room_id')->nullable()
+            $table->unsignedBigInteger('room_id')->nullable()
                 ->comment('Room if line item is room-level');
-            $table->foreign('room_id')
-                ->references('id')
-                ->on('projects_rooms')
-                ->onDelete('set null');
 
-            $table->foreignId('room_location_id')->nullable()
+            $table->unsignedBigInteger('room_location_id')->nullable()
                 ->comment('Location if line item is location-level (e.g., "Sink Wall")');
-            $table->foreign('room_location_id')
-                ->references('id')
-                ->on('projects_room_locations')
-                ->onDelete('set null');
 
-            $table->foreignId('cabinet_run_id')->nullable()
+            $table->unsignedBigInteger('cabinet_run_id')->nullable()
                 ->comment('Cabinet run if line item is run-level');
-            $table->foreign('cabinet_run_id')
-                ->references('id')
-                ->on('projects_cabinet_runs')
-                ->onDelete('set null');
 
-            $table->foreignId('cabinet_specification_id')->nullable()
+            $table->unsignedBigInteger('cabinet_specification_id')->nullable()
                 ->comment('Individual cabinet if line item is cabinet-level');
-            $table->foreign('cabinet_specification_id')
-                ->references('id')
-                ->on('projects_cabinet_specifications')
-                ->onDelete('set null');
 
             // Product/Inventory Linkage (for non-cabinet items or finished goods)
             $table->foreignId('product_id')->nullable()

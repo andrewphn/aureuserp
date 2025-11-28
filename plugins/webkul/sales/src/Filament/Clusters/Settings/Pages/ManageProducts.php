@@ -10,6 +10,11 @@ use Filament\Schemas\Schema;
 use Webkul\Sale\Settings\ProductSettings;
 use Webkul\Support\Filament\Clusters\Settings;
 
+/**
+ * Manage Products class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageProducts extends SettingsPage
 {
     use HasPageShield;
@@ -26,6 +31,11 @@ class ManageProducts extends SettingsPage
 
     protected static ?string $cluster = Settings::class;
 
+    /**
+     * Get the breadcrumb items for this page
+     *
+     * @return array<string>
+     */
     public function getBreadcrumbs(): array
     {
         return [
@@ -33,16 +43,32 @@ class ManageProducts extends SettingsPage
         ];
     }
 
+    /**
+     * Get the page title
+     *
+     * @return string
+     */
     public function getTitle(): string
     {
         return __('sales::filament/clusters/settings/pages/manage-products.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/settings/pages/manage-products.navigation.title');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema

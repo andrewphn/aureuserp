@@ -17,13 +17,28 @@ use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Models\Order;
 
+/**
+ * Send By Email Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class SendByEmailAction extends Action
 {
+    /**
+     * Get the default name for this action
+     *
+     * @return string|null
+     */
     public static function getDefaultName(): ?string
     {
         return 'orders.sales.send-by-email';
     }
 
+    /**
+     * Set up the action configuration
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -88,6 +103,12 @@ class SendByEmailAction extends Action
             });
     }
 
+    /**
+     * Handle Email Results
+     *
+     * @param array $result
+     * @return void
+     */
     private function handleEmailResults(array $result): void
     {
         $sent = $result['sent'] ?? [];
@@ -136,6 +157,13 @@ class SendByEmailAction extends Action
         }
     }
 
+    /**
+     * Format Success Message
+     *
+     * @param array $sent
+     * @param int $count
+     * @return string
+     */
     private function formatSuccessMessage(array $sent, int $count): string
     {
         $recipients = implode(', ', $sent);
@@ -149,6 +177,12 @@ class SendByEmailAction extends Action
         ]);
     }
 
+    /**
+     * Format Failure Message
+     *
+     * @param array $failed
+     * @return string
+     */
     private function formatFailureMessage(array $failed): string
     {
         $failedMessages = [];
@@ -164,6 +198,15 @@ class SendByEmailAction extends Action
         ]);
     }
 
+    /**
+     * Format Mixed Message
+     *
+     * @param array $sent
+     * @param array $failed
+     * @param int $sentCount
+     * @param int $failedCount
+     * @return string
+     */
     private function formatMixedMessage(array $sent, array $failed, int $sentCount, int $failedCount): string
     {
         $successPart = __('sales::filament/clusters/orders/resources/quotation/actions/send-by-email.actions.notification.email.partial_success.sent_part', [

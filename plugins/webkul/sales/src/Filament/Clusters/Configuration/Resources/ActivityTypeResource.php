@@ -10,6 +10,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityTypeResource\P
 use Webkul\Sale\Models\ActivityType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
+/**
+ * Activity Type Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ActivityTypeResource extends BaseActivityTypeResource
 {
     protected static ?string $model = ActivityType::class;
@@ -18,16 +23,31 @@ class ActivityTypeResource extends BaseActivityTypeResource
 
     protected static ?string $cluster = Configuration::class;
 
+    /**
+     * Get the model label
+     *
+     * @return string
+     */
     public static function getModelLabel(): string
     {
         return __('Activity Type');
     }
 
+    /**
+     * Get the navigation group
+     *
+     * @return string|null
+     */
     public static function getNavigationGroup(): ?string
     {
         return __('Activities');
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

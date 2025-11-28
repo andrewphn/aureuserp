@@ -16,6 +16,11 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages\Manage
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages\ViewCustomer;
 use Webkul\Sale\Models\Partner;
 
+/**
+ * Customer Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class CustomerResource extends BaseCustomerResource
 {
     protected static ?string $model = Partner::class;
@@ -30,16 +35,32 @@ class CustomerResource extends BaseCustomerResource
 
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
+    /**
+     * Get the model label
+     *
+     * @return string
+     */
     public static function getModelLabel(): string
     {
         return __('sales::filament/clusters/orders/resources/customer.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/orders/resources/customer.navigation.title');
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return BaseCustomerResource::table($table)
@@ -51,6 +72,12 @@ class CustomerResource extends BaseCustomerResource
             ]);
     }
 
+    /**
+     * Get Record Sub Navigation
+     *
+     * @param Page $page Page number
+     * @return array
+     */
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
@@ -62,6 +89,11 @@ class CustomerResource extends BaseCustomerResource
         ]);
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

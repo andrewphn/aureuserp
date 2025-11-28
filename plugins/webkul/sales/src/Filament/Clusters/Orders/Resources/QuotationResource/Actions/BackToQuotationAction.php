@@ -7,13 +7,28 @@ use Filament\Notifications\Notification;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
 
+/**
+ * Back To Quotation Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class BackToQuotationAction extends Action
 {
+    /**
+     * Get the default name for this action
+     *
+     * @return string|null Action identifier
+     */
     public static function getDefaultName(): ?string
     {
         return 'orders.sales.bak-to-quotation';
     }
 
+    /**
+     * Configure the action to revert a cancelled order back to quotation status
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();

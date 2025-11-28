@@ -10,6 +10,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Sale Order Quotation class
+ *
+ */
 class SaleOrderQuotation extends Mailable
 {
     use Queueable, SerializesModels;

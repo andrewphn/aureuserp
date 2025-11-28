@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Webkul\Sale\Models\Team;
 use Webkul\Security\Models\User;
 
+/**
+ * Team Policy authorization policy
+ *
+ */
 class TeamPolicy
 {
     use HandlesAuthorization;

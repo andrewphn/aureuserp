@@ -10,6 +10,11 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Activity Plans class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListActivityPlans extends ListRecords
 {
     use HasTableViews;
@@ -18,11 +23,21 @@ class ListActivityPlans extends ListRecords
 
     protected static ?string $pluginName = 'sales';
 
+    /**
+     * Get the plugin name for filtering activity plans
+     *
+     * @return string|null
+     */
     protected static function getPluginName()
     {
         return static::$pluginName;
     }
 
+    /**
+     * Get the header actions for the list page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -49,6 +64,11 @@ class ListActivityPlans extends ListRecords
         ];
     }
 
+    /**
+     * Get preset table views for filtering activity plans
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

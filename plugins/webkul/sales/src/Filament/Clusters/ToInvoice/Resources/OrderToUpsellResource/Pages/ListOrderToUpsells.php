@@ -9,17 +9,32 @@ use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToUpsellResource;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Order To Upsells class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListOrderToUpsells extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = OrderToUpsellResource::class;
 
+    /**
+     * Get the header actions for the list page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [];
     }
 
+    /**
+     * Get preset table views for filtering upsell orders
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

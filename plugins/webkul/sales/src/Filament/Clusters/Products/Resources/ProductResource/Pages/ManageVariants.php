@@ -6,6 +6,11 @@ use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages\Man
 use Webkul\Sale\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Sale\Settings\ProductSettings;
 
+/**
+ * Manage Variants class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageVariants extends BaseManageVariants
 {
     protected static string $resource = ProductResource::class;

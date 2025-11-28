@@ -12,6 +12,11 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\DeliveryResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Support\Package;
 
+/**
+ * Manage Deliveries class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ManageDeliveries extends ManageRelatedRecords
 {
     protected static string $resource = QuotationResource::class;
@@ -20,6 +25,12 @@ class ManageDeliveries extends ManageRelatedRecords
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
+    /**
+     * Can Access
+     *
+     * @param array $parameters
+     * @return bool
+     */
     public static function canAccess(array $parameters = []): bool
     {
         $canAccess = parent::canAccess($parameters);
@@ -31,16 +42,33 @@ class ManageDeliveries extends ManageRelatedRecords
         return Package::isPluginInstalled('inventories');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/orders/resources/quotation/pages/manage-deliveries.navigation.title');
     }
 
+    /**
+     * Get the navigation badge
+     *
+     * @param mixed $parameters
+     * @return ?string
+     */
     public static function getNavigationBadge($parameters = []): ?string
     {
         return Livewire::current()->getRecord()->operations()->count();
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return OperationResource::table($table)

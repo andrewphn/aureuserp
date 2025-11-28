@@ -21,6 +21,11 @@ use Webkul\Sale\Filament\Clusters\Configuration;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TagResource\Pages\ListTags;
 use Webkul\Sale\Models\Tag;
 
+/**
+ * Tag Resource Filament resource
+ *
+ * @see \Filament\Resources\Resource
+ */
 class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
@@ -29,21 +34,42 @@ class TagResource extends Resource
 
     protected static ?string $cluster = Configuration::class;
 
+    /**
+     * Get the model label
+     *
+     * @return string
+     */
     public static function getModelLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/tag.title');
     }
 
+    /**
+     * Get the navigation label
+     *
+     * @return string
+     */
     public static function getNavigationLabel(): string
     {
         return __('sales::filament/clusters/configurations/resources/tag.navigation.title');
     }
 
+    /**
+     * Get the navigation group
+     *
+     * @return string|null
+     */
     public static function getNavigationGroup(): ?string
     {
         return __('sales::filament/clusters/configurations/resources/tag.navigation.group');
     }
 
+    /**
+     * Define the form schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -58,6 +84,12 @@ class TagResource extends Resource
             ]);
     }
 
+    /**
+     * Define the table schema
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -101,6 +133,11 @@ class TagResource extends Resource
             ]);
     }
 
+    /**
+     * Get the pages for this resource
+     *
+     * @return array<string, \Filament\Resources\Pages\PageRegistration>
+     */
     public static function getPages(): array
     {
         return [
@@ -108,6 +145,12 @@ class TagResource extends Resource
         ];
     }
 
+    /**
+     * Define the infolist schema
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema

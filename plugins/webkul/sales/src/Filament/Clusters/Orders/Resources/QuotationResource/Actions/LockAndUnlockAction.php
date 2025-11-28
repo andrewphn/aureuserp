@@ -7,13 +7,28 @@ use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Settings\QuotationAndOrderSettings;
 
+/**
+ * Lock And Unlock Action Filament action
+ *
+ * @see \Filament\Resources\Resource
+ */
 class LockAndUnlockAction extends Action
 {
+    /**
+     * Get the default name for this action
+     *
+     * @return string|null Action identifier
+     */
     public static function getDefaultName(): ?string
     {
         return 'purchases.orders.lock';
     }
 
+    /**
+     * Configure the action to toggle order lock state
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();

@@ -10,12 +10,22 @@ use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Pages\ListQ
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Orders class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListOrders extends BaseListOrders
 {
     use HasTableViews;
 
     protected static string $resource = OrderResource::class;
 
+    /**
+     * Get preset table views for filtering orders
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

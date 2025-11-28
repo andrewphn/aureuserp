@@ -4,6 +4,10 @@ namespace Webkul\Sale\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * Product Category Factory model factory
+ *
+ */
 class ProductCategoryFactory extends Factory
 {
     /**

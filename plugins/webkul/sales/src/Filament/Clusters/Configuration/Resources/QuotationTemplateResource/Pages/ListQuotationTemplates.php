@@ -8,12 +8,22 @@ use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResou
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
+/**
+ * List Quotation Templates class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ListQuotationTemplates extends ListRecords
 {
     use HasTableViews;
 
     protected static string $resource = QuotationTemplateResource::class;
 
+    /**
+     * Get the header actions for the list page
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -22,6 +32,11 @@ class ListQuotationTemplates extends ListRecords
         ];
     }
 
+    /**
+     * Get preset table views for filtering templates
+     *
+     * @return array<string, PresetView>
+     */
     public function getPresetTableViews(): array
     {
         return [

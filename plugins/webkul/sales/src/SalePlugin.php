@@ -9,18 +9,38 @@ use ReflectionClass;
 use Webkul\Sale\Filament\Clusters\Settings\Pages\ManageProducts;
 use Webkul\Support\Package;
 
+/**
+ * Sale Plugin class
+ *
+ */
 class SalePlugin implements Plugin
 {
+    /**
+     * Get the plugin ID
+     *
+     * @return string
+     */
     public function getId(): string
     {
         return 'sales';
     }
 
+    /**
+     * Make
+     *
+     * @return static
+     */
     public static function make(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Register
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function register(Panel $panel): void
     {
         if (! Package::isPluginInstalled($this->getId())) {
@@ -44,11 +64,23 @@ class SalePlugin implements Plugin
             });
     }
 
+    /**
+     * Boot
+     *
+     * @param Panel $panel
+     * @return void
+     */
     public function boot(Panel $panel): void
     {
         //
     }
 
+    /**
+     * Get Plugin Base Path
+     *
+     * @param mixed $path
+     * @return string
+     */
     protected function getPluginBasePath($path = null): string
     {
         $reflector = new ReflectionClass(get_class($this));

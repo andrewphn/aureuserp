@@ -5,6 +5,11 @@ namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttribute
 use Webkul\Invoice\Filament\Clusters\Configuration\Resources\ProductAttributeResource\Pages\ViewProductAttribute as BaseViewProductAttribute;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ProductAttributeResource;
 
+/**
+ * View Product Attribute class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewProductAttribute extends BaseViewProductAttribute
 {
     protected static string $resource = ProductAttributeResource::class;

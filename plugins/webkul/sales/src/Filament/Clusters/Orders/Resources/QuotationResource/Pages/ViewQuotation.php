@@ -11,15 +11,30 @@ use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource\Actions as BaseActions;
 
+/**
+ * View Quotation class
+ *
+ * @see \Filament\Resources\Resource
+ */
 class ViewQuotation extends ViewRecord
 {
     protected static string $resource = QuotationResource::class;
 
+    /**
+     * Get the sub-navigation position for this page
+     *
+     * @return SubNavigationPosition
+     */
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
         return SubNavigationPosition::Top;
     }
 
+    /**
+     * Get the header actions for viewing a quotation
+     *
+     * @return array<\Filament\Actions\Action>
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -28,6 +43,7 @@ class ViewQuotation extends ViewRecord
             BaseActions\BackToQuotationAction::make(),
             BaseActions\CancelQuotationAction::make(),
             BaseActions\ConfirmAction::make(),
+            BaseActions\ConvertToOrderAction::make(),
             BaseActions\CreateInvoiceAction::make(),
             BaseActions\PreviewAction::make(),
             BaseActions\SendByEmailAction::make(),
