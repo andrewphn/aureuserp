@@ -76,12 +76,6 @@ class CreateProject extends Page implements HasForms
     public ?string $lastSavedAt = null;
 
     /**
-     * Pending customer name for pre-filling the create modal
-     * Set when user clicks "Add [name] as new customer" in dropdown
-     */
-    public ?string $pendingCustomerName = null;
-
-    /**
      * Mount the wizard
      */
     public function mount(): void
@@ -223,67 +217,42 @@ class CreateProject extends Page implements HasForms
                     ->live(onBlur: true)
                     ->getSearchResultsUsing(function (string $search): array {
                         // Search existing customers
-                        $customers = Partner::where('sub_type', 'customer')
+                        return Partner::where('sub_type', 'customer')
                             ->where('name', 'like', "%{$search}%")
                             ->orderBy('name')
                             ->limit(50)
                             ->pluck('name', 'id')
                             ->toArray();
-
-                        // If search has content and no exact match, show "Add new" option at end
-                        $exactMatch = collect($customers)->contains(fn ($name) =>
-                            strtolower($name) === strtolower($search)
-                        );
-
-                        if ($search && !$exactMatch) {
-                            $customers['__create__:' . $search] = "➕ Add \"{$search}\" as new customer";
-                        }
-
-                        return $customers;
                     })
                     ->getOptionLabelUsing(fn ($value): ?string => Partner::find($value)?->name)
-                    ->allowHtml()
-                    ->createOptionForm($this->getCustomerCreationFormComponents())
+                    // Enable inline "Create new customer" slide-over using FilamentPHP's built-in pattern
+                    // Reference: https://github.com/filamentphp/filament/discussions/5379
+                    ->createOptionForm($this->getCustomerCreationFormComponentsSimplified())
                     ->createOptionUsing(function (array $data): int {
+                        // Set required fields for customer creation
                         $data['sub_type'] = 'customer';
                         $data['creator_id'] = Auth::id();
+
+                        // Create the customer
                         $partner = Partner::create($data);
-                        return $partner->id;
+
+                        // Show success notification
+                        Notification::make()
+                            ->success()
+                            ->title('Customer Created')
+                            ->body("Customer '{$partner->name}' has been created and selected.")
+                            ->send();
+
+                        return $partner->getKey();
                     })
-                    ->createOptionAction(function (Action $action) {
-                        $action
-                            ->label('+ Add Customer')
+                    ->createOptionAction(
+                        fn (Action $action) => $action
+                            ->slideOver()
+                            ->modalWidth('lg')
                             ->modalHeading('Add New Customer')
                             ->modalDescription('Quick customer entry - you can add more details later.')
-                            ->slideOver()
-                            ->modalWidth('md')
-                            ->fillForm(function (): array {
-                                // Pre-fill the name if user clicked "Add [name] as new customer"
-                                $name = $this->pendingCustomerName;
-                                // Clear the pending name after using it
-                                $this->pendingCustomerName = null;
-                                return $name ? ['name' => $name] : [];
-                            });
-                    })
-                    ->afterStateUpdated(function ($state, callable $set, callable $get, Select $component) {
-                        // Check if user selected the "create new" option
-                        if ($state && str_starts_with((string) $state, '__create__:')) {
-                            // Extract the name they typed
-                            $typedName = str_replace('__create__:', '', $state);
-
-                            // Store the name for pre-filling the modal
-                            $this->pendingCustomerName = $typedName;
-
-                            // Clear the invalid selection (the __create__: prefix isn't a real ID)
-                            $set('partner_id', null);
-
-                            // Programmatically mount the createOption action to open the modal
-                            // The component key is 'data.partner_id' and action name is 'createOption'
-                            $this->mountFormComponentAction('data.partner_id', 'createOption');
-
-                            return;
-                        }
-
+                    )
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
                         if ($state && $get('use_customer_address')) {
                             $partner = Partner::with(['state', 'country'])->find($state);
                             if ($partner) {
@@ -1113,6 +1082,212 @@ class CreateProject extends Page implements HasForms
                 // Silently fail
             }
         }
+    }
+
+    /**
+     * Simplified customer creation form for createOptionForm()
+     *
+     * This version avoids ->relationship() calls which don't work
+     * in the Select::createOptionForm() context (no model instance).
+     *
+     * Organized hierarchically with:
+     * - Essentials first (always visible)
+     * - Collapsible sections for additional details
+     *
+     * Reference: https://github.com/filamentphp/filament/discussions/5379
+     *
+     * @return array
+     */
+    protected function getCustomerCreationFormComponentsSimplified(): array
+    {
+        return [
+            // ========================================
+            // ESSENTIALS (Always Visible)
+            // ========================================
+
+            // Customer Type Toggle - Affects form behavior
+            Radio::make('account_type')
+                ->label('Customer Type')
+                ->inline()
+                ->inlineLabel(false)
+                ->options([
+                    AccountType::INDIVIDUAL->value => 'Individual',
+                    AccountType::COMPANY->value => 'Company',
+                ])
+                ->default(AccountType::INDIVIDUAL->value)
+                ->live()
+                ->columnSpanFull(),
+
+            // Dynamic Name Field based on type
+            TextInput::make('name')
+                ->label(fn (Get $get): string => $get('account_type') === AccountType::COMPANY->value
+                    ? 'Company Name'
+                    : 'Full Name')
+                ->required()
+                ->maxLength(255)
+                ->placeholder(fn (Get $get): string => $get('account_type') === AccountType::COMPANY->value
+                    ? 'e.g. Acme Construction LLC'
+                    : 'e.g. John Smith')
+                ->autofocus()
+                ->extraInputAttributes(['class' => 'text-lg font-medium'])
+                ->columnSpanFull(),
+
+            // Primary Contact Info (essential)
+            Grid::make(2)->schema([
+                TextInput::make('phone')
+                    ->label('Phone')
+                    ->tel()
+                    ->maxLength(255)
+                    ->placeholder('(508) 555-1234')
+                    ->prefixIcon('heroicon-o-phone'),
+
+                TextInput::make('email')
+                    ->label('Email')
+                    ->email()
+                    ->maxLength(255)
+                    ->placeholder('john@example.com')
+                    ->prefixIcon('heroicon-o-envelope'),
+            ]),
+
+            // ========================================
+            // ACCORDION SECTIONS (Collapsible)
+            // ========================================
+
+            // Section 1: Address
+            Section::make('Address')
+                ->description('Billing and project location')
+                ->icon('heroicon-o-map-pin')
+                ->schema([
+                    AddressAutocomplete::make('street1')
+                        ->label('Street Address')
+                        ->cityField('city')
+                        ->stateField('state_id')
+                        ->zipField('zip')
+                        ->countryField('country_id')
+                        ->maxLength(255)
+                        ->prefixIcon('heroicon-o-map-pin')
+                        ->columnSpanFull(),
+
+                    TextInput::make('street2')
+                        ->label('Apt/Suite/Unit')
+                        ->maxLength(255)
+                        ->placeholder('Apt 2B, Suite 100, etc.')
+                        ->columnSpanFull(),
+
+                    Grid::make(2)->schema([
+                        TextInput::make('city')
+                            ->label('City')
+                            ->maxLength(255),
+
+                        TextInput::make('zip')
+                            ->label('Zip')
+                            ->maxLength(255),
+                    ]),
+
+                    Grid::make(2)->schema([
+                        Select::make('state_id')
+                            ->label('State')
+                            ->options(fn () => \Webkul\Support\Models\State::where('country_id', 233)
+                                ->orderBy('name')
+                                ->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload(),
+
+                        Select::make('country_id')
+                            ->label('Country')
+                            ->options(fn () => \Webkul\Support\Models\Country::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->default(233)
+                            ->live(),
+                    ]),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed(),
+
+            // Section 2: Additional Contact (for individuals)
+            Section::make('Additional Details')
+                ->description('Job title, mobile, website')
+                ->icon('heroicon-o-identification')
+                ->schema([
+                    Grid::make(2)->schema([
+                        TextInput::make('mobile')
+                            ->label('Mobile')
+                            ->tel()
+                            ->maxLength(255)
+                            ->placeholder('(508) 555-5678'),
+
+                        TextInput::make('job_title')
+                            ->label('Job Title')
+                            ->maxLength(255)
+                            ->placeholder('Project Manager')
+                            ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL->value),
+
+                        TextInput::make('website')
+                            ->label('Website')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://example.com')
+                            ->visible(fn (Get $get): bool => $get('account_type') === AccountType::COMPANY->value),
+                    ]),
+
+                    // Parent Company (only for individuals)
+                    Select::make('parent_id')
+                        ->label('Associated Company')
+                        ->options(fn () => Partner::where('account_type', AccountType::COMPANY->value)
+                            ->where('sub_type', 'customer')
+                            ->orderBy('name')
+                            ->pluck('name', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL->value)
+                        ->helperText('Link this person to a company')
+                        ->columnSpanFull(),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed(),
+
+            // Section 3: Business Details (for companies only)
+            Section::make('Business Details')
+                ->description('Tax ID, company registry')
+                ->icon('heroicon-o-building-office')
+                ->schema([
+                    Grid::make(2)->schema([
+                        TextInput::make('tax_id')
+                            ->label('Tax ID / EIN')
+                            ->maxLength(255)
+                            ->placeholder('12-3456789'),
+
+                        TextInput::make('company_registry')
+                            ->label('Company Registry / D-U-N-S')
+                            ->maxLength(255)
+                            ->placeholder('123456789'),
+                    ]),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed()
+                ->visible(fn (Get $get): bool => $get('account_type') === AccountType::COMPANY->value),
+
+            // Section 4: Sales Settings
+            Section::make('Sales Settings')
+                ->description('Salesperson assignment')
+                ->icon('heroicon-o-currency-dollar')
+                ->schema([
+                    Select::make('user_id')
+                        ->label('Sales Person')
+                        ->options(fn () => \Webkul\Security\Models\User::pluck('name', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->default(fn () => Auth::id())
+                        ->columnSpanFull(),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed(),
+        ];
     }
 
     /**
