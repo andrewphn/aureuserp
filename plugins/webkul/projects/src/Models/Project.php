@@ -127,6 +127,28 @@ class Project extends Model implements Sortable
         'branch_id',
         'user_id',
         'creator_id',
+        // Stage gate timestamps
+        'design_approved_at',
+        'redline_approved_at',
+        'materials_staged_at',
+        'all_materials_received_at',
+        'bol_created_at',
+        'bol_signed_at',
+        'delivered_at',
+        'closeout_delivered_at',
+        'customer_signoff_at',
+        // MEDIUM priority fields
+        'designer_id',
+        'rhino_file_path',
+        'purchasing_manager_id',
+        'ferry_booking_date',
+        'ferry_confirmation',
+        'install_support_completed_at',
+        // LOW priority fields
+        'initial_consultation_date',
+        'initial_consultation_notes',
+        'design_revision_number',
+        'design_notes',
     ];
 
     /**
@@ -142,6 +164,22 @@ class Project extends Model implements Sortable
         'allow_timesheets'        => 'boolean',
         'allow_milestones'        => 'boolean',
         'allow_task_dependencies' => 'boolean',
+        // Stage gate timestamps
+        'design_approved_at'        => 'datetime',
+        'redline_approved_at'       => 'datetime',
+        'materials_staged_at'       => 'datetime',
+        'all_materials_received_at' => 'datetime',
+        'bol_created_at'            => 'datetime',
+        'bol_signed_at'             => 'datetime',
+        'delivered_at'              => 'datetime',
+        'closeout_delivered_at'     => 'datetime',
+        'customer_signoff_at'       => 'datetime',
+        // MEDIUM priority fields
+        'ferry_booking_date'          => 'date',
+        'install_support_completed_at' => 'datetime',
+        // LOW priority fields
+        'initial_consultation_date' => 'date',
+        'design_revision_number'    => 'integer',
     ];
 
     protected array $logAttributes = [
@@ -209,6 +247,26 @@ class Project extends Model implements Sortable
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Designer (assigned for design stage)
+     *
+     * @return BelongsTo
+     */
+    public function designer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'designer_id');
+    }
+
+    /**
+     * Purchasing Manager (assigned for sourcing stage)
+     *
+     * @return BelongsTo
+     */
+    public function purchasingManager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'purchasing_manager_id');
     }
 
     /**
@@ -553,5 +611,331 @@ class Project extends Model implements Sortable
     protected static function newFactory(): ProjectFactory
     {
         return ProjectFactory::new();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stage Gate Methods
+    |--------------------------------------------------------------------------
+    | These methods determine if a project can advance from one production
+    | stage to the next based on required milestones and conditions.
+    |
+    | Production Stages: Discovery → Design → Sourcing → Production → Delivery
+    |
+    | Two stage tracking systems:
+    | 1. `current_production_stage` (enum) - The production workflow position
+    | 2. `stage_id` (FK to projects_project_stages) - Kanban column for visual management
+    |
+    | When stage_id points to a ProjectStage with a matching stage_key,
+    | the systems stay in sync. Use advanceToNextStage() to update both.
+    */
+
+    /**
+     * Production stage order for workflow progression.
+     */
+    public const PRODUCTION_STAGES = [
+        'discovery',
+        'design',
+        'sourcing',
+        'production',
+        'delivery',
+    ];
+
+    /**
+     * Get the next production stage in the workflow.
+     *
+     * @param string|null $currentStage
+     * @return string|null
+     */
+    public function getNextProductionStage(?string $currentStage = null): ?string
+    {
+        $current = $currentStage ?? $this->current_production_stage;
+        $index = array_search($current, self::PRODUCTION_STAGES);
+
+        if ($index === false || $index >= count(self::PRODUCTION_STAGES) - 1) {
+            return null;
+        }
+
+        return self::PRODUCTION_STAGES[$index + 1];
+    }
+
+    /**
+     * Get the previous production stage in the workflow.
+     *
+     * @param string|null $currentStage
+     * @return string|null
+     */
+    public function getPreviousProductionStage(?string $currentStage = null): ?string
+    {
+        $current = $currentStage ?? $this->current_production_stage;
+        $index = array_search($current, self::PRODUCTION_STAGES);
+
+        if ($index === false || $index <= 0) {
+            return null;
+        }
+
+        return self::PRODUCTION_STAGES[$index - 1];
+    }
+
+    /**
+     * Check if project can advance from current stage to next stage.
+     *
+     * @return bool
+     */
+    public function canAdvanceToNextStage(): bool
+    {
+        $method = 'canAdvanceFrom' . ucfirst($this->current_production_stage);
+
+        if (method_exists($this, $method)) {
+            return $this->{$method}();
+        }
+
+        return false;
+    }
+
+    /**
+     * Advance project to next production stage if gates pass.
+     * Updates both current_production_stage and stage_id (if matching stage exists).
+     *
+     * @param bool $force Skip gate checks (admin override)
+     * @return bool Success
+     */
+    public function advanceToNextStage(bool $force = false): bool
+    {
+        if (!$force && !$this->canAdvanceToNextStage()) {
+            return false;
+        }
+
+        $nextStage = $this->getNextProductionStage();
+        if (!$nextStage) {
+            return false;
+        }
+
+        $this->current_production_stage = $nextStage;
+
+        // Sync stage_id if a matching ProjectStage exists with this stage_key
+        $matchingStage = ProjectStage::where('stage_key', $nextStage)->first();
+        if ($matchingStage) {
+            $this->stage_id = $matchingStage->id;
+        }
+
+        return $this->save();
+    }
+
+    /**
+     * Set production stage directly (with optional stage_id sync).
+     *
+     * @param string $stage
+     * @param bool $syncStageId
+     * @return bool
+     */
+    public function setProductionStage(string $stage, bool $syncStageId = true): bool
+    {
+        if (!in_array($stage, self::PRODUCTION_STAGES)) {
+            return false;
+        }
+
+        $this->current_production_stage = $stage;
+
+        if ($syncStageId) {
+            $matchingStage = ProjectStage::where('stage_key', $stage)->first();
+            if ($matchingStage) {
+                $this->stage_id = $matchingStage->id;
+            }
+        }
+
+        return $this->save();
+    }
+
+    /**
+     * Check if project can advance from DISCOVERY to DESIGN stage.
+     *
+     * Requirements:
+     * - Sales order exists with proposal accepted
+     * - Deposit has been paid
+     *
+     * @return bool
+     */
+    public function canAdvanceFromDiscovery(): bool
+    {
+        $salesOrder = $this->orders()->first();
+
+        return $salesOrder
+            && $salesOrder->proposal_accepted_at !== null
+            && $salesOrder->deposit_paid_at !== null;
+    }
+
+    /**
+     * Check if project can advance from DESIGN to SOURCING stage.
+     *
+     * Requirements:
+     * - Design has been approved by customer
+     * - Final redline changes confirmed
+     *
+     * @return bool
+     */
+    public function canAdvanceFromDesign(): bool
+    {
+        return $this->design_approved_at !== null
+            && $this->redline_approved_at !== null;
+    }
+
+    /**
+     * Check if project can advance from SOURCING to PRODUCTION stage.
+     *
+     * Requirements:
+     * - All materials have been received
+     * - Materials have been staged in shop
+     *
+     * @return bool
+     */
+    public function canAdvanceFromSourcing(): bool
+    {
+        return $this->all_materials_received_at !== null
+            && $this->materials_staged_at !== null;
+    }
+
+    /**
+     * Check if project can advance from PRODUCTION to DELIVERY stage.
+     *
+     * Requirements:
+     * - All cabinet specifications have passed QC
+     *
+     * @return bool
+     */
+    public function canAdvanceFromProduction(): bool
+    {
+        // Check if all cabinet specs have passed QC
+        $totalCabinets = $this->cabinetSpecifications()->count();
+        if ($totalCabinets === 0) {
+            return false;
+        }
+
+        $qcPassedCabinets = $this->cabinetSpecifications()
+            ->where('qc_passed', true)
+            ->count();
+
+        return $qcPassedCabinets === $totalCabinets;
+    }
+
+    /**
+     * Check if project can advance from DELIVERY stage (mark complete).
+     *
+     * Requirements:
+     * - Delivery confirmed
+     * - Closeout package delivered
+     * - Customer signoff received
+     * - Final payment received
+     *
+     * @return bool
+     */
+    public function canAdvanceFromDelivery(): bool
+    {
+        return $this->canMarkComplete();
+    }
+
+    /**
+     * Check if project can be marked as COMPLETE/CLOSED.
+     *
+     * Requirements:
+     * - Delivery confirmed
+     * - Closeout package delivered
+     * - Customer signoff received
+     * - Final payment received
+     *
+     * @return bool
+     */
+    public function canMarkComplete(): bool
+    {
+        $salesOrder = $this->orders()->first();
+
+        return $this->delivered_at !== null
+            && $this->closeout_delivered_at !== null
+            && $this->customer_signoff_at !== null
+            && $salesOrder
+            && $salesOrder->final_paid_at !== null;
+    }
+
+    /**
+     * Get the gate status for the current production stage.
+     *
+     * @param string|null $fromStage Defaults to current_production_stage
+     * @return array ['can_advance' => bool, 'blockers' => array, 'next_stage' => string|null]
+     */
+    public function getStageGateStatus(?string $fromStage = null): array
+    {
+        $stage = $fromStage ?? $this->current_production_stage;
+        $blockers = [];
+
+        switch (strtolower($stage)) {
+            case 'discovery':
+                $salesOrder = $this->orders()->first();
+                if (!$salesOrder) {
+                    $blockers[] = 'No sales order linked to project';
+                } else {
+                    if (!$salesOrder->proposal_accepted_at) {
+                        $blockers[] = 'Proposal not yet accepted by customer';
+                    }
+                    if (!$salesOrder->deposit_paid_at) {
+                        $blockers[] = 'Deposit payment not received';
+                    }
+                }
+                break;
+
+            case 'design':
+                if (!$this->design_approved_at) {
+                    $blockers[] = 'Design not yet approved by customer';
+                }
+                if (!$this->redline_approved_at) {
+                    $blockers[] = 'Final redline changes not confirmed';
+                }
+                break;
+
+            case 'sourcing':
+                if (!$this->all_materials_received_at) {
+                    $blockers[] = 'Not all materials received';
+                }
+                if (!$this->materials_staged_at) {
+                    $blockers[] = 'Materials not yet staged in shop';
+                }
+                break;
+
+            case 'production':
+                $totalCabinets = $this->cabinetSpecifications()->count();
+                if ($totalCabinets === 0) {
+                    $blockers[] = 'No cabinet specifications found';
+                } else {
+                    $qcPassedCabinets = $this->cabinetSpecifications()
+                        ->where('qc_passed', true)
+                        ->count();
+                    if ($qcPassedCabinets < $totalCabinets) {
+                        $blockers[] = "{$qcPassedCabinets}/{$totalCabinets} cabinets have passed QC";
+                    }
+                }
+                break;
+
+            case 'delivery':
+                $salesOrder = $this->orders()->first();
+                if (!$this->delivered_at) {
+                    $blockers[] = 'Delivery not confirmed';
+                }
+                if (!$this->closeout_delivered_at) {
+                    $blockers[] = 'Closeout package not delivered';
+                }
+                if (!$this->customer_signoff_at) {
+                    $blockers[] = 'Customer signoff not received';
+                }
+                if (!$salesOrder || !$salesOrder->final_paid_at) {
+                    $blockers[] = 'Final payment not received';
+                }
+                break;
+        }
+
+        return [
+            'current_stage' => $stage,
+            'next_stage' => $this->getNextProductionStage($stage),
+            'can_advance' => empty($blockers),
+            'blockers' => $blockers,
+        ];
     }
 }

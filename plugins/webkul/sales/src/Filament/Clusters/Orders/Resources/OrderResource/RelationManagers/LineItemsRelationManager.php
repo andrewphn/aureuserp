@@ -242,21 +242,21 @@ class LineItemsRelationManager extends RelationManager
                     ->numeric(decimalPlaces: 2)
                     ->sortable()
                     ->toggleable()
-                    ->visible(fn ($record) => $record->line_item_type === 'cabinet'),
+                    ->visible(fn ($record) => $record?->line_item_type === 'cabinet'),
 
                 Tables\Columns\TextColumn::make('unit_price_per_lf')
                     ->label('$/LF')
                     ->money('USD')
                     ->sortable()
                     ->toggleable()
-                    ->visible(fn ($record) => $record->line_item_type === 'cabinet'),
+                    ->visible(fn ($record) => $record?->line_item_type === 'cabinet'),
 
                 Tables\Columns\TextColumn::make('unit_price')
                     ->label('Unit Price')
                     ->money('USD')
                     ->sortable()
                     ->toggleable()
-                    ->visible(fn ($record) => $record->line_item_type !== 'cabinet'),
+                    ->visible(fn ($record) => $record?->line_item_type !== 'cabinet'),
 
                 Tables\Columns\TextColumn::make('subtotal')
                     ->label('Subtotal')
@@ -292,12 +292,12 @@ class LineItemsRelationManager extends RelationManager
                 \Filament\Actions\CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

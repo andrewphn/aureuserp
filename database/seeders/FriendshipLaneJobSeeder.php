@@ -74,6 +74,8 @@ class FriendshipLaneJobSeeder extends Seeder
             $this->seedSalesOrderLines();
             $this->seedChangeOrders();
             $this->seedChangeOrderLines();
+            $this->seedCncPrograms();
+            $this->seedCncProgramParts();
 
             DB::commit();
 
@@ -102,19 +104,27 @@ class FriendshipLaneJobSeeder extends Seeder
                 ->where('name', $stage['name'])
                 ->first();
 
+            $stageData = [
+                'name' => $stage['name'],
+                'stage_key' => $stage['stage_key'] ?? null,
+                'color' => $stage['color'],
+                'tags' => isset($stage['tags']) ? json_encode($stage['tags']) : null,
+                'is_active' => $stage['is_active'],
+                'is_collapsed' => $stage['is_collapsed'],
+                'sort' => $stage['sort'],
+                'updated_at' => $this->now,
+            ];
+
             if ($existing) {
+                // Update existing record with any missing fields
+                DB::table('projects_project_stages')
+                    ->where('id', $existing->id)
+                    ->update($stageData);
                 $this->refs['stage_' . $stage['stage_key']] = $existing->id;
-                $this->command->info("   ✓ Stage exists: {$stage['name']} (ID: {$existing->id})");
+                $this->command->info("   ✓ Updated stage: {$stage['name']} (ID: {$existing->id})");
             } else {
-                $id = DB::table('projects_project_stages')->insertGetId([
-                    'name' => $stage['name'],
-                    'color' => $stage['color'],
-                    'is_active' => $stage['is_active'],
-                    'is_collapsed' => $stage['is_collapsed'],
-                    'sort' => $stage['sort'],
-                    'created_at' => $this->now,
-                    'updated_at' => $this->now,
-                ]);
+                $stageData['created_at'] = $this->now;
+                $id = DB::table('projects_project_stages')->insertGetId($stageData);
                 $this->refs['stage_' . $stage['stage_key']] = $id;
                 $this->command->info("   ✓ Created stage: {$stage['name']} (ID: {$id})");
             }
@@ -166,24 +176,18 @@ class FriendshipLaneJobSeeder extends Seeder
 
         $customer = $this->data['customer'];
 
-        // Check if customer exists
-        $existing = DB::table('partners_partners')
-            ->where('name', $customer['name'])
-            ->first();
-
-        if ($existing) {
-            $this->refs['customer'] = $existing->id;
-            $this->command->info("   ✓ Customer exists: {$customer['name']} (ID: {$existing->id})");
-            return;
-        }
-
         // Get state ID for Massachusetts
         $stateId = DB::table('states')->where('code', 'MA')->value('id');
 
         // Get country ID for USA
         $countryId = DB::table('countries')->where('code', 'US')->value('id') ?? 233;
 
-        $id = DB::table('partners_partners')->insertGetId([
+        // Check if customer exists
+        $existing = DB::table('partners_partners')
+            ->where('name', $customer['name'])
+            ->first();
+
+        $customerData = [
             'account_type' => $customer['account_type'],
             'sub_type' => $customer['sub_type'],
             'name' => $customer['name'],
@@ -204,12 +208,21 @@ class FriendshipLaneJobSeeder extends Seeder
             'state_id' => $stateId,
             'country_id' => $countryId,
             'is_active' => $customer['is_active'],
-            'created_at' => $this->now,
             'updated_at' => $this->now,
-        ]);
+        ];
 
-        $this->refs['customer'] = $id;
-        $this->command->info("   ✓ Created customer: {$customer['name']} (ID: {$id})");
+        if ($existing) {
+            DB::table('partners_partners')
+                ->where('id', $existing->id)
+                ->update($customerData);
+            $this->refs['customer'] = $existing->id;
+            $this->command->info("   ✓ Updated customer: {$customer['name']} (ID: {$existing->id})");
+        } else {
+            $customerData['created_at'] = $this->now;
+            $id = DB::table('partners_partners')->insertGetId($customerData);
+            $this->refs['customer'] = $id;
+            $this->command->info("   ✓ Created customer: {$customer['name']} (ID: {$id})");
+        }
     }
 
     /**
@@ -221,21 +234,15 @@ class FriendshipLaneJobSeeder extends Seeder
 
         $project = $this->data['project'];
 
+        // Get production stage ID
+        $stageId = $this->refs['stage_' . $project['current_production_stage']] ?? null;
+
         // Check if project exists
         $existing = DB::table('projects_projects')
             ->where('project_number', $project['project_number'])
             ->first();
 
-        if ($existing) {
-            $this->refs['project'] = $existing->id;
-            $this->command->info("   ✓ Project exists: {$project['name']} (ID: {$existing->id})");
-            return;
-        }
-
-        // Get production stage ID
-        $stageId = $this->refs['stage_' . $project['current_production_stage']] ?? null;
-
-        $id = DB::table('projects_projects')->insertGetId([
+        $projectData = [
             'name' => $project['name'],
             'project_number' => $project['project_number'],
             'project_type' => $project['project_type'],
@@ -256,14 +263,47 @@ class FriendshipLaneJobSeeder extends Seeder
             'allow_milestones' => $project['allow_milestones'],
             'allow_task_dependencies' => $project['allow_task_dependencies'],
             'is_active' => $project['is_active'],
+            'current_production_stage' => $project['current_production_stage'],
+            'use_customer_address' => $project['use_customer_address'],
             'stage_id' => $stageId,
             'partner_id' => $this->refs['customer'],
-            'created_at' => $this->now,
+            // Stage gate timestamps (HIGH priority)
+            'design_approved_at' => $project['design_approved_at'] ?? null,
+            'redline_approved_at' => $project['redline_approved_at'] ?? null,
+            'materials_staged_at' => $project['materials_staged_at'] ?? null,
+            'all_materials_received_at' => $project['all_materials_received_at'] ?? null,
+            'bol_created_at' => $project['bol_created_at'] ?? null,
+            'bol_signed_at' => $project['bol_signed_at'] ?? null,
+            'delivered_at' => $project['delivered_at'] ?? null,
+            'closeout_delivered_at' => $project['closeout_delivered_at'] ?? null,
+            'customer_signoff_at' => $project['customer_signoff_at'] ?? null,
+            // MEDIUM priority fields
+            'designer_id' => $project['designer_id'] ?? null,
+            'rhino_file_path' => $project['rhino_file_path'] ?? null,
+            'purchasing_manager_id' => $project['purchasing_manager_id'] ?? null,
+            'ferry_booking_date' => $project['ferry_booking_date'] ?? null,
+            'ferry_confirmation' => $project['ferry_confirmation'] ?? null,
+            'install_support_completed_at' => $project['install_support_completed_at'] ?? null,
+            // LOW priority fields
+            'initial_consultation_date' => $project['initial_consultation_date'] ?? null,
+            'initial_consultation_notes' => $project['initial_consultation_notes'] ?? null,
+            'design_revision_number' => $project['design_revision_number'] ?? 1,
+            'design_notes' => $project['design_notes'] ?? null,
             'updated_at' => $this->now,
-        ]);
+        ];
 
-        $this->refs['project'] = $id;
-        $this->command->info("   ✓ Created project: {$project['name']} (ID: {$id})");
+        if ($existing) {
+            DB::table('projects_projects')
+                ->where('id', $existing->id)
+                ->update($projectData);
+            $this->refs['project'] = $existing->id;
+            $this->command->info("   ✓ Updated project: {$project['name']} (ID: {$existing->id})");
+        } else {
+            $projectData['created_at'] = $this->now;
+            $id = DB::table('projects_projects')->insertGetId($projectData);
+            $this->refs['project'] = $id;
+            $this->command->info("   ✓ Created project: {$project['name']} (ID: {$id})");
+        }
     }
 
     /**
@@ -522,6 +562,7 @@ class FriendshipLaneJobSeeder extends Seeder
             $roomId = $this->refs[$spec['_room_ref']] ?? null;
 
             $id = DB::table('projects_cabinet_specifications')->insertGetId([
+                'project_id' => $this->refs['project'],
                 'cabinet_run_id' => $runId,
                 'room_id' => $roomId,
                 'cabinet_number' => $spec['cabinet_number'],
@@ -595,6 +636,13 @@ class FriendshipLaneJobSeeder extends Seeder
                 'plywood_sqft' => $spec['plywood_sqft'] ?? null,
                 'solid_wood_bf' => $spec['solid_wood_bf'] ?? null,
                 'edge_banding_lf' => $spec['edge_banding_lf'] ?? null,
+                // Production tracking timestamps
+                'face_frame_cut_at' => $spec['face_frame_cut_at'] ?? null,
+                'door_fronts_cut_at' => $spec['door_fronts_cut_at'] ?? null,
+                'edge_banded_at' => $spec['edge_banded_at'] ?? null,
+                'hardware_installed_at' => $spec['hardware_installed_at'] ?? null,
+                'pocket_holes_at' => $spec['pocket_holes_at'] ?? null,
+                'doweled_at' => $spec['doweled_at'] ?? null,
                 'created_at' => $this->now,
                 'updated_at' => $this->now,
             ]);
@@ -1085,6 +1133,9 @@ class FriendshipLaneJobSeeder extends Seeder
             'proposal_accepted_at' => $order['proposal_accepted_at'] ?? null,
             'production_authorized' => $order['production_authorized'] ?? false,
             'production_authorized_at' => $order['production_authorized_at'] ?? null,
+            // Payment stage gate timestamps
+            'deposit_paid_at' => $order['deposit_paid_at'] ?? null,
+            'final_paid_at' => $order['final_paid_at'] ?? null,
             'is_change_order' => false,
             'note' => $order['note'] ?? null,
             'created_at' => $this->now,
@@ -1115,6 +1166,7 @@ class FriendshipLaneJobSeeder extends Seeder
                 'price_total' => $line['price_total'],
                 'state' => $line['state'],
                 'invoice_status' => $line['invoice_status'],
+                'currency_id' => 1, // USD
                 'created_at' => $this->now,
                 'updated_at' => $this->now,
             ]);
@@ -1181,10 +1233,75 @@ class FriendshipLaneJobSeeder extends Seeder
                 'product_uom_qty' => $line['product_uom_qty'],
                 'price_unit' => $line['price_unit'],
                 'price_subtotal' => $line['price_subtotal'],
+                'currency_id' => 1, // USD
                 'created_at' => $this->now,
                 'updated_at' => $this->now,
             ]);
         }
         $this->command->info("   ✓ Created " . count($this->data['change_order_lines']) . " change order lines");
+    }
+
+    /**
+     * Seed CNC programs (VCarve project files)
+     */
+    protected function seedCncPrograms(): void
+    {
+        if (!isset($this->data['cnc_programs'])) {
+            $this->command->info("26. No CNC programs to seed");
+            return;
+        }
+
+        $this->command->info("26. Seeding CNC programs...");
+
+        foreach ($this->data['cnc_programs'] as $program) {
+            $id = DB::table('projects_cnc_programs')->insertGetId([
+                'project_id' => $this->refs['project'],
+                'name' => $program['name'],
+                'vcarve_file' => $program['vcarve_file'],
+                'material_code' => $program['material_code'],
+                'material_type' => $program['material_type'],
+                'sheet_size' => $program['sheet_size'],
+                'sheet_count' => $program['sheet_count'],
+                'created_date' => $program['created_date'],
+                'description' => $program['description'],
+                'status' => 'pending',
+                'creator_id' => 1,
+                'created_at' => $this->now,
+                'updated_at' => $this->now,
+            ]);
+            $this->refs[$program['_ref']] = $id;
+            $this->command->info("   ✓ Created CNC program: {$program['name']} ({$program['material_code']})");
+        }
+    }
+
+    /**
+     * Seed CNC program parts (G-code files)
+     */
+    protected function seedCncProgramParts(): void
+    {
+        if (!isset($this->data['cnc_program_parts'])) {
+            $this->command->info("27. No CNC program parts to seed");
+            return;
+        }
+
+        $this->command->info("27. Seeding CNC program parts (G-code files)...");
+
+        foreach ($this->data['cnc_program_parts'] as $part) {
+            $programId = $this->refs[$part['_program_ref']] ?? null;
+            if (!$programId) continue;
+
+            DB::table('projects_cnc_program_parts')->insert([
+                'cnc_program_id' => $programId,
+                'file_name' => $part['file_name'],
+                'sheet_number' => $part['sheet_number'],
+                'operation_type' => $part['operation_type'],
+                'tool' => $part['tool'],
+                'file_size' => $part['file_size'],
+                'status' => 'pending',
+                'created_at' => $this->now,
+                'updated_at' => $this->now,
+            ]);
+        }
+        $this->command->info("   ✓ Created " . count($this->data['cnc_program_parts']) . " G-code files");
     }
 }
