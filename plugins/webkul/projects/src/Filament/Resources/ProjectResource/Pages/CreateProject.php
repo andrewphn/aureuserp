@@ -270,12 +270,17 @@ class CreateProject extends Page implements HasForms
                         if ($state && str_starts_with((string) $state, '__create__:')) {
                             // Extract the name they typed
                             $typedName = str_replace('__create__:', '', $state);
-                            // Clear the invalid selection
-                            $set('partner_id', null);
-                            // Store the typed name for pre-filling the modal form
+
+                            // Store the name for pre-filling the modal
                             $this->pendingCustomerName = $typedName;
-                            // Trigger the built-in createOption action on the Select component
+
+                            // Clear the invalid selection (the __create__: prefix isn't a real ID)
+                            $set('partner_id', null);
+
+                            // Programmatically mount the createOption action to open the modal
+                            // The component key is 'data.partner_id' and action name is 'createOption'
                             $this->mountFormComponentAction('data.partner_id', 'createOption');
+
                             return;
                         }
 
