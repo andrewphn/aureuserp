@@ -5,8 +5,10 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Pages;
 use App\Forms\Components\AddressAutocomplete;
 use App\Forms\Components\TagSelectorPanel;
 use App\Services\ProductionEstimatorService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
@@ -17,13 +19,19 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Webkul\Partner\Enums\AccountType;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Partner\Models\Partner;
 use Webkul\Project\Enums\BudgetRange;
@@ -60,6 +68,18 @@ class CreateProject extends Page implements HasForms
     public ?array $data = [];
 
     public ?ProjectDraft $draft = null;
+
+    /**
+     * Last saved timestamp for auto-save indicator
+     * Format: "X minutes ago" or "just now"
+     */
+    public ?string $lastSavedAt = null;
+
+    /**
+     * Pending customer name for pre-filling the create modal
+     * Set when user clicks "Add [name] as new customer" in dropdown
+     */
+    public ?string $pendingCustomerName = null;
 
     /**
      * Mount the wizard
@@ -198,12 +218,67 @@ class CreateProject extends Page implements HasForms
 
                 Select::make('partner_id')
                     ->label('Customer')
-                    ->options(fn () => Partner::where('sub_type', 'customer')->pluck('name', 'id'))
                     ->searchable()
-                    ->preload()
                     ->required()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    ->getSearchResultsUsing(function (string $search): array {
+                        // Search existing customers
+                        $customers = Partner::where('sub_type', 'customer')
+                            ->where('name', 'like', "%{$search}%")
+                            ->orderBy('name')
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                            ->toArray();
+
+                        // If search has content and no exact match, show "Add new" option at end
+                        $exactMatch = collect($customers)->contains(fn ($name) =>
+                            strtolower($name) === strtolower($search)
+                        );
+
+                        if ($search && !$exactMatch) {
+                            $customers['__create__:' . $search] = "➕ Add \"{$search}\" as new customer";
+                        }
+
+                        return $customers;
+                    })
+                    ->getOptionLabelUsing(fn ($value): ?string => Partner::find($value)?->name)
+                    ->allowHtml()
+                    ->createOptionForm($this->getCustomerCreationFormComponents())
+                    ->createOptionUsing(function (array $data): int {
+                        $data['sub_type'] = 'customer';
+                        $data['creator_id'] = Auth::id();
+                        $partner = Partner::create($data);
+                        return $partner->id;
+                    })
+                    ->createOptionAction(function (Action $action) {
+                        $action
+                            ->label('+ Add Customer')
+                            ->modalHeading('Add New Customer')
+                            ->modalDescription('Quick customer entry - you can add more details later.')
+                            ->slideOver()
+                            ->modalWidth('md')
+                            ->fillForm(function (): array {
+                                // Pre-fill the name if user clicked "Add [name] as new customer"
+                                $name = $this->pendingCustomerName;
+                                // Clear the pending name after using it
+                                $this->pendingCustomerName = null;
+                                return $name ? ['name' => $name] : [];
+                            });
+                    })
+                    ->afterStateUpdated(function ($state, callable $set, callable $get, Select $component) {
+                        // Check if user selected the "create new" option
+                        if ($state && str_starts_with((string) $state, '__create__:')) {
+                            // Extract the name they typed
+                            $typedName = str_replace('__create__:', '', $state);
+                            // Clear the invalid selection
+                            $set('partner_id', null);
+                            // Store the typed name for pre-filling the modal form
+                            $this->pendingCustomerName = $typedName;
+                            // Trigger the built-in createOption action on the Select component
+                            $this->mountFormComponentAction('data.partner_id', 'createOption');
+                            return;
+                        }
+
                         if ($state && $get('use_customer_address')) {
                             $partner = Partner::with(['state', 'country'])->find($state);
                             if ($partner) {
@@ -321,31 +396,17 @@ class CreateProject extends Page implements HasForms
                 ])
                 ->compact(),
 
-            // Project Preview
-            Section::make('Project Preview')
-                ->schema([
-                    Grid::make(2)->schema([
-                        Placeholder::make('project_number_preview')
-                            ->label('Project Number')
-                            ->content(fn (callable $get) => $get('project_number') ?: 'Auto-generated'),
-                        Placeholder::make('project_name_preview')
-                            ->label('Project Name')
-                            ->content(fn (callable $get) => $get('name') ?: 'Auto-generated from address & type'),
-                    ]),
-                    TextInput::make('project_number')
-                        ->label('Project Number (override)')
-                        ->placeholder('Leave blank to auto-generate')
-                        ->maxLength(255)
-                        ->hidden(),
-                    TextInput::make('name')
-                        ->label('Project Name (override)')
-                        ->placeholder('Leave blank to auto-generate')
-                        ->maxLength(255)
-                        ->hidden(),
-                ])
-                ->compact()
-                ->collapsible()
-                ->collapsed(),
+            // Hidden fields for project number/name (displayed in sidebar instead)
+            TextInput::make('project_number')
+                ->label('Project Number (override)')
+                ->placeholder('Leave blank to auto-generate')
+                ->maxLength(255)
+                ->hidden(),
+            TextInput::make('name')
+                ->label('Project Name (override)')
+                ->placeholder('Leave blank to auto-generate')
+                ->maxLength(255)
+                ->hidden(),
         ];
     }
 
@@ -745,26 +806,31 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Save draft at current step
+     * Save draft at current step (called by auto-save and step navigation)
+     * Public so it can be triggered from Alpine.js auto-save interval
      */
-    protected function saveDraft(int $step): void
+    public function saveDraft(?int $step = null): void
     {
         $data = $this->form->getState();
+        $currentStep = $step ?? $this->draft?->current_step ?? 1;
 
         if (!$this->draft) {
             $this->draft = ProjectDraft::create([
                 'user_id' => Auth::id(),
                 'session_id' => session()->getId(),
-                'current_step' => $step,
+                'current_step' => $currentStep,
                 'form_data' => $data,
                 'expires_at' => now()->addDays(7),
             ]);
         } else {
             $this->draft->update([
-                'current_step' => $step,
+                'current_step' => $currentStep,
                 'form_data' => $data,
             ]);
         }
+
+        // Update the last saved indicator
+        $this->lastSavedAt = 'just now';
     }
 
     /**
@@ -1042,5 +1108,278 @@ class CreateProject extends Page implements HasForms
                 // Silently fail
             }
         }
+    }
+
+    /**
+     * Get comprehensive customer creation form components for the wizard modal
+     *
+     * Organized using "Don't Make Me Think" principles:
+     * - Essential info always visible (name, type, contact)
+     * - Progressive disclosure via collapsible sections
+     * - Logical grouping with clear hierarchy
+     *
+     * @return array
+     */
+    protected function getCustomerCreationFormComponents(): array
+    {
+        return [
+            // ========================================
+            // SECTION 1: Essential Information (Always Visible)
+            // The most critical fields for customer identification
+            // ========================================
+            Section::make('Essential Information')
+                ->description('Required for customer identification')
+                ->schema([
+                    // Customer Type Toggle - Affects form behavior
+                    Radio::make('account_type')
+                        ->label('Customer Type')
+                        ->inline()
+                        ->options([
+                            AccountType::INDIVIDUAL->value => 'Individual',
+                            AccountType::COMPANY->value => 'Company',
+                        ])
+                        ->default(AccountType::INDIVIDUAL->value)
+                        ->live()
+                        ->columnSpanFull(),
+
+                    // Dynamic Name Field based on type
+                    TextInput::make('name')
+                        ->label(fn (Get $get): string => $get('account_type') === AccountType::COMPANY->value
+                            ? 'Company Name'
+                            : 'Full Name')
+                        ->required()
+                        ->maxLength(255)
+                        ->placeholder(fn (Get $get): string => $get('account_type') === AccountType::COMPANY->value
+                            ? 'e.g. Acme Construction LLC'
+                            : 'e.g. John Smith')
+                        ->extraInputAttributes(['style' => 'font-size: 1.1rem;'])
+                        ->columnSpanFull(),
+
+                    // Parent Company (only for individuals)
+                    Select::make('parent_id')
+                        ->label('Parent Company')
+                        ->options(fn () => Partner::where('account_type', AccountType::COMPANY->value)
+                            ->where('sub_type', 'customer')
+                            ->pluck('name', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL->value)
+                        ->helperText('Associate this person with a company')
+                        ->columnSpanFull(),
+
+                    // Primary Contact Info
+                    Grid::make(2)->schema([
+                        TextInput::make('phone')
+                            ->label('Phone')
+                            ->tel()
+                            ->maxLength(255)
+                            ->placeholder('e.g. (508) 555-1234'),
+
+                        TextInput::make('mobile')
+                            ->label('Mobile')
+                            ->tel()
+                            ->maxLength(255)
+                            ->placeholder('e.g. (508) 555-5678'),
+                    ]),
+
+                    Grid::make(2)->schema([
+                        TextInput::make('email')
+                            ->label('Email')
+                            ->email()
+                            ->maxLength(255)
+                            ->placeholder('e.g. john@example.com'),
+
+                        TextInput::make('website')
+                            ->label('Website')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('e.g. https://example.com')
+                            ->visible(fn (Get $get): bool => $get('account_type') === AccountType::COMPANY->value),
+                    ]),
+                ])
+                ->compact()
+                ->columns(1),
+
+            // ========================================
+            // SECTION 2: Address (Collapsible)
+            // Important but can be added later
+            // ========================================
+            Section::make('Address')
+                ->description('Billing and project location address')
+                ->schema([
+                    AddressAutocomplete::make('street1')
+                        ->label('Street Address')
+                        ->cityField('city')
+                        ->stateField('state_id')
+                        ->zipField('zip')
+                        ->countryField('country_id')
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+
+                    TextInput::make('street2')
+                        ->label('Street Address 2')
+                        ->maxLength(255)
+                        ->placeholder('Apt, Suite, Unit, etc.')
+                        ->columnSpanFull(),
+
+                    Grid::make(4)->schema([
+                        TextInput::make('city')
+                            ->label('City')
+                            ->maxLength(255),
+
+                        Select::make('state_id')
+                            ->label('State')
+                            ->options(function (Get $get) {
+                                $countryId = $get('country_id') ?: 233;
+                                return \Webkul\Support\Models\State::where('country_id', $countryId)
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->preload(),
+
+                        TextInput::make('zip')
+                            ->label('Zip')
+                            ->maxLength(255),
+
+                        Select::make('country_id')
+                            ->label('Country')
+                            ->options(fn () => \Webkul\Support\Models\Country::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->default(233)
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('state_id', null)),
+                    ]),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed(),
+
+            // ========================================
+            // SECTION 3: Business Details (Collapsible)
+            // For companies - Tax ID, Industry, etc.
+            // ========================================
+            Section::make('Business Details')
+                ->description('Company information and identification')
+                ->schema([
+                    Grid::make(2)->schema([
+                        TextInput::make('tax_id')
+                            ->label('Tax ID / EIN')
+                            ->maxLength(255)
+                            ->placeholder('e.g. 12-3456789'),
+
+                        TextInput::make('company_registry')
+                            ->label('Company Registry / D-U-N-S')
+                            ->maxLength(255)
+                            ->placeholder('e.g. 123456789'),
+                    ]),
+
+                    Grid::make(2)->schema([
+                        Select::make('industry_id')
+                            ->label('Industry')
+                            ->relationship('industry', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Select industry'),
+
+                        TextInput::make('reference')
+                            ->label('Internal Reference')
+                            ->maxLength(255)
+                            ->placeholder('Your internal code'),
+                    ]),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed()
+                ->visible(fn (Get $get): bool => $get('account_type') === AccountType::COMPANY->value),
+
+            // ========================================
+            // SECTION 4: Individual Details (Collapsible)
+            // For individuals - Job title, Title (Mr/Mrs), etc.
+            // ========================================
+            Section::make('Personal Details')
+                ->description('Additional information for this contact')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Select::make('title_id')
+                            ->label('Title')
+                            ->relationship('title', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Mr., Mrs., Dr., etc.'),
+
+                        TextInput::make('job_title')
+                            ->label('Job Title')
+                            ->maxLength(255)
+                            ->placeholder('e.g. Project Manager'),
+                    ]),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed()
+                ->visible(fn (Get $get): bool => $get('account_type') === AccountType::INDIVIDUAL->value),
+
+            // ========================================
+            // SECTION 5: Sales Settings (Collapsible)
+            // Payment terms, salesperson - usually set later
+            // ========================================
+            Section::make('Sales Settings')
+                ->description('Payment terms and sales configuration')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Select::make('user_id')
+                            ->label('Sales Person')
+                            ->options(fn () => \Webkul\Security\Models\User::pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->default(fn () => Auth::id())
+                            ->helperText('Responsible salesperson'),
+
+                        Select::make('payment_term_id')
+                            ->label('Payment Terms')
+                            ->relationship('paymentTerm', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('e.g. Net 30'),
+                    ]),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed(),
+
+            // ========================================
+            // SECTION 6: Tags (Collapsible)
+            // Organization and categorization
+            // ========================================
+            Section::make('Tags & Notes')
+                ->description('Categorize and add notes')
+                ->schema([
+                    Select::make('tags')
+                        ->label('Tags')
+                        ->relationship('tags', 'name')
+                        ->multiple()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                            TextInput::make('name')
+                                ->label('Tag Name')
+                                ->required()
+                                ->maxLength(255),
+                            \Filament\Forms\Components\ColorPicker::make('color')
+                                ->label('Color'),
+                        ])
+                        ->columnSpanFull(),
+                ])
+                ->compact()
+                ->collapsible()
+                ->collapsed(),
+
+            // Hidden fields for proper customer creation
+            Hidden::make('sub_type')
+                ->default('customer'),
+            Hidden::make('creator_id')
+                ->default(fn () => Auth::id()),
+        ];
     }
 }
