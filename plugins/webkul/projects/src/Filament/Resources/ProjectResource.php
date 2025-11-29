@@ -70,6 +70,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomsRela
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomLocationsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRunsRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\ProjectMediaRelationManager;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
@@ -1231,10 +1232,11 @@ class ProjectResource extends Resource
             ])
                 ->icon('heroicon-o-cube'),
 
-            RelationGroup::make('Documents', [
+            RelationGroup::make('Assets & Documents', [
+                ProjectMediaRelationManager::class,
                 PdfDocumentsRelationManager::class,
             ])
-                ->icon('heroicon-o-document-text'),
+                ->icon('heroicon-o-photo'),
 
             RelationGroup::make('Task Stages', [
                 TaskStagesRelationManager::class,

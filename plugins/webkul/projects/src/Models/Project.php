@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -80,9 +83,9 @@ use Webkul\Support\Models\Company;
  * @property-read \Illuminate\Database\Eloquent\Collection $pdfDocuments
  *
  */
-class Project extends Model implements Sortable
+class Project extends Model implements HasMedia, Sortable
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes, SortableTrait;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, InteractsWithMedia, SoftDeletes, SortableTrait;
 
     /**
      * Table name.
@@ -611,6 +614,105 @@ class Project extends Model implements Sortable
     protected static function newFactory(): ProjectFactory
     {
         return ProjectFactory::new();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Media Collections
+    |--------------------------------------------------------------------------
+    | Using Spatie Media Library for asset management.
+    |
+    | Collections:
+    | - inspiration: Customer inspiration images (Pinterest, references)
+    | - drawings: CAD drawings, DWG files, shop drawings
+    | - documents: PDFs, contracts, proposals, permits
+    | - photos: Site photos, progress photos, final install photos
+    | - videos: Installation videos, customer walk-throughs
+    */
+
+    /**
+     * Register media collections for project assets.
+     */
+    public function registerMediaCollections(): void
+    {
+        // Inspiration images from customer (Pinterest boards, reference photos)
+        $this->addMediaCollection('inspiration')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'image/gif',
+            ]);
+
+        // CAD drawings and DWG files
+        $this->addMediaCollection('drawings')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'image/jpeg',
+                'image/png',
+                // DWG MIME types (various browser interpretations)
+                'application/acad',
+                'application/x-acad',
+                'application/autocad_dwg',
+                'image/vnd.dwg',
+                'image/x-dwg',
+                'application/dwg',
+                'drawing/dwg',
+                'application/octet-stream', // DWG files often detected as binary
+            ]);
+
+        // Documents: PDFs, proposals, contracts, permits
+        $this->addMediaCollection('documents')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+
+        // Site photos, progress photos, final install photos
+        $this->addMediaCollection('photos')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'image/gif',
+                'image/heic',
+            ]);
+
+        // Videos: installation, walk-throughs
+        $this->addMediaCollection('videos')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'video/mp4',
+                'video/quicktime',
+                'video/x-msvideo',
+                'video/webm',
+                'video/mpeg',
+            ]);
+    }
+
+    /**
+     * Register media conversions for thumbnails.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(300)
+            ->height(300)
+            ->sharpen(10)
+            ->performOnCollections('inspiration', 'photos');
+
+        $this->addMediaConversion('preview')
+            ->width(800)
+            ->height(600)
+            ->sharpen(5)
+            ->performOnCollections('inspiration', 'photos');
     }
 
     /*
