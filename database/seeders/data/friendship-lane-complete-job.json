@@ -67,20 +67,23 @@
     "account_type": "company",
     "sub_type": "customer",
     "name": "Trottier Fine Woodworking",
-    "email": "info@trottierfww.com",
-    "phone": "(508) 555-0123",
-    "mobile": "(508) 555-0124",
-    "website": "https://trottierfww.com",
-    "tax_id": "12-3456789",
+    "email": "trottierfinewoodworking@gmail.com",
+    "phone": "508-332-8671",
+    "mobile": null,
+    "website": null,
+    "tax_id": null,
     "reference": "TFW",
     "color": "#2563EB",
     "customer_rank": 1,
     "supplier_rank": 0,
+    "owner_name": "Jeremy Trottier",
     "comment": "Premier millwork contractor on Nantucket. Long-term partner for high-end residential projects.",
-    "street1": "15B Correia Lane",
+    "street1": "15 Correia Ln",
     "street2": null,
     "city": "Nantucket",
+    "state": "MA",
     "zip": "02554",
+    "country_id": 233,
     "is_active": true
   },
 
@@ -105,8 +108,34 @@
     "allow_milestones": true,
     "allow_task_dependencies": true,
     "is_active": true,
-    "current_production_stage": "production",
-    "use_customer_address": false
+    "current_production_stage": "discovery",
+    "use_customer_address": false,
+
+    "_comment_stage_gates": "Project starts at DISCOVERY stage - all gates null, ready to test advancement",
+
+    "initial_consultation_date": "2025-09-10",
+    "initial_consultation_notes": "Site visit with Jeremy Trottier. Reviewed existing kitchen layout, discussed material preferences (paint grade for kitchen, stain grade white oak for pantry). Customer provided architectural PDFs. Access code for gated community obtained.",
+
+    "design_approved_at": null,
+    "redline_approved_at": null,
+    "designer_id": null,
+    "rhino_file_path": null,
+    "design_revision_number": 1,
+    "design_notes": null,
+
+    "materials_staged_at": null,
+    "all_materials_received_at": null,
+    "purchasing_manager_id": null,
+
+    "ferry_booking_date": null,
+    "ferry_confirmation": null,
+    "install_support_completed_at": null,
+
+    "bol_created_at": null,
+    "bol_signed_at": null,
+    "delivered_at": null,
+    "closeout_delivered_at": null,
+    "customer_signoff_at": null
   },
 
   "project_addresses": [
@@ -123,22 +152,29 @@
 
   "pdf_document": {
     "module_type": "projects",
-    "file_name": "25-Friendship-Lane-Architectural-Drawings.pdf",
+    "file_name": "9.28.25_25FriendshipRevision4.pdf",
     "document_type": "floor_plan",
-    "file_path": "projects/tcs-0001/drawings/25-Friendship-Lane-Architectural-Drawings.pdf",
+    "file_path": "projects/tcs-0001/drawings/9.28.25_25FriendshipRevision4.pdf",
     "file_size": 15728640,
     "mime_type": "application/pdf",
     "page_count": 8,
-    "version_number": 1,
+    "version_number": 4,
     "is_latest_version": true,
     "is_primary_reference": true,
-    "tags": ["kitchen", "pantry", "cabinetry", "nantucket"],
+    "tags": ["kitchen", "pantry", "cabinetry", "nantucket", "tier2", "tier4"],
     "metadata": {
-      "architect": "Nantucket Design Co",
-      "revision": "Rev C",
-      "date": "2025-08-15"
+      "drawn_by": "J. Garcia",
+      "approved_by": "J. Trottier",
+      "revision": "Revision 4",
+      "date": "2025-09-27",
+      "scope_summary": {
+        "tier_2_lf": 11.5,
+        "tier_4_lf": 35.25,
+        "floating_shelves_lf": 4,
+        "millwork_countertops_sf": 11
+      }
     },
-    "notes": "Complete architectural package from designer. Includes floor plan, elevations, and details."
+    "notes": "Complete architectural package. Pages: Cover, Plan View, Overview Elevations, Sink Wall, Fridge Wall, Pantry, Island, Countertops."
   },
 
   "pdf_pages": [
@@ -220,16 +256,16 @@
       "pdf_page_number": 2,
       "pdf_room_label": "KITCHEN",
       "pdf_detail_number": "A-1.1",
-      "pdf_notes": "Main kitchen area with L-shaped cabinet layout and center island",
-      "notes": "Paint grade maple cabinets, BM White Dove finish. Shaker style doors with beaded face frames.",
+      "pdf_notes": "Main kitchen area - Tier 4 Cabinetry per PDF cover scope",
+      "notes": "Tier 4 Paint grade cabinets. 35.25 LF per architectural drawings.",
       "sort_order": 1,
       "total_linear_feet_tier_1": 0,
       "total_linear_feet_tier_2": 0,
       "total_linear_feet_tier_3": 0,
       "total_linear_feet_tier_4": 35.25,
       "total_linear_feet_tier_5": 0,
-      "floating_shelves_lf": 4.5,
-      "countertop_sqft": 0,
+      "floating_shelves_lf": 4.0,
+      "countertop_sqft": 11,
       "trim_millwork_lf": 0,
       "material_type": "maple",
       "estimated_cabinet_value": 7402.50,
@@ -238,24 +274,30 @@
       "estimated_project_value": 12267.00,
       "quoted_price": 12267.00,
       "margin_percentage": 35.00,
-      "labor_hours_estimate": 93.41
+      "labor_hours_estimate": 93.41,
+      "appliances": [
+        {"name": "Refrigerator", "model": "SubZero DET3650RID"},
+        {"name": "Range", "model": "Wolf GR304"},
+        {"name": "Dishwasher", "model": "Miele G5056SCVi"},
+        {"name": "Range Hood", "model": "Zephyr Monsoon 30\""}
+      ]
     },
     {
       "_ref": "room_pantry",
-      "name": "Pantry",
-      "cabinet_level": "1",
+      "name": "Walk-In Pantry",
+      "cabinet_level": "2",
       "material_category": "stain_grade",
       "finish_option": "stained",
       "room_type": "pantry",
       "floor_number": "1",
-      "pdf_page_number": 2,
+      "pdf_page_number": 6,
       "pdf_room_label": "PANTRY",
       "pdf_detail_number": "A-1.2",
-      "pdf_notes": "Walk-in pantry adjacent to kitchen",
-      "notes": "Stain grade rift-sawn white oak. Open shelving with adjustable shelf pins. Natural finish.",
+      "pdf_notes": "Walk-in pantry - Tier 2 Cabinetry per PDF cover scope",
+      "notes": "Tier 2 Stain grade rift-sawn white oak. 11.5 LF per architectural drawings. Natural finish.",
       "sort_order": 2,
-      "total_linear_feet_tier_1": 11.5,
-      "total_linear_feet_tier_2": 0,
+      "total_linear_feet_tier_1": 0,
+      "total_linear_feet_tier_2": 11.5,
       "total_linear_feet_tier_3": 0,
       "total_linear_feet_tier_4": 0,
       "total_linear_feet_tier_5": 0,
@@ -1375,7 +1417,7 @@
       "_run_ref": "run_sink_wall",
       "hardware_type": "hinge",
       "manufacturer": "Blum",
-      "model_number": "71T3550",
+      "model_number": "71B3550",
       "quantity_required": 24,
       "unit_of_measure": "EA",
       "hinge_type": "concealed",
@@ -1384,7 +1426,20 @@
       "finish": "nickel",
       "unit_cost": 4.50,
       "total_hardware_cost": 108.00,
-      "installation_notes": "Clip Top 110 degree, full overlay",
+      "installation_notes": "Blum 71B3550 hinge per PDF spec",
+      "hardware_allocated": false
+    },
+    {
+      "_run_ref": "run_sink_wall",
+      "hardware_type": "hinge_plate",
+      "manufacturer": "Blum",
+      "model_number": "79B9556",
+      "quantity_required": 24,
+      "unit_of_measure": "EA",
+      "finish": "nickel",
+      "unit_cost": 2.50,
+      "total_hardware_cost": 60.00,
+      "installation_notes": "Blum 79B9556 mounting plate per PDF spec",
       "hardware_allocated": false
     },
     {
@@ -1400,7 +1455,7 @@
       "finish": "zinc",
       "unit_cost": 38.00,
       "total_hardware_cost": 228.00,
-      "installation_notes": "Tandem Plus Blumotion, 21\" length",
+      "installation_notes": "Blum 563H series Tandem Plus Blumotion per PDF spec",
       "hardware_allocated": false
     },
     {
@@ -1936,7 +1991,7 @@
     "locked": false,
     "require_signature": true,
     "require_payment": true,
-    "invoice_status": "to invoice",
+    "invoice_status": "to_invoice",
     "delivery_status": "pending",
     "woodworking_order_type": "cabinetry",
     "deposit_percentage": 30.00,
@@ -1964,7 +2019,7 @@
       "price_subtotal": 12267.0000,
       "price_total": 12267.0000,
       "state": "sale",
-      "invoice_status": "to invoice"
+      "invoice_status": "to_invoice"
     },
     {
       "sort": 2,
@@ -1976,7 +2031,7 @@
       "price_subtotal": 3381.0000,
       "price_total": 3381.0000,
       "state": "sale",
-      "invoice_status": "to invoice"
+      "invoice_status": "to_invoice"
     },
     {
       "sort": 3,
@@ -1988,7 +2043,7 @@
       "price_subtotal": 108.0000,
       "price_total": 108.0000,
       "state": "sale",
-      "invoice_status": "to invoice"
+      "invoice_status": "to_invoice"
     },
     {
       "sort": 4,
@@ -2000,7 +2055,7 @@
       "price_subtotal": -3500.0000,
       "price_total": -3500.0000,
       "state": "sale",
-      "invoice_status": "to invoice"
+      "invoice_status": "to_invoice"
     }
   ],
 
@@ -2035,6 +2090,227 @@
       "product_uom_qty": 2.0000,
       "price_unit": 50.0000,
       "price_subtotal": 100.0000
+    }
+  ],
+
+  "cnc_programs": [
+    {
+      "_ref": "cnc_fl_unfin",
+      "name": "9.26.25 FL_UnFin",
+      "vcarve_file": "9.26.25 FL_UnFin.crv",
+      "material_code": "FL",
+      "material_type": "Unfinished Plywood",
+      "sheet_size": "4x8",
+      "sheet_count": 2,
+      "created_date": "2025-09-26",
+      "description": "Friendship Lane unfinished plywood parts - cabinet boxes"
+    },
+    {
+      "_ref": "cnc_fl_prefin",
+      "name": "9.29.25 FL_PreFin",
+      "vcarve_file": "9.29.25 FL_PreFin .crv",
+      "material_code": "PreFin",
+      "material_type": "Pre-finished Maple Plywood",
+      "sheet_size": "4x8",
+      "sheet_count": 10,
+      "created_date": "2025-09-29",
+      "description": "Friendship Lane pre-finished maple parts - cabinet interiors"
+    },
+    {
+      "_ref": "cnc_rift_wo_ply",
+      "name": "9.26.25 Rift WO Ply",
+      "vcarve_file": "9.26.25 Rift WO Ply.crv",
+      "material_code": "RiftWOPly",
+      "material_type": "Rift-Sawn White Oak Plywood",
+      "sheet_size": "4x8",
+      "sheet_count": 4,
+      "created_date": "2025-09-26",
+      "description": "Rift-sawn white oak plywood for pantry cabinets"
+    },
+    {
+      "_ref": "cnc_mdf_wo_backs",
+      "name": "9.26.25 MDF WO Backs",
+      "vcarve_file": "9.26.25 MDF WO Backs.crv",
+      "material_code": "MDF_RiftWO",
+      "material_type": "MDF with White Oak Veneer",
+      "sheet_size": "4x8",
+      "sheet_count": 2,
+      "created_date": "2025-09-26",
+      "description": "MDF backs with white oak veneer for pantry cabinets"
+    },
+    {
+      "_ref": "cnc_fl_change",
+      "name": "10.13.25 FL Change",
+      "vcarve_file": "10.13.25 FL Change.crv",
+      "material_code": "Medex",
+      "material_type": "Medex MDF",
+      "sheet_size": "4x8",
+      "sheet_count": 1,
+      "created_date": "2025-10-13",
+      "description": "Change order - additional parts for spice rack modification"
+    }
+  ],
+
+  "cnc_program_parts": [
+    {
+      "_program_ref": "cnc_fl_unfin",
+      "file_name": "9.26.25 FL__UnFin01_1-Profile 3.NC",
+      "sheet_number": 1,
+      "operation_type": "profile",
+      "tool": "Profile 3",
+      "file_size": 3341
+    },
+    {
+      "_program_ref": "cnc_fl_unfin",
+      "file_name": "9.26.25 FL__UnFin02_2-Profile 3.NC",
+      "sheet_number": 2,
+      "operation_type": "profile",
+      "tool": "Profile 3",
+      "file_size": 4371
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin01_1-Profile 3.NC",
+      "sheet_number": 1,
+      "operation_type": "profile",
+      "tool": "Profile 3",
+      "file_size": 3348
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin02_2-Profile 3.NC",
+      "sheet_number": 2,
+      "operation_type": "profile",
+      "tool": "Profile 3",
+      "file_size": 5966
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin03_3-4-Slide Holes.NC",
+      "sheet_number": 3,
+      "operation_type": "drilling",
+      "tool": "Slide Holes",
+      "file_size": 7905
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin04_5-6-Slide Holes.NC",
+      "sheet_number": 5,
+      "operation_type": "drilling",
+      "tool": "Slide Holes",
+      "file_size": 5721
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin05_7-9-Slide Holes.NC",
+      "sheet_number": 7,
+      "operation_type": "drilling",
+      "tool": "Slide Holes",
+      "file_size": 8098
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin06_10-13-Slide Holes.NC",
+      "sheet_number": 10,
+      "operation_type": "drilling",
+      "tool": "Slide Holes",
+      "file_size": 18465
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin07_14-16-Slide Holes.NC",
+      "sheet_number": 14,
+      "operation_type": "drilling",
+      "tool": "Slide Holes",
+      "file_size": 11813
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin08_17-19-Slide Holes.NC",
+      "sheet_number": 17,
+      "operation_type": "drilling",
+      "tool": "Slide Holes",
+      "file_size": 13557
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin09_20-22-Shelf Pins.NC",
+      "sheet_number": 20,
+      "operation_type": "drilling",
+      "tool": "Shelf Pins",
+      "file_size": 26090
+    },
+    {
+      "_program_ref": "cnc_fl_prefin",
+      "file_name": "9.29.25_PreFin10_23-24-Pin Pocket.NC",
+      "sheet_number": 23,
+      "operation_type": "pocket",
+      "tool": "Pin Pocket",
+      "file_size": 9666
+    },
+    {
+      "_program_ref": "cnc_rift_wo_ply",
+      "file_name": "9.26.25_RiftWOPly01_1-2-Shelf Pins.NC",
+      "sheet_number": 1,
+      "operation_type": "drilling",
+      "tool": "Shelf Pins",
+      "file_size": 12527
+    },
+    {
+      "_program_ref": "cnc_rift_wo_ply",
+      "file_name": "9.26.25_RiftWOPly02_3-5-Shelf Pins.NC",
+      "sheet_number": 3,
+      "operation_type": "drilling",
+      "tool": "Shelf Pins",
+      "file_size": 15685
+    },
+    {
+      "_program_ref": "cnc_rift_wo_ply",
+      "file_name": "9.26.25_RiftWOPly03_6-8-Shelf Pins.NC",
+      "sheet_number": 6,
+      "operation_type": "drilling",
+      "tool": "Shelf Pins",
+      "file_size": 39338
+    },
+    {
+      "_program_ref": "cnc_rift_wo_ply",
+      "file_name": "9.26.25_RiftWOPly04_9-10-Pin Pocket.NC",
+      "sheet_number": 9,
+      "operation_type": "pocket",
+      "tool": "Pin Pocket",
+      "file_size": 7313
+    },
+    {
+      "_program_ref": "cnc_mdf_wo_backs",
+      "file_name": "9.26.25_MDF_RiftWO_01_1-2-Grooves.NC",
+      "sheet_number": 1,
+      "operation_type": "groove",
+      "tool": "Grooves",
+      "file_size": 3826
+    },
+    {
+      "_program_ref": "cnc_mdf_wo_backs",
+      "file_name": "9.26.25_MDF_RiftWO_02_3-4-Grooves 2.NC",
+      "sheet_number": 3,
+      "operation_type": "groove",
+      "tool": "Grooves 2",
+      "file_size": 3436
+    },
+    {
+      "_program_ref": "cnc_fl_change",
+      "file_name": "10.13.25 FIXED_1Medex_BACK_1-3-Drill 1.NC",
+      "sheet_number": 1,
+      "operation_type": "drilling",
+      "tool": "Drill 1",
+      "file_size": 2068
+    },
+    {
+      "_program_ref": "cnc_fl_change",
+      "file_name": "10.13.25 FIXED_1Medex_FACE_1-4-Pocket 2 [Clear 1].NC",
+      "sheet_number": 1,
+      "operation_type": "pocket",
+      "tool": "Pocket 2 [Clear 1]",
+      "file_size": 8560
     }
   ]
 }

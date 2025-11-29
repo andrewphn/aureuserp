@@ -79,6 +79,13 @@ class CabinetSpecification extends Model
         'custom_modifications',
         'shop_notes',
         'creator_id',
+        // Production tracking timestamps
+        'face_frame_cut_at',
+        'door_fronts_cut_at',
+        'edge_banded_at',
+        'hardware_installed_at',
+        'pocket_holes_at',
+        'doweled_at',
     ];
 
     protected $casts = [
@@ -92,6 +99,13 @@ class CabinetSpecification extends Model
         'total_price' => 'decimal:2',
         'position_in_run' => 'integer',
         'wall_position_start_inches' => 'decimal:2',
+        // Production tracking timestamps
+        'face_frame_cut_at' => 'datetime',
+        'door_fronts_cut_at' => 'datetime',
+        'edge_banded_at' => 'datetime',
+        'hardware_installed_at' => 'datetime',
+        'pocket_holes_at' => 'datetime',
+        'doweled_at' => 'datetime',
     ];
 
     /**
