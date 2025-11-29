@@ -181,13 +181,27 @@ class GlobalContextFooter extends Widget implements HasSchemas
     /**
      * Set Active Context
      *
-     * @param string $entityType
-     * @param int|string $entityId
+     * Accepts either named parameters or an array with entityType/entityId keys
+     * to support both Livewire event dispatching patterns.
+     *
+     * @param string|array $entityType Either the entity type string or an array with entityType/entityId keys
+     * @param int|string|null $entityId The entity ID (optional if $entityType is an array)
      * @param ?array $data The data array
      * @return void
      */
-    public function setActiveContext(string $entityType, int|string $entityId, ?array $data = null): void
+    public function setActiveContext(string|array $entityType, int|string|null $entityId = null, ?array $data = null): void
     {
+        // Handle array format from JavaScript event dispatch
+        if (is_array($entityType)) {
+            $data = $entityType['data'] ?? $data;
+            $entityId = $entityType['entityId'] ?? null;
+            $entityType = $entityType['entityType'] ?? null;
+        }
+
+        if (!$entityType || $entityId === null) {
+            return;
+        }
+
         $this->contextType = $entityType;
         $this->contextId = $entityId;
 
