@@ -685,28 +685,240 @@
     <x-filament::modal
         id="edit-details-modal"
         slide-over
-        width="lg"
+        width="7xl"
     >
-        <x-slot name="header">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                @php
-                    $purpose = $this->getEditingPagePurpose();
-                    $headings = [
-                        'cover' => 'Cover Page Details',
-                        'floor_plan' => 'Floor Plan Details',
-                        'elevations' => 'Elevation Details',
-                        'countertops' => 'Countertop Details',
-                        'reference' => 'Reference Page Details',
-                    ];
-                @endphp
-                {{ $headings[$purpose] ?? 'Page Details' }}
-                @if($this->editingPageNumber)
-                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">(Page {{ $this->editingPageNumber }})</span>
-                @endif
-            </h2>
+        <x-slot name="heading">
+            @php
+                $purpose = $this->getEditingPagePurpose();
+                $headings = [
+                    'cover' => 'Cover Page Details',
+                    'floor_plan' => 'Floor Plan Details',
+                    'elevations' => 'Elevation Details',
+                    'countertops' => 'Countertop Details',
+                    'reference' => 'Reference Page Details',
+                ];
+            @endphp
+            {{ $headings[$purpose] ?? 'Page Details' }}
+            @if($this->editingPageNumber)
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">(Page {{ $this->editingPageNumber }})</span>
+            @endif
         </x-slot>
 
-        <div class="space-y-4">
+        {{-- Two-Column Layout: PDF Viewer (Left ~60%) + Form (Right ~40%) --}}
+        <div class="flex flex-row gap-4" style="min-height: calc(100vh - 200px);">
+
+            {{-- PDF Viewer Panel (Left Side - ~60% width) --}}
+            <div class="shrink-0 flex flex-col" style="width: 60%;">
+
+                @if($this->editingPageNumber && $this->pdfDocument)
+                    <div
+                        class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 overflow-hidden flex-1 flex flex-col"
+                        x-data="{
+                            pdfUrl: '{{ Storage::disk('public')->url($this->pdfDocument->file_path) }}',
+                            pageNumber: {{ $this->editingPageNumber }},
+                            totalPages: {{ $this->pdfDocument->page_count ?? 1 }},
+                            zoom: 1.0,
+                            loading: true,
+                            error: null,
+                            isDragging: false,
+                            dragStartX: 0,
+                            dragStartY: 0,
+                            scrollStartX: 0,
+                            scrollStartY: 0,
+
+                            async init() {
+                                await this.$nextTick();
+                                // Wait for container to be ready
+                                let retries = 0;
+                                while (retries < 20) {
+                                    await new Promise(r => setTimeout(r, 100));
+                                    if (this.$refs.pdfContainer?.clientWidth > 0) {
+                                        await this.renderPage();
+                                        return;
+                                    }
+                                    retries++;
+                                }
+                                this.error = 'Container not ready';
+                                this.loading = false;
+                            },
+
+                            async renderPage() {
+                                if (!window.pdfjsLib) {
+                                    this.error = 'PDF.js not loaded';
+                                    this.loading = false;
+                                    return;
+                                }
+
+                                const container = this.$refs.pdfContainer;
+                                const containerWidth = container?.clientWidth || 600;
+                                const containerHeight = container?.clientHeight || 500;
+
+                                this.loading = true;
+                                this.error = null;
+
+                                try {
+                                    const pdf = await pdfjsLib.getDocument(this.pdfUrl).promise;
+                                    const page = await pdf.getPage(this.pageNumber);
+                                    const unscaledViewport = page.getViewport({ scale: 1.0 });
+
+                                    // Calculate scale to fit page in container (fit whole page)
+                                    const scaleX = (containerWidth - 40) / unscaledViewport.width;
+                                    const scaleY = (containerHeight - 20) / unscaledViewport.height;
+                                    const baseScale = Math.min(scaleX, scaleY);
+                                    const scale = baseScale * this.zoom;
+                                    const viewport = page.getViewport({ scale });
+
+                                    const canvas = document.createElement('canvas');
+                                    const ctx = canvas.getContext('2d');
+                                    const pixelRatio = window.devicePixelRatio || 1;
+
+                                    canvas.width = Math.floor(viewport.width * pixelRatio);
+                                    canvas.height = Math.floor(viewport.height * pixelRatio);
+                                    canvas.style.width = Math.floor(viewport.width) + 'px';
+                                    canvas.style.height = Math.floor(viewport.height) + 'px';
+                                    ctx.scale(pixelRatio, pixelRatio);
+
+                                    await page.render({ canvasContext: ctx, viewport }).promise;
+
+                                    const holder = this.$refs.canvasHolder;
+                                    if (holder) {
+                                        holder.innerHTML = '';
+                                        holder.appendChild(canvas);
+                                    }
+
+                                    await pdf.destroy();
+                                    this.loading = false;
+                                } catch (e) {
+                                    console.error('PDF render error:', e);
+                                    this.error = 'Failed to load page';
+                                    this.loading = false;
+                                }
+                            },
+
+                            setZoom(level) {
+                                this.zoom = level;
+                                this.renderPage();
+                            },
+
+                            startDrag(e) {
+                                if (this.zoom <= 1.0) return;
+                                this.isDragging = true;
+                                this.dragStartX = e.clientX || e.touches?.[0]?.clientX || 0;
+                                this.dragStartY = e.clientY || e.touches?.[0]?.clientY || 0;
+                                const c = this.$refs.pdfContainer;
+                                this.scrollStartX = c.scrollLeft;
+                                this.scrollStartY = c.scrollTop;
+                            },
+
+                            drag(e) {
+                                if (!this.isDragging) return;
+                                e.preventDefault();
+                                const c = this.$refs.pdfContainer;
+                                const x = e.clientX || e.touches?.[0]?.clientX || 0;
+                                const y = e.clientY || e.touches?.[0]?.clientY || 0;
+                                c.scrollLeft = this.scrollStartX - (x - this.dragStartX);
+                                c.scrollTop = this.scrollStartY - (y - this.dragStartY);
+                            },
+
+                            endDrag() {
+                                this.isDragging = false;
+                            }
+                        }"
+                        x-init="init()"
+                    >
+                        {{-- Controls Header --}}
+                        <div class="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Page {{ $this->editingPageNumber }} of {{ $this->pdfDocument->page_count ?? 1 }}
+                            </span>
+                            <div class="flex items-center gap-1">
+                                {{-- Zoom Presets --}}
+                                <button @click="setZoom(0.5)" :class="zoom === 0.5 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'" class="px-2 py-1 text-xs rounded transition-colors">50%</button>
+                                <button @click="setZoom(0.75)" :class="zoom === 0.75 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'" class="px-2 py-1 text-xs rounded transition-colors">75%</button>
+                                <button @click="setZoom(1.0)" :class="zoom === 1.0 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'" class="px-2 py-1 text-xs rounded transition-colors">Fit</button>
+                                <button @click="setZoom(1.5)" :class="zoom === 1.5 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'" class="px-2 py-1 text-xs rounded transition-colors">150%</button>
+                                <button @click="setZoom(2.0)" :class="zoom === 2.0 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'" class="px-2 py-1 text-xs rounded transition-colors">200%</button>
+                            </div>
+                        </div>
+
+                        {{-- Single Page PDF Viewer --}}
+                        <div
+                            x-ref="pdfContainer"
+                            class="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 flex items-center justify-center"
+                            style="min-height: calc(100vh - 280px);"
+                            :style="{ cursor: zoom > 1.0 ? (isDragging ? 'grabbing' : 'grab') : 'default' }"
+                            @mousedown="startDrag($event)"
+                            @mousemove="drag($event)"
+                            @mouseup="endDrag()"
+                            @mouseleave="endDrag()"
+                            @touchstart="startDrag($event)"
+                            @touchmove="drag($event)"
+                            @touchend="endDrag()"
+                        >
+                            {{-- Loading --}}
+                            <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/75 dark:bg-gray-900/75 z-10">
+                                <div class="flex flex-col items-center gap-2">
+                                    <svg class="animate-spin h-8 w-8 text-primary-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Loading page...</span>
+                                </div>
+                            </div>
+
+                            {{-- Error --}}
+                            <div x-show="error" x-cloak class="text-center p-8">
+                                <x-heroicon-o-exclamation-triangle class="w-8 h-8 text-red-500 mx-auto mb-2" />
+                                <p class="text-sm text-gray-600 dark:text-gray-400" x-text="error"></p>
+                            </div>
+
+                            {{-- Canvas --}}
+                            <div x-ref="canvasHolder" x-show="!loading && !error" class="p-4"></div>
+                        </div>
+                    </div>
+                @else
+                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-8 text-center flex items-center justify-center" style="height: calc(100vh - 260px); min-height: 500px;">
+                        <div>
+                            <x-heroicon-o-document class="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                            <p class="text-gray-500 dark:text-gray-400">No page selected</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Form Panel (Right Side - ~35% width, scrollable) --}}
+            <div class="flex-1 overflow-y-auto min-w-0" style="max-height: calc(100vh - 200px);">
+                <div class="space-y-4">
+                    {{-- Quick Action Icons (AI Extract & Activity) --}}
+                    <div class="flex items-center justify-end gap-1 pb-2 border-b border-gray-100 dark:border-gray-800">
+                        <button
+                            type="button"
+                            wire:click="aiExtractPageDetails"
+                            wire:loading.attr="disabled"
+                            wire:target="aiExtractPageDetails"
+                            class="p-1.5 rounded-lg text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
+                            title="AI Extract from PDF"
+                        >
+                            <span wire:loading.remove wire:target="aiExtractPageDetails">
+                                <x-heroicon-o-photo class="w-5 h-5" />
+                            </span>
+                            <span wire:loading wire:target="aiExtractPageDetails">
+                                <svg class="animate-spin w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="openPageChatter"
+                            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title="Activity & Comments"
+                        >
+                            <x-heroicon-o-chat-bubble-left-ellipsis class="w-5 h-5" />
+                        </button>
+                    </div>
+
             @php $purpose = $this->getEditingPagePurpose(); @endphp
 
             @if($purpose === 'cover')
@@ -872,10 +1084,12 @@
                     </div>
                 </div>
             @endif
+                </div>
+            </div>
         </div>
 
         <x-slot name="footer">
-            <div class="flex items-center justify-end gap-3">
+            <div class="flex items-center justify-end w-full gap-3">
                 <x-filament::button
                     wire:click="closeEditDetailsModal"
                     color="gray"
