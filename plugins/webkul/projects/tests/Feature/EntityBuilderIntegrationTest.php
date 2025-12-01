@@ -40,7 +40,7 @@ class EntityBuilderIntegrationTest extends TestCase
     {
         parent::setUp();
 
-        // Create a project stage (required for project factory)
+        // Create a project stage (required for project)
         $this->stage = ProjectStage::create([
             'name' => 'Discovery',
             'slug' => 'discovery',
@@ -49,21 +49,18 @@ class EntityBuilderIntegrationTest extends TestCase
             'sort' => 1,
         ]);
 
-        // Create admin user
-        $this->user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@tcswoodwork.com',
-        ]);
+        // Use the admin user created in TestCase
+        $this->user = User::find(1);
 
-        // Create company
-        $this->company = Company::factory()->create([
+        // Create company directly (without factory)
+        $this->company = Company::create([
             'name' => 'TCS Woodwork',
             'acronym' => 'TCS',
             'is_default' => true,
         ]);
 
-        // Create customer
-        $this->customer = Partner::factory()->create([
+        // Create customer directly (without factory)
+        $this->customer = Partner::create([
             'name' => 'Jane Doe',
             'sub_type' => 'customer',
             'street1' => '25 Friendship Lane',
@@ -71,13 +68,14 @@ class EntityBuilderIntegrationTest extends TestCase
             'phone' => '555-0125',
         ]);
 
-        // Create project
-        $this->project = Project::factory()->create([
+        // Create project directly (without factory)
+        $this->project = Project::create([
             'name' => '25 Friendship Lane - Kitchen Remodel',
             'project_number' => 'TCS-025-FL',
             'partner_id' => $this->customer->id,
             'company_id' => $this->company->id,
             'creator_id' => $this->user->id,
+            'stage_id' => $this->stage->id,
         ]);
 
         // Create PDF document

@@ -88,7 +88,7 @@ class ProjectFinancialsWidget extends BaseWidget
         }
 
         $actualColor = $actual > $quoted ? 'danger' : 'success';
-        $costBreakdown = $actual > 0 ? 'Spent: ' . number_format(($actual / $quoted) * 100, 1) . '% of budget' : 'No costs recorded';
+        $costBreakdown = ($actual > 0 && $quoted > 0) ? 'Spent: ' . number_format(($actual / $quoted) * 100, 1) . '% of budget' : 'No costs recorded';
 
         return [
             'quoted' => $quoted,
