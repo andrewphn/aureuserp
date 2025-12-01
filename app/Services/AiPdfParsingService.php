@@ -530,12 +530,22 @@ PROMPT;
 
     /**
      * Apply AI classification results to a PdfPage
+     *
+     * Uses the model's classify() method to properly set classification status
+     * and audit fields (classified_by, classified_at, processing_status).
      */
     public function applyClassification(PdfPage $page, array $classification): void
     {
+        $primaryPurpose = $classification['primary_purpose'] ?? null;
+        $pageLabel = $classification['page_label'] ?? null;
+
+        // Use the model's classify method for proper status tracking
+        if ($primaryPurpose) {
+            $page->classify($primaryPurpose, $pageLabel);
+        }
+
+        // Build additional update data
         $updateData = [
-            'primary_purpose' => $classification['primary_purpose'] ?? null,
-            'page_label' => $classification['page_label'] ?? null,
             'page_metadata' => array_merge($page->page_metadata ?? [], [
                 'ai_classification' => $classification,
                 'ai_classified_at' => now()->toIso8601String(),
