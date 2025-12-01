@@ -26,6 +26,7 @@ use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\ProjectDraft;
+use Webkul\Project\Services\PdfPageEntityService;
 
 /**
  * Review Pdf And Price class
@@ -569,7 +570,18 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                             'other' => 'gray',
                                         ])
                                         ->inline()
-                                        ->live(),
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, $get) {
+                                            // Persist to database immediately when user classifies a page
+                                            $pageNumber = $get('page_number');
+                                            if ($pageNumber) {
+                                                $this->persistPageClassification(
+                                                    (int) $pageNumber,
+                                                    $state,
+                                                    ['page_label' => $get('page_label')]
+                                                );
+                                            }
+                                        }),
 
                                     // ============ COMPACT SUMMARY + EDIT ACTION ============
                                     // Shows summary badge when data exists, with "Edit Details" slide-over action
@@ -864,6 +876,22 @@ class ReviewPdfAndPrice extends Page implements HasForms
             foreach ($updates as $field => $value) {
                 $this->data['page_metadata'][$itemKey][$field] = $value;
             }
+        }
+
+        // Also persist to database immediately
+        $pageNumber = $this->data['page_metadata'][$itemKey]['page_number'] ?? null;
+        if ($pageNumber) {
+            $this->persistPageClassification(
+                (int) $pageNumber,
+                $primaryPurpose,
+                [
+                    'page_label' => $updates['page_label'] ?? null,
+                    'page_notes' => $updates['page_notes'] ?? null,
+                    'has_hardware_schedule' => $updates['has_hardware_schedule'] ?? false,
+                    'has_material_spec' => $updates['has_material_spec'] ?? false,
+                    'drawing_number' => $updates['drawing_number'] ?? null,
+                ]
+            );
         }
 
         // Trigger draft save
@@ -2412,6 +2440,91 @@ class ReviewPdfAndPrice extends Page implements HasForms
         }
 
         return $this->pdfPageIdCache[$pageNumber];
+    }
+
+    /**
+     * Persist page classification to database immediately
+     *
+     * This is called when the user selects a page type via ToggleButtons.
+     * We save immediately to pdf_pages for progressive data persistence.
+     *
+     * @param int $pageNumber
+     * @param string|null $primaryPurpose
+     * @param array $additionalData Optional additional data (page_label, etc.)
+     * @return \App\Models\PdfPage|null
+     */
+    protected function persistPageClassification(int $pageNumber, ?string $primaryPurpose, array $additionalData = []): ?\App\Models\PdfPage
+    {
+        if (!$this->pdfDocument) {
+            return null;
+        }
+
+        // Find or create the page record
+        $pdfPage = \App\Models\PdfPage::firstOrCreate(
+            [
+                'document_id' => $this->pdfDocument->id,
+                'page_number' => $pageNumber,
+            ],
+            [
+                'project_id' => $this->record->id,
+                'creator_id' => auth()->id(),
+            ]
+        );
+
+        // Use the model's classify method for proper status tracking
+        if ($primaryPurpose) {
+            $pdfPage->classify(
+                $primaryPurpose,
+                $additionalData['page_label'] ?? null,
+                auth()->id()
+            );
+        } else {
+            // Clear classification if null
+            $pdfPage->update([
+                'primary_purpose' => null,
+                'page_label' => null,
+                'processing_status' => \App\Models\PdfPage::STATUS_PENDING,
+            ]);
+        }
+
+        // Update any additional fields from additionalData
+        $updateFields = [];
+        $allowedFields = ['page_notes', 'has_hardware_schedule', 'has_material_spec', 'drawing_number', 'view_types', 'section_labels'];
+
+        foreach ($allowedFields as $field) {
+            if (array_key_exists($field, $additionalData)) {
+                $updateFields[$field] = $additionalData[$field];
+            }
+        }
+
+        if (!empty($updateFields)) {
+            $pdfPage->update($updateFields);
+        }
+
+        // Clear cache for this page
+        unset($this->pdfPageIdCache[$pageNumber]);
+
+        return $pdfPage->fresh();
+    }
+
+    /**
+     * Get or create PdfPage model for a page number
+     *
+     * @param int $pageNumber
+     * @return \App\Models\PdfPage
+     */
+    protected function getOrCreatePdfPage(int $pageNumber): \App\Models\PdfPage
+    {
+        return \App\Models\PdfPage::firstOrCreate(
+            [
+                'document_id' => $this->pdfDocument->id,
+                'page_number' => $pageNumber,
+            ],
+            [
+                'project_id' => $this->record->id,
+                'creator_id' => auth()->id(),
+            ]
+        );
     }
 
     /**
