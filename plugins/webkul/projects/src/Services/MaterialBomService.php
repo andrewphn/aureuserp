@@ -2,7 +2,7 @@
 
 namespace Webkul\Project\Services;
 
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\TcsMaterialInventoryMapping;
 use Webkul\Product\Models\Product;
 use Illuminate\Support\Collection;
@@ -19,10 +19,10 @@ class MaterialBomService
     /**
      * Generate BOM for a single cabinet specification
      *
-     * @param CabinetSpecification $cabinet
+     * @param Cabinet $cabinet
      * @return Collection Collection of BOM line items with material requirements
      */
-    public function generateBomForCabinet(CabinetSpecification $cabinet): Collection
+    public function generateBomForCabinet(Cabinet $cabinet): Collection
     {
         if (!$cabinet->material_category) {
             return collect();
@@ -51,7 +51,7 @@ class MaterialBomService
     /**
      * Generate BOM for multiple cabinet specifications
      *
-     * @param Collection|array $cabinets Collection of CabinetSpecification models
+     * @param Collection|array $cabinets Collection of Cabinet models
      * @return Collection Aggregated BOM with combined material requirements
      */
     public function generateBomForCabinets($cabinets): Collection
@@ -87,11 +87,11 @@ class MaterialBomService
     /**
      * Calculate material requirement for a cabinet + mapping combination
      *
-     * @param CabinetSpecification $cabinet
+     * @param Cabinet $cabinet
      * @param object $mapping Material inventory mapping record
      * @return array BOM line item with material requirement details
      */
-    protected function calculateMaterialRequirement(CabinetSpecification $cabinet, object $mapping): array
+    protected function calculateMaterialRequirement(Cabinet $cabinet, object $mapping): array
     {
         $linearFeet = $cabinet->linear_feet * $cabinet->quantity;
         $quantity = 0;
@@ -312,11 +312,11 @@ class MaterialBomService
      *
      * Suggests which materials to use based on usage type and priority
      *
-     * @param CabinetSpecification $cabinet
+     * @param Cabinet $cabinet
      * @param string $usageType box|face_frame|door
      * @return Collection
      */
-    public function getMaterialRecommendations(CabinetSpecification $cabinet, string $usageType): Collection
+    public function getMaterialRecommendations(Cabinet $cabinet, string $usageType): Collection
     {
         if (!$cabinet->material_category) {
             return collect();

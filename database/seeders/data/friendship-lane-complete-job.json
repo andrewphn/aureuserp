@@ -7,9 +7,11 @@
     "project_summary": {
       "name": "25 Friendship Lane Kitchen & Pantry",
       "customer": "Trottier Fine Woodworking",
-      "total_linear_feet": 51.25,
-      "total_value": 12256.00,
+      "total_linear_feet": 45.00,
+      "floating_shelves_lf": 4.00,
+      "total_value": 8622.00,
       "rooms": 2,
+      "room_locations": 4,
       "cabinet_runs": 4,
       "cabinets": 17
     }
@@ -180,19 +182,29 @@
   "pdf_pages": [
     {
       "page_number": 1,
-      "page_type": "cover",
+      "page_type": "cover_page",
       "width": 612,
       "height": 792,
       "rotation": 0,
-      "extracted_text": "25 Friendship Lane - Kitchen & Pantry Cabinetry Package"
+      "extracted_text": "25 Friendship Lane - Kitchen & Pantry Cabinetry Package",
+      "page_metadata": {
+        "title": "Cover Page",
+        "detail_number": "",
+        "notes": "Project: 25 Friendship Lane, Nantucket, MA. Kitchen Cabinetry. Client: Jeremy Trottier (Trottier Fine Woodworking). Designer: J. Garcia. Revision 4 dated 9/27/25. Summary: Tier 2 Cabinetry 11.5 LF, Tier 4 Cabinetry 35.25 LF, Floating Shelves 4 LF, Millwork Countertops 11 SF."
+      }
     },
     {
       "page_number": 2,
-      "page_type": "floor_plan",
+      "page_type": "plan_view",
       "width": 792,
       "height": 612,
       "rotation": 0,
-      "extracted_text": "Floor Plan - Kitchen and Pantry Layout"
+      "extracted_text": "Floor Plan - Kitchen and Pantry Layout",
+      "page_metadata": {
+        "title": "Plan View",
+        "detail_number": "1 of 6",
+        "notes": "Floor plan showing Kitchen and NEW WALK-IN PANTRY. Cabinet runs: Sink Wall, Fridge Wall (SubZero DET3650RID), Island, Pantry walls. Features: Rev-a-Shelf 4WDKB1 Knife Block, Lemans II 6930140150 corner storage, Double Recycle drawer, Broom/vacuum storage. Construction notes: Remove existing baseboard heaters, half wall, non-load bearing wall. 2x3 wall framing - leave sheetrock off pantry wall."
+      }
     },
     {
       "page_number": 3,
@@ -200,7 +212,12 @@
       "width": 792,
       "height": 612,
       "rotation": 0,
-      "extracted_text": "Kitchen Elevations - Sink Wall, Fridge Wall, Pantry Wall"
+      "extracted_text": "Kitchen Elevations - Sink Wall, Fridge Wall, Pantry Wall",
+      "page_metadata": {
+        "title": "Overview Elevations",
+        "detail_number": "2 of 6",
+        "notes": "Shows 4 overview elevations: Sink Wall (Wolf Gas Range GR304, Zephyr Monsoon 30\" AK9528AS, White Oak Floating Shelves with LED groove, Anderson P6035 Picture Window), Fridge Wall/Pantry (SubZero DET3050R), Island End Panel, New Pantry Wall (Paint Grade). Wolf Stainless Steel Splash/Shelf behind range. Interior wall blocking needed by GC for floating shelves."
+      }
     },
     {
       "page_number": 4,
@@ -208,15 +225,25 @@
       "width": 792,
       "height": 612,
       "rotation": 0,
-      "extracted_text": "Sink Wall Cabinet Details"
+      "extracted_text": "Sink Wall Cabinet Details",
+      "page_metadata": {
+        "title": "Sink Wall",
+        "detail_number": "3 of 6",
+        "notes": "Sink Wall detailed drawings with sections A-D. Lower: Double Recycle (Rev-A-Shelf 4WCSC2135DM2), Knife Block (Rev-A-Shelf 4WDKB1), Sink Base 36\" (Shaws Lancaster RC3018-C Farm Sink, double plywood), 3-Drawer banks. Upper: Floating shelves, hood. Dishwasher: Miele DW G 5056 SCVi. Hardware: 18 hinge plates, 4x 21\" BLUM slides. Finish: Paint Grade Maple/Medex, Prefinished Maple/Birch interior."
+      }
     },
     {
       "page_number": 5,
-      "page_type": "elevation",
+      "page_type": "detail",
       "width": 792,
       "height": 612,
       "rotation": 0,
-      "extracted_text": "Fridge Wall Elevation"
+      "extracted_text": "Fridge Wall Elevation",
+      "page_metadata": {
+        "title": "Fridge Wall",
+        "detail_number": "4 of 6",
+        "notes": "Fridge Wall with sections D-E. SubZero DET3650RID integrated fridge with custom fridge panel (16 11/16\"). Lemans II 6930140150 corner storage unit. 3-Drawer bank near fridge. 84\" total height, 25\" countertop depth. Hardware: 12 inset hinges, 12 hinge plates, 2x 21\" BLUM slides. Finish: Paint Grade Maple/Medex."
+      }
     },
     {
       "page_number": 6,
@@ -224,23 +251,38 @@
       "width": 792,
       "height": 612,
       "rotation": 0,
-      "extracted_text": "Pantry Cabinet Details"
+      "extracted_text": "Pantry Cabinet Details",
+      "page_metadata": {
+        "title": "Pantry",
+        "detail_number": "5 of 6",
+        "notes": "Walk-In Pantry with 3 walls: Exterior Wall (39\" full height, Flat Sawn White Oak doors), Full Height Wall Section F (open shelving), Workstation Wall (counter for Toaster oven, KitchenAid, distiller). Countertop TBD: Soapstone if enough leftover from kitchen, otherwise white oak. 3 locations require electrical outlet wiring. All hardware quantities zero (open shelving, no doors). **INSPIRATION PHOTO EMBEDDED** - Pantry Design Inspo image shows rustic wood shelving with baskets and jars."
+      }
     },
     {
       "page_number": 7,
-      "page_type": "elevation",
-      "width": 792,
-      "height": 612,
-      "rotation": 0,
-      "extracted_text": "Island Elevation"
-    },
-    {
-      "page_number": 8,
       "page_type": "detail",
       "width": 792,
       "height": 612,
       "rotation": 0,
-      "extracted_text": "Countertop Cutout Details"
+      "extracted_text": "Island Elevation",
+      "page_metadata": {
+        "title": "Island",
+        "detail_number": "6 of 6",
+        "notes": "Kitchen Island: 97 1/8\" length x 21 3/4\" depth. Front and Back elevations, End Panels x2, Plan View, Section Views H-I. All drawers (no doors): Left 3-Drawer bank, Center 2 Deep Drawers for Pots, Right 3-Drawer bank with top utensil divider. Both ends have space for electrical wiring. Hardware: 8 clip sets only. Finish: Paint Grade faces, Prefinished Maple/Birch interior."
+      }
+    },
+    {
+      "page_number": 8,
+      "page_type": "countertops",
+      "width": 792,
+      "height": 612,
+      "rotation": 0,
+      "extracted_text": "Countertop Cutout Details",
+      "page_metadata": {
+        "title": "Countertops",
+        "detail_number": "",
+        "notes": "Countertop layout showing all pieces with FE (Finished Edge) markers (14+ locations). Pitched drain grooves near sink area (24 1/4\" x 12\") for drying rack. Multiple countertop pieces: Sink area, Island (largest piece), Fridge wall L-shaped corner, Pantry counter. Total: 11 SF millwork countertops per cover page."
+      }
     }
   ],
 
@@ -257,22 +299,22 @@
       "pdf_room_label": "KITCHEN",
       "pdf_detail_number": "A-1.1",
       "pdf_notes": "Main kitchen area - Tier 4 Cabinetry per PDF cover scope",
-      "notes": "Tier 4 Paint grade cabinets. 35.25 LF per architectural drawings.",
+      "notes": "Tier 4 Paint grade cabinets. 33.5 LF cabinet + 4 LF floating shelves.",
       "sort_order": 1,
       "total_linear_feet_tier_1": 0,
       "total_linear_feet_tier_2": 0,
       "total_linear_feet_tier_3": 0,
-      "total_linear_feet_tier_4": 35.25,
+      "total_linear_feet_tier_4": 33.50,
       "total_linear_feet_tier_5": 0,
       "floating_shelves_lf": 4.0,
       "countertop_sqft": 11,
       "trim_millwork_lf": 0,
       "material_type": "maple",
-      "estimated_cabinet_value": 7402.50,
+      "estimated_cabinet_value": 7035.00,
       "estimated_additional_products": 4864.50,
       "estimated_finish_value": 800.00,
-      "estimated_project_value": 12267.00,
-      "quoted_price": 12267.00,
+      "estimated_project_value": 12699.50,
+      "quoted_price": 12699.50,
       "margin_percentage": 35.00,
       "labor_hours_estimate": 93.41,
       "appliances": [
@@ -363,18 +405,18 @@
       "location_type": "wall",
       "sequence": 2,
       "elevation_reference": "A-2.2",
-      "notes": "East wall with 36\" wide refrigerator alcove. 147\" total wall span.",
+      "notes": "East wall with 36\" wide refrigerator alcove. 126\" total wall span.",
       "sort_order": 2,
       "material_type": "maple",
       "wood_species": "hard_maple",
       "door_style": "shaker",
       "finish_type": "painted",
       "paint_color": "BM White Dove OC-17",
-      "overall_width_inches": 147.00,
+      "overall_width_inches": 126.00,
       "overall_height_inches": 96.00,
       "overall_depth_inches": 24.00,
-      "cabinet_count": 5,
-      "total_linear_feet": 12.25,
+      "cabinet_count": 4,
+      "total_linear_feet": 10.50,
       "cabinet_type_primary": "tall",
       "has_face_frame": true,
       "soft_close_doors": true,
@@ -466,9 +508,10 @@
       "solid_wood_required_bf": 30.00,
       "production_status": "pending",
       "estimated_labor_hours": 40.00,
-      "blum_hinges_total": 24,
-      "blum_slides_total": 6,
-      "shelf_pins_total": 96,
+      "hinges_count": 24,
+      "slides_count": 6,
+      "shelf_pins_count": 96,
+      "pullouts_count": 0,
       "hardware_kitted": false,
       "primer_type": "Shellac-based",
       "primer_coats": 1,
@@ -485,20 +528,21 @@
       "material_category": "paint_grade",
       "finish_option": "painted",
       "run_type": "tall",
-      "total_linear_feet": 12.25,
+      "total_linear_feet": 10.50,
       "start_wall_measurement": 0.00,
-      "end_wall_measurement": 147.00,
-      "notes": "Tall fridge surround with panels. Upper cabinets above fridge and flanking.",
+      "end_wall_measurement": 126.00,
+      "notes": "Tall fridge surround with panels. Utility cabinet and microwave base.",
       "sort_order": 2,
-      "cabinet_count": 5,
+      "cabinet_count": 4,
       "material_type": "maple",
       "finish_type": "painted",
       "production_status": "pending",
       "estimated_labor_hours": 35.00,
-      "blum_hinges_total": 18,
-      "blum_slides_total": 8,
-      "shelf_pins_total": 60,
-      "cnc_notes": "Fridge opening 36\" wide x 72\" tall. Panels on both sides."
+      "hinges_count": 18,
+      "slides_count": 4,
+      "shelf_pins_count": 44,
+      "pullouts_count": 0,
+      "cnc_notes": "Fridge opening 36\" wide x 72\" tall. Tall pantry, above fridge, utility with drawers, microwave base."
     },
     {
       "_ref": "run_island",
@@ -516,8 +560,10 @@
       "finish_type": "painted",
       "production_status": "pending",
       "estimated_labor_hours": 25.00,
-      "blum_hinges_total": 8,
-      "blum_slides_total": 6,
+      "hinges_count": 8,
+      "slides_count": 6,
+      "shelf_pins_count": 0,
+      "pullouts_count": 1,
       "labor_notes": "12\" seating overhang requires L-bracket support system"
     },
     {
@@ -539,15 +585,16 @@
       "finish_type": "clear_coat",
       "production_status": "pending",
       "estimated_labor_hours": 30.00,
-      "blum_hinges_total": 12,
-      "blum_slides_total": 8,
-      "shelf_pins_total": 200,
+      "hinges_count": 12,
+      "slides_count": 8,
+      "shelf_pins_count": 200,
+      "pullouts_count": 0,
       "finishing_notes": "Natural clear coat, satin sheen. Osmo Polyx-Oil recommended.",
       "cnc_notes": "Rift-sawn white oak. Shelf pin holes at 1.25\" spacing."
     }
   ],
 
-  "cabinet_specifications": [
+  "cabinets": [
     {
       "_ref": "cab_B1",
       "_run_ref": "run_sink_wall",
@@ -738,6 +785,126 @@
       "door_count": 1,
       "adjustable_shelf_count": 2,
       "shop_notes": "Wall cabinet right of window",
+      "complexity_tier": 4
+    },
+    {
+      "_ref": "cab_F1",
+      "_run_ref": "run_fridge_wall",
+      "_room_ref": "room_kitchen",
+      "cabinet_number": "F1",
+      "cabinet_level": "4",
+      "material_category": "paint_grade",
+      "finish_option": "painted",
+      "position_in_run": 1,
+      "wall_position_start_inches": 0.00,
+      "length_inches": 36.00,
+      "width_inches": 24.00,
+      "depth_inches": 24.00,
+      "height_inches": 96.00,
+      "linear_feet": 3.00,
+      "quantity": 1,
+      "unit_price_per_lf": 210.00,
+      "total_price": 630.00,
+      "box_material": "maple_plywood",
+      "has_face_frame": true,
+      "door_count": 2,
+      "door_style": "shaker",
+      "adjustable_shelf_count": 5,
+      "shelf_pin_holes": 20,
+      "hinge_model": "Blum Clip Top 110",
+      "hinge_quantity": 6,
+      "shop_notes": "Tall pantry cabinet left of refrigerator",
+      "complexity_tier": 4
+    },
+    {
+      "_ref": "cab_F2",
+      "_run_ref": "run_fridge_wall",
+      "_room_ref": "room_kitchen",
+      "cabinet_number": "F2",
+      "cabinet_level": "4",
+      "material_category": "paint_grade",
+      "finish_option": "painted",
+      "position_in_run": 2,
+      "wall_position_start_inches": 36.00,
+      "length_inches": 36.00,
+      "width_inches": 24.00,
+      "depth_inches": 24.00,
+      "height_inches": 15.00,
+      "linear_feet": 3.00,
+      "quantity": 1,
+      "unit_price_per_lf": 210.00,
+      "total_price": 630.00,
+      "box_material": "maple_plywood",
+      "has_face_frame": true,
+      "door_count": 2,
+      "door_style": "shaker",
+      "hinge_model": "Blum Clip Top 110",
+      "hinge_quantity": 4,
+      "appliance_panel": true,
+      "shop_notes": "Cabinet above refrigerator",
+      "complexity_tier": 4
+    },
+    {
+      "_ref": "cab_F3",
+      "_run_ref": "run_fridge_wall",
+      "_room_ref": "room_kitchen",
+      "cabinet_number": "F3",
+      "cabinet_level": "4",
+      "material_category": "paint_grade",
+      "finish_option": "painted",
+      "position_in_run": 3,
+      "wall_position_start_inches": 72.00,
+      "length_inches": 24.00,
+      "width_inches": 24.00,
+      "depth_inches": 24.00,
+      "height_inches": 96.00,
+      "linear_feet": 2.00,
+      "quantity": 1,
+      "unit_price_per_lf": 210.00,
+      "total_price": 420.00,
+      "box_material": "maple_plywood",
+      "has_face_frame": true,
+      "door_count": 2,
+      "drawer_count": 2,
+      "door_style": "shaker",
+      "dovetail_drawers": true,
+      "adjustable_shelf_count": 3,
+      "shelf_pin_holes": 12,
+      "hinge_model": "Blum Clip Top 110",
+      "hinge_quantity": 4,
+      "slide_model": "Blum Tandem 18\"",
+      "slide_quantity": 4,
+      "shop_notes": "Tall utility cabinet right of refrigerator with bottom drawers",
+      "complexity_tier": 4
+    },
+    {
+      "_ref": "cab_F4",
+      "_run_ref": "run_fridge_wall",
+      "_room_ref": "room_kitchen",
+      "cabinet_number": "F4",
+      "cabinet_level": "4",
+      "material_category": "paint_grade",
+      "finish_option": "painted",
+      "position_in_run": 4,
+      "wall_position_start_inches": 96.00,
+      "length_inches": 30.00,
+      "width_inches": 24.00,
+      "depth_inches": 24.00,
+      "height_inches": 34.50,
+      "linear_feet": 2.50,
+      "quantity": 1,
+      "unit_price_per_lf": 210.00,
+      "total_price": 525.00,
+      "box_material": "maple_plywood",
+      "has_face_frame": true,
+      "door_count": 2,
+      "door_style": "shaker",
+      "has_microwave_shelf": true,
+      "adjustable_shelf_count": 1,
+      "hinge_model": "Blum Clip Top 110",
+      "hinge_quantity": 4,
+      "hardware_notes": "Microwave shelf with adjustable tray above",
+      "shop_notes": "Base cabinet with microwave cutout",
       "complexity_tier": 4
     },
     {

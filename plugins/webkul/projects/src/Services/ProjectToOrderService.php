@@ -5,7 +5,7 @@ namespace Webkul\Project\Services;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Room;
 use Webkul\Sale\Enums\OrderState;
@@ -81,7 +81,7 @@ class ProjectToOrderService
 
             // Add standalone cabinets (not associated with rooms)
             if ($options['include_cabinets']) {
-                $standaloneCabinets = $project->cabinetSpecifications()
+                $standaloneCabinets = $project->cabinets()
                     ->whereNull('room_id')
                     ->get();
 
@@ -205,7 +205,7 @@ class ProjectToOrderService
         }
 
         // Also get cabinets directly on the room
-        $directCabinets = CabinetSpecification::where('room_id', $room->id)
+        $directCabinets = Cabinet::where('room_id', $room->id)
             ->whereNull('cabinet_run_id')
             ->get();
 
@@ -228,7 +228,7 @@ class ProjectToOrderService
         $lines->push($this->createSectionLine($order, 'Materials', $sortOrder++));
 
         // Get BOM items with products
-        $bomItems = $project->cabinetSpecifications()
+        $bomItems = $project->cabinets()
             ->with('bom.product')
             ->get()
             ->flatMap(function ($cabinet) {
@@ -292,7 +292,7 @@ class ProjectToOrderService
     /**
      * Create a cabinet order line
      */
-    protected function createCabinetLine(Order $order, CabinetSpecification $cabinet, int $sortOrder): OrderLine
+    protected function createCabinetLine(Order $order, Cabinet $cabinet, int $sortOrder): OrderLine
     {
         // Build description
         $description = $this->buildCabinetDescription($cabinet);
@@ -350,7 +350,7 @@ class ProjectToOrderService
     /**
      * Build cabinet description for order line
      */
-    protected function buildCabinetDescription(CabinetSpecification $cabinet): string
+    protected function buildCabinetDescription(Cabinet $cabinet): string
     {
         $parts = [];
 

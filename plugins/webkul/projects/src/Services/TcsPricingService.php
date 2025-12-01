@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\Project;
 use Webkul\Product\Models\Product;
 use Webkul\Product\Models\Attribute;
@@ -290,10 +290,10 @@ class TcsPricingService
      *
      * Check order: Cabinet → Cabinet Run → Location → Room
      *
-     * @param CabinetSpecification $cabinet The cabinet to price
+     * @param Cabinet $cabinet The cabinet to price
      * @return array Resolved pricing configuration ['cabinet_level', 'material_category', 'finish_option']
      */
-    public function resolveEffectivePricing(CabinetSpecification $cabinet): array
+    public function resolveEffectivePricing(Cabinet $cabinet): array
     {
         $cabinetRun = $cabinet->cabinetRun;
         $location = $cabinetRun?->roomLocation;
@@ -579,7 +579,7 @@ class TcsPricingService
         }
 
         // Check parent based on entity type
-        if ($entity instanceof CabinetSpecification) {
+        if ($entity instanceof Cabinet) {
             $run = $entity->cabinetRun;
             if ($run && !empty($run->$field)) {
                 return 'cabinet_run';

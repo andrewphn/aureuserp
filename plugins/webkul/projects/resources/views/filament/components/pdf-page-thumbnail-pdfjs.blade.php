@@ -4,6 +4,9 @@
     if (isset($this) && method_exists($this, 'useAnnotationSystemV2')) {
         $useV2 = $this->useAnnotationSystemV2();
     }
+
+    // Support $record passed from viewData or fall back to $this->record
+    $projectRecord = $record ?? ($this->record ?? null);
 @endphp
 
 <div
@@ -41,7 +44,7 @@
             @endif
             @if($useV2)
                 <a
-                    href="{{ \Webkul\Project\Filament\Resources\ProjectResource::getUrl('annotate-v2', ['record' => $this->record->id, 'page' => $pageNumber, 'pdf' => $pdfId ?? $pdfDocument->id ?? null]) }}"
+                    href="{{ \Webkul\Project\Filament\Resources\ProjectResource::getUrl('annotate-v2', ['record' => $projectRecord->id ?? null, 'page' => $pageNumber, 'pdf' => $pdfId ?? $pdfDocument->id ?? null]) }}"
                     class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors inline-block"
                     title="Annotate this page (V2 Canvas System)"
                     target="_blank"
@@ -1336,7 +1339,7 @@
                 'pdfPageId' => $pdfPageId ?? null,
                 'pdfUrl' => $pdfUrl,
                 'pageNumber' => $pageNumber,
-                'projectId' => $this->record->id ?? null,
+                'projectId' => $projectRecord->id ?? null,
             ])
         </div>
     </div>

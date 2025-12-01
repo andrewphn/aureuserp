@@ -2,10 +2,12 @@
 
 namespace Webkul\Project\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 use Carbon\Carbon;
+use Webkul\Project\Database\Factories\ProjectDraftFactory;
 
 /**
  * Project Draft Eloquent model
@@ -23,7 +25,17 @@ use Carbon\Carbon;
  */
 class ProjectDraft extends Model
 {
+    use HasFactory;
+
     protected $table = 'projects_project_drafts';
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): ProjectDraftFactory
+    {
+        return ProjectDraftFactory::new();
+    }
 
     protected $fillable = [
         'user_id',

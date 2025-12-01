@@ -6,7 +6,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\DB;
 use Webkul\Project\Filament\Resources\CabinetReportResource;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 

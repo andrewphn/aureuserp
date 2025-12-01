@@ -14,7 +14,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use App\Forms\Components\AddressAutocomplete;
+use Webkul\Support\Filament\Forms\Components\AddressAutocomplete;
 use App\Forms\Components\TagSelectorPanel;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;

@@ -471,7 +471,7 @@ class TcsSampleDataSeeder extends Seeder
             $unitPrice = $this->calculateTcsPrice($cabinetLevel, $materialCategory, $finishOption);
             $totalPrice = round($unitPrice * $linearFeet, 2);
 
-            DB::table('projects_cabinet_specifications')->insert([
+            DB::table('projects_cabinets')->insert([
                 'cabinet_run_id' => $runId,
                 'room_id' => $roomId,
                 'cabinet_number' => $cabinet['number'],

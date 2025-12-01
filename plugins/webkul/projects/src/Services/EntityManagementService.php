@@ -3,8 +3,8 @@
 namespace Webkul\Project\Services;
 
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 
@@ -28,7 +28,7 @@ class EntityManagementService
             'room'        => 'room_id',
             'location'    => 'room_location_id',
             'cabinet_run' => 'cabinet_run_id',
-            'cabinet'     => 'cabinet_specification_id',
+            'cabinet'     => 'cabinet_id',
             default       => throw new \InvalidArgumentException("Unknown annotation type: {$annotationType}"),
         };
     }
@@ -80,7 +80,7 @@ class EntityManagementService
             'room'        => Room::class,
             'location'    => RoomLocation::class,
             'cabinet_run' => CabinetRun::class,
-            'cabinet'     => CabinetSpecification::class,
+            'cabinet'     => Cabinet::class,
             default       => throw new \InvalidArgumentException("Unknown annotation type: {$annotationType}"),
         };
     }
@@ -297,7 +297,7 @@ class EntityManagementService
      */
     protected function getCabinetOptions(int $projectId): array
     {
-        $cabinets = CabinetSpecification::where('project_id', $projectId)
+        $cabinets = Cabinet::where('project_id', $projectId)
             ->with(['cabinetRun.roomLocation.room'])
             ->orderBy('cabinet_number')
             ->get();

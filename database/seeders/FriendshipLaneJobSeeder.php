@@ -59,7 +59,7 @@ class FriendshipLaneJobSeeder extends Seeder
             $this->seedRooms();
             $this->seedRoomLocations();
             $this->seedCabinetRuns();
-            $this->seedCabinetSpecifications();
+            $this->seedCabinets();
             $this->seedDoors();
             $this->seedDrawers();
             $this->seedShelves();
@@ -388,6 +388,7 @@ class FriendshipLaneJobSeeder extends Seeder
                 'height' => $page['height'],
                 'rotation' => $page['rotation'],
                 'extracted_text' => $page['extracted_text'],
+                'page_metadata' => isset($page['page_metadata']) ? json_encode($page['page_metadata']) : null,
                 'created_at' => $this->now,
                 'updated_at' => $this->now,
             ]);
@@ -529,9 +530,11 @@ class FriendshipLaneJobSeeder extends Seeder
                 'solid_wood_required_bf' => $run['solid_wood_required_bf'] ?? null,
                 'production_status' => $run['production_status'] ?? 'pending',  // NOT NULL default 'pending'
                 'estimated_labor_hours' => $run['estimated_labor_hours'] ?? null,
-                'blum_hinges_total' => $run['blum_hinges_total'] ?? 0,  // NOT NULL default 0
-                'blum_slides_total' => $run['blum_slides_total'] ?? 0,  // NOT NULL default 0
-                'shelf_pins_total' => $run['shelf_pins_total'] ?? 0,  // NOT NULL default 0
+                // Hardware counts (brand-agnostic)
+                'hinges_count' => $run['hinges_count'] ?? $run['blum_hinges_total'] ?? 0,
+                'slides_count' => $run['slides_count'] ?? $run['blum_slides_total'] ?? 0,
+                'shelf_pins_count' => $run['shelf_pins_count'] ?? $run['shelf_pins_total'] ?? 0,
+                'pullouts_count' => $run['pullouts_count'] ?? 0,
                 'hardware_kitted' => $run['hardware_kitted'] ?? false,  // NOT NULL default 0
                 'ready_for_delivery' => $run['ready_for_delivery'] ?? false,  // NOT NULL default 0
                 'primer_type' => $run['primer_type'] ?? null,
@@ -551,17 +554,17 @@ class FriendshipLaneJobSeeder extends Seeder
     }
 
     /**
-     * Seed cabinet specifications
+     * Seed cabinets
      */
-    protected function seedCabinetSpecifications(): void
+    protected function seedCabinets(): void
     {
-        $this->command->info("11. Seeding cabinet specifications...");
+        $this->command->info("11. Seeding cabinets...");
 
-        foreach ($this->data['cabinet_specifications'] as $spec) {
+        foreach ($this->data['cabinets'] as $spec) {
             $runId = $this->refs[$spec['_run_ref']] ?? null;
             $roomId = $this->refs[$spec['_room_ref']] ?? null;
 
-            $id = DB::table('projects_cabinet_specifications')->insertGetId([
+            $id = DB::table('projects_cabinets')->insertGetId([
                 'project_id' => $this->refs['project'],
                 'cabinet_run_id' => $runId,
                 'room_id' => $roomId,
@@ -648,7 +651,7 @@ class FriendshipLaneJobSeeder extends Seeder
             ]);
             $this->refs[$spec['_ref']] = $id;
         }
-        $this->command->info("   ✓ Created " . count($this->data['cabinet_specifications']) . " cabinet specifications");
+        $this->command->info("   ✓ Created " . count($this->data['cabinets']) . " cabinets");
     }
 
     /**
@@ -662,7 +665,7 @@ class FriendshipLaneJobSeeder extends Seeder
             $cabinetId = $this->refs[$door['_cabinet_ref']] ?? null;
 
             DB::table('projects_doors')->insert([
-                'cabinet_specification_id' => $cabinetId,
+                'cabinet_id' => $cabinetId,
                 'door_number' => $door['door_number'],
                 'door_name' => $door['door_name'] ?? null,
                 'sort_order' => $door['sort_order'] ?? 1,
@@ -701,7 +704,7 @@ class FriendshipLaneJobSeeder extends Seeder
             $cabinetId = $this->refs[$drawer['_cabinet_ref']] ?? null;
 
             DB::table('projects_drawers')->insert([
-                'cabinet_specification_id' => $cabinetId,
+                'cabinet_id' => $cabinetId,
                 'drawer_number' => $drawer['drawer_number'],
                 'drawer_name' => $drawer['drawer_name'] ?? null,
                 'drawer_position' => $drawer['drawer_position'] ?? null,
@@ -742,7 +745,7 @@ class FriendshipLaneJobSeeder extends Seeder
             $cabinetId = $this->refs[$shelf['_cabinet_ref']] ?? null;
 
             DB::table('projects_shelves')->insert([
-                'cabinet_specification_id' => $cabinetId,
+                'cabinet_id' => $cabinetId,
                 'shelf_number' => $shelf['shelf_number'],
                 'shelf_name' => $shelf['shelf_name'] ?? null,
                 'sort_order' => $shelf['sort_order'] ?? 1,
@@ -774,7 +777,7 @@ class FriendshipLaneJobSeeder extends Seeder
             $cabinetId = $this->refs[$pullout['_cabinet_ref']] ?? null;
 
             DB::table('projects_pullouts')->insert([
-                'cabinet_specification_id' => $cabinetId,
+                'cabinet_id' => $cabinetId,
                 'pullout_number' => $pullout['pullout_number'],
                 'pullout_name' => $pullout['pullout_name'] ?? null,
                 'sort_order' => $pullout['sort_order'] ?? 1,
@@ -813,7 +816,7 @@ class FriendshipLaneJobSeeder extends Seeder
             DB::table('pdf_page_annotations')->insert([
                 'pdf_page_id' => $pageId,
                 'cabinet_run_id' => $runId,
-                'cabinet_specification_id' => $cabinetId,
+                'cabinet_id' => $cabinetId,
                 'annotation_type' => $annotation['annotation_type'],
                 'view_type' => $annotation['view_type'] ?? null,
                 'label' => $annotation['label'],

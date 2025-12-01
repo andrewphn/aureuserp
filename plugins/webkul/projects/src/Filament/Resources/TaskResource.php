@@ -213,7 +213,7 @@ class TaskResource extends Resource
                                     ->afterStateUpdated(function (Set $set) {
                                         $set('room_location_id', null);
                                         $set('cabinet_run_id', null);
-                                        $set('cabinet_specification_id', null);
+                                        $set('cabinet_id', null);
                                     })
                                     ->visible(fn (Get $get) => filled($get('project_id'))),
 
@@ -229,7 +229,7 @@ class TaskResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function (Set $set) {
                                         $set('cabinet_run_id', null);
-                                        $set('cabinet_specification_id', null);
+                                        $set('cabinet_id', null);
                                     })
                                     ->visible(fn (Get $get) => filled($get('room_id'))),
 
@@ -244,14 +244,14 @@ class TaskResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->afterStateUpdated(function (Set $set) {
-                                        $set('cabinet_specification_id', null);
+                                        $set('cabinet_id', null);
                                     })
                                     ->visible(fn (Get $get) => filled($get('room_location_id'))),
 
-                                Select::make('cabinet_specification_id')
+                                Select::make('cabinet_id')
                                     ->label('Cabinet')
                                     ->relationship(
-                                        name: 'cabinetSpecification',
+                                        name: 'cabinet',
                                         titleAttribute: 'cabinet_number',
                                         modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('cabinet_run_id', $get('cabinet_run_id'))
                                     )

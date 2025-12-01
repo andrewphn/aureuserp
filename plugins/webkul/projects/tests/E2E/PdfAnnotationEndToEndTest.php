@@ -10,7 +10,7 @@ use Webkul\Project\Models\PdfPageAnnotation;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * End-to-End Test for Multi-Pass PDF Annotation System
@@ -270,12 +270,12 @@ class PdfAnnotationEndToEndTest extends TestCase
         $saveResponse4->assertOk();
 
         // Verify cabinet created
-        $this->assertDatabaseHas('projects_cabinet_specifications', [
+        $this->assertDatabaseHas('projects_cabinets', [
             'cabinet_run_id' => $run->id,
             'label' => 'W3018',
         ]);
 
-        $cabinet = CabinetSpecification::where('label', 'W3018')->first();
+        $cabinet = Cabinet::where('label', 'W3018')->first();
         $this->assertNotNull($cabinet);
 
         // ========================================
@@ -311,7 +311,7 @@ class PdfAnnotationEndToEndTest extends TestCase
         $this->assertEquals($run->id, $runAnnotation->cabinet_run_id);
 
         $cabinetAnnotation = PdfPageAnnotation::where('label', 'W3018')->first();
-        $this->assertEquals($cabinet->id, $cabinetAnnotation->cabinet_specification_id);
+        $this->assertEquals($cabinet->id, $cabinetAnnotation->cabinet_id);
 
         // ========================================
         // VERIFICATION COMPLETE ✅

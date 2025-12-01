@@ -20,7 +20,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property int $room_id
  * @property int $room_location_id
  * @property int $cabinet_run_id
- * @property int $cabinet_specification_id
+ * @property int $cabinet_id
  * @property int $product_id
  * @property string|null $line_item_type
  * @property string|null $description
@@ -39,7 +39,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property-read \Illuminate\Database\Eloquent\Model|null $room
  * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
  * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
- * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinet
  * @property-read \Illuminate\Database\Eloquent\Model|null $product
  *
  */
@@ -54,7 +54,7 @@ class SalesOrderLineItem extends Model
         'room_id',
         'room_location_id',
         'cabinet_run_id',
-        'cabinet_specification_id',
+        'cabinet_id',
         'product_id',
         'line_item_type',
         'description',
@@ -140,13 +140,13 @@ class SalesOrderLineItem extends Model
     }
 
     /**
-     * Cabinet Specification
+     * Cabinet
      *
      * @return BelongsTo
      */
-    public function cabinetSpecification(): BelongsTo
+    public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(\Webkul\Project\Models\CabinetSpecification::class, 'cabinet_specification_id');
+        return $this->belongsTo(\Webkul\Project\Models\Cabinet::class, 'cabinet_id');
     }
 
     /**

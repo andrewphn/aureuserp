@@ -53,7 +53,7 @@ class InventoryReservationService
         }
 
         // Get all BOM items for the project
-        $bomItems = CabinetMaterialsBom::whereHas('cabinetSpecification', function ($query) use ($project) {
+        $bomItems = CabinetMaterialsBom::whereHas('cabinet', function ($query) use ($project) {
             $query->where('project_id', $project->id);
         })
             ->whereNotNull('product_id')
@@ -137,8 +137,8 @@ class InventoryReservationService
             ];
         }
 
-        // Get project from cabinet specification
-        $project = $bom->cabinetSpecification?->project;
+        // Get project from cabinet
+        $project = $bom->cabinet?->project;
         if (!$project) {
             return [
                 'success' => false,

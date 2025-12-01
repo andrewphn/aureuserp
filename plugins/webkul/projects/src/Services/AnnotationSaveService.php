@@ -8,7 +8,7 @@ use App\Models\PdfPageAnnotation;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Utils\PositionInferenceUtil;
 
@@ -218,7 +218,7 @@ class AnnotationSaveService
             'room_id'                  => $roomId,
             'room_location_id'         => $entityResult['room_location_id'] ?? null,
             'cabinet_run_id'           => $entityResult['cabinet_run_id'] ?? null,
-            'cabinet_specification_id' => $entityResult['cabinet_specification_id'] ?? null,
+            'cabinet_id' => $entityResult['cabinet_id'] ?? null,
             'x'                        => $originalAnnotation['normalizedX'] ?? 0,
             'y'                        => $normalizedY,
             'width'                    => $normalizedWidth,
@@ -298,7 +298,7 @@ class AnnotationSaveService
             'room_id'                  => $roomId,
             'room_location_id'         => $entityResult['room_location_id'] ?? null,
             'cabinet_run_id'           => $entityResult['cabinet_run_id'] ?? null,
-            'cabinet_specification_id' => $entityResult['cabinet_specification_id'] ?? null,
+            'cabinet_id' => $entityResult['cabinet_id'] ?? null,
             'view_type'                => $formData['view_type'] ?? 'plan',
             'view_orientation'         => $formData['view_orientation'] ?? null,
             'view_scale'               => $formData['view_scale'] ?? null,  // Allow updating view scale
@@ -351,7 +351,7 @@ class AnnotationSaveService
             'room_id'                  => null,
             'room_location_id'         => null,
             'cabinet_run_id'           => null,
-            'cabinet_specification_id' => null,
+            'cabinet_id' => null,
         ];
 
         // Handle linking to existing entity
@@ -411,7 +411,7 @@ class AnnotationSaveService
             'label'                    => $formData['label'] ?? $annotation->label,
             'room_location_id'         => $annotation->room_location_id,
             'cabinet_run_id'           => $annotation->cabinet_run_id,
-            'cabinet_specification_id' => $annotation->cabinet_specification_id,
+            'cabinet_id' => $annotation->cabinet_id,
         ];
 
         $entityIdField = $this->entityManagement->getEntityIdField($annotationType);
@@ -484,7 +484,7 @@ class AnnotationSaveService
                 $result['room_location_id'] = $entity->room_location_id ?? null;
                 $result['room_id'] = $entity->roomLocation->room_id ?? null;
             } elseif ($annotationType === 'cabinet') {
-                $result['cabinet_specification_id'] = $entityId;
+                $result['cabinet_id'] = $entityId;
                 $result['cabinet_run_id'] = $entity->cabinet_run_id ?? null;
 
                 // Get location and room IDs from cabinet entity or traverse cabinet run relationship
@@ -523,7 +523,7 @@ class AnnotationSaveService
      */
     protected function updateCabinetHierarchy(int $cabinetId, PdfPageAnnotation $annotation, array $formData): void
     {
-        $cabinet = CabinetSpecification::find($cabinetId);
+        $cabinet = Cabinet::find($cabinetId);
         if (!$cabinet) {
             return;
         }

@@ -2,10 +2,12 @@
 
 namespace Webkul\Project\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Project\Database\Factories\RoomFactory;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
@@ -39,7 +41,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  */
 class Room extends Model
 {
-    use SoftDeletes, HasChatter, HasLogActivity;
+    use HasFactory, SoftDeletes, HasChatter, HasLogActivity;
 
     protected $table = 'projects_rooms';
 
@@ -106,7 +108,7 @@ class Room extends Model
      */
     public function cabinets(): HasMany
     {
-        return $this->hasMany(CabinetSpecification::class, 'room_id');
+        return $this->hasMany(Cabinet::class, 'room_id');
     }
 
     /**
@@ -236,5 +238,13 @@ class Room extends Model
     public function scopeWithCounts($query)
     {
         return $query->withCount(['cabinets', 'locations']);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): RoomFactory
+    {
+        return RoomFactory::new();
     }
 }

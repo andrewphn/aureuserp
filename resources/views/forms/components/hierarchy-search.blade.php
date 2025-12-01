@@ -21,7 +21,7 @@
             'roomId' => $getState()['room_id'] ?? null,
             'roomLocationId' => $getState()['room_location_id'] ?? null,
             'cabinetRunId' => $getState()['cabinet_run_id'] ?? null,
-            'cabinetSpecificationId' => $getState()['cabinet_specification_id'] ?? null,
+            'cabinetId' => $getState()['cabinet_id'] ?? null,
         ])
     </div>
 </x-dynamic-component>

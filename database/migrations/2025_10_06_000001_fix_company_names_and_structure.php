@@ -16,12 +16,50 @@ class extends Migration
      */
     public function up(): void
     {
-        // Fix company ID 1 to be "The Carpenter's Son Woodworking LLC"
+        // First, create or find the TCS partner record
+        $tcsPartner = DB::table('partners_partners')
+            ->where('name', 'The Carpenter\'s Son Woodworking LLC')
+            ->where('sub_type', 'company')
+            ->first();
+
+        if (!$tcsPartner) {
+            // Get state/country IDs
+            $nyState = DB::table('states')->where('code', 'NY')->first();
+            $usCountry = DB::table('countries')->where('code', 'US')->first();
+
+            $tcsPartnerId = DB::table('partners_partners')->insertGetId([
+                'name'       => 'The Carpenter\'s Son Woodworking LLC',
+                'email'      => 'info@tcswoodwork.com',
+                'phone'      => '(845) 816-2388',
+                'street1'    => '392 N Montgomery St',
+                'street2'    => 'Building B',
+                'city'       => 'Newburgh',
+                'zip'        => '12550',
+                'state_id'   => $nyState?->id,
+                'country_id' => $usCountry?->id,
+                'sub_type'   => 'company',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            $tcsPartnerId = $tcsPartner->id;
+        }
+
+        // Fix company ID 1 to be "The Carpenter's Son Woodworking LLC" with full address
         DB::table('companies')
             ->where('id', 1)
             ->update([
                 'name' => 'The Carpenter\'s Son Woodworking LLC',
                 'acronym' => 'TCS',
+                'street1' => '392 N Montgomery St',
+                'street2' => 'Building B',
+                'city' => 'Newburgh',
+                'state_id' => 35, // New York
+                'country_id' => 233, // United States
+                'zip' => '12550',
+                'phone' => '(845) 816-2388',
+                'email' => 'info@tcswoodwork.com',
+                'partner_id' => $tcsPartnerId,
                 'updated_at' => now(),
             ]);
 

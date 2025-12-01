@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Forms\Components;
 
-use App\Forms\Components\AddressAutocomplete;
+use Webkul\Support\Filament\Forms\Components\AddressAutocomplete;
 use Tests\TestCase;
 
 /**

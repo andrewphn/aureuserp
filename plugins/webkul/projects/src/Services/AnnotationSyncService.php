@@ -28,7 +28,7 @@ class AnnotationSyncService
             'room' => 'room_id',
             'location' => 'room_location_id',
             'cabinet_run' => 'cabinet_run_id',
-            'cabinet' => 'cabinet_specification_id',
+            'cabinet' => 'cabinet_id',
             default => null,
         };
 
@@ -59,7 +59,7 @@ class AnnotationSyncService
             'room_id'          => $updateData['room_id'] ?? null,
             'room_location_id' => $updateData['room_location_id'] ?? null,
             'cabinet_run_id'   => $updateData['cabinet_run_id'] ?? null,
-            'cabinet_specification_id' => $updateData['cabinet_specification_id'] ?? null,
+            'cabinet_id' => $updateData['cabinet_id'] ?? null,
             // NOTE: We do NOT sync view_type, view_orientation, x, y, width, height
             // Those are page-specific
         ];
@@ -125,7 +125,7 @@ class AnnotationSyncService
             'room' => 'room_id',
             'location' => 'room_location_id',
             'cabinet_run' => 'cabinet_run_id',
-            'cabinet' => 'cabinet_specification_id',
+            'cabinet' => 'cabinet_id',
             default => null,
         };
 
@@ -230,7 +230,7 @@ class AnnotationSyncService
             'room' => 'room_id',
             'location' => 'room_location_id',
             'cabinet_run' => 'cabinet_run_id',
-            'cabinet' => 'cabinet_specification_id',
+            'cabinet' => 'cabinet_id',
             default => throw new \InvalidArgumentException("Unknown annotation type: {$annotationType}"),
         };
     }

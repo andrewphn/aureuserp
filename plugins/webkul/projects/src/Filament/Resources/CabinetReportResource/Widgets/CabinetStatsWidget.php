@@ -5,7 +5,7 @@ namespace Webkul\Project\Filament\Resources\CabinetReportResource\Widgets;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Cabinet Stats Widget Filament widget
@@ -16,14 +16,14 @@ class CabinetStatsWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $totalCabinets = CabinetSpecification::sum('quantity');
-        $totalRevenue = CabinetSpecification::sum('total_price');
-        $avgLinearFeet = CabinetSpecification::avg('linear_feet');
-        $uniqueConfigs = CabinetSpecification::distinct('product_variant_id')->count();
+        $totalCabinets = Cabinet::sum('quantity');
+        $totalRevenue = Cabinet::sum('total_price');
+        $avgLinearFeet = Cabinet::avg('linear_feet');
+        $uniqueConfigs = Cabinet::distinct('product_variant_id')->count();
 
         // Month-over-month comparison
-        $thisMonth = CabinetSpecification::whereMonth('created_at', now()->month)->sum('quantity');
-        $lastMonth = CabinetSpecification::whereMonth('created_at', now()->subMonth()->month)->sum('quantity');
+        $thisMonth = Cabinet::whereMonth('created_at', now()->month)->sum('quantity');
+        $lastMonth = Cabinet::whereMonth('created_at', now()->subMonth()->month)->sum('quantity');
         $monthChange = $lastMonth > 0 ? (($thisMonth - $lastMonth) / $lastMonth) * 100 : 0;
 
         return [
@@ -52,7 +52,7 @@ class CabinetStatsWidget extends BaseWidget
 
     private function getCabinetTrendData(): array
     {
-        return CabinetSpecification::selectRaw('DATE(created_at) as date, SUM(quantity) as total')
+        return Cabinet::selectRaw('DATE(created_at) as date, SUM(quantity) as total')
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('date')
             ->orderBy('date')

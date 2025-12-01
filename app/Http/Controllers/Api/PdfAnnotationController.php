@@ -136,7 +136,7 @@ class PdfAnnotationController extends Controller
                 'annotations.*.room_id' => 'nullable|integer',
                 'annotations.*.room_location_id' => 'nullable|integer',  // For location annotations
                 'annotations.*.cabinet_run_id' => 'nullable|integer',  // For cabinet run annotations
-                'annotations.*.cabinet_specification_id' => 'nullable|integer',  // For cabinet annotations
+                'annotations.*.cabinet_id' => 'nullable|integer',  // For cabinet annotations
                 'annotations.*.view_type' => 'nullable|string|in:plan,elevation,section,detail',  // View type enum
                 'annotations.*.view_orientation' => 'nullable|string',  // View orientation for elevation/section (front, back, left, right, A-A, etc.)
                 'annotations.*.notes' => 'nullable|string',
@@ -198,7 +198,7 @@ class PdfAnnotationController extends Controller
                         'room_id' => $roomId,
                         'room_location_id' => $annotation['room_location_id'] ?? null,  // For location annotations
                         'cabinet_run_id' => $cabinetRunId,
-                        'cabinet_specification_id' => $annotation['cabinet_specification_id'] ?? null,  // For cabinet annotations
+                        'cabinet_id' => $annotation['cabinet_id'] ?? null,  // For cabinet annotations
                         'view_type' => $annotation['view_type'] ?? 'plan',  // Default to plan view
                         'view_orientation' => $annotation['view_orientation'] ?? null,  // Orientation for elevation/section views
                         'notes' => $annotation['notes'] ?? null,
@@ -236,9 +236,9 @@ class PdfAnnotationController extends Controller
                             }
                         }
 
-                        // Update CabinetSpecification notes if cabinet_specification_id is present
-                        if (!empty($savedAnnotation->cabinet_specification_id)) {
-                            $cabinet = \Webkul\Project\Models\CabinetSpecification::find($savedAnnotation->cabinet_specification_id);
+                        // Update Cabinet notes if cabinet_id is present
+                        if (!empty($savedAnnotation->cabinet_id)) {
+                            $cabinet = \Webkul\Project\Models\Cabinet::find($savedAnnotation->cabinet_id);
                             if ($cabinet) {
                                 $cabinet->notes = $notes;
                                 $cabinet->save();
@@ -463,7 +463,7 @@ class PdfAnnotationController extends Controller
                     'room_type' => $annotation->room_type,
                     'color' => $annotation->color,
                     'cabinet_run_id' => $annotation->cabinet_run_id,
-                    'cabinet_specification_id' => $annotation->cabinet_specification_id,  // CRITICAL: Include linked entity ID so editor can detect "existing" mode
+                    'cabinet_id' => $annotation->cabinet_id,  // CRITICAL: Include linked entity ID so editor can detect "existing" mode
                     'room_id' => $annotation->room_id,
                     'room_location_id' => $annotation->room_location_id,  // CRITICAL: Include room_location_id for location isolation mode
                     'parent_annotation_id' => $annotation->parent_annotation_id,  // Add parent relationship for hierarchy
@@ -662,7 +662,7 @@ class PdfAnnotationController extends Controller
                     'display_name' => $run->roomLocation->room->name . ' - ' . $run->roomLocation->name . ' - ' . $run->name,
                 ]);
 
-            $cabinets = \Webkul\Project\Models\CabinetSpecification::where('project_id', $project->id)
+            $cabinets = \Webkul\Project\Models\Cabinet::where('project_id', $project->id)
                 ->with(['cabinetRun.roomLocation.room'])
                 ->orderBy('cabinet_run_id')
                 ->orderBy('position_in_run')

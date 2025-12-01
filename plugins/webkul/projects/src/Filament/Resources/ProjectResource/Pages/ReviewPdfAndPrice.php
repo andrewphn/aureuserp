@@ -7,6 +7,7 @@ use App\Services\PdfParsingService;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Actions\Action;
@@ -21,6 +22,9 @@ use Livewire\Attributes\Url;
 use Webkul\Employee\Models\Employee;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Models\Room;
+use Webkul\Project\Models\RoomLocation;
+use Webkul\Project\Models\CabinetRun;
+use Webkul\Project\Models\ProjectDraft;
 
 /**
  * Review Pdf And Price class
@@ -48,6 +52,21 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     #[Url]
     public $pdf;
+
+    /**
+     * Draft for auto-saving wizard state
+     */
+    public ?ProjectDraft $draft = null;
+
+    /**
+     * Cached pricing levels from database
+     */
+    protected ?array $pricingLevelsCache = null;
+
+    /**
+     * Last saved at timestamp for wizard submit button display
+     */
+    public ?string $lastSavedAt = null;
 
     /**
      * Mount
@@ -83,27 +102,96 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 ->send();
         }
 
-        // Pre-fill page metadata for each page
-        $pageMetadata = [];
-        for ($i = 1; $i <= $this->getTotalPages(); $i++) {
-            $pageMetadata[] = [
-                'page_number' => $i,
-                'rooms'       => [
-                    [
-                        'room_number' => '',
-                        'room_type'   => '',
-                        'room_id'     => null,
-                    ],
-                ],
-                'detail_number' => '',
-                'notes'         => '',
+        // Check for existing draft for this PDF review
+        $this->draft = ProjectDraft::where('user_id', auth()->id())
+            ->where('session_id', 'pdf-review-' . $this->record->id . '-' . $this->pdf)
+            ->active()
+            ->latest()
+            ->first();
+
+        // Check if we have a draft to restore
+        if ($this->draft && ! empty($this->draft->form_data)) {
+            $this->form->fill($this->draft->form_data);
+        } else {
+            // Fresh start - build initial page metadata
+            $coverPageData = $this->buildCoverPageData();
+
+            $pageMetadata = [];
+            for ($i = 1; $i <= $this->getTotalPages(); $i++) {
+                $pageData = [
+                    'page_number' => $i,
+                    'page_type' => null, // User will classify each page
+                    'rooms' => [], // User will assign rooms to pages
+                    'detail_number' => '',
+                    'notes' => '',
+                ];
+
+                // Add cover page data to all pages (so any can be set as cover)
+                $pageData = array_merge($pageData, $coverPageData);
+                $pageMetadata[] = $pageData;
+            }
+
+            // Start with empty rooms - user will extract/create them from PDF
+            $this->form->fill([
+                'page_metadata' => $pageMetadata,
+                'rooms' => [],
+            ]);
+        }
+    }
+
+    /**
+     * Build rooms data from existing project rooms
+     *
+     * @return array
+     */
+    protected function buildExistingRoomsData(): array
+    {
+        $rooms = Room::where('project_id', $this->record->id)
+            ->with(['locations.cabinetRuns'])
+            ->ordered()
+            ->get();
+
+        if ($rooms->isEmpty()) {
+            return [];
+        }
+
+        $roomsData = [];
+        foreach ($rooms as $room) {
+            $cabinetRuns = [];
+
+            // Collect cabinet runs from all locations in this room
+            foreach ($room->locations as $location) {
+                foreach ($location->cabinetRuns as $run) {
+                    $cabinetRuns[] = [
+                        'cabinet_run_id' => $run->id,
+                        'run_name' => $run->name ?? $location->name . ' - ' . $run->run_type,
+                        'cabinet_level' => $run->cabinet_level ?? '2',
+                        'linear_feet' => $run->total_linear_feet ?? 0,
+                        'notes' => $run->notes ?? '',
+                    ];
+                }
+            }
+
+            // If room has no cabinet runs yet, add one empty slot
+            if (empty($cabinetRuns)) {
+                $cabinetRuns[] = [
+                    'cabinet_run_id' => null,
+                    'run_name' => '',
+                    'cabinet_level' => '2',
+                    'linear_feet' => '',
+                    'notes' => '',
+                ];
+            }
+
+            $roomsData[] = [
+                'room_id' => $room->id,
+                'room_name' => $room->name ?? ucwords(str_replace('_', ' ', $room->room_type)),
+                'room_type' => $room->room_type,
+                'cabinet_runs' => $cabinetRuns,
             ];
         }
 
-        $this->form->fill([
-            'page_metadata' => $pageMetadata,
-            'rooms'         => [],
-        ]);
+        return $roomsData;
     }
 
     public function getTotalPages(): int
@@ -112,7 +200,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
     }
 
     /**
-     * Define the form schema
+     * Define the form schema - Wizard with steps like CreateProject
      *
      * @param Schema $form
      * @return Schema
@@ -122,370 +210,298 @@ class ReviewPdfAndPrice extends Page implements HasForms
         return $form
             ->schema([
                 Wizard::make([
-                    Step::make('Page Metadata')
-                        ->description('Fill in metadata for each PDF page')
-                        ->schema([
-                            \Filament\Forms\Components\Placeholder::make('pdf_info')
-                                ->label('Document Information')
-                                ->content(function () {
-                                    $info = "**{$this->pdfDocument->file_name}** — Total Pages: {$this->getTotalPages()}";
+                    // Step 1: Classify PDF Pages
+                    Step::make('1. Classify Pages')
+                        ->description('Identify page types in the PDF')
+                        ->icon('heroicon-o-document-text')
+                        ->schema($this->getStep1Schema())
+                        ->afterValidation(fn () => $this->saveDraft()),
 
-                                    // Add version information
-                                    if ($this->pdfDocument->version_number > 1 || ! $this->pdfDocument->is_latest_version) {
-                                        $versionBadge = $this->pdfDocument->is_latest_version
-                                            ? "Version {$this->pdfDocument->version_number} (Latest)"
-                                            : "Version {$this->pdfDocument->version_number}";
-                                        $info .= " — **{$versionBadge}**";
+                    // Step 2: Define Rooms & Cabinet Runs
+                    Step::make('2. Rooms & Runs')
+                        ->description('Add rooms and cabinet configurations')
+                        ->icon('heroicon-o-home')
+                        ->schema($this->getStep2Schema())
+                        ->afterValidation(fn () => $this->saveDraft()),
 
-                                        if ($this->pdfDocument->version_metadata && isset($this->pdfDocument->version_metadata['version_notes'])) {
-                                            $info .= "\n\n📝 **Version Notes:** {$this->pdfDocument->version_metadata['version_notes']}";
-                                        }
-                                    }
-
-                                    return $info;
-                                })
-                                ->columnSpanFull(),
-
-                            Repeater::make('page_metadata')
-                                ->label('Pages')
-                                ->schema([
-                                    \Filament\Schemas\Components\View::make('webkul-project::filament.components.pdf-page-thumbnail-pdfjs')
-                                        ->viewData(fn ($get) => [
-                                            'pdfId'       => $this->pdfDocument->id,
-                                            'pdfDocument' => $this->pdfDocument,
-                                            'pdfUrl'      => \Illuminate\Support\Facades\Storage::disk('public')->url($this->pdfDocument->file_path),
-                                            'pageNumber'  => $get('page_number') ?? 1,
-                                            'pdfPageId'   => $this->getPdfPageId($get('page_number') ?? 1),
-                                            'pdfPage'     => $this->getPdfPageId($get('page_number') ?? 1) ? \App\Models\PdfPage::find($this->getPdfPageId($get('page_number') ?? 1)) : null,
-                                            'itemKey'     => 'page-'.($get('page_number') ?? 1),
-                                        ])
-                                        ->key(fn ($get) => 'thumbnail-page-'.($get('page_number') ?? 1))
-                                        ->columnSpan(1),
-
-                                    \Filament\Schemas\Components\Section::make()
-                                        ->schema([
-                                            \Filament\Forms\Components\TextInput::make('page_number')
-                                                ->label('Page')
-                                                ->disabled()
-                                                ->dehydrated()
-                                                ->prefix('Page'),
-
-                                            Select::make('page_type')
-                                                ->label('Page Type')
-                                                ->options([
-                                                    'cover_page' => 'Cover Page',
-                                                    'floor_plan' => 'Floor Plan',
-                                                    'elevation'  => 'Elevation',
-                                                    'section'    => 'Section',
-                                                    'detail'     => 'Detail',
-                                                    'schedule'   => 'Schedule',
-                                                    'site_plan'  => 'Site Plan',
-                                                    'rendering'  => 'Rendering',
-                                                    'other'      => 'Other',
-                                                ])
-                                                ->searchable()
-                                                ->allowHtml()
-                                                ->getSearchResultsUsing(fn (string $search) => [
-                                                    $search => "Create: {$search}",
-                                                ])
-                                                ->getOptionLabelUsing(fn ($value): string => ucwords(str_replace('_', ' ', $value)))
-                                                ->placeholder('Select or type to create new')
-                                                ->helperText('Type to create a custom page type')
-                                                ->live(),
-
-                                            \Filament\Schemas\Components\Section::make('Cover Page Information')
-                                                ->description('Edit the information that will appear on the cover page')
-                                                ->schema([
-                                                    \Filament\Schemas\Components\Section::make('Customer Details')
-                                                        ->schema([
-                                                            TextInput::make('cover_customer_name')
-                                                                ->label('Customer Name')
-                                                                ->default(fn () => $this->record->partner->name ?? '')
-                                                                ->placeholder('Customer name')
-                                                                ->columnSpanFull(),
-
-                                                            TextInput::make('cover_customer_address.street1')
-                                                                ->label('Street Address')
-                                                                ->default(fn () => $this->record->partner->street1 ?? '')
-                                                                ->placeholder('Street address')
-                                                                ->columnSpanFull(),
-
-                                                            TextInput::make('cover_customer_address.street2')
-                                                                ->label('Street Address Line 2')
-                                                                ->default(fn () => $this->record->partner->street2 ?? '')
-                                                                ->placeholder('Apt, suite, etc.')
-                                                                ->columnSpanFull(),
-
-                                                            TextInput::make('cover_customer_address.city')
-                                                                ->label('City')
-                                                                ->default(fn () => $this->record->partner->city ?? '')
-                                                                ->placeholder('City'),
-
-                                                            Select::make('cover_customer_address.country_id')
-                                                                ->label('Country')
-                                                                ->options(\Webkul\Support\Models\Country::pluck('name', 'id'))
-                                                                ->default(fn () => $this->record->partner->country_id ?? 1)
-                                                                ->searchable()
-                                                                ->preload()
-                                                                ->live()
-                                                                ->afterStateUpdated(fn (callable $set) => $set('cover_customer_address.state_id', null)),
-
-                                                            Select::make('cover_customer_address.state_id')
-                                                                ->label('State')
-                                                                ->options(function (callable $get) {
-                                                                    $countryId = $get('cover_customer_address.country_id');
-                                                                    if (! $countryId) {
-                                                                        return [];
-                                                                    }
-
-                                                                    return \Webkul\Support\Models\State::where('country_id', $countryId)
-                                                                        ->pluck('name', 'id');
-                                                                })
-                                                                ->default(fn () => $this->record->partner->state_id ?? null)
-                                                                ->searchable()
-                                                                ->preload(),
-
-                                                            TextInput::make('cover_customer_address.zip')
-                                                                ->label('Zip Code')
-                                                                ->default(fn () => $this->record->partner->zip ?? '')
-                                                                ->placeholder('Zip code'),
-
-                                                            TextInput::make('cover_customer_phone')
-                                                                ->label('Phone')
-                                                                ->default(fn () => $this->record->partner->phone ?? '')
-                                                                ->placeholder('Phone number')
-                                                                ->tel(),
-
-                                                            TextInput::make('cover_customer_email')
-                                                                ->label('Email')
-                                                                ->default(fn () => $this->record->partner->email ?? '')
-                                                                ->placeholder('Email address')
-                                                                ->email(),
-                                                        ])
-                                                        ->columns(2),
-
-                                                    \Filament\Schemas\Components\Section::make('Project Details')
-                                                        ->schema([
-                                                            TextInput::make('cover_project_number')
-                                                                ->label('Project Number')
-                                                                ->default(fn () => $this->record->project_number ?? '')
-                                                                ->placeholder('Project number'),
-
-                                                            TextInput::make('cover_project_name')
-                                                                ->label('Project Name')
-                                                                ->default(fn () => $this->record->name ?? '')
-                                                                ->placeholder('Project name'),
-
-                                                            TextInput::make('cover_project_address')
-                                                                ->label('Project Address')
-                                                                ->default(function () {
-                                                                    if ($this->record->addresses()->count() > 0) {
-                                                                        $address = $this->record->addresses()->where('is_primary', true)->first()
-                                                                                   ?? $this->record->addresses()->first();
-
-                                                                        $parts = array_filter([
-                                                                            $address->street1,
-                                                                            $address->street2,
-                                                                            $address->city,
-                                                                            $address->state?->name,
-                                                                            $address->zip,
-                                                                        ]);
-
-                                                                        return ! empty($parts) ? implode(', ', $parts) : '';
-                                                                    }
-
-                                                                    return '';
-                                                                })
-                                                                ->placeholder('Project address')
-                                                                ->columnSpanFull(),
-
-                                                            TextInput::make('cover_project_date')
-                                                                ->label('Date')
-                                                                ->default(fn () => $this->record->created_at?->format('F d, Y') ?? now()->format('F d, Y'))
-                                                                ->placeholder('Date'),
-                                                        ])
-                                                        ->columns(2),
-                                                ])
-                                                ->collapsed()
-                                                ->columnSpanFull(),
-
-                                            Repeater::make('rooms')
-                                                ->label('Rooms on this Page')
-                                                // Temporarily always visible - page_type field disabled
-                                                ->schema([
-                                                    Select::make('room_type')
-                                                        ->label('Room Type')
-                                                        ->required()
-                                                        ->options([
-                                                            'kitchen'     => 'Kitchen',
-                                                            'bathroom'    => 'Bathroom',
-                                                            'bedroom'     => 'Bedroom',
-                                                            'pantry'      => 'Pantry',
-                                                            'laundry'     => 'Laundry',
-                                                            'office'      => 'Office',
-                                                            'closet'      => 'Closet',
-                                                            'mudroom'     => 'Mudroom',
-                                                            'dining_room' => 'Dining Room',
-                                                            'living_room' => 'Living Room',
-                                                            'family_room' => 'Family Room',
-                                                            'entryway'    => 'Entryway',
-                                                            'hallway'     => 'Hallway',
-                                                            'other'       => 'Other',
-                                                        ])
-                                                        ->native(false)
-                                                        ->placeholder('Select room type')
-                                                        ->live()
-                                                        ->afterStateUpdated(function ($state, $set, $get) {
-                                                            // Check if this room type already exists in other pages
-                                                            $allPages = $this->form->getState()['page_metadata'] ?? [];
-                                                            $currentPageNum = $get('../../page_number');
-
-                                                            $existingRoomTypes = [];
-                                                            foreach ($allPages as $page) {
-                                                                if ($page['page_number'] != $currentPageNum && ! empty($page['rooms'])) {
-                                                                    foreach ($page['rooms'] as $room) {
-                                                                        if (! empty($room['room_type'])) {
-                                                                            $existingRoomTypes[] = $room['room_type'];
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            // Room number will be auto-calculated later
-                                                        }),
-
-                                                    TextInput::make('room_number')
-                                                        ->label('Room Number')
-                                                        ->placeholder('Auto-calculated or enter manually')
-                                                        ->helperText('Will be auto-numbered based on room occurrences'),
-
-                                                    Select::make('room_id')
-                                                        ->label('Link to Project Room')
-                                                        ->options(function () {
-                                                            return Room::where('project_id', $this->record->id)
-                                                                ->get()
-                                                                ->mapWithKeys(fn ($room) => [
-                                                                    $room->id => ($room->room_number ?? $room->name).' - '.($room->room_type ?? 'Unknown Type'),
-                                                                ])
-                                                                ->toArray();
-                                                        })
-                                                        ->native(false)
-                                                        ->placeholder('Optional: Link to existing project room')
-                                                        ->helperText('Leave blank to create new room later'),
-                                                ])
-                                                ->columns(3)
-                                                ->defaultItems(1)
-                                                ->collapsible()
-                                                ->itemLabel(fn ($state) => ucwords(str_replace('_', ' ', $state['room_type'] ?? 'New Room')))
-                                                ->addActionLabel('Add Another Room')
-                                                ->columnSpanFull(),
-
-                                            TextInput::make('detail_number')
-                                                ->label('Detail/Drawing Number')
-                                                ->placeholder('e.g., A-101, D-3'),
-
-                                            \Filament\Forms\Components\Textarea::make('notes')
-                                                ->label('Notes')
-                                                ->placeholder('Special details about this page...')
-                                                ->rows(2)
-                                                ->columnSpanFull(),
-                                        ])
-                                        ->columns(2)
-                                        ->columnSpan(1),
-                                ])
-                                ->columns(2)
-                                ->reorderable(false)
-                                ->addable(false)
-                                ->deletable(false)
-                                ->collapsible()
-                                ->itemLabel(fn ($state) => 'Page '.($state['page_number'] ?? ''))
-                                ->columnSpanFull(),
-                        ]),
-
-                    Step::make('Enter Pricing Details')
-                        ->description('Add cabinet runs and linear feet for each room')
-                        ->schema([
-                            Repeater::make('rooms')
-                                ->label('Rooms & Cabinet Runs')
-                                ->schema([
-                                    TextInput::make('room_name')
-                                        ->label('Room Name')
-                                        ->required()
-                                        ->placeholder('e.g., Kitchen, Pantry, Bathroom'),
-
-                                    Repeater::make('cabinet_runs')
-                                        ->label('Cabinet Runs in this Room')
-                                        ->schema([
-                                            TextInput::make('run_name')
-                                                ->label('Run Name')
-                                                ->required()
-                                                ->placeholder('e.g., Sink Wall, Pantry Wall, Island'),
-
-                                            Select::make('cabinet_level')
-                                                ->label('Cabinet Level')
-                                                ->options([
-                                                    '1' => 'Level 1 - Basic ($138/LF)',
-                                                    '2' => 'Level 2 - Standard ($168/LF)',
-                                                    '3' => 'Level 3 - Enhanced ($192/LF)',
-                                                    '4' => 'Level 4 - Premium ($210/LF)',
-                                                    '5' => 'Level 5 - Custom ($225/LF)',
-                                                ])
-                                                ->default('2')
-                                                ->required(),
-
-                                            TextInput::make('linear_feet')
-                                                ->label('Linear Feet')
-                                                ->numeric()
-                                                ->required()
-                                                ->step(0.25)
-                                                ->suffix('LF'),
-
-                                            TextInput::make('notes')
-                                                ->label('Notes')
-                                                ->placeholder('Material, finish, special details...')
-                                                ->columnSpanFull(),
-                                        ])
-                                        ->columns(3)
-                                        ->defaultItems(1)
-                                        ->reorderable()
-                                        ->collapsible(),
-                                ])
-                                ->columns(1)
-                                ->defaultItems(1)
-                                ->reorderable()
-                                ->collapsible()
-                                ->columnSpanFull(),
-                        ]),
-
-                    Step::make('Additional Items')
-                        ->description('Add countertops, shelves, or other non-cabinet items')
-                        ->schema([
-                            Repeater::make('additional_items')
-                                ->label('Additional Items')
-                                ->schema([
-                                    Select::make('product_id')
-                                        ->label('Product')
-                                        ->relationship('product', 'name')
-                                        ->native(false)
-                                        ->required(),
-
-                                    TextInput::make('quantity')
-                                        ->label('Quantity')
-                                        ->numeric()
-                                        ->required()
-                                        ->step(0.25),
-
-                                    TextInput::make('notes')
-                                        ->label('Notes')
-                                        ->columnSpanFull(),
-                                ])
-                                ->columns(2)
-                                ->defaultItems(0)
-                                ->columnSpanFull(),
-                        ]),
-                ])->columnSpanFull(),
+                    // Step 3: Additional Items & Review
+                    Step::make('3. Review & Quote')
+                        ->description('Add extras and create quote')
+                        ->icon('heroicon-o-calculator')
+                        ->schema($this->getStep3Schema()),
+                ])
+                    ->submitAction(view('webkul-project::filament.components.wizard-submit-button'))
+                    ->columnSpanFull(),
             ])
             ->statePath('data');
+    }
+
+    /**
+     * Step 1: Classify PDF Pages - with visual PDF browser
+     */
+    protected function getStep1Schema(): array
+    {
+        return [
+            \Filament\Forms\Components\Placeholder::make('pdf_info')
+                ->label('Document Information')
+                ->content(function () {
+                    $info = "**{$this->pdfDocument->file_name}** — Total Pages: {$this->getTotalPages()}";
+
+                    // Add version information
+                    if ($this->pdfDocument->version_number > 1 || ! $this->pdfDocument->is_latest_version) {
+                        $versionBadge = $this->pdfDocument->is_latest_version
+                            ? "Version {$this->pdfDocument->version_number} (Latest)"
+                            : "Version {$this->pdfDocument->version_number}";
+                        $info .= " — **{$versionBadge}**";
+
+                        if ($this->pdfDocument->version_metadata && isset($this->pdfDocument->version_metadata['version_notes'])) {
+                            $info .= "\n\n📝 **Version Notes:** {$this->pdfDocument->version_metadata['version_notes']}";
+                        }
+                    }
+
+                    return $info;
+                })
+                ->columnSpanFull(),
+
+            Repeater::make('page_metadata')
+                ->label('Pages')
+                ->schema([
+                    // PDF Thumbnail with annotation capability
+                    ViewField::make('pdf_thumbnail')
+                        ->view('webkul-project::filament.components.pdf-page-thumbnail-pdfjs')
+                        ->viewData(fn ($get) => [
+                            'pdfId'       => $this->pdfDocument->id,
+                            'pdfDocument' => $this->pdfDocument,
+                            'pdfUrl'      => Storage::disk('public')->url($this->pdfDocument->file_path),
+                            'pageNumber'  => $get('page_number') ?? 1,
+                            'pdfPageId'   => $this->getPdfPageId($get('page_number') ?? 1),
+                            'pdfPage'     => $this->getPdfPageId($get('page_number') ?? 1) ? \App\Models\PdfPage::find($this->getPdfPageId($get('page_number') ?? 1)) : null,
+                            'itemKey'     => 'page-'.($get('page_number') ?? 1),
+                            'record'      => $this->record,
+                            'project'     => $this->record,
+                        ])
+                        ->columnSpan(1),
+
+                    // Page metadata section
+                    \Filament\Schemas\Components\Section::make('Page Details')
+                        ->schema([
+                            TextInput::make('page_number')
+                                ->label('Page')
+                                ->disabled()
+                                ->dehydrated()
+                                ->prefix('Page'),
+
+                            Select::make('page_type')
+                                ->label('Page Type')
+                                ->options([
+                                    'cover_page'        => 'Cover Page',
+                                    'plan_view'         => 'Plan View',
+                                    'elevation'         => 'Elevation',
+                                    'section'           => 'Section',
+                                    'detail'            => 'Detail',
+                                    'countertops'       => 'Countertops',
+                                    'hardware_schedule' => 'Hardware Schedule',
+                                    'schedule'          => 'Schedule',
+                                    'site_plan'         => 'Site Plan',
+                                    'rendering'         => 'Rendering',
+                                    'other'             => 'Other',
+                                ])
+                                ->searchable()
+                                ->placeholder('Select or type to create new')
+                                ->helperText('Type to create a custom page type')
+                                ->live(),
+
+                            TextInput::make('detail_number')
+                                ->label('Drawing Number')
+                                ->placeholder('e.g., A-101, D-3'),
+
+                            \Filament\Forms\Components\Textarea::make('notes')
+                                ->label('Notes')
+                                ->placeholder('Notes about this page...')
+                                ->rows(2),
+                        ])
+                        ->columnSpan(1),
+                ])
+                ->columns(2)
+                ->reorderable(false)
+                ->addable(false)
+                ->deletable(false)
+                ->collapsible()
+                ->itemLabel(fn ($state) => 'Page '.($state['page_number'] ?? ''))
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * Step 2: Define Rooms & Cabinet Runs
+     */
+    protected function getStep2Schema(): array
+    {
+        return [
+            \Filament\Forms\Components\Placeholder::make('rooms_info')
+                ->label('')
+                ->content(function () {
+                    $roomCount = Room::where('project_id', $this->record->id)->count();
+                    if ($roomCount > 0) {
+                        return "📋 **{$roomCount} existing room(s)** loaded from project. Edit or add more below.";
+                    }
+                    return "➕ No rooms defined yet. Add rooms and cabinet runs below.";
+                })
+                ->columnSpanFull(),
+
+            Repeater::make('rooms')
+                ->label('Rooms & Cabinet Runs')
+                ->schema([
+                    \Filament\Forms\Components\Hidden::make('room_id'),
+
+                    Select::make('room_type')
+                        ->label('Room Type')
+                        ->options([
+                            'kitchen' => 'Kitchen',
+                            'bathroom' => 'Bathroom',
+                            'pantry' => 'Pantry',
+                            'laundry' => 'Laundry',
+                            'mudroom' => 'Mudroom',
+                            'closet' => 'Closet',
+                            'office' => 'Office',
+                            'bedroom' => 'Bedroom',
+                            'living_room' => 'Living Room',
+                            'dining_room' => 'Dining Room',
+                            'other' => 'Other',
+                        ])
+                        ->native(false)
+                        ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function ($state, $set, $get) {
+                            if ($state && ! $get('room_name')) {
+                                $set('room_name', ucwords(str_replace('_', ' ', $state)));
+                            }
+                        }),
+
+                    TextInput::make('room_name')
+                        ->label('Room Name')
+                        ->required()
+                        ->placeholder('e.g., Kitchen, Master Pantry'),
+
+                    Repeater::make('cabinet_runs')
+                        ->label('Cabinet Runs in this Room')
+                        ->schema([
+                            \Filament\Forms\Components\Hidden::make('cabinet_run_id'),
+
+                            TextInput::make('run_name')
+                                ->label('Run Name')
+                                ->required()
+                                ->placeholder('e.g., Sink Wall, Pantry Wall, Island'),
+
+                            Select::make('cabinet_level')
+                                ->label('Cabinet Level')
+                                ->options(fn () => $this->getPricingLevelOptions())
+                                ->default('2')
+                                ->required()
+                                ->native(false),
+
+                            TextInput::make('linear_feet')
+                                ->label('Linear Feet')
+                                ->numeric()
+                                ->required()
+                                ->step(0.25)
+                                ->suffix('LF')
+                                ->live(onBlur: true),
+
+                            TextInput::make('notes')
+                                ->label('Notes')
+                                ->placeholder('Material, finish, special details...')
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(3)
+                        ->defaultItems(1)
+                        ->reorderable()
+                        ->collapsible()
+                        ->itemLabel(fn ($state) => ($state['run_name'] ?? 'New Run') . ' - ' . ($state['linear_feet'] ?? '0') . ' LF')
+                        ->addActionLabel('Add Cabinet Run'),
+                ])
+                ->columns(2)
+                ->defaultItems(1)
+                ->reorderable()
+                ->collapsible()
+                ->itemLabel(fn ($state) => ($state['room_name'] ?? 'New Room') . ' (' . ucwords(str_replace('_', ' ', $state['room_type'] ?? 'Unknown')) . ')')
+                ->addActionLabel('Add Room')
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * Step 3: Additional Items & Review
+     */
+    protected function getStep3Schema(): array
+    {
+        return [
+            // Pricing Summary
+            \Filament\Schemas\Components\Section::make('Pricing Summary')
+                ->schema([
+                    \Filament\Forms\Components\Placeholder::make('total_linear_feet')
+                        ->label('Total Linear Feet')
+                        ->content(function ($get) {
+                            $rooms = $get('rooms') ?? [];
+                            $total = 0;
+                            foreach ($rooms as $room) {
+                                foreach ($room['cabinet_runs'] ?? [] as $run) {
+                                    $total += (float) ($run['linear_feet'] ?? 0);
+                                }
+                            }
+                            return number_format($total, 2) . ' LF';
+                        }),
+
+                    \Filament\Forms\Components\Placeholder::make('estimated_total')
+                        ->label('Estimated Total')
+                        ->content(function ($get) {
+                            $rooms = $get('rooms') ?? [];
+                            $total = 0;
+                            foreach ($rooms as $room) {
+                                foreach ($room['cabinet_runs'] ?? [] as $run) {
+                                    $level = (int) ($run['cabinet_level'] ?? 2);
+                                    $lf = (float) ($run['linear_feet'] ?? 0);
+                                    $product = $this->getCabinetProduct($level);
+                                    if ($product && isset($product['unit_price'])) {
+                                        $total += $lf * $product['unit_price'];
+                                    }
+                                }
+                            }
+                            return '$' . number_format($total, 2);
+                        }),
+                ])
+                ->columns(2),
+
+            // Additional Items
+            \Filament\Schemas\Components\Section::make('Additional Items')
+                ->description('Add countertops, shelves, or other non-cabinet items')
+                ->schema([
+                    Repeater::make('additional_items')
+                        ->label('')
+                        ->schema([
+                            Select::make('product_id')
+                                ->label('Product')
+                                ->relationship('product', 'name')
+                                ->native(false)
+                                ->required(),
+
+                            TextInput::make('quantity')
+                                ->label('Quantity')
+                                ->numeric()
+                                ->required()
+                                ->step(0.25),
+
+                            TextInput::make('notes')
+                                ->label('Notes')
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2)
+                        ->defaultItems(0)
+                        ->columnSpanFull(),
+                ])
+                ->collapsible()
+                ->collapsed(),
+        ];
     }
 
     public function getPdfUrl(): string
@@ -1042,5 +1058,283 @@ class ReviewPdfAndPrice extends Page implements HasForms
     public function useAnnotationSystemV2(): bool
     {
         return $this->annotationSystemVersion() === 'v2';
+    }
+
+    /**
+     * Get pricing level options from products or fallback to defaults
+     *
+     * @return array
+     */
+    public function getPricingLevelOptions(): array
+    {
+        if ($this->pricingLevelsCache !== null) {
+            return $this->pricingLevelsCache;
+        }
+
+        // Try to get cabinet products from database
+        $products = \Webkul\Product\Models\Product::where('is_published', true)
+            ->where(function ($q) {
+                $q->where('name', 'LIKE', '%Cabinet Level%')
+                    ->orWhere('name', 'LIKE', '%Linear Foot%')
+                    ->orWhere('sku', 'LIKE', 'CAB-LVL-%');
+            })
+            ->orderBy('name')
+            ->get();
+
+        if ($products->isNotEmpty()) {
+            $this->pricingLevelsCache = [];
+            foreach ($products as $product) {
+                // Extract level from name or sku
+                if (preg_match('/Level\s*(\d+)/i', $product->name, $matches)) {
+                    $level = $matches[1];
+                    $price = $product->lst_price ?? $product->standard_price ?? 0;
+                    $this->pricingLevelsCache[$level] = "Level {$level} - {$product->name} (\${$price}/LF)";
+                }
+            }
+
+            if (! empty($this->pricingLevelsCache)) {
+                return $this->pricingLevelsCache;
+            }
+        }
+
+        // Fallback to default pricing levels
+        $this->pricingLevelsCache = [
+            '1' => 'Level 1 - Basic ($138/LF)',
+            '2' => 'Level 2 - Standard ($168/LF)',
+            '3' => 'Level 3 - Enhanced ($192/LF)',
+            '4' => 'Level 4 - Premium ($210/LF)',
+            '5' => 'Level 5 - Custom ($225/LF)',
+        ];
+
+        return $this->pricingLevelsCache;
+    }
+
+    /**
+     * Save draft state for the PDF review wizard
+     *
+     * @return void
+     */
+    public function saveDraft(): void
+    {
+        $sessionId = 'pdf-review-' . $this->record->id . '-' . $this->pdf;
+        $formData = $this->form->getState();
+
+        if ($this->draft) {
+            $this->draft->update([
+                'form_data' => $formData,
+                'expires_at' => now()->addDays(7),
+            ]);
+        } else {
+            $this->draft = ProjectDraft::create([
+                'user_id' => auth()->id(),
+                'session_id' => $sessionId,
+                'current_step' => 'pdf-review',
+                'form_data' => $formData,
+                'expires_at' => now()->addDays(7),
+            ]);
+        }
+
+        $this->lastSavedAt = 'just now';
+
+        Notification::make()
+            ->success()
+            ->title('Draft Saved')
+            ->body('Your progress has been saved.')
+            ->duration(2000)
+            ->send();
+    }
+
+    /**
+     * Discard the current draft
+     *
+     * @return void
+     */
+    public function discardDraft(): void
+    {
+        if ($this->draft) {
+            $this->draft->delete();
+            $this->draft = null;
+        }
+
+        // Reload form with fresh data
+        $existingRooms = $this->buildExistingRoomsData();
+        $coverPageData = $this->buildCoverPageData();
+
+        $pageMetadata = [];
+        for ($i = 1; $i <= $this->getTotalPages(); $i++) {
+            $pageData = [
+                'page_number' => $i,
+                'rooms'       => [['room_number' => '', 'room_type' => '', 'room_id' => null]],
+                'detail_number' => '',
+                'notes'         => '',
+            ];
+            $pageData = array_merge($pageData, $coverPageData);
+            $pageMetadata[] = $pageData;
+        }
+
+        $this->form->fill([
+            'page_metadata' => $pageMetadata,
+            'rooms'         => $existingRooms,
+        ]);
+
+        Notification::make()
+            ->warning()
+            ->title('Draft Discarded')
+            ->body('Started fresh with project data.')
+            ->send();
+    }
+
+    /**
+     * Save rooms and cabinet runs to database (without creating sales order)
+     *
+     * @return void
+     */
+    public function saveRoomsAndCabinets(): void
+    {
+        $data = $this->form->getState();
+
+        if (empty($data['rooms'])) {
+            Notification::make()
+                ->warning()
+                ->title('No Rooms to Save')
+                ->body('Add at least one room before saving.')
+                ->send();
+            return;
+        }
+
+        $savedRooms = 0;
+        $savedRuns = 0;
+
+        foreach ($data['rooms'] as $roomData) {
+            // Check if room already exists
+            $room = null;
+            if (! empty($roomData['room_id'])) {
+                $room = Room::find($roomData['room_id']);
+            }
+
+            if ($room) {
+                // Update existing room
+                $room->update([
+                    'name' => $roomData['room_name'],
+                    'room_type' => $roomData['room_type'] ?? $room->room_type,
+                ]);
+            } else {
+                // Create new room
+                $room = Room::create([
+                    'project_id' => $this->record->id,
+                    'name' => $roomData['room_name'],
+                    'room_type' => $roomData['room_type'] ?? 'other',
+                    'creator_id' => auth()->id(),
+                ]);
+                $savedRooms++;
+            }
+
+            // Create default location for room if none exists
+            $location = $room->locations()->first();
+            if (! $location) {
+                $location = RoomLocation::create([
+                    'room_id' => $room->id,
+                    'name' => 'Main',
+                    'location_type' => 'wall',
+                    'sequence' => 1,
+                    'creator_id' => auth()->id(),
+                ]);
+            }
+
+            // Save cabinet runs
+            foreach ($roomData['cabinet_runs'] ?? [] as $runData) {
+                if (empty($runData['run_name']) && empty($runData['linear_feet'])) {
+                    continue; // Skip empty runs
+                }
+
+                $run = null;
+                if (! empty($runData['cabinet_run_id'])) {
+                    $run = CabinetRun::find($runData['cabinet_run_id']);
+                }
+
+                if ($run) {
+                    // Update existing run
+                    $run->update([
+                        'name' => $runData['run_name'],
+                        'cabinet_level' => $runData['cabinet_level'] ?? '2',
+                        'total_linear_feet' => (float) ($runData['linear_feet'] ?? 0),
+                        'notes' => $runData['notes'] ?? null,
+                    ]);
+                } else {
+                    // Create new run
+                    CabinetRun::create([
+                        'room_location_id' => $location->id,
+                        'name' => $runData['run_name'],
+                        'cabinet_level' => $runData['cabinet_level'] ?? '2',
+                        'total_linear_feet' => (float) ($runData['linear_feet'] ?? 0),
+                        'notes' => $runData['notes'] ?? null,
+                        'creator_id' => auth()->id(),
+                    ]);
+                    $savedRuns++;
+                }
+            }
+        }
+
+        // Update project total linear feet
+        $totalLf = CabinetRun::whereHas('roomLocation.room', fn ($q) => $q->where('project_id', $this->record->id))
+            ->sum('total_linear_feet');
+
+        $this->record->update([
+            'estimated_linear_feet' => $totalLf,
+        ]);
+
+        Notification::make()
+            ->success()
+            ->title('Rooms & Cabinets Saved')
+            ->body("Saved {$savedRooms} new room(s) and {$savedRuns} new cabinet run(s). Total: {$totalLf} LF")
+            ->send();
+    }
+
+    /**
+     * Build cover page data from project partner and address information
+     *
+     * @return array
+     */
+    protected function buildCoverPageData(): array
+    {
+        $partner = $this->record->partner;
+
+        // Build project address from project addresses
+        $projectAddress = '';
+        if ($this->record->addresses()->count() > 0) {
+            $address = $this->record->addresses()->where('is_primary', true)->first()
+                       ?? $this->record->addresses()->first();
+
+            $parts = array_filter([
+                $address->street1,
+                $address->street2,
+                $address->city,
+                $address->state?->name,
+                $address->zip,
+            ]);
+
+            $projectAddress = ! empty($parts) ? implode(', ', $parts) : '';
+        }
+
+        return [
+            // Customer Details
+            'cover_customer_name' => $partner->name ?? '',
+            'cover_customer_address' => [
+                'street1' => $partner->street1 ?? '',
+                'street2' => $partner->street2 ?? '',
+                'city' => $partner->city ?? '',
+                'country_id' => $partner->country_id ?? 1,
+                'state_id' => $partner->state_id ?? null,
+                'zip' => $partner->zip ?? '',
+            ],
+            'cover_customer_phone' => $partner->phone ?? '',
+            'cover_customer_email' => $partner->email ?? '',
+
+            // Project Details
+            'cover_project_number' => $this->record->project_number ?? '',
+            'cover_project_name' => $this->record->name ?? '',
+            'cover_project_address' => $projectAddress,
+            'cover_project_date' => $this->record->created_at?->format('F d, Y') ?? now()->format('F d, Y'),
+        ];
     }
 }

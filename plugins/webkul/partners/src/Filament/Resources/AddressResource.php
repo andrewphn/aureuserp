@@ -6,7 +6,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use App\Forms\Components\AddressAutocomplete;
+use Webkul\Support\Filament\Forms\Components\AddressAutocomplete;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

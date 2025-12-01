@@ -13,7 +13,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Cabinets Relation Manager class
@@ -26,7 +26,7 @@ class CabinetsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'cabinet_number';
 
-    protected static ?string $title = 'Cabinet Specifications';
+    protected static ?string $title = 'Cabinets';
 
     /**
      * Define the form schema
@@ -313,7 +313,7 @@ class CabinetsRelationManager extends RelationManager
                 $projectId = $livewire->getOwnerRecord()->id;
 
                 // Bypass the broken direct relationship and use proper filtering
-                return CabinetSpecification::query()
+                return Cabinet::query()
                     ->whereHas('room', function ($q) use ($projectId) {
                         $q->where('project_id', $projectId);
                     })

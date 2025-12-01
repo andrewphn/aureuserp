@@ -4,7 +4,7 @@ namespace Webkul\Project\Filament\Resources\CabinetReportResource\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Size Distribution Widget Filament widget
@@ -21,7 +21,7 @@ class SizeDistributionWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $distribution = DB::table('projects_cabinet_specifications')
+        $distribution = DB::table('projects_cabinets')
             ->selectRaw("
                 CASE
                     WHEN linear_feet <= 1.5 THEN 'Small (12-18\")'

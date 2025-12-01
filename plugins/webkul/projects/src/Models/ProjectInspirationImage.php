@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Project\Database\Factories\ProjectInspirationImageFactory;
 use Webkul\Security\Models\User;
 
 /**
@@ -52,7 +53,9 @@ class ProjectInspirationImage extends Model implements Sortable
      */
     protected $fillable = [
         'project_id',
+        'room_id',
         'file_name',
+        'title',
         'file_path',
         'file_size',
         'mime_type',
@@ -114,6 +117,16 @@ class ProjectInspirationImage extends Model implements Sortable
     }
 
     /**
+     * Get the room this image is associated with (optional).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    /**
      * Get the user who uploaded this image.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -133,6 +146,33 @@ class ProjectInspirationImage extends Model implements Sortable
     public function scopeForProject($query, int $projectId)
     {
         return $query->where('project_id', $projectId);
+    }
+
+    /**
+     * Scope a query to filter images by room.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int|null $roomId
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForRoom($query, ?int $roomId)
+    {
+        if ($roomId === null) {
+            return $query;
+        }
+
+        return $query->where('room_id', $roomId);
+    }
+
+    /**
+     * Scope a query to only include images without a room.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('room_id');
     }
 
     /**
@@ -196,5 +236,13 @@ class ProjectInspirationImage extends Model implements Sortable
     public function buildSortQuery()
     {
         return static::query()->where('project_id', $this->project_id);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): ProjectInspirationImageFactory
+    {
+        return ProjectInspirationImageFactory::new();
     }
 }

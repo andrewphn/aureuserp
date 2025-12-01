@@ -53,9 +53,9 @@ class LineItemsRelationManager extends RelationManager
                                 ->searchable()
                                 ->preload(),
                         ]),
-                        Select::make('cabinet_specification_id')
-                            ->label('Cabinet Specification')
-                            ->relationship('cabinetSpecification', 'cabinet_code')
+                        Select::make('cabinet_id')
+                            ->label('Cabinet')
+                            ->relationship('cabinet', 'cabinet_code')
                             ->searchable()
                             ->preload()
                             ->helperText('Link to specific cabinet'),

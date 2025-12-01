@@ -21,7 +21,7 @@ class HierarchySearchSelect extends Component
     public $roomId = null;
     public $roomLocationId = null;
     public $cabinetRunId = null;
-    public $cabinetSpecificationId = null;
+    public $cabinetId = null;
 
     protected $searchService;
 
@@ -43,18 +43,18 @@ class HierarchySearchSelect extends Component
      * @param mixed $roomId
      * @param mixed $roomLocationId
      * @param mixed $cabinetRunId
-     * @param mixed $cabinetSpecificationId
+     * @param mixed $cabinetId
      */
-    public function mount($projectId = null, $roomId = null, $roomLocationId = null, $cabinetRunId = null, $cabinetSpecificationId = null)
+    public function mount($projectId = null, $roomId = null, $roomLocationId = null, $cabinetRunId = null, $cabinetId = null)
     {
         $this->projectId = $projectId;
         $this->roomId = $roomId;
         $this->roomLocationId = $roomLocationId;
         $this->cabinetRunId = $cabinetRunId;
-        $this->cabinetSpecificationId = $cabinetSpecificationId;
+        $this->cabinetId = $cabinetId;
 
         // Build initial display path if values are set
-        if ($this->roomId || $this->roomLocationId || $this->cabinetRunId || $this->cabinetSpecificationId) {
+        if ($this->roomId || $this->roomLocationId || $this->cabinetRunId || $this->cabinetId) {
             $this->updateDisplayPath();
         }
     }
@@ -129,7 +129,7 @@ class HierarchySearchSelect extends Component
         $this->roomId = $result['room_id'];
         $this->roomLocationId = $result['room_location_id'];
         $this->cabinetRunId = $result['cabinet_run_id'];
-        $this->cabinetSpecificationId = $result['cabinet_specification_id'];
+        $this->cabinetId = $result['cabinet_id'];
 
         // Update display
         $this->selectedPath = $result['display_path'];
@@ -145,7 +145,7 @@ class HierarchySearchSelect extends Component
             room_id: $this->roomId,
             room_location_id: $this->roomLocationId,
             cabinet_run_id: $this->cabinetRunId,
-            cabinet_specification_id: $this->cabinetSpecificationId,
+            cabinet_id: $this->cabinetId,
         );
     }
 
@@ -159,7 +159,7 @@ class HierarchySearchSelect extends Component
         $this->roomId = null;
         $this->roomLocationId = null;
         $this->cabinetRunId = null;
-        $this->cabinetSpecificationId = null;
+        $this->cabinetId = null;
         $this->selectedPath = '';
         $this->search = '';
         $this->showDropdown = false;
@@ -223,8 +223,8 @@ class HierarchySearchSelect extends Component
             }
         }
 
-        if ($this->cabinetSpecificationId) {
-            $cabinet = \Webkul\Project\Models\CabinetSpecification::find($this->cabinetSpecificationId);
+        if ($this->cabinetId) {
+            $cabinet = \Webkul\Project\Models\Cabinet::find($this->cabinetId);
             if ($cabinet) {
                 $parts[] = $cabinet->cabinet_number;
             }
