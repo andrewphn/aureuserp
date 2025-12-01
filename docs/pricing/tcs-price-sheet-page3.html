@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFW Wholesale Pricing Sheet - Page 3 | The Carpenter's Son</title>
+    <style>
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+            
+            body { 
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding: 0.25in;
+            }
+            
+            .no-print { display: none !important; }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.4;
+            font-size: 11px;
+        }
+        
+        .container {
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.25in;
+            background: white;
+            min-height: 11in;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #d4a574;
+            font-weight: 600;
+        }
+        
+        .pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .pricing-table th,
+        .pricing-table td {
+            border: 1px solid #ddd;
+            padding: 5px 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .pricing-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 9px;
+        }
+        
+        .pricing-table .price {
+            text-align: right;
+            font-weight: 600;
+            color: #d4a574;
+        }
+        
+        .pricing-table .features {
+            font-size: 9px;
+            color: #666;
+            line-height: 1.3;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+        }
+        
+        .includes-excludes {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .includes-excludes h4 {
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .includes-excludes.included h4 {
+            color: #27ae60;
+        }
+        
+        .includes-excludes.excluded h4 {
+            color: #e74c3c;
+        }
+        
+        .includes-excludes ul {
+            margin-left: 15px;
+            font-size: 9px;
+            line-height: 1.4;
+        }
+        
+        .includes-excludes li {
+            margin-bottom: 2px;
+        }
+        
+        .material-note {
+            font-size: 8px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .page-indicator {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 10px;
+            color: #666;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page 3 Content Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #d4a574;">
+            <h2 style="font-size: 16px; font-weight: 300; letter-spacing: 2px; color: #000; margin: 0;">THE CARPENTER'S SON</h2>
+            <h2 style="font-size: 16px; font-weight: 300; letter-spacing: 1px; color: #333; margin: 0;">TFW WHOLESALE PRICING SHEET - PAGE 3</h2>
+        </div>
+        
+        <!-- PRICING EXAMPLES -->
+        <div class="section">
+            <h2 class="section-title">💰 Pricing Examples - Combined Rates</h2>
+            <div class="two-column">
+                <div>
+                    <h4 style="font-size: 11px; margin-bottom: 8px; color: #333;">Kitchen Cabinet Examples:</h4>
+                    <table class="pricing-table">
+                        <thead>
+                            <tr>
+                                <th>Configuration</th>
+                                <th>Base + Material</th>
+                                <th>Combined Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="features"><strong>Basic Kitchen</strong><br>Level 1 Base</td>
+                                <td class="features">$168 base</td>
+                                <td class="price">$168/LF</td>
+                            </tr>
+                            <tr>
+                                <td class="features"><strong>Paint Grade Kitchen</strong><br>Level 1 + Hard Maple</td>
+                                <td class="features">$168 + $138</td>
+                                <td class="price">$306/LF</td>
+                            </tr>
+                            <tr>
+                                <td class="features"><strong>Stain Grade Kitchen</strong><br>Level 2 + Red Oak</td>
+                                <td class="features">$192 + $156</td>
+                                <td class="price">$348/LF</td>
+                            </tr>
+                            <tr>
+                                <td class="features"><strong>Premium Kitchen</strong><br>Level 3 + White Oak</td>
+                                <td class="features">$210 + $185</td>
+                                <td class="price">$395/LF</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 11px; margin-bottom: 8px; color: #333;">Project Cost Examples:</h4>
+                    <table class="pricing-table">
+                        <thead>
+                            <tr>
+                                <th>Project Size</th>
+                                <th>Rate/LF</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="features"><strong>Small Kitchen</strong><br>20 LF @ $306</td>
+                                <td class="price">$306</td>
+                                <td class="price">$6,120</td>
+                            </tr>
+                            <tr>
+                                <td class="features"><strong>Medium Kitchen</strong><br>35 LF @ $348</td>
+                                <td class="price">$348</td>
+                                <td class="price">$12,180</td>
+                            </tr>
+                            <tr>
+                                <td class="features"><strong>Large Kitchen</strong><br>50 LF @ $395</td>
+                                <td class="price">$395</td>
+                                <td class="price">$19,750</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="material-note">
+                        <strong>Production Capacity:</strong> Standard scheduling available<br>
+                        <strong>Rush Orders:</strong> Available with premium pricing
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FINISH OPTIONS -->
+        <div class="section">
+            <h2 class="section-title">🎨 Finish Options - Outsourced (Add-On Pricing)</h2>
+            <p style="font-size: 9px; margin-bottom: 8px; color: #666;">
+                <strong>We pass through our contractor costs plus handling</strong>
+            </p>
+            <table class="pricing-table">
+                <thead>
+                    <tr>
+                        <th>Finish Type</th>
+                        <th>Your Price</th>
+                        <th>Est. per LF*</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Unfinished</strong></td>
+                        <td class="price">$0</td>
+                        <td class="price">$0</td>
+                        <td class="features">Ready for your finishing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prime Only</strong></td>
+                        <td class="price">$60/LF</td>
+                        <td class="price">$420-480</td>
+                        <td class="features">Primer ready for paint</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prime + Paint</strong></td>
+                        <td class="price">$118/LF</td>
+                        <td class="price">$826-944</td>
+                        <td class="features">Complete paint finish</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom Color</strong></td>
+                        <td class="price">$125/LF</td>
+                        <td class="price">$875-1,000</td>
+                        <td class="features">Custom color matching</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Clear Coat</strong></td>
+                        <td class="price">$95/LF</td>
+                        <td class="price">$665-760</td>
+                        <td class="features">Clear protective finish</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stain + Clear</strong></td>
+                        <td class="price">$213/LF</td>
+                        <td class="price">$1,491-1,704</td>
+                        <td class="features">Natural wood stain + clear coat</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Color Match Stain + Clear</strong></td>
+                        <td class="price">$255/LF</td>
+                        <td class="price">$1,785-2,040</td>
+                        <td class="features">Custom color match stain + clear coat</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Two-tone</strong></td>
+                        <td class="price">$235/LF</td>
+                        <td class="price">$1,645-1,880</td>
+                        <td class="features">Multiple color finish</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="material-note">
+                *Based on 7-8 LF of door/drawer faces per linear foot
+            </div>
+        </div>
+        
+        
+        <!-- TERMS & CONDITIONS -->
+        <div class="section">
+            <h2 class="section-title">📋 Terms & Conditions</h2>
+            <div class="two-column">
+                <div>
+                    <h4 style="font-size: 11px; margin-bottom: 8px; color: #2c3e50;">Payment & Delivery:</h4>
+                    <table class="pricing-table">
+                        <tbody>
+                            <tr>
+                                <td><strong>Payment Schedule:</strong></td>
+                                <td class="features">75% deposit to begin<br>25% on completion</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lead Times:</strong></td>
+                                <td class="features">Level 1-2: 15-20 days<br>Level 3-4: 20-25 days<br>Rush available: +25%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 11px; margin-bottom: 8px; color: #2c3e50;">Production & Quality:</h4>
+                    <table class="pricing-table">
+                        <tbody>
+                            <tr>
+                                <td><strong>Production:</strong></td>
+                                <td class="features">Est. Capacity: 234 LF/month<br>Standard scheduling available</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Quality:</strong></td>
+                                <td class="features">Professional grade construction<br>3/4" plywood construction<br>No particle board - ever</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="page-indicator">
+            <strong>PAGE 3 OF 3</strong> • Complete TFW Wholesale Pricing Guide
+        </div>
+        
+        <div class="footer">
+            <p><strong>THE CARPENTER'S SON</strong> • 392 N Montgomery St, Building B, Newburgh, NY 12550</p>
+            <p>(845) 816-2388 • info@tcswoodwork.com • www.tcswoodwork.com</p>
+            <p><strong>Building Value Through Simplicity</strong> • Est. Production Capacity: 234 LF/month</p>
+            <p>Prices effective January 2025 • Subject to material market conditions • Custom quotes available for unique projects</p>
+        </div>
+    </div>
+</body>
+</html>

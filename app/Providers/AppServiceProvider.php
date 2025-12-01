@@ -52,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Relation::morphMap([
             'project' => \Webkul\Project\Models\Project::class,
+            'projects' => \Webkul\Project\Models\Project::class,
         ]);
     }
 
