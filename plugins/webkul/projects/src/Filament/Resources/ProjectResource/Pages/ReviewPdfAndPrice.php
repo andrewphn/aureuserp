@@ -2845,8 +2845,60 @@ class ReviewPdfAndPrice extends Page implements HasForms
         // Fill the edit form with current data
         $this->editDetailsData = $this->getSlideOverFormDataFromArray($pageData);
 
+        // For cover pages, pre-fill with project data if fields are empty
+        $primaryPurpose = $pageData['primary_purpose'] ?? null;
+        if ($primaryPurpose === 'cover') {
+            $this->prefillCoverPageFromProject();
+        }
+
         // Open the modal using Filament's dispatch method
         $this->dispatch('open-modal', id: 'edit-details-modal');
+    }
+
+    /**
+     * Pre-fill cover page fields from project data when they are empty
+     */
+    protected function prefillCoverPageFromProject(): void
+    {
+        if (!$this->record) {
+            return;
+        }
+
+        // Get project address (primary address first)
+        $address = $this->record->addresses()
+            ->where('is_primary', true)
+            ->first() ?? $this->record->addresses()->first();
+
+        if ($address) {
+            // Only fill if current value is empty
+            if (empty($this->editDetailsData['cover_address_street'])) {
+                $this->editDetailsData['cover_address_street'] = $address->street1;
+            }
+            if (empty($this->editDetailsData['cover_address_city'])) {
+                $this->editDetailsData['cover_address_city'] = $address->city;
+            }
+            if (empty($this->editDetailsData['cover_address_state'])) {
+                // Get state name or code
+                $this->editDetailsData['cover_address_state'] = $address->state?->code ?? $address->state?->name;
+            }
+            if (empty($this->editDetailsData['cover_address_zip'])) {
+                $this->editDetailsData['cover_address_zip'] = $address->zip;
+            }
+        }
+
+        // Get partner (designer/architect) information
+        $partner = $this->record->partner;
+        if ($partner) {
+            if (empty($this->editDetailsData['cover_designer_company'])) {
+                $this->editDetailsData['cover_designer_company'] = $partner->name;
+            }
+            if (empty($this->editDetailsData['cover_designer_phone'])) {
+                $this->editDetailsData['cover_designer_phone'] = $partner->phone;
+            }
+            if (empty($this->editDetailsData['cover_designer_email'])) {
+                $this->editDetailsData['cover_designer_email'] = $partner->email;
+            }
+        }
     }
 
     /**
