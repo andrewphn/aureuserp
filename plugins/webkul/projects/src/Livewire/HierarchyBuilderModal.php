@@ -6,8 +6,8 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -289,7 +289,7 @@ class HierarchyBuilderModal extends Component
                 return $run->id;
 
             case 'cabinet':
-                $cabinet = CabinetSpecification::create($data);
+                $cabinet = Cabinet::create($data);
                 return $cabinet->id;
 
             default:

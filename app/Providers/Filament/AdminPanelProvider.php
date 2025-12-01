@@ -137,12 +137,117 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): string => <<<'HTML'
-                    <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=3.0, user-scalable=yes">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
                     <style>
+                        /* Note: Removed html { zoom: 0.9 } as it breaks Floating UI dropdown positioning */
+                        /* Floating UI calculates positions using getBoundingClientRect() (viewport coords) */
+                        /* but zoom affects CSS positioning differently, causing ~10% offset errors */
+
+                        /* Two-Column Layout Responsive Utilities */
                         @media (min-width: 1280px) {
-                            html {
-                                zoom: 0.9;
-                            }
+                            .xl\:flex-row { flex-direction: row !important; }
+                            .xl\:items-start { align-items: flex-start !important; }
+                            .xl\:gap-6 { gap: 1.5rem !important; }
+                            .xl\:w-80 { width: 20rem !important; }
+                            .xl\:max-w-xs { max-width: 20rem !important; }
+                            .xl\:flex-shrink-0 { flex-shrink: 0 !important; }
+                            .xl\:sticky { position: sticky !important; }
+                            .xl\:top-20 { top: 5rem !important; }
+                        }
+                        .flex-1 { flex: 1 1 0% !important; }
+                        .min-w-0 { min-width: 0 !important; }
+                        .gap-4 { gap: 1rem !important; }
+
+                        /* TCS Discovery Phase Colors */
+                        :root {
+                            --tcs-discovery-900: #1e3a8a;
+                            --tcs-discovery-700: #1d4ed8;
+                            --tcs-discovery-500: #3b82f6;
+                            --tcs-discovery-300: #93c5fd;
+                            --tcs-discovery-100: #dbeafe;
+                        }
+
+                        /* Wizard Step 1: Discovery Blue 900 (Deepest) */
+                        .fi-sc-wizard-header-step:nth-child(1).fi-active .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(1).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+                            background-color: #1e3a8a !important;
+                            border-color: #1e3a8a !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(1).fi-active .fi-sc-wizard-header-step-label {
+                            color: #1e3a8a !important;
+                        }
+
+                        /* Wizard Step 2: Discovery Blue 700 */
+                        .fi-sc-wizard-header-step:nth-child(2).fi-active .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(2).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+                            background-color: #1d4ed8 !important;
+                            border-color: #1d4ed8 !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(2).fi-active .fi-sc-wizard-header-step-label {
+                            color: #1d4ed8 !important;
+                        }
+
+                        /* Wizard Step 3: Discovery Blue 500 (Base) */
+                        .fi-sc-wizard-header-step:nth-child(3).fi-active .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(3).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+                            background-color: #3b82f6 !important;
+                            border-color: #3b82f6 !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(3).fi-active .fi-sc-wizard-header-step-label {
+                            color: #3b82f6 !important;
+                        }
+
+                        /* Wizard Step 4: Discovery Blue 300 (Light) */
+                        .fi-sc-wizard-header-step:nth-child(4).fi-active .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(4).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+                            background-color: #93c5fd !important;
+                            border-color: #93c5fd !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(4).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+                            color: #1e3a8a !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(4).fi-active .fi-sc-wizard-header-step-label {
+                            color: #3b82f6 !important;
+                        }
+
+                        /* Wizard Step 5: Discovery Blue 100 (Lightest) */
+                        .fi-sc-wizard-header-step:nth-child(5).fi-active .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(5).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+                            background-color: #dbeafe !important;
+                            border-color: #3b82f6 !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(5).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+                        .fi-sc-wizard-header-step:nth-child(5).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+                            color: #1d4ed8 !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(5).fi-active .fi-sc-wizard-header-step-label {
+                            color: #1d4ed8 !important;
+                        }
+
+                        /* White icons for dark backgrounds (Steps 1-3) */
+                        .fi-sc-wizard-header-step:nth-child(1).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+                        .fi-sc-wizard-header-step:nth-child(1).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+                        .fi-sc-wizard-header-step:nth-child(2).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+                        .fi-sc-wizard-header-step:nth-child(2).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+                        .fi-sc-wizard-header-step:nth-child(3).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+                        .fi-sc-wizard-header-step:nth-child(3).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+                            color: white !important;
+                        }
+
+                        /* Dark icon for Step 4 completed */
+                        .fi-sc-wizard-header-step:nth-child(4).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+                            color: #1e3a8a !important;
+                        }
+
+                        /* Pending step border colors */
+                        .fi-sc-wizard-header-step:nth-child(1):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(2):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(3):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+                            border-color: #93c5fd !important;
+                        }
+                        .fi-sc-wizard-header-step:nth-child(4):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn,
+                        .fi-sc-wizard-header-step:nth-child(5):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+                            border-color: #dbeafe !important;
                         }
                     </style>
                 HTML
@@ -151,28 +256,29 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::SCRIPTS_BEFORE,
                 fn (): string => view('filament.scripts.global-app-js')->render()
             )
-            ->renderHook(
-                PanelsRenderHook::BODY_END,
-                function (): string {
-                    // Global footer with feature flag for staged migration
-                    // v1 = Original Blade-only implementation
-                    // v2 = New FilamentPHP v4 compliant widget
-                    $footerVersion = config('footer.version', 'v1');
-
-                    if ($footerVersion === 'v2') {
-                        // New FilamentPHP v4 widget - render Livewire component
-                        $content = \Livewire\Livewire::mount(\App\Filament\Widgets\GlobalContextFooter::class);
-                    } else {
-                        // Original v1 footer (fallback)
-                        $content = view('filament.components.project-sticky-footer-global')->render();
-                    }
-
-                    // Always include project selector modal (used by both versions)
-                    $content .= view('filament.components.project-selector-modal')->render();
-
-                    return $content;
-                }
-            )
+            // TEMPORARILY DISABLED: Global footer bar
+            // ->renderHook(
+            //     PanelsRenderHook::BODY_END,
+            //     function (): string {
+            //         // Global footer with feature flag for staged migration
+            //         // v1 = Original Blade-only implementation
+            //         // v2 = New FilamentPHP v4 compliant widget
+            //         $footerVersion = config('footer.version', 'v1');
+            //
+            //         if ($footerVersion === 'v2') {
+            //             // New FilamentPHP v4 widget - render Livewire component
+            //             $content = \Livewire\Livewire::mount(\App\Filament\Widgets\GlobalContextFooter::class);
+            //         } else {
+            //             // Original v1 footer (fallback)
+            //             $content = view('filament.components.project-sticky-footer-global')->render();
+            //         }
+            //
+            //         // Always include project selector modal (used by both versions)
+            //         $content .= view('filament.components.project-selector-modal')->render();
+            //
+            //         return $content;
+            //     }
+            // )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

@@ -234,9 +234,9 @@ class CloneProjectAction extends Action
 
                     $newRun = $newLocation->cabinetRuns()->create($runData);
 
-                    // Clone cabinet specifications if requested
+                    // Clone cabinets if requested
                     if ($data['include_cabinets'] ?? false) {
-                        foreach ($run->cabinetSpecifications as $cabinet) {
+                        foreach ($run->cabinets as $cabinet) {
                             $this->cloneCabinet($cabinet, $target, $newRoom, $newRun, $data);
                         }
                     }
@@ -245,7 +245,7 @@ class CloneProjectAction extends Action
 
             // Clone cabinets directly on room (not in runs)
             if ($data['include_cabinets'] ?? false) {
-                $directCabinets = $source->cabinetSpecifications()
+                $directCabinets = $source->cabinets()
                     ->where('room_id', $room->id)
                     ->whereNull('cabinet_run_id')
                     ->get();
@@ -258,7 +258,7 @@ class CloneProjectAction extends Action
 
         // Clone standalone cabinets (not in any room)
         if ($data['include_cabinets'] ?? false) {
-            $standaloneCabinets = $source->cabinetSpecifications()
+            $standaloneCabinets = $source->cabinets()
                 ->whereNull('room_id')
                 ->get();
 
@@ -300,7 +300,7 @@ class CloneProjectAction extends Action
             $cabinetData['total_price'] = null;
         }
 
-        $target->cabinetSpecifications()->create($cabinetData);
+        $target->cabinets()->create($cabinetData);
     }
 
     /**

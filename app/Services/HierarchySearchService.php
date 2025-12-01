@@ -8,7 +8,7 @@ use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Hierarchy Search Service service
@@ -101,7 +101,7 @@ class HierarchySearchService
                 'location_name' => null,
                 'cabinet_run_id' => null,
                 'run_name' => null,
-                'cabinet_specification_id' => null,
+                'cabinet_id' => null,
                 'cabinet_number' => null,
                 'display_path' => $this->buildPath([
                     $room->project->name ?? 'Unknown',
@@ -139,7 +139,7 @@ class HierarchySearchService
                 'location_name' => $location->name,
                 'cabinet_run_id' => null,
                 'run_name' => null,
-                'cabinet_specification_id' => null,
+                'cabinet_id' => null,
                 'cabinet_number' => null,
                 'display_path' => $this->buildPath([
                     $location->room->project->name ?? 'Unknown',
@@ -178,7 +178,7 @@ class HierarchySearchService
                 'location_name' => $run->roomLocation->name ?? 'Unknown Location',
                 'cabinet_run_id' => $run->id,
                 'run_name' => $run->name,
-                'cabinet_specification_id' => null,
+                'cabinet_id' => null,
                 'cabinet_number' => null,
                 'display_path' => $this->buildPath([
                     $run->roomLocation->room->project->name ?? 'Unknown',
@@ -196,7 +196,7 @@ class HierarchySearchService
      */
     protected function searchCabinets(string $query, ?int $projectId = null): Collection
     {
-        $cabinetsQuery = CabinetSpecification::with(['cabinetRun.roomLocation.room.project', 'room.project'])
+        $cabinetsQuery = Cabinet::with(['cabinetRun.roomLocation.room.project', 'room.project'])
             ->where('cabinet_number', 'like', "%{$query}%");
 
         if ($projectId) {
@@ -215,7 +215,7 @@ class HierarchySearchService
 
             return [
                 'type' => 'cabinet',
-                'level' => 'cabinet_specification',
+                'level' => 'cabinet',
                 'name' => $cabinet->cabinet_number,
                 'project_id' => $project->id ?? null,
                 'project_name' => $project->name ?? 'Unknown Project',
@@ -225,7 +225,7 @@ class HierarchySearchService
                 'location_name' => $location->name ?? null,
                 'cabinet_run_id' => $run->id ?? null,
                 'run_name' => $run->name ?? null,
-                'cabinet_specification_id' => $cabinet->id,
+                'cabinet_id' => $cabinet->id,
                 'cabinet_number' => $cabinet->cabinet_number,
                 'display_path' => $this->buildPath(array_filter([
                     $project->name ?? 'Unknown',
@@ -267,7 +267,7 @@ class HierarchySearchService
             return $item['room_id'] === $location['room_id'] &&
                    $item['room_location_id'] === $location['room_location_id'] &&
                    $item['cabinet_run_id'] === $location['cabinet_run_id'] &&
-                   $item['cabinet_specification_id'] === $location['cabinet_specification_id'];
+                   $item['cabinet_id'] === $location['cabinet_id'];
         });
 
         // Add to beginning

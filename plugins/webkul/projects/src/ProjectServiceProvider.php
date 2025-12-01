@@ -2,9 +2,13 @@
 
 namespace Webkul\Project;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
+use Webkul\Project\Console\Commands\CleanupExpiredDrafts;
 use Webkul\Project\Events\ProjectStageChanged;
 use Webkul\Project\Listeners\HandleProjectStageChange;
+use Webkul\Project\Models\HardwareRequirement;
+use Webkul\Project\Observers\HardwareRequirementObserver;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -104,6 +108,9 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_11_28_114322_create_projects_material_reservations_table',
                 '2025_11_28_114620_add_quote_tracking_columns',
                 '2025_11_28_115000_add_inventory_stages_and_stage_keys',
+                '2025_11_29_000001_rename_hardware_columns_to_generic',
+                '2025_10_02_141007_create_project_inspiration_images_table',
+                '2025_11_29_180000_add_room_id_and_title_to_project_inspiration_images',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -139,8 +146,31 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('hierarchy-builder-modal', \Webkul\Project\Livewire\HierarchyBuilderModal::class);
         \Livewire\Livewire::component('milestone-timeline', \Webkul\Project\Livewire\MilestoneTimeline::class);
         \Livewire\Livewire::component('production-timeline', \Webkul\Project\Livewire\ProductionTimeline::class);
+        \Livewire\Livewire::component('project-summary-sidebar', \Webkul\Project\Livewire\ProjectSummarySidebar::class);
+        \Livewire\Livewire::component('inspiration-gallery', \Webkul\Project\Livewire\InspirationGalleryComponent::class);
+        \Livewire\Livewire::component('pdf-document-manager', \Webkul\Project\Livewire\PdfDocumentManagerComponent::class);
 
         // Register event listeners for project stage changes
         Event::listen(ProjectStageChanged::class, HandleProjectStageChange::class);
+
+        // Register model observers for auto-syncing hardware totals
+        HardwareRequirement::observe(HardwareRequirementObserver::class);
+
+        // Register console commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CleanupExpiredDrafts::class,
+            ]);
+
+            // Schedule the draft cleanup to run daily at 2:00 AM
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
+                $schedule->command('projects:cleanup-drafts')
+                    ->dailyAt('02:00')
+                    ->withoutOverlapping()
+                    ->runInBackground()
+                    ->appendOutputTo(storage_path('logs/draft-cleanup.log'));
+            });
+        }
     }
 }

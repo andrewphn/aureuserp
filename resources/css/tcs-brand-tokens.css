@@ -202,6 +202,71 @@
 
     /* Info - Use Filament's info color */
     --tcs-info: var(--info-600);
+
+    /* ============================================
+       TCS WORKFLOW PHASE COLORS
+       Matching projects_project_stages table colors
+       Each phase has 5-shade gradient (900→100)
+
+       From database:
+       - Discovery: #3B82F6 (Blue)
+       - Design: #8B5CF6 (Purple)
+       - Sourcing: #F59E0B (Amber)
+       - Production: #10B981 (Green)
+       - Delivery: #14B8A6 (Teal)
+       ============================================ */
+
+    /* Discovery (Blue) - Trust, communication, beginning */
+    --tcs-discovery-900: #1e3a8a;  /* Deep navy - Pre-active */
+    --tcs-discovery-700: #1d4ed8;  /* Dark blue - Active sub-stage */
+    --tcs-discovery-500: #3b82f6;  /* BASE - Primary discovery color */
+    --tcs-discovery-300: #93c5fd;  /* Light blue - Completed recent */
+    --tcs-discovery-100: #dbeafe;  /* Pale blue - Pending */
+
+    /* Design (Purple) - Creativity, planning, transformation */
+    --tcs-design-900: #4c1d95;     /* Deep purple - Pre-active */
+    --tcs-design-700: #6d28d9;     /* Dark purple - Active sub-stage */
+    --tcs-design-500: #8b5cf6;     /* BASE - Primary design color */
+    --tcs-design-300: #c4b5fd;     /* Light purple - Completed recent */
+    --tcs-design-100: #ede9fe;     /* Pale purple - Pending */
+
+    /* Sourcing (Amber) - Energy, procurement, action */
+    --tcs-sourcing-900: #78350f;   /* Deep amber - Pre-active */
+    --tcs-sourcing-700: #b45309;   /* Dark amber - Active sub-stage */
+    --tcs-sourcing-500: #f59e0b;   /* BASE - Primary sourcing color */
+    --tcs-sourcing-300: #fcd34d;   /* Light amber - Completed recent */
+    --tcs-sourcing-100: #fef3c7;   /* Pale amber - Pending */
+
+    /* Production (Green) - Growth, progress, building */
+    --tcs-production-900: #064e3b; /* Deep green - Pre-active */
+    --tcs-production-700: #047857; /* Dark green - Active sub-stage */
+    --tcs-production-500: #10b981; /* BASE - Primary production color */
+    --tcs-production-300: #6ee7b7; /* Light green - Completed recent */
+    --tcs-production-100: #d1fae5; /* Pale green - Pending */
+
+    /* Delivery (Teal) - Success, completion, satisfaction */
+    --tcs-delivery-900: #134e4a;   /* Deep teal - Pre-active */
+    --tcs-delivery-700: #0f766e;   /* Dark teal - Active sub-stage */
+    --tcs-delivery-500: #14b8a6;   /* BASE - Primary delivery color */
+    --tcs-delivery-300: #5eead4;   /* Light teal - Completed recent */
+    --tcs-delivery-100: #ccfbf1;   /* Pale teal - Pending */
+
+    /* Phase gradients for progress bars and UI elements */
+    --tcs-gradient-discovery: linear-gradient(to right, #1e3a8a, #3b82f6, #dbeafe);
+    --tcs-gradient-design: linear-gradient(to right, #4c1d95, #8b5cf6, #ede9fe);
+    --tcs-gradient-sourcing: linear-gradient(to right, #78350f, #f59e0b, #fef3c7);
+    --tcs-gradient-production: linear-gradient(to right, #064e3b, #10b981, #d1fae5);
+    --tcs-gradient-delivery: linear-gradient(to right, #134e4a, #14b8a6, #ccfbf1);
+
+    /* Full workflow gradient (all phases) */
+    --tcs-gradient-workflow: linear-gradient(
+        to right,
+        var(--tcs-discovery-500),
+        var(--tcs-design-500),
+        var(--tcs-sourcing-500),
+        var(--tcs-production-500),
+        var(--tcs-delivery-500)
+    );
 }
 
 /* ============================================

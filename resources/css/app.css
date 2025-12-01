@@ -1,9 +1,25 @@
 @import "tailwindcss";
+@import "../../public/css/annotation-system-v2.css";
 
 /* ============================================
-   PDF ANNOTATION SYSTEM V2
+   TWO-COLUMN LAYOUT RESPONSIVE UTILITIES
+   For Project Wizard Sidebar - xl: breakpoint (1280px+)
    ============================================ */
-@import "../../public/css/annotation-system-v2.css";
+@media (min-width: 1280px) {
+    .xl\:flex-row { flex-direction: row !important; }
+    .xl\:items-start { align-items: flex-start !important; }
+    .xl\:gap-6 { gap: 1.5rem !important; }
+    .xl\:w-80 { width: 20rem !important; }
+    .xl\:max-w-xs { max-width: 20rem !important; }
+    .xl\:flex-shrink-0 { flex-shrink: 0 !important; }
+    .xl\:sticky { position: sticky !important; }
+    .xl\:top-20 { top: 5rem !important; }
+}
+
+/* Base layout utilities */
+.flex-1 { flex: 1 1 0% !important; }
+.min-w-0 { min-width: 0 !important; }
+.gap-4 { gap: 1rem !important; }
 
 /* ============================================
    TCS TOP NAVIGATION IMPROVEMENTS
@@ -432,9 +448,69 @@ button {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    
+
     .entry-method-card:hover {
         animation: none;
+    }
+}
+
+/* ============================================
+   WIZARD FOOTER UX STYLES
+   "Don't Make Me Think" Principles Applied
+   ============================================ */
+@layer components {
+    /* Unified Wizard Footer */
+    .wizard-footer {
+        @apply flex items-center justify-between gap-4;
+        @apply py-4 px-4;
+        @apply border-t border-gray-200 dark:border-gray-700;
+        @apply bg-gray-50 dark:bg-gray-900;
+        @apply rounded-b-xl;
+        @apply -mx-6 -mb-6 mt-6;
+    }
+
+    /* Auto-save indicator - subtle but visible */
+    .wizard-footer .auto-save-indicator {
+        @apply flex items-center gap-1.5;
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    .wizard-footer .auto-save-indicator.saved {
+        @apply text-green-600 dark:text-green-400;
+    }
+
+    /* Navigation buttons container */
+    .wizard-footer .nav-buttons {
+        @apply flex items-center gap-3;
+    }
+
+    /* Primary action (Next/Create) should be prominent */
+    .wizard-footer .fi-btn-success,
+    .wizard-footer .fi-btn-primary {
+        @apply font-semibold;
+        @apply shadow-sm hover:shadow-md;
+        @apply transition-all duration-200;
+    }
+
+    /* Secondary action (Back) should be subdued */
+    .wizard-footer .fi-btn-gray {
+        @apply font-medium;
+    }
+
+    /* Mobile: Stack on small screens */
+    @media (max-width: 640px) {
+        .wizard-footer {
+            @apply flex-col gap-3;
+            @apply py-3 px-3;
+        }
+
+        .wizard-footer .nav-buttons {
+            @apply w-full justify-end;
+        }
+
+        .wizard-footer .auto-save-indicator {
+            @apply w-full justify-center;
+        }
     }
 }
 

@@ -16,7 +16,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon|null $deleted_at
- * @property int $cabinet_specification_id
+ * @property int $cabinet_id
  * @property int $cabinet_run_id
  * @property int $product_id
  * @property string|null $component_name
@@ -46,7 +46,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property \Carbon\Carbon|null $material_issued_at
  * @property int $substituted_product_id
  * @property string|null $substitution_notes
- * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinet
  * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
  * @property-read \Illuminate\Database\Eloquent\Model|null $product
  * @property-read \Illuminate\Database\Eloquent\Model|null $substitutedProduct
@@ -59,7 +59,7 @@ class CabinetMaterialsBom extends Model
     protected $table = 'projects_bom';
 
     protected $fillable = [
-        'cabinet_specification_id',
+        'cabinet_id',
         'cabinet_run_id',
         'product_id',
         'component_name',
@@ -129,9 +129,9 @@ class CabinetMaterialsBom extends Model
     /**
      * Relationships
      */
-    public function cabinetSpecification(): BelongsTo
+    public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(CabinetSpecification::class, 'cabinet_specification_id');
+        return $this->belongsTo(Cabinet::class, 'cabinet_id');
     }
 
     /**

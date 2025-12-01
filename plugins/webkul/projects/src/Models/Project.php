@@ -69,7 +69,6 @@ use Webkul\Support\Models\Company;
  * @property-read \Illuminate\Database\Eloquent\Collection $orders
  * @property-read \Illuminate\Database\Eloquent\Collection $rooms
  * @property-read \Illuminate\Database\Eloquent\Collection $cabinets
- * @property-read \Illuminate\Database\Eloquent\Collection $cabinetSpecifications
  * @property-read \Illuminate\Database\Eloquent\Model|null $partner
  * @property-read \Illuminate\Database\Eloquent\Model|null $creator
  * @property-read \Illuminate\Database\Eloquent\Model|null $user
@@ -102,6 +101,9 @@ class Project extends Model implements HasMedia, Sortable
     protected $fillable = [
         'name',
         'project_number',
+        'draft_number',        // Draft identifier (TCS-D001-Address) - assigned at creation
+        'is_converted',        // Whether draft has been converted to official project
+        'converted_at',        // When draft was converted to official project
         'project_type',
         'project_type_other',
         'lead_source',
@@ -164,6 +166,8 @@ class Project extends Model implements HasMedia, Sortable
         'end_date'                => 'date',
         'desired_completion_date' => 'date',
         'is_active'               => 'boolean',
+        'is_converted'            => 'boolean',
+        'converted_at'            => 'datetime',
         'allow_timesheets'        => 'boolean',
         'allow_milestones'        => 'boolean',
         'allow_task_dependencies' => 'boolean',
@@ -481,17 +485,7 @@ class Project extends Model implements HasMedia, Sortable
      */
     public function cabinets(): HasMany
     {
-        return $this->hasMany(CabinetSpecification::class);
-    }
-
-    /**
-     * Cabinet Specifications
-     *
-     * @return HasMany
-     */
-    public function cabinetSpecifications(): HasMany
-    {
-        return $this->hasMany(CabinetSpecification::class);
+        return $this->hasMany(Cabinet::class);
     }
 
     /**
@@ -517,12 +511,10 @@ class Project extends Model implements HasMedia, Sortable
     {
         static::addGlobalScope(new UserPermissionScope('user'));
 
-        // Auto-generate project number when project is created
-        static::created(function ($project) {
-            if ($project->company_id) {
-                $project->generateProjectNumber();
-            }
-        });
+        // Note: Project number generation is now handled by CreateProject wizard
+        // New projects get draft_number (TCS-D001-Address) at creation
+        // Project numbers (TCS-501-Address) are only assigned when converting to official project
+        // The generateProjectNumber() method below is kept for legacy compatibility
 
         // Fire event when stage changes
         // Use static property to avoid persisting temp value to database
@@ -907,13 +899,13 @@ class Project extends Model implements HasMedia, Sortable
      */
     public function canAdvanceFromProduction(): bool
     {
-        // Check if all cabinet specs have passed QC
-        $totalCabinets = $this->cabinetSpecifications()->count();
+        // Check if all cabinets have passed QC
+        $totalCabinets = $this->cabinets()->count();
         if ($totalCabinets === 0) {
             return false;
         }
 
-        $qcPassedCabinets = $this->cabinetSpecifications()
+        $qcPassedCabinets = $this->cabinets()
             ->where('qc_passed', true)
             ->count();
 
@@ -1003,11 +995,11 @@ class Project extends Model implements HasMedia, Sortable
                 break;
 
             case 'production':
-                $totalCabinets = $this->cabinetSpecifications()->count();
+                $totalCabinets = $this->cabinets()->count();
                 if ($totalCabinets === 0) {
-                    $blockers[] = 'No cabinet specifications found';
+                    $blockers[] = 'No cabinets found';
                 } else {
-                    $qcPassedCabinets = $this->cabinetSpecifications()
+                    $qcPassedCabinets = $this->cabinets()
                         ->where('qc_passed', true)
                         ->count();
                     if ($qcPassedCabinets < $totalCabinets) {
@@ -1039,5 +1031,122 @@ class Project extends Model implements HasMedia, Sortable
             'can_advance' => empty($blockers),
             'blockers' => $blockers,
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Draft to Official Project Conversion
+    |--------------------------------------------------------------------------
+    | Projects start as drafts with draft_number (TCS-D001-Address).
+    | When a project is converted to official (payment received, contract signed),
+    | it gets assigned a project_number (TCS-501-Address).
+    |
+    | This enables tracking:
+    | - Total inquiries/quotes (draft count)
+    | - Actual jobs completed (project count)
+    | - Conversion rate (projects / drafts)
+    */
+
+    /**
+     * Check if this project is still a draft (not yet converted to official).
+     *
+     * @return bool
+     */
+    public function isDraft(): bool
+    {
+        return !$this->is_converted;
+    }
+
+    /**
+     * Check if this project has been converted to official.
+     *
+     * @return bool
+     */
+    public function isOfficial(): bool
+    {
+        return $this->is_converted;
+    }
+
+    /**
+     * Convert this draft to an official project.
+     * Generates and assigns the official project_number.
+     *
+     * @return bool
+     */
+    public function convertToOfficial(): bool
+    {
+        if ($this->is_converted) {
+            return false; // Already converted
+        }
+
+        // Generate official project number
+        $projectNumber = $this->generateOfficialProjectNumber();
+
+        // Update the project
+        $this->project_number = $projectNumber;
+        $this->is_converted = true;
+        $this->converted_at = now();
+
+        return $this->save();
+    }
+
+    /**
+     * Generate the official project number for conversion.
+     *
+     * Format: TCS-501-123MainStreet
+     *
+     * @return string
+     */
+    protected function generateOfficialProjectNumber(): string
+    {
+        $company = $this->company;
+        $companyAcronym = $company?->acronym ?? strtoupper(substr($company?->name ?? 'UNK', 0, 3));
+
+        // Get the starting project number from company settings
+        $startNumber = $company?->project_number_start ?? 1;
+
+        // Find the last official project number for this company
+        // (exclude draft numbers which contain -D)
+        $lastProject = static::where('company_id', $this->company_id)
+            ->where('id', '!=', $this->id)
+            ->whereNotNull('project_number')
+            ->where('project_number', 'like', "{$companyAcronym}-%")
+            ->where('project_number', 'not like', "{$companyAcronym}-D%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $sequentialNumber = $startNumber;
+        if ($lastProject && $lastProject->project_number) {
+            // Extract number from format like TCS-501-Address
+            preg_match('/-(\d+)-/', $lastProject->project_number, $matches);
+            if (!empty($matches[1])) {
+                $sequentialNumber = max(intval($matches[1]) + 1, $startNumber);
+            }
+        }
+
+        // Get street address from project address if available
+        $streetAbbr = '';
+        $address = $this->addresses()->where('is_primary', true)->first();
+        if ($address && $address->street1) {
+            $streetAbbr = preg_replace('/[^a-zA-Z0-9]/', '', $address->street1);
+        }
+
+        return sprintf(
+            '%s-%03d%s',
+            $companyAcronym,
+            $sequentialNumber,
+            $streetAbbr ? "-{$streetAbbr}" : ''
+        );
+    }
+
+    /**
+     * Get the display identifier for this project.
+     * Returns project_number if converted, otherwise draft_number.
+     *
+     * @return string|null
+     */
+    public function getDisplayIdentifierAttribute(): ?string
+    {
+        return $this->project_number ?? $this->draft_number;
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Security\Models\User;
@@ -35,7 +35,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property int $room_id
  * @property int $room_location_id
  * @property int $cabinet_run_id
- * @property int $cabinet_specification_id
+ * @property int $cabinet_id
  * @property array $visual_properties
  * @property int $nutrient_annotation_id
  * @property array $nutrient_data
@@ -54,7 +54,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property-read \Illuminate\Database\Eloquent\Model|null $room
  * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
  * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
- * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinet
  * @property-read \Illuminate\Database\Eloquent\Model|null $creator
  *
  */
@@ -78,7 +78,7 @@ class PdfPageAnnotation extends Model
         'room_id',
         'room_location_id',
         'cabinet_run_id',
-        'cabinet_specification_id',
+        'cabinet_id',
         'visual_properties',
         'nutrient_annotation_id',
         'nutrient_data',
@@ -118,7 +118,7 @@ class PdfPageAnnotation extends Model
         'height' => 'Height',
         'cabinet_run_id' => 'Cabinet Run',
         'room_id' => 'Room',
-        'cabinet_specification_id' => 'Cabinet',
+        'cabinet_id' => 'Cabinet',
         'notes' => 'Notes',
     ];
 
@@ -181,13 +181,13 @@ class PdfPageAnnotation extends Model
     }
 
     /**
-     * Cabinet Specification
+     * Cabinet
      *
      * @return BelongsTo
      */
-    public function cabinetSpecification(): BelongsTo
+    public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(CabinetSpecification::class, 'cabinet_specification_id');
+        return $this->belongsTo(Cabinet::class, 'cabinet_id');
     }
 
     /**
@@ -360,11 +360,11 @@ class PdfPageAnnotation extends Model
             ]);
         }
 
-        // Add cabinet specification reference if set
-        if ($this->cabinet_specification_id) {
+        // Add cabinet reference if set
+        if ($this->cabinet_id) {
             $references->push((object)[
                 'entity_type' => 'cabinet',
-                'entity_id' => $this->cabinet_specification_id,
+                'entity_id' => $this->cabinet_id,
                 'reference_type' => 'primary',
             ]);
         }
@@ -388,7 +388,7 @@ class PdfPageAnnotation extends Model
         $this->room_id = null;
         $this->room_location_id = null;
         $this->cabinet_run_id = null;
-        $this->cabinet_specification_id = null;
+        $this->cabinet_id = null;
 
         // Set new references from input
         foreach ($references as $ref) {
@@ -403,7 +403,7 @@ class PdfPageAnnotation extends Model
                 'room' => $this->room_id = $entityId,
                 'location' => $this->room_location_id = $entityId,
                 'cabinet_run' => $this->cabinet_run_id = $entityId,
-                'cabinet' => $this->cabinet_specification_id = $entityId,
+                'cabinet' => $this->cabinet_id = $entityId,
                 default => null,
             };
         }
@@ -452,7 +452,7 @@ class PdfPageAnnotation extends Model
             'room' => $this->room_id = $entityId,
             'location' => $this->room_location_id = $entityId,
             'cabinet_run' => $this->cabinet_run_id = $entityId,
-            'cabinet' => $this->cabinet_specification_id = $entityId,
+            'cabinet' => $this->cabinet_id = $entityId,
             default => null,
         };
 
@@ -488,7 +488,7 @@ class PdfPageAnnotation extends Model
                 'label' => $this->label,
                 'parent_id' => $this->parent_annotation_id,
                 'cabinet_run_id' => $this->cabinet_run_id,
-                'cabinet_specification_id' => $this->cabinet_specification_id,
+                'cabinet_id' => $this->cabinet_id,
             ],
         ];
     }
@@ -518,7 +518,7 @@ class PdfPageAnnotation extends Model
             'width' => $nutrientAnnotation['bbox'][2],
             'height' => $nutrientAnnotation['bbox'][3],
             'cabinet_run_id' => $customData['cabinet_run_id'] ?? null,
-            'cabinet_specification_id' => $customData['cabinet_specification_id'] ?? null,
+            'cabinet_id' => $customData['cabinet_id'] ?? null,
             'visual_properties' => [
                 'strokeColor' => $nutrientAnnotation['strokeColor'] ?? '#FF0000',
                 'strokeWidth' => $nutrientAnnotation['strokeWidth'] ?? 2,

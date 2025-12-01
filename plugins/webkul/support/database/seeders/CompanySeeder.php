@@ -50,7 +50,24 @@ class CompanySeeder extends Seeder
                 throw new Exception('Required reference data (currency, country, states) not found.');
             }
 
-            // Create TCS company (no partner needed, it's the main company)
+            // Create TCS partner first (needed for address/contact reference)
+            $tcsPartnerId = DB::table('partners_partners')->insertGetId([
+                'name'       => 'The Carpenter\'s Son Woodworking LLC',
+                'email'      => 'info@tcswoodwork.com',
+                'phone'      => '(845) 816-2388',
+                'street1'    => '392 N Montgomery St',
+                'street2'    => 'Building B',
+                'city'       => 'Newburgh',
+                'zip'        => '12550',
+                'state_id'   => $nyState->id,
+                'country_id' => $usCountry->id,
+                'sub_type'   => 'company',
+                'creator_id' => $user?->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Create TCS company linked to its partner
             $tcsData = [
                 'id'                  => 1,
                 'sort'                => 1,
@@ -69,6 +86,7 @@ class CompanySeeder extends Seeder
                 'state_id'            => $nyState->id,
                 'country_id'          => $usCountry->id,
                 'currency_id'         => $usdCurrency->id,
+                'partner_id'          => $tcsPartnerId,
                 'parent_id'           => null,
                 'is_active'           => true,
                 'is_default'          => true,

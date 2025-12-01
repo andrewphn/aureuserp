@@ -6,7 +6,7 @@ use App\Models\PdfPageAnnotation;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -321,7 +321,7 @@ class AnnotationEntityService
     }
 
     /**
-     * Create CabinetSpecification record from elevation/detail annotation
+     * Create Cabinet record from elevation/detail annotation
      *
      * @param PdfPageAnnotation $annotation
      * @param array $context Must contain: cabinet_run_id, project_id
@@ -349,7 +349,7 @@ class AnnotationEntityService
             // Default product variant (should be passed from context in real implementation)
             $productVariantId = $context['product_variant_id'] ?? 1;
 
-            $cabinet = CabinetSpecification::create([
+            $cabinet = Cabinet::create([
                 'cabinet_run_id' => $context['cabinet_run_id'],
                 'project_id' => $context['project_id'],
                 'product_variant_id' => $productVariantId,
@@ -368,7 +368,7 @@ class AnnotationEntityService
             ]);
 
             // Link annotation to cabinet
-            $annotation->update(['cabinet_specification_id' => $cabinet->id]);
+            $annotation->update(['cabinet_id' => $cabinet->id]);
 
             DB::commit();
 
@@ -403,7 +403,7 @@ class AnnotationEntityService
     public function updateCabinetSpecs(int $cabinetId, array $data): array
     {
         try {
-            $cabinet = CabinetSpecification::findOrFail($cabinetId);
+            $cabinet = Cabinet::findOrFail($cabinetId);
 
             $updateData = [];
 

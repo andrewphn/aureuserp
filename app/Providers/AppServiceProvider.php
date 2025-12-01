@@ -10,6 +10,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -40,6 +41,18 @@ class AppServiceProvider extends ServiceProvider
         // Scripts are now bundled via Vite in app.js - no need for separate registration
         // $this->registerJavaScriptAssets();
         $this->configureRateLimiting();
+        $this->configureMorphMap();
+    }
+
+    /**
+     * Configure the polymorphic relationship morph map.
+     * Maps short aliases in the database to their full class names.
+     */
+    protected function configureMorphMap(): void
+    {
+        Relation::morphMap([
+            'project' => \Webkul\Project\Models\Project::class,
+        ]);
     }
 
     /**

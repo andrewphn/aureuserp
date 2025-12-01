@@ -17,7 +17,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon|null $deleted_at
- * @property int $cabinet_specification_id
+ * @property int $cabinet_id
  * @property int $cabinet_run_id
  * @property int $product_id
  * @property string|null $hardware_type
@@ -63,7 +63,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property bool $has_defect
  * @property string|null $defect_description
  * @property bool $returned_to_supplier
- * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinet
  * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
  * @property-read \Illuminate\Database\Eloquent\Model|null $product
  * @property-read \Illuminate\Database\Eloquent\Model|null $installedBy
@@ -77,7 +77,7 @@ class HardwareRequirement extends Model
     protected $table = 'hardware_requirements';
 
     protected $fillable = [
-        'cabinet_specification_id',
+        'cabinet_id',
         'cabinet_run_id',
         'product_id',
         'hardware_type',
@@ -170,9 +170,9 @@ class HardwareRequirement extends Model
     /**
      * Relationships
      */
-    public function cabinetSpecification(): BelongsTo
+    public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(CabinetSpecification::class, 'cabinet_specification_id');
+        return $this->belongsTo(Cabinet::class, 'cabinet_id');
     }
 
     /**

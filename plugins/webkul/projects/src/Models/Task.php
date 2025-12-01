@@ -22,7 +22,7 @@ use Webkul\Support\Models\Company;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Task Eloquent model
@@ -58,7 +58,7 @@ use Webkul\Project\Models\CabinetSpecification;
  * @property int $room_id
  * @property int $room_location_id
  * @property int $cabinet_run_id
- * @property int $cabinet_specification_id
+ * @property int $cabinet_id
  * @property-read \Illuminate\Database\Eloquent\Collection $subTasks
  * @property-read \Illuminate\Database\Eloquent\Collection $timesheets
  * @property-read \Illuminate\Database\Eloquent\Model|null $parent
@@ -71,7 +71,7 @@ use Webkul\Project\Models\CabinetSpecification;
  * @property-read \Illuminate\Database\Eloquent\Model|null $room
  * @property-read \Illuminate\Database\Eloquent\Model|null $roomLocation
  * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetRun
- * @property-read \Illuminate\Database\Eloquent\Model|null $cabinetSpecification
+ * @property-read \Illuminate\Database\Eloquent\Model|null $cabinet
  * @property-read \Illuminate\Database\Eloquent\Collection $users
  * @property-read \Illuminate\Database\Eloquent\Collection $tags
  *
@@ -120,7 +120,7 @@ class Task extends Model implements Sortable
         'room_id',
         'room_location_id',
         'cabinet_run_id',
-        'cabinet_specification_id',
+        'cabinet_id',
     ];
 
     /**
@@ -164,7 +164,7 @@ class Task extends Model implements Sortable
         'room.name' => 'Room',
         'roomLocation.name' => 'Room Location',
         'cabinetRun.name' => 'Cabinet Run',
-        'cabinetSpecification.cabinet_number' => 'Cabinet',
+        'cabinet.cabinet_number' => 'Cabinet',
     ];
 
     public string $recordTitleAttribute = 'title';
@@ -315,13 +315,13 @@ class Task extends Model implements Sortable
     }
 
     /**
-     * Cabinet Specification
+     * Cabinet
      *
      * @return BelongsTo
      */
-    public function cabinetSpecification(): BelongsTo
+    public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(CabinetSpecification::class);
+        return $this->belongsTo(Cabinet::class);
     }
 
     /**

@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Webkul\Inventory\Filament\Clusters\Products;
 use Webkul\Project\Filament\Resources\CabinetReportResource\Pages;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Cabinet Report Resource Filament resource
@@ -26,7 +26,7 @@ use Webkul\Project\Models\CabinetSpecification;
  */
 class CabinetReportResource extends Resource
 {
-    protected static ?string $model = CabinetSpecification::class;
+    protected static ?string $model = Cabinet::class;
 
     protected static ?string $cluster = Products::class;
 

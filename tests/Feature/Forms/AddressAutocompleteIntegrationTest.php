@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Forms;
 
-use App\Forms\Components\AddressAutocomplete;
+use Webkul\Support\Filament\Forms\Components\AddressAutocomplete;
 use Tests\TestCase;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;

@@ -220,5 +220,18 @@ export default {
         'right-0',
         'top-0',
         'bottom-0',
+
+        // Two-Column Layout Classes (Project Wizard Sidebar)
+        'xl:flex-row',
+        'xl:items-start',
+        'xl:gap-6',
+        'xl:w-80',
+        'xl:max-w-xs',
+        'xl:flex-shrink-0',
+        'xl:sticky',
+        'xl:top-20',
+        'flex-1',
+        'min-w-0',
+        'gap-4',
     ]
 };

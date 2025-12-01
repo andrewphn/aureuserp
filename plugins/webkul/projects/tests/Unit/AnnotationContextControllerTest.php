@@ -9,7 +9,7 @@ use Webkul\Project\Models\PdfDocument;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Annotation Context Controller Test test case
@@ -203,13 +203,13 @@ class AnnotationContextControllerTest extends TestCase
             'name' => 'Upper Cabinets',
         ]);
 
-        $cabinet1 = CabinetSpecification::create([
+        $cabinet1 = Cabinet::create([
             'cabinet_run_id' => $run->id,
             'label' => 'W3018',
             'cabinet_type' => 'wall',
         ]);
 
-        $cabinet2 = CabinetSpecification::create([
+        $cabinet2 = Cabinet::create([
             'cabinet_run_id' => $run->id,
             'label' => 'W3612',
             'cabinet_type' => 'wall',
@@ -251,7 +251,7 @@ class AnnotationContextControllerTest extends TestCase
             'name' => 'Upper Cabinets',
         ]);
 
-        $cabinet = CabinetSpecification::create([
+        $cabinet = Cabinet::create([
             'cabinet_run_id' => $run->id,
             'label' => 'W3018',
             'cabinet_type' => 'wall',

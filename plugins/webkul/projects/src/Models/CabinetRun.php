@@ -53,6 +53,11 @@ class CabinetRun extends Model
         'material_category',
         'finish_option',
         'creator_id',
+        // Hardware summary counts (brand-agnostic)
+        'hinges_count',
+        'slides_count',
+        'shelf_pins_count',
+        'pullouts_count',
     ];
 
     protected $casts = [
@@ -60,6 +65,10 @@ class CabinetRun extends Model
         'start_wall_measurement' => 'decimal:2',
         'end_wall_measurement' => 'decimal:2',
         'sort_order' => 'integer',
+        'hinges_count' => 'integer',
+        'slides_count' => 'integer',
+        'shelf_pins_count' => 'integer',
+        'pullouts_count' => 'integer',
     ];
 
     /**
@@ -91,7 +100,7 @@ class CabinetRun extends Model
      */
     public function cabinets(): HasMany
     {
-        return $this->hasMany(CabinetSpecification::class, 'cabinet_run_id');
+        return $this->hasMany(Cabinet::class, 'cabinet_run_id');
     }
 
     /**
@@ -102,6 +111,16 @@ class CabinetRun extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    /**
+     * Hardware requirements for this cabinet run (brand-agnostic)
+     *
+     * @return HasMany
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'cabinet_run_id');
     }
 
     /**
@@ -284,5 +303,42 @@ class CabinetRun extends Model
         $bomService = new \Webkul\Project\Services\MaterialBomService();
         $bom = $bomService->generateBomForCabinets($this->cabinets);
         return $bomService->checkMaterialAvailability($bom);
+    }
+
+    /**
+     * Hardware Summary Methods
+     */
+
+    /**
+     * Recalculate hardware totals from hardware_requirements table
+     * This aggregates all hardware requirements linked to this cabinet run
+     * and updates the denormalized count columns for quick access.
+     *
+     * @return void
+     */
+    public function recalculateHardwareTotals(): void
+    {
+        $this->hinges_count = $this->hardwareRequirements()->hinges()->sum('quantity_required');
+        $this->slides_count = $this->hardwareRequirements()->slides()->sum('quantity_required');
+        $this->shelf_pins_count = $this->hardwareRequirements()->shelfPins()->sum('quantity_required');
+        $this->pullouts_count = $this->hardwareRequirements()->pullouts()->sum('quantity_required');
+        $this->saveQuietly(); // Avoid triggering observers recursively
+    }
+
+    /**
+     * Get hardware summary as array (for API/exports)
+     *
+     * @return array
+     */
+    public function getHardwareSummary(): array
+    {
+        return [
+            'hinges' => $this->hinges_count ?? 0,
+            'slides' => $this->slides_count ?? 0,
+            'shelf_pins' => $this->shelf_pins_count ?? 0,
+            'pullouts' => $this->pullouts_count ?? 0,
+            'total_items' => ($this->hinges_count ?? 0) + ($this->slides_count ?? 0) +
+                            ($this->shelf_pins_count ?? 0) + ($this->pullouts_count ?? 0),
+        ];
     }
 }

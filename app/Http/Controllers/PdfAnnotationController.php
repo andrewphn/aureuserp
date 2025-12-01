@@ -21,7 +21,7 @@ class PdfAnnotationController extends Controller
         $pdfPage = PdfPage::findOrFail($pdfPageId);
 
         $annotations = PdfPageAnnotation::where('pdf_page_id', $pdfPageId)
-            ->with(['cabinetRun', 'cabinetSpecification', 'childAnnotations'])
+            ->with(['cabinetRun', 'cabinet', 'childAnnotations'])
             ->get();
 
         // Convert to Nutrient Instant JSON format
@@ -106,7 +106,7 @@ class PdfAnnotationController extends Controller
             'width' => 'required|numeric',
             'height' => 'required|numeric',
             'cabinet_run_id' => 'nullable|exists:projects_cabinet_runs,id',
-            'cabinet_specification_id' => 'nullable|exists:projects_cabinet_specifications,id',
+            'cabinet_id' => 'nullable|exists:projects_cabinets,id',
         ]);
 
         $pdfPage = PdfPage::findOrFail($pdfPageId);
@@ -119,7 +119,7 @@ class PdfAnnotationController extends Controller
 
         return response()->json([
             'success' => true,
-            'annotation' => $annotation->load(['cabinetRun', 'cabinetSpecification']),
+            'annotation' => $annotation->load(['cabinetRun', 'cabinet']),
             'nutrient_annotation' => $annotation->toNutrientAnnotation(),
         ]);
     }
@@ -131,7 +131,7 @@ class PdfAnnotationController extends Controller
     {
         $validated = $request->validate([
             'cabinet_run_id' => 'nullable|exists:projects_cabinet_runs,id',
-            'cabinet_specification_id' => 'nullable|exists:projects_cabinet_specifications,id',
+            'cabinet_id' => 'nullable|exists:projects_cabinets,id',
             'label' => 'nullable|string',
         ]);
 
@@ -140,7 +140,7 @@ class PdfAnnotationController extends Controller
 
         return response()->json([
             'success' => true,
-            'annotation' => $annotation->load(['cabinetRun', 'cabinetSpecification']),
+            'annotation' => $annotation->load(['cabinetRun', 'cabinet']),
         ]);
     }
 

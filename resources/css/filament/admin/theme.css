@@ -4,6 +4,7 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../resources/views/components/**/*';
+@source '../../../../plugins/webkul/*/resources/views/**/*';
 
 @layer components {
     /* ============================================
@@ -217,4 +218,322 @@
     .annotation-marker.annotation-active {
         transition: none !important;
     }
+
+    /* ============================================
+       TCS WIZARD STEP BAR - Scalable & Color-Coded
+       Phase colors with gradient palette (dark to light)
+       ============================================ */
+
+    /* Override wizard header to scale instead of scroll */
+    /* Note: Removed overflow-hidden as it was clipping Filament's Floating UI dropdowns */
+    .fi-sc-wizard-header {
+        @apply flex flex-wrap md:flex-nowrap !important;
+    }
+
+    /* Make steps flexible and scale to fit */
+    .fi-sc-wizard-header .fi-sc-wizard-header-step {
+        @apply flex-1 min-w-0 !important;
+    }
+
+    /* Reduce padding on step buttons for better fit */
+    .fi-sc-wizard-header .fi-sc-wizard-header-step-btn {
+        @apply px-3 py-3 gap-x-2 !important;
+    }
+
+    /* Allow step text to shrink and truncate */
+    .fi-sc-wizard-header .fi-sc-wizard-header-step-text {
+        @apply w-auto max-w-none min-w-0 !important;
+    }
+
+    /* Truncate long labels */
+    .fi-sc-wizard-header .fi-sc-wizard-header-step-label {
+        @apply truncate text-xs !important;
+    }
+
+    /* Smaller description text */
+    .fi-sc-wizard-header .fi-sc-wizard-header-step-description {
+        @apply truncate text-[11px] !important;
+    }
+
+    /* Smaller icons for better fit */
+    .fi-sc-wizard-header .fi-sc-wizard-header-step-icon-ctn {
+        @apply size-8 !important;
+    }
+
+    .fi-sc-wizard-header .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+        @apply size-4 !important;
+    }
+
+    /* Hide separator arrows on smaller screens */
+    @media (max-width: 1280px) {
+        .fi-sc-wizard-header .fi-sc-wizard-header-step-separator {
+            @apply hidden !important;
+        }
+    }
+
+    /* ============================================
+       TCS PHASE COLOR SYSTEM - CSS Custom Properties
+       Matching database stage colors with sub-stage gradients
+
+       Main Stages (from projects_project_stages):
+       - Discovery: #3B82F6 (Blue)
+       - Design: #8B5CF6 (Purple)
+       - Sourcing: #F59E0B (Amber)
+       - Production: #10B981 (Green)
+       - Delivery: #14B8A6 (Teal)
+
+       Sub-stages: 5-shade gradient (darkest to lightest)
+       - 900: Deep (pre-active)
+       - 700: Dark (active/current)
+       - 500: Base (primary stage color)
+       - 300: Light (completed recent)
+       - 100: Lightest (pending)
+       ============================================ */
+    :root {
+        /* Discovery (Blue) - Trust, communication, beginning */
+        --tcs-discovery-900: #1e3a8a;
+        --tcs-discovery-700: #1d4ed8;
+        --tcs-discovery-500: #3b82f6;
+        --tcs-discovery-300: #93c5fd;
+        --tcs-discovery-100: #dbeafe;
+
+        /* Design (Purple) - Creativity, planning, transformation */
+        --tcs-design-900: #4c1d95;
+        --tcs-design-700: #6d28d9;
+        --tcs-design-500: #8b5cf6;
+        --tcs-design-300: #c4b5fd;
+        --tcs-design-100: #ede9fe;
+
+        /* Sourcing (Amber) - Energy, procurement, action */
+        --tcs-sourcing-900: #78350f;
+        --tcs-sourcing-700: #b45309;
+        --tcs-sourcing-500: #f59e0b;
+        --tcs-sourcing-300: #fcd34d;
+        --tcs-sourcing-100: #fef3c7;
+
+        /* Production (Green) - Growth, progress, building */
+        --tcs-production-900: #064e3b;
+        --tcs-production-700: #047857;
+        --tcs-production-500: #10b981;
+        --tcs-production-300: #6ee7b7;
+        --tcs-production-100: #d1fae5;
+
+        /* Delivery (Teal) - Success, completion, satisfaction */
+        --tcs-delivery-900: #134e4a;
+        --tcs-delivery-700: #0f766e;
+        --tcs-delivery-500: #14b8a6;
+        --tcs-delivery-300: #5eead4;
+        --tcs-delivery-100: #ccfbf1;
+    }
+
+    /* ============================================
+       TCS WIZARD PHASE COLORS - Discovery Wizard
+       All 5 steps use Discovery Blue palette (sub-stage gradient)
+       Darkest (Step 1) to Lightest (Step 5)
+       ============================================ */
+
+    /* --- STEP 1: CUSTOMER INFO (Discovery Blue 900 - Deepest) --- */
+    .fi-sc-wizard-header-step:nth-child(1).fi-active .fi-sc-wizard-header-step-icon-ctn,
+    .fi-sc-wizard-header-step:nth-child(1).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+        background-color: var(--tcs-discovery-900) !important;
+        border-color: var(--tcs-discovery-900) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(1).fi-active .fi-sc-wizard-header-step-label {
+        color: var(--tcs-discovery-900) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(1):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+        border-color: var(--tcs-discovery-300) !important;
+    }
+
+    /* --- STEP 2: SCOPE & BUDGET (Discovery Blue 700 - Dark) --- */
+    .fi-sc-wizard-header-step:nth-child(2).fi-active .fi-sc-wizard-header-step-icon-ctn,
+    .fi-sc-wizard-header-step:nth-child(2).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+        background-color: var(--tcs-discovery-700) !important;
+        border-color: var(--tcs-discovery-700) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(2).fi-active .fi-sc-wizard-header-step-label {
+        color: var(--tcs-discovery-700) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(2):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+        border-color: var(--tcs-discovery-300) !important;
+    }
+
+    /* --- STEP 3: TIMELINE (Discovery Blue 500 - Base) --- */
+    .fi-sc-wizard-header-step:nth-child(3).fi-active .fi-sc-wizard-header-step-icon-ctn,
+    .fi-sc-wizard-header-step:nth-child(3).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+        background-color: var(--tcs-discovery-500) !important;
+        border-color: var(--tcs-discovery-500) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(3).fi-active .fi-sc-wizard-header-step-label {
+        color: var(--tcs-discovery-500) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(3):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+        border-color: var(--tcs-discovery-300) !important;
+    }
+
+    /* --- STEP 4: DOCUMENTS (Discovery Blue 300 - Light) --- */
+    .fi-sc-wizard-header-step:nth-child(4).fi-active .fi-sc-wizard-header-step-icon-ctn,
+    .fi-sc-wizard-header-step:nth-child(4).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+        background-color: var(--tcs-discovery-300) !important;
+        border-color: var(--tcs-discovery-300) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(4).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+        color: var(--tcs-discovery-900) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(4).fi-active .fi-sc-wizard-header-step-label {
+        color: var(--tcs-discovery-500) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(4):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+        border-color: var(--tcs-discovery-100) !important;
+    }
+
+    /* --- STEP 5: REVIEW & CREATE (Discovery Blue 100 - Lightest) --- */
+    .fi-sc-wizard-header-step:nth-child(5).fi-active .fi-sc-wizard-header-step-icon-ctn,
+    .fi-sc-wizard-header-step:nth-child(5).fi-completed .fi-sc-wizard-header-step-icon-ctn {
+        background-color: var(--tcs-discovery-100) !important;
+        border-color: var(--tcs-discovery-500) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(5).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+    .fi-sc-wizard-header-step:nth-child(5).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+        color: var(--tcs-discovery-700) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(5).fi-active .fi-sc-wizard-header-step-label {
+        color: var(--tcs-discovery-700) !important;
+    }
+    .fi-sc-wizard-header-step:nth-child(5):not(.fi-active):not(.fi-completed) .fi-sc-wizard-header-step-icon-ctn {
+        border-color: var(--tcs-discovery-100) !important;
+    }
+
+    /* Completed step icons - white checkmark (for dark backgrounds) */
+    .fi-sc-wizard-header-step:nth-child(1).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+    .fi-sc-wizard-header-step:nth-child(2).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+    .fi-sc-wizard-header-step:nth-child(3).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+        @apply text-white !important;
+    }
+
+    /* Completed step icons - dark checkmark (for light backgrounds) */
+    .fi-sc-wizard-header-step:nth-child(4).fi-completed .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+        color: var(--tcs-discovery-900) !important;
+    }
+
+    /* Active step icons - white by default */
+    .fi-sc-wizard-header-step:nth-child(1).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+    .fi-sc-wizard-header-step:nth-child(2).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon,
+    .fi-sc-wizard-header-step:nth-child(3).fi-active .fi-sc-wizard-header-step-icon-ctn .fi-icon {
+        @apply text-white !important;
+    }
+
+    /* Progress bar under wizard header - Discovery blue gradient */
+    .fi-sc-wizard-header::after {
+        content: '';
+        @apply absolute bottom-0 left-0 h-1;
+        background: linear-gradient(
+            to right,
+            var(--tcs-discovery-900),
+            var(--tcs-discovery-700),
+            var(--tcs-discovery-500),
+            var(--tcs-discovery-300),
+            var(--tcs-discovery-100)
+        );
+        width: var(--wizard-progress, 0%);
+        transition: width 0.3s ease-out;
+    }
+
+    /* ============================================
+       TCS PHASE UTILITY CLASSES
+       For use throughout the application
+       ============================================ */
+
+    /* Discovery phase backgrounds */
+    .bg-tcs-discovery { background-color: var(--tcs-discovery-500); }
+    .bg-tcs-discovery-dark { background-color: var(--tcs-discovery-700); }
+    .bg-tcs-discovery-light { background-color: var(--tcs-discovery-300); }
+
+    /* Design phase backgrounds */
+    .bg-tcs-design { background-color: var(--tcs-design-500); }
+    .bg-tcs-design-dark { background-color: var(--tcs-design-700); }
+    .bg-tcs-design-light { background-color: var(--tcs-design-300); }
+
+    /* Sourcing phase backgrounds */
+    .bg-tcs-sourcing { background-color: var(--tcs-sourcing-500); }
+    .bg-tcs-sourcing-dark { background-color: var(--tcs-sourcing-700); }
+    .bg-tcs-sourcing-light { background-color: var(--tcs-sourcing-300); }
+
+    /* Production phase backgrounds */
+    .bg-tcs-production { background-color: var(--tcs-production-500); }
+    .bg-tcs-production-dark { background-color: var(--tcs-production-700); }
+    .bg-tcs-production-light { background-color: var(--tcs-production-300); }
+
+    /* Delivery phase backgrounds */
+    .bg-tcs-delivery { background-color: var(--tcs-delivery-500); }
+    .bg-tcs-delivery-dark { background-color: var(--tcs-delivery-700); }
+    .bg-tcs-delivery-light { background-color: var(--tcs-delivery-300); }
+
+    /* Phase text colors */
+    .text-tcs-discovery { color: var(--tcs-discovery-500); }
+    .text-tcs-design { color: var(--tcs-design-500); }
+    .text-tcs-sourcing { color: var(--tcs-sourcing-500); }
+    .text-tcs-production { color: var(--tcs-production-500); }
+    .text-tcs-delivery { color: var(--tcs-delivery-500); }
+
+    /* Phase border colors */
+    .border-tcs-discovery { border-color: var(--tcs-discovery-500); }
+    .border-tcs-design { border-color: var(--tcs-design-500); }
+    .border-tcs-sourcing { border-color: var(--tcs-sourcing-500); }
+    .border-tcs-production { border-color: var(--tcs-production-500); }
+    .border-tcs-delivery { border-color: var(--tcs-delivery-500); }
+}
+
+/* ============================================
+   TWO-COLUMN LAYOUT RESPONSIVE UTILITIES
+   For Project Wizard and similar pages
+   These are defined outside @layer to ensure they're always compiled
+   ============================================ */
+
+/* XL breakpoint (1280px+) responsive utilities */
+@media (min-width: 1280px) {
+    .xl\:flex-row {
+        flex-direction: row !important;
+    }
+
+    .xl\:items-start {
+        align-items: flex-start !important;
+    }
+
+    .xl\:gap-6 {
+        gap: 1.5rem !important;
+    }
+
+    .xl\:w-80 {
+        width: 20rem !important;
+    }
+
+    .xl\:max-w-xs {
+        max-width: 20rem !important;
+    }
+
+    .xl\:flex-shrink-0 {
+        flex-shrink: 0 !important;
+    }
+
+    .xl\:sticky {
+        position: sticky !important;
+    }
+
+    .xl\:top-20 {
+        top: 5rem !important;
+    }
+}
+
+/* Base utilities that should always be available */
+.flex-1 {
+    flex: 1 1 0% !important;
+}
+
+.min-w-0 {
+    min-width: 0 !important;
+}
+
+.gap-4 {
+    gap: 1rem !important;
 }

@@ -1,5 +1,13 @@
 import './bootstrap';
 
+// Import Masonry.js and imagesLoaded for gallery layouts
+import Masonry from 'masonry-layout';
+import imagesLoaded from 'imagesloaded';
+
+// Make them available globally for Alpine components
+window.Masonry = Masonry;
+window.imagesLoaded = imagesLoaded;
+
 // Import Livewire-aware component loader FIRST
 import './livewire-component-loader.js';
 

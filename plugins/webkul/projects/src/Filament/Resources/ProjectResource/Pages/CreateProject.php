@@ -117,35 +117,35 @@ class CreateProject extends Page implements HasForms
             ->schema([
                 Wizard::make([
                     // Step 1: Quick Capture (Required - Target 60 seconds)
-                    Step::make('Quick Capture')
+                    Step::make('1. Quick Capture')
                         ->description('Customer, address & project type')
                         ->icon('heroicon-o-bolt')
                         ->schema($this->getStep1Schema())
                         ->afterValidation(fn () => $this->saveDraft(1)),
 
                     // Step 2: Scope & Budget (Required - Target 2-3 minutes)
-                    Step::make('Scope & Budget')
+                    Step::make('2. Scope & Budget')
                         ->description('Linear feet & budget estimate')
                         ->icon('heroicon-o-calculator')
                         ->schema($this->getStep2Schema())
                         ->afterValidation(fn () => $this->saveDraft(2)),
 
                     // Step 3: Timeline (Skippable)
-                    Step::make('Timeline')
+                    Step::make('3. Timeline')
                         ->description('Dates & project manager')
                         ->icon('heroicon-o-calendar')
                         ->schema($this->getStep3Schema())
                         ->afterValidation(fn () => $this->saveDraft(3)),
 
                     // Step 4: Documents & Tags (Skippable)
-                    Step::make('Documents')
+                    Step::make('4. Documents')
                         ->description('PDFs, tags & notes')
                         ->icon('heroicon-o-document-text')
                         ->schema($this->getStep4Schema())
                         ->afterValidation(fn () => $this->saveDraft(4)),
 
                     // Step 5: Review & Create
-                    Step::make('Review & Create')
+                    Step::make('5. Review & Create')
                         ->description('Confirm & create project')
                         ->icon('heroicon-o-check-circle')
                         ->schema($this->getStep5Schema()),
@@ -162,119 +162,139 @@ class CreateProject extends Page implements HasForms
     protected function getStep1Schema(): array
     {
         return [
-            Grid::make(2)->schema([
-                Select::make('company_id')
-                    ->label('Company')
-                    ->options(fn () => Company::whereNull('parent_id')->pluck('name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->default(fn () => Company::where('is_default', true)->value('id'))
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        $this->updateProjectNumberPreview($state, $get, $set);
-                        $this->calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
-                    }),
+            // ========================================
+            // YOUR BUSINESS - Internal settings (auto-collapsed if company selected)
+            // ========================================
+            Section::make('Your Business')
+                ->description('Internal settings - where this project is managed from')
+                ->icon('heroicon-o-building-office-2')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Select::make('company_id')
+                            ->label('Company')
+                            ->options(fn () => Company::whereNull('parent_id')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->default(fn () => Company::where('is_default', true)->value('id'))
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $this->updateProjectNumberPreview($state, $get, $set);
+                                $this->calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                            }),
 
-                Select::make('branch_id')
-                    ->label('Branch')
-                    ->options(function (callable $get) {
-                        $companyId = $get('company_id');
-                        if (!$companyId) {
-                            return [];
-                        }
-                        return Company::where('parent_id', $companyId)->pluck('name', 'id');
-                    })
-                    ->searchable()
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        $this->updateProjectNumberPreview($get('company_id'), $get, $set);
-                    })
-                    ->visible(fn (callable $get) => $get('company_id') !== null)
-                    ->helperText('Optional: Select a specific branch'),
-            ]),
-
-            Grid::make(2)->schema([
-                Select::make('warehouse_id')
-                    ->label('Warehouse')
-                    ->options(function (callable $get) {
-                        $companyId = $get('company_id');
-                        if (!$companyId) {
-                            return \Webkul\Inventory\Models\Warehouse::pluck('name', 'id');
-                        }
-                        return \Webkul\Inventory\Models\Warehouse::where('company_id', $companyId)->pluck('name', 'id');
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->live(onBlur: true)
-                    ->visible(fn (callable $get) => $get('company_id') !== null)
-                    ->helperText('Warehouse for material allocation'),
-
-                Select::make('partner_id')
-                    ->label('Customer')
-                    ->searchable()
-                    ->required()
-                    ->live(onBlur: true)
-                    ->getSearchResultsUsing(function (string $search): array {
-                        // Search existing customers
-                        return Partner::where('sub_type', 'customer')
-                            ->where('name', 'like', "%{$search}%")
-                            ->orderBy('name')
-                            ->limit(50)
-                            ->pluck('name', 'id')
-                            ->toArray();
-                    })
-                    ->getOptionLabelUsing(fn ($value): ?string => Partner::find($value)?->name)
-                    // Enable inline "Create new customer" slide-over using FilamentPHP's built-in pattern
-                    // Reference: https://github.com/filamentphp/filament/discussions/5379
-                    ->createOptionForm($this->getCustomerCreationFormComponentsSimplified())
-                    ->createOptionUsing(function (array $data): int {
-                        // Set required fields for customer creation
-                        $data['sub_type'] = 'customer';
-                        $data['creator_id'] = Auth::id();
-
-                        // Create the customer
-                        $partner = Partner::create($data);
-
-                        // Show success notification
-                        Notification::make()
-                            ->success()
-                            ->title('Customer Created')
-                            ->body("Customer '{$partner->name}' has been created and selected.")
-                            ->send();
-
-                        return $partner->getKey();
-                    })
-                    ->createOptionAction(
-                        fn (Action $action) => $action
-                            ->slideOver()
-                            ->modalWidth('lg')
-                            ->modalHeading('Add New Customer')
-                            ->modalDescription('Quick customer entry - you can add more details later.')
-                    )
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        if ($state && $get('use_customer_address')) {
-                            $partner = Partner::with(['state', 'country'])->find($state);
-                            if ($partner) {
-                                $set('project_address.street1', $partner->street1);
-                                $set('project_address.street2', $partner->street2);
-                                $set('project_address.city', $partner->city);
-                                $set('project_address.zip', $partner->zip);
-                                $set('project_address.country_id', $partner->country_id);
-                                $set('project_address.state_id', $partner->state_id);
+                        Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(function (callable $get) {
+                                $companyId = $get('company_id');
+                                if (!$companyId) {
+                                    return [];
+                                }
+                                return Company::where('parent_id', $companyId)->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $this->updateProjectNumberPreview($get('company_id'), $get, $set);
-                                $this->updateProjectName($get, $set);
-                            }
-                        }
-                    }),
+                            })
+                            ->visible(fn (callable $get) => $get('company_id') !== null)
+                            ->helperText('Optional: Select a specific branch'),
+                    ]),
 
-                Select::make('lead_source')
-                    ->label('Lead Source')
-                    ->options(LeadSource::options())
-                    ->required()
-                    ->native(false)
-                    ->helperText('How did the customer find us?'),
-            ]),
+                    Select::make('warehouse_id')
+                        ->label('Warehouse')
+                        ->options(function (callable $get) {
+                            $companyId = $get('company_id');
+                            if (!$companyId) {
+                                return \Webkul\Inventory\Models\Warehouse::pluck('name', 'id');
+                            }
+                            return \Webkul\Inventory\Models\Warehouse::where('company_id', $companyId)->pluck('name', 'id');
+                        })
+                        ->searchable()
+                        ->preload()
+                        ->live(onBlur: true)
+                        ->visible(fn (callable $get) => $get('company_id') !== null)
+                        ->helperText('Where materials will be allocated from'),
+                ])
+                ->collapsible()
+                ->collapsed(fn (callable $get) => filled($get('company_id')))
+                ->compact(),
+
+            // ========================================
+            // CLIENT INFORMATION - Who you're working for
+            // ========================================
+            Section::make('Client Information')
+                ->description('Who is this project for?')
+                ->icon('heroicon-o-user-group')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Select::make('partner_id')
+                            ->label('Customer')
+                            ->searchable()
+                            ->required()
+                            ->live(onBlur: true)
+                            ->getSearchResultsUsing(function (string $search): array {
+                                // Search existing customers
+                                return Partner::where('sub_type', 'customer')
+                                    ->where('name', 'like', "%{$search}%")
+                                    ->orderBy('name')
+                                    ->limit(50)
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(fn ($value): ?string => Partner::find($value)?->name)
+                            // Enable inline "Create new customer" slide-over using FilamentPHP's built-in pattern
+                            // Reference: https://github.com/filamentphp/filament/discussions/5379
+                            ->createOptionForm($this->getCustomerCreationFormComponentsSimplified())
+                            ->createOptionUsing(function (array $data): int {
+                                // Set required fields for customer creation
+                                $data['sub_type'] = 'customer';
+                                $data['creator_id'] = Auth::id();
+
+                                // Create the customer
+                                $partner = Partner::create($data);
+
+                                // Show success notification
+                                Notification::make()
+                                    ->success()
+                                    ->title('Customer Created')
+                                    ->body("Customer '{$partner->name}' has been created and selected.")
+                                    ->send();
+
+                                return $partner->getKey();
+                            })
+                            ->createOptionAction(
+                                fn (Action $action) => $action
+                                    ->slideOver()
+                                    ->modalWidth('lg')
+                                    ->modalHeading('Add New Customer')
+                                    ->modalDescription('Quick customer entry - you can add more details later.')
+                            )
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                if ($state && $get('use_customer_address')) {
+                                    $partner = Partner::with(['state', 'country'])->find($state);
+                                    if ($partner) {
+                                        $set('project_address.street1', $partner->street1);
+                                        $set('project_address.street2', $partner->street2);
+                                        $set('project_address.city', $partner->city);
+                                        $set('project_address.zip', $partner->zip);
+                                        $set('project_address.country_id', $partner->country_id);
+                                        $set('project_address.state_id', $partner->state_id);
+                                        $this->updateProjectNumberPreview($get('company_id'), $get, $set);
+                                        $this->updateProjectName($get, $set);
+                                    }
+                                }
+                            }),
+
+                        Select::make('lead_source')
+                            ->label('Lead Source')
+                            ->options(LeadSource::options())
+                            ->required()
+                            ->native(false)
+                            ->helperText('How did the customer find us?'),
+                    ]),
+                ])
+                ->compact(),
 
             Section::make('Project Type')
                 ->schema([
@@ -298,9 +318,14 @@ class CreateProject extends Page implements HasForms
                 ->compact(),
 
             Section::make('Project Location')
+                ->description('Where will the work be done?')
+                ->icon('heroicon-o-map-pin')
                 ->schema([
                     Toggle::make('use_customer_address')
-                        ->label('Use customer address')
+                        ->label('Same as customer address')
+                        ->helperText(fn (callable $get) => $get('use_customer_address')
+                            ? 'Project location will use the customer\'s address'
+                            : 'Enter a different location for this project')
                         ->default(true)
                         ->reactive()
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {

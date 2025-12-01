@@ -10,7 +10,7 @@ use Webkul\Project\Models\PdfPageAnnotation;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Annotation Save Integration Test test case

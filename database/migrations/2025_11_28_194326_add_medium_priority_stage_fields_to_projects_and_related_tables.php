@@ -17,6 +17,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if projects_projects table doesn't exist (plugin not installed)
+        if (!Schema::hasTable('projects_projects')) {
+            return;
+        }
+
         // Projects table - MEDIUM priority fields
         Schema::table('projects_projects', function (Blueprint $table) {
             // Design stage

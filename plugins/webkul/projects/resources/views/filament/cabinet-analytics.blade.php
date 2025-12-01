@@ -7,21 +7,21 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cabinets</h3>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white">
-                    {{ number_format(\Webkul\Project\Models\CabinetSpecification::sum('quantity')) }}
+                    {{ number_format(\Webkul\Project\Models\Cabinet::sum('quantity')) }}
                 </p>
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</h3>
                 <p class="text-3xl font-bold text-green-600 dark:text-green-400">
-                    ${{ number_format(\Webkul\Project\Models\CabinetSpecification::sum('total_price'), 2) }}
+                    ${{ number_format(\Webkul\Project\Models\Cabinet::sum('total_price'), 2) }}
                 </p>
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Linear Feet</h3>
                 <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                    {{ number_format(\Webkul\Project\Models\CabinetSpecification::avg('linear_feet'), 2) }} LF
+                    {{ number_format(\Webkul\Project\Models\Cabinet::avg('linear_feet'), 2) }} LF
                 </p>
             </div>
         </div>

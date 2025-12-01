@@ -375,7 +375,54 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete Document')
+                    ->modalDescription(function (PdfDocument $record) {
+                        $pageIds = $record->pages()->pluck('id');
+                        $annotationCount = PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)->count();
+
+                        if ($annotationCount > 0) {
+                            $roomRefs = PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)
+                                ->where(fn ($q) => $q->whereNotNull('room_id')->orWhereNotNull('room_location_id'))
+                                ->count();
+                            $cabinetRefs = PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)
+                                ->where(fn ($q) => $q->whereNotNull('cabinet_id')->orWhereNotNull('cabinet_run_id'))
+                                ->count();
+
+                            $desc = "This document has {$annotationCount} " . \Str::plural('annotation', $annotationCount);
+                            if ($roomRefs > 0) {
+                                $desc .= ", {$roomRefs} room " . \Str::plural('reference', $roomRefs);
+                            }
+                            if ($cabinetRefs > 0) {
+                                $desc .= ", {$cabinetRefs} cabinet " . \Str::plural('reference', $cabinetRefs);
+                            }
+                            return $desc . ". These will be soft deleted and can be restored later.";
+                        }
+
+                        return 'Are you sure you want to delete this document?';
+                    })
+                    ->form([
+                        \Filament\Forms\Components\Toggle::make('clear_entities')
+                            ->label('Permanently delete all annotations and entity references')
+                            ->helperText('If enabled, all annotations and their room/cabinet links will be permanently removed. This cannot be undone.')
+                            ->default(false)
+                            ->visible(function (PdfDocument $record) {
+                                $pageIds = $record->pages()->pluck('id');
+                                return PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)->exists();
+                            }),
+                    ])
+                    ->before(function (PdfDocument $record, array $data) {
+                        if (!empty($data['clear_entities'])) {
+                            $pageIds = $record->pages()->pluck('id');
+                            PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)->forceDelete();
+                        }
+
+                        // Delete file from storage
+                        if ($record->file_path && Storage::disk('public')->exists($record->file_path)) {
+                            Storage::disk('public')->delete($record->file_path);
+                        }
+                    }),
             ]);
     }
 
@@ -398,7 +445,7 @@ class PdfDocumentsRelationManager extends RelationManager
                 return;
             }
 
-            // Parse PDF to get actual page count
+            // Parse PDF to get actual page count and dimensions
             $parser = new \Smalot\PdfParser\Parser();
             $pdf = $parser->parseFile($fullPath);
             $pages = $pdf->getPages();
@@ -409,11 +456,16 @@ class PdfDocumentsRelationManager extends RelationManager
                 $pdfDocument->update(['page_count' => $actualPageCount]);
             }
 
-            // Create PdfPage record for each page
-            for ($pageNumber = 1; $pageNumber <= $actualPageCount; $pageNumber++) {
+            // Create PdfPage record for each page with dimensions
+            foreach ($pages as $index => $page) {
+                $details = $page->getDetails();
+
                 PdfPage::create([
                     'document_id' => $pdfDocument->id,
-                    'page_number' => $pageNumber,
+                    'page_number' => $index + 1,
+                    'width' => $details['MediaBox'][2] ?? null,
+                    'height' => $details['MediaBox'][3] ?? null,
+                    'rotation' => $details['Rotate'] ?? 0,
                     'page_type' => null, // Will be set later during review
                 ]);
             }

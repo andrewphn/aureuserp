@@ -38,6 +38,32 @@ class PdfDocument extends Model
     use HasFactory, SoftDeletes, HasChatter, HasLogActivity;
 
     /**
+     * Boot the model.
+     * Cascade soft deletes to related pages and annotations.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When document is soft deleted, cascade to pages
+        static::deleting(function ($document) {
+            if ($document->isForceDeleting()) {
+                // Hard delete - FK cascade handles pages
+                return;
+            }
+            // Soft delete - cascade to pages (which cascades to annotations)
+            $document->pages()->each(function ($page) {
+                $page->delete();
+            });
+        });
+
+        // When document is restored, restore pages too
+        static::restored(function ($document) {
+            $document->pages()->onlyTrashed()->restore();
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

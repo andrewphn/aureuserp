@@ -121,6 +121,32 @@ class ViewProject extends ViewRecord
                         $data['mime_type'] = 'application/pdf';
                     }
 
+                    // Extract page count and dimensions from PDF
+                    $pageCount = null;
+                    $pageData = [];
+                    try {
+                        $fullPath = Storage::disk('public')->path($data['file_path']);
+                        if (file_exists($fullPath)) {
+                            $parser = new \Smalot\PdfParser\Parser();
+                            $pdf = $parser->parseFile($fullPath);
+                            $pages = $pdf->getPages();
+                            $pageCount = count($pages);
+
+                            // Extract page dimensions for each page
+                            foreach ($pages as $index => $page) {
+                                $details = $page->getDetails();
+                                $pageData[] = [
+                                    'page_number' => $index + 1,
+                                    'width' => $details['MediaBox'][2] ?? null,
+                                    'height' => $details['MediaBox'][3] ?? null,
+                                    'rotation' => $details['Rotate'] ?? 0,
+                                ];
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Log::warning('Could not extract page count from PDF: ' . $e->getMessage());
+                    }
+
                     // If this document is being set as primary reference, unmark any existing primary references
                     if (!empty($data['is_primary_reference'])) {
                         $this->record->pdfDocuments()
@@ -129,20 +155,36 @@ class ViewProject extends ViewRecord
                     }
 
                     // Create PDF document
-                    $this->record->pdfDocuments()->create([
+                    $pdfDocument = $this->record->pdfDocuments()->create([
                         'file_path' => $data['file_path'],
                         'file_name' => $data['file_name'] ?? basename($data['file_path']),
                         'file_size' => $data['file_size'],
                         'mime_type' => $data['mime_type'],
                         'document_type' => $data['document_type'],
                         'notes' => $data['notes'] ?? null,
+                        'page_count' => $pageCount,
                         'is_primary_reference' => $data['is_primary_reference'] ?? false,
                         'uploaded_by' => Auth::id(),
                     ]);
 
+                    // Create PdfPage records for each page
+                    if ($pageCount && $pageCount > 0) {
+                        foreach ($pageData as $page) {
+                            \App\Models\PdfPage::create([
+                                'document_id' => $pdfDocument->id,
+                                'page_number' => $page['page_number'],
+                                'width' => $page['width'],
+                                'height' => $page['height'],
+                                'rotation' => $page['rotation'],
+                            ]);
+                        }
+                        \Log::info("Created {$pageCount} PdfPage records for document {$pdfDocument->id}");
+                    }
+
                     Notification::make()
                         ->success()
                         ->title('PDF uploaded successfully')
+                        ->body("Uploaded {$pageCount} pages")
                         ->send();
                 }),
             CloneProjectAction::make(),

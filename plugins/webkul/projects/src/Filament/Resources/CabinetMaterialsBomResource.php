@@ -64,9 +64,9 @@ class CabinetMaterialsBomResource extends Resource
                         Section::make('Reference')
                             ->schema([
                                 Grid::make(2)->schema([
-                                    Select::make('cabinet_specification_id')
-                                        ->label('Cabinet Specification')
-                                        ->relationship('cabinetSpecification', 'cabinet_code')
+                                    Select::make('cabinet_id')
+                                        ->label('Cabinet')
+                                        ->relationship('cabinet', 'cabinet_code')
                                         ->searchable()
                                         ->preload()
                                         ->helperText('Individual cabinet material requirement'),
@@ -294,7 +294,7 @@ class CabinetMaterialsBomResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('cabinetSpecification.cabinet_code')
+                TextColumn::make('cabinet.cabinet_code')
                     ->label('Cabinet')
                     ->searchable()
                     ->sortable()

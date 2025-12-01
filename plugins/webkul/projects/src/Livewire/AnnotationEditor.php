@@ -19,8 +19,8 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Webkul\Project\Models\Cabinet;
 use Webkul\Project\Models\CabinetRun;
-use Webkul\Project\Models\CabinetSpecification;
 use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Services\AnnotationHierarchyService;
@@ -1081,7 +1081,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
     {
         // Cabinet Specification (most specific)
         if (! empty($this->linkedCabinetSpecId)) {
-            $cabinet = CabinetSpecification::find($this->linkedCabinetSpecId);
+            $cabinet = Cabinet::find($this->linkedCabinetSpecId);
             if (! $cabinet) {
                 return '<span class="text-gray-500">Cabinet specification not found</span>';
             }
@@ -1243,7 +1243,7 @@ class AnnotationEditor extends Component implements HasActions, HasForms
                 'roomId'            => $annotation->room_id,
                 'locationId'        => $annotation->room_location_id,
                 'cabinetRunId'      => $annotation->cabinet_run_id,
-                'cabinetSpecId'     => $annotation->cabinet_specification_id,
+                'cabinetSpecId'     => $annotation->cabinet_id,
                 'viewType'          => $annotation->view_type,
                 'viewOrientation'   => $annotation->view_orientation,
                 'viewScale'         => $annotation->view_scale,
@@ -1516,12 +1516,12 @@ class AnnotationEditor extends Component implements HasActions, HasForms
         $entityIdField = $entityManagement->getEntityIdField($this->annotationType);
 
         // Convert snake_case to camelCase for annotation array access
-        // e.g., 'room_id' -> 'roomId', 'cabinet_specification_id' -> 'cabinetSpecId'
+        // e.g., 'room_id' -> 'roomId', 'cabinet_id' -> 'cabinetSpecId'
         $camelCaseField = match($entityIdField) {
             'room_id' => 'roomId',
             'room_location_id' => 'locationId',
             'cabinet_run_id' => 'cabinetRunId',
-            'cabinet_specification_id' => 'cabinetSpecId',
+            'cabinet_id' => 'cabinetSpecId',
             default => str_replace('_id', 'Id', $entityIdField)
         };
 

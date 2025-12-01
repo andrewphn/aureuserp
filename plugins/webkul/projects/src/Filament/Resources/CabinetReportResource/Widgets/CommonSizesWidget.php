@@ -6,7 +6,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\DB;
-use Webkul\Project\Models\CabinetSpecification;
+use Webkul\Project\Models\Cabinet;
 
 /**
  * Common Sizes Widget Filament widget
@@ -31,7 +31,7 @@ class CommonSizesWidget extends BaseWidget
             ->heading('Most Common Cabinet Sizes')
             ->description('Top 10 most frequently built configurations')
             ->query(
-                CabinetSpecification::query()
+                Cabinet::query()
                     ->selectRaw('
                         CONCAT(length_inches, "-", width_inches, "-", depth_inches, "-", height_inches) as id,
                         length_inches,
