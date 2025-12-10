@@ -116,6 +116,23 @@ class CreateProduct extends BaseCreateProduct
                             $updates['volume'] = $data['volume'];
                         }
 
+                        // Box/Package pricing from AI
+                        if (!empty($data['box_cost']) && $data['box_cost'] > 0) {
+                            $updates['box_cost'] = $data['box_cost'];
+                        }
+                        if (!empty($data['units_per_box']) && $data['units_per_box'] > 0) {
+                            $updates['units_per_box'] = $data['units_per_box'];
+                            // Auto-calculate unit cost if we have box cost
+                            if (!empty($data['box_cost']) && $data['box_cost'] > 0) {
+                                $unitCost = round($data['box_cost'] / $data['units_per_box'], 4);
+                                $updates['cost'] = $unitCost;
+                                $updates['price'] = $unitCost; // Default price to cost, user can mark up
+                            }
+                        }
+                        if (!empty($data['package_description'])) {
+                            $updates['package_description'] = $data['package_description'];
+                        }
+
                         // Handle tags - find or create and get IDs
                         if (!empty($data['tags']) && is_array($data['tags'])) {
                             $tagIds = [];
