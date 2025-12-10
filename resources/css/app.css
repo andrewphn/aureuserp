@@ -22,6 +22,39 @@
 .gap-4 { gap: 1rem !important; }
 
 /* ============================================
+   SAFARI MOBILE MENU Z-INDEX FIX
+   ============================================ */
+/* Fix dropdown menu appearing behind content on Safari iOS */
+.fi-topbar {
+    position: relative;
+    z-index: 50 !important;
+}
+
+.fi-topbar .fi-dropdown {
+    z-index: 9999 !important;
+}
+
+.fi-topbar .fi-dropdown-panel {
+    z-index: 9999 !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Safari-specific: Force GPU acceleration and stacking context */
+@supports (-webkit-touch-callout: none) {
+    .fi-topbar {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+    .fi-topbar .fi-dropdown-panel {
+        position: fixed !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+}
+
+/* ============================================
    TCS TOP NAVIGATION IMPROVEMENTS
    ============================================ */
 @layer components {
