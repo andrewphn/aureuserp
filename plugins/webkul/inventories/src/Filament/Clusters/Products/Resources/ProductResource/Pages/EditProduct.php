@@ -164,6 +164,22 @@ class EditProduct extends BaseEditProduct
                             $updates['reference_type_code_id'] = $data['reference_type_code_id'];
                         }
 
+                        // Download product image from URL if provided
+                        if (!empty($data['image_url'])) {
+                            $downloadedImage = GeminiProductService::downloadProductImage(
+                                $data['image_url'],
+                                $data['identified_product_name'] ?? $productName
+                            );
+                            if ($downloadedImage) {
+                                $existingImages = $currentData['images'] ?? [];
+                                if (!is_array($existingImages)) {
+                                    $existingImages = [];
+                                }
+                                $existingImages[] = $downloadedImage;
+                                $updates['images'] = $existingImages;
+                            }
+                        }
+
                         if (!empty($updates)) {
                             // Update form state without saving to database
                             $this->form->fill(array_merge($currentData, $updates));
@@ -403,12 +419,23 @@ class EditProduct extends BaseEditProduct
                             $updates['reference_type_code_id'] = $aiData['reference_type_code_id'];
                         }
 
-                        // Add image to product's images array
+                        // Add uploaded image to product's images array
                         $existingImages = $currentData['images'] ?? [];
                         if (!is_array($existingImages)) {
                             $existingImages = [];
                         }
                         $existingImages[] = $permanentPath;
+
+                        // Also download AI-suggested product image if available
+                        if (!empty($aiData['image_url'])) {
+                            $downloadedImage = GeminiProductService::downloadProductImage(
+                                $aiData['image_url'],
+                                $aiData['identified_product_name'] ?? null
+                            );
+                            if ($downloadedImage) {
+                                $existingImages[] = $downloadedImage;
+                            }
+                        }
                         $updates['images'] = $existingImages;
 
                         // Quantity from user input

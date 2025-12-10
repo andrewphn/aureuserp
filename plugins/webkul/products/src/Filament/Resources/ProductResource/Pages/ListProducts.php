@@ -274,28 +274,11 @@ class ListProducts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Grid size selector - only visible in grid layout
-            ActionGroup::make([
-                Action::make('gridSizeSmall')
-                    ->label('Small Cards')
-                    ->icon('heroicon-o-squares-2x2')
-                    ->color($this->gridSize === 'small' ? 'primary' : 'gray')
-                    ->action(fn () => $this->setGridSize('small')),
-                Action::make('gridSizeMedium')
-                    ->label('Medium Cards')
-                    ->icon('heroicon-o-square-3-stack-3d')
-                    ->color($this->gridSize === 'medium' ? 'primary' : 'gray')
-                    ->action(fn () => $this->setGridSize('medium')),
-                Action::make('gridSizeLarge')
-                    ->label('Large Cards')
-                    ->icon('heroicon-o-rectangle-stack')
-                    ->color($this->gridSize === 'large' ? 'primary' : 'gray')
-                    ->action(fn () => $this->setGridSize('large')),
-            ])
-                ->label('Card Size')
-                ->icon('heroicon-o-adjustments-horizontal')
-                ->button()
-                ->color('gray')
+            // Inline grid size slider - only visible in grid layout
+            Action::make('gridSizeSlider')
+                ->view('products::filament.resources.product.pages.grid-size-slider', [
+                    'gridSize' => $this->gridSize,
+                ])
                 ->visible(fn () => $this->isGridLayout()),
 
             CreateAction::make()
