@@ -1335,6 +1335,13 @@ class EmployeeResource extends Resource
                     ->outlined(),
                 EditAction::make()
                     ->outlined(),
+                Tables\Actions\Action::make('generateIntakeForm')
+                    ->label('Intake Form')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->outlined()
+                    ->url(fn (Employee $record): string => route('employee.intake-form', ['employee' => $record->id]))
+                    ->openUrlInNewTab(),
                 RestoreAction::make()
                     ->outlined()
                     ->successNotification(

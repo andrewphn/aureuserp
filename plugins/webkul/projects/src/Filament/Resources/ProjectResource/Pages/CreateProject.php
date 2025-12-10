@@ -109,6 +109,22 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
+     * Get header actions - includes "Create Now" button for early project creation
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('createNow')
+                ->label('Create Now')
+                ->icon('heroicon-o-rocket-launch')
+                ->color('success')
+                ->size('lg')
+                ->action(fn () => $this->create())
+                ->tooltip('Create project with current data'),
+        ];
+    }
+
+    /**
      * Define the wizard form schema
      */
     public function form(Schema $form): Schema
@@ -369,6 +385,17 @@ class CreateProject extends Page implements HasForms
                         })
                         ->columnSpanFull(),
 
+                    // Hidden country field - populated by AddressAutocomplete, triggers state options refresh
+                    Select::make('project_address.country_id')
+                        ->label('Country')
+                        ->options(\Webkul\Support\Models\Country::whereIn('code', ['US', 'CA'])->pluck('name', 'id'))
+                        ->default(fn () => \Webkul\Support\Models\Country::where('code', 'US')->first()?->id)
+                        ->live()
+                        ->afterStateUpdated(fn (callable $set) => $set('project_address.state_id', null))
+                        ->disabled(fn (callable $get) => $get('use_customer_address'))
+                        ->dehydrated()
+                        ->hidden(),
+
                     Grid::make(3)->schema([
                         TextInput::make('project_address.city')
                             ->label('City')
@@ -379,7 +406,9 @@ class CreateProject extends Page implements HasForms
                             ->options(function (callable $get) {
                                 $countryId = $get('project_address.country_id');
                                 if (!$countryId) {
-                                    return [];
+                                    // Default to US states if no country selected
+                                    $usCountryId = \Webkul\Support\Models\Country::where('code', 'US')->first()?->id;
+                                    return \Webkul\Support\Models\State::where('country_id', $usCountryId)->pluck('name', 'id');
                                 }
                                 return \Webkul\Support\Models\State::where('country_id', $countryId)->pluck('name', 'id');
                             })

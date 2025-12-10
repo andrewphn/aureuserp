@@ -5,6 +5,7 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
@@ -46,6 +47,7 @@ use Webkul\Security\Models\User;
  * @property-read Location|null $location
  * @property-read User|null $reservedByUser
  * @property-read Move|null $move
+ * @property-read \Illuminate\Database\Eloquent\Collection|HardwareRequirement[] $hardwareRequirements
  */
 class MaterialReservation extends Model
 {
@@ -163,6 +165,14 @@ class MaterialReservation extends Model
     public function move(): BelongsTo
     {
         return $this->belongsTo(Move::class);
+    }
+
+    /**
+     * Hardware requirements linked to this reservation
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'material_reservation_id');
     }
 
     // =========================================================================

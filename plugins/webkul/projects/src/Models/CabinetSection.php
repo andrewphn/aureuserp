@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
 
 /**
  * Cabinet Section Model
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $cabinet_id
  * @property int|null $section_number
+ * @property string|null $section_code
+ * @property string|null $full_code
  * @property string|null $name
  * @property string|null $section_type
  * @property float|null $width_inches
@@ -51,8 +54,12 @@ class CabinetSection extends Model
     protected $fillable = [
         'cabinet_id',
         'section_number',
+        'section_code',
+        'full_code',
         'name',
         'section_type',
+        'product_id',
+        'hardware_product_id',
         'width_inches',
         'height_inches',
         'position_from_left_inches',
@@ -100,11 +107,122 @@ class CabinetSection extends Model
     ];
 
     /**
+     * Boot the model - auto-generate codes on saving
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($section) {
+            // Auto-generate section_code if empty
+            if (empty($section->section_code)) {
+                $section->section_code = $section->generateSectionCode();
+            }
+
+            // Always regenerate full_code
+            $section->full_code = $section->generateFullCode();
+        });
+
+        // When section_code changes, regenerate all descendant full_codes
+        static::updated(function ($section) {
+            if ($section->isDirty('section_code')) {
+                $section->regenerateDescendantCodes();
+            }
+        });
+    }
+
+    /**
+     * Generate the section code (letter based on position)
+     * Format: A, B, C, D... (1=A, 2=B, etc.)
+     */
+    public function generateSectionCode(): string
+    {
+        $number = $this->section_number ?? $this->sort_order ?? 1;
+        return chr(64 + $number); // 1=A, 2=B, 3=C, etc.
+    }
+
+    /**
+     * Generate the complete hierarchical code for this section
+     * Format: TCS-0554-15WSANKATY-K1-SW-U1-A
+     */
+    public function generateFullCode(): string
+    {
+        $parts = [];
+
+        // Explicitly load relationships to ensure they're available
+        // This is necessary because during boot/saving, relationships may not be loaded
+        if ($this->cabinet_id && !$this->relationLoaded('cabinet')) {
+            $this->load('cabinet.cabinetRun.roomLocation.room.project');
+        }
+
+        // Walk up the hierarchy
+        $cabinet = $this->cabinet;
+        $run = $cabinet?->cabinetRun;
+        $location = $run?->roomLocation;
+        $room = $location?->room ?? $cabinet?->room;
+        $project = $room?->project ?? $cabinet?->project;
+
+        // Build code from project down to section
+        if ($project?->project_number) {
+            $parts[] = $project->project_number;
+        }
+
+        if ($room?->room_code) {
+            $parts[] = $room->room_code;
+        }
+
+        if ($location?->location_code) {
+            $parts[] = $location->location_code;
+        }
+
+        if ($run?->run_code) {
+            $parts[] = $run->run_code;
+        }
+
+        // Add the section code
+        $parts[] = $this->section_code ?? $this->generateSectionCode();
+
+        return implode('-', array_filter($parts));
+    }
+
+    /**
+     * Regenerate full_codes for all descendant components
+     * Called when section_code changes
+     */
+    public function regenerateDescendantCodes(): void
+    {
+        $this->load(['doors', 'drawers', 'shelves', 'pullouts']);
+
+        foreach (['doors', 'drawers', 'shelves', 'pullouts'] as $relation) {
+            foreach ($this->$relation as $component) {
+                $component->full_code = $component->generateFullCode();
+                $component->saveQuietly();
+            }
+        }
+    }
+
+    /**
      * Get the cabinet this section belongs to.
      */
     public function cabinet(): BelongsTo
     {
         return $this->belongsTo(Cabinet::class, 'cabinet_id');
+    }
+
+    /**
+     * Get the product associated with this section.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /**
+     * Get the hardware product associated with this section.
+     */
+    public function hardwareProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'hardware_product_id');
     }
 
     /**

@@ -36,7 +36,18 @@
             </x-filament::button>
         </div>
 
-        {{-- Next / Create Button --}}
+        {{-- Create Now Button (available on all steps except last) --}}
+        <div x-show="! isLastStep()">
+            <x-filament::button
+                type="submit"
+                color="success"
+                icon="heroicon-o-rocket-launch"
+            >
+                Create Now
+            </x-filament::button>
+        </div>
+
+        {{-- Next Button (not on last step) --}}
         <div x-show="! isLastStep()">
             <x-filament::button
                 type="button"

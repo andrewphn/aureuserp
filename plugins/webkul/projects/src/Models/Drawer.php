@@ -5,17 +5,22 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasFullCode;
 
 /**
  * Drawer Model
  *
  * Represents a cabinet drawer component.
  * Hierarchy: Project -> Room -> Location -> Cabinet Run -> Cabinet -> Section -> Drawer
+ *
+ * @property string|null $full_code Hierarchical code (e.g., TCS-0554-15WSANKATY-K1-SW-B1-A-DRW1)
  */
 class Drawer extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasFullCode;
 
     protected $table = 'projects_drawers';
 
@@ -25,6 +30,7 @@ class Drawer extends Model
         'section_id',
         'drawer_number',
         'drawer_name',
+        'full_code',
         'drawer_position',
         'sort_order',
         'front_width_inches',
@@ -51,6 +57,8 @@ class Drawer extends Model
         'stain_color',
         'has_decorative_hardware',
         'decorative_hardware_model',
+        'slide_product_id',
+        'decorative_hardware_product_id',
         'cnc_cut_at',
         'manually_cut_at',
         'edge_banded_at',
@@ -110,6 +118,29 @@ class Drawer extends Model
         return $this->belongsTo(CabinetSection::class, 'section_id');
     }
 
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function slideProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'slide_product_id');
+    }
+
+    public function decorativeHardwareProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'decorative_hardware_product_id');
+    }
+
+    /**
+     * Additional hardware/products for this drawer
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'drawer_id');
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order');
@@ -118,5 +149,14 @@ class Drawer extends Model
     public function getFormattedFrontDimensionsAttribute(): string
     {
         return ($this->front_width_inches ?? '?') . '"W x ' . ($this->front_height_inches ?? '?') . '"H';
+    }
+
+    /**
+     * Get the component code for this drawer
+     * Format: DRW1, DRW2, etc.
+     */
+    public function getComponentCode(): string
+    {
+        return 'DRW' . ($this->drawer_number ?? 1);
     }
 }

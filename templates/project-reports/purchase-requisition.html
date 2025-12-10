@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Requisition | {{PROJECT_NAME}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                width: 100%;
+                max-width: 7.5in;
+                margin: 0;
+                padding: 0;
+                page-break-after: always;
+                box-shadow: none;
+            }
+
+            .page:last-child {
+                page-break-after: auto;
+            }
+
+            .no-print { display: none !important; }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.4;
+            color: #1c1917;
+            background: #f5f5f5;
+            font-size: 10pt;
+        }
+
+        .page {
+            width: 8.5in;
+            min-height: 11in;
+            max-width: 100%;
+            margin: 20px auto;
+            padding: 0.5in;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .company-text h1 {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .company-text .tagline {
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #78716c;
+        }
+
+        .report-info {
+            text-align: right;
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            font-size: 10px;
+            color: #78716c;
+        }
+
+        .report-date {
+            font-size: 9px;
+            color: #a8a29e;
+            margin-top: 4px;
+        }
+
+        /* Project Info Bar */
+        .project-bar {
+            background: #1e40af;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .project-bar-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .project-bar-number {
+            font-size: 10px;
+            font-family: monospace;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .project-bar-customer {
+            font-size: 11px;
+            color: #bfdbfe;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-icon {
+            color: #f59e0b;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            font-size: 10px;
+            color: #92400e;
+        }
+
+        .alert-content strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1c1917;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-count {
+            font-size: 10px;
+            font-weight: 500;
+            color: #78716c;
+            background: #f5f5f4;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        .data-table th {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #1e40af;
+        }
+
+        .data-table td {
+            border: 1px solid #e7e5e4;
+            padding: 10px 12px;
+            vertical-align: middle;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #fafaf9;
+        }
+
+        .data-table .text-right {
+            text-align: right;
+        }
+
+        .data-table .text-center {
+            text-align: center;
+        }
+
+        .data-table .font-mono {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 9px;
+        }
+
+        .data-table .font-bold {
+            font-weight: 600;
+        }
+
+        .data-table .text-muted {
+            color: #78716c;
+        }
+
+        .data-table .total-row {
+            background: #1e40af !important;
+            color: white;
+            font-weight: 700;
+        }
+
+        .data-table .total-row td {
+            border-color: #1e40af;
+        }
+
+        /* Category Badges */
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .category-materials { background: #fef3c7; color: #92400e; }
+        .category-hardware { background: #dbeafe; color: #1e40af; }
+        .category-accessories { background: #d1fae5; color: #065f46; }
+
+        /* Stock Status Badges */
+        .stock-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .stock-in { background: #d1fae5; color: #065f46; }
+        .stock-low { background: #fef3c7; color: #92400e; }
+        .stock-out { background: #fee2e2; color: #dc2626; }
+        .stock-unknown { background: #e7e5e4; color: #57534e; }
+
+        /* Vendor Cell */
+        .vendor-cell {
+            font-size: 9px;
+        }
+
+        .vendor-name {
+            font-weight: 500;
+        }
+
+        .vendor-not-set {
+            color: #dc2626;
+            font-style: italic;
+        }
+
+        /* Quantity Cells */
+        .qty-needed {
+            font-weight: 700;
+            font-size: 11px;
+            color: #1e40af;
+        }
+
+        .qty-on-hand {
+            font-size: 10px;
+        }
+
+        .qty-to-order {
+            font-weight: 700;
+            font-size: 11px;
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .qty-zero {
+            color: #059669;
+            background: #d1fae5;
+        }
+
+        /* Cost Cells */
+        .cost-cell {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 10px;
+        }
+
+        .cost-cell.total {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .summary-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1e40af;
+            margin-bottom: 12px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1c1917;
+        }
+
+        .summary-value.money {
+            color: #dc2626;
+        }
+
+        .summary-value.success {
+            color: #059669;
+        }
+
+        .summary-label {
+            font-size: 9px;
+            color: #78716c;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        /* Job Reference */
+        .job-ref {
+            font-size: 8px;
+            color: #78716c;
+            margin-top: 4px;
+        }
+
+        .job-ref code {
+            background: #f5f5f4;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-family: monospace;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 12px;
+            border-top: 1px solid #e7e5e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8px;
+            color: #a8a29e;
+        }
+
+        .footer-notes {
+            max-width: 70%;
+        }
+
+        .footer-notes ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-notes li {
+            margin-bottom: 2px;
+        }
+
+        .footer-notes li:before {
+            content: "* ";
+            color: #3b82f6;
+        }
+
+        .page-number {
+            font-weight: 500;
+        }
+
+        /* Print Button */
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+        }
+
+        .print-btn {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            background: #1e3a8a;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #78716c;
+            font-style: italic;
+            background: #fafaf9;
+            border-radius: 6px;
+            border: 1px dashed #d6d3d1;
+        }
+
+        /* Approval Section */
+        .approval-section {
+            margin-top: 30px;
+            border-top: 2px solid #e7e5e4;
+            padding-top: 20px;
+        }
+
+        .approval-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #78716c;
+            margin-bottom: 16px;
+        }
+
+        .approval-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .approval-block {
+            border-bottom: 1px solid #1c1917;
+            padding-bottom: 8px;
+        }
+
+        .approval-label {
+            font-size: 8px;
+            color: #78716c;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls no-print">
+        <button class="print-btn" onclick="window.print()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print Requisition
+        </button>
+    </div>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <div class="company-logo">TCS</div>
+                <div class="company-text">
+                    <h1>The Carpenter's Son</h1>
+                    <div class="tagline">Fine Custom Woodworking</div>
+                </div>
+            </div>
+            <div class="report-info">
+                <div class="report-title">Purchase Requisition</div>
+                <div class="report-subtitle">Materials & Hardware Procurement Request</div>
+                <div class="report-date">Generated: {{GENERATED_DATE}}</div>
+            </div>
+        </div>
+
+        <!-- Project Bar -->
+        <div class="project-bar">
+            <div class="project-bar-left">
+                <span class="project-bar-name">{{PROJECT_NAME}}</span>
+                <span class="project-bar-number">{{PROJECT_NUMBER}}</span>
+            </div>
+            <span class="project-bar-customer">{{CUSTOMER_NAME}}</span>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert-banner">
+            <svg class="alert-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="alert-content">
+                <strong>Action Required: Please verify quantities and add vendor details before creating Purchase Orders</strong>
+                Items marked with "Not Set" vendor need supplier assignment. Stock levels are estimates - verify with physical counts.
+            </div>
+        </div>
+
+        <!-- Materials Section -->
+        <div class="section">
+            <div class="section-header">
+                <span>Sheet Goods & Lumber</span>
+                <span class="section-count">{{MATERIAL_COUNT}} items</span>
+            </div>
+            {{MATERIALS_TABLE}}
+        </div>
+
+        <!-- Hardware Section -->
+        <div class="section">
+            <div class="section-header">
+                <span>Hardware Components</span>
+                <span class="section-count">{{HARDWARE_COUNT}} items</span>
+            </div>
+            {{HARDWARE_TABLE}}
+        </div>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <div class="summary-title">Requisition Summary</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{TOTAL_LINE_ITEMS}}</div>
+                    <div class="summary-label">Line Items</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ITEMS_IN_STOCK}}</div>
+                    <div class="summary-label">In Stock</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value money">{{ITEMS_TO_ORDER}}</div>
+                    <div class="summary-label">To Order</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value money">{{ESTIMATED_COST}}</div>
+                    <div class="summary-label">Est. Purchase Cost</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Section -->
+        <div class="approval-section">
+            <div class="approval-title">Approval Signatures</div>
+            <div class="approval-grid">
+                <div class="approval-block">
+                    <div class="approval-label">Requested By / Date</div>
+                </div>
+                <div class="approval-block">
+                    <div class="approval-label">Approved By / Date</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-notes">
+                <ul>
+                    <li>Verify vendor pricing before creating POs</li>
+                    <li>Check lead times against project schedule</li>
+                    <li>Job Code: {{PROJECT_NUMBER}} - allocate all costs to this project</li>
+                </ul>
+            </div>
+            <div class="page-number">Page 1 of 1</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Product\Models\Product;
+use Webkul\Project\Services\TcsPricingService;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
@@ -28,6 +29,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property int $cabinet_run_id
  * @property int $product_variant_id
  * @property string|null $cabinet_number
+ * @property string|null $full_code
  * @property int $position_in_run
  * @property float $wall_position_start_inches
  * @property float $length_inches
@@ -67,6 +69,7 @@ class Cabinet extends Model
         'cabinet_run_id',
         'product_variant_id',
         'cabinet_number',
+        'full_code',
         'position_in_run',
         'wall_position_start_inches',
         'length_inches',
@@ -84,6 +87,19 @@ class Cabinet extends Model
         'custom_modifications',
         'shop_notes',
         'creator_id',
+        // Door/Drawer Configuration
+        'door_style',
+        'door_mounting',
+        'door_count',
+        'drawer_count',
+        // Hardware from Products
+        'hinge_product_id',
+        'hinge_quantity',
+        'hinge_model',
+        'slide_product_id',
+        'slide_quantity',
+        'slide_model',
+        'product_id',
         // Production tracking timestamps
         'face_frame_cut_at',
         'door_fronts_cut_at',
@@ -91,6 +107,9 @@ class Cabinet extends Model
         'hardware_installed_at',
         'pocket_holes_at',
         'doweled_at',
+        // Hardware products
+        'pullout_product_id',
+        'lazy_susan_product_id',
     ];
 
     protected $casts = [
@@ -200,6 +219,66 @@ class Cabinet extends Model
     public function sections(): HasMany
     {
         return $this->hasMany(CabinetSection::class, 'cabinet_id');
+    }
+
+    /**
+     * Product (main cabinet product/SKU)
+     *
+     * @return BelongsTo
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /**
+     * Hinge product for this cabinet
+     *
+     * @return BelongsTo
+     */
+    public function hingeProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'hinge_product_id');
+    }
+
+    /**
+     * Slide product for this cabinet
+     *
+     * @return BelongsTo
+     */
+    public function slideProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'slide_product_id');
+    }
+
+    /**
+     * Pullout product for this cabinet
+     *
+     * @return BelongsTo
+     */
+    public function pulloutProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'pullout_product_id');
+    }
+
+    /**
+     * Lazy susan product for this cabinet
+     *
+     * @return BelongsTo
+     */
+    public function lazySusanProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'lazy_susan_product_id');
+    }
+
+    /**
+     * Hardware requirements for this cabinet
+     *
+     * @return HasMany
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'cabinet_id');
     }
 
     /**
@@ -326,14 +405,134 @@ class Cabinet extends Model
                 $cabinet->linear_feet = round($cabinet->length_inches / 12, 2);
             }
 
-            // Auto-calculate total price if not set
-            if ($cabinet->unit_price_per_lf && $cabinet->linear_feet && $cabinet->quantity && !$cabinet->total_price) {
+            // Auto-calculate unit_price_per_lf from TcsPricingService if pricing attributes are set
+            // This dynamically pulls pricing from products_attribute_options
+            if ($cabinet->shouldCalculatePrice()) {
+                $pricingService = new TcsPricingService();
+                $effectivePricing = $pricingService->resolveEffectivePricing($cabinet);
+
+                $cabinet->unit_price_per_lf = $pricingService->calculateUnitPrice(
+                    $effectivePricing['cabinet_level'],
+                    $effectivePricing['material_category'],
+                    $effectivePricing['finish_option']
+                );
+            }
+
+            // Auto-calculate total price from unit price, LF, and quantity
+            if ($cabinet->unit_price_per_lf && $cabinet->linear_feet && $cabinet->quantity) {
                 $cabinet->total_price = round(
                     $cabinet->unit_price_per_lf * $cabinet->linear_feet * $cabinet->quantity,
                     2
                 );
             }
+
+            // Always regenerate full_code
+            $cabinet->full_code = $cabinet->generateFullCode();
         });
+    }
+
+    /**
+     * Generate the complete hierarchical code for this cabinet
+     * Format: TCS-0554-15WSANKATY-K1-SW-U1
+     */
+    public function generateFullCode(): string
+    {
+        $parts = [];
+
+        // Explicitly load relationships to ensure they're available
+        // This is necessary because during boot/saving, relationships may not be loaded
+        if ($this->cabinet_run_id && !$this->relationLoaded('cabinetRun')) {
+            $this->load('cabinetRun.roomLocation.room.project');
+        }
+
+        // Walk up the hierarchy
+        $run = $this->cabinetRun;
+        $location = $run?->roomLocation;
+        $room = $location?->room ?? $this->room;
+        $project = $room?->project ?? $this->project;
+
+        // Build code from project down to cabinet run
+        if ($project?->project_number) {
+            $parts[] = $project->project_number;
+        }
+
+        if ($room?->room_code) {
+            $parts[] = $room->room_code;
+        }
+
+        if ($location?->location_code) {
+            $parts[] = $location->location_code;
+        }
+
+        if ($run?->run_code) {
+            $parts[] = $run->run_code;
+        }
+
+        return implode('-', array_filter($parts));
+    }
+
+    /**
+     * Determine if pricing should be calculated from TcsPricingService
+     *
+     * Pricing is calculated when:
+     * - unit_price_per_lf is not manually set (null or 0)
+     * - Cabinet has pricing attributes (level, material, or finish)
+     *
+     * @return bool
+     */
+    public function shouldCalculatePrice(): bool
+    {
+        // Skip if unit_price_per_lf is already explicitly set
+        if ($this->unit_price_per_lf && $this->unit_price_per_lf > 0) {
+            // Check if pricing attributes changed - if so, recalculate
+            $dirty = $this->getDirty();
+            if (!isset($dirty['cabinet_level']) &&
+                !isset($dirty['material_category']) &&
+                !isset($dirty['finish_option'])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the calculated unit price from TcsPricingService
+     *
+     * This method can be used to get pricing without saving the cabinet.
+     * Uses the inheritance chain: Cabinet → Run → Location → Room
+     *
+     * @return float The calculated unit price per linear foot
+     */
+    public function getCalculatedUnitPriceAttribute(): float
+    {
+        $pricingService = new TcsPricingService();
+        $effectivePricing = $pricingService->resolveEffectivePricing($this);
+
+        return $pricingService->calculateUnitPrice(
+            $effectivePricing['cabinet_level'],
+            $effectivePricing['material_category'],
+            $effectivePricing['finish_option']
+        );
+    }
+
+    /**
+     * Get detailed price breakdown from TcsPricingService
+     *
+     * Returns price components: base level price + material price + finish price
+     *
+     * @return array Price breakdown with labels and values
+     */
+    public function getPriceBreakdownAttribute(): array
+    {
+        $pricingService = new TcsPricingService();
+        $effectivePricing = $pricingService->resolveEffectivePricing($this);
+
+        return $pricingService->getPriceBreakdown(
+            $effectivePricing['cabinet_level'],
+            $effectivePricing['material_category'],
+            $effectivePricing['finish_option']
+        );
     }
 
     /**

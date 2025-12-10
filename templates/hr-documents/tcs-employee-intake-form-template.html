@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Intake Form | The Carpenter's Son</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.4in;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-size: 8pt;
+            }
+
+            .page {
+                width: 100%;
+                max-width: 7.7in;
+                margin: 0;
+                padding: 0;
+                page-break-after: always;
+            }
+
+            .page:last-child {
+                page-break-after: auto;
+            }
+
+            input, textarea {
+                border: none !important;
+                border-bottom: 1px solid #999 !important;
+                background: transparent !important;
+            }
+
+            .no-print { display: none !important; }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.2;
+            color: #1c1917;
+            background: #f5f5f5;
+            font-size: 9pt;
+        }
+
+        .page {
+            width: 8.5in;
+            min-height: 11in;
+            max-width: 100%;
+            margin: 10px auto;
+            padding: 0.3in;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .company-text h1 {
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 1.5px;
+            color: #000;
+            margin-bottom: 0;
+        }
+
+        .company-text .tagline {
+            font-size: 7px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #57534e;
+        }
+
+        .form-info {
+            text-align: right;
+        }
+
+        .form-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #000;
+            margin-bottom: 2px;
+        }
+
+        .form-subtitle {
+            font-size: 8px;
+            color: #57534e;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #000;
+            margin-bottom: 6px;
+            padding-bottom: 3px;
+            border-bottom: 2px solid #d4a574;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-note {
+            font-size: 7px;
+            font-weight: 400;
+            color: #57534e;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* Form Fields */
+        .form-grid {
+            display: grid;
+            gap: 6px;
+        }
+
+        .form-grid.cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-grid.cols-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .form-grid.cols-4 {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .field.inline {
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .field label {
+            font-size: 7px;
+            font-weight: 500;
+            color: #57534e;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .field input[type="text"],
+        .field input[type="date"],
+        .field input[type="tel"],
+        .field input[type="email"] {
+            border: none;
+            border-bottom: 1px solid #d6d3d1;
+            padding: 3px 2px;
+            font-size: 9px;
+            background: transparent;
+            width: 100%;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-bottom-color: #d4a574;
+        }
+
+        .field-wide {
+            grid-column: span 2;
+        }
+
+        .field-full {
+            grid-column: 1 / -1;
+        }
+
+        /* Pre-filled values */
+        .prefilled {
+            font-weight: 500;
+            color: #1c1917;
+        }
+
+        /* Checkbox Groups */
+        .checkbox-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 10px;
+            height: 10px;
+            margin: 0;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #fafaf9;
+            border: 1px solid #d6d3d1;
+            border-radius: 2px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .info-box h4 {
+            font-size: 8px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        /* Table for structured data */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8px;
+        }
+
+        .data-table th {
+            background: #fafaf9;
+            border: 1px solid #d6d3d1;
+            padding: 4px 6px;
+            text-align: left;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 7px;
+            color: #57534e;
+        }
+
+        .data-table td {
+            border: 1px solid #d6d3d1;
+            padding: 6px;
+            height: 24px;
+        }
+
+        .data-table input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 8px;
+            padding: 1px;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #d6d3d1;
+        }
+
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #000;
+            min-height: 25px;
+        }
+
+        .signature-label {
+            font-size: 7px;
+            color: #57534e;
+            margin-top: 2px;
+        }
+
+        /* Page indicator */
+        .page-indicator {
+            text-align: center;
+            font-size: 7px;
+            color: #a8a29e;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px solid #d6d3d1;
+            text-align: center;
+            font-size: 7px;
+            color: #57534e;
+        }
+
+        /* Notice Box */
+        .notice-box {
+            background: #fef9c3;
+            border: 1px solid #fbbf24;
+            border-radius: 2px;
+            padding: 6px 8px;
+            font-size: 7px;
+            margin-bottom: 10px;
+        }
+
+        .notice-box strong {
+            color: #92400e;
+        }
+
+        /* W-4 Simplified */
+        .w4-box {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            border-radius: 2px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .w4-box h4 {
+            font-size: 9px;
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 6px;
+        }
+
+        /* Bank info styling */
+        .bank-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 120px;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- PAGE 1: Personal Information -->
+    <div class="page">
+        <div class="header">
+            <div class="company-info">
+                <img src="tcs_logo.png" alt="TCS Logo" style="height:28px; width:auto;" />
+                <div class="company-text">
+                    <h1>THE CARPENTER'S SON</h1>
+                    <p class="tagline">Custom Cabinetry & Fine Millwork</p>
+                </div>
+            </div>
+            <div class="form-info">
+                <h2 class="form-title">NEW EMPLOYEE INTAKE FORM</h2>
+                <p class="form-subtitle">Please print clearly in ink</p>
+            </div>
+        </div>
+
+        <div class="notice-box">
+            <strong>CONFIDENTIAL:</strong> This information is collected for employment purposes only and will be kept in your personnel file.
+            Please complete all sections. Attach additional documentation as needed.
+        </div>
+
+        <!-- Personal Information -->
+        <div class="section">
+            <div class="section-header">Personal Information</div>
+            <div class="form-grid cols-3">
+                <div class="field">
+                    <label>Legal First Name</label>
+                    <input type="text" value="{{FIRST_NAME}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Middle Name/Initial</label>
+                    <input type="text" value="{{MIDDLE_NAME}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Legal Last Name</label>
+                    <input type="text" value="{{LAST_NAME}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top: 6px;">
+                <div class="field">
+                    <label>Preferred Name (if different)</label>
+                    <input type="text" value="{{PREFERRED_NAME}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Date of Birth</label>
+                    <input type="text" placeholder="MM/DD/YYYY" value="{{DATE_OF_BIRTH}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Social Security Number</label>
+                    <input type="text" placeholder="XXX-XX-XXXX" value="{{SSN}}" class="prefilled" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="section">
+            <div class="section-header">Contact Information</div>
+            <div class="form-grid cols-2">
+                <div class="field field-wide">
+                    <label>Street Address</label>
+                    <input type="text" value="{{STREET_ADDRESS}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-4" style="margin-top: 6px;">
+                <div class="field" style="grid-column: span 2;">
+                    <label>City</label>
+                    <input type="text" value="{{CITY}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>State</label>
+                    <input type="text" value="{{STATE}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>ZIP Code</label>
+                    <input type="text" value="{{ZIP_CODE}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top: 6px;">
+                <div class="field">
+                    <label>Primary Phone</label>
+                    <input type="tel" placeholder="(___) ___-____" value="{{PRIMARY_PHONE}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Secondary Phone</label>
+                    <input type="tel" placeholder="(___) ___-____" value="{{SECONDARY_PHONE}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Email Address</label>
+                    <input type="email" value="{{EMAIL}}" class="prefilled" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="section">
+            <div class="section-header">Emergency Contact <span class="section-note">(Required - Someone NOT living with you)</span></div>
+            <div class="form-grid cols-3">
+                <div class="field">
+                    <label>Contact Name</label>
+                    <input type="text" value="{{EMERGENCY_CONTACT_NAME}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Relationship</label>
+                    <input type="text" value="{{EMERGENCY_CONTACT_RELATIONSHIP}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="(___) ___-____" value="{{EMERGENCY_CONTACT_PHONE}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top: 6px;">
+                <div class="field">
+                    <label>Secondary Emergency Contact Name</label>
+                    <input type="text" value="{{EMERGENCY_CONTACT_2_NAME}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="(___) ___-____" value="{{EMERGENCY_CONTACT_2_PHONE}}" class="prefilled" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Employment Information -->
+        <div class="section">
+            <div class="section-header">Employment Information</div>
+            <div class="form-grid cols-3">
+                <div class="field">
+                    <label>Position/Title</label>
+                    <input type="text" value="{{POSITION}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Start Date</label>
+                    <input type="text" placeholder="MM/DD/YYYY" value="{{START_DATE}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Hourly Rate / Salary</label>
+                    <input type="text" placeholder="$" value="{{PAY_RATE}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top: 6px;">
+                <div class="field">
+                    <label>Employment Type</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" {{FULL_TIME_CHECKED}} /> Full-Time</span>
+                        <span class="checkbox-item"><input type="checkbox" {{PART_TIME_CHECKED}} /> Part-Time</span>
+                        <span class="checkbox-item"><input type="checkbox" {{SEASONAL_CHECKED}} /> Seasonal</span>
+                        <span class="checkbox-item"><input type="checkbox" {{CONTRACT_CHECKED}} /> Contract</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Pay Frequency</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" {{WEEKLY_CHECKED}} /> Weekly</span>
+                        <span class="checkbox-item"><input type="checkbox" {{BIWEEKLY_CHECKED}} /> Bi-Weekly</span>
+                        <span class="checkbox-item"><input type="checkbox" {{MONTHLY_CHECKED}} /> Monthly</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Driver's License / Transportation -->
+        <div class="section">
+            <div class="section-header">Identification & Transportation</div>
+            <div class="form-grid cols-3">
+                <div class="field">
+                    <label>Driver's License Number</label>
+                    <input type="text" value="{{DRIVERS_LICENSE}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>State Issued</label>
+                    <input type="text" value="{{LICENSE_STATE}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Expiration Date</label>
+                    <input type="text" placeholder="MM/DD/YYYY" value="{{LICENSE_EXPIRATION}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top: 6px;">
+                <div class="field">
+                    <label>Do you have reliable transportation to work?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" {{TRANSPORTATION_YES}} /> Yes</span>
+                        <span class="checkbox-item"><input type="checkbox" {{TRANSPORTATION_NO}} /> No</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Are you legally authorized to work in the U.S.?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" {{WORK_AUTH_YES}} /> Yes</span>
+                        <span class="checkbox-item"><input type="checkbox" {{WORK_AUTH_NO}} /> No</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Employment -->
+        <div class="section">
+            <div class="section-header">Previous Employment <span class="section-note">(Most Recent)</span></div>
+            <div class="form-grid cols-2">
+                <div class="field">
+                    <label>Employer Name</label>
+                    <input type="text" value="{{PREVIOUS_EMPLOYER}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Phone Number</label>
+                    <input type="tel" value="{{PREVIOUS_EMPLOYER_PHONE}}" class="prefilled" />
+                </div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top: 6px;">
+                <div class="field">
+                    <label>Position Held</label>
+                    <input type="text" value="{{PREVIOUS_POSITION}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Dates Employed</label>
+                    <input type="text" placeholder="From - To" value="{{PREVIOUS_DATES}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>Reason for Leaving</label>
+                    <input type="text" value="{{PREVIOUS_REASON}}" class="prefilled" />
+                </div>
+            </div>
+        </div>
+
+        <div class="page-indicator">Page 1 of 2 — Continue on next page</div>
+    </div>
+
+    <!-- PAGE 2: Tax & Payment Information -->
+    <div class="page">
+        <div class="header">
+            <div class="company-info">
+                <img src="tcs_logo.png" alt="TCS Logo" style="height:28px; width:auto;" />
+                <div class="company-text">
+                    <h1>THE CARPENTER'S SON</h1>
+                    <p class="tagline">Custom Cabinetry & Fine Millwork</p>
+                </div>
+            </div>
+            <div class="form-info">
+                <h2 class="form-title">NEW EMPLOYEE INTAKE FORM</h2>
+                <p class="form-subtitle">Tax & Payment Information</p>
+            </div>
+        </div>
+
+        <!-- W-4 Information (Simplified) -->
+        <div class="w4-box">
+            <h4>Federal Tax Withholding (W-4 Information)</h4>
+            <p style="font-size: 7px; color: #166534; margin-bottom: 8px;">
+                Complete this section OR attach a completed IRS Form W-4. For complex situations, we recommend completing the official W-4.
+            </p>
+            <div class="form-grid cols-2">
+                <div class="field">
+                    <label>Filing Status</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Single</span>
+                        <span class="checkbox-item"><input type="checkbox" /> Married Filing Jointly</span>
+                        <span class="checkbox-item"><input type="checkbox" /> Head of Household</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Multiple Jobs or Spouse Works?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes</span>
+                        <span class="checkbox-item"><input type="checkbox" /> No</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top: 8px;">
+                <div class="field">
+                    <label>Number of Dependents</label>
+                    <input type="text" style="background: #fff;" />
+                </div>
+                <div class="field">
+                    <label>Additional Withholding per Paycheck</label>
+                    <input type="text" placeholder="$" style="background: #fff;" />
+                </div>
+                <div class="field">
+                    <label>Claim Exempt?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes (attach W-4)</span>
+                        <span class="checkbox-item"><input type="checkbox" /> No</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- State Tax -->
+        <div class="section">
+            <div class="section-header">State Tax Withholding (NY IT-2104)</div>
+            <div class="form-grid cols-3">
+                <div class="field">
+                    <label>NY Allowances Claimed</label>
+                    <input type="text" />
+                </div>
+                <div class="field">
+                    <label>Additional State Withholding</label>
+                    <input type="text" placeholder="$" />
+                </div>
+                <div class="field">
+                    <label>Exempt from NY Withholding?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes</span>
+                        <span class="checkbox-item"><input type="checkbox" /> No</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direct Deposit -->
+        <div class="section">
+            <div class="section-header">Direct Deposit Information <span class="section-note">(Attach voided check or bank letter)</span></div>
+            <div class="form-grid cols-2">
+                <div class="field">
+                    <label>Payment Method</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Direct Deposit (Recommended)</span>
+                        <span class="checkbox-item"><input type="checkbox" /> Paper Check</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Account Type</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Checking</span>
+                        <span class="checkbox-item"><input type="checkbox" /> Savings</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bank-grid" style="margin-top: 8px;">
+                <div class="field">
+                    <label>Bank Name</label>
+                    <input type="text" />
+                </div>
+                <div class="field">
+                    <label>Account Number</label>
+                    <input type="text" />
+                </div>
+                <div class="field">
+                    <label>Routing Number</label>
+                    <input type="text" />
+                </div>
+            </div>
+        </div>
+
+        <!-- I-9 Section -->
+        <div class="info-box">
+            <h4>Form I-9 Employment Eligibility Verification</h4>
+            <p style="font-size: 7px; margin-bottom: 6px;">
+                Federal law requires all employers to verify identity and employment authorization. You must provide acceptable documents within 3 business days of your start date.
+            </p>
+            <div style="font-size: 7px;">
+                <strong>Acceptable Documents (bring originals):</strong><br>
+                <strong>List A (proves both identity & work authorization):</strong> U.S. Passport, Passport Card, Permanent Resident Card, Employment Authorization Document<br>
+                <strong>OR List B + List C:</strong> Driver's License/State ID (B) + Social Security Card or Birth Certificate (C)
+            </div>
+        </div>
+
+        <!-- Equipment & Clothing -->
+        <div class="section">
+            <div class="section-header">Shop Equipment & Clothing <span class="section-note">(For safety gear ordering)</span></div>
+            <div class="form-grid cols-4">
+                <div class="field">
+                    <label>T-Shirt Size</label>
+                    <div class="checkbox-group" style="flex-wrap: wrap;">
+                        <span class="checkbox-item"><input type="checkbox" /> S</span>
+                        <span class="checkbox-item"><input type="checkbox" /> M</span>
+                        <span class="checkbox-item"><input type="checkbox" /> L</span>
+                        <span class="checkbox-item"><input type="checkbox" /> XL</span>
+                        <span class="checkbox-item"><input type="checkbox" /> 2XL</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Safety Glasses Needed?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes</span>
+                        <span class="checkbox-item"><input type="checkbox" /> No (have own)</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Prescription Safety Glasses?</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes</span>
+                        <span class="checkbox-item"><input type="checkbox" /> No</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Glove Size</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> S</span>
+                        <span class="checkbox-item"><input type="checkbox" /> M</span>
+                        <span class="checkbox-item"><input type="checkbox" /> L</span>
+                        <span class="checkbox-item"><input type="checkbox" /> XL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acknowledgements -->
+        <div class="section">
+            <div class="section-header">Acknowledgements</div>
+            <div style="font-size: 7px; line-height: 1.4; margin-bottom: 8px;">
+                <div class="checkbox-item" style="margin-bottom: 4px;">
+                    <input type="checkbox" style="margin-right: 5px;" />
+                    I certify that all information provided is true and complete to the best of my knowledge. I understand that false statements may result in termination.
+                </div>
+                <div class="checkbox-item" style="margin-bottom: 4px;">
+                    <input type="checkbox" style="margin-right: 5px;" />
+                    I have received and agree to review the Employee Handbook and understand that policies may be updated from time to time.
+                </div>
+                <div class="checkbox-item" style="margin-bottom: 4px;">
+                    <input type="checkbox" style="margin-right: 5px;" />
+                    I understand that employment with The Carpenter's Son is at-will and may be terminated at any time by either party.
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" style="margin-right: 5px;" />
+                    I authorize The Carpenter's Son to verify information provided and conduct background checks as permitted by law.
+                </div>
+            </div>
+        </div>
+
+        <!-- Signature -->
+        <div class="signature-section">
+            <div class="section-header" style="border-bottom: none; margin-bottom: 0;">Employee Signature</div>
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Employee Signature</div>
+                </div>
+                <div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Date</div>
+                </div>
+            </div>
+            <div class="signature-grid" style="margin-top: 15px;">
+                <div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Print Name</div>
+                </div>
+                <div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Supervisor Initials</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Office Use -->
+        <div class="info-box" style="background: #f5f5f4; border-color: #a8a29e; margin-top: 15px;">
+            <h4 style="color: #57534e;">Office Use Only</h4>
+            <div class="form-grid cols-4" style="font-size: 7px;">
+                <div class="field">
+                    <label>Employee ID</label>
+                    <input type="text" value="{{EMPLOYEE_ID}}" class="prefilled" />
+                </div>
+                <div class="field">
+                    <label>I-9 Verified</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Added to Payroll</label>
+                    <div class="checkbox-group">
+                        <span class="checkbox-item"><input type="checkbox" /> Yes</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>HR Initials/Date</label>
+                    <input type="text" />
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <strong>The Carpenter's Son</strong> | 392 N Montgomery St, Building B, Newburgh, NY 12550 | (845) 816-2388 | info@tcswoodwork.com
+        </div>
+
+        <div class="page-indicator">Page 2 of 2</div>
+    </div>
+</body>
+</html>

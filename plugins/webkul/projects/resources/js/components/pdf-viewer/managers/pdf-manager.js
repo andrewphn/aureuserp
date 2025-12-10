@@ -101,6 +101,24 @@ export async function displayPdf(state, refs) {
 
     const embedContainer = refs.pdfEmbed;
 
+    // Guard: Ensure container element exists before rendering
+    if (!embedContainer) {
+        console.warn('⚠️ PDF embed container not found in DOM, skipping render');
+        return;
+    }
+
+    // Guard: Ensure container has valid dimensions
+    if (!embedContainer.clientWidth || embedContainer.clientWidth < 10) {
+        console.warn('⚠️ PDF embed container has no width, waiting for layout...');
+        // Wait a bit and retry
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (!embedContainer.clientWidth || embedContainer.clientWidth < 10) {
+            console.error('❌ PDF embed container still has no width after waiting');
+            state.error = 'PDF viewer container not ready';
+            return;
+        }
+    }
+
     try {
         // Get PDF document from WeakMap, or preload if not available
         let pdfDocument = pdfDocuments.get(state);
@@ -273,6 +291,7 @@ export async function initializePdfSystem(state, refs, callbacks) {
  */
 function calculateCanvasScale(refs, state) {
     if (!refs.pdfEmbed || !state.pageDimensions) {
+        console.warn('⚠️ calculateCanvasScale: Missing refs.pdfEmbed or pageDimensions');
         return 1.0;
     }
 
@@ -282,15 +301,19 @@ function calculateCanvasScale(refs, state) {
 
     let actualWidth;
 
-    if (canvas) {
-        // Canvas element exists
+    if (canvas && canvas.clientWidth > 0) {
+        // Canvas element exists with valid width
         actualWidth = canvas.clientWidth;
-    } else if (iframe) {
+    } else if (iframe && iframe.clientWidth > 0) {
         // Use iframe dimensions
         actualWidth = iframe.clientWidth;
-    } else {
+    } else if (refs.pdfEmbed.clientWidth > 0) {
         // Fallback to container
         actualWidth = refs.pdfEmbed.clientWidth;
+    } else {
+        // No valid width found - return default scale
+        console.warn('⚠️ calculateCanvasScale: No element has valid clientWidth, using default scale');
+        return 1.0;
     }
 
     const naturalWidth = state.pageDimensions.width;

@@ -25,3 +25,26 @@ Route::get('/test-auth-debug', function () {
         'session_id' => session()->getId(),
     ]);
 })->middleware('web');
+
+// Employee HR Form Routes
+// Blank intake form (no employee data) - public for easy access
+Route::get('/hr/intake-form/blank', function () {
+    try {
+        $html = \Webkul\Employee\Filament\Exports\EmployeeIntakeFormExporter::generateBlankFormHtml();
+        return response($html)->header('Content-Type', 'text/html');
+    } catch (\Exception $e) {
+        abort(404, 'Template not found: ' . $e->getMessage());
+    }
+})->name('employee.intake-form.blank');
+
+// Employee intake form - pre-filled with employee data (requires auth)
+Route::middleware(['auth', 'web'])->group(function () {
+    Route::get('/hr/employee/{employee}/intake-form', function ($employeeId) {
+        try {
+            $html = \Webkul\Employee\Filament\Exports\EmployeeIntakeFormExporter::generateIntakeFormHtml($employeeId);
+            return response($html)->header('Content-Type', 'text/html');
+        } catch (\Exception $e) {
+            abort(404, 'Employee not found or template error: ' . $e->getMessage());
+        }
+    })->name('employee.intake-form');
+});

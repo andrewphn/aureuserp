@@ -5,17 +5,22 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasFullCode;
 
 /**
  * Shelf Model
  *
  * Represents a cabinet shelf component.
  * Hierarchy: Project -> Room -> Location -> Cabinet Run -> Cabinet -> Section -> Shelf
+ *
+ * @property string|null $full_code Hierarchical code (e.g., TCS-0554-15WSANKATY-K1-SW-U1-B-SHELF1)
  */
 class Shelf extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasFullCode;
 
     protected $table = 'projects_shelves';
 
@@ -25,6 +30,7 @@ class Shelf extends Model
         'section_id',
         'shelf_number',
         'shelf_name',
+        'full_code',
         'sort_order',
         'width_inches',
         'depth_inches',
@@ -36,6 +42,7 @@ class Shelf extends Model
         'number_of_positions',
         'slide_type',
         'slide_model',
+        'slide_product_id',
         'slide_length_inches',
         'soft_close',
         'weight_capacity_lbs',
@@ -110,6 +117,24 @@ class Shelf extends Model
         return $this->belongsTo(CabinetSection::class, 'section_id');
     }
 
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function slideProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'slide_product_id');
+    }
+
+    /**
+     * Additional hardware/products for this shelf
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'shelf_id');
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order');
@@ -120,5 +145,14 @@ class Shelf extends Model
         $w = $this->width_inches ?? '?';
         $d = $this->depth_inches ?? '?';
         return "{$w}\"W x {$d}\"D";
+    }
+
+    /**
+     * Get the component code for this shelf
+     * Format: SHELF1, SHELF2, etc.
+     */
+    public function getComponentCode(): string
+    {
+        return 'SHELF' . ($this->shelf_number ?? 1);
     }
 }

@@ -21,6 +21,7 @@
         "guava/filament-icon-picker": "^3.0",
         "hugomyb/filament-media-action": "^4.0",
         "jacobtims/inline-date-time-picker": "^2.0",
+        "joaopaulolndev/filament-pdf-viewer": "^2.0",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "milon/barcode": "^11.0",

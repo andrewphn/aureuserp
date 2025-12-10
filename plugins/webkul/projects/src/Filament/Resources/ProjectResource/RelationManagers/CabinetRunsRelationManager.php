@@ -2,14 +2,18 @@
 
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Webkul\Product\Models\AttributeOption;
 use Webkul\Project\Models\CabinetRun;
 
 /**
@@ -94,10 +98,82 @@ class CabinetRunsRelationManager extends RelationManager
                             ->numeric()
                             ->default(0),
 
+                        Select::make('cabinet_level')
+                            ->label('Cabinet Level')
+                            ->options(fn () => AttributeOption::where('attribute_id', 20)
+                                ->orderBy('sort')
+                                ->pluck('name', 'name')
+                                ->toArray())
+                            ->native(false)
+                            ->searchable()
+                            ->helperText('Default pricing level for cabinets in this run'),
+
+                        Select::make('material_category')
+                            ->label('Material Category')
+                            ->options(fn () => AttributeOption::where('attribute_id', 18)
+                                ->orderBy('sort')
+                                ->pluck('name', 'name')
+                                ->toArray())
+                            ->native(false)
+                            ->searchable()
+                            ->helperText('Default material for cabinets in this run'),
+
+                        Select::make('finish_option')
+                            ->label('Finish Option')
+                            ->options(fn () => AttributeOption::where('attribute_id', 19)
+                                ->orderBy('sort')
+                                ->pluck('name', 'name')
+                                ->toArray())
+                            ->native(false)
+                            ->searchable()
+                            ->helperText('Default finish for cabinets in this run'),
+
                         Textarea::make('notes')
                             ->label('Notes')
                             ->rows(3)
                             ->columnSpanFull(),
+
+                        Section::make('Products & Materials')
+                            ->schema([
+                                Repeater::make('hardwareRequirements')
+                                    ->relationship()
+                                    ->label('')
+                                    ->schema([
+                                        Grid::make(3)
+                                            ->schema([
+                                                Select::make('product_id')
+                                                    ->label('Product')
+                                                    ->relationship('product', 'name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->required()
+                                                    ->placeholder('Search products...'),
+
+                                                TextInput::make('quantity_required')
+                                                    ->label('Qty')
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->minValue(1)
+                                                    ->required(),
+
+                                                TextInput::make('installation_notes')
+                                                    ->label('Notes')
+                                                    ->placeholder('Optional notes...'),
+                                            ]),
+                                    ])
+                                    ->addActionLabel('Add Product')
+                                    ->reorderable()
+                                    ->itemLabel(fn (array $state): ?string =>
+                                        $state['product_id']
+                                            ? \Webkul\Product\Models\Product::find($state['product_id'])?->name . ' (x' . ($state['quantity_required'] ?? 1) . ')'
+                                            : null
+                                    )
+                                    ->defaultItems(0)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpanFull()
+                            ->collapsible()
+                            ->collapsed(),
                     ]),
             ]);
     }
@@ -141,36 +217,28 @@ class CabinetRunsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
-                Tables\Columns\TextColumn::make('material_category')
-                    ->label('Material')
-                    ->badge()
-                    ->color('info')
-                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
-                        'paint_grade' => 'Paint',
-                        'stain_grade' => 'Stain',
-                        'premium' => 'Premium',
-                        'custom_exotic' => 'Custom',
-                        default => null,
-                    })
-                    ->toggleable(),
-
-                Tables\Columns\TextColumn::make('cabinet_level')
+                Tables\Columns\SelectColumn::make('cabinet_level')
                     ->label('Level')
-                    ->badge()
+                    ->options(fn () => AttributeOption::where('attribute_id', 20)
+                        ->orderBy('sort')
+                        ->pluck('name', 'name')
+                        ->toArray())
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('finish_option')
+                Tables\Columns\SelectColumn::make('material_category')
+                    ->label('Material')
+                    ->options(fn () => AttributeOption::where('attribute_id', 18)
+                        ->orderBy('sort')
+                        ->pluck('name', 'name')
+                        ->toArray())
+                    ->toggleable(),
+
+                Tables\Columns\SelectColumn::make('finish_option')
                     ->label('Finish')
-                    ->badge()
-                    ->color('warning')
-                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
-                        'unfinished' => 'Unfinished',
-                        'natural_stain' => 'Natural',
-                        'custom_stain' => 'Custom',
-                        'paint_finish' => 'Paint',
-                        'clear_coat' => 'Clear',
-                        default => null,
-                    })
+                    ->options(fn () => AttributeOption::where('attribute_id', 19)
+                        ->orderBy('sort')
+                        ->pluck('name', 'name')
+                        ->toArray())
                     ->toggleable(),
 
                 Tables\Columns\TextColumn::make('total_linear_feet')
@@ -200,6 +268,45 @@ class CabinetRunsRelationManager extends RelationManager
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['creator_id'] = auth()->id();
                         return $data;
+                    }),
+                \Filament\Actions\Action::make('manageOptions')
+                    ->label('Add Option')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('gray')
+                    ->form([
+                        Select::make('attribute_type')
+                            ->label('Option Type')
+                            ->options([
+                                '20' => 'Pricing Level',
+                                '18' => 'Material Category',
+                                '19' => 'Finish Option',
+                            ])
+                            ->required()
+                            ->native(false),
+                        TextInput::make('name')
+                            ->label('Option Name')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('e.g., Level 6 - Ultra Premium ($250/LF)'),
+                        TextInput::make('extra_price')
+                            ->label('Extra Price')
+                            ->numeric()
+                            ->prefix('$')
+                            ->default(0)
+                            ->helperText('Additional cost for this option'),
+                    ])
+                    ->action(function (array $data): void {
+                        AttributeOption::create([
+                            'attribute_id' => $data['attribute_type'],
+                            'name' => $data['name'],
+                            'extra_price' => $data['extra_price'] ?? 0,
+                            'creator_id' => auth()->id(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Option added successfully')
+                            ->success()
+                            ->send();
                     }),
             ])
             ->actions([

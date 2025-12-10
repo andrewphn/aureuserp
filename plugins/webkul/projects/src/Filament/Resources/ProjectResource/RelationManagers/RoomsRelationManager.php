@@ -2,11 +2,13 @@
 
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -90,6 +92,48 @@ class RoomsRelationManager extends RelationManager
                             ->label('Internal Notes')
                             ->rows(3)
                             ->columnSpanFull(),
+
+                        Section::make('Products & Materials')
+                            ->schema([
+                                Repeater::make('hardwareRequirements')
+                                    ->relationship()
+                                    ->label('')
+                                    ->schema([
+                                        Grid::make(3)
+                                            ->schema([
+                                                Select::make('product_id')
+                                                    ->label('Product')
+                                                    ->relationship('product', 'name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->required()
+                                                    ->placeholder('Search products...'),
+
+                                                TextInput::make('quantity_required')
+                                                    ->label('Qty')
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->minValue(1)
+                                                    ->required(),
+
+                                                TextInput::make('installation_notes')
+                                                    ->label('Notes')
+                                                    ->placeholder('Optional notes...'),
+                                            ]),
+                                    ])
+                                    ->addActionLabel('Add Product')
+                                    ->reorderable()
+                                    ->itemLabel(fn (array $state): ?string =>
+                                        $state['product_id']
+                                            ? \Webkul\Product\Models\Product::find($state['product_id'])?->name . ' (x' . ($state['quantity_required'] ?? 1) . ')'
+                                            : null
+                                    )
+                                    ->defaultItems(0)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpanFull()
+                            ->collapsible()
+                            ->collapsed(),
                     ]),
             ]);
     }
@@ -132,38 +176,6 @@ class RoomsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('floor_number')
                     ->label('Floor')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('material_category')
-                    ->label('Material')
-                    ->badge()
-                    ->color('info')
-                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
-                        'paint_grade' => 'Paint',
-                        'stain_grade' => 'Stain',
-                        'premium' => 'Premium',
-                        'custom_exotic' => 'Custom',
-                        default => null,
-                    })
-                    ->toggleable(),
-
-                Tables\Columns\TextColumn::make('cabinet_level')
-                    ->label('Level')
-                    ->badge()
-                    ->toggleable(),
-
-                Tables\Columns\TextColumn::make('finish_option')
-                    ->label('Finish')
-                    ->badge()
-                    ->color('warning')
-                    ->formatStateUsing(fn (?string $state): ?string => match($state) {
-                        'unfinished' => 'Unfinished',
-                        'natural_stain' => 'Natural',
-                        'custom_stain' => 'Custom',
-                        'paint_finish' => 'Paint',
-                        'clear_coat' => 'Clear',
-                        default => null,
-                    })
-                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('locations_count')
                     ->label('Locations')

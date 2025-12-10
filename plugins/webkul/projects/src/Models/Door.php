@@ -5,17 +5,22 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasFullCode;
 
 /**
  * Door Model
  *
  * Represents a cabinet door component.
  * Hierarchy: Project -> Room -> Location -> Cabinet Run -> Cabinet -> Section -> Door
+ *
+ * @property string|null $full_code Hierarchical code (e.g., TCS-0554-15WSANKATY-K1-SW-U1-A-DOOR1)
  */
 class Door extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasFullCode;
 
     protected $table = 'projects_doors';
 
@@ -25,6 +30,7 @@ class Door extends Model
         'section_id',
         'door_number',
         'door_name',
+        'full_code',
         'sort_order',
         'width_inches',
         'height_inches',
@@ -46,6 +52,8 @@ class Door extends Model
         'stain_color',
         'has_decorative_hardware',
         'decorative_hardware_model',
+        'hinge_product_id',
+        'decorative_hardware_product_id',
         'cnc_cut_at',
         'manually_cut_at',
         'edge_banded_at',
@@ -98,6 +106,29 @@ class Door extends Model
         return $this->belongsTo(CabinetSection::class, 'section_id');
     }
 
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function hingeProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'hinge_product_id');
+    }
+
+    public function decorativeHardwareProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'decorative_hardware_product_id');
+    }
+
+    /**
+     * Additional hardware/products for this door
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'door_id');
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order');
@@ -106,5 +137,14 @@ class Door extends Model
     public function getFormattedDimensionsAttribute(): string
     {
         return ($this->width_inches ?? '?') . '"W x ' . ($this->height_inches ?? '?') . '"H';
+    }
+
+    /**
+     * Get the component code for this door
+     * Format: DOOR1, DOOR2, etc.
+     */
+    public function getComponentCode(): string
+    {
+        return 'DOOR' . ($this->door_number ?? 1);
     }
 }

@@ -288,8 +288,8 @@
                 @mousemove="draw($event)"
                 @mouseup="stopDrawing($event)"
                 @mouseleave="stopDrawing($event)"
-                :width="pdfPage ? pdfPage.getViewport({ scale: scale }).width : 0"
-                :height="pdfPage ? pdfPage.getViewport({ scale: scale }).height : 0"
+                :width="pageDimensions ? pageDimensions.width * (zoomLevel || 1) : 800"
+                :height="pageDimensions ? pageDimensions.height * (zoomLevel || 1) : 600"
                 :style="'cursor: ' + (canDraw() && drawMode ? 'crosshair' : 'default')"
                 class="absolute top-0 left-0"
             ></canvas>
