@@ -12,7 +12,6 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Table;
 use Hydrat\TableLayoutToggle\Concerns\HasToggleableTable;
 use Illuminate\Database\Eloquent\Builder;
@@ -194,20 +193,17 @@ class ListProducts extends ListRecords
                     // Category badge
                     TextColumn::make('category.name')
                         ->badge()
-                        ->color('gray')
-                        ->size(TextColumnSize::ExtraSmall),
+                        ->color('gray'),
 
                     // Product name - prominent
                     TextColumn::make('name')
                         ->weight(FontWeight::SemiBold)
-                        ->size(TextColumnSize::Medium)
                         ->wrap()
                         ->lineClamp(2)
                         ->searchable(),
 
                     // SKU
                     TextColumn::make('reference')
-                        ->size(TextColumnSize::ExtraSmall)
                         ->color('gray')
                         ->prefix('SKU: ')
                         ->placeholder(''),
@@ -217,7 +213,6 @@ class ListProducts extends ListRecords
                         TextColumn::make('price')
                             ->money('USD')
                             ->weight(FontWeight::Bold)
-                            ->size(TextColumnSize::Large)
                             ->color('primary'),
                         IconColumn::make('is_favorite')
                             ->icon(fn (Product $record): string => $record->is_favorite ? 'heroicon-s-star' : 'heroicon-o-star')
@@ -232,7 +227,6 @@ class ListProducts extends ListRecords
                     TextColumn::make('tags.name')
                         ->badge()
                         ->color('info')
-                        ->size(TextColumnSize::ExtraSmall)
                         ->limit(3)
                         ->separator(' '),
 
