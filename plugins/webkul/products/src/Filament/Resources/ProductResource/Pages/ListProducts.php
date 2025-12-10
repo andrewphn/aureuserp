@@ -141,7 +141,7 @@ class ListProducts extends ListRecords
                     // Product name - prominent
                     TextColumn::make('name')
                         ->weight(FontWeight::SemiBold)
-                        ->size(TextColumn\TextColumnSize::Medium)
+                        ->size('md')
                         ->wrap()
                         ->lineClamp(2)
                         ->searchable(),
@@ -158,7 +158,7 @@ class ListProducts extends ListRecords
                         TextColumn::make('price')
                             ->money('USD')
                             ->weight(FontWeight::Bold)
-                            ->size(TextColumn\TextColumnSize::Large)
+                            ->size('lg')
                             ->color('primary'),
                         IconColumn::make('is_favorite')
                             ->icon(fn (Product $record): string => $record->is_favorite ? 'heroicon-s-star' : 'heroicon-o-star')
