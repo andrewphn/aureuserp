@@ -18,6 +18,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table doesn't exist (plugin not installed or migration not run)
+        if (!Schema::hasTable('projects_cnc_programs')) {
+            return;
+        }
+
         Schema::table('projects_cnc_programs', function (Blueprint $table) {
             // Rename existing sheet_count to sheets_actual for clarity
             // (will handle this separately if data exists)
@@ -59,6 +64,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('projects_cnc_programs')) {
+            return;
+        }
+
         Schema::table('projects_cnc_programs', function (Blueprint $table) {
             $table->dropForeign(['nested_by_user_id']);
             $table->dropColumn([
