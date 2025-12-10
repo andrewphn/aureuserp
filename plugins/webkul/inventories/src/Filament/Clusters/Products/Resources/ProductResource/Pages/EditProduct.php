@@ -110,17 +110,12 @@ class EditProduct extends BaseEditProduct
                             $updates['description'] = $fullDescription;
                         }
 
-                        // SKU (reference field) - only update if empty
-                        if (empty($currentData['reference'])) {
-                            if (!empty($data['sku'])) {
-                                $updates['reference'] = $data['sku'];
-                            }
-                        }
-
-                        // Barcode - only update if empty
+                        // Barcode - only update if empty (use SKU or barcode from AI)
                         if (empty($currentData['barcode'])) {
                             if (!empty($data['barcode'])) {
                                 $updates['barcode'] = $data['barcode'];
+                            } elseif (!empty($data['sku'])) {
+                                $updates['barcode'] = $data['sku'];
                             }
                         }
 
@@ -309,14 +304,13 @@ class EditProduct extends BaseEditProduct
                             $updates['description'] = $fullDescription;
                         }
 
-                        // SKU (reference field) - only update if empty
-                        if (empty($currentData['reference']) && !empty($aiData['sku'])) {
-                            $updates['reference'] = $aiData['sku'];
-                        }
-
-                        // Barcode - only update if empty
-                        if (empty($currentData['barcode']) && !empty($aiData['barcode'])) {
-                            $updates['barcode'] = $aiData['barcode'];
+                        // Barcode - only update if empty (use barcode or SKU from AI)
+                        if (empty($currentData['barcode'])) {
+                            if (!empty($aiData['barcode'])) {
+                                $updates['barcode'] = $aiData['barcode'];
+                            } elseif (!empty($aiData['sku'])) {
+                                $updates['barcode'] = $aiData['sku'];
+                            }
                         }
 
                         // Always update price/cost/weight/volume with AI estimates

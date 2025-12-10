@@ -44,7 +44,7 @@ class ReferenceTypeCodeResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Reference Type Codes';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 50;
 
