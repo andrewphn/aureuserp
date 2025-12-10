@@ -8,32 +8,46 @@ return [
 
     'form' => [
         'fields' => [
+            'product'      => 'Product',
+            'warehouse'    => 'Warehouse',
+            'location'     => 'Location',
+            'min-qty'      => 'Minimum Qty (Reorder Point)',
+            'max-qty'      => 'Maximum Qty (Order Up To)',
+            'qty-multiple' => 'Order Multiple',
+            'trigger'      => 'Trigger Type',
         ],
     ],
 
     'table' => [
         'columns' => [
-            'product'           => 'Product',
-            'location'          => 'Location',
-            'route'             => 'Route',
-            'vendor'            => 'Vendor',
-            'trigger'           => 'Trigger',
-            'on-hand'           => 'On Hand',
-            'min'               => 'Min',
-            'max'               => 'Max',
-            'multiple-quantity' => 'Multiple Quantity',
-            'to-order'          => 'To Order',
-            'uom'               => 'UOM',
-            'company'           => 'Company',
+            'product'      => 'Product',
+            'warehouse'    => 'Warehouse',
+            'location'     => 'Location',
+            'route'        => 'Route',
+            'vendor'       => 'Vendor',
+            'trigger'      => 'Trigger',
+            'on-hand'      => 'On Hand',
+            'min-qty'      => 'Min Qty',
+            'max-qty'      => 'Max Qty',
+            'status'       => 'Status',
+            'qty-to-order' => 'Qty to Order',
+            'uom'          => 'UOM',
+            'company'      => 'Company',
+            'created-at'   => 'Created At',
         ],
 
         'groups' => [
-            'location' => 'Location',
-            'product'  => 'Product',
-            'category' => 'Category',
+            'warehouse' => 'Warehouse',
+            'location'  => 'Location',
+            'product'   => 'Product',
+            'category'  => 'Category',
+            'trigger'   => 'Trigger Type',
         ],
 
         'filters' => [
+            'product' => 'Product',
+            'min-qty' => 'Minimum Quantity',
+            'max-qty' => 'Maximum Quantity',
         ],
 
         'header-actions' => [
@@ -42,7 +56,7 @@ return [
 
                 'notification' => [
                     'title' => 'Replenishment added',
-                    'body'  => 'The replenishment has been added successfully.',
+                    'body'  => 'The reorder point has been added successfully.',
                 ],
 
                 'before' => [

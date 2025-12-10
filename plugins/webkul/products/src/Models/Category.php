@@ -48,6 +48,7 @@ class Category extends Model
      */
     protected $fillable = [
         'name',
+        'code',
         'full_name',
         'parent_path',
         'parent_id',
@@ -56,6 +57,7 @@ class Category extends Model
 
     protected $logAttributes = [
         'name',
+        'code',
         'full_name',
         'parent_path',
         'parent.name'  => 'Parent Category',
@@ -110,6 +112,16 @@ class Category extends Model
     public function priceRuleItems(): HasMany
     {
         return $this->hasMany(PriceRuleItem::class);
+    }
+
+    /**
+     * Reference Type Codes
+     *
+     * @return HasMany
+     */
+    public function referenceTypeCodes(): HasMany
+    {
+        return $this->hasMany(ReferenceTypeCode::class);
     }
 
     /**
