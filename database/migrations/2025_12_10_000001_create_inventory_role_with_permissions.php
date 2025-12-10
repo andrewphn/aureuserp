@@ -110,6 +110,19 @@ return new class extends Migration
 
             // Activity Plans
             'view_any_activity::plan', 'view_activity::plan', 'create_activity::plan', 'update_activity::plan', 'delete_activity::plan', 'restore_activity::plan', 'delete_any_activity::plan', 'force_delete_activity::plan', 'force_delete_any_activity::plan', 'restore_any_activity::plan',
+
+            // Page Permissions
+            'page_manage_operations',
+            'page_manage_products',
+            'page_manage_warehouses',
+            'page_products',
+            'page_dashboard',
+            'page_manage_tasks',
+
+            // Widget Permissions
+            'widget_top_projects_widget',
+            'widget_task_by_stage_chart',
+            'widget_task_by_state_chart',
         ];
 
         // Create permissions if they don't exist and sync to role
