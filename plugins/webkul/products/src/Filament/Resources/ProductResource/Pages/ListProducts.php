@@ -2,6 +2,8 @@
 
 namespace Webkul\Product\Filament\Resources\ProductResource\Pages;
 
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\FontWeight;
@@ -13,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Hydrat\TableLayoutToggle\Concerns\HasToggleableTable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Url;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Filament\Resources\ProductResource;
 use Webkul\Product\Models\Product;
@@ -32,11 +35,61 @@ class ListProducts extends ListRecords
     protected static string $resource = ProductResource::class;
 
     /**
+     * Grid size preference (small, medium, large)
+     * Persisted in URL for bookmarking/sharing
+     */
+    #[Url]
+    public string $gridSize = 'medium';
+
+    /**
+     * Grid size configurations
+     * small = more cards per row (compact)
+     * medium = balanced (default)
+     * large = fewer cards per row (bigger cards)
+     */
+    protected array $gridSizeConfigs = [
+        'small' => [
+            'md' => 3,
+            'lg' => 4,
+            'xl' => 6,
+            'imageHeight' => 120,
+        ],
+        'medium' => [
+            'md' => 2,
+            'lg' => 3,
+            'xl' => 4,
+            'imageHeight' => 180,
+        ],
+        'large' => [
+            'md' => 1,
+            'lg' => 2,
+            'xl' => 3,
+            'imageHeight' => 240,
+        ],
+    ];
+
+    /**
      * Default to grid layout for retail-style browsing
      */
     public function getDefaultLayoutView(): string
     {
         return 'grid';
+    }
+
+    /**
+     * Set the grid size
+     */
+    public function setGridSize(string $size): void
+    {
+        $this->gridSize = $size;
+    }
+
+    /**
+     * Get current grid configuration
+     */
+    protected function getGridConfig(): array
+    {
+        return $this->gridSizeConfigs[$this->gridSize] ?? $this->gridSizeConfigs['medium'];
     }
 
     /**
@@ -47,6 +100,8 @@ class ListProducts extends ListRecords
      */
     public function table(Table $table): Table
     {
+        $gridConfig = $this->getGridConfig();
+
         return parent::table($table)
             ->columns(
                 $this->isGridLayout()
@@ -57,9 +112,9 @@ class ListProducts extends ListRecords
                 fn () => $this->isListLayout()
                     ? null
                     : [
-                        'md' => 2,
-                        'lg' => 3,
-                        'xl' => 4,
+                        'md' => $gridConfig['md'],
+                        'lg' => $gridConfig['lg'],
+                        'xl' => $gridConfig['xl'],
                     ]
             )
             ->modifyQueryUsing(function (Builder $query) {
@@ -121,11 +176,13 @@ class ListProducts extends ListRecords
      */
     public function getGridTableColumns(): array
     {
+        $imageHeight = $this->getGridConfig()['imageHeight'];
+
         return [
             Stack::make([
-                // Product image - hero element
+                // Product image - hero element (dynamic height based on grid size)
                 ImageColumn::make('images')
-                    ->height(180)
+                    ->height($imageHeight)
                     ->width('100%')
                     ->extraImgAttributes(['class' => 'object-contain w-full rounded-t-lg bg-gray-50'])
                     ->defaultImageUrl(fn () => 'data:image/svg+xml,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full text-gray-300"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>')),
@@ -216,6 +273,30 @@ class ListProducts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            // Grid size selector - only visible in grid layout
+            ActionGroup::make([
+                Action::make('gridSizeSmall')
+                    ->label('Small Cards')
+                    ->icon('heroicon-o-squares-2x2')
+                    ->color($this->gridSize === 'small' ? 'primary' : 'gray')
+                    ->action(fn () => $this->setGridSize('small')),
+                Action::make('gridSizeMedium')
+                    ->label('Medium Cards')
+                    ->icon('heroicon-o-square-3-stack-3d')
+                    ->color($this->gridSize === 'medium' ? 'primary' : 'gray')
+                    ->action(fn () => $this->setGridSize('medium')),
+                Action::make('gridSizeLarge')
+                    ->label('Large Cards')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->color($this->gridSize === 'large' ? 'primary' : 'gray')
+                    ->action(fn () => $this->setGridSize('large')),
+            ])
+                ->label('Card Size')
+                ->icon('heroicon-o-adjustments-horizontal')
+                ->button()
+                ->color('gray')
+                ->visible(fn () => $this->isGridLayout()),
+
             CreateAction::make()
                 ->label(__('products::filament/resources/product/pages/list-products.header-actions.create.label'))
                 ->icon('heroicon-o-plus-circle'),
