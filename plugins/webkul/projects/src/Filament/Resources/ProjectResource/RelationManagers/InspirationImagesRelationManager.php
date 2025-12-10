@@ -2,6 +2,7 @@
 
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
+use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
@@ -150,7 +151,7 @@ class InspirationImagesRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\Action::make('view')
+                Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
                     ->modalHeading(fn ($record) => $record->file_name)

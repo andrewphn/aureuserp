@@ -1335,7 +1335,7 @@ class EmployeeResource extends Resource
                     ->outlined(),
                 EditAction::make()
                     ->outlined(),
-                Tables\Actions\Action::make('generateIntakeForm')
+                Action::make('generateIntakeForm')
                     ->label('Intake Form')
                     ->icon('heroicon-o-document-text')
                     ->color('success')
