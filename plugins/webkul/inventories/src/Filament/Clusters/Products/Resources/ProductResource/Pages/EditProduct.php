@@ -47,8 +47,25 @@ class EditProduct extends BaseEditProduct
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
                 ->action(function (Product $record) {
                     try {
+                        // Get current form data WITHOUT triggering validation
+                        $currentData = $this->form->getRawState();
+
+                        // Use name from FORM (what user typed), not database record
+                        $productName = $currentData['name'] ?? $record->name;
+                        $existingDescription = $currentData['description'] ?? $record->description;
+
+                        if (empty($productName)) {
+                            Notification::make()
+                                ->title('Product Name Required')
+                                ->body('Please enter a product name first.')
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
                         $service = new GeminiProductService();
-                        $data = $service->generateProductDetails($record->name, $record->description);
+                        $data = $service->generateProductDetails($productName, $existingDescription);
 
                         if (isset($data['error'])) {
                             Notification::make()
@@ -59,9 +76,6 @@ class EditProduct extends BaseEditProduct
                                 ->send();
                             return;
                         }
-
-                        // Get current form data WITHOUT triggering validation
-                        $currentData = $this->form->getRawState();
 
                         // Only update fields if AI returned valid data
                         $updates = [];
@@ -102,29 +116,21 @@ class EditProduct extends BaseEditProduct
                             }
                         }
 
-                        // Only update price/cost if current values are 0 or empty
-                        if (empty($currentData['price']) || $currentData['price'] == 0) {
-                            if (!empty($data['suggested_price']) && $data['suggested_price'] > 0) {
-                                $updates['price'] = $data['suggested_price'];
-                            }
+                        // Always update price/cost/weight/volume with AI estimates
+                        if (!empty($data['suggested_price']) && $data['suggested_price'] > 0) {
+                            $updates['price'] = $data['suggested_price'];
                         }
 
-                        if (empty($currentData['cost']) || $currentData['cost'] == 0) {
-                            if (!empty($data['suggested_cost']) && $data['suggested_cost'] > 0) {
-                                $updates['cost'] = $data['suggested_cost'];
-                            }
+                        if (!empty($data['suggested_cost']) && $data['suggested_cost'] > 0) {
+                            $updates['cost'] = $data['suggested_cost'];
                         }
 
-                        if (empty($currentData['weight']) || $currentData['weight'] == 0) {
-                            if (!empty($data['weight']) && $data['weight'] > 0) {
-                                $updates['weight'] = $data['weight'];
-                            }
+                        if (!empty($data['weight']) && $data['weight'] > 0) {
+                            $updates['weight'] = $data['weight'];
                         }
 
-                        if (empty($currentData['volume']) || $currentData['volume'] == 0) {
-                            if (!empty($data['volume']) && $data['volume'] > 0) {
-                                $updates['volume'] = $data['volume'];
-                            }
+                        if (!empty($data['volume']) && $data['volume'] > 0) {
+                            $updates['volume'] = $data['volume'];
                         }
 
                         // Handle tags - find or create and get IDs
