@@ -4,6 +4,8 @@ namespace Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\
 
 use App\Services\GeminiProductService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Webkul\Product\Models\Tag;
@@ -173,6 +175,193 @@ class CreateProduct extends BaseCreateProduct
 
                         Notification::make()
                             ->title('AI Generation Error')
+                            ->body('An unexpected error occurred. Please try again.')
+                            ->danger()
+                            ->persistent()
+                            ->send();
+                    }
+                }),
+            Action::make('aiIdentifyPhoto')
+                ->label('AI from Photo')
+                ->icon('heroicon-o-camera')
+                ->color('info')
+                ->form([
+                    FileUpload::make('product_image')
+                        ->label('Product Photo')
+                        ->image()
+                        ->imageEditor()
+                        ->required()
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->maxSize(10240) // 10MB
+                        ->helperText('Take a photo or upload an image of the product'),
+                    Textarea::make('additional_context')
+                        ->label('Additional Context (optional)')
+                        ->placeholder('e.g., "16oz bottle", "for outdoor use", "bought from Home Depot"')
+                        ->rows(2)
+                        ->helperText('Any additional info to help identify the product'),
+                ])
+                ->modalHeading('Identify Product from Photo')
+                ->modalDescription('Upload a photo of the product. AI will identify it and populate the form with product details.')
+                ->modalSubmitActionLabel('Identify & Populate')
+                ->visible(fn () => (new GeminiProductService())->isConfigured())
+                ->action(function (array $data) {
+                    try {
+                        // Get the uploaded file
+                        $imagePath = $data['product_image'] ?? null;
+                        if (empty($imagePath)) {
+                            Notification::make()
+                                ->title('No Image')
+                                ->body('Please upload a product image.')
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
+                        // Get full path - handle both string and array cases
+                        if (is_array($imagePath)) {
+                            $imagePath = reset($imagePath);
+                        }
+                        $fullPath = storage_path('app/public/' . $imagePath);
+
+                        if (!file_exists($fullPath)) {
+                            Notification::make()
+                                ->title('Image Not Found')
+                                ->body('Could not find the uploaded image.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
+                        // Read and encode the image
+                        $imageData = file_get_contents($fullPath);
+                        $base64Image = base64_encode($imageData);
+                        $mimeType = mime_content_type($fullPath);
+
+                        // Call AI service
+                        $service = new GeminiProductService();
+                        $aiData = $service->generateProductDetailsFromImage(
+                            $base64Image,
+                            $mimeType,
+                            $data['additional_context'] ?? null
+                        );
+
+                        // Clean up uploaded file
+                        @unlink($fullPath);
+
+                        if (isset($aiData['error'])) {
+                            Notification::make()
+                                ->title('AI Identification Failed')
+                                ->body($aiData['error'])
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
+                        // Get current form data WITHOUT triggering validation
+                        $currentData = $this->form->getRawState();
+                        $updates = [];
+
+                        // If AI identified the product, update the name
+                        if (!empty($aiData['identified_product_name'])) {
+                            $updates['name'] = $aiData['identified_product_name'];
+                        }
+
+                        // Build rich description with technical specs and source
+                        if (!empty($aiData['description'])) {
+                            $fullDescription = $aiData['description'];
+
+                            if (!empty($aiData['technical_specs'])) {
+                                $fullDescription .= "\n<p><strong>Technical Specs:</strong> " . htmlspecialchars($aiData['technical_specs']) . "</p>";
+                            }
+
+                            if (!empty($aiData['brand'])) {
+                                $fullDescription .= "\n<p><strong>Brand:</strong> " . htmlspecialchars($aiData['brand']) . "</p>";
+                            }
+
+                            if (!empty($aiData['source_url'])) {
+                                $fullDescription .= "\n<p><strong>Source:</strong> <a href=\"" . htmlspecialchars($aiData['source_url']) . "\" target=\"_blank\">" . htmlspecialchars($aiData['source_url']) . "</a></p>";
+                            }
+
+                            $updates['description'] = $fullDescription;
+                        }
+
+                        // SKU (reference field) - only update if empty
+                        if (empty($currentData['reference']) && !empty($aiData['sku'])) {
+                            $updates['reference'] = $aiData['sku'];
+                        }
+
+                        // Barcode - only update if empty
+                        if (empty($currentData['barcode']) && !empty($aiData['barcode'])) {
+                            $updates['barcode'] = $aiData['barcode'];
+                        }
+
+                        // Always update price/cost/weight/volume with AI estimates
+                        if (!empty($aiData['suggested_price']) && $aiData['suggested_price'] > 0) {
+                            $updates['price'] = $aiData['suggested_price'];
+                        }
+
+                        if (!empty($aiData['suggested_cost']) && $aiData['suggested_cost'] > 0) {
+                            $updates['cost'] = $aiData['suggested_cost'];
+                        }
+
+                        if (!empty($aiData['weight']) && $aiData['weight'] > 0) {
+                            $updates['weight'] = $aiData['weight'];
+                        }
+
+                        if (!empty($aiData['volume']) && $aiData['volume'] > 0) {
+                            $updates['volume'] = $aiData['volume'];
+                        }
+
+                        // Handle tags
+                        if (!empty($aiData['tags']) && is_array($aiData['tags'])) {
+                            $tagIds = [];
+                            foreach ($aiData['tags'] as $tagName) {
+                                $tagName = trim($tagName);
+                                if (empty($tagName)) continue;
+                                $tag = Tag::firstOrCreate(['name' => $tagName], ['name' => $tagName]);
+                                $tagIds[] = $tag->id;
+                            }
+
+                            if (!empty($tagIds)) {
+                                $existingTagIds = $currentData['tags'] ?? [];
+                                $updates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
+                            }
+                        }
+
+                        if (!empty($updates)) {
+                            $this->form->fill(array_merge($currentData, $updates));
+
+                            $identifiedName = $aiData['identified_product_name'] ?? 'Unknown product';
+                            Notification::make()
+                                ->title('Product Identified!')
+                                ->body("Identified as: {$identifiedName}. Review the details and click Create when ready.")
+                                ->success()
+                                ->persistent()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('No Information Found')
+                                ->body('AI could not identify or find information for this product.')
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        Log::info('AI Photo Identify completed for new product', [
+                            'identified_as' => $aiData['identified_product_name'] ?? 'unknown',
+                            'updates' => array_keys($updates),
+                        ]);
+
+                    } catch (\Exception $e) {
+                        Log::error('AI Photo Identify error: ' . $e->getMessage(), [
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+
+                        Notification::make()
+                            ->title('AI Identification Error')
                             ->body('An unexpected error occurred. Please try again.')
                             ->danger()
                             ->persistent()

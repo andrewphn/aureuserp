@@ -85,6 +85,8 @@ class Product extends Model implements Sortable
         'name',
         'service_tracking',
         'reference',
+        'type_code',
+        'reference_type_code_id',
         'barcode',
         'price',
         'cost',
@@ -189,6 +191,16 @@ class Product extends Model implements Sortable
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Reference Type Code
+     *
+     * @return BelongsTo
+     */
+    public function referenceTypeCode(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceTypeCode::class);
     }
 
     /**

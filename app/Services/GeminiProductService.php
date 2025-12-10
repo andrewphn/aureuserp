@@ -244,6 +244,9 @@ PROMPT;
     protected function sanitizeResponse(array $data): array
     {
         return [
+            // Image identification (for photo-based lookups)
+            'identified_product_name' => trim($data['identified_product_name'] ?? ''),
+
             // Core product info
             'description' => $this->sanitizeHtml($data['description'] ?? ''),
             'description_sale' => $this->sanitizeHtml($data['description_sale'] ?? $data['description'] ?? ''),
@@ -292,6 +295,182 @@ PROMPT;
             return max(0, (float) $value);
         }
         return 0.0;
+    }
+
+    /**
+     * Generate product details from an image using Gemini Vision
+     *
+     * @param string $imageBase64 Base64-encoded image data
+     * @param string $mimeType Image mime type (image/jpeg, image/png, etc.)
+     * @param string|null $additionalContext Optional text context to help identify the product
+     * @return array Structured product data
+     */
+    public function generateProductDetailsFromImage(string $imageBase64, string $mimeType = 'image/jpeg', ?string $additionalContext = null): array
+    {
+        if (empty($this->geminiKey)) {
+            Log::warning('GeminiProductService: No Gemini API key configured');
+            return ['error' => 'Gemini API key not configured. Add GOOGLE_API_KEY to .env'];
+        }
+
+        $prompt = $this->buildImagePrompt($additionalContext);
+
+        Log::info("GeminiProductService: Generating details from image" . ($additionalContext ? " with context: {$additionalContext}" : ""));
+
+        $maxRetries = 3;
+        $lastError = null;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                Log::info("GeminiProductService (image): Attempt {$attempt}/{$maxRetries}");
+
+                $response = Http::timeout(90)->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$this->geminiKey}", [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt],
+                                [
+                                    'inlineData' => [
+                                        'mimeType' => $mimeType,
+                                        'data' => $imageBase64,
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    'tools' => [
+                        ['googleSearch' => new \stdClass()]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.7,
+                        'topP' => 0.95,
+                        'maxOutputTokens' => 4096,
+                    ],
+                ]);
+
+                if ($response->failed()) {
+                    $errorBody = $response->json();
+                    $errorMsg = $errorBody['error']['message'] ?? 'Unknown API error';
+                    Log::error("GeminiProductService (image) API error: {$errorMsg}");
+
+                    if ($response->status() === 429 && $attempt < $maxRetries) {
+                        $waitTime = pow(2, $attempt + 1);
+                        Log::info("Rate limited (image), waiting {$waitTime}s...");
+                        sleep($waitTime);
+                        continue;
+                    }
+
+                    return ['error' => "API error: {$errorMsg}"];
+                }
+
+                $content = $response->json('candidates.0.content.parts.0.text');
+                if (empty($content)) {
+                    Log::warning('GeminiProductService (image): Empty response from API');
+                    return ['error' => 'No content generated from image'];
+                }
+
+                Log::info("GeminiProductService (image): Raw response received", ['length' => strlen($content)]);
+
+                $result = $this->parseResponse($content);
+                $sanitized = $this->sanitizeResponse($result);
+
+                Log::info("GeminiProductService (image): Successfully processed image", [
+                    'identified_product' => $sanitized['identified_product_name'] ?? 'unknown',
+                    'brand' => $sanitized['brand'] ?? 'unknown',
+                ]);
+
+                return $sanitized;
+
+            } catch (\Exception $e) {
+                Log::error("GeminiProductService (image) error (attempt {$attempt}): " . $e->getMessage());
+                $lastError = ['error' => $e->getMessage()];
+
+                if ($attempt < $maxRetries) {
+                    sleep(pow(2, $attempt));
+                }
+            }
+        }
+
+        Log::error('GeminiProductService (image): All attempts failed');
+        return $lastError ?? ['error' => 'All attempts failed'];
+    }
+
+    /**
+     * Build the prompt for image-based product identification
+     */
+    protected function buildImagePrompt(?string $additionalContext): string
+    {
+        $contextSection = '';
+        if (!empty($additionalContext)) {
+            $contextSection = "\nAdditional Context from User: {$additionalContext}\n";
+        }
+
+        return <<<PROMPT
+You are a product identification specialist for TCS Woodwork, a professional cabinet and furniture shop.
+
+Analyze this image and identify the product shown. Then search the web for accurate, real-world information about this product.
+{$contextSection}
+IMPORTANT: First identify what product this is, including brand if visible. Then provide detailed information.
+
+Think like Levi, a lead craftsman with 15+ years experience. He needs PRACTICAL info:
+
+For ADHESIVES/GLUES:
+- Open time and cure time at different temperatures
+- Mix ratios if two-part
+- Clamping pressure requirements
+- What surfaces it bonds (wood-to-wood, wood-to-metal, etc.)
+
+For HARDWARE (hinges, slides, knobs):
+- Bore patterns and mounting dimensions
+- Weight/load ratings
+- Required screws/fasteners
+- Overlay specifications
+
+For FINISHES (stains, lacquers, oils):
+- Coverage rate per gallon
+- Dry time between coats vs full cure
+- VOC content and ventilation needs
+- Compatible topcoats
+
+For MATERIALS (wood, sheet goods, laminates):
+- Actual vs nominal dimensions
+- Sheet sizes available
+- Grade specifications
+- Machining characteristics
+
+For ALL products:
+- Safety/PPE requirements
+- Storage requirements
+- Shelf life
+- Common issues to avoid
+
+Return ONLY valid JSON with this exact structure:
+{
+    "identified_product_name": "Full product name as identified from image",
+    "description": "Professional HTML description (use <p>, <ul>, <li> tags)",
+    "description_sale": "Brief sales-focused description",
+    "description_purchase": "Purchasing notes (min order, lead time, supplier info)",
+    "brand": "Manufacturer name",
+    "sku": "Manufacturer part/model number if visible or findable",
+    "barcode": "UPC/EAN if findable (12-13 digit number)",
+    "product_type": "One of: adhesive, hardware, finish, material, tool, consumable, safety",
+    "category_suggestion": "Category path with / separator",
+    "suggested_price": 0.00,
+    "suggested_cost": 0.00,
+    "weight": 0.0,
+    "volume": 0.0,
+    "technical_specs": "Key specs as single line text",
+    "tags": ["brand-name", "product-type", "material", "application"],
+    "source_url": "Primary source URL"
+}
+
+CRITICAL:
+- Always provide your best estimate for price, cost, weight, and volume based on the product type and size visible in the image.
+- Include the identified product name - this is essential for the user to confirm you identified it correctly.
+
+Return ONLY valid JSON, no markdown.
+PROMPT;
     }
 
     /**
