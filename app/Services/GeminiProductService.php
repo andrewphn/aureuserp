@@ -132,7 +132,7 @@ NOT marketing fluff - practical shop floor information.
 Return this exact JSON format:
 
 {
-    "description": "HTML description for woodworkers (see guidelines below)",
+    "description": "SHORT HTML description - max 5 bullet points with KEY specs only (see guidelines below)",
     "brand": "Manufacturer/brand name",
     "sku": "Manufacturer SKU or part number",
     "barcode": "UPC or EAN barcode",
@@ -156,37 +156,23 @@ Include tags for:
 - Special properties (e.g., "waterproof", "food-safe", "fast-cure", "gap-filling")
 - Size/format (e.g., "quart", "gallon", "35mm", "full-overlay")
 
-DESCRIPTION GUIDELINES - Include what woodworkers need:
-Use HTML <p> tags. Focus on PRACTICAL information:
+DESCRIPTION GUIDELINES - KEEP IT SHORT:
+Use <ul><li> bullet format. MAX 5 BULLETS with only the most critical specs:
 
-For ADHESIVES/GLUES:
-- Open time / working time
-- Cure time / clamp time
-- Temperature requirements (min shop temp)
-- Mix ratio (if 2-part)
-- Gap-filling capability
-- Water resistance rating (Type I, II, III)
-- Cleanup method (water, solvent, acetone)
-- Compatible materials
+For ADHESIVES: Open time, cure time, temp requirement, water resistance
+For HARDWARE: Dimensions, weight capacity, bore pattern
+For FINISHES: Coverage rate, dry time, application method
+For MATERIALS: Actual dimensions, core type
 
-For HARDWARE (hinges, slides, fasteners):
-- Exact dimensions and mounting requirements
-- Weight capacity / load rating
-- Required boring patterns (32mm, 35mm cup)
-- Compatible overlay/inset specs
-- Soft-close included?
+Example format:
+<ul>
+<li>Open time: 10-15 min</li>
+<li>Cure: 24 hours</li>
+<li>Min temp: 50°F</li>
+<li>Type II water resistant</li>
+</ul>
 
-For FINISHES (stains, sealers, topcoats):
-- Coverage rate (sq ft per gallon)
-- Dry time between coats
-- Recoat window
-- VOC content / compliance
-- Application method (spray, brush, wipe)
-
-For MATERIALS (sheet goods, lumber, edgebanding):
-- Actual vs nominal dimensions
-- Core type and thickness
-- Machining notes
+DO NOT write paragraphs. Only bullet points with key specs.
 
 For ALL products:
 - Safety/PPE requirements
@@ -413,42 +399,20 @@ Analyze this image and identify the product shown. Then search the web for accur
 {$contextSection}
 IMPORTANT: First identify what product this is, including brand if visible. Then provide detailed information.
 
-Think like Levi, a lead craftsman with 15+ years experience. He needs PRACTICAL info:
+DESCRIPTION MUST BE SHORT - MAX 5 BULLET POINTS:
+Use <ul><li> format with only critical specs:
+- ADHESIVES: Open time, cure time, temp, water resistance
+- HARDWARE: Dimensions, weight capacity, bore pattern
+- FINISHES: Coverage, dry time, application method
+- MATERIALS: Actual dims, core type
 
-For ADHESIVES/GLUES:
-- Open time and cure time at different temperatures
-- Mix ratios if two-part
-- Clamping pressure requirements
-- What surfaces it bonds (wood-to-wood, wood-to-metal, etc.)
-
-For HARDWARE (hinges, slides, knobs):
-- Bore patterns and mounting dimensions
-- Weight/load ratings
-- Required screws/fasteners
-- Overlay specifications
-
-For FINISHES (stains, lacquers, oils):
-- Coverage rate per gallon
-- Dry time between coats vs full cure
-- VOC content and ventilation needs
-- Compatible topcoats
-
-For MATERIALS (wood, sheet goods, laminates):
-- Actual vs nominal dimensions
-- Sheet sizes available
-- Grade specifications
-- Machining characteristics
-
-For ALL products:
-- Safety/PPE requirements
-- Storage requirements
-- Shelf life
-- Common issues to avoid
+Example:
+<ul><li>Open time: 10-15 min</li><li>Cure: 24 hours</li><li>Min temp: 50°F</li></ul>
 
 Return ONLY valid JSON with this exact structure:
 {
     "identified_product_name": "Full product name as identified from image",
-    "description": "Professional HTML description (use <p>, <ul>, <li> tags)",
+    "description": "SHORT bullet list - MAX 5 items with key specs only",
     "description_sale": "Brief sales-focused description",
     "description_purchase": "Purchasing notes (min order, lead time, supplier info)",
     "brand": "Manufacturer name",

@@ -22,6 +22,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -55,6 +56,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Category;
 use Webkul\Product\Models\Product;
+use Webkul\Product\Models\ReferenceTypeCode;
 use Webkul\Support\Models\UOM;
 
 /**
@@ -146,12 +148,6 @@ class ProductResource extends Resource
                                     ->options(ProductType::class)
                                     ->default(ProductType::GOODS->value)
                                     ->live(),
-                                TextInput::make('reference')
-                                    ->label(__('products::filament/resources/product.form.sections.settings.fields.reference'))
-                                    ->maxLength(255),
-                                TextInput::make('barcode')
-                                    ->label(__('products::filament/resources/product.form.sections.settings.fields.barcode'))
-                                    ->maxLength(255),
                                 Select::make('category_id')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.category'))
                                     ->required()
@@ -159,7 +155,83 @@ class ProductResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->default(Category::first()?->id)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($set) => $set('reference_type_code_id', null))
                                     ->createOptionForm(fn (Schema $schema): Schema => CategoryResource::form($schema)),
+                                Select::make('reference_type_code_id')
+                                    ->label('Type Code')
+                                    ->relationship(
+                                        'referenceTypeCode',
+                                        'name',
+                                        modifyQueryUsing: fn (Builder $query, $get) => $query
+                                            ->where('is_active', true)
+                                            ->when($get('category_id'), fn ($q, $catId) => $q->where('category_id', $catId))
+                                    )
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} ({$record->code})")
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->helperText('Select product type for reference code')
+                                    ->createOptionForm([
+                                        TextInput::make('code')
+                                            ->label('Code')
+                                            ->required()
+                                            ->maxLength(10)
+                                            ->placeholder('e.g., GLUE, SAW')
+                                            ->extraInputAttributes(['style' => 'text-transform: uppercase;']),
+                                        TextInput::make('name')
+                                            ->label('Name')
+                                            ->required()
+                                            ->maxLength(100)
+                                            ->placeholder('e.g., Glue, Saw Blade'),
+                                        Toggle::make('is_active')
+                                            ->label('Active')
+                                            ->default(true),
+                                    ])
+                                    ->createOptionUsing(function (array $data, $get): int {
+                                        $data['code'] = strtoupper($data['code']);
+                                        $data['category_id'] = $get('category_id');
+                                        $data['creator_id'] = Auth::id();
+                                        return ReferenceTypeCode::create($data)->id;
+                                    }),
+                                \Filament\Forms\Components\Placeholder::make('reference_preview')
+                                    ->label('Reference Code Preview')
+                                    ->content(function ($get) {
+                                        $categoryId = $get('category_id');
+                                        $typeCodeId = $get('reference_type_code_id');
+
+                                        if (!$categoryId || !$typeCodeId) {
+                                            return 'TCS-???-???-##';
+                                        }
+
+                                        $category = Category::find($categoryId);
+                                        $typeCode = ReferenceTypeCode::find($typeCodeId);
+
+                                        $catCode = $category?->code ?? '???';
+                                        $typeCodeStr = $typeCode?->code ?? '???';
+
+                                        // Calculate next sequence
+                                        $prefix = "TCS-{$catCode}-{$typeCodeStr}-";
+                                        $lastProduct = \Webkul\Product\Models\Product::where('reference', 'like', $prefix . '%')
+                                            ->orderByRaw("CAST(SUBSTRING(reference, ?) AS UNSIGNED) DESC", [strlen($prefix) + 1])
+                                            ->first();
+
+                                        $nextSeq = 1;
+                                        if ($lastProduct) {
+                                            $lastSeq = (int) substr($lastProduct->reference, strlen($prefix));
+                                            $nextSeq = $lastSeq + 1;
+                                        }
+
+                                        return $prefix . str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
+                                    })
+                                    ->helperText('Auto-generated reference code'),
+                                TextInput::make('reference')
+                                    ->label(__('products::filament/resources/product.form.sections.settings.fields.reference'))
+                                    ->maxLength(255)
+                                    ->helperText('Leave empty to auto-generate, or enter custom code'),
+                                TextInput::make('barcode')
+                                    ->label(__('products::filament/resources/product.form.sections.settings.fields.barcode'))
+                                    ->maxLength(255),
                                 Select::make('company_id')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.company'))
                                     ->relationship(
