@@ -347,9 +347,17 @@ PROMPT;
             'category_id' => (int) ($data['category_id'] ?? 0),
             'reference_type_code_id' => (int) ($data['reference_type_code_id'] ?? 0),
 
-            // Pricing
+            // Pricing (unit pricing)
             'suggested_price' => $this->sanitizeNumber($data['suggested_price'] ?? 0),
             'suggested_cost' => $this->sanitizeNumber($data['suggested_cost'] ?? 0),
+
+            // Box/Package pricing (for bulk purchasing)
+            'box_cost' => $this->sanitizeNumber($data['box_cost'] ?? 0),
+            'units_per_box' => (int) ($data['units_per_box'] ?? 0),
+            'package_description' => trim($data['package_description'] ?? ''),
+
+            // Size/Variant info
+            'size_variant' => trim($data['size_variant'] ?? ''),
 
             // Physical properties
             'weight' => $this->sanitizeNumber($data['weight'] ?? 0),
@@ -511,6 +519,18 @@ AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
 {$contextSection}
 IMPORTANT: First identify what product this is, including brand if visible. Then provide detailed information.
 
+SIZE/VARIANT DETECTION:
+- Look for size markings on product or packaging (mm, inches, oz, ml, grit numbers, etc.)
+- For hinges: Note the arm length (52mm, 578mm), cup size (35mm, 40mm)
+- For fasteners: Note length, gauge, drive type
+- For adhesives/finishes: Note container size (oz, gallon, etc.)
+- For sanding: Note grit numbers, belt/disc sizes
+- Include the specific size/variant in the product name
+
+PACKAGING DETECTION:
+- Look for "Box of X", "Case of X", packaging quantity labels
+- If you can identify box/bulk pricing vs unit pricing, provide both
+
 AVAILABLE CATEGORIES (select ONE by ID):
 {$categoryOptions}
 
@@ -529,7 +549,7 @@ Example:
 
 Return ONLY valid JSON with this exact structure:
 {
-    "identified_product_name": "Full product name as identified from image",
+    "identified_product_name": "Full product name INCLUDING size/variant (e.g. 'Blum Compact 33 Hinge 578mm')",
     "description": "SHORT bullet list - MAX 5 items with key specs only",
     "description_sale": "Brief sales-focused description",
     "description_purchase": "Purchasing notes (min order, lead time, supplier info)",
@@ -541,10 +561,14 @@ Return ONLY valid JSON with this exact structure:
     "reference_type_code_id": 0,
     "suggested_price": 0.00,
     "suggested_cost": 0.00,
+    "box_cost": 0.00,
+    "units_per_box": 0,
+    "package_description": "e.g. 'Box of 100', 'Case of 12', 'Single unit'",
+    "size_variant": "Specific size/variant (e.g. '578mm', '16oz', '120 grit')",
     "weight": 0.0,
     "volume": 0.0,
     "technical_specs": "Key specs as single line text",
-    "tags": ["brand-name", "product-type", "material", "application"],
+    "tags": ["brand-name", "product-type", "material", "application", "size-variant"],
     "source_url": "Primary source URL",
     "image_url": "Direct URL to high-quality product image from manufacturer or supplier website"
 }
@@ -552,8 +576,9 @@ Return ONLY valid JSON with this exact structure:
 CRITICAL:
 - ALWAYS select a category_id and reference_type_code_id from the lists above
 - The reference_type_code MUST belong to the selected category
+- Include the SIZE/VARIANT in the product name (this helps distinguish products like "Hinge 578mm" vs "Hinge 52mm")
+- If you detect packaging info, provide box_cost and units_per_box so we can calculate unit cost
 - Always provide your best estimate for price, cost, weight, and volume based on the product type and size visible in the image
-- Include the identified product name - this is essential for the user to confirm you identified it correctly
 
 Return ONLY valid JSON, no markdown.
 PROMPT;
