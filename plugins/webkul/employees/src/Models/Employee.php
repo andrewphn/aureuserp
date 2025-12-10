@@ -503,6 +503,13 @@ class Employee extends Model
      */
     private function handlePartnerCreation(self $employee): void
     {
+        // Get parent employee's partner_id if parent exists
+        $parentPartnerId = null;
+        if ($employee->parent_id) {
+            $parentEmployee = self::find($employee->parent_id);
+            $parentPartnerId = $parentEmployee?->partner_id;
+        }
+
         $partner = $employee->partner()->create([
             'account_type' => 'individual',
             'sub_type'     => 'employee',
@@ -513,7 +520,7 @@ class Employee extends Model
             'phone'        => $employee?->work_phone,
             'mobile'       => $employee?->mobile_phone,
             'color'        => $employee?->color,
-            'parent_id'    => $employee?->parent_id,
+            'parent_id'    => $parentPartnerId,
             'company_id'   => $employee?->company_id,
             'user_id'      => $employee?->user_id,
         ]);

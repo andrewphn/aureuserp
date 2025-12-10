@@ -3,6 +3,11 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
@@ -126,7 +131,7 @@ class InspirationImagesRelationManager extends RelationManager
                     ->preload(),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         // Get file info
                         $filePath = $data['file_path'];
@@ -162,7 +167,7 @@ class InspirationImagesRelationManager extends RelationManager
                     ->modalWidth('7xl')
                     ->slideOver(),
 
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->mutateFormDataUsing(function (array $data, $record): array {
                         // Only update file metadata if file changed
                         if ($data['file_path'] !== $record->file_path) {
@@ -180,7 +185,7 @@ class InspirationImagesRelationManager extends RelationManager
                         return $data;
                     }),
 
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->before(function ($record) {
                         // Delete the actual file
                         if (Storage::disk('private')->exists($record->file_path)) {
@@ -189,8 +194,8 @@ class InspirationImagesRelationManager extends RelationManager
                     }),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->before(function ($records) {
                             // Delete the actual files
                             foreach ($records as $record) {
