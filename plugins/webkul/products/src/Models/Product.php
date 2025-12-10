@@ -90,6 +90,10 @@ class Product extends Model implements Sortable
         'barcode',
         'price',
         'cost',
+        'box_cost',
+        'units_per_box',
+        'package_description',
+        'supplier_sku',
         'volume',
         'weight',
         'description',
@@ -123,6 +127,8 @@ class Product extends Model implements Sortable
         'images'          => 'array',
         'cost'            => 'float',
         'price'           => 'float',
+        'box_cost'        => 'float',
+        'units_per_box'   => 'integer',
     ];
 
     protected array $logAttributes = [

@@ -260,12 +260,67 @@ class ProductResource extends Resource
                                     ->label(__('products::filament/resources/product.form.sections.pricing.fields.cost'))
                                     ->numeric()
                                     ->default(0.00)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->helperText('Unit cost (auto-calculated from box cost if provided)'),
                                 Hidden::make('uom_id')
                                     ->default(UOM::first()->id),
                                 Hidden::make('uom_po_id')
                                     ->default(UOM::first()->id),
                             ]),
+
+                        Section::make('Package/Box Pricing')
+                            ->description('Track supplier box costs and calculate unit cost automatically')
+                            ->schema([
+                                TextInput::make('box_cost')
+                                    ->label('Box/Package Cost')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->prefix('$')
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                        $unitsPerBox = (int) $get('units_per_box');
+                                        if ($state > 0 && $unitsPerBox > 0) {
+                                            $unitCost = round($state / $unitsPerBox, 4);
+                                            $set('cost', $unitCost);
+                                        }
+                                    })
+                                    ->helperText('What you pay for a full box/package'),
+                                TextInput::make('units_per_box')
+                                    ->label('Units per Box')
+                                    ->numeric()
+                                    ->integer()
+                                    ->minValue(1)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                        $boxCost = (float) $get('box_cost');
+                                        if ($boxCost > 0 && $state > 0) {
+                                            $unitCost = round($boxCost / $state, 4);
+                                            $set('cost', $unitCost);
+                                        }
+                                    })
+                                    ->helperText('How many individual units come in a box'),
+                                TextInput::make('package_description')
+                                    ->label('Package Description')
+                                    ->placeholder('e.g., Box of 100, Case of 12, Bundle of 50')
+                                    ->maxLength(255),
+                                TextInput::make('supplier_sku')
+                                    ->label('Supplier SKU')
+                                    ->placeholder('Supplier part number for ordering')
+                                    ->maxLength(255),
+                                \Filament\Forms\Components\Placeholder::make('cost_calculation')
+                                    ->label('Calculated Unit Cost')
+                                    ->content(function ($get) {
+                                        $boxCost = (float) $get('box_cost');
+                                        $unitsPerBox = (int) $get('units_per_box');
+                                        if ($boxCost > 0 && $unitsPerBox > 0) {
+                                            $unitCost = round($boxCost / $unitsPerBox, 4);
+                                            return '$' . number_format($unitCost, 4) . ' per unit';
+                                        }
+                                        return 'Enter box cost and units per box to calculate';
+                                    }),
+                            ])
+                            ->collapsible()
+                            ->collapsed(),
                     ])
                     ->columnSpan(['lg' => 1]),
             ])
