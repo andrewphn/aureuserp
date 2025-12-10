@@ -20,6 +20,7 @@
         "flowframe/laravel-trend": "^0.3.0",
         "guava/filament-icon-picker": "^3.0",
         "hugomyb/filament-media-action": "^4.0",
+        "hydrat/filament-table-layout-toggle": "^3.0",
         "jacobtims/inline-date-time-picker": "^2.0",
         "joaopaulolndev/filament-pdf-viewer": "^2.0",
         "laravel/framework": "^11.9",

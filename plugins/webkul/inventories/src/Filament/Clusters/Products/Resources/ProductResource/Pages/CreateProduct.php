@@ -101,13 +101,11 @@ class CreateProduct extends BaseCreateProduct
                             }
                         }
 
-                        // Always update price/cost/weight/volume with AI estimates
-                        if (!empty($data['suggested_price']) && $data['suggested_price'] > 0) {
-                            $updates['price'] = $data['suggested_price'];
-                        }
-
-                        if (!empty($data['suggested_cost']) && $data['suggested_cost'] > 0) {
-                            $updates['cost'] = $data['suggested_cost'];
+                        // Set both price and cost to the COST value (user can override with markup later)
+                        $costValue = $data['suggested_cost'] ?? $data['suggested_price'] ?? 0;
+                        if ($costValue > 0) {
+                            $updates['price'] = $costValue;
+                            $updates['cost'] = $costValue;
                         }
 
                         if (!empty($data['weight']) && $data['weight'] > 0) {
@@ -292,13 +290,11 @@ class CreateProduct extends BaseCreateProduct
                             }
                         }
 
-                        // Always update price/cost/weight/volume with AI estimates
-                        if (!empty($aiData['suggested_price']) && $aiData['suggested_price'] > 0) {
-                            $updates['price'] = $aiData['suggested_price'];
-                        }
-
-                        if (!empty($aiData['suggested_cost']) && $aiData['suggested_cost'] > 0) {
-                            $updates['cost'] = $aiData['suggested_cost'];
+                        // Set both price and cost to the COST value (user can override with markup later)
+                        $costValue = $aiData['suggested_cost'] ?? $aiData['suggested_price'] ?? 0;
+                        if ($costValue > 0) {
+                            $updates['price'] = $costValue;
+                            $updates['cost'] = $costValue;
                         }
 
                         if (!empty($aiData['weight']) && $aiData['weight'] > 0) {
