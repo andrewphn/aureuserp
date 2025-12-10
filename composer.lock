@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c55e5d463b26bdb744f570fd358c9e77",
+    "content-hash": "486ec30ba6d9d733c1ea94add63c48c6",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2880,6 +2880,85 @@
                 }
             ],
             "time": "2025-07-28T14:58:05+00:00"
+        },
+        {
+            "name": "hydrat/filament-table-layout-toggle",
+            "version": "v3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Hydrat-Agency/filament-table-layout-toggle.git",
+                "reference": "008d94fe8c45e8f17ee4ad4cd114ffa5504d1886"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Hydrat-Agency/filament-table-layout-toggle/zipball/008d94fe8c45e8f17ee4ad4cd114ffa5504d1886",
+                "reference": "008d94fe8c45e8f17ee4ad4cd114ffa5504d1886",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "illuminate/contracts": "^11.0|^12.0",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "nunomaduro/collision": "^8.0",
+                "nunomaduro/larastan": "^2.0.1",
+                "orchestra/testbench": "^9.0",
+                "pestphp/pest": "^3.0|^4.0",
+                "pestphp/pest-plugin-arch": "^3.0|^4.0",
+                "pestphp/pest-plugin-laravel": "^3.0|^4.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "spatie/laravel-ray": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "TableLayoutToggle": "Hydrat\\TableLayoutToggle\\Facades\\TableLayoutToggle"
+                    },
+                    "providers": [
+                        "Hydrat\\TableLayoutToggle\\TableLayoutToggleServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hydrat\\TableLayoutToggle\\": "src/",
+                    "Hydrat\\TableLayoutToggle\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Thomas",
+                    "email": "thomas@hydrat.agency",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Filament plugin adding a toggle button to tables, allowing user to switch between Grid and Table layouts.",
+            "homepage": "https://github.com/hydrat/filament-table-layout-toggle",
+            "keywords": [
+                "Hydrat",
+                "filament-table-layout-toggle",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/hydrat/filament-table-layout-toggle/issues",
+                "source": "https://github.com/hydrat/filament-table-layout-toggle"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Hydrat",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-08-26T09:31:21+00:00"
         },
         {
             "name": "jacobtims/inline-date-time-picker",

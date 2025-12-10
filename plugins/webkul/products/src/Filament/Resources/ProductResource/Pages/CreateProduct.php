@@ -6,6 +6,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\ProductResource;
+use Webkul\Product\Traits\GeneratesReferenceCode;
 
 /**
  * Create Product class
@@ -14,6 +15,8 @@ use Webkul\Product\Filament\Resources\ProductResource;
  */
 class CreateProduct extends CreateRecord
 {
+    use GeneratesReferenceCode;
+
     protected static string $resource = ProductResource::class;
 
     protected function getRedirectUrl(): string
@@ -38,6 +41,9 @@ class CreateProduct extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['creator_id'] = Auth::id();
+
+        // Auto-generate reference code if not provided
+        $data = $this->mutateFormDataWithReferenceCode($data);
 
         return $data;
     }

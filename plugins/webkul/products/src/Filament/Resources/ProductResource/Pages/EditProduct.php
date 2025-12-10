@@ -12,6 +12,7 @@ use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Product\Filament\Resources\ProductResource;
+use Webkul\Product\Traits\GeneratesReferenceCode;
 
 /**
  * Edit Product class
@@ -20,6 +21,8 @@ use Webkul\Product\Filament\Resources\ProductResource;
  */
 class EditProduct extends EditRecord
 {
+    use GeneratesReferenceCode;
+
     protected static string $resource = ProductResource::class;
 
     public static function getSubNavigationPosition(): SubNavigationPosition
@@ -94,6 +97,17 @@ class EditProduct extends EditRecord
                         ->body(__('products::filament/resources/product/pages/edit-product.header-actions.delete.notification.body')),
                 ),
         ];
+    }
+
+    /**
+     * Mutate Form Data Before Save
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Auto-generate reference code if not provided
+        $data = $this->mutateFormDataWithReferenceCode($data);
+
+        return $data;
     }
 
     /**
