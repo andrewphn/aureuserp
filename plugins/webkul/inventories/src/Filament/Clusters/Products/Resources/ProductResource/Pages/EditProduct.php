@@ -52,7 +52,13 @@ class EditProduct extends BaseEditProduct
 
                         // Use name from FORM (what user typed), not database record
                         $productName = $currentData['name'] ?? $record->name;
+
+                        // Description may be array from RichEditor - extract string value
                         $existingDescription = $currentData['description'] ?? $record->description;
+                        if (is_array($existingDescription)) {
+                            $existingDescription = $existingDescription['content'] ?? ($existingDescription[0] ?? null);
+                        }
+                        $existingDescription = is_string($existingDescription) ? $existingDescription : null;
 
                         if (empty($productName)) {
                             Notification::make()

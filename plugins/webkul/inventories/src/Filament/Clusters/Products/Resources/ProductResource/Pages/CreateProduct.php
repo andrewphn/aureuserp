@@ -48,7 +48,12 @@ class CreateProduct extends BaseCreateProduct
                         }
 
                         $service = new GeminiProductService();
-                        $data = $service->generateProductDetails($productName, $currentData['description'] ?? null);
+                        // Description may be array from RichEditor - extract string value
+                        $existingDesc = $currentData['description'] ?? null;
+                        if (is_array($existingDesc)) {
+                            $existingDesc = $existingDesc['content'] ?? ($existingDesc[0] ?? null);
+                        }
+                        $data = $service->generateProductDetails($productName, is_string($existingDesc) ? $existingDesc : null);
 
                         if (isset($data['error'])) {
                             Notification::make()
