@@ -196,15 +196,17 @@ For ALL products:
 
 Field guidelines:
 - brand: Manufacturer name (e.g., "West System", "Blum", "Titebond")
-- sku: Manufacturer part number (empty string if not found)
-- barcode: UPC/EAN (empty string if not found)
+- sku: Manufacturer part number - ALWAYS TRY TO FIND (e.g., "5004", "TB-II-16", "105-B")
+- barcode: UPC/EAN barcode - SEARCH HARD FOR THIS (12-13 digit number like "037083050042")
 - product_type: One of: adhesive, hardware, finish, material, tool, consumable, safety
 - category_suggestion: Category path with " / " separator
-- suggested_price: Retail price USD (0 if unknown)
-- suggested_cost: Wholesale ~40-60% of retail (0 if unknown)
-- weight: In kilograms (0 if unknown)
-- volume: In liters (0 if unknown)
+- suggested_price: Retail price USD - ALWAYS ESTIMATE (wood glue pint ~$8-15, quart ~$15-25, gallon ~$30-50)
+- suggested_cost: Wholesale - ALWAYS ESTIMATE as 50-60% of retail price
+- weight: In kg - ALWAYS ESTIMATE (1 gallon liquid ~4kg, 1 quart ~1kg)
+- volume: In liters - ALWAYS ESTIMATE (1 gallon = 3.78L, 1 quart = 0.95L, 1 pint = 0.47L)
 - source_url: Primary source URL for this product info
+
+CRITICAL: Never return 0 for price, cost, weight, or volume. Always provide your best estimate based on typical products in this category. Empty string is OK for sku/barcode only if truly not findable.
 
 Return ONLY valid JSON, no markdown.
 PROMPT;

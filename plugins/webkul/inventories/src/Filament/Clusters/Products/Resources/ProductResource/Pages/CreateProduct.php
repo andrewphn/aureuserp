@@ -99,28 +99,21 @@ class CreateProduct extends BaseCreateProduct
                             }
                         }
 
+                        // Always update price/cost/weight/volume with AI estimates
                         if (!empty($data['suggested_price']) && $data['suggested_price'] > 0) {
-                            if (empty($currentData['price']) || $currentData['price'] == 0) {
-                                $updates['price'] = $data['suggested_price'];
-                            }
+                            $updates['price'] = $data['suggested_price'];
                         }
 
                         if (!empty($data['suggested_cost']) && $data['suggested_cost'] > 0) {
-                            if (empty($currentData['cost']) || $currentData['cost'] == 0) {
-                                $updates['cost'] = $data['suggested_cost'];
-                            }
+                            $updates['cost'] = $data['suggested_cost'];
                         }
 
                         if (!empty($data['weight']) && $data['weight'] > 0) {
-                            if (empty($currentData['weight']) || $currentData['weight'] == 0) {
-                                $updates['weight'] = $data['weight'];
-                            }
+                            $updates['weight'] = $data['weight'];
                         }
 
                         if (!empty($data['volume']) && $data['volume'] > 0) {
-                            if (empty($currentData['volume']) || $currentData['volume'] == 0) {
-                                $updates['volume'] = $data['volume'];
-                            }
+                            $updates['volume'] = $data['volume'];
                         }
 
                         // Handle tags - find or create and get IDs
