@@ -2,7 +2,7 @@
 
 namespace Webkul\Inventory\Filament\Resources;
 
-use Filament\Forms\Components\Grid;
+use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
