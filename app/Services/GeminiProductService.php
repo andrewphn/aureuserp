@@ -112,6 +112,79 @@ class GeminiProductService
     }
 
     /**
+     * Get available categories for AI selection
+     */
+    protected function getCategories(): array
+    {
+        return Cache::remember('ai_product_categories', 3600, function () {
+            return DB::table('products_categories')
+                ->select('id', 'name')
+                ->whereNotIn('name', ['All', 'Internal', 'Expenses'])
+                ->orderBy('name')
+                ->get()
+                ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+                ->toArray();
+        });
+    }
+
+    /**
+     * Get available reference type codes for AI selection
+     */
+    protected function getReferenceCodes(): array
+    {
+        return Cache::remember('ai_reference_type_codes', 3600, function () {
+            return DB::table('products_reference_type_codes as r')
+                ->join('products_categories as c', 'r.category_id', '=', 'c.id')
+                ->select('r.id', 'r.code', 'r.name', 'r.category_id', 'c.name as category_name')
+                ->where('r.is_active', true)
+                ->orderBy('c.name')
+                ->orderBy('r.name')
+                ->get()
+                ->map(fn($r) => [
+                    'id' => $r->id,
+                    'code' => $r->code,
+                    'name' => $r->name,
+                    'category_id' => $r->category_id,
+                    'category' => $r->category_name,
+                ])
+                ->toArray();
+        });
+    }
+
+    /**
+     * Build category options string for prompt
+     */
+    protected function buildCategoryOptions(): string
+    {
+        $categories = $this->getCategories();
+        $lines = [];
+        foreach ($categories as $cat) {
+            $lines[] = "  {$cat['id']}: {$cat['name']}";
+        }
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Build reference code options string for prompt
+     */
+    protected function buildReferenceCodeOptions(): string
+    {
+        $codes = $this->getReferenceCodes();
+        $lines = [];
+        $byCategory = [];
+        foreach ($codes as $code) {
+            $byCategory[$code['category']][] = $code;
+        }
+        foreach ($byCategory as $catName => $catCodes) {
+            $lines[] = "\n  {$catName}:";
+            foreach ($catCodes as $code) {
+                $lines[] = "    {$code['id']}: {$code['code']} - {$code['name']}";
+            }
+        }
+        return implode("\n", $lines);
+    }
+
+    /**
      * Build the prompt for Gemini
      */
     protected function buildPrompt(string $productName, ?string $existingDescription): string
@@ -120,6 +193,9 @@ class GeminiProductService
         if (!empty($existingDescription)) {
             $contextSection = "\nExisting Description: {$existingDescription}\n";
         }
+
+        $categoryOptions = $this->buildCategoryOptions();
+        $referenceCodeOptions = $this->buildReferenceCodeOptions();
 
         return <<<PROMPT
 You are a product data specialist for TCS Woodwork, a professional cabinet and furniture shop.
@@ -136,6 +212,12 @@ AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
 Product Name: {$productName}
 {$contextSection}
 
+AVAILABLE CATEGORIES (select ONE by ID):
+{$categoryOptions}
+
+AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
+{$referenceCodeOptions}
+
 Generate product details that a PROFESSIONAL WOODWORKER would actually need to know.
 NOT marketing fluff - practical shop floor information.
 
@@ -147,7 +229,8 @@ Return this exact JSON format:
     "sku": "Manufacturer SKU or part number",
     "barcode": "UPC or EAN barcode",
     "product_type": "adhesive|hardware|finish|material|tool|consumable|safety",
-    "category_suggestion": "Best category path like 'Adhesives / Epoxy' or 'Hardware / Hinges / Euro'",
+    "category_id": 0,
+    "reference_type_code_id": 0,
     "suggested_price": 0.00,
     "suggested_cost": 0.00,
     "weight": 0.0,
@@ -195,14 +278,18 @@ Field guidelines:
 - sku: Manufacturer part number - ALWAYS TRY TO FIND (e.g., "5004", "TB-II-16", "105-B")
 - barcode: UPC/EAN barcode - SEARCH HARD FOR THIS (12-13 digit number like "037083050042")
 - product_type: One of: adhesive, hardware, finish, material, tool, consumable, safety
-- category_suggestion: Category path with " / " separator
+- category_id: REQUIRED - Select ID from AVAILABLE CATEGORIES above (e.g., 58 for Hardware, 53 for Adhesives)
+- reference_type_code_id: REQUIRED - Select ID from AVAILABLE REFERENCE TYPE CODES above (must match category)
 - suggested_price: Retail price USD - ALWAYS ESTIMATE (wood glue pint ~$8-15, quart ~$15-25, gallon ~$30-50)
 - suggested_cost: Wholesale - ALWAYS ESTIMATE as 50-60% of retail price
 - weight: In kg - ALWAYS ESTIMATE (1 gallon liquid ~4kg, 1 quart ~1kg)
 - volume: In liters - ALWAYS ESTIMATE (1 gallon = 3.78L, 1 quart = 0.95L, 1 pint = 0.47L)
 - source_url: Primary source URL for this product info
 
-CRITICAL: Never return 0 for price, cost, weight, or volume. Always provide your best estimate based on typical products in this category. Empty string is OK for sku/barcode only if truly not findable.
+CRITICAL:
+- ALWAYS select a category_id and reference_type_code_id from the lists above
+- Never return 0 for price, cost, weight, or volume - always estimate
+- The reference_type_code MUST belong to the selected category
 
 Return ONLY valid JSON, no markdown.
 PROMPT;
@@ -256,6 +343,8 @@ PROMPT;
             // Classification
             'product_type' => trim($data['product_type'] ?? ''),
             'category_suggestion' => trim($data['category_suggestion'] ?? ''),
+            'category_id' => (int) ($data['category_id'] ?? 0),
+            'reference_type_code_id' => (int) ($data['reference_type_code_id'] ?? 0),
 
             // Pricing
             'suggested_price' => $this->sanitizeNumber($data['suggested_price'] ?? 0),
@@ -402,6 +491,9 @@ PROMPT;
             $contextSection = "\nAdditional Context from User: {$additionalContext}\n";
         }
 
+        $categoryOptions = $this->buildCategoryOptions();
+        $referenceCodeOptions = $this->buildReferenceCodeOptions();
+
         return <<<PROMPT
 You are a product identification specialist for TCS Woodwork, a professional cabinet and furniture shop.
 
@@ -416,6 +508,12 @@ PRIORITY SOURCES - Search these FIRST for pricing and specs:
 AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
 {$contextSection}
 IMPORTANT: First identify what product this is, including brand if visible. Then provide detailed information.
+
+AVAILABLE CATEGORIES (select ONE by ID):
+{$categoryOptions}
+
+AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
+{$referenceCodeOptions}
 
 DESCRIPTION MUST BE SHORT - MAX 5 BULLET POINTS:
 Use <ul><li> format with only critical specs:
@@ -437,7 +535,8 @@ Return ONLY valid JSON with this exact structure:
     "sku": "Manufacturer part/model number if visible or findable",
     "barcode": "UPC/EAN if findable (12-13 digit number)",
     "product_type": "One of: adhesive, hardware, finish, material, tool, consumable, safety",
-    "category_suggestion": "Category path with / separator",
+    "category_id": 0,
+    "reference_type_code_id": 0,
     "suggested_price": 0.00,
     "suggested_cost": 0.00,
     "weight": 0.0,
@@ -448,8 +547,10 @@ Return ONLY valid JSON with this exact structure:
 }
 
 CRITICAL:
-- Always provide your best estimate for price, cost, weight, and volume based on the product type and size visible in the image.
-- Include the identified product name - this is essential for the user to confirm you identified it correctly.
+- ALWAYS select a category_id and reference_type_code_id from the lists above
+- The reference_type_code MUST belong to the selected category
+- Always provide your best estimate for price, cost, weight, and volume based on the product type and size visible in the image
+- Include the identified product name - this is essential for the user to confirm you identified it correctly
 
 Return ONLY valid JSON, no markdown.
 PROMPT;

@@ -156,6 +156,14 @@ class EditProduct extends BaseEditProduct
                             }
                         }
 
+                        // Category and Reference Type Code from AI
+                        if (!empty($data['category_id']) && $data['category_id'] > 0) {
+                            $updates['category_id'] = $data['category_id'];
+                        }
+                        if (!empty($data['reference_type_code_id']) && $data['reference_type_code_id'] > 0) {
+                            $updates['reference_type_code_id'] = $data['reference_type_code_id'];
+                        }
+
                         if (!empty($updates)) {
                             // Update form state without saving to database
                             $this->form->fill(array_merge($currentData, $updates));
@@ -211,6 +219,12 @@ class EditProduct extends BaseEditProduct
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                         ->maxSize(10240) // 10MB
                         ->helperText('Take a photo or upload an image of the product'),
+                    \Filament\Forms\Components\TextInput::make('quantity')
+                        ->label('Quantity on Hand')
+                        ->numeric()
+                        ->default(1)
+                        ->minValue(0)
+                        ->helperText('How many do you have in stock?'),
                     Textarea::make('additional_context')
                         ->label('Additional Context (optional)')
                         ->placeholder('e.g., "16oz bottle", "for outdoor use", "bought from Home Depot"')
@@ -218,7 +232,7 @@ class EditProduct extends BaseEditProduct
                         ->helperText('Any additional info to help identify the product'),
                 ])
                 ->modalHeading('Identify Product from Photo')
-                ->modalDescription('Upload a photo of the product. AI will identify it and populate the form with product details.')
+                ->modalDescription('Upload a photo and enter quantity. AI will identify the product and populate all details.')
                 ->modalSubmitActionLabel('Identify & Populate')
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
                 ->action(function (array $data, Product $record) {
@@ -381,6 +395,14 @@ class EditProduct extends BaseEditProduct
                             }
                         }
 
+                        // Category and Reference Type Code from AI
+                        if (!empty($aiData['category_id']) && $aiData['category_id'] > 0) {
+                            $updates['category_id'] = $aiData['category_id'];
+                        }
+                        if (!empty($aiData['reference_type_code_id']) && $aiData['reference_type_code_id'] > 0) {
+                            $updates['reference_type_code_id'] = $aiData['reference_type_code_id'];
+                        }
+
                         // Add image to product's images array
                         $existingImages = $currentData['images'] ?? [];
                         if (!is_array($existingImages)) {
@@ -388,6 +410,11 @@ class EditProduct extends BaseEditProduct
                         }
                         $existingImages[] = $permanentPath;
                         $updates['images'] = $existingImages;
+
+                        // Quantity from user input
+                        if (!empty($data['quantity']) && $data['quantity'] > 0) {
+                            $updates['qty_available'] = $data['quantity'];
+                        }
 
                         if (!empty($updates)) {
                             $this->form->fill(array_merge($currentData, $updates));
