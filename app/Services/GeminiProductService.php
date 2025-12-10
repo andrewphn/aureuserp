@@ -237,7 +237,8 @@ Return this exact JSON format:
     "volume": 0.0,
     "technical_specs": "Key specifications as plain text",
     "tags": ["tag1", "tag2", "tag3"],
-    "source_url": "URL where you found the main product info"
+    "source_url": "URL where you found the main product info",
+    "image_url": "Direct URL to product image (prefer manufacturer or Richelieu images)"
 }
 
 TAG GUIDELINES - Use specific, searchable tags:
@@ -358,6 +359,7 @@ PROMPT;
             'technical_specs' => trim($data['technical_specs'] ?? ''),
             'tags' => is_array($data['tags'] ?? null) ? $data['tags'] : [],
             'source_url' => trim($data['source_url'] ?? ''),
+            'image_url' => trim($data['image_url'] ?? ''),
         ];
     }
 
@@ -543,7 +545,8 @@ Return ONLY valid JSON with this exact structure:
     "volume": 0.0,
     "technical_specs": "Key specs as single line text",
     "tags": ["brand-name", "product-type", "material", "application"],
-    "source_url": "Primary source URL"
+    "source_url": "Primary source URL",
+    "image_url": "Direct URL to high-quality product image from manufacturer or supplier website"
 }
 
 CRITICAL:
@@ -562,5 +565,91 @@ PROMPT;
     public function isConfigured(): bool
     {
         return !empty($this->geminiKey);
+    }
+
+    /**
+     * Download an image from URL and save to product images directory
+     *
+     * @param string $imageUrl URL to download image from
+     * @param string|null $productName Optional product name for filename
+     * @return string|null Relative path to saved image, or null if failed
+     */
+    public static function downloadProductImage(string $imageUrl, ?string $productName = null): ?string
+    {
+        if (empty($imageUrl)) {
+            return null;
+        }
+
+        try {
+            // Validate URL
+            if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                Log::warning('GeminiProductService: Invalid image URL', ['url' => $imageUrl]);
+                return null;
+            }
+
+            // Download image with timeout
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (compatible; TCSWoodwork/1.0)',
+                    'Accept' => 'image/*',
+                ])
+                ->get($imageUrl);
+
+            if (!$response->successful()) {
+                Log::warning('GeminiProductService: Failed to download image', [
+                    'url' => $imageUrl,
+                    'status' => $response->status(),
+                ]);
+                return null;
+            }
+
+            // Get content type and validate it's an image
+            $contentType = $response->header('Content-Type') ?? '';
+            if (!str_starts_with($contentType, 'image/')) {
+                Log::warning('GeminiProductService: URL is not an image', [
+                    'url' => $imageUrl,
+                    'content_type' => $contentType,
+                ]);
+                return null;
+            }
+
+            // Determine file extension
+            $extension = match (true) {
+                str_contains($contentType, 'jpeg') || str_contains($contentType, 'jpg') => 'jpg',
+                str_contains($contentType, 'png') => 'png',
+                str_contains($contentType, 'webp') => 'webp',
+                str_contains($contentType, 'gif') => 'gif',
+                default => 'jpg',
+            };
+
+            // Generate filename
+            $slug = $productName ? preg_replace('/[^a-z0-9]+/', '-', strtolower($productName)) : 'product';
+            $slug = substr($slug, 0, 50); // Limit length
+            $filename = $slug . '-' . time() . '-' . bin2hex(random_bytes(4)) . '.' . $extension;
+
+            // Ensure directory exists
+            $directory = storage_path('app/public/products/images');
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            // Save image
+            $fullPath = $directory . '/' . $filename;
+            file_put_contents($fullPath, $response->body());
+
+            Log::info('GeminiProductService: Downloaded product image', [
+                'url' => $imageUrl,
+                'saved_to' => $filename,
+            ]);
+
+            return 'products/images/' . $filename;
+
+        } catch (\Exception $e) {
+            Log::error('GeminiProductService: Error downloading image', [
+                'url' => $imageUrl,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
     }
 }
