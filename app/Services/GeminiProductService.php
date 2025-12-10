@@ -123,6 +123,14 @@ class GeminiProductService
 You are a product data specialist for TCS Woodwork, a professional cabinet and furniture shop.
 Search the web for accurate, real-world information about the following product.
 
+PRIORITY SOURCES - Search these FIRST for pricing and specs:
+1. Richelieu.com (primary hardware supplier)
+2. Woodworker's Supply
+3. Rockler.com
+4. Woodcraft.com
+5. Manufacturer website (Blum, Titebond, West System, etc.)
+AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
+
 Product Name: {$productName}
 {$contextSection}
 
@@ -396,6 +404,14 @@ PROMPT;
 You are a product identification specialist for TCS Woodwork, a professional cabinet and furniture shop.
 
 Analyze this image and identify the product shown. Then search the web for accurate, real-world information about this product.
+
+PRIORITY SOURCES - Search these FIRST for pricing and specs:
+1. Richelieu.com (primary hardware supplier)
+2. Woodworker's Supply
+3. Rockler.com
+4. Woodcraft.com
+5. Manufacturer website (Blum, Titebond, West System, etc.)
+AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
 {$contextSection}
 IMPORTANT: First identify what product this is, including brand if visible. Then provide detailed information.
 
