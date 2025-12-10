@@ -778,6 +778,219 @@ PROMPT;
     }
 
     /**
+     * Find existing products that might match the AI-identified product
+     * This helps prevent creating duplicate products/variants
+     *
+     * @param string $identifiedName The product name identified by AI
+     * @param string|null $brand Brand name if available
+     * @param string|null $sku SKU if available
+     * @param array $suggestedAttributes Attributes suggested by AI
+     * @return array Array of potential matches with relevance info
+     */
+    public static function findSimilarProducts(
+        string $identifiedName,
+        ?string $brand = null,
+        ?string $sku = null,
+        array $suggestedAttributes = []
+    ): array {
+        $matches = [];
+
+        // Clean the name for searching
+        $searchName = trim(preg_replace('/\s+/', ' ', $identifiedName));
+        $words = array_filter(explode(' ', strtolower($searchName)));
+
+        // Remove common words that don't help matching
+        $stopWords = ['the', 'a', 'an', 'for', 'with', 'and', 'or', 'mm', 'inch', 'oz', 'lb'];
+        $searchWords = array_diff($words, $stopWords);
+
+        // Strategy 1: Exact SKU match (highest priority)
+        if (!empty($sku)) {
+            $skuMatches = DB::table('products_products')
+                ->where('reference', $sku)
+                ->orWhere('barcode', $sku)
+                ->whereNull('deleted_at')
+                ->select('id', 'name', 'reference', 'barcode', 'parent_id', 'is_configurable', 'price', 'cost')
+                ->limit(5)
+                ->get();
+
+            foreach ($skuMatches as $product) {
+                $matches[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'reference' => $product->reference,
+                    'barcode' => $product->barcode,
+                    'parent_id' => $product->parent_id,
+                    'is_configurable' => $product->is_configurable,
+                    'price' => $product->price,
+                    'cost' => $product->cost,
+                    'match_type' => 'exact_sku',
+                    'confidence' => 100,
+                ];
+            }
+        }
+
+        // Strategy 2: Brand + partial name match
+        if (!empty($brand)) {
+            $brandLower = strtolower($brand);
+            $nameMatches = DB::table('products_products')
+                ->whereNull('deleted_at')
+                ->where(function ($query) use ($brandLower, $searchWords) {
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%{$brandLower}%"]);
+                    foreach (array_slice($searchWords, 0, 3) as $word) {
+                        if (strlen($word) > 2) {
+                            $query->whereRaw('LOWER(name) LIKE ?', ["%{$word}%"]);
+                        }
+                    }
+                })
+                ->select('id', 'name', 'reference', 'barcode', 'parent_id', 'is_configurable', 'price', 'cost')
+                ->limit(10)
+                ->get();
+
+            foreach ($nameMatches as $product) {
+                // Avoid duplicates
+                if (collect($matches)->where('id', $product->id)->isEmpty()) {
+                    $matches[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'reference' => $product->reference,
+                        'barcode' => $product->barcode,
+                        'parent_id' => $product->parent_id,
+                        'is_configurable' => $product->is_configurable,
+                        'price' => $product->price,
+                        'cost' => $product->cost,
+                        'match_type' => 'brand_name',
+                        'confidence' => 75,
+                    ];
+                }
+            }
+        }
+
+        // Strategy 3: Configurable products (parents) that might be a match
+        // Look for products with variants that could include this item
+        $configurableMatches = DB::table('products_products')
+            ->where('is_configurable', true)
+            ->whereNull('deleted_at')
+            ->whereNull('parent_id')
+            ->where(function ($query) use ($searchWords) {
+                foreach (array_slice($searchWords, 0, 2) as $word) {
+                    if (strlen($word) > 2) {
+                        $query->whereRaw('LOWER(name) LIKE ?', ["%{$word}%"]);
+                    }
+                }
+            })
+            ->select('id', 'name', 'reference', 'barcode', 'parent_id', 'is_configurable', 'price', 'cost')
+            ->limit(5)
+            ->get();
+
+        foreach ($configurableMatches as $product) {
+            if (collect($matches)->where('id', $product->id)->isEmpty()) {
+                // Get variant count
+                $variantCount = DB::table('products_products')
+                    ->where('parent_id', $product->id)
+                    ->whereNull('deleted_at')
+                    ->count();
+
+                $matches[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'reference' => $product->reference,
+                    'barcode' => $product->barcode,
+                    'parent_id' => $product->parent_id,
+                    'is_configurable' => $product->is_configurable,
+                    'price' => $product->price,
+                    'cost' => $product->cost,
+                    'variant_count' => $variantCount,
+                    'match_type' => 'configurable_parent',
+                    'confidence' => 60,
+                ];
+            }
+        }
+
+        // Strategy 4: Fuzzy name match for any remaining products
+        if (count($matches) < 5 && count($searchWords) >= 2) {
+            $fuzzyMatches = DB::table('products_products')
+                ->whereNull('deleted_at')
+                ->where(function ($query) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        if (strlen($word) > 3) {
+                            $query->orWhereRaw('LOWER(name) LIKE ?', ["%{$word}%"]);
+                        }
+                    }
+                })
+                ->select('id', 'name', 'reference', 'barcode', 'parent_id', 'is_configurable', 'price', 'cost')
+                ->limit(10)
+                ->get();
+
+            foreach ($fuzzyMatches as $product) {
+                if (collect($matches)->where('id', $product->id)->isEmpty()) {
+                    // Calculate similarity score
+                    similar_text(strtolower($product->name), strtolower($identifiedName), $similarity);
+
+                    if ($similarity > 30) {
+                        $matches[] = [
+                            'id' => $product->id,
+                            'name' => $product->name,
+                            'reference' => $product->reference,
+                            'barcode' => $product->barcode,
+                            'parent_id' => $product->parent_id,
+                            'is_configurable' => $product->is_configurable,
+                            'price' => $product->price,
+                            'cost' => $product->cost,
+                            'match_type' => 'fuzzy',
+                            'confidence' => (int) $similarity,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Sort by confidence descending
+        usort($matches, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
+
+        // Limit to top 10 matches
+        return array_slice($matches, 0, 10);
+    }
+
+    /**
+     * Get existing variants for a configurable parent product
+     *
+     * @param int $parentId The parent product ID
+     * @return array List of variants with their attributes
+     */
+    public static function getProductVariants(int $parentId): array
+    {
+        $variants = DB::table('products_products as p')
+            ->where('p.parent_id', $parentId)
+            ->whereNull('p.deleted_at')
+            ->select('p.id', 'p.name', 'p.reference', 'p.price', 'p.cost')
+            ->get();
+
+        $result = [];
+        foreach ($variants as $variant) {
+            // Get attribute values for this variant
+            $attributes = DB::table('products_product_attribute_values as pav')
+                ->join('products_attribute_options as ao', 'pav.attribute_option_id', '=', 'ao.id')
+                ->join('products_attributes as a', 'ao.attribute_id', '=', 'a.id')
+                ->where('pav.product_id', $variant->id)
+                ->select('a.name as attribute_name', 'ao.name as option_name')
+                ->get()
+                ->mapWithKeys(fn($item) => [$item->attribute_name => $item->option_name])
+                ->toArray();
+
+            $result[] = [
+                'id' => $variant->id,
+                'name' => $variant->name,
+                'reference' => $variant->reference,
+                'price' => $variant->price,
+                'cost' => $variant->cost,
+                'attributes' => $attributes,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Download an image from URL and save to product images directory
      *
      * @param string $imageUrl URL to download image from

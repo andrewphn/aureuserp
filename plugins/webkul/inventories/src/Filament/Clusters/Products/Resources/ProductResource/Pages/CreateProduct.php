@@ -5,10 +5,14 @@ namespace Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\
 use App\Services\GeminiProductService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\View;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Webkul\Product\Models\Tag;
+use Webkul\Product\Models\Product;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Product\Filament\Resources\ProductResource\Pages\CreateProduct as BaseCreateProduct;
 
@@ -20,6 +24,21 @@ use Webkul\Product\Filament\Resources\ProductResource\Pages\CreateProduct as Bas
 class CreateProduct extends BaseCreateProduct
 {
     protected static string $resource = ProductResource::class;
+
+    /**
+     * Stores AI-identified product data temporarily for confirmation flow
+     */
+    public ?array $pendingAiData = null;
+
+    /**
+     * Stores similar product matches for confirmation
+     */
+    public ?array $similarProducts = null;
+
+    /**
+     * Stores the permanent image path from photo upload
+     */
+    public ?string $pendingImagePath = null;
 
     protected function getHeaderActions(): array
     {
@@ -244,8 +263,8 @@ class CreateProduct extends BaseCreateProduct
                         ->helperText('Any additional info to help identify the product'),
                 ])
                 ->modalHeading('Identify Product from Photo')
-                ->modalDescription('Upload a photo and enter quantity. AI will identify the product and populate all details.')
-                ->modalSubmitActionLabel('Identify & Populate')
+                ->modalDescription('Upload a photo and enter quantity. AI will identify the product and check for existing matches.')
+                ->modalSubmitActionLabel('Identify Product')
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
                 ->action(function (array $data) {
                     try {
@@ -339,146 +358,43 @@ class CreateProduct extends BaseCreateProduct
                             return;
                         }
 
-                        // Get current form data WITHOUT triggering validation
-                        $currentData = $this->form->getRawState();
-                        $updates = [];
+                        // Store the quantity from user input
+                        $aiData['_user_quantity'] = $data['quantity'] ?? 1;
 
-                        // If AI identified the product, update the name
-                        if (!empty($aiData['identified_product_name'])) {
-                            $updates['name'] = $aiData['identified_product_name'];
-                        }
+                        // Search for similar existing products
+                        $identifiedName = $aiData['identified_product_name'] ?? '';
+                        $brand = $aiData['brand'] ?? null;
+                        $sku = $aiData['sku'] ?? null;
+                        $suggestedAttributes = $aiData['suggested_attributes'] ?? [];
 
-                        // Build rich description with technical specs and source
-                        if (!empty($aiData['description'])) {
-                            $fullDescription = $aiData['description'];
-
-                            if (!empty($aiData['technical_specs'])) {
-                                $fullDescription .= "\n<p><strong>Technical Specs:</strong> " . htmlspecialchars($aiData['technical_specs']) . "</p>";
-                            }
-
-                            if (!empty($aiData['brand'])) {
-                                $fullDescription .= "\n<p><strong>Brand:</strong> " . htmlspecialchars($aiData['brand']) . "</p>";
-                            }
-
-                            if (!empty($aiData['source_url'])) {
-                                $fullDescription .= "\n<p><strong>Source:</strong> <a href=\"" . htmlspecialchars($aiData['source_url']) . "\" target=\"_blank\">" . htmlspecialchars($aiData['source_url']) . "</a></p>";
-                            }
-
-                            $updates['description'] = $fullDescription;
-                        }
-
-                        // Barcode - only update if empty (use barcode or SKU from AI)
-                        if (empty($currentData['barcode'])) {
-                            if (!empty($aiData['barcode'])) {
-                                $updates['barcode'] = $aiData['barcode'];
-                            } elseif (!empty($aiData['sku'])) {
-                                $updates['barcode'] = $aiData['sku'];
-                            }
-                        }
-
-                        // Set both price and cost to the COST value (user can override with markup later)
-                        $costValue = $aiData['suggested_cost'] ?? $aiData['suggested_price'] ?? 0;
-                        if ($costValue > 0) {
-                            $updates['price'] = $costValue;
-                            $updates['cost'] = $costValue;
-                        }
-
-                        if (!empty($aiData['weight']) && $aiData['weight'] > 0) {
-                            $updates['weight'] = $aiData['weight'];
-                        }
-
-                        if (!empty($aiData['volume']) && $aiData['volume'] > 0) {
-                            $updates['volume'] = $aiData['volume'];
-                        }
-
-                        // Box/Package pricing from AI
-                        if (!empty($aiData['box_cost']) && $aiData['box_cost'] > 0) {
-                            $updates['box_cost'] = $aiData['box_cost'];
-                        }
-                        if (!empty($aiData['units_per_box']) && $aiData['units_per_box'] > 0) {
-                            $updates['units_per_box'] = $aiData['units_per_box'];
-                            // Auto-calculate unit cost if we have box cost
-                            if (!empty($aiData['box_cost']) && $aiData['box_cost'] > 0) {
-                                $unitCost = round($aiData['box_cost'] / $aiData['units_per_box'], 4);
-                                $updates['cost'] = $unitCost;
-                                $updates['price'] = $unitCost;
-                            }
-                        }
-                        if (!empty($aiData['package_description'])) {
-                            $updates['package_description'] = $aiData['package_description'];
-                        }
-
-                        // Handle tags
-                        if (!empty($aiData['tags']) && is_array($aiData['tags'])) {
-                            $tagIds = [];
-                            foreach ($aiData['tags'] as $tagName) {
-                                $tagName = trim($tagName);
-                                if (empty($tagName)) continue;
-                                $tag = Tag::firstOrCreate(['name' => $tagName], ['name' => $tagName]);
-                                $tagIds[] = $tag->id;
-                            }
-
-                            if (!empty($tagIds)) {
-                                $existingTagIds = $currentData['tags'] ?? [];
-                                $updates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
-                            }
-                        }
-
-                        // Category and Reference Type Code from AI
-                        if (!empty($aiData['category_id']) && $aiData['category_id'] > 0) {
-                            $updates['category_id'] = $aiData['category_id'];
-                        }
-                        if (!empty($aiData['reference_type_code_id']) && $aiData['reference_type_code_id'] > 0) {
-                            $updates['reference_type_code_id'] = $aiData['reference_type_code_id'];
-                        }
-
-                        // Add uploaded image to product's images array
-                        $existingImages = $currentData['images'] ?? [];
-                        if (!is_array($existingImages)) {
-                            $existingImages = [];
-                        }
-                        $existingImages[] = $permanentPath;
-
-                        // Also download AI-suggested product image if available
-                        if (!empty($aiData['image_url'])) {
-                            $downloadedImage = GeminiProductService::downloadProductImage(
-                                $aiData['image_url'],
-                                $aiData['identified_product_name'] ?? null
+                        $similarProducts = [];
+                        if (!empty($identifiedName)) {
+                            $similarProducts = GeminiProductService::findSimilarProducts(
+                                $identifiedName,
+                                $brand,
+                                $sku,
+                                $suggestedAttributes
                             );
-                            if ($downloadedImage) {
-                                $existingImages[] = $downloadedImage;
-                            }
-                        }
-                        $updates['images'] = $existingImages;
-
-                        // Quantity from user input
-                        if (!empty($data['quantity']) && $data['quantity'] > 0) {
-                            $updates['qty_available'] = $data['quantity'];
                         }
 
-                        if (!empty($updates)) {
-                            $this->form->fill(array_merge($currentData, $updates));
+                        // Store the data for the confirmation step
+                        $this->pendingAiData = $aiData;
+                        $this->similarProducts = $similarProducts;
+                        $this->pendingImagePath = $permanentPath;
 
-                            $identifiedName = $aiData['identified_product_name'] ?? 'Unknown product';
-                            Notification::make()
-                                ->title('Product Identified!')
-                                ->body("Identified as: {$identifiedName}. Review the details and click Create when ready.")
-                                ->success()
-                                ->persistent()
-                                ->send();
-                        } else {
-                            Notification::make()
-                                ->title('No Information Found')
-                                ->body('AI could not identify or find information for this product.')
-                                ->warning()
-                                ->persistent()
-                                ->send();
-                        }
-
-                        Log::info('AI Photo Identify completed for new product', [
-                            'identified_as' => $aiData['identified_product_name'] ?? 'unknown',
-                            'updates' => array_keys($updates),
+                        Log::info('AI Photo Identify - Searching for matches', [
+                            'identified_as' => $identifiedName,
+                            'similar_count' => count($similarProducts),
                         ]);
+
+                        // Show the confirmation action
+                        if (!empty($similarProducts)) {
+                            // Dispatch the confirmation modal
+                            $this->mountAction('confirmProductChoice');
+                        } else {
+                            // No matches found, proceed directly
+                            $this->applyAiDataToForm();
+                        }
 
                     } catch (\Exception $e) {
                         Log::error('AI Photo Identify error: ' . $e->getMessage(), [
@@ -493,6 +409,395 @@ class CreateProduct extends BaseCreateProduct
                             ->send();
                     }
                 }),
+            // Hidden action for confirmation modal - triggered after AI identification
+            Action::make('confirmProductChoice')
+                ->label('Choose Product')
+                ->modalHeading('Similar Products Found')
+                ->modalDescription(fn () => $this->pendingAiData
+                    ? "AI identified: **{$this->pendingAiData['identified_product_name']}**\n\nWe found existing products that might match. Select one to update, or create a new product."
+                    : 'Select an option')
+                ->modalWidth('lg')
+                ->form(fn () => [
+                    Radio::make('product_choice')
+                        ->label('What would you like to do?')
+                        ->options(fn () => $this->buildProductChoiceOptions())
+                        ->descriptions(fn () => $this->buildProductChoiceDescriptions())
+                        ->required()
+                        ->default('new'),
+                ])
+                ->modalSubmitActionLabel('Continue')
+                ->action(function (array $data) {
+                    $choice = $data['product_choice'] ?? 'new';
+
+                    if ($choice === 'new') {
+                        // Create new product with AI data
+                        $this->applyAiDataToForm();
+                    } elseif (str_starts_with($choice, 'existing_')) {
+                        // User selected an existing product - redirect to edit it
+                        $productId = (int) str_replace('existing_', '', $choice);
+                        $this->redirectToExistingProduct($productId);
+                    } elseif (str_starts_with($choice, 'variant_')) {
+                        // User selected a configurable product to add variant
+                        $parentId = (int) str_replace('variant_', '', $choice);
+                        $this->showVariantSelection($parentId);
+                    }
+                })
+                ->visible(false), // Hidden - triggered programmatically
+            // Hidden action for variant selection from parent product
+            Action::make('selectVariant')
+                ->label('Select Variant')
+                ->modalHeading('Select Product Variant')
+                ->modalDescription(fn () => 'Choose the specific variant you have, or the AI-identified product details will be used.')
+                ->modalWidth('lg')
+                ->form(fn () => [
+                    Radio::make('variant_choice')
+                        ->label('Which variant do you have?')
+                        ->options(fn () => $this->buildVariantOptions())
+                        ->descriptions(fn () => $this->buildVariantDescriptions())
+                        ->required()
+                        ->default('use_ai'),
+                ])
+                ->modalSubmitActionLabel('Continue')
+                ->action(function (array $data) {
+                    $choice = $data['variant_choice'] ?? 'use_ai';
+
+                    if ($choice === 'use_ai') {
+                        // Use AI data to create/update
+                        $this->applyAiDataToForm();
+                    } elseif (str_starts_with($choice, 'variant_')) {
+                        // User selected specific variant - redirect to edit
+                        $variantId = (int) str_replace('variant_', '', $choice);
+                        $this->redirectToExistingProduct($variantId);
+                    }
+                })
+                ->visible(false), // Hidden - triggered programmatically
         ], parent::getHeaderActions());
+    }
+
+    /**
+     * Build options for the product choice radio
+     */
+    protected function buildProductChoiceOptions(): array
+    {
+        $options = [
+            'new' => '➕ Create as NEW product',
+        ];
+
+        if (empty($this->similarProducts)) {
+            return $options;
+        }
+
+        foreach ($this->similarProducts as $product) {
+            $label = $product['name'];
+            if (!empty($product['reference'])) {
+                $label .= " (SKU: {$product['reference']})";
+            }
+
+            if ($product['is_configurable'] ?? false) {
+                $variantCount = $product['variant_count'] ?? 0;
+                $options["variant_{$product['id']}"] = "📦 Add as variant of: {$label} ({$variantCount} variants)";
+            } else {
+                $options["existing_{$product['id']}"] = "✏️ Update existing: {$label}";
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * Build descriptions for product choice options
+     */
+    protected function buildProductChoiceDescriptions(): array
+    {
+        $descriptions = [
+            'new' => 'Create a brand new product entry with the AI-identified details',
+        ];
+
+        if (empty($this->similarProducts)) {
+            return $descriptions;
+        }
+
+        foreach ($this->similarProducts as $product) {
+            $confidence = $product['confidence'] ?? 0;
+            $matchType = $product['match_type'] ?? 'fuzzy';
+            $price = number_format($product['price'] ?? 0, 2);
+
+            $matchLabel = match ($matchType) {
+                'exact_sku' => 'Exact SKU match',
+                'brand_name' => 'Brand & name match',
+                'configurable_parent' => 'Product family',
+                default => "{$confidence}% similar",
+            };
+
+            if ($product['is_configurable'] ?? false) {
+                $descriptions["variant_{$product['id']}"] = "{$matchLabel} • This is a configurable product - select if this is a variant/size";
+            } else {
+                $descriptions["existing_{$product['id']}"] = "{$matchLabel} • Price: \${$price}";
+            }
+        }
+
+        return $descriptions;
+    }
+
+    /**
+     * Build variant options for parent product
+     */
+    protected function buildVariantOptions(): array
+    {
+        $options = [
+            'use_ai' => '➕ Create NEW variant using AI data',
+        ];
+
+        if (empty($this->pendingAiData['_parent_id'])) {
+            return $options;
+        }
+
+        $variants = GeminiProductService::getProductVariants($this->pendingAiData['_parent_id']);
+
+        foreach ($variants as $variant) {
+            $attrStr = '';
+            if (!empty($variant['attributes'])) {
+                $attrStr = ' (' . implode(', ', array_map(
+                    fn($k, $v) => "{$k}: {$v}",
+                    array_keys($variant['attributes']),
+                    array_values($variant['attributes'])
+                )) . ')';
+            }
+            $options["variant_{$variant['id']}"] = "✏️ {$variant['name']}{$attrStr}";
+        }
+
+        return $options;
+    }
+
+    /**
+     * Build descriptions for variant options
+     */
+    protected function buildVariantDescriptions(): array
+    {
+        $descriptions = [
+            'use_ai' => 'Create a new variant with the AI-identified details',
+        ];
+
+        if (empty($this->pendingAiData['_parent_id'])) {
+            return $descriptions;
+        }
+
+        $variants = GeminiProductService::getProductVariants($this->pendingAiData['_parent_id']);
+
+        foreach ($variants as $variant) {
+            $price = number_format($variant['price'] ?? 0, 2);
+            $descriptions["variant_{$variant['id']}"] = "Price: \${$price}";
+        }
+
+        return $descriptions;
+    }
+
+    /**
+     * Show variant selection for a configurable parent
+     */
+    protected function showVariantSelection(int $parentId): void
+    {
+        // Store parent ID for variant selection
+        $this->pendingAiData['_parent_id'] = $parentId;
+
+        // Mount the variant selection action
+        $this->mountAction('selectVariant');
+    }
+
+    /**
+     * Redirect to edit an existing product
+     */
+    protected function redirectToExistingProduct(int $productId): void
+    {
+        // Add the uploaded image to the existing product if we have one
+        if (!empty($this->pendingImagePath)) {
+            $product = Product::find($productId);
+            if ($product) {
+                $images = $product->images ?? [];
+                if (!is_array($images)) {
+                    $images = [];
+                }
+                $images[] = $this->pendingImagePath;
+                $product->images = $images;
+                $product->save();
+
+                Log::info('Added uploaded image to existing product', [
+                    'product_id' => $productId,
+                    'image_path' => $this->pendingImagePath,
+                ]);
+            }
+        }
+
+        Notification::make()
+            ->title('Redirecting to existing product')
+            ->body('You chose to update an existing product. Redirecting...')
+            ->info()
+            ->send();
+
+        // Redirect to the edit page
+        $this->redirect(ProductResource::getUrl('edit', ['record' => $productId]));
+    }
+
+    /**
+     * Apply pending AI data to the create form
+     */
+    protected function applyAiDataToForm(): void
+    {
+        if (empty($this->pendingAiData)) {
+            Notification::make()
+                ->title('No AI Data')
+                ->body('No pending AI data to apply.')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $aiData = $this->pendingAiData;
+        $currentData = $this->form->getRawState();
+        $updates = [];
+
+        // If AI identified the product, update the name
+        if (!empty($aiData['identified_product_name'])) {
+            $updates['name'] = $aiData['identified_product_name'];
+        }
+
+        // Build rich description with technical specs and source
+        if (!empty($aiData['description'])) {
+            $fullDescription = $aiData['description'];
+
+            if (!empty($aiData['technical_specs'])) {
+                $fullDescription .= "\n<p><strong>Technical Specs:</strong> " . htmlspecialchars($aiData['technical_specs']) . "</p>";
+            }
+
+            if (!empty($aiData['brand'])) {
+                $fullDescription .= "\n<p><strong>Brand:</strong> " . htmlspecialchars($aiData['brand']) . "</p>";
+            }
+
+            if (!empty($aiData['source_url'])) {
+                $fullDescription .= "\n<p><strong>Source:</strong> <a href=\"" . htmlspecialchars($aiData['source_url']) . "\" target=\"_blank\">" . htmlspecialchars($aiData['source_url']) . "</a></p>";
+            }
+
+            $updates['description'] = $fullDescription;
+        }
+
+        // Barcode - only update if empty (use barcode or SKU from AI)
+        if (empty($currentData['barcode'])) {
+            if (!empty($aiData['barcode'])) {
+                $updates['barcode'] = $aiData['barcode'];
+            } elseif (!empty($aiData['sku'])) {
+                $updates['barcode'] = $aiData['sku'];
+            }
+        }
+
+        // Set both price and cost to the COST value (user can override with markup later)
+        $costValue = $aiData['suggested_cost'] ?? $aiData['suggested_price'] ?? 0;
+        if ($costValue > 0) {
+            $updates['price'] = $costValue;
+            $updates['cost'] = $costValue;
+        }
+
+        if (!empty($aiData['weight']) && $aiData['weight'] > 0) {
+            $updates['weight'] = $aiData['weight'];
+        }
+
+        if (!empty($aiData['volume']) && $aiData['volume'] > 0) {
+            $updates['volume'] = $aiData['volume'];
+        }
+
+        // Box/Package pricing from AI
+        if (!empty($aiData['box_cost']) && $aiData['box_cost'] > 0) {
+            $updates['box_cost'] = $aiData['box_cost'];
+        }
+        if (!empty($aiData['units_per_box']) && $aiData['units_per_box'] > 0) {
+            $updates['units_per_box'] = $aiData['units_per_box'];
+            // Auto-calculate unit cost if we have box cost
+            if (!empty($aiData['box_cost']) && $aiData['box_cost'] > 0) {
+                $unitCost = round($aiData['box_cost'] / $aiData['units_per_box'], 4);
+                $updates['cost'] = $unitCost;
+                $updates['price'] = $unitCost;
+            }
+        }
+        if (!empty($aiData['package_description'])) {
+            $updates['package_description'] = $aiData['package_description'];
+        }
+
+        // Handle tags
+        if (!empty($aiData['tags']) && is_array($aiData['tags'])) {
+            $tagIds = [];
+            foreach ($aiData['tags'] as $tagName) {
+                $tagName = trim($tagName);
+                if (empty($tagName)) continue;
+                $tag = Tag::firstOrCreate(['name' => $tagName], ['name' => $tagName]);
+                $tagIds[] = $tag->id;
+            }
+
+            if (!empty($tagIds)) {
+                $existingTagIds = $currentData['tags'] ?? [];
+                $updates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
+            }
+        }
+
+        // Category and Reference Type Code from AI
+        if (!empty($aiData['category_id']) && $aiData['category_id'] > 0) {
+            $updates['category_id'] = $aiData['category_id'];
+        }
+        if (!empty($aiData['reference_type_code_id']) && $aiData['reference_type_code_id'] > 0) {
+            $updates['reference_type_code_id'] = $aiData['reference_type_code_id'];
+        }
+
+        // Add uploaded image to product's images array
+        $existingImages = $currentData['images'] ?? [];
+        if (!is_array($existingImages)) {
+            $existingImages = [];
+        }
+        if (!empty($this->pendingImagePath)) {
+            $existingImages[] = $this->pendingImagePath;
+        }
+
+        // Also download AI-suggested product image if available
+        if (!empty($aiData['image_url'])) {
+            $downloadedImage = GeminiProductService::downloadProductImage(
+                $aiData['image_url'],
+                $aiData['identified_product_name'] ?? null
+            );
+            if ($downloadedImage) {
+                $existingImages[] = $downloadedImage;
+            }
+        }
+        $updates['images'] = $existingImages;
+
+        // Quantity from user input
+        if (!empty($aiData['_user_quantity']) && $aiData['_user_quantity'] > 0) {
+            $updates['qty_available'] = $aiData['_user_quantity'];
+        }
+
+        if (!empty($updates)) {
+            $this->form->fill(array_merge($currentData, $updates));
+
+            $identifiedName = $aiData['identified_product_name'] ?? 'Unknown product';
+            Notification::make()
+                ->title('Product Identified!')
+                ->body("Identified as: {$identifiedName}. Review the details and click Create when ready.")
+                ->success()
+                ->persistent()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('No Information Found')
+                ->body('AI could not identify or find information for this product.')
+                ->warning()
+                ->persistent()
+                ->send();
+        }
+
+        Log::info('AI Photo Identify completed for new product', [
+            'identified_as' => $aiData['identified_product_name'] ?? 'unknown',
+            'updates' => array_keys($updates),
+        ]);
+
+        // Clear pending data
+        $this->pendingAiData = null;
+        $this->similarProducts = null;
+        $this->pendingImagePath = null;
     }
 }
