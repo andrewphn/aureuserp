@@ -205,6 +205,9 @@ class EditProduct extends BaseEditProduct
                         ->image()
                         ->imageEditor()
                         ->required()
+                        ->disk('public')
+                        ->directory('products/images')
+                        ->visibility('public')
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                         ->maxSize(10240) // 10MB
                         ->helperText('Take a photo or upload an image of the product'),
@@ -220,7 +223,7 @@ class EditProduct extends BaseEditProduct
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
                 ->action(function (array $data, Product $record) {
                     try {
-                        // Get the uploaded file
+                        // Get the uploaded file path
                         $imagePath = $data['product_image'] ?? null;
                         if (empty($imagePath)) {
                             Notification::make()
@@ -232,23 +235,42 @@ class EditProduct extends BaseEditProduct
                             return;
                         }
 
-                        // Get full path - handle both string and array cases
+                        // Handle array or string path
                         if (is_array($imagePath)) {
                             $imagePath = reset($imagePath);
                         }
-                        $fullPath = storage_path('app/public/' . $imagePath);
 
-                        if (!file_exists($fullPath)) {
+                        // Try multiple possible file locations
+                        $possiblePaths = [
+                            storage_path('app/public/' . $imagePath),
+                            storage_path('app/public/products/images/' . basename($imagePath)),
+                            storage_path('app/livewire-tmp/' . $imagePath),
+                            storage_path('app/' . $imagePath),
+                        ];
+
+                        $fullPath = null;
+                        foreach ($possiblePaths as $path) {
+                            if (file_exists($path)) {
+                                $fullPath = $path;
+                                break;
+                            }
+                        }
+
+                        if (!$fullPath) {
+                            Log::error('AI Photo: Image not found', [
+                                'imagePath' => $imagePath,
+                                'tried' => $possiblePaths,
+                            ]);
                             Notification::make()
                                 ->title('Image Not Found')
-                                ->body('Could not find the uploaded image.')
+                                ->body('Could not find the uploaded image. Path: ' . $imagePath)
                                 ->danger()
                                 ->persistent()
                                 ->send();
                             return;
                         }
 
-                        // Read and encode the image
+                        // Read and encode the image for AI
                         $imageData = file_get_contents($fullPath);
                         $base64Image = base64_encode($imageData);
                         $mimeType = mime_content_type($fullPath);
@@ -261,8 +283,25 @@ class EditProduct extends BaseEditProduct
                             $data['additional_context'] ?? null
                         );
 
-                        // Clean up uploaded file
-                        @unlink($fullPath);
+                        // Move image to permanent location if it's in temp
+                        $permanentPath = 'products/images/' . basename($imagePath);
+                        $permanentFullPath = storage_path('app/public/' . $permanentPath);
+
+                        if ($fullPath !== $permanentFullPath) {
+                            // Ensure directory exists
+                            $dir = dirname($permanentFullPath);
+                            if (!is_dir($dir)) {
+                                mkdir($dir, 0755, true);
+                            }
+                            // Move or copy to permanent location
+                            if (!file_exists($permanentFullPath)) {
+                                copy($fullPath, $permanentFullPath);
+                            }
+                            // Clean up temp file
+                            if (strpos($fullPath, 'livewire-tmp') !== false) {
+                                @unlink($fullPath);
+                            }
+                        }
 
                         if (isset($aiData['error'])) {
                             Notification::make()
@@ -341,6 +380,14 @@ class EditProduct extends BaseEditProduct
                                 $updates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
                             }
                         }
+
+                        // Add image to product's images array
+                        $existingImages = $currentData['images'] ?? [];
+                        if (!is_array($existingImages)) {
+                            $existingImages = [];
+                        }
+                        $existingImages[] = $permanentPath;
+                        $updates['images'] = $existingImages;
 
                         if (!empty($updates)) {
                             $this->form->fill(array_merge($currentData, $updates));
