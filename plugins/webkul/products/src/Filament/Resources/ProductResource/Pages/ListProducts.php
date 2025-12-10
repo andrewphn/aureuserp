@@ -77,11 +77,12 @@ class ListProducts extends ListRecords
     }
 
     /**
-     * Set the grid size
+     * Set the grid size and refresh the table
      */
     public function setGridSize(string $size): void
     {
         $this->gridSize = $size;
+        $this->resetTable();
     }
 
     /**
