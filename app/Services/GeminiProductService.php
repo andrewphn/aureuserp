@@ -368,7 +368,113 @@ PROMPT;
             'tags' => is_array($data['tags'] ?? null) ? $data['tags'] : [],
             'source_url' => trim($data['source_url'] ?? ''),
             'image_url' => trim($data['image_url'] ?? ''),
+
+            // Suggested attributes for variant creation
+            'suggested_attributes' => is_array($data['suggested_attributes'] ?? null) ? $data['suggested_attributes'] : [],
         ];
+    }
+
+    /**
+     * Extract GPS coordinates from image EXIF data
+     *
+     * @param string $imagePath Full path to image file
+     * @return array|null Array with 'latitude' and 'longitude', or null if not available
+     */
+    public static function extractGpsFromImage(string $imagePath): ?array
+    {
+        if (!file_exists($imagePath)) {
+            return null;
+        }
+
+        // Check if EXIF extension is available
+        if (!function_exists('exif_read_data')) {
+            Log::warning('GeminiProductService: EXIF extension not available for GPS extraction');
+            return null;
+        }
+
+        try {
+            $exif = @exif_read_data($imagePath, 'GPS');
+            if (!$exif || empty($exif['GPSLatitude']) || empty($exif['GPSLongitude'])) {
+                return null;
+            }
+
+            // Convert GPS coordinates from DMS to decimal
+            $lat = self::gpsToDecimal(
+                $exif['GPSLatitude'],
+                $exif['GPSLatitudeRef'] ?? 'N'
+            );
+            $lng = self::gpsToDecimal(
+                $exif['GPSLongitude'],
+                $exif['GPSLongitudeRef'] ?? 'W'
+            );
+
+            if ($lat === null || $lng === null) {
+                return null;
+            }
+
+            Log::info('GeminiProductService: Extracted GPS from image', [
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ]);
+
+            return [
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ];
+
+        } catch (\Exception $e) {
+            Log::warning('GeminiProductService: Error reading EXIF data', [
+                'path' => $imagePath,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Convert GPS coordinates from DMS (degrees, minutes, seconds) to decimal
+     */
+    protected static function gpsToDecimal(array $coordinate, string $hemisphere): ?float
+    {
+        if (count($coordinate) !== 3) {
+            return null;
+        }
+
+        $degrees = self::gpsRationalToFloat($coordinate[0]);
+        $minutes = self::gpsRationalToFloat($coordinate[1]);
+        $seconds = self::gpsRationalToFloat($coordinate[2]);
+
+        if ($degrees === null || $minutes === null || $seconds === null) {
+            return null;
+        }
+
+        $decimal = $degrees + ($minutes / 60) + ($seconds / 3600);
+
+        // South and West are negative
+        if (strtoupper($hemisphere) === 'S' || strtoupper($hemisphere) === 'W') {
+            $decimal = -$decimal;
+        }
+
+        return round($decimal, 8);
+    }
+
+    /**
+     * Convert GPS rational number (fraction string) to float
+     */
+    protected static function gpsRationalToFloat($rational): ?float
+    {
+        if (is_numeric($rational)) {
+            return (float) $rational;
+        }
+
+        if (is_string($rational) && str_contains($rational, '/')) {
+            $parts = explode('/', $rational);
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1]) && $parts[1] != 0) {
+                return (float) $parts[0] / (float) $parts[1];
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -503,6 +609,7 @@ PROMPT;
 
         $categoryOptions = $this->buildCategoryOptions();
         $referenceCodeOptions = $this->buildReferenceCodeOptions();
+        $attributeOptions = $this->buildAttributeOptions();
 
         return <<<PROMPT
 You are a product identification specialist for TCS Woodwork, a professional cabinet and furniture shop.
@@ -537,6 +644,16 @@ AVAILABLE CATEGORIES (select ONE by ID):
 AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
 {$referenceCodeOptions}
 
+AVAILABLE PRODUCT ATTRIBUTES (suggest only relevant ones):
+{$attributeOptions}
+
+Only suggest attributes that are DIRECTLY RELEVANT to this product type.
+For hinges: Size is relevant (52mm, 578mm, etc.)
+For sandpaper: Grit is relevant (80, 120, 220, etc.)
+For glue: Pack Size is relevant (oz, gallon)
+Do NOT suggest Brand as an attribute (it goes in the brand field instead)
+If an existing option matches, use its ID. If not, suggest a NEW option name.
+
 DESCRIPTION MUST BE SHORT - MAX 5 BULLET POINTS:
 Use <ul><li> format with only critical specs:
 - ADHESIVES: Open time, cure time, temp, water resistance
@@ -570,7 +687,15 @@ Return ONLY valid JSON with this exact structure:
     "technical_specs": "Key specs as single line text",
     "tags": ["brand-name", "product-type", "material", "application", "size-variant"],
     "source_url": "Primary source URL",
-    "image_url": "Direct URL to high-quality product image from manufacturer or supplier website"
+    "image_url": "Direct URL to high-quality product image from manufacturer or supplier website",
+    "suggested_attributes": [
+        {
+            "attribute_id": 8,
+            "attribute_name": "Size",
+            "option_id": 0,
+            "option_name": "578mm"
+        }
+    ]
 }
 
 CRITICAL:
@@ -590,6 +715,66 @@ PROMPT;
     public function isConfigured(): bool
     {
         return !empty($this->geminiKey);
+    }
+
+    /**
+     * Get relevant product attributes for AI to suggest
+     * Only returns attributes commonly used for consumable/hardware products
+     */
+    protected function getRelevantAttributes(): array
+    {
+        return Cache::remember('ai_product_attributes', 3600, function () {
+            // Only get attributes that make sense for consumables/hardware
+            $relevantNames = ['Size', 'Brand', 'Color', 'Finish', 'Length', 'Width', 'Pack Size', 'Grit', 'Type'];
+
+            $attributes = DB::table('products_attributes')
+                ->whereIn('name', $relevantNames)
+                ->whereNull('deleted_at')
+                ->select('id', 'name', 'type')
+                ->get();
+
+            $result = [];
+            foreach ($attributes as $attr) {
+                $options = DB::table('products_attribute_options')
+                    ->where('attribute_id', $attr->id)
+                    ->select('id', 'name', 'extra_price')
+                    ->orderBy('sort')
+                    ->get()
+                    ->map(fn($o) => [
+                        'id' => $o->id,
+                        'name' => $o->name,
+                        'extra_price' => (float) $o->extra_price,
+                    ])
+                    ->toArray();
+
+                $result[] = [
+                    'id' => $attr->id,
+                    'name' => $attr->name,
+                    'type' => $attr->type,
+                    'options' => $options,
+                ];
+            }
+            return $result;
+        });
+    }
+
+    /**
+     * Build attribute options string for AI prompt
+     */
+    protected function buildAttributeOptions(): string
+    {
+        $attributes = $this->getRelevantAttributes();
+        if (empty($attributes)) {
+            return "No attributes available.";
+        }
+
+        $lines = [];
+        foreach ($attributes as $attr) {
+            $optionNames = array_map(fn($o) => $o['name'], $attr['options']);
+            $optionsStr = empty($optionNames) ? '(no predefined options)' : implode(', ', array_slice($optionNames, 0, 10));
+            $lines[] = "- {$attr['name']} (id={$attr['id']}): {$optionsStr}";
+        }
+        return implode("\n", $lines);
     }
 
     /**
