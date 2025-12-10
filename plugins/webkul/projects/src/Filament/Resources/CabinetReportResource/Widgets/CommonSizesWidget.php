@@ -20,6 +20,14 @@ class CommonSizesWidget extends BaseWidget
     protected int | string | array $columnSpan = 'full';
 
     /**
+     * Get the record key for the table (required for GROUP BY queries)
+     */
+    public function getTableRecordKey($record): string
+    {
+        return $record->id ?? "{$record->length_inches}-{$record->width_inches}-{$record->depth_inches}-{$record->height_inches}";
+    }
+
+    /**
      * Define the table schema
      *
      * @param Table $table
