@@ -2,12 +2,16 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages;
 
+use App\Services\GeminiProductService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Webkul\Product\Models\Tag;
 use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
@@ -32,6 +36,158 @@ class EditProduct extends BaseEditProduct
     protected function getHeaderActions(): array
     {
         return array_merge([
+            Action::make('aiPopulate')
+                ->label('AI Populate')
+                ->icon('heroicon-o-sparkles')
+                ->color('info')
+                ->requiresConfirmation()
+                ->modalHeading('Generate Product Details with AI')
+                ->modalDescription('AI will search the web and generate product details based on the product name. This may take up to 30 seconds. You can review and edit before saving.')
+                ->modalSubmitActionLabel('Generate')
+                ->visible(fn () => (new GeminiProductService())->isConfigured())
+                ->action(function (Product $record) {
+                    try {
+                        $service = new GeminiProductService();
+                        $data = $service->generateProductDetails($record->name, $record->description);
+
+                        if (isset($data['error'])) {
+                            Notification::make()
+                                ->title('AI Generation Failed')
+                                ->body($data['error'])
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
+                        // Get current form data WITHOUT triggering validation
+                        $currentData = $this->form->getRawState();
+
+                        // Only update fields if AI returned valid data
+                        $updates = [];
+
+                        // Build rich description with technical specs and source
+                        if (!empty($data['description'])) {
+                            $fullDescription = $data['description'];
+
+                            // Append technical specs if available
+                            if (!empty($data['technical_specs'])) {
+                                $fullDescription .= "\n<p><strong>Technical Specs:</strong> " . htmlspecialchars($data['technical_specs']) . "</p>";
+                            }
+
+                            // Append brand if available
+                            if (!empty($data['brand'])) {
+                                $fullDescription .= "\n<p><strong>Brand:</strong> " . htmlspecialchars($data['brand']) . "</p>";
+                            }
+
+                            // Append source URL if available
+                            if (!empty($data['source_url'])) {
+                                $fullDescription .= "\n<p><em>Source: <a href=\"" . htmlspecialchars($data['source_url']) . "\" target=\"_blank\">" . htmlspecialchars($data['source_url']) . "</a></em></p>";
+                            }
+
+                            $updates['description'] = $fullDescription;
+                        }
+
+                        // SKU (reference field) - only update if empty
+                        if (empty($currentData['reference'])) {
+                            if (!empty($data['sku'])) {
+                                $updates['reference'] = $data['sku'];
+                            }
+                        }
+
+                        // Barcode - only update if empty
+                        if (empty($currentData['barcode'])) {
+                            if (!empty($data['barcode'])) {
+                                $updates['barcode'] = $data['barcode'];
+                            }
+                        }
+
+                        // Only update price/cost if current values are 0 or empty
+                        if (empty($currentData['price']) || $currentData['price'] == 0) {
+                            if (!empty($data['suggested_price']) && $data['suggested_price'] > 0) {
+                                $updates['price'] = $data['suggested_price'];
+                            }
+                        }
+
+                        if (empty($currentData['cost']) || $currentData['cost'] == 0) {
+                            if (!empty($data['suggested_cost']) && $data['suggested_cost'] > 0) {
+                                $updates['cost'] = $data['suggested_cost'];
+                            }
+                        }
+
+                        if (empty($currentData['weight']) || $currentData['weight'] == 0) {
+                            if (!empty($data['weight']) && $data['weight'] > 0) {
+                                $updates['weight'] = $data['weight'];
+                            }
+                        }
+
+                        if (empty($currentData['volume']) || $currentData['volume'] == 0) {
+                            if (!empty($data['volume']) && $data['volume'] > 0) {
+                                $updates['volume'] = $data['volume'];
+                            }
+                        }
+
+                        // Handle tags - find or create and get IDs
+                        if (!empty($data['tags']) && is_array($data['tags'])) {
+                            $tagIds = [];
+                            foreach ($data['tags'] as $tagName) {
+                                $tagName = trim($tagName);
+                                if (empty($tagName)) continue;
+
+                                // Find or create the tag
+                                $tag = Tag::firstOrCreate(
+                                    ['name' => $tagName],
+                                    ['name' => $tagName]
+                                );
+                                $tagIds[] = $tag->id;
+                            }
+
+                            if (!empty($tagIds)) {
+                                // Merge with existing tags
+                                $existingTagIds = $currentData['tags'] ?? [];
+                                $updates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
+                            }
+                        }
+
+                        if (!empty($updates)) {
+                            // Update form state without saving to database
+                            $this->form->fill(array_merge($currentData, $updates));
+
+                            Notification::make()
+                                ->title('Product details generated')
+                                ->body('Review the changes below and click Save when ready.')
+                                ->success()
+                                ->persistent()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('No updates made')
+                                ->body('AI could not find additional information for this product.')
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        Log::info('AI Populate completed for product: ' . $record->name, [
+                            'product_id' => $record->id,
+                            'updates' => array_keys($updates),
+                            'ai_data' => $data,
+                        ]);
+
+                    } catch (\Exception $e) {
+                        Log::error('AI Populate error: ' . $e->getMessage(), [
+                            'product_id' => $record->id,
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+
+                        Notification::make()
+                            ->title('AI Generation Error')
+                            ->body('An unexpected error occurred. Please try again.')
+                            ->danger()
+                            ->persistent()
+                            ->send();
+                    }
+                }),
             Action::make('updateQuantity')
                 ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.label'))
                 ->modalHeading(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-heading'))
