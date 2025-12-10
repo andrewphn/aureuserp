@@ -3,6 +3,9 @@
 namespace Webkul\Project\Services;
 
 use Webkul\Project\Models\Cabinet;
+use Webkul\Project\Models\CabinetRun;
+use Webkul\Project\Models\CabinetMaterialsBom;
+use Webkul\Project\Models\HardwareRequirement;
 use Webkul\Project\Models\TcsMaterialInventoryMapping;
 use Webkul\Product\Models\Product;
 use Illuminate\Support\Collection;
@@ -345,5 +348,311 @@ class MaterialBomService
                     'notes' => $mapping->notes,
                 ];
             });
+    }
+
+    // =========================================================================
+    // Hardware BOM Generation Methods
+    // =========================================================================
+
+    /**
+     * Generate BOM items from hardware requirements for a cabinet run
+     *
+     * @param CabinetRun $cabinetRun
+     * @return Collection Created CabinetMaterialsBom records
+     */
+    public function generateBomFromHardwareForRun(CabinetRun $cabinetRun): Collection
+    {
+        $createdBomItems = collect();
+
+        // Get all hardware requirements for this run
+        $hardwareRequirements = HardwareRequirement::where('cabinet_run_id', $cabinetRun->id)
+            ->whereNotNull('product_id')
+            ->with('product')
+            ->get();
+
+        foreach ($hardwareRequirements as $hardware) {
+            $bomItem = $this->createBomFromHardware($hardware, $cabinetRun);
+            if ($bomItem) {
+                $createdBomItems->push($bomItem);
+            }
+        }
+
+        return $createdBomItems;
+    }
+
+    /**
+     * Generate BOM items from hardware requirements for a cabinet
+     *
+     * @param Cabinet $cabinet
+     * @return Collection Created CabinetMaterialsBom records
+     */
+    public function generateBomFromHardwareForCabinet(Cabinet $cabinet): Collection
+    {
+        $createdBomItems = collect();
+
+        // Get all hardware requirements for this cabinet
+        $hardwareRequirements = HardwareRequirement::where('cabinet_id', $cabinet->id)
+            ->whereNotNull('product_id')
+            ->with('product')
+            ->get();
+
+        foreach ($hardwareRequirements as $hardware) {
+            $bomItem = $this->createBomFromHardware($hardware, $cabinet->cabinetRun, $cabinet);
+            if ($bomItem) {
+                $createdBomItems->push($bomItem);
+            }
+        }
+
+        return $createdBomItems;
+    }
+
+    /**
+     * Generate BOM items from all hardware requirements for a project
+     *
+     * @param int $projectId
+     * @return Collection Created CabinetMaterialsBom records
+     */
+    public function generateBomFromHardwareForProject(int $projectId): Collection
+    {
+        $createdBomItems = collect();
+
+        // Get all cabinet runs for the project through the hierarchy
+        $cabinetRuns = CabinetRun::whereHas('roomLocation.room', function ($query) use ($projectId) {
+            $query->where('project_id', $projectId);
+        })->with(['cabinets', 'hardwareRequirements.product'])->get();
+
+        foreach ($cabinetRuns as $run) {
+            // Run-level hardware
+            foreach ($run->hardwareRequirements as $hardware) {
+                if ($hardware->product_id) {
+                    $bomItem = $this->createBomFromHardware($hardware, $run);
+                    if ($bomItem) {
+                        $createdBomItems->push($bomItem);
+                    }
+                }
+            }
+
+            // Cabinet-level hardware
+            foreach ($run->cabinets as $cabinet) {
+                $cabinetHardware = HardwareRequirement::where('cabinet_id', $cabinet->id)
+                    ->whereNotNull('product_id')
+                    ->with('product')
+                    ->get();
+
+                foreach ($cabinetHardware as $hardware) {
+                    $bomItem = $this->createBomFromHardware($hardware, $run, $cabinet);
+                    if ($bomItem) {
+                        $createdBomItems->push($bomItem);
+                    }
+                }
+            }
+        }
+
+        return $createdBomItems;
+    }
+
+    /**
+     * Create a single BOM record from a hardware requirement
+     *
+     * @param HardwareRequirement $hardware
+     * @param CabinetRun|null $cabinetRun
+     * @param Cabinet|null $cabinet
+     * @return CabinetMaterialsBom|null
+     */
+    protected function createBomFromHardware(
+        HardwareRequirement $hardware,
+        ?CabinetRun $cabinetRun = null,
+        ?Cabinet $cabinet = null
+    ): ?CabinetMaterialsBom {
+        if (!$hardware->product_id) {
+            return null;
+        }
+
+        $product = $hardware->product ?? Product::find($hardware->product_id);
+        if (!$product) {
+            return null;
+        }
+
+        // Check if BOM item already exists for this hardware
+        $existingBom = CabinetMaterialsBom::where('product_id', $hardware->product_id)
+            ->where(function ($query) use ($cabinet, $cabinetRun) {
+                if ($cabinet) {
+                    $query->where('cabinet_id', $cabinet->id);
+                } elseif ($cabinetRun) {
+                    $query->where('cabinet_run_id', $cabinetRun->id)
+                        ->whereNull('cabinet_id');
+                }
+            })
+            ->first();
+
+        if ($existingBom) {
+            // Update existing BOM quantity instead of creating duplicate
+            $existingBom->update([
+                'quantity_required' => $existingBom->quantity_required + $hardware->quantity_required,
+            ]);
+            return $existingBom;
+        }
+
+        // Create new BOM item
+        $componentName = $this->formatHardwareComponentName($hardware);
+
+        return CabinetMaterialsBom::create([
+            'cabinet_id' => $cabinet?->id,
+            'cabinet_run_id' => $cabinetRun?->id,
+            'product_id' => $hardware->product_id,
+            'component_name' => $componentName,
+            'quantity_required' => $hardware->quantity_required,
+            'unit_of_measure' => $hardware->unit_of_measure ?? 'EA',
+            'waste_factor_percentage' => 0, // No waste for hardware
+            'quantity_with_waste' => $hardware->quantity_required,
+            'unit_cost' => $hardware->unit_cost ?? $product->cost ?? 0,
+            'total_material_cost' => $hardware->total_hardware_cost ?? 0,
+            'cnc_notes' => null,
+            'machining_operations' => null,
+            'material_allocated' => $hardware->hardware_allocated,
+            'material_allocated_at' => $hardware->hardware_allocated_at,
+            'material_issued' => $hardware->hardware_issued,
+            'material_issued_at' => $hardware->hardware_issued_at,
+        ]);
+    }
+
+    /**
+     * Format hardware component name for BOM
+     *
+     * @param HardwareRequirement $hardware
+     * @return string
+     */
+    protected function formatHardwareComponentName(HardwareRequirement $hardware): string
+    {
+        $parts = [];
+
+        // Hardware type
+        $type = ucfirst(str_replace('_', ' ', $hardware->hardware_type ?? 'Hardware'));
+        $parts[] = $type;
+
+        // Model number if available
+        if ($hardware->model_number) {
+            $parts[] = $hardware->model_number;
+        }
+
+        // Application details
+        if ($hardware->applied_to) {
+            $parts[] = "({$hardware->applied_to})";
+        }
+
+        return implode(' - ', $parts);
+    }
+
+    /**
+     * Sync BOM with hardware requirements (updates quantities, adds new, removes orphaned)
+     *
+     * @param CabinetRun $cabinetRun
+     * @return array Summary of changes: ['added' => int, 'updated' => int, 'removed' => int]
+     */
+    public function syncBomWithHardwareForRun(CabinetRun $cabinetRun): array
+    {
+        $summary = ['added' => 0, 'updated' => 0, 'removed' => 0];
+
+        // Get current hardware requirements
+        $hardwareRequirements = HardwareRequirement::where('cabinet_run_id', $cabinetRun->id)
+            ->orWhereHas('cabinet', function ($q) use ($cabinetRun) {
+                $q->where('cabinet_run_id', $cabinetRun->id);
+            })
+            ->whereNotNull('product_id')
+            ->get();
+
+        $hardwareProductIds = $hardwareRequirements->pluck('product_id')->unique()->toArray();
+
+        // Get existing BOM items for hardware (exclude cabinet materials by checking component_name or product type)
+        $existingHardwareBom = CabinetMaterialsBom::where('cabinet_run_id', $cabinetRun->id)
+            ->whereIn('product_id', $hardwareProductIds)
+            ->get()
+            ->keyBy('product_id');
+
+        // Process each hardware requirement
+        foreach ($hardwareRequirements as $hardware) {
+            if (!$hardware->product_id) {
+                continue;
+            }
+
+            $existingBom = $existingHardwareBom->get($hardware->product_id);
+
+            if ($existingBom) {
+                // Update existing
+                if ($existingBom->quantity_required != $hardware->quantity_required) {
+                    $existingBom->update(['quantity_required' => $hardware->quantity_required]);
+                    $summary['updated']++;
+                }
+            } else {
+                // Create new
+                $this->createBomFromHardware($hardware, $cabinetRun, $hardware->cabinet);
+                $summary['added']++;
+            }
+        }
+
+        // Remove BOM items for hardware that no longer exists
+        $orphanedBomItems = CabinetMaterialsBom::where('cabinet_run_id', $cabinetRun->id)
+            ->whereIn('product_id', $hardwareProductIds)
+            ->whereNotIn('product_id', $hardwareRequirements->pluck('product_id')->toArray())
+            ->get();
+
+        foreach ($orphanedBomItems as $orphan) {
+            $orphan->delete();
+            $summary['removed']++;
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Get hardware BOM summary for display
+     *
+     * @param CabinetRun $cabinetRun
+     * @return array Aggregated hardware by type with totals
+     */
+    public function getHardwareBomSummary(CabinetRun $cabinetRun): array
+    {
+        $hardware = HardwareRequirement::where('cabinet_run_id', $cabinetRun->id)
+            ->orWhereHas('cabinet', function ($q) use ($cabinetRun) {
+                $q->where('cabinet_run_id', $cabinetRun->id);
+            })
+            ->with('product')
+            ->get();
+
+        $summary = [
+            'hinges' => ['count' => 0, 'items' => [], 'cost' => 0],
+            'slides' => ['count' => 0, 'items' => [], 'cost' => 0],
+            'shelf_pins' => ['count' => 0, 'items' => [], 'cost' => 0],
+            'pullouts' => ['count' => 0, 'items' => [], 'cost' => 0],
+            'other' => ['count' => 0, 'items' => [], 'cost' => 0],
+        ];
+
+        foreach ($hardware as $item) {
+            $type = $item->hardware_type;
+            $category = match ($type) {
+                'hinge' => 'hinges',
+                'slide' => 'slides',
+                'shelf_pin' => 'shelf_pins',
+                'pullout' => 'pullouts',
+                default => 'other',
+            };
+
+            $summary[$category]['count'] += $item->quantity_required;
+            $summary[$category]['cost'] += $item->total_hardware_cost ?? 0;
+            $summary[$category]['items'][] = [
+                'id' => $item->id,
+                'model_number' => $item->model_number,
+                'quantity' => $item->quantity_required,
+                'unit_cost' => $item->unit_cost,
+                'total_cost' => $item->total_hardware_cost,
+                'allocated' => $item->hardware_allocated,
+                'product_name' => $item->product?->name,
+            ];
+        }
+
+        $summary['total_items'] = array_sum(array_column($summary, 'count'));
+        $summary['total_cost'] = array_sum(array_column($summary, 'cost'));
+
+        return $summary;
     }
 }

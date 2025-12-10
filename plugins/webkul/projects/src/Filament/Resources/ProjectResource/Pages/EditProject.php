@@ -143,12 +143,23 @@ class EditProject extends EditRecord
             $address = $this->record->addresses()->where('is_primary', true)->first()
                        ?? $this->record->addresses()->first();
 
+            // Derive country_id from state if missing (fixes legacy data where country wasn't saved)
+            $countryId = $address->country_id;
+            if (!$countryId && $address->state_id) {
+                $state = \Webkul\Support\Models\State::find($address->state_id);
+                $countryId = $state?->country_id;
+            }
+            // Default to US if still no country
+            if (!$countryId) {
+                $countryId = \Webkul\Support\Models\Country::where('code', 'US')->first()?->id;
+            }
+
             $data['project_address'] = [
                 'street1' => $address->street1,
                 'street2' => $address->street2,
                 'city' => $address->city,
                 'zip' => $address->zip,
-                'country_id' => $address->country_id,
+                'country_id' => $countryId,
                 'state_id' => $address->state_id,
             ];
 

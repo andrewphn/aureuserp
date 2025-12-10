@@ -9,6 +9,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -24,6 +25,9 @@ use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Filament\Resources\ProjectResource\Actions\CloneProjectAction;
+use Webkul\Project\Models\Cabinet;
+use Webkul\Project\Services\MaterialBomService;
+use Webkul\Project\Services\ProjectReportService;
 use Webkul\Support\Models\ActivityPlan;
 
 /**
@@ -287,6 +291,64 @@ class ViewProject extends ViewRecord
                     ->collapsible()
                     ->collapsed(false)
                     ->columnSpan(2), // Takes 2/3 of the width
+
+                // Right Column: Quick Actions (1/3 width, top of right column)
+                Section::make('Quick Actions')
+                    ->schema([
+                        Actions::make([
+                            Action::make('exportBom')
+                                ->label('Export BOM')
+                                ->icon('heroicon-o-document-arrow-down')
+                                ->color('primary')
+                                ->action(fn () => $this->exportBom()),
+                            Action::make('generateSummary')
+                                ->label('Generate Summary')
+                                ->icon('heroicon-o-document-text')
+                                ->color('success')
+                                ->form([
+                                    Section::make('Report Sections')
+                                        ->description('Select which sections to include in your report')
+                                        ->schema([
+                                            \Filament\Forms\Components\CheckboxList::make('sections')
+                                                ->label('')
+                                                ->options([
+                                                    'project_info' => 'Project Information (name, customer, status, tags)',
+                                                    'project_totals' => 'Project Totals (rooms, cabinets, LF, value)',
+                                                    'room_breakdown' => 'Room Breakdown (summary by room)',
+                                                    'cabinet_detail' => 'Cabinet Detail (all cabinets with specs)',
+                                                    'hardware_summary' => 'Hardware Summary (hinges, slides, etc.)',
+                                                    'materials_bom' => 'Materials BOM (wood, sheet goods)',
+                                                    'production_status' => 'Production Status (stage gates, timestamps)',
+                                                    'tasks_milestones' => 'Tasks & Milestones',
+                                                    'addresses' => 'Project Addresses',
+                                                    'pdf_documents' => 'PDF Documents List',
+                                                ])
+                                                ->default(['project_info', 'project_totals', 'room_breakdown', 'cabinet_detail'])
+                                                ->columns(2)
+                                                ->bulkToggleable(),
+                                        ]),
+                                    Section::make('Options')
+                                        ->schema([
+                                            \Filament\Forms\Components\Toggle::make('include_pricing')
+                                                ->label('Include Pricing Details')
+                                                ->default(true)
+                                                ->helperText('Show unit prices and totals'),
+                                            \Filament\Forms\Components\Toggle::make('include_dimensions')
+                                                ->label('Include Dimensions')
+                                                ->default(true)
+                                                ->helperText('Show W x D x H measurements'),
+                                        ])
+                                        ->columns(2),
+                                ])
+                                ->action(fn (array $data) => $this->generateSummary($data)),
+                            Action::make('purchaseRequisition')
+                                ->label('Purchase Requisition')
+                                ->icon('heroicon-o-shopping-cart')
+                                ->color('warning')
+                                ->action(fn () => $this->generatePurchaseRequisition()),
+                        ])->fullWidth(),
+                    ])
+                    ->columnSpan(1),
 
                 // Right Column: Project Breakdown (1/3 width)
                 Section::make('Project Breakdown')
@@ -555,5 +617,76 @@ class ViewProject extends ViewRecord
     private function getActivityPlans(): mixed
     {
         return ActivityPlan::where('plugin', 'projects')->pluck('name', 'id');
+    }
+
+    /**
+     * Export Bill of Materials (BOM) for the project as HTML
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    protected function exportBom(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $record = $this->record;
+        $reportService = app(ProjectReportService::class);
+
+        $html = $reportService->generateBomHtml($record);
+
+        // Sanitize project name for filename
+        $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '-', $record->name);
+        $filename = "bom-{$safeName}-" . now()->format('Y-m-d') . '.html';
+
+        return response()->streamDownload(function () use ($html) {
+            echo $html;
+        }, $filename, [
+            'Content-Type' => 'text/html; charset=utf-8',
+        ]);
+    }
+
+    /**
+     * Generate and display a configurable project summary as HTML
+     *
+     * @param array $config Configuration options from the form
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    protected function generateSummary(array $config = []): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $record = $this->record;
+        $reportService = app(ProjectReportService::class);
+
+        $html = $reportService->generateSummaryHtml($record, $config);
+
+        // Sanitize project name for filename
+        $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '-', $record->name);
+        $filename = "summary-{$safeName}-" . now()->format('Y-m-d') . '.html';
+
+        return response()->streamDownload(function () use ($html) {
+            echo $html;
+        }, $filename, [
+            'Content-Type' => 'text/html; charset=utf-8',
+        ]);
+    }
+
+    /**
+     * Generate a Purchase Requisition for the project as HTML
+     * This report shows what needs to be ordered from suppliers
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    protected function generatePurchaseRequisition(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $record = $this->record;
+        $reportService = app(ProjectReportService::class);
+
+        $html = $reportService->generatePurchaseRequisitionHtml($record);
+
+        // Sanitize project name for filename
+        $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '-', $record->name);
+        $filename = "purchase-requisition-{$safeName}-" . now()->format('Y-m-d') . '.html';
+
+        return response()->streamDownload(function () use ($html) {
+            echo $html;
+        }, $filename, [
+            'Content-Type' => 'text/html; charset=utf-8',
+        ]);
     }
 }

@@ -225,137 +225,191 @@ PROMPT;
 
     /**
      * Parse a cover page and extract structured project data
+     * Falls back to PDF vision if no extracted text available
      */
     public function parseCoverPage(PdfPage $page): array
     {
         $text = $page->extracted_text;
 
-        if (empty($text)) {
-            return ['error' => 'No extracted text available'];
-        }
-
-        $prompt = <<<PROMPT
-Analyze this architectural drawing cover page text and extract structured data.
+        // If we have extracted text, use text-based parsing
+        if (!empty($text)) {
+            $prompt = <<<PROMPT
+Analyze this architectural drawing cover page text and extract the actual data shown.
 
 TEXT FROM COVER PAGE:
 {$text}
 
-Extract and return as JSON:
-{
-    "project_name": "Name of the project",
-    "client_name": "Client/homeowner name if shown",
-    "designer": "Designer or architect name if shown",
-    "revision": "Revision number or date",
-    "drawing_set_title": "Title of the drawing package",
-    "pricing_tiers": [
-        {"tier": 1, "description": "Level 1 description", "linear_feet": 0.0},
-        {"tier": 2, "description": "Level 2 description", "linear_feet": 0.0}
-    ],
-    "rooms_mentioned": ["Kitchen", "Pantry"],
-    "total_linear_feet": 0.0,
-    "scope_summary": "Brief description of project scope"
-}
+Return a JSON object with these fields (use null if not found, extract ACTUAL values from the text):
+- project_name: The actual project name shown
+- client_name: The actual client/homeowner name
+- designer: The actual designer or architect name
+- revision: The actual revision number or date
+- drawing_set_title: The actual title of the drawing package
+- address: Object with street, city, state, zip - extract actual address values
+- pricing_tiers: Array of objects with tier number, description, and linear_feet - extract actual tier info
+- rooms_mentioned: Array of actual room names mentioned
+- total_linear_feet: The actual total linear feet number
+- scope_summary: Brief summary of what the project includes
 
-Only include fields that are clearly present in the text. Use null for missing fields.
-Return ONLY valid JSON, no other text.
+Return ONLY valid JSON with the actual extracted values.
+PROMPT;
+            return $this->callAI($prompt);
+        }
+
+        // Fall back to PDF vision for the specific page
+        $prompt = <<<PROMPT
+You are looking at page {$page->page_number} of an architectural cabinet drawing PDF.
+This appears to be a cover page. Extract all the ACTUAL information visible on this page.
+
+Return a JSON object with these fields (use null if not visible, extract ACTUAL values):
+- project_name: The actual project name shown
+- client_name: The actual client/homeowner name
+- designer: The actual designer or architect name
+- revision: The actual revision number or date
+- drawing_set_title: The actual title of the drawing package
+- address: Object with street, city, state, zip - extract actual address values
+- pricing_tiers: Array of objects with tier number, description, and linear_feet - extract actual tier info if shown
+- rooms_mentioned: Array of actual room names mentioned
+- total_linear_feet: The actual total linear feet number if shown
+- scope_summary: Brief summary of what the project includes based on what you see
+
+Return ONLY valid JSON with the actual extracted values from this PDF page.
 PROMPT;
 
-        return $this->callAI($prompt);
+        return $this->parsePageWithVision($page, $prompt);
+    }
+
+    /**
+     * Parse a specific page using Gemini's native PDF vision
+     * Sends the entire PDF but instructs the AI to focus on a specific page
+     */
+    public function parsePageWithVision(PdfPage $page, string $prompt): array
+    {
+        // Use the correct relationship name 'pdfDocument' not 'document'
+        $document = $page->pdfDocument;
+
+        if (!$document) {
+            // Fallback: try to load the document by ID
+            $document = PdfDocument::find($page->document_id);
+
+            if (!$document) {
+                return ['error' => 'Page has no associated document'];
+            }
+        }
+
+        $filePath = $document->file_path;
+
+        // Try to get the full path
+        if (Storage::disk('public')->exists($filePath)) {
+            $fullPath = Storage::disk('public')->path($filePath);
+        } elseif (file_exists(storage_path('app/public/' . $filePath))) {
+            $fullPath = storage_path('app/public/' . $filePath);
+        } elseif (file_exists($filePath)) {
+            $fullPath = $filePath;
+        } else {
+            Log::error("PDF file not found for vision parsing: {$filePath}");
+            return ['error' => "PDF file not found: {$filePath}"];
+        }
+
+        Log::info("Parsing page {$page->page_number} with PDF vision from: " . basename($fullPath));
+
+        return $this->callGeminiWithPdf($fullPath, $prompt);
     }
 
     /**
      * Parse a floor plan page and extract room information
+     * Falls back to PDF vision if no extracted text available
      */
     public function parseFloorPlan(PdfPage $page): array
     {
         $text = $page->extracted_text;
 
-        if (empty($text)) {
-            return ['error' => 'No extracted text available'];
-        }
-
-        $prompt = <<<PROMPT
-Analyze this architectural floor plan text and extract room and location information.
+        if (!empty($text)) {
+            $prompt = <<<PROMPT
+Analyze this architectural floor plan text and extract the ACTUAL room and location information.
 
 TEXT FROM FLOOR PLAN:
 {$text}
 
-Extract and return as JSON:
-{
-    "rooms": [
-        {
-            "name": "Kitchen",
-            "locations": ["Sink Wall", "Fridge Wall", "Island"]
-        },
-        {
-            "name": "Pantry",
-            "locations": ["North Wall", "East Wall", "South Wall"]
-        }
-    ],
-    "appliances_noted": ["Refrigerator", "Dishwasher", "Range"],
-    "dimensions_noted": ["12'-6\" x 14'-0\""],
-    "notes": "Any special notes from the plan"
-}
+Return a JSON object with these fields (extract ACTUAL values from the text):
+- rooms: Array of room objects, each with "name" (actual room name) and "locations" (array of actual wall/area names like "Sink Wall", "Island", etc.)
+- appliances_noted: Array of actual appliances mentioned
+- dimensions_noted: Array of actual dimension strings shown
+- notes: Any actual special notes from the plan
 
-Only include data clearly present in the text. Return ONLY valid JSON.
+Return ONLY valid JSON with actual extracted values.
+PROMPT;
+            return $this->callAI($prompt);
+        }
+
+        // Fall back to PDF vision
+        $prompt = <<<PROMPT
+You are looking at page {$page->page_number} of an architectural cabinet drawing PDF.
+This appears to be a floor plan. Extract all the ACTUAL room and location information visible.
+
+Return a JSON object with these fields (extract ACTUAL values you see):
+- rooms: Array of room objects, each with "name" (actual room name) and "locations" (array of actual wall/area names visible)
+- appliances_noted: Array of actual appliances shown
+- dimensions_noted: Array of actual dimension strings visible
+- notes: Any actual special notes visible on this floor plan
+
+Return ONLY valid JSON with actual extracted values from this PDF page.
 PROMPT;
 
-        return $this->callAI($prompt);
+        return $this->parsePageWithVision($page, $prompt);
     }
 
     /**
      * Parse an elevation page and extract cabinet/location details
+     * Falls back to PDF vision if no extracted text available
      */
     public function parseElevation(PdfPage $page): array
     {
         $text = $page->extracted_text;
 
-        if (empty($text)) {
-            return ['error' => 'No extracted text available'];
-        }
-
-        $prompt = <<<PROMPT
-Analyze this cabinet elevation drawing text and extract detailed information.
+        if (!empty($text)) {
+            $prompt = <<<PROMPT
+Analyze this cabinet elevation drawing text and extract the ACTUAL detailed information.
 
 TEXT FROM ELEVATION:
 {$text}
 
-Extract and return as JSON:
-{
-    "location_name": "Sink Wall",
-    "room_name": "Kitchen",
-    "linear_feet": 8.25,
-    "pricing_tier": 4,
-    "cabinets": [
-        {
-            "type": "base",
-            "width": "36\"",
-            "description": "Sink base cabinet"
-        },
-        {
-            "type": "upper",
-            "width": "30\"",
-            "description": "Upper cabinet over sink"
-        }
-    ],
-    "hardware": {
-        "drawer_slides": "Blum Tandem 21\"",
-        "hinges": "Blum Clip Top",
-        "pulls": "Client supplied"
-    },
-    "materials": {
-        "face_frame": "Paint Grade Maple",
-        "interior": "Prefinished Maple/Birch",
-        "finish": "Painted - color TBD"
-    },
-    "appliances": ["Sink", "Dishwasher"],
-    "special_features": ["Pull-out trash", "Tip-out tray"]
-}
+Return a JSON object with these fields (extract ACTUAL values from the text):
+- location_name: The actual wall/location name (e.g., "Sink Wall", "Island", "Fridge Wall")
+- room_name: The actual room this elevation is in
+- linear_feet: The actual linear feet number if shown
+- pricing_tier: The actual tier/level number if shown
+- cabinets: Array of cabinet objects with type (base/upper/tall), width, and description - extract actual cabinets shown
+- hardware: Object with drawer_slides, hinges, pulls - extract actual hardware specs
+- materials: Object with face_frame, interior, finish - extract actual material specs
+- appliances: Array of actual appliances in this elevation
+- special_features: Array of actual special features mentioned
 
-Only include data clearly present in the text. Return ONLY valid JSON.
+Return ONLY valid JSON with actual extracted values.
+PROMPT;
+            return $this->callAI($prompt);
+        }
+
+        // Fall back to PDF vision
+        $prompt = <<<PROMPT
+You are looking at page {$page->page_number} of an architectural cabinet drawing PDF.
+This appears to be an elevation view showing cabinet details. Extract all the ACTUAL information visible.
+
+Return a JSON object with these fields (extract ACTUAL values you see):
+- location_name: The actual wall/location name shown
+- room_name: The actual room this elevation is in
+- linear_feet: The actual linear feet number if visible
+- pricing_tier: The actual tier/level number if visible
+- cabinets: Array of cabinet objects with type, width, description - extract actual cabinets visible
+- hardware: Object with actual hardware specifications if shown
+- materials: Object with actual material specifications if shown
+- appliances: Array of actual appliances visible in this elevation
+- special_features: Array of actual special features visible
+
+Return ONLY valid JSON with actual extracted values from this PDF page.
 PROMPT;
 
-        return $this->callAI($prompt);
+        return $this->parsePageWithVision($page, $prompt);
     }
 
     /**

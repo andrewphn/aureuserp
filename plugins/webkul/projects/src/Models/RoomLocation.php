@@ -19,6 +19,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property \Carbon\Carbon|null $deleted_at
  * @property int $room_id
  * @property string|null $name
+ * @property string|null $location_code
  * @property string|null $location_type
  * @property int $sequence
  * @property string|null $elevation_reference
@@ -42,6 +43,7 @@ class RoomLocation extends Model
     protected $fillable = [
         'room_id',
         'name',
+        'location_code',
         'location_type',
         'sequence',
         'elevation_reference',
@@ -64,11 +66,107 @@ class RoomLocation extends Model
     protected $logAttributes = [
         'room.name' => 'Room',
         'name' => 'Location Name',
+        'location_code' => 'Location Code',
         'location_type' => 'Location Type',
         'sequence' => 'Sequence',
         'elevation_reference' => 'Elevation Reference',
         'notes' => 'Notes',
     ];
+
+    /**
+     * Location name patterns to code mapping
+     * Order matters - more specific patterns should come first
+     */
+    protected static array $locationCodePatterns = [
+        '/sink\s*wall/i' => 'SW',
+        '/north\s*wall/i' => 'NW',
+        '/south\s*wall/i' => 'STH',  // Avoids conflict with Sink Wall
+        '/east\s*wall/i' => 'EW',
+        '/west\s*wall/i' => 'WW',
+        '/back\s*wall/i' => 'BW',
+        '/range\s*wall/i' => 'RW',
+        '/cooktop\s*wall/i' => 'CW',
+        '/fridge\s*wall/i' => 'FW',
+        '/island/i' => 'ISL',
+        '/peninsula/i' => 'PEN',
+        '/corner/i' => 'CRN',
+        '/pantry/i' => 'PAN',
+        '/bar/i' => 'BAR',
+    ];
+
+    /**
+     * Boot the model - auto-generate location_code on saving
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($location) {
+            // Only auto-generate if location_code is empty
+            if (empty($location->location_code)) {
+                $location->location_code = $location->generateLocationCode();
+            }
+        });
+
+        // When location_code changes, regenerate all descendant full_codes
+        static::updated(function ($location) {
+            if ($location->isDirty('location_code')) {
+                $location->regenerateDescendantCodes();
+            }
+        });
+    }
+
+    /**
+     * Generate the location code by parsing the name
+     * Examples: "Sink Wall" → SW, "North Wall" → NW, "Island" → ISL
+     */
+    public function generateLocationCode(): string
+    {
+        $name = $this->name ?? '';
+
+        // Try pattern matching first
+        foreach (static::$locationCodePatterns as $pattern => $code) {
+            if (preg_match($pattern, $name)) {
+                return $code;
+            }
+        }
+
+        // Fallback: first letter of each word (up to 3 letters)
+        $words = preg_split('/\s+/', $name);
+        $initials = array_map(fn($word) => strtoupper(substr($word, 0, 1)), $words);
+        return implode('', array_slice($initials, 0, 3));
+    }
+
+    /**
+     * Regenerate full_codes for all descendant entities
+     * Called when location_code changes
+     */
+    public function regenerateDescendantCodes(): void
+    {
+        $this->load('cabinetRuns.cabinets.sections');
+
+        foreach ($this->cabinetRuns as $run) {
+            foreach ($run->cabinets as $cabinet) {
+                $cabinet->full_code = $cabinet->generateFullCode();
+                $cabinet->saveQuietly();
+
+                foreach ($cabinet->sections as $section) {
+                    $section->full_code = $section->generateFullCode();
+                    $section->saveQuietly();
+
+                    // Regenerate component codes
+                    foreach (['doors', 'drawers', 'shelves', 'pullouts'] as $relation) {
+                        if ($section->relationLoaded($relation)) {
+                            foreach ($section->$relation as $component) {
+                                $component->full_code = $component->generateFullCode();
+                                $component->saveQuietly();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Relationships
@@ -89,6 +187,14 @@ class RoomLocation extends Model
     }
 
     /**
+     * Hardware requirements for this room location
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'room_location_id');
+    }
+
+    /**
      * Creator
      *
      * @return BelongsTo
@@ -104,10 +210,38 @@ class RoomLocation extends Model
 
     /**
      * Get total linear feet for all cabinet runs in this location
+     * Uses the calculated linear_feet accessor from each run (which accounts for cabinet qty)
      */
     public function getTotalLinearFeetAttribute(): float
     {
+        if ($this->relationLoaded('cabinetRuns')) {
+            return $this->cabinetRuns->sum(fn($run) => $run->linear_feet);
+        }
+
+        return $this->cabinetRuns()
+            ->with('cabinets')
+            ->get()
+            ->sum(fn($run) => $run->linear_feet);
+    }
+
+    /**
+     * Get stored linear feet total (from database, not calculated)
+     */
+    public function getStoredLinearFeetAttribute(): float
+    {
         return $this->cabinetRuns()->sum('total_linear_feet') ?? 0;
+    }
+
+    /**
+     * Check if there's a discrepancy between stored and calculated linear feet
+     */
+    public function getHasLinearFeetDiscrepancyAttribute(): bool
+    {
+        $calculated = $this->total_linear_feet;
+        $stored = $this->stored_linear_feet;
+
+        // Allow small floating point differences
+        return abs($calculated - $stored) > 0.1;
     }
 
     /**

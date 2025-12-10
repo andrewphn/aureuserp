@@ -25,8 +25,14 @@ use Webkul\Project\Models\Room;
 use Webkul\Project\Models\RoomLocation;
 use Webkul\Project\Models\CabinetRun;
 use Webkul\Project\Models\Cabinet;
+use Webkul\Project\Models\CabinetSection;
+use Webkul\Project\Models\Door;
+use Webkul\Project\Models\Drawer;
+use Webkul\Project\Models\Shelf;
+use Webkul\Project\Models\Pullout;
 use Webkul\Project\Models\ProjectDraft;
 use Webkul\Project\Services\PdfPageEntityService;
+use Webkul\Support\Models\Company;
 
 /**
  * Review Pdf And Price class
@@ -101,6 +107,141 @@ class ReviewPdfAndPrice extends Page implements HasForms
      * Whether the edit details modal is open
      */
     public bool $showEditDetailsModal = false;
+
+    // =====================================================
+    // ENTITY CRUD MODAL PROPERTIES
+    // =====================================================
+
+    /**
+     * Entity type being edited (room, room_location, cabinet_run, cabinet)
+     */
+    public string $entityType = '';
+
+    /**
+     * CRUD mode: 'create' or 'edit'
+     */
+    public string $entityMode = 'create';
+
+    /**
+     * Entity ID when editing (can be temp ID like 'temp_123' for unsaved)
+     */
+    public string|int|null $entityId = null;
+
+    /**
+     * Parent entity ID when creating child entities
+     */
+    public string|int|null $entityParentId = null;
+
+    /**
+     * Entity form data
+     */
+    public array $entityFormData = [];
+
+    // =====================================================
+    // STATEFUL ENTITY STORE
+    // All changes are held in memory until explicitly saved
+    // =====================================================
+
+    /**
+     * Pending entities to create (not yet in database)
+     * Format: ['temp_id' => ['type' => 'room', 'data' => [...], 'parent_id' => null]]
+     */
+    public array $pendingEntities = [];
+
+    /**
+     * Counter for generating temp IDs
+     */
+    public int $tempIdCounter = 0;
+
+    /**
+     * Track which entities have unsaved changes
+     */
+    public bool $hasUnsavedEntityChanges = false;
+
+    // =====================================================
+    // HIERARCHICAL NAVIGATION PROPERTIES
+    // Room → Location → CabinetRun → Cabinet → Section → Component
+    // =====================================================
+
+    /**
+     * Full project hierarchy cache (loaded once on mount)
+     * Structure: ['rooms' => [...], 'locations' => [...], 'runs' => [...], 'cabinets' => [...], 'sections' => [...]]
+     * Each keyed by ID for O(1) lookup
+     */
+    public array $hierarchyCache = [];
+
+    /**
+     * Flag to indicate if hierarchy has been loaded
+     */
+    public bool $hierarchyLoaded = false;
+
+    /**
+     * Current navigation level in the hierarchy
+     * Levels: 'rooms', 'locations', 'runs', 'cabinets', 'sections', 'components'
+     */
+    public string $hierarchyLevel = 'rooms';
+
+    /**
+     * Breadcrumb trail for navigation
+     * Each item: ['level' => string, 'id' => int|null, 'name' => string]
+     */
+    public array $breadcrumbs = [];
+
+    /**
+     * Currently selected room for drill-down
+     */
+    public ?int $selectedRoomId = null;
+    public ?string $selectedRoomName = null;
+
+    /**
+     * Currently selected location for drill-down
+     */
+    public ?int $selectedLocationId = null;
+    public ?string $selectedLocationName = null;
+
+    /**
+     * Currently selected cabinet run for drill-down
+     */
+    public ?int $selectedRunId = null;
+    public ?string $selectedRunName = null;
+
+    /**
+     * Currently selected cabinet for drill-down
+     */
+    public ?int $selectedCabinetId = null;
+    public ?string $selectedCabinetName = null;
+
+    /**
+     * Currently selected section for drill-down
+     */
+    public ?int $selectedSectionId = null;
+    public ?string $selectedSectionName = null;
+
+    // =====================================================
+    // ENTITY DETAILS PANEL SELECTION PROPERTIES
+    // For the third column in Edit Details modal
+    // =====================================================
+
+    /**
+     * Currently highlighted entity type for details panel
+     * Values: 'room', 'location', 'run', 'cabinet', 'section', 'component'
+     */
+    public ?string $highlightedEntityType = null;
+
+    /**
+     * Currently highlighted entity ID for details panel
+     */
+    public ?int $highlightedEntityId = null;
+
+    /**
+     * Whether the details panel is in edit mode
+     */
+    public bool $isEditingInline = false;
+
+    /**
+     * Inline edit form data
+     */
+    public array $inlineEditData = [];
 
     /**
      * Mount
@@ -218,6 +359,9 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 'rooms' => $existingRooms,
             ]);
         }
+
+        // Pre-load the full project hierarchy into cache for instant tree navigation
+        $this->loadFullProjectHierarchy();
     }
 
     /**
@@ -363,6 +507,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             'door_height' => $door->height_inches,
             'hinge_side' => $door->hinge_side,
             'has_glass' => (bool) $door->has_glass,
+            'products' => $this->loadComponentProducts('door_id', $door->id),
         ])->toArray();
     }
 
@@ -383,6 +528,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             'front_height' => $drawer->front_height_inches,
             'box_depth' => $drawer->box_depth_inches,
             'slide_type' => $drawer->slide_type,
+            'products' => $this->loadComponentProducts('drawer_id', $drawer->id),
         ])->toArray();
     }
 
@@ -402,6 +548,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             'pullout_type' => $pullout->pullout_type,
             'pullout_width' => $pullout->width_inches ?? null,
             'pullout_depth' => $pullout->depth_inches ?? null,
+            'products' => $this->loadComponentProducts('pullout_id', $pullout->id),
         ])->toArray();
     }
 
@@ -422,7 +569,27 @@ class ReviewPdfAndPrice extends Page implements HasForms
             'shelf_width' => $shelf->width_inches,
             'shelf_depth' => $shelf->depth_inches,
             'shelf_quantity' => $shelf->quantity ?? 1,
+            'products' => $this->loadComponentProducts('shelf_id', $shelf->id),
         ])->toArray();
+    }
+
+    /**
+     * Load products/hardware for a component
+     *
+     * @param string $foreignKeyColumn The column name (door_id, drawer_id, shelf_id, pullout_id)
+     * @param int $componentId The ID of the component
+     * @return array
+     */
+    protected function loadComponentProducts(string $foreignKeyColumn, int $componentId): array
+    {
+        return \DB::table('hardware_requirements')
+            ->where($foreignKeyColumn, $componentId)
+            ->get()
+            ->map(fn ($hw) => [
+                'product_id' => $hw->product_id,
+                'quantity' => $hw->quantity_required ?? 1,
+            ])
+            ->toArray();
     }
 
     public function getTotalPages(): int
@@ -780,6 +947,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             // Cover page data
             'cover_address_street' => $pageData['cover_address_street'] ?? null,
             'cover_address_city' => $pageData['cover_address_city'] ?? null,
+            'cover_address_country' => $pageData['cover_address_country'] ?? 'US',
             'cover_address_state' => $pageData['cover_address_state'] ?? null,
             'cover_address_zip' => $pageData['cover_address_zip'] ?? null,
             'cover_designer_company' => $pageData['cover_designer_company'] ?? null,
@@ -820,6 +988,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 $updates = [
                     'cover_address_street' => $data['cover_address_street'] ?? null,
                     'cover_address_city' => $data['cover_address_city'] ?? null,
+                    'cover_address_country' => $data['cover_address_country'] ?? 'US',
                     'cover_address_state' => $data['cover_address_state'] ?? null,
                     'cover_address_zip' => $data['cover_address_zip'] ?? null,
                     'cover_designer_company' => $data['cover_designer_company'] ?? null,
@@ -915,6 +1084,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             case 'cover':
                 $set('cover_address_street', $data['cover_address_street'] ?? null);
                 $set('cover_address_city', $data['cover_address_city'] ?? null);
+                $set('cover_address_country', $data['cover_address_country'] ?? 'US');
                 $set('cover_address_state', $data['cover_address_state'] ?? null);
                 $set('cover_address_zip', $data['cover_address_zip'] ?? null);
                 $set('cover_designer_company', $data['cover_designer_company'] ?? null);
@@ -975,6 +1145,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
                     case 'cover':
                         $this->data['page_metadata'][$index]['cover_address_street'] = $data['cover_address_street'] ?? null;
                         $this->data['page_metadata'][$index]['cover_address_city'] = $data['cover_address_city'] ?? null;
+                        $this->data['page_metadata'][$index]['cover_address_country'] = $data['cover_address_country'] ?? 'US';
                         $this->data['page_metadata'][$index]['cover_address_state'] = $data['cover_address_state'] ?? null;
                         $this->data['page_metadata'][$index]['cover_address_zip'] = $data['cover_address_zip'] ?? null;
                         $this->data['page_metadata'][$index]['cover_designer_company'] = $data['cover_designer_company'] ?? null;
@@ -1878,6 +2049,26 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                                 ->native(false),
                                                                             \Filament\Forms\Components\Toggle::make('has_glass')
                                                                                 ->label('Glass Panel'),
+                                                                            Repeater::make('products')
+                                                                                ->label('Products')
+                                                                                ->schema([
+                                                                                    Select::make('product_id')
+                                                                                        ->label('Product')
+                                                                                        ->options(fn () => \Webkul\Product\Models\Product::pluck('name', 'id'))
+                                                                                        ->searchable()
+                                                                                        ->required(),
+                                                                                    TextInput::make('quantity')
+                                                                                        ->label('Qty')
+                                                                                        ->numeric()
+                                                                                        ->default(1)
+                                                                                        ->minValue(1),
+                                                                                ])
+                                                                                ->columns(2)
+                                                                                ->defaultItems(0)
+                                                                                ->addActionLabel('Add Product')
+                                                                                ->columnSpanFull()
+                                                                                ->collapsible()
+                                                                                ->collapsed(),
                                                                         ])
                                                                         ->columns(3)
                                                                         ->defaultItems(0)
@@ -1919,6 +2110,26 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                                     'center_mount' => 'Center Mount',
                                                                                 ])
                                                                                 ->native(false),
+                                                                            Repeater::make('products')
+                                                                                ->label('Products')
+                                                                                ->schema([
+                                                                                    Select::make('product_id')
+                                                                                        ->label('Product')
+                                                                                        ->options(fn () => \Webkul\Product\Models\Product::pluck('name', 'id'))
+                                                                                        ->searchable()
+                                                                                        ->required(),
+                                                                                    TextInput::make('quantity')
+                                                                                        ->label('Qty')
+                                                                                        ->numeric()
+                                                                                        ->default(1)
+                                                                                        ->minValue(1),
+                                                                                ])
+                                                                                ->columns(2)
+                                                                                ->defaultItems(0)
+                                                                                ->addActionLabel('Add Product')
+                                                                                ->columnSpanFull()
+                                                                                ->collapsible()
+                                                                                ->collapsed(),
                                                                         ])
                                                                         ->columns(3)
                                                                         ->defaultItems(0)
@@ -1958,6 +2169,26 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                                 ->numeric()
                                                                                 ->step(0.125)
                                                                                 ->suffix('"'),
+                                                                            Repeater::make('products')
+                                                                                ->label('Products')
+                                                                                ->schema([
+                                                                                    Select::make('product_id')
+                                                                                        ->label('Product')
+                                                                                        ->options(fn () => \Webkul\Product\Models\Product::pluck('name', 'id'))
+                                                                                        ->searchable()
+                                                                                        ->required(),
+                                                                                    TextInput::make('quantity')
+                                                                                        ->label('Qty')
+                                                                                        ->numeric()
+                                                                                        ->default(1)
+                                                                                        ->minValue(1),
+                                                                                ])
+                                                                                ->columns(2)
+                                                                                ->defaultItems(0)
+                                                                                ->addActionLabel('Add Product')
+                                                                                ->columnSpanFull()
+                                                                                ->collapsible()
+                                                                                ->collapsed(),
                                                                         ])
                                                                         ->columns(2)
                                                                         ->defaultItems(0)
@@ -1999,6 +2230,26 @@ class ReviewPdfAndPrice extends Page implements HasForms
                                                                                 ->label('Qty')
                                                                                 ->numeric()
                                                                                 ->default(1),
+                                                                            Repeater::make('products')
+                                                                                ->label('Products')
+                                                                                ->schema([
+                                                                                    Select::make('product_id')
+                                                                                        ->label('Product')
+                                                                                        ->options(fn () => \Webkul\Product\Models\Product::pluck('name', 'id'))
+                                                                                        ->searchable()
+                                                                                        ->required(),
+                                                                                    TextInput::make('quantity')
+                                                                                        ->label('Qty')
+                                                                                        ->numeric()
+                                                                                        ->default(1)
+                                                                                        ->minValue(1),
+                                                                                ])
+                                                                                ->columns(2)
+                                                                                ->defaultItems(0)
+                                                                                ->addActionLabel('Add Product')
+                                                                                ->columnSpanFull()
+                                                                                ->collapsible()
+                                                                                ->collapsed(),
                                                                         ])
                                                                         ->columns(3)
                                                                         ->defaultItems(0)
@@ -2878,11 +3129,33 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 $this->editDetailsData['cover_address_city'] = $address->city;
             }
             if (empty($this->editDetailsData['cover_address_state'])) {
-                // Get state name or code
-                $this->editDetailsData['cover_address_state'] = $address->state?->code ?? $address->state?->name;
+                // Get state - try relationship first, then lookup by ID
+                $stateCode = $address->state?->code ?? $address->state?->name;
+                if (empty($stateCode) && $address->state_id) {
+                    $state = \Webkul\Support\Models\State::find($address->state_id);
+                    $stateCode = $state?->code ?? $state?->name;
+                }
+                $this->editDetailsData['cover_address_state'] = $stateCode;
             }
             if (empty($this->editDetailsData['cover_address_zip'])) {
                 $this->editDetailsData['cover_address_zip'] = $address->zip;
+            }
+            // Also set country if available
+            if (empty($this->editDetailsData['cover_address_country'])) {
+                $countryCode = $address->country?->code ?? $address->country?->name;
+                if (empty($countryCode) && $address->country_id) {
+                    $country = \Webkul\Support\Models\Country::find($address->country_id);
+                    $countryCode = $country?->code ?? $country?->name;
+                }
+                // Default to US if state is in US but no country set
+                if (empty($countryCode) && $address->state_id) {
+                    $state = \Webkul\Support\Models\State::find($address->state_id);
+                    if ($state) {
+                        $country = \Webkul\Support\Models\Country::find($state->country_id);
+                        $countryCode = $country?->code ?? 'US';
+                    }
+                }
+                $this->editDetailsData['cover_address_country'] = $countryCode ?? 'US';
             }
         }
 
@@ -2899,6 +3172,324 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 $this->editDetailsData['cover_designer_email'] = $partner->email;
             }
         }
+    }
+
+    /**
+     * AI Extract page details - universal method that works for all page types
+     * Uses AI vision to analyze the page image and extract structured data
+     */
+    public function aiExtractPageDetails(): void
+    {
+        if (!$this->editingPageNumber || !$this->pdfDocument) {
+            Notification::make()
+                ->warning()
+                ->title('No page selected')
+                ->body('Please select a page to extract details from.')
+                ->send();
+            return;
+        }
+
+        $purpose = $this->getEditingPagePurpose();
+        if (!$purpose) {
+            Notification::make()
+                ->warning()
+                ->title('Page not classified')
+                ->body('Please classify the page type first before extracting details.')
+                ->send();
+            return;
+        }
+
+        // Get the PdfPage model for this page
+        $pdfPage = \App\Models\PdfPage::where('document_id', $this->pdfDocument->id)
+            ->where('page_number', $this->editingPageNumber)
+            ->first();
+
+        if (!$pdfPage) {
+            Notification::make()
+                ->warning()
+                ->title('Page not found')
+                ->body('Could not find the page in the database.')
+                ->send();
+            return;
+        }
+
+        try {
+            $aiService = app(\App\Services\AiPdfParsingService::class);
+            $extractedData = [];
+
+            // Call the appropriate parsing method based on page type
+            switch ($purpose) {
+                case 'cover':
+                    $extractedData = $aiService->parseCoverPage($pdfPage);
+                    $this->applyAiCoverPageData($extractedData);
+                    break;
+
+                case 'floor_plan':
+                    $extractedData = $aiService->parseFloorPlan($pdfPage);
+                    $this->applyAiFloorPlanData($extractedData);
+                    break;
+
+                case 'elevations':
+                    $extractedData = $aiService->parseElevation($pdfPage);
+                    $this->applyAiElevationData($extractedData);
+                    break;
+
+                case 'countertops':
+                    // For countertops, we can use a generic extraction
+                    $extractedData = $aiService->parseElevation($pdfPage);
+                    $this->applyAiCountertopData($extractedData);
+                    break;
+
+                default:
+                    Notification::make()
+                        ->info()
+                        ->title('AI extraction not available')
+                        ->body("AI extraction is not yet available for '{$purpose}' pages.")
+                        ->send();
+                    return;
+            }
+
+            if (isset($extractedData['error'])) {
+                Notification::make()
+                    ->danger()
+                    ->title('AI Extraction Failed')
+                    ->body($extractedData['error'])
+                    ->send();
+                return;
+            }
+
+            // Log the activity
+            $this->logPageActivity('ai_extract', [
+                'page_number' => $this->editingPageNumber,
+                'page_type' => $purpose,
+                'extracted_fields' => array_keys($extractedData),
+            ]);
+
+            Notification::make()
+                ->success()
+                ->title('AI Extraction Complete')
+                ->body('Details have been extracted. Review and save the changes.')
+                ->send();
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('AI extraction failed', [
+                'error' => $e->getMessage(),
+                'page' => $this->editingPageNumber,
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('AI Extraction Error')
+                ->body('An error occurred during extraction: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Apply AI-extracted cover page data to the form (only fills empty fields)
+     */
+    protected function applyAiCoverPageData(array $data): void
+    {
+        // Map AI response fields to form fields
+        $mappings = [
+            'project_name' => 'page_label', // Map project name to page label
+            'designer' => 'cover_designer_company',
+            'revision' => 'cover_revision_date',
+            'drawing_set_title' => 'page_label',
+        ];
+
+        foreach ($mappings as $aiField => $formField) {
+            if ($formField && !empty($data[$aiField]) && empty($this->editDetailsData[$formField])) {
+                $this->editDetailsData[$formField] = $data[$aiField];
+            }
+        }
+
+        // Handle address data from AI response
+        if (!empty($data['address']) && is_array($data['address'])) {
+            $address = $data['address'];
+            if (!empty($address['street']) && empty($this->editDetailsData['cover_address_street'])) {
+                $this->editDetailsData['cover_address_street'] = $address['street'];
+            }
+            if (!empty($address['city']) && empty($this->editDetailsData['cover_address_city'])) {
+                $this->editDetailsData['cover_address_city'] = $address['city'];
+            }
+            if (!empty($address['state']) && empty($this->editDetailsData['cover_address_state'])) {
+                $this->editDetailsData['cover_address_state'] = $address['state'];
+            }
+            if (!empty($address['zip']) && empty($this->editDetailsData['cover_address_zip'])) {
+                $this->editDetailsData['cover_address_zip'] = $address['zip'];
+            }
+        }
+
+        // Handle rooms mentioned
+        if (!empty($data['rooms_mentioned']) && empty($this->editDetailsData['rooms_mentioned'])) {
+            $this->editDetailsData['rooms_mentioned'] = $data['rooms_mentioned'];
+        }
+
+        // Handle scope summary as notes
+        if (!empty($data['scope_summary']) && empty($this->editDetailsData['page_notes'])) {
+            $this->editDetailsData['page_notes'] = $data['scope_summary'];
+        }
+    }
+
+    /**
+     * Apply AI-extracted floor plan data to the form
+     */
+    protected function applyAiFloorPlanData(array $data): void
+    {
+        // Extract room names for page label
+        if (!empty($data['rooms']) && empty($this->editDetailsData['page_label'])) {
+            $roomNames = array_column($data['rooms'], 'name');
+            $this->editDetailsData['page_label'] = implode(' / ', $roomNames) . ' Floor Plan';
+        }
+
+        // Handle rooms on page
+        if (!empty($data['rooms']) && empty($this->editDetailsData['rooms_on_page'])) {
+            $this->editDetailsData['rooms_on_page'] = array_column($data['rooms'], 'name');
+        }
+
+        // Handle notes
+        if (!empty($data['notes']) && empty($this->editDetailsData['page_notes'])) {
+            $this->editDetailsData['page_notes'] = $data['notes'];
+        }
+    }
+
+    /**
+     * Apply AI-extracted elevation data to the form
+     */
+    protected function applyAiElevationData(array $data): void
+    {
+        // Map AI fields to form fields
+        if (!empty($data['location_name']) && empty($this->editDetailsData['page_label'])) {
+            $this->editDetailsData['page_label'] = $data['location_name'];
+        }
+
+        if (!empty($data['room_name']) && empty($this->editDetailsData['room_name'])) {
+            $this->editDetailsData['room_name'] = $data['room_name'];
+        }
+
+        if (!empty($data['linear_feet']) && empty($this->editDetailsData['linear_feet'])) {
+            $this->editDetailsData['linear_feet'] = $data['linear_feet'];
+        }
+
+        if (!empty($data['pricing_tier']) && empty($this->editDetailsData['pricing_tier'])) {
+            $this->editDetailsData['pricing_tier'] = (string) $data['pricing_tier'];
+        }
+
+        // Check for hardware and material specs
+        if (!empty($data['hardware'])) {
+            $this->editDetailsData['has_hardware_schedule'] = true;
+        }
+
+        if (!empty($data['materials'])) {
+            $this->editDetailsData['has_material_spec'] = true;
+        }
+
+        // Build notes from special features
+        if (!empty($data['special_features']) && empty($this->editDetailsData['page_notes'])) {
+            $this->editDetailsData['page_notes'] = 'Features: ' . implode(', ', $data['special_features']);
+        }
+    }
+
+    /**
+     * Apply AI-extracted countertop data to the form
+     */
+    protected function applyAiCountertopData(array $data): void
+    {
+        if (!empty($data['location_name']) && empty($this->editDetailsData['page_label'])) {
+            $this->editDetailsData['page_label'] = $data['location_name'] . ' Countertops';
+        }
+
+        if (!empty($data['room_name']) && empty($this->editDetailsData['room_name'])) {
+            $this->editDetailsData['room_name'] = $data['room_name'];
+        }
+    }
+
+    /**
+     * Log page activity for audit trail
+     */
+    protected function logPageActivity(string $action, array $data = []): void
+    {
+        if (!$this->pdfDocument) {
+            return;
+        }
+
+        // Get or create the PDF page record
+        $pdfPage = \App\Models\PdfPage::firstOrCreate(
+            [
+                'document_id' => $this->pdfDocument->id,
+                'page_number' => $this->editingPageNumber ?? 0,
+            ],
+            [
+                'project_id' => $this->record->id,
+                'creator_id' => auth()->id(),
+            ]
+        );
+
+        // Update the page metadata with activity log
+        $metadata = $pdfPage->page_metadata ?? [];
+        $metadata['activity_log'] = $metadata['activity_log'] ?? [];
+        $metadata['activity_log'][] = [
+            'action' => $action,
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()?->name,
+            'timestamp' => now()->toIso8601String(),
+            'data' => $data,
+        ];
+
+        $pdfPage->update(['page_metadata' => $metadata]);
+    }
+
+    /**
+     * Open the chatter/activity panel for the current page
+     */
+    public function openPageChatter(): void
+    {
+        if (!$this->editingPageNumber || !$this->pdfDocument) {
+            Notification::make()
+                ->warning()
+                ->title('No page selected')
+                ->body('Please select a page to view activity.')
+                ->send();
+            return;
+        }
+
+        // Get or create the PDF page record
+        $pdfPage = \App\Models\PdfPage::firstOrCreate(
+            [
+                'document_id' => $this->pdfDocument->id,
+                'page_number' => $this->editingPageNumber,
+            ],
+            [
+                'project_id' => $this->record->id,
+                'creator_id' => auth()->id(),
+            ]
+        );
+
+        // For now, show a notification with activity summary
+        // In the future, this could open a dedicated chatter modal
+        $metadata = $pdfPage->page_metadata ?? [];
+        $activityLog = $metadata['activity_log'] ?? [];
+        $activityCount = count($activityLog);
+
+        if ($activityCount === 0) {
+            Notification::make()
+                ->info()
+                ->title('No Activity Yet')
+                ->body('This page has no recorded activity.')
+                ->send();
+        } else {
+            $lastActivity = end($activityLog);
+            Notification::make()
+                ->info()
+                ->title("Page Activity ({$activityCount} events)")
+                ->body("Last: {$lastActivity['action']} by {$lastActivity['user_name']} at " .
+                    \Carbon\Carbon::parse($lastActivity['timestamp'])->diffForHumans())
+                ->send();
+        }
+
+        // TODO: In the future, dispatch to open a full chatter modal
+        // $this->dispatch('open-modal', id: 'page-chatter-modal');
     }
 
     /**
@@ -2975,6 +3566,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             case 'cover':
                 $formData['page_metadata'][$targetIndex]['cover_address_street'] = $data['cover_address_street'] ?? null;
                 $formData['page_metadata'][$targetIndex]['cover_address_city'] = $data['cover_address_city'] ?? null;
+                $formData['page_metadata'][$targetIndex]['cover_address_country'] = $data['cover_address_country'] ?? 'US';
                 $formData['page_metadata'][$targetIndex]['cover_address_state'] = $data['cover_address_state'] ?? null;
                 $formData['page_metadata'][$targetIndex]['cover_address_zip'] = $data['cover_address_zip'] ?? null;
                 $formData['page_metadata'][$targetIndex]['cover_designer_company'] = $data['cover_designer_company'] ?? null;
@@ -3020,12 +3612,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
         // Update $this->data with the modified formData
         $this->data = $formData;
 
-        // CRITICAL: Also update the form state to prevent saveDraft() from overwriting
-        // When Livewire triggers saveDraft() elsewhere, it uses $this->form->getState()
-        // which would return the old state without our changes
-        $this->form->fill($formData);
-
         // Save the draft with updated data directly
+        // NOTE: We intentionally do NOT call $this->form->fill() here because it would
+        // regenerate UUID keys for the repeater items, causing the page cards to disappear
+        // and the component to lose its state. The draft is saved from $formData directly.
         $this->saveDraftWithData($formData);
 
         // Reset the editing state
@@ -3536,6 +4126,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
                    || !empty($coverPageData['cover_address_state']);
 
         if ($hasAddress) {
+            // Look up country ID (default to US if not specified)
+            $countryCode = $coverPageData['cover_address_country'] ?? 'US';
+            $country = \Webkul\Support\Models\Country::where('code', $countryCode)->first();
+            $countryId = $country?->id ?? 233; // Default to USA (ID 233)
+
             // Look up state ID
             $stateId = null;
             if (!empty($coverPageData['cover_address_state'])) {
@@ -3552,6 +4147,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             $addressData = array_filter([
                 'street1' => $coverPageData['cover_address_street'] ?? null,
                 'city' => $coverPageData['cover_address_city'] ?? null,
+                'country_id' => $countryId,
                 'state_id' => $stateId,
                 'zip' => $coverPageData['cover_address_zip'] ?? null,
                 'is_primary' => true,
@@ -3563,7 +4159,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             } elseif (!$address && !empty($addressData)) {
                 $this->record->addresses()->create(array_merge($addressData, [
                     'address_type' => 'project',
-                    'country_id' => 233, // USA
+                    // country_id is already in $addressData from lookup above
                 ]));
                 $saved[] = 'Address';
             }
@@ -3882,8 +4478,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
             }
 
             $door = null;
+            $doorId = null;
             if (! empty($doorData['door_id'])) {
                 $door = \DB::table('projects_doors')->where('id', $doorData['door_id'])->first();
+                $doorId = $door?->id;
             }
 
             $data = [
@@ -3898,7 +4496,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             if ($door) {
                 \DB::table('projects_doors')->where('id', $door->id)->update($data);
             } else {
-                \DB::table('projects_doors')->insert(array_merge($data, [
+                $doorId = \DB::table('projects_doors')->insertGetId(array_merge($data, [
                     'cabinet_id' => $cabinet->id,
                     'section_id' => $section->id,
                     'door_number' => \DB::table('projects_doors')->where('cabinet_id', $cabinet->id)->count() + 1,
@@ -3906,6 +4504,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
                     'created_at' => now(),
                 ]));
                 $stats['doors']++;
+            }
+
+            // Save products for this door
+            if ($doorId && !empty($doorData['products'])) {
+                $this->saveComponentProducts('door_id', $doorId, $doorData['products']);
             }
         }
     }
@@ -3921,8 +4524,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
             }
 
             $drawer = null;
+            $drawerId = null;
             if (! empty($drawerData['drawer_id'])) {
                 $drawer = \DB::table('projects_drawers')->where('id', $drawerData['drawer_id'])->first();
+                $drawerId = $drawer?->id;
             }
 
             $data = [
@@ -3937,7 +4542,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             if ($drawer) {
                 \DB::table('projects_drawers')->where('id', $drawer->id)->update($data);
             } else {
-                \DB::table('projects_drawers')->insert(array_merge($data, [
+                $drawerId = \DB::table('projects_drawers')->insertGetId(array_merge($data, [
                     'cabinet_id' => $cabinet->id,
                     'section_id' => $section->id,
                     'drawer_number' => \DB::table('projects_drawers')->where('cabinet_id', $cabinet->id)->count() + 1,
@@ -3945,6 +4550,11 @@ class ReviewPdfAndPrice extends Page implements HasForms
                     'created_at' => now(),
                 ]));
                 $stats['drawers']++;
+            }
+
+            // Save products for this drawer
+            if ($drawerId && !empty($drawerData['products'])) {
+                $this->saveComponentProducts('drawer_id', $drawerId, $drawerData['products']);
             }
         }
     }
@@ -3960,8 +4570,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
             }
 
             $pullout = null;
+            $pulloutId = null;
             if (! empty($pulloutData['pullout_id'])) {
                 $pullout = \DB::table('projects_pullouts')->where('id', $pulloutData['pullout_id'])->first();
+                $pulloutId = $pullout?->id;
             }
 
             $data = [
@@ -3975,13 +4587,18 @@ class ReviewPdfAndPrice extends Page implements HasForms
             if ($pullout) {
                 \DB::table('projects_pullouts')->where('id', $pullout->id)->update($data);
             } else {
-                \DB::table('projects_pullouts')->insert(array_merge($data, [
+                $pulloutId = \DB::table('projects_pullouts')->insertGetId(array_merge($data, [
                     'cabinet_id' => $cabinet->id,
                     'section_id' => $section->id,
                     'sort_order' => \DB::table('projects_pullouts')->where('section_id', $section->id)->count(),
                     'created_at' => now(),
                 ]));
                 $stats['pullouts']++;
+            }
+
+            // Save products for this pullout
+            if ($pulloutId && !empty($pulloutData['products'])) {
+                $this->saveComponentProducts('pullout_id', $pulloutId, $pulloutData['products']);
             }
         }
     }
@@ -3997,8 +4614,10 @@ class ReviewPdfAndPrice extends Page implements HasForms
             }
 
             $shelf = null;
+            $shelfId = null;
             if (! empty($shelfData['shelf_id'])) {
                 $shelf = \DB::table('projects_shelves')->where('id', $shelfData['shelf_id'])->first();
+                $shelfId = $shelf?->id;
             }
 
             $data = [
@@ -4013,7 +4632,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
             if ($shelf) {
                 \DB::table('projects_shelves')->where('id', $shelf->id)->update($data);
             } else {
-                \DB::table('projects_shelves')->insert(array_merge($data, [
+                $shelfId = \DB::table('projects_shelves')->insertGetId(array_merge($data, [
                     'cabinet_id' => $cabinet->id,
                     'section_id' => $section->id,
                     'sort_order' => \DB::table('projects_shelves')->where('section_id', $section->id)->count(),
@@ -4021,6 +4640,41 @@ class ReviewPdfAndPrice extends Page implements HasForms
                 ]));
                 $stats['shelves']++;
             }
+
+            // Save products for this shelf
+            if ($shelfId && !empty($shelfData['products'])) {
+                $this->saveComponentProducts('shelf_id', $shelfId, $shelfData['products']);
+            }
+        }
+    }
+
+    /**
+     * Save products/hardware for a component (door, drawer, shelf, pullout)
+     *
+     * @param string $foreignKeyColumn The column name (door_id, drawer_id, shelf_id, pullout_id)
+     * @param int $componentId The ID of the component
+     * @param array $products Array of product data from the repeater
+     */
+    protected function saveComponentProducts(string $foreignKeyColumn, int $componentId, array $products): void
+    {
+        // Delete existing products for this component
+        \DB::table('hardware_requirements')
+            ->where($foreignKeyColumn, $componentId)
+            ->delete();
+
+        // Insert new products
+        foreach ($products as $productData) {
+            if (empty($productData['product_id'])) {
+                continue;
+            }
+
+            \DB::table('hardware_requirements')->insert([
+                $foreignKeyColumn => $componentId,
+                'product_id' => $productData['product_id'],
+                'quantity_required' => $productData['quantity'] ?? 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 
@@ -4237,6 +4891,3273 @@ class ReviewPdfAndPrice extends Page implements HasForms
                     ->label('View Project')
                     ->url(ProjectResource::getUrl('view', ['record' => $this->record]))
             ])
+            ->send();
+    }
+
+    // =====================================================
+    // ENTITY CRUD MODAL METHODS
+    // =====================================================
+
+    /**
+     * Get project rooms with full hierarchy for tree display
+     * Loads from database instead of form state
+     */
+    public function getProjectRooms(): array
+    {
+        $rooms = Room::where('project_id', $this->record->id)
+            ->with([
+                'locations.cabinetRuns' => function ($query) {
+                    $query->orderBy('sort_order');
+                },
+                'locations.cabinetRuns.cabinets' // Eager load cabinets for linear_feet calculation
+            ])
+            ->orderBy('floor_number')
+            ->orderBy('name')
+            ->get();
+
+        // Transform to array format for blade templates
+        return $rooms->map(function ($room) {
+            return [
+                'id' => $room->id,
+                'name' => $room->name,
+                'room_type' => $room->room_type,
+                'floor_number' => $room->floor_number,
+                'pdf_page_number' => $room->pdf_page_number,
+                'child_count' => $room->locations->count(),
+                'locations' => $room->locations->map(function ($location) {
+                    return [
+                        'id' => $location->id,
+                        'name' => $location->name,
+                        'location_type' => $location->location_type,
+                        'runs' => $location->cabinetRuns->map(function ($run) {
+                            return [
+                                'id' => $run->id,
+                                'name' => $run->name,
+                                'run_type' => $run->run_type,
+                                'linear_feet' => $run->linear_feet,
+                                'pricing_tier' => $run->pricing_tier ?? $run->cabinet_level,
+                            ];
+                        })->toArray(),
+                    ];
+                })->toArray(),
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Open entity creator modal with context-aware defaults
+     */
+    public function openEntityCreator(string $entityType, ?int $parentId = null): void
+    {
+        $this->entityType = $entityType;
+        $this->entityMode = 'create';
+        $this->entityId = null;
+        $this->entityParentId = $parentId;
+
+        // Get defaults and enhance with PDF context
+        $defaults = $this->getEntityDefaults($entityType);
+        $this->entityFormData = $this->applyPdfContextDefaults($entityType, $defaults);
+
+        $this->dispatch('open-modal', id: 'entity-crud-modal');
+    }
+
+    /**
+     * Apply context-aware defaults based on current PDF page
+     * UX: Pre-fills form fields from page label to reduce typing
+     */
+    protected function applyPdfContextDefaults(string $entityType, array $defaults): array
+    {
+        // Get current page info
+        $pageLabel = $this->editDetailsData['page_label'] ?? '';
+        $pageType = $this->editDetailsData['page_type'] ?? '';
+        $linearFeet = $this->editDetailsData['linear_feet'] ?? null;
+
+        if (empty($pageLabel)) {
+            return $defaults;
+        }
+
+        // Parse room and location from page label
+        // Common patterns: "Kitchen Elevations", "Kitchen - Sink Wall", "Master Bath Floor Plan"
+        $context = $this->extractContextFromPageLabel($pageLabel);
+
+        switch ($entityType) {
+            case 'room':
+                if (!empty($context['room'])) {
+                    $defaults['name'] = $context['room'];
+                    $defaults['_suggested_from_pdf'] = true;
+
+                    // Auto-detect room type from name
+                    $roomType = $this->detectRoomType($context['room']);
+                    if ($roomType) {
+                        $defaults['room_type'] = $roomType;
+                    }
+                }
+                break;
+
+            case 'room_location':
+                if (!empty($context['location'])) {
+                    $defaults['name'] = $context['location'];
+                    $defaults['_suggested_from_pdf'] = true;
+
+                    // Auto-detect location type
+                    $locationType = $this->detectLocationType($context['location']);
+                    if ($locationType) {
+                        $defaults['location_type'] = $locationType;
+                    }
+                }
+                break;
+
+            case 'cabinet_run':
+                // Use linear feet from edit details if available
+                if ($linearFeet) {
+                    $defaults['linear_feet'] = $linearFeet;
+                    $defaults['_suggested_from_pdf'] = true;
+                }
+
+                // Try to detect run type from page label
+                if (!empty($context['run_type'])) {
+                    $defaults['run_type'] = $context['run_type'];
+                }
+                break;
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Extract room name and location from page label
+     * Patterns: "Kitchen Elevations", "Kitchen - Sink Wall", "Master Bath - Island"
+     */
+    protected function extractContextFromPageLabel(string $label): array
+    {
+        $context = ['room' => '', 'location' => '', 'run_type' => ''];
+
+        // Common room keywords to strip
+        $stripSuffixes = [
+            'Elevations', 'Elevation', 'Floor Plan', 'Plan', 'Details',
+            'Section', 'Sections', 'View', 'Views', 'Layout'
+        ];
+
+        // Check for "Room - Location" pattern
+        if (str_contains($label, ' - ')) {
+            $parts = explode(' - ', $label, 2);
+            $context['room'] = trim($parts[0]);
+            $context['location'] = trim($parts[1]);
+        } else {
+            // Strip common suffixes to get room name
+            $cleanLabel = $label;
+            foreach ($stripSuffixes as $suffix) {
+                $cleanLabel = preg_replace('/\s*' . preg_quote($suffix, '/') . '\s*$/i', '', $cleanLabel);
+            }
+            $context['room'] = trim($cleanLabel);
+        }
+
+        // Detect run type keywords in label
+        $labelLower = strtolower($label);
+        if (str_contains($labelLower, 'base')) {
+            $context['run_type'] = 'base';
+        } elseif (str_contains($labelLower, 'wall') || str_contains($labelLower, 'upper')) {
+            $context['run_type'] = 'wall';
+        } elseif (str_contains($labelLower, 'tall') || str_contains($labelLower, 'pantry')) {
+            $context['run_type'] = 'tall';
+        } elseif (str_contains($labelLower, 'island')) {
+            $context['run_type'] = 'island';
+        }
+
+        return $context;
+    }
+
+    /**
+     * Detect room type from room name
+     */
+    protected function detectRoomType(string $name): ?string
+    {
+        $nameLower = strtolower($name);
+
+        $typeMap = [
+            'kitchen' => 'kitchen',
+            'bath' => 'bathroom',
+            'bathroom' => 'bathroom',
+            'powder' => 'bathroom',
+            'laundry' => 'laundry',
+            'pantry' => 'pantry',
+            'closet' => 'closet',
+            'mudroom' => 'mudroom',
+            'mud room' => 'mudroom',
+            'office' => 'office',
+            'study' => 'office',
+            'bedroom' => 'bedroom',
+            'master' => 'bedroom',
+            'living' => 'living_room',
+            'family' => 'living_room',
+            'dining' => 'dining_room',
+            'garage' => 'garage',
+            'basement' => 'basement',
+        ];
+
+        foreach ($typeMap as $keyword => $type) {
+            if (str_contains($nameLower, $keyword)) {
+                return $type;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Detect location type from location name
+     */
+    protected function detectLocationType(string $name): ?string
+    {
+        $nameLower = strtolower($name);
+
+        $typeMap = [
+            'island' => 'island',
+            'peninsula' => 'peninsula',
+            'corner' => 'corner',
+            'alcove' => 'alcove',
+            'nook' => 'alcove',
+            'sink wall' => 'sink_wall',
+            'sink' => 'sink_wall',
+            'range wall' => 'range_wall',
+            'range' => 'range_wall',
+            'stove' => 'range_wall',
+            'refrigerator' => 'refrigerator_wall',
+            'fridge' => 'refrigerator_wall',
+        ];
+
+        foreach ($typeMap as $keyword => $type) {
+            if (str_contains($nameLower, $keyword)) {
+                return $type;
+            }
+        }
+
+        return 'wall'; // Default to wall
+    }
+
+    /**
+     * Check if a room with similar name already exists
+     * UX: Prevents duplicate creation
+     */
+    public function findSimilarRooms(string $name): array
+    {
+        if (empty($name)) {
+            return [];
+        }
+
+        $nameLower = strtolower(trim($name));
+
+        return Room::where('project_id', $this->record->id)
+            ->get()
+            ->filter(function ($room) use ($nameLower) {
+                $roomNameLower = strtolower($room->name);
+                // Check for exact match or contains
+                return $roomNameLower === $nameLower
+                    || str_contains($roomNameLower, $nameLower)
+                    || str_contains($nameLower, $roomNameLower);
+            })
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Get suggested context from current PDF page for display
+     */
+    public function getSuggestedContext(): array
+    {
+        $pageLabel = $this->editDetailsData['page_label'] ?? '';
+        if (empty($pageLabel)) {
+            return [];
+        }
+
+        return $this->extractContextFromPageLabel($pageLabel);
+    }
+
+    /**
+     * Close entity modal
+     */
+    public function closeEntityModal(): void
+    {
+        $this->dispatch('close-modal', id: 'entity-crud-modal');
+        $this->entityType = '';
+        $this->entityMode = 'create';
+        $this->entityId = null;
+        $this->entityParentId = null;
+        $this->entityFormData = [];
+    }
+
+    /**
+     * Get default form values for entity type
+     */
+    protected function getEntityDefaults(string $entityType): array
+    {
+        return match ($entityType) {
+            'room' => [
+                'name' => '',
+                'room_type' => 'kitchen',
+                'floor_number' => 1,
+                'notes' => '',
+            ],
+            'room_location' => [
+                'name' => '',
+                'location_type' => 'wall',
+                'overall_width_inches' => null,
+                'cabinet_level' => '2',
+                'material_category' => '',
+                'finish_option' => '',
+                'notes' => '',
+            ],
+            'cabinet_run' => [
+                'name' => '',
+                'run_type' => 'base',
+                'linear_feet' => null,
+                'sort_order' => 0,
+            ],
+            'cabinet' => [
+                'name' => '',
+                'cabinet_type' => 'base',
+                'length_inches' => 24,
+                'depth_inches' => 24,
+                'height_inches' => 30,
+                'quantity' => 1,
+                'cabinet_level' => '2',
+                'material_category' => '',
+                'finish_option' => '',
+                // Hardware fields
+                'hinge_product_id' => '',
+                'hinge_quantity' => 0,
+                'slide_product_id' => '',
+                'slide_quantity' => 0,
+                // Door/Drawer configuration
+                'door_style' => '',
+                'door_mounting' => '',
+                'door_count' => 0,
+                'drawer_count' => 0,
+            ],
+            'section' => [
+                'name' => '',
+                'section_type' => 'door',
+                'width_inches' => null,
+                'height_inches' => null,
+                'notes' => '',
+            ],
+            'door' => [
+                'door_number' => '',
+                'door_name' => '',
+                'width_inches' => null,
+                'height_inches' => null,
+                'hinge_side' => 'left',
+                'has_glass' => false,
+                'finish_type' => '',
+                'notes' => '',
+                // Hardware product associations
+                'hinge_product_id' => '',
+                'decorative_hardware_product_id' => '',
+            ],
+            'drawer' => [
+                'drawer_number' => '',
+                'drawer_name' => '',
+                'front_width_inches' => null,
+                'front_height_inches' => null,
+                'drawer_position' => 1,
+                'slide_type' => '',
+                'soft_close' => true,
+                'finish_type' => '',
+                'notes' => '',
+                // Hardware product associations
+                'slide_product_id' => '',
+                'decorative_hardware_product_id' => '',
+                // Drawer box dimensions
+                'drawer_box_width_inches' => null,
+                'drawer_box_height_inches' => null,
+                'drawer_box_depth_inches' => null,
+            ],
+            'shelf' => [
+                'shelf_number' => '',
+                'shelf_name' => '',
+                'width_inches' => null,
+                'depth_inches' => null,
+                'thickness_inches' => null,
+                'shelf_type' => 'adjustable',
+                'material' => 'plywood',
+                'edge_treatment' => '',
+                'finish_type' => '',
+                'notes' => '',
+                // Hardware product association (for roll-out shelves)
+                'slide_product_id' => '',
+            ],
+            'pullout' => [
+                'pullout_number' => '',
+                'pullout_name' => '',
+                'pullout_type' => 'roll_out_tray',
+                'manufacturer' => '',
+                'model_number' => '',
+                'width_inches' => null,
+                'height_inches' => null,
+                'depth_inches' => null,
+                'soft_close' => true,
+                'quantity' => 1,
+                'notes' => '',
+                // Hardware product associations
+                'product_id' => '',
+                'slide_product_id' => '',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Load existing entity data for editing
+     */
+    protected function loadEntityData(string $entityType, int $entityId): array
+    {
+        $entity = match ($entityType) {
+            'room' => Room::find($entityId),
+            'room_location' => RoomLocation::find($entityId),
+            'cabinet_run' => CabinetRun::find($entityId),
+            'cabinet' => Cabinet::find($entityId),
+            'section' => CabinetSection::find($entityId),
+            'door' => Door::find($entityId),
+            'drawer' => Drawer::find($entityId),
+            'shelf' => Shelf::find($entityId),
+            'pullout' => Pullout::find($entityId),
+            default => null,
+        };
+
+        if (!$entity) {
+            return [];
+        }
+
+        return match ($entityType) {
+            'room' => [
+                'name' => $entity->name,
+                'room_type' => $entity->room_type,
+                'floor_number' => $entity->floor_number,
+                'notes' => $entity->notes ?? '',
+            ],
+            'room_location' => [
+                'name' => $entity->name,
+                'location_type' => $entity->location_type,
+                'overall_width_inches' => $entity->overall_width_inches,
+                'cabinet_level' => $entity->cabinet_level,
+                'material_category' => $entity->material_category ?? '',
+                'finish_option' => $entity->finish_option ?? '',
+                'notes' => $entity->notes ?? '',
+            ],
+            'cabinet_run' => [
+                'name' => $entity->name,
+                'run_type' => $entity->run_type,
+                'linear_feet' => $entity->linear_feet,
+                'sort_order' => $entity->sort_order ?? 0,
+            ],
+            'cabinet' => [
+                'name' => $entity->name,
+                'cabinet_type' => $entity->cabinet_type,
+                'length_inches' => $entity->length_inches,
+                'depth_inches' => $entity->depth_inches,
+                'height_inches' => $entity->height_inches,
+                'quantity' => $entity->quantity ?? 1,
+                'cabinet_level' => $entity->cabinet_level ?? '2',
+                'material_category' => $entity->material_category ?? '',
+                'finish_option' => $entity->finish_option ?? '',
+                // Hardware fields
+                'hinge_product_id' => $entity->hinge_product_id ?? '',
+                'hinge_quantity' => $entity->hinge_quantity ?? 0,
+                'slide_product_id' => $entity->slide_product_id ?? '',
+                'slide_quantity' => $entity->slide_quantity ?? 0,
+                // Door/Drawer configuration
+                'door_style' => $entity->door_style ?? '',
+                'door_mounting' => $entity->door_mounting ?? '',
+                'door_count' => $entity->door_count ?? 0,
+                'drawer_count' => $entity->drawer_count ?? 0,
+            ],
+            'section' => [
+                'name' => $entity->name,
+                'section_type' => $entity->section_type ?? 'door',
+                'width_inches' => $entity->width_inches,
+                'height_inches' => $entity->height_inches,
+                'notes' => $entity->notes ?? '',
+            ],
+            'door' => [
+                'door_number' => $entity->door_number ?? '',
+                'door_name' => $entity->door_name ?? '',
+                'width_inches' => $entity->width_inches,
+                'height_inches' => $entity->height_inches,
+                'hinge_side' => $entity->hinge_side ?? 'left',
+                'has_glass' => $entity->has_glass ?? false,
+                'finish_type' => $entity->finish_type ?? '',
+                'notes' => $entity->notes ?? '',
+                // Hardware product associations
+                'hinge_product_id' => $entity->hinge_product_id ?? '',
+                'decorative_hardware_product_id' => $entity->decorative_hardware_product_id ?? '',
+            ],
+            'drawer' => [
+                'drawer_number' => $entity->drawer_number ?? '',
+                'drawer_name' => $entity->drawer_name ?? '',
+                'front_width_inches' => $entity->front_width_inches,
+                'front_height_inches' => $entity->front_height_inches,
+                'drawer_position' => $entity->drawer_position ?? 1,
+                'slide_type' => $entity->slide_type ?? '',
+                'soft_close' => $entity->soft_close ?? true,
+                'finish_type' => $entity->finish_type ?? '',
+                'notes' => $entity->notes ?? '',
+                // Hardware product associations
+                'slide_product_id' => $entity->slide_product_id ?? '',
+                'decorative_hardware_product_id' => $entity->decorative_hardware_product_id ?? '',
+                // Drawer box dimensions
+                'drawer_box_width_inches' => $entity->drawer_box_width_inches,
+                'drawer_box_height_inches' => $entity->drawer_box_height_inches,
+                'drawer_box_depth_inches' => $entity->drawer_box_depth_inches,
+            ],
+            'shelf' => [
+                'shelf_number' => $entity->shelf_number ?? '',
+                'shelf_name' => $entity->shelf_name ?? '',
+                'width_inches' => $entity->width_inches,
+                'depth_inches' => $entity->depth_inches,
+                'thickness_inches' => $entity->thickness_inches,
+                'shelf_type' => $entity->shelf_type ?? 'adjustable',
+                'material' => $entity->material ?? 'plywood',
+                'edge_treatment' => $entity->edge_treatment ?? '',
+                'finish_type' => $entity->finish_type ?? '',
+                'notes' => $entity->notes ?? '',
+                // Hardware product association (for roll-out shelves)
+                'slide_product_id' => $entity->slide_product_id ?? '',
+            ],
+            'pullout' => [
+                'pullout_number' => $entity->pullout_number ?? '',
+                'pullout_name' => $entity->pullout_name ?? '',
+                'pullout_type' => $entity->pullout_type ?? 'roll_out_tray',
+                'manufacturer' => $entity->manufacturer ?? '',
+                'model_number' => $entity->model_number ?? '',
+                'width_inches' => $entity->width_inches,
+                'height_inches' => $entity->height_inches,
+                'depth_inches' => $entity->depth_inches,
+                'soft_close' => $entity->soft_close ?? true,
+                'quantity' => $entity->quantity ?? 1,
+                'notes' => $entity->notes ?? '',
+                // Hardware product associations
+                'product_id' => $entity->product_id ?? '',
+                'slide_product_id' => $entity->slide_product_id ?? '',
+            ],
+            default => $entity->toArray(),
+        };
+    }
+
+    /**
+     * Track recently created entities for visual feedback
+     */
+    public array $recentlyCreatedEntities = [];
+
+    /**
+     * Save entity (create or update)
+     */
+    public function saveEntity(): void
+    {
+        try {
+            \Illuminate\Support\Facades\Log::info('saveEntity called', [
+                'mode' => $this->entityMode,
+                'entityType' => $this->entityType,
+                'entityParentId' => $this->entityParentId,
+                'selectedSectionId' => $this->selectedSectionId,
+                'formData' => $this->entityFormData,
+            ]);
+
+            if ($this->entityMode === 'create') {
+                $this->createEntity();
+            } else {
+                $this->updateEntity();
+            }
+
+            \Illuminate\Support\Facades\Log::info('Entity saved, refreshing cache', [
+                'selectedSectionId' => $this->selectedSectionId,
+            ]);
+
+            // Refresh hierarchy cache after save
+            $this->refreshHierarchyCache();
+
+            \Illuminate\Support\Facades\Log::info('Cache refreshed', [
+                'selectedSectionId' => $this->selectedSectionId,
+                'componentsInCache' => isset($this->hierarchyCache['components'][$this->selectedSectionId])
+                    ? count($this->hierarchyCache['components'][$this->selectedSectionId])
+                    : 'section not found in cache',
+            ]);
+
+            $this->closeEntityModal();
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to save entity', [
+                'error' => $e->getMessage(),
+                'type' => $this->entityType,
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('Error')
+                ->body('Failed to save: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Save entity to LOCAL STATE and reset form to add another
+     * NO database call - instant response
+     */
+    public function saveEntityAndContinue(): void
+    {
+        // Validate required fields
+        if (empty($this->entityFormData['name'])) {
+            Notification::make()
+                ->warning()
+                ->title('Name required')
+                ->duration(2000)
+                ->send();
+            return;
+        }
+
+        if ($this->entityMode === 'create') {
+            // Add to pending entities (local state only)
+            $this->addToPendingEntities();
+        } else {
+            // Update existing pending entity
+            $this->updatePendingEntity();
+        }
+
+        // Reset form for next entry (keep entityType and parentId)
+        $defaults = $this->getEntityDefaults($this->entityType);
+        $this->entityFormData = $this->applyPdfContextDefaults($this->entityType, $defaults);
+    }
+
+    /**
+     * Add entity to local pending state (no DB save)
+     */
+    protected function addToPendingEntities(): void
+    {
+        $tempId = 'temp_' . (++$this->tempIdCounter);
+        $data = $this->entityFormData;
+        $data['_temp_id'] = $tempId;
+
+        $this->pendingEntities[$tempId] = [
+            'type' => $this->entityType,
+            'data' => $data,
+            'parent_id' => $this->entityParentId,
+            'created_at' => now()->toISOString(),
+        ];
+
+        // Track for visual feedback
+        $this->recentlyCreatedEntities[] = [
+            'type' => $this->entityType,
+            'id' => $tempId,
+            'name' => $data['name'] ?? 'Unnamed',
+            'created_at' => now()->toISOString(),
+            'pending' => true,
+        ];
+
+        // Keep only last 10 items
+        if (count($this->recentlyCreatedEntities) > 10) {
+            $this->recentlyCreatedEntities = array_slice($this->recentlyCreatedEntities, -10);
+        }
+
+        $this->hasUnsavedEntityChanges = true;
+    }
+
+    /**
+     * Update a pending entity in local state
+     */
+    protected function updatePendingEntity(): void
+    {
+        $id = $this->entityId;
+
+        if (is_string($id) && str_starts_with($id, 'temp_')) {
+            // Update pending entity
+            if (isset($this->pendingEntities[$id])) {
+                $this->pendingEntities[$id]['data'] = $this->entityFormData;
+            }
+        }
+
+        $this->hasUnsavedEntityChanges = true;
+    }
+
+    /**
+     * Get all entities (database + pending) for display
+     */
+    public function getAllRoomsWithPending(): array
+    {
+        // Get existing rooms from database
+        $dbRooms = $this->record->rooms()
+            ->orderBy('name')
+            ->get()
+            ->map(fn($room) => [
+                'id' => $room->id,
+                'name' => $room->name,
+                'room_type' => $room->room_type,
+                'floor_number' => $room->floor_number,
+                'pending' => false,
+            ])
+            ->toArray();
+
+        // Add pending rooms
+        $pendingRooms = collect($this->pendingEntities)
+            ->filter(fn($entity) => $entity['type'] === 'room')
+            ->map(fn($entity, $tempId) => [
+                'id' => $tempId,
+                'name' => $entity['data']['name'] ?? 'Unnamed',
+                'room_type' => $entity['data']['room_type'] ?? 'other',
+                'floor_number' => $entity['data']['floor_number'] ?? 1,
+                'pending' => true,
+            ])
+            ->values()
+            ->toArray();
+
+        return array_merge($dbRooms, $pendingRooms);
+    }
+
+    /**
+     * Get locations for a room (database + pending)
+     */
+    public function getLocationsWithPending(string|int $roomId): array
+    {
+        $dbLocations = [];
+
+        // Only query DB if it's a real ID
+        if (is_int($roomId) || (is_string($roomId) && !str_starts_with($roomId, 'temp_'))) {
+            $dbLocations = RoomLocation::where('room_id', $roomId)
+                ->orderBy('name')
+                ->get()
+                ->map(fn($loc) => [
+                    'id' => $loc->id,
+                    'name' => $loc->name,
+                    'location_type' => $loc->location_type,
+                    'pending' => false,
+                ])
+                ->toArray();
+        }
+
+        // Add pending locations for this room
+        $pendingLocations = collect($this->pendingEntities)
+            ->filter(fn($entity) => $entity['type'] === 'room_location' && $entity['parent_id'] == $roomId)
+            ->map(fn($entity, $tempId) => [
+                'id' => $tempId,
+                'name' => $entity['data']['name'] ?? 'Unnamed',
+                'location_type' => $entity['data']['location_type'] ?? 'wall',
+                'pending' => true,
+            ])
+            ->values()
+            ->toArray();
+
+        return array_merge($dbLocations, $pendingLocations);
+    }
+
+    /**
+     * Persist all pending entities to database
+     * Called when user clicks "Save All" or closes modal
+     */
+    public function persistPendingEntities(): void
+    {
+        if (empty($this->pendingEntities)) {
+            return;
+        }
+
+        $idMapping = []; // Maps temp IDs to real IDs
+        $counts = ['room' => 0, 'room_location' => 0, 'cabinet_run' => 0, 'cabinet' => 0, 'section' => 0];
+
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            // First pass: Create rooms (no parent dependencies)
+            foreach ($this->pendingEntities as $tempId => $entity) {
+                if ($entity['type'] === 'room') {
+                    $data = $entity['data'];
+                    unset($data['_temp_id'], $data['_suggested_from_pdf']);
+                    $data['project_id'] = $this->record->id;
+                    $data['creator_id'] = auth()->id();
+
+                    $room = Room::create($data);
+                    $idMapping[$tempId] = $room->id;
+                    $counts['room']++;
+                }
+            }
+
+            // Second pass: Create room locations
+            foreach ($this->pendingEntities as $tempId => $entity) {
+                if ($entity['type'] === 'room_location') {
+                    $data = $entity['data'];
+                    unset($data['_temp_id'], $data['_suggested_from_pdf']);
+
+                    // Resolve parent ID (could be temp or real)
+                    $parentId = $entity['parent_id'];
+                    if (is_string($parentId) && str_starts_with($parentId, 'temp_')) {
+                        $parentId = $idMapping[$parentId] ?? null;
+                    }
+
+                    if ($parentId) {
+                        $data['room_id'] = $parentId;
+                        $data['creator_id'] = auth()->id();
+
+                        $location = RoomLocation::create($data);
+                        $idMapping[$tempId] = $location->id;
+                        $counts['room_location']++;
+                    }
+                }
+            }
+
+            // Third pass: Create cabinet runs
+            foreach ($this->pendingEntities as $tempId => $entity) {
+                if ($entity['type'] === 'cabinet_run') {
+                    $data = $entity['data'];
+                    unset($data['_temp_id'], $data['_suggested_from_pdf']);
+
+                    $parentId = $entity['parent_id'];
+                    if (is_string($parentId) && str_starts_with($parentId, 'temp_')) {
+                        $parentId = $idMapping[$parentId] ?? null;
+                    }
+
+                    if ($parentId) {
+                        $data['room_location_id'] = $parentId;
+
+                        $run = CabinetRun::create($data);
+                        $idMapping[$tempId] = $run->id;
+                        $counts['cabinet_run']++;
+                    }
+                }
+            }
+
+            // Fourth pass: Create cabinets
+            foreach ($this->pendingEntities as $tempId => $entity) {
+                if ($entity['type'] === 'cabinet') {
+                    $data = $entity['data'];
+                    unset($data['_temp_id'], $data['_suggested_from_pdf']);
+
+                    $parentId = $entity['parent_id'];
+                    if (is_string($parentId) && str_starts_with($parentId, 'temp_')) {
+                        $parentId = $idMapping[$parentId] ?? null;
+                    }
+
+                    if ($parentId) {
+                        $run = CabinetRun::find($parentId);
+                        $data['cabinet_run_id'] = $parentId;
+                        $data['room_id'] = $run?->roomLocation?->room_id;
+
+                        $cabinet = Cabinet::create($data);
+                        $idMapping[$tempId] = $cabinet->id;
+                        $counts['cabinet']++;
+                    }
+                }
+            }
+
+            // Fifth pass: Create sections
+            foreach ($this->pendingEntities as $tempId => $entity) {
+                if ($entity['type'] === 'section') {
+                    $data = $entity['data'];
+                    unset($data['_temp_id'], $data['_suggested_from_pdf']);
+
+                    $parentId = $entity['parent_id'];
+                    if (is_string($parentId) && str_starts_with($parentId, 'temp_')) {
+                        $parentId = $idMapping[$parentId] ?? null;
+                    }
+
+                    if ($parentId) {
+                        $data['cabinet_id'] = $parentId;
+
+                        CabinetSection::create($data);
+                        $counts['section']++;
+                    }
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            // Clear pending state
+            $this->pendingEntities = [];
+            $this->recentlyCreatedEntities = [];
+            $this->hasUnsavedEntityChanges = false;
+
+            // Show success notification with counts
+            $parts = [];
+            if ($counts['room'] > 0) $parts[] = "{$counts['room']} room(s)";
+            if ($counts['room_location'] > 0) $parts[] = "{$counts['room_location']} location(s)";
+            if ($counts['cabinet_run'] > 0) $parts[] = "{$counts['cabinet_run']} run(s)";
+            if ($counts['cabinet'] > 0) $parts[] = "{$counts['cabinet']} cabinet(s)";
+            if ($counts['section'] > 0) $parts[] = "{$counts['section']} section(s)";
+
+            Notification::make()
+                ->success()
+                ->title('Saved to Database')
+                ->body('Created: ' . implode(', ', $parts))
+                ->send();
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+
+            \Illuminate\Support\Facades\Log::error('Failed to persist pending entities', [
+                'error' => $e->getMessage(),
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('Save Failed')
+                ->body($e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Remove a pending entity from local state
+     */
+    public function removePendingEntity(string $tempId): void
+    {
+        if (isset($this->pendingEntities[$tempId])) {
+            unset($this->pendingEntities[$tempId]);
+
+            // Also remove from recently created
+            $this->recentlyCreatedEntities = array_filter(
+                $this->recentlyCreatedEntities,
+                fn($item) => $item['id'] !== $tempId
+            );
+        }
+    }
+
+    /**
+     * Discard all pending changes
+     */
+    public function discardPendingEntities(): void
+    {
+        $this->pendingEntities = [];
+        $this->recentlyCreatedEntities = [];
+        $this->hasUnsavedEntityChanges = false;
+
+        Notification::make()
+            ->warning()
+            ->title('Changes Discarded')
+            ->body('All unsaved entities have been removed.')
+            ->send();
+    }
+
+    /**
+     * Sanitize form data - convert empty strings to null for database fields
+     */
+    protected function sanitizeEntityData(array $data): array
+    {
+        // Fields that should be null instead of empty string
+        $nullableFields = [
+            'hinge_product_id',
+            'decorative_hardware_product_id',
+            'slide_product_id',
+            'finish_type',
+            'door_style',
+            'door_mounting',
+            'notes',
+            'description',
+            'hardware_notes',
+            'installation_notes',
+        ];
+
+        foreach ($nullableFields as $field) {
+            if (array_key_exists($field, $data) && $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Create a new entity
+     */
+    protected function createEntity(): void
+    {
+        $data = $this->sanitizeEntityData($this->entityFormData);
+
+        switch ($this->entityType) {
+            case 'room':
+                $data['project_id'] = $this->record->id;
+                $data['creator_id'] = auth()->id();
+                Room::create($data);
+                break;
+
+            case 'room_location':
+                $data['room_id'] = $this->entityParentId;
+                $data['creator_id'] = auth()->id();
+                RoomLocation::create($data);
+                break;
+
+            case 'cabinet_run':
+                $data['room_location_id'] = $this->entityParentId;
+                CabinetRun::create($data);
+                break;
+
+            case 'cabinet':
+                $run = CabinetRun::find($this->entityParentId);
+                $data['cabinet_run_id'] = $this->entityParentId;
+                $data['room_id'] = $run?->roomLocation?->room_id;
+                Cabinet::create($data);
+                break;
+
+            case 'section':
+                $data['cabinet_id'] = $this->entityParentId;
+                CabinetSection::create($data);
+                break;
+
+            case 'door':
+                $section = CabinetSection::find($this->entityParentId);
+                $data['section_id'] = $this->entityParentId;
+                $data['cabinet_id'] = $section?->cabinet_id;
+                $created = Door::create($data);
+                \Illuminate\Support\Facades\Log::info('Door created', [
+                    'door_id' => $created->id,
+                    'section_id' => $this->entityParentId,
+                    'cabinet_id' => $section?->cabinet_id,
+                    'name' => $data['name'] ?? $data['door_name'] ?? 'unnamed',
+                ]);
+                break;
+
+            case 'drawer':
+                $section = CabinetSection::find($this->entityParentId);
+                $data['section_id'] = $this->entityParentId;
+                $data['cabinet_id'] = $section?->cabinet_id;
+                Drawer::create($data);
+                break;
+
+            case 'shelf':
+                $section = CabinetSection::find($this->entityParentId);
+                $data['section_id'] = $this->entityParentId;
+                $data['cabinet_id'] = $section?->cabinet_id;
+                Shelf::create($data);
+                break;
+
+            case 'pullout':
+                $section = CabinetSection::find($this->entityParentId);
+                $data['section_id'] = $this->entityParentId;
+                $data['cabinet_id'] = $section?->cabinet_id;
+                Pullout::create($data);
+                break;
+        }
+
+        $label = $this->getEntityLabel($this->entityType);
+        Notification::make()
+            ->success()
+            ->title("{$label} Created")
+            ->body("The {$label} has been created successfully.")
+            ->send();
+    }
+
+    /**
+     * Update an existing entity
+     */
+    protected function updateEntity(): void
+    {
+        $entity = match ($this->entityType) {
+            'room' => Room::find($this->entityId),
+            'room_location' => RoomLocation::find($this->entityId),
+            'cabinet_run' => CabinetRun::find($this->entityId),
+            'cabinet' => Cabinet::find($this->entityId),
+            'section' => CabinetSection::find($this->entityId),
+            'door' => Door::find($this->entityId),
+            'drawer' => Drawer::find($this->entityId),
+            'shelf' => Shelf::find($this->entityId),
+            'pullout' => Pullout::find($this->entityId),
+            default => null,
+        };
+
+        if (!$entity) {
+            throw new \Exception('Entity not found');
+        }
+
+        $entity->update($this->sanitizeEntityData($this->entityFormData));
+
+        $label = $this->getEntityLabel($this->entityType);
+        Notification::make()
+            ->success()
+            ->title("{$label} Updated")
+            ->body("The {$label} has been updated successfully.")
+            ->send();
+    }
+
+    /**
+     * Delete an entity
+     */
+    public function deleteEntity(): void
+    {
+        try {
+            $entity = match ($this->entityType) {
+                'room' => Room::find($this->entityId),
+                'room_location' => RoomLocation::find($this->entityId),
+                'cabinet_run' => CabinetRun::find($this->entityId),
+                'cabinet' => Cabinet::find($this->entityId),
+                'section' => CabinetSection::find($this->entityId),
+                'door' => Door::find($this->entityId),
+                'drawer' => Drawer::find($this->entityId),
+                'shelf' => Shelf::find($this->entityId),
+                'pullout' => Pullout::find($this->entityId),
+                default => null,
+            };
+
+            if ($entity) {
+                $entity->delete();
+
+                // Refresh hierarchy cache after delete
+                $this->refreshHierarchyCache();
+
+                $label = $this->getEntityLabel($this->entityType);
+                Notification::make()
+                    ->success()
+                    ->title("{$label} Deleted")
+                    ->body("The {$label} has been deleted.")
+                    ->send();
+            }
+
+            $this->closeEntityModal();
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error')
+                ->body('Failed to delete: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Delete entity directly with type and ID parameters
+     * Used by inline delete buttons in Edit Details modal
+     */
+    public function deleteEntityDirect(string $entityType, int $entityId): void
+    {
+        try {
+            $entity = match ($entityType) {
+                'room' => Room::find($entityId),
+                'room_location' => RoomLocation::find($entityId),
+                'cabinet_run' => CabinetRun::find($entityId),
+                'cabinet' => Cabinet::find($entityId),
+                'section' => CabinetSection::find($entityId),
+                'door' => Door::find($entityId),
+                'drawer' => Drawer::find($entityId),
+                'shelf' => Shelf::find($entityId),
+                'pullout' => Pullout::find($entityId),
+                default => null,
+            };
+
+            if ($entity) {
+                $entityName = $entity->name ?? 'Unknown';
+                $entity->delete();
+
+                // Refresh hierarchy cache after delete
+                $this->refreshHierarchyCache();
+
+                $label = $this->getEntityLabel($entityType);
+                Notification::make()
+                    ->success()
+                    ->title("{$label} Deleted")
+                    ->body("'{$entityName}' has been deleted.")
+                    ->send();
+            }
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error')
+                ->body('Failed to delete: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Get human-readable label for entity type
+     */
+    protected function getEntityLabel(string $entityType): string
+    {
+        return match ($entityType) {
+            'room' => 'Room',
+            'room_location' => 'Location',
+            'cabinet_run' => 'Cabinet Run',
+            'cabinet' => 'Cabinet',
+            'section' => 'Section',
+            'door' => 'Door',
+            'drawer' => 'Drawer',
+            'shelf' => 'Shelf',
+            'pullout' => 'Pullout',
+            default => 'Entity',
+        };
+    }
+
+    /**
+     * Parse fractional measurement input and convert to decimal inches
+     *
+     * Supports woodworker-friendly formats:
+     * - "12.5" -> 12.5 (decimal)
+     * - "12 1/2" -> 12.5 (whole + fraction with space)
+     * - "12-1/2" -> 12.5 (whole + fraction with dash)
+     * - "3/4" -> 0.75 (fraction only)
+     * - "1/2" -> 0.5
+     * - "2'" -> 24 (feet to inches)
+     * - "2' 6" -> 30 (feet and inches)
+     * - "2' 6 1/2" -> 30.5 (feet, inches, and fraction)
+     *
+     * @param  string|float|null  $input  The input measurement
+     * @return float|null The decimal value or null if invalid
+     */
+    public function parseFractionalMeasurement($input): ?float
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        // If already a number, return it
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        // Convert to string for parsing
+        $input = trim((string) $input);
+
+        // Handle feet notation first (e.g., "2'" or "2' 6" or "2' 6 1/2")
+        if (preg_match("/^(\d+)'(?:\s*(\d+(?:\s+\d+\/\d+|\-\d+\/\d+|\/\d+)?)?)?$/", $input, $feetMatches)) {
+            $feet = (int) $feetMatches[1];
+            $inches = 0.0;
+
+            if (!empty($feetMatches[2])) {
+                // Parse the inches part (which may include fractions)
+                $inches = $this->parseFractionalMeasurement($feetMatches[2]) ?? 0;
+            }
+
+            return ($feet * 12) + $inches;
+        }
+
+        // Pattern: Match "12 1/2" (whole number space fraction)
+        if (preg_match('/^(\d+)\s+(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $whole + ($numerator / $denominator);
+        }
+
+        // Format: "12-1/2" (whole number dash fraction)
+        if (preg_match('/^(\d+)-(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $whole + ($numerator / $denominator);
+        }
+
+        // Format: "3/4" (just fraction)
+        if (preg_match('/^(\d+)\/(\d+)$/', $input, $matches)) {
+            $numerator = (int) $matches[1];
+            $denominator = (int) $matches[2];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $numerator / $denominator;
+        }
+
+        // Try as decimal
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        // Invalid format - return null
+        return null;
+    }
+
+    /**
+     * Handle measurement field update - parses fractional input and updates the field
+     */
+    public function updateMeasurementField(string $field, $value): void
+    {
+        $parsed = $this->parseFractionalMeasurement($value);
+        $this->entityFormData[$field] = $parsed;
+    }
+
+    /**
+     * Get entity modal heading
+     */
+    public function getEntityModalHeading(): string
+    {
+        $label = $this->getEntityLabel($this->entityType);
+        return $this->entityMode === 'create' ? "Create {$label}" : "Edit {$label}";
+    }
+
+    // =====================================================
+    // HIERARCHICAL NAVIGATION METHODS
+    // =====================================================
+
+    /**
+     * Initialize breadcrumbs to root level (rooms)
+     */
+    public function initHierarchy(): void
+    {
+        $this->hierarchyLevel = 'rooms';
+        $this->breadcrumbs = [
+            ['level' => 'rooms', 'id' => null, 'name' => 'All Rooms']
+        ];
+        $this->selectedRoomId = null;
+        $this->selectedRoomName = null;
+        $this->selectedLocationId = null;
+        $this->selectedLocationName = null;
+        $this->selectedRunId = null;
+        $this->selectedRunName = null;
+        $this->selectedCabinetId = null;
+        $this->selectedCabinetName = null;
+        $this->selectedSectionId = null;
+        $this->selectedSectionName = null;
+    }
+
+    /**
+     * Drill down into a room to see its locations
+     */
+    public function drillDownToRoom(int $roomId): void
+    {
+        $room = Room::find($roomId);
+        if (!$room) return;
+
+        $this->selectedRoomId = $roomId;
+        $this->selectedRoomName = $room->name;
+        $this->hierarchyLevel = 'locations';
+
+        $this->breadcrumbs = [
+            ['level' => 'rooms', 'id' => null, 'name' => 'All Rooms'],
+            ['level' => 'locations', 'id' => $roomId, 'name' => $room->name]
+        ];
+    }
+
+    /**
+     * Drill down into a location to see its cabinet runs
+     */
+    public function drillDownToLocation(int $locationId): void
+    {
+        $location = RoomLocation::with('room')->find($locationId);
+        if (!$location) return;
+
+        $this->selectedLocationId = $locationId;
+        $this->selectedLocationName = $location->name;
+        $this->selectedRoomId = $location->room_id;
+        $this->selectedRoomName = $location->room->name ?? 'Unknown Room';
+        $this->hierarchyLevel = 'runs';
+
+        $this->breadcrumbs = [
+            ['level' => 'rooms', 'id' => null, 'name' => 'All Rooms'],
+            ['level' => 'locations', 'id' => $location->room_id, 'name' => $this->selectedRoomName],
+            ['level' => 'runs', 'id' => $locationId, 'name' => $location->name]
+        ];
+    }
+
+    /**
+     * Drill down into a cabinet run to see its cabinets
+     */
+    public function drillDownToRun(int $runId): void
+    {
+        $run = CabinetRun::with(['roomLocation.room'])->find($runId);
+        if (!$run) return;
+
+        $this->selectedRunId = $runId;
+        $this->selectedRunName = $run->name;
+        $this->selectedLocationId = $run->room_location_id;
+        $this->selectedLocationName = $run->roomLocation->name ?? 'Unknown Location';
+        $this->selectedRoomId = $run->roomLocation->room_id ?? null;
+        $this->selectedRoomName = $run->roomLocation->room->name ?? 'Unknown Room';
+        $this->hierarchyLevel = 'cabinets';
+
+        $this->breadcrumbs = [
+            ['level' => 'rooms', 'id' => null, 'name' => 'All Rooms'],
+            ['level' => 'locations', 'id' => $this->selectedRoomId, 'name' => $this->selectedRoomName],
+            ['level' => 'runs', 'id' => $this->selectedLocationId, 'name' => $this->selectedLocationName],
+            ['level' => 'cabinets', 'id' => $runId, 'name' => $run->name]
+        ];
+    }
+
+    /**
+     * Drill down into a cabinet to see its sections
+     */
+    public function drillDownToCabinet(int $cabinetId): void
+    {
+        $cabinet = Cabinet::with(['cabinetRun.roomLocation.room'])->find($cabinetId);
+        if (!$cabinet) return;
+
+        $this->selectedCabinetId = $cabinetId;
+        $this->selectedCabinetName = $cabinet->cabinet_number ?? "Cabinet #{$cabinetId}";
+        $this->selectedRunId = $cabinet->cabinet_run_id;
+        $this->selectedRunName = $cabinet->cabinetRun->name ?? 'Unknown Run';
+        $this->selectedLocationId = $cabinet->cabinetRun->room_location_id ?? null;
+        $this->selectedLocationName = $cabinet->cabinetRun->roomLocation->name ?? 'Unknown Location';
+        $this->selectedRoomId = $cabinet->cabinetRun->roomLocation->room_id ?? null;
+        $this->selectedRoomName = $cabinet->cabinetRun->roomLocation->room->name ?? 'Unknown Room';
+        $this->hierarchyLevel = 'sections';
+
+        $this->breadcrumbs = [
+            ['level' => 'rooms', 'id' => null, 'name' => 'All Rooms'],
+            ['level' => 'locations', 'id' => $this->selectedRoomId, 'name' => $this->selectedRoomName],
+            ['level' => 'runs', 'id' => $this->selectedLocationId, 'name' => $this->selectedLocationName],
+            ['level' => 'cabinets', 'id' => $this->selectedRunId, 'name' => $this->selectedRunName],
+            ['level' => 'sections', 'id' => $cabinetId, 'name' => $this->selectedCabinetName]
+        ];
+    }
+
+    /**
+     * Drill down into a section to see its components (doors/drawers)
+     */
+    public function drillDownToSection(int $sectionId): void
+    {
+        // Get section data from cache
+        $section = $this->hierarchyCache['sections'][$sectionId] ?? null;
+        if (!$section) {
+            // Debug: Log available section IDs for troubleshooting
+            $availableSectionIds = array_keys($this->hierarchyCache['sections'] ?? []);
+            \Log::warning("drillDownToSection: Section ID {$sectionId} not found in cache. Available IDs: " . implode(', ', $availableSectionIds));
+
+            Notification::make()
+                ->title('Entity not found')
+                ->body("Section #{$sectionId} was not found in the hierarchy cache. Try refreshing the page.")
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $this->selectedSectionId = $sectionId;
+        $this->selectedSectionName = $section['name'] ?? "Section #{$sectionId}";
+        $this->hierarchyLevel = 'components';
+
+        // Add section to breadcrumbs
+        $this->breadcrumbs[] = ['level' => 'components', 'id' => $sectionId, 'name' => $this->selectedSectionName];
+    }
+
+    /**
+     * Navigate to a specific breadcrumb level
+     */
+    public function navigateToBreadcrumb(string $level, ?int $id = null): void
+    {
+        switch ($level) {
+            case 'rooms':
+                $this->initHierarchy();
+                break;
+            case 'locations':
+                if ($id) $this->drillDownToRoom($id);
+                break;
+            case 'runs':
+                if ($id) $this->drillDownToLocation($id);
+                break;
+            case 'cabinets':
+                if ($id) $this->drillDownToRun($id);
+                break;
+            case 'sections':
+                if ($id) $this->drillDownToCabinet($id);
+                break;
+            case 'components':
+                if ($id) $this->drillDownToSection($id);
+                break;
+        }
+    }
+
+    /**
+     * Edit an entity from breadcrumb click
+     * Loads the entity into the inline edit panel (same as clicking items in the list)
+     */
+    public function editBreadcrumbEntity(string $entityType, int $entityId): void
+    {
+        // Map breadcrumb entity types to highlightEntity types
+        $highlightType = match ($entityType) {
+            'room' => 'room',
+            'room_location' => 'location',
+            'cabinet_run' => 'run',
+            'cabinet' => 'cabinet',
+            'section' => 'section',
+            default => $entityType,
+        };
+
+        // Use the same highlight/inline edit system as the list items
+        $this->highlightEntity($highlightType, $entityId);
+    }
+
+    /**
+     * Go back one level in the hierarchy
+     */
+    public function navigateUp(): void
+    {
+        if (count($this->breadcrumbs) <= 1) {
+            $this->initHierarchy();
+            return;
+        }
+
+        // Remove the last breadcrumb
+        array_pop($this->breadcrumbs);
+
+        // Navigate to the new last breadcrumb
+        $lastBreadcrumb = end($this->breadcrumbs);
+        if ($lastBreadcrumb) {
+            $this->navigateToBreadcrumb($lastBreadcrumb['level'], $lastBreadcrumb['id']);
+        }
+    }
+
+    /**
+     * Load full project hierarchy into cache (called once on mount)
+     * This eliminates per-click DB queries for tree navigation
+     */
+    public function loadFullProjectHierarchy(): void
+    {
+        if ($this->hierarchyLoaded) {
+            return;
+        }
+
+        // Single query with full eager loading of entire hierarchy
+        $rooms = Room::where('project_id', $this->record->id)
+            ->with([
+                'locations' => function ($query) {
+                    $query->orderBy('sort_order');
+                },
+                'locations.cabinetRuns' => function ($query) {
+                    $query->orderBy('sort_order');
+                },
+                'locations.cabinetRuns.cabinets' => function ($query) {
+                    $query->orderBy('position_in_run')->orderBy('id');
+                },
+                'locations.cabinetRuns.cabinets.sections' => function ($query) {
+                    $query->orderBy('sort_order')->orderBy('id');
+                },
+                'locations.cabinetRuns.cabinets.sections.doors',
+                'locations.cabinetRuns.cabinets.sections.drawers',
+                'locations.cabinetRuns.cabinets.sections.shelves',
+                'locations.cabinetRuns.cabinets.sections.pullouts',
+            ])
+            ->orderBy('floor_number')
+            ->orderBy('name')
+            ->get();
+
+        // Build indexed cache for O(1) lookups
+        $this->hierarchyCache = [
+            'rooms' => [],
+            'locations' => [],
+            'runs' => [],
+            'cabinets' => [],
+            'sections' => [],
+            'components' => [], // Doors and drawers indexed by section_id
+        ];
+
+        foreach ($rooms as $room) {
+            $roomData = [
+                'id' => $room->id,
+                'name' => $room->name,
+                'room_type' => $room->room_type,
+                'floor_number' => $room->floor_number,
+                'pdf_page_number' => $room->pdf_page_number,
+                'child_count' => $room->locations->count(),
+                'child_ids' => $room->locations->pluck('id')->toArray(),
+            ];
+            $this->hierarchyCache['rooms'][$room->id] = $roomData;
+
+            foreach ($room->locations as $location) {
+                $locationData = [
+                    'id' => $location->id,
+                    'name' => $location->name,
+                    'type' => $location->location_type ?? 'wall',
+                    'sort_order' => $location->sort_order,
+                    'room_id' => $room->id,
+                    'child_count' => $location->cabinetRuns->count(),
+                    'child_ids' => $location->cabinetRuns->pluck('id')->toArray(),
+                ];
+                $this->hierarchyCache['locations'][$location->id] = $locationData;
+
+                foreach ($location->cabinetRuns as $run) {
+                    $runData = [
+                        'id' => $run->id,
+                        'name' => $run->name,
+                        'type' => $run->run_type ?? 'base',
+                        'material' => $run->material_type,
+                        'level' => $run->pricing_level,
+                        'linear_feet' => $run->linear_feet,
+                        'stored_linear_feet' => $run->stored_linear_feet,
+                        'has_discrepancy' => $run->has_linear_feet_discrepancy,
+                        'has_missing_measurements' => $run->has_missing_measurements,
+                        'missing_linear_feet' => $run->missing_linear_feet,
+                        'cabinets_missing_width_count' => $run->cabinets_missing_width_count,
+                        'location_id' => $location->id,
+                        'child_count' => $run->cabinets->count(),
+                        'child_ids' => $run->cabinets->pluck('id')->toArray(),
+                    ];
+                    $this->hierarchyCache['runs'][$run->id] = $runData;
+
+                    foreach ($run->cabinets as $cabinet) {
+                        $cabinetData = [
+                            'id' => $cabinet->id,
+                            'name' => $cabinet->cabinet_number ?: "Cabinet #{$cabinet->id}",
+                            'cabinet_type' => $cabinet->cabinet_type ?? 'base',
+                            'width' => $cabinet->width_inches,
+                            'linear_feet' => $cabinet->linear_feet,
+                            'quantity' => $cabinet->quantity,
+                            'price' => $cabinet->total_price,
+                            'run_id' => $run->id,
+                            'child_count' => $cabinet->sections->count(),
+                            'child_ids' => $cabinet->sections->pluck('id')->toArray(),
+                        ];
+                        $this->hierarchyCache['cabinets'][$cabinet->id] = $cabinetData;
+
+                        foreach ($cabinet->sections as $section) {
+                            // Build component list for this section (doors, drawers, shelves, pullouts)
+                            $sectionComponents = [];
+
+                            foreach ($section->doors as $door) {
+                                $sectionComponents[] = [
+                                    'id' => $door->id,
+                                    'component_type' => 'door',
+                                    'name' => $door->door_name ?: $door->door_number ?: "Door #{$door->id}",
+                                    'number' => $door->door_number,
+                                    'width' => $door->width_inches,
+                                    'height' => $door->height_inches,
+                                    'dimensions' => $door->width_inches && $door->height_inches
+                                        ? number_format($door->width_inches, 1) . '"W × ' . number_format($door->height_inches, 1) . '"H'
+                                        : null,
+                                    'hinge_side' => $door->hinge_side,
+                                    'has_glass' => $door->has_glass ?? false,
+                                    'finish_type' => $door->finish_type,
+                                    'section_id' => $section->id,
+                                    'cabinet_id' => $cabinet->id,
+                                    'sort_order' => $door->sort_order ?? 0,
+                                ];
+                            }
+
+                            foreach ($section->drawers as $drawer) {
+                                $sectionComponents[] = [
+                                    'id' => $drawer->id,
+                                    'component_type' => 'drawer',
+                                    'name' => $drawer->drawer_name ?: $drawer->drawer_number ?: "Drawer #{$drawer->id}",
+                                    'number' => $drawer->drawer_number,
+                                    'width' => $drawer->front_width_inches,
+                                    'height' => $drawer->front_height_inches,
+                                    'dimensions' => $drawer->front_width_inches && $drawer->front_height_inches
+                                        ? number_format($drawer->front_width_inches, 1) . '"W × ' . number_format($drawer->front_height_inches, 1) . '"H'
+                                        : null,
+                                    'position' => $drawer->drawer_position,
+                                    'slide_type' => $drawer->slide_type,
+                                    'finish_type' => $drawer->finish_type,
+                                    'section_id' => $section->id,
+                                    'cabinet_id' => $cabinet->id,
+                                    'sort_order' => $drawer->sort_order ?? 0,
+                                ];
+                            }
+
+                            foreach ($section->shelves as $shelf) {
+                                $sectionComponents[] = [
+                                    'id' => $shelf->id,
+                                    'component_type' => 'shelf',
+                                    'name' => $shelf->shelf_name ?: $shelf->shelf_number ?: "Shelf #{$shelf->id}",
+                                    'number' => $shelf->shelf_number,
+                                    'width' => $shelf->width_inches,
+                                    'depth' => $shelf->depth_inches,
+                                    'thickness' => $shelf->thickness_inches,
+                                    'dimensions' => $shelf->width_inches && $shelf->depth_inches
+                                        ? number_format($shelf->width_inches, 1) . '"W × ' . number_format($shelf->depth_inches, 1) . '"D'
+                                        : null,
+                                    'shelf_type' => $shelf->shelf_type,
+                                    'material' => $shelf->material,
+                                    'finish_type' => $shelf->finish_type,
+                                    'section_id' => $section->id,
+                                    'cabinet_id' => $cabinet->id,
+                                    'sort_order' => $shelf->sort_order ?? 0,
+                                ];
+                            }
+
+                            foreach ($section->pullouts as $pullout) {
+                                $sectionComponents[] = [
+                                    'id' => $pullout->id,
+                                    'component_type' => 'pullout',
+                                    'name' => $pullout->pullout_name ?: $pullout->pullout_number ?: "Pullout #{$pullout->id}",
+                                    'number' => $pullout->pullout_number,
+                                    'width' => $pullout->width_inches,
+                                    'height' => $pullout->height_inches,
+                                    'depth' => $pullout->depth_inches,
+                                    'dimensions' => $pullout->width_inches && $pullout->height_inches
+                                        ? number_format($pullout->width_inches, 1) . '"W × ' . number_format($pullout->height_inches, 1) . '"H'
+                                        : null,
+                                    'pullout_type' => $pullout->pullout_type,
+                                    'manufacturer' => $pullout->manufacturer,
+                                    'model_number' => $pullout->model_number,
+                                    'soft_close' => $pullout->soft_close ?? false,
+                                    'quantity' => $pullout->quantity ?? 1,
+                                    'section_id' => $section->id,
+                                    'cabinet_id' => $cabinet->id,
+                                    'sort_order' => $pullout->sort_order ?? 0,
+                                ];
+                            }
+
+                            // Sort components by sort_order
+                            usort($sectionComponents, fn($a, $b) => ($a['sort_order'] ?? 0) <=> ($b['sort_order'] ?? 0));
+
+                            // Store components indexed by section_id
+                            $this->hierarchyCache['components'][$section->id] = $sectionComponents;
+
+                            $sectionData = [
+                                'id' => $section->id,
+                                'name' => $section->name ?: $section->section_label ?: "Section #{$section->id}",
+                                'section_type' => $section->section_type ?? 'standard',
+                                'width' => $section->width_inches,
+                                'height' => $section->height_inches,
+                                'cabinet_id' => $cabinet->id,
+                                'child_count' => count($sectionComponents),
+                                'child_ids' => array_column($sectionComponents, 'id'),
+                            ];
+                            $this->hierarchyCache['sections'][$section->id] = $sectionData;
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->hierarchyLoaded = true;
+    }
+
+    /**
+     * Refresh hierarchy cache after CRUD operations
+     */
+    public function refreshHierarchyCache(): void
+    {
+        $this->hierarchyLoaded = false;
+        $this->hierarchyCache = [];
+        $this->loadFullProjectHierarchy();
+
+        // Debug: Log component count for current section
+        if ($this->selectedSectionId && isset($this->hierarchyCache['components'][$this->selectedSectionId])) {
+            \Illuminate\Support\Facades\Log::info('Hierarchy cache refreshed', [
+                'section_id' => $this->selectedSectionId,
+                'component_count' => count($this->hierarchyCache['components'][$this->selectedSectionId]),
+                'components' => array_column($this->hierarchyCache['components'][$this->selectedSectionId], 'name'),
+            ]);
+        }
+    }
+
+    /**
+     * Get items for the current hierarchy level (from cache)
+     * Cache is pre-loaded in mount() for instant navigation
+     */
+    public function getHierarchyItems(): array
+    {
+        // Return empty if cache not loaded yet (shouldn't happen - cache loaded in mount)
+        if (!$this->hierarchyLoaded) {
+            return [];
+        }
+
+        return match ($this->hierarchyLevel) {
+            'rooms' => $this->getCachedRooms(),
+            'locations' => $this->getCachedLocations($this->selectedRoomId),
+            'runs' => $this->getCachedRuns($this->selectedLocationId),
+            'cabinets' => $this->getCachedCabinets($this->selectedRunId),
+            'sections' => $this->getCachedSections($this->selectedCabinetId),
+            'components' => $this->getCachedComponents($this->selectedSectionId),
+            default => []
+        };
+    }
+
+    /**
+     * Get rooms from cache
+     */
+    protected function getCachedRooms(): array
+    {
+        return array_values($this->hierarchyCache['rooms'] ?? []);
+    }
+
+    /**
+     * Get locations from cache for a specific room
+     */
+    protected function getCachedLocations(?int $roomId): array
+    {
+        if (!$roomId) return [];
+
+        $room = $this->hierarchyCache['rooms'][$roomId] ?? null;
+        if (!$room) return [];
+
+        $locations = [];
+        foreach ($room['child_ids'] ?? [] as $locationId) {
+            if (isset($this->hierarchyCache['locations'][$locationId])) {
+                $locations[] = $this->hierarchyCache['locations'][$locationId];
+            }
+        }
+        return $locations;
+    }
+
+    /**
+     * Get runs from cache for a specific location
+     */
+    protected function getCachedRuns(?int $locationId): array
+    {
+        if (!$locationId) return [];
+
+        $location = $this->hierarchyCache['locations'][$locationId] ?? null;
+        if (!$location) return [];
+
+        $runs = [];
+        foreach ($location['child_ids'] ?? [] as $runId) {
+            if (isset($this->hierarchyCache['runs'][$runId])) {
+                $runs[] = $this->hierarchyCache['runs'][$runId];
+            }
+        }
+        return $runs;
+    }
+
+    /**
+     * Get cabinets from cache for a specific run
+     */
+    protected function getCachedCabinets(?int $runId): array
+    {
+        if (!$runId) return [];
+
+        $run = $this->hierarchyCache['runs'][$runId] ?? null;
+        if (!$run) return [];
+
+        $cabinets = [];
+        foreach ($run['child_ids'] ?? [] as $cabinetId) {
+            if (isset($this->hierarchyCache['cabinets'][$cabinetId])) {
+                $cabinets[] = $this->hierarchyCache['cabinets'][$cabinetId];
+            }
+        }
+        return $cabinets;
+    }
+
+    /**
+     * Get sections from cache for a specific cabinet
+     */
+    protected function getCachedSections(?int $cabinetId): array
+    {
+        if (!$cabinetId) return [];
+
+        $cabinet = $this->hierarchyCache['cabinets'][$cabinetId] ?? null;
+        if (!$cabinet) return [];
+
+        $sections = [];
+        foreach ($cabinet['child_ids'] ?? [] as $sectionId) {
+            if (isset($this->hierarchyCache['sections'][$sectionId])) {
+                $sections[] = $this->hierarchyCache['sections'][$sectionId];
+            }
+        }
+        return $sections;
+    }
+
+    /**
+     * Get components (doors and drawers) from cache for a specific section
+     */
+    protected function getCachedComponents(?int $sectionId): array
+    {
+        if (!$sectionId) return [];
+
+        return $this->hierarchyCache['components'][$sectionId] ?? [];
+    }
+
+    /**
+     * Get locations for a specific room (DB fallback - kept for compatibility)
+     */
+    public function getRoomLocations(?int $roomId): array
+    {
+        // Use cache if available
+        if ($this->hierarchyLoaded) {
+            return $this->getCachedLocations($roomId);
+        }
+
+        if (!$roomId) return [];
+
+        return RoomLocation::where('room_id', $roomId)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn($loc) => [
+                'id' => $loc->id,
+                'name' => $loc->name,
+                'type' => $loc->location_type ?? 'wall',
+                'sort_order' => $loc->sort_order,
+                'child_count' => $loc->cabinetRuns()->count(),
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Get cabinet runs for a specific location (uses cache or DB fallback)
+     */
+    public function getLocationRuns(?int $locationId): array
+    {
+        // Use cache if available
+        if ($this->hierarchyLoaded) {
+            return $this->getCachedRuns($locationId);
+        }
+
+        if (!$locationId) return [];
+
+        return CabinetRun::where('room_location_id', $locationId)
+            ->with('cabinets') // Eager load for accurate LF calculation
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn($run) => [
+                'id' => $run->id,
+                'name' => $run->name,
+                'type' => $run->run_type ?? 'base',
+                'material' => $run->material_type,
+                'level' => $run->pricing_level,
+                'linear_feet' => $run->linear_feet, // Uses calculated accessor
+                'stored_linear_feet' => $run->stored_linear_feet,
+                'has_discrepancy' => $run->has_linear_feet_discrepancy,
+                'has_missing_measurements' => $run->has_missing_measurements,
+                'missing_linear_feet' => $run->missing_linear_feet,
+                'cabinets_missing_width_count' => $run->cabinets_missing_width_count,
+                'child_count' => $run->cabinets->count(),
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Get cabinets for a specific run (uses cache or DB fallback)
+     */
+    public function getRunCabinets(?int $runId): array
+    {
+        // Use cache if available
+        if ($this->hierarchyLoaded) {
+            return $this->getCachedCabinets($runId);
+        }
+
+        if (!$runId) return [];
+
+        return Cabinet::where('cabinet_run_id', $runId)
+            ->orderBy('position_in_run')
+            ->orderBy('id')
+            ->get()
+            ->map(fn($cab) => [
+                'id' => $cab->id,
+                'name' => $cab->cabinet_number ?: "Cabinet #{$cab->id}",
+                'cabinet_type' => $cab->cabinet_type ?? 'base',
+                'width' => $cab->width_inches,
+                'linear_feet' => $cab->linear_feet,
+                'quantity' => $cab->quantity,
+                'price' => $cab->total_price,
+                'child_count' => $cab->sections()->count(),
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Get sections for a specific cabinet (uses cache or DB fallback)
+     */
+    public function getCabinetSections(?int $cabinetId): array
+    {
+        // Use cache if available
+        if ($this->hierarchyLoaded) {
+            return $this->getCachedSections($cabinetId);
+        }
+
+        if (!$cabinetId) return [];
+
+        return CabinetSection::where('cabinet_id', $cabinetId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->map(fn($section) => [
+                'id' => $section->id,
+                'name' => $section->name ?: $section->section_label ?: "Section #{$section->id}",
+                'section_type' => $section->section_type ?? 'standard',
+                'width' => $section->width_inches,
+                'height' => $section->height_inches,
+                'child_count' => $section->doors()->count() + $section->drawers()->count() + $section->shelves()->count() + $section->pullouts()->count(),
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Get the current level label for display
+     */
+    public function getHierarchyLevelLabel(): string
+    {
+        return match ($this->hierarchyLevel) {
+            'rooms' => 'Rooms',
+            'locations' => 'Locations in ' . ($this->selectedRoomName ?? 'Room'),
+            'runs' => 'Cabinet Runs in ' . ($this->selectedLocationName ?? 'Location'),
+            'cabinets' => 'Cabinets in ' . ($this->selectedRunName ?? 'Run'),
+            'sections' => 'Sections in ' . ($this->selectedCabinetName ?? 'Cabinet'),
+            'components' => 'Components in ' . ($this->selectedSectionName ?? 'Section'),
+            default => 'Items'
+        };
+    }
+
+    /**
+     * Get the add button label for current level
+     */
+    public function getAddButtonLabel(): string
+    {
+        if ($this->hierarchyLevel === 'components') {
+            return 'Add ' . ucfirst($this->getComponentTypeForCurrentSection());
+        }
+
+        return match ($this->hierarchyLevel) {
+            'rooms' => 'Add Room',
+            'locations' => 'Add Location',
+            'runs' => 'Add Cabinet Run',
+            'cabinets' => 'Add Cabinet',
+            'sections' => 'Add Section',
+            default => 'Add Item'
+        };
+    }
+
+    /**
+     * Get the entity type string for the current hierarchy level
+     */
+    public function getEntityTypeForLevel(): string
+    {
+        if ($this->hierarchyLevel === 'components') {
+            return $this->getComponentTypeForCurrentSection();
+        }
+
+        return match ($this->hierarchyLevel) {
+            'rooms' => 'room',
+            'locations' => 'room_location',
+            'runs' => 'cabinet_run',
+            'cabinets' => 'cabinet',
+            'sections' => 'section',
+            default => 'room'
+        };
+    }
+
+    /**
+     * Get the component type (door/drawer) based on current section's section_type
+     */
+    protected function getComponentTypeForCurrentSection(): string
+    {
+        if (!$this->selectedSectionId) {
+            return 'door'; // Default
+        }
+
+        $section = $this->hierarchyCache['sections'][$this->selectedSectionId] ?? null;
+        if (!$section) {
+            return 'door'; // Default
+        }
+
+        $sectionType = $section['section_type'] ?? 'door';
+
+        // Map section type to component type
+        return match ($sectionType) {
+            'door' => 'door',
+            'drawer_bank' => 'drawer',
+            'open_shelf' => 'shelf',
+            'appliance' => 'appliance',
+            'pullout' => 'pullout',
+            'mixed' => 'door', // Default to door for mixed, user can switch
+            default => 'door'
+        };
+    }
+
+    /**
+     * Get the inline edit entity type for the current hierarchy level
+     * Maps modal entity types to inline edit entity types
+     */
+    public function getInlineEditTypeForLevel(): string
+    {
+        if ($this->hierarchyLevel === 'components') {
+            return $this->getComponentTypeForCurrentSection();
+        }
+
+        return match ($this->hierarchyLevel) {
+            'rooms' => 'room',
+            'locations' => 'location',
+            'runs' => 'run',
+            'cabinets' => 'cabinet',
+            'sections' => 'section',
+            default => 'room'
+        };
+    }
+
+    /**
+     * Get the drill down action string for an item
+     */
+    public function getDrillDownAction(array $item): string
+    {
+        $id = $item['id'] ?? 0;
+
+        return match ($this->hierarchyLevel) {
+            'rooms' => "drillDownToRoom({$id})",
+            'locations' => "drillDownToLocation({$id})",
+            'runs' => "drillDownToRun({$id})",
+            'cabinets' => "drillDownToCabinet({$id})",
+            'sections' => "drillDownToSection({$id})",
+            'components' => '', // Components have no children
+            default => ''
+        };
+    }
+
+    /**
+     * Open entity creator for the current hierarchy level
+     */
+    public function openEntityCreatorForCurrentLevel(): void
+    {
+        $parentId = match ($this->hierarchyLevel) {
+            'rooms' => null,
+            'locations' => $this->selectedRoomId,
+            'runs' => $this->selectedLocationId,
+            'cabinets' => $this->selectedRunId,
+            'sections' => $this->selectedCabinetId,
+            'components' => $this->selectedSectionId,
+            default => null
+        };
+
+        $entityType = $this->getEntityTypeForLevel();
+        $this->openEntityCreator($entityType, $parentId);
+    }
+
+    /**
+     * Open entity creator for a specific component type
+     * Used when at components level to allow adding any component type
+     */
+    public function openComponentCreator(string $componentType): void
+    {
+        if (!in_array($componentType, ['door', 'drawer', 'shelf', 'pullout'])) {
+            return;
+        }
+
+        $this->openEntityCreator($componentType, $this->selectedSectionId);
+    }
+
+    /**
+     * Check if we're at the components level (for blade template conditionals)
+     */
+    public function isAtComponentsLevel(): bool
+    {
+        return $this->hierarchyLevel === 'components';
+    }
+
+    /**
+     * Get all available component types for sections
+     * Returns array with type key and display label
+     */
+    public function getAvailableComponentTypes(): array
+    {
+        return [
+            'door' => 'Door',
+            'drawer' => 'Drawer',
+            'shelf' => 'Shelf',
+            'pullout' => 'Pullout',
+        ];
+    }
+
+    /**
+     * Get room type options
+     */
+    public function getRoomTypeOptions(): array
+    {
+        return [
+            'kitchen' => 'Kitchen',
+            'bathroom' => 'Bathroom',
+            'laundry' => 'Laundry',
+            'pantry' => 'Pantry',
+            'closet' => 'Closet',
+            'mudroom' => 'Mudroom',
+            'office' => 'Office',
+            'bedroom' => 'Bedroom',
+            'living_room' => 'Living Room',
+            'dining_room' => 'Dining Room',
+            'garage' => 'Garage',
+            'basement' => 'Basement',
+            'other' => 'Other',
+        ];
+    }
+
+    /**
+     * Get location type options
+     */
+    public function getLocationTypeOptions(): array
+    {
+        return [
+            'wall' => 'Wall',
+            'island' => 'Island',
+            'peninsula' => 'Peninsula',
+            'corner' => 'Corner',
+            'alcove' => 'Alcove',
+            'sink_wall' => 'Sink Wall',
+            'range_wall' => 'Range Wall',
+            'refrigerator_wall' => 'Refrigerator Wall',
+        ];
+    }
+
+    /**
+     * Get cabinet run type options
+     */
+    public function getRunTypeOptions(): array
+    {
+        return [
+            'base' => 'Base Cabinets',
+            'wall' => 'Wall Cabinets',
+            'tall' => 'Tall Cabinets',
+            'island' => 'Island',
+        ];
+    }
+
+    /**
+     * Get cabinet type options
+     */
+    public function getCabinetTypeOptions(): array
+    {
+        return [
+            'base' => 'Base',
+            'wall' => 'Wall',
+            'tall' => 'Tall',
+            'vanity' => 'Vanity',
+            'specialty' => 'Specialty',
+        ];
+    }
+
+    /**
+     * Get pricing tier options from Products database
+     * Pulls from products_attribute_options for "Pricing Level" attribute
+     */
+    public function getPricingTierOptions(): array
+    {
+        try {
+            $options = \DB::table('products_attribute_options as o')
+                ->join('products_attributes as a', 'o.attribute_id', '=', 'a.id')
+                ->where('a.name', 'Pricing Level')
+                ->orderBy('o.sort')
+                ->select('o.name', 'o.extra_price')
+                ->get();
+
+            if ($options->isNotEmpty()) {
+                $result = [];
+                foreach ($options as $opt) {
+                    // Extract level number from name like "Level 3 - Enhanced ($192/LF)"
+                    if (preg_match('/Level\s*(\d+)/i', $opt->name, $matches)) {
+                        $level = $matches[1];
+                        $result[$level] = $opt->name;
+                    }
+                }
+                if (!empty($result)) {
+                    return $result;
+                }
+            }
+        } catch (\Exception $e) {
+            // Fall through to defaults
+        }
+
+        // Fallback to hardcoded defaults
+        return [
+            '1' => 'Level 1 - Basic ($138/LF)',
+            '2' => 'Level 2 - Standard ($168/LF)',
+            '3' => 'Level 3 - Enhanced ($192/LF)',
+            '4' => 'Level 4 - Premium ($210/LF)',
+            '5' => 'Level 5 - Custom ($225/LF)',
+        ];
+    }
+
+    /**
+     * Get material category options from Products database
+     * Pulls from products_attribute_options for "Material Category" attribute
+     */
+    public function getMaterialCategoryOptions(): array
+    {
+        try {
+            $options = \DB::table('products_attribute_options as o')
+                ->join('products_attributes as a', 'o.attribute_id', '=', 'a.id')
+                ->where('a.name', 'Material Category')
+                ->orderBy('o.sort')
+                ->select('o.name', 'o.extra_price')
+                ->get();
+
+            if ($options->isNotEmpty()) {
+                $result = [];
+                foreach ($options as $opt) {
+                    // Create slug key from name
+                    $slug = \Illuminate\Support\Str::slug($opt->name, '_');
+                    $price = number_format($opt->extra_price ?? 0, 0);
+                    $result[$slug] = $opt->name . ($opt->extra_price > 0 ? " (\${$price}/LF)" : '');
+                }
+                return $result;
+            }
+        } catch (\Exception $e) {
+            // Fall through to defaults
+        }
+
+        // Fallback to hardcoded defaults
+        return [
+            'paint_grade' => 'Paint Grade (Hard Maple/Poplar)',
+            'stain_grade' => 'Stain Grade (Oak/Maple)',
+            'premium' => 'Premium (Rifted White Oak/Black Walnut)',
+            'custom' => 'Custom/Exotic (Price TBD)',
+        ];
+    }
+
+    /**
+     * Get finish options from Products database
+     * Pulls from products_attribute_options for "Finish Option" attribute
+     */
+    public function getFinishOptions(): array
+    {
+        try {
+            $options = \DB::table('products_attribute_options as o')
+                ->join('products_attributes as a', 'o.attribute_id', '=', 'a.id')
+                ->where('a.name', 'Finish Option')
+                ->orderBy('o.sort')
+                ->select('o.name', 'o.extra_price')
+                ->get();
+
+            if ($options->isNotEmpty()) {
+                $result = [];
+                foreach ($options as $opt) {
+                    // Create slug key from name
+                    $slug = \Illuminate\Support\Str::slug($opt->name, '_');
+                    $price = number_format($opt->extra_price ?? 0, 0);
+                    $result[$slug] = $opt->name . ($opt->extra_price > 0 ? " (+\${$price}/LF)" : '');
+                }
+                return $result;
+            }
+        } catch (\Exception $e) {
+            // Fall through to defaults
+        }
+
+        // Fallback to hardcoded defaults
+        return [
+            'unfinished' => 'Unfinished',
+            'prime_only' => 'Prime Only (+$60/LF)',
+            'prime_paint' => 'Prime + Paint (+$118/LF)',
+            'clear_coat' => 'Clear Coat (+$95/LF)',
+            'stain_clear' => 'Stain + Clear (+$213/LF)',
+        ];
+    }
+
+    /**
+     * Get the Cabinet product ID for linking
+     */
+    public function getCabinetProductId(): ?int
+    {
+        try {
+            $product = \DB::table('products_products')
+                ->where('reference', 'CABINET')
+                ->first(['id']);
+            return $product?->id;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get hinge products from inventory for selection
+     * Returns products with 'hinge' in name or reference
+     */
+    public function getHingeProducts(): array
+    {
+        try {
+            $products = \DB::table('products_products')
+                ->where(function ($query) {
+                    $query->where('name', 'like', '%hinge%')
+                        ->orWhere('reference', 'like', '%HINGE%');
+                })
+                ->orderBy('name')
+                ->select('id', 'name', 'reference')
+                ->get();
+
+            $result = ['' => '-- Select Hinge --'];
+            foreach ($products as $product) {
+                $result[$product->id] = $product->name;
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return ['' => '-- No hinges available --'];
+        }
+    }
+
+    /**
+     * Get drawer slide products from inventory for selection
+     * Returns products with 'slide' in name or reference
+     */
+    public function getSlideProducts(): array
+    {
+        try {
+            $products = \DB::table('products_products')
+                ->where(function ($query) {
+                    $query->where('name', 'like', '%slide%')
+                        ->orWhere('reference', 'like', '%SLIDE%');
+                })
+                ->orderBy('name')
+                ->select('id', 'name', 'reference')
+                ->get();
+
+            $result = ['' => '-- Select Slide --'];
+            foreach ($products as $product) {
+                $result[$product->id] = $product->name;
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return ['' => '-- No slides available --'];
+        }
+    }
+
+    /**
+     * Get all hardware products from inventory for selection
+     * Pulls from Cabinet Hardware category (id: 58)
+     */
+    public function getHardwareProducts(): array
+    {
+        try {
+            $products = \DB::table('products_products')
+                ->where('category_id', 58) // Cabinet Hardware category
+                ->orderBy('name')
+                ->select('id', 'name', 'reference')
+                ->get();
+
+            $result = ['' => '-- Select Hardware --'];
+            foreach ($products as $product) {
+                $result[$product->id] = $product->name;
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return ['' => '-- No hardware available --'];
+        }
+    }
+
+    /**
+     * Get decorative hardware products (knobs, pulls, handles)
+     * Returns products with 'knob', 'pull', or 'handle' in name/reference
+     */
+    public function getDecorativeHardwareProducts(): array
+    {
+        try {
+            $products = \DB::table('products_products')
+                ->where(function ($query) {
+                    $query->where('name', 'like', '%knob%')
+                        ->orWhere('name', 'like', '%pull%')
+                        ->orWhere('name', 'like', '%handle%')
+                        ->orWhere('reference', 'like', '%KNOB%')
+                        ->orWhere('reference', 'like', '%PULL%')
+                        ->orWhere('reference', 'like', '%HANDLE%');
+                })
+                ->orderBy('name')
+                ->select('id', 'name', 'reference')
+                ->get();
+
+            $result = ['' => '-- Select Decorative Hardware --'];
+            foreach ($products as $product) {
+                $result[$product->id] = $product->name;
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return ['' => '-- No decorative hardware available --'];
+        }
+    }
+
+    /**
+     * Get pullout/accessory products (Rev-A-Shelf, trash pullouts, etc.)
+     * Returns products with 'pullout', 'rev-a-shelf', 'trash', 'accessory' in name/reference
+     */
+    public function getPulloutProducts(): array
+    {
+        try {
+            $products = \DB::table('products_products')
+                ->where(function ($query) {
+                    $query->where('name', 'like', '%pullout%')
+                        ->orWhere('name', 'like', '%pull-out%')
+                        ->orWhere('name', 'like', '%rev-a-shelf%')
+                        ->orWhere('name', 'like', '%trash%')
+                        ->orWhere('name', 'like', '%recycl%')
+                        ->orWhere('name', 'like', '%lazy susan%')
+                        ->orWhere('name', 'like', '%spice%')
+                        ->orWhere('reference', 'like', '%PULLOUT%')
+                        ->orWhere('reference', 'like', '%REVASHELF%');
+                })
+                ->orderBy('name')
+                ->select('id', 'name', 'reference')
+                ->get();
+
+            $result = ['' => '-- Select Pullout Accessory --'];
+            foreach ($products as $product) {
+                $result[$product->id] = $product->name;
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return ['' => '-- No pullout products available --'];
+        }
+    }
+
+    /**
+     * Get door style options for cabinets
+     */
+    public function getDoorStyleOptions(): array
+    {
+        return [
+            '' => '-- Select Door Style --',
+            'shaker' => 'Shaker',
+            'raised_panel' => 'Raised Panel',
+            'flat_panel' => 'Flat Panel',
+            'slab' => 'Slab',
+            'beadboard' => 'Beadboard',
+            'glass' => 'Glass Front',
+            'open' => 'Open (No Door)',
+        ];
+    }
+
+    /**
+     * Get door mounting options
+     */
+    public function getDoorMountingOptions(): array
+    {
+        return [
+            '' => '-- Select Mounting --',
+            'inset' => 'Inset',
+            'full_overlay' => 'Full Overlay',
+            'half_overlay' => 'Half Overlay',
+        ];
+    }
+
+    // =====================================================
+    // ENTITY DETAILS PANEL METHODS
+    // For the third column in Edit Details modal
+    // =====================================================
+
+    /**
+     * Select/highlight an entity to show in details panel (single-click)
+     * This does NOT change navigation - just highlights for details view
+     * Auto-loads entity into edit mode for immediate editing
+     */
+    public function highlightEntity(string $entityType, int $entityId): void
+    {
+        $this->highlightedEntityType = $entityType;
+        $this->highlightedEntityId = $entityId;
+
+        // Auto-load into edit mode for immediate editing
+        $this->editHighlightedEntity();
+    }
+
+    /**
+     * Clear the highlighted entity
+     */
+    public function clearHighlightedEntity(): void
+    {
+        $this->highlightedEntityType = null;
+        $this->highlightedEntityId = null;
+    }
+
+    /**
+     * Get details for the currently highlighted entity
+     * Returns structured data for the details panel
+     */
+    public function getSelectedEntityDetails(): ?array
+    {
+        if (!$this->highlightedEntityType || !$this->highlightedEntityId) {
+            return null;
+        }
+
+        $entity = match ($this->highlightedEntityType) {
+            'room' => Room::with(['locations.cabinetRuns.cabinets'])->find($this->highlightedEntityId),
+            'location' => RoomLocation::with(['room', 'cabinetRuns.cabinets'])->find($this->highlightedEntityId),
+            'run' => CabinetRun::with(['roomLocation.room', 'cabinets'])->find($this->highlightedEntityId),
+            'cabinet' => Cabinet::with(['cabinetRun.roomLocation.room', 'sections'])->find($this->highlightedEntityId),
+            'section' => CabinetSection::with(['cabinet.cabinetRun.roomLocation.room'])->find($this->highlightedEntityId),
+            'door' => Door::with(['section.cabinet.cabinetRun.roomLocation.room'])->find($this->highlightedEntityId),
+            'drawer' => Drawer::with(['section.cabinet.cabinetRun.roomLocation.room'])->find($this->highlightedEntityId),
+            'shelf' => Shelf::with(['section.cabinet.cabinetRun.roomLocation.room'])->find($this->highlightedEntityId),
+            'pullout' => Pullout::with(['section.cabinet.cabinetRun.roomLocation.room'])->find($this->highlightedEntityId),
+            default => null,
+        };
+
+        if (!$entity) {
+            return null;
+        }
+
+        return match ($this->highlightedEntityType) {
+            'room' => $this->formatRoomDetails($entity),
+            'location' => $this->formatLocationDetails($entity),
+            'run' => $this->formatRunDetails($entity),
+            'cabinet' => $this->formatCabinetDetails($entity),
+            'section' => $this->formatSectionDetails($entity),
+            'door' => $this->formatDoorDetails($entity),
+            'drawer' => $this->formatDrawerDetails($entity),
+            'shelf' => $this->formatShelfDetails($entity),
+            'pullout' => $this->formatPulloutDetails($entity),
+            default => null,
+        };
+    }
+
+    /**
+     * Format room entity details for display
+     */
+    protected function formatRoomDetails(Room $room): array
+    {
+        // Calculate aggregate stats from all cabinets (LF trickles up from cabinet level)
+        $totalLinearFeet = 0;
+        $totalCabinets = 0;
+        $locationCount = $room->locations->count();
+
+        foreach ($room->locations as $location) {
+            foreach ($location->cabinetRuns as $run) {
+                foreach ($run->cabinets as $cabinet) {
+                    $totalLinearFeet += (float) ($cabinet->linear_feet ?? 0);
+                    $totalCabinets++;
+                }
+            }
+        }
+
+        // Calculate production days from linear feet
+        $productionDays = $this->calculateProductionDays($totalLinearFeet);
+
+        return [
+            'id' => $room->id,
+            'type' => 'room',
+            'name' => $room->name,
+            'stats' => [
+                'cabinets' => $totalCabinets,
+                'linear_feet' => round($totalLinearFeet, 1),
+                'production_days' => $productionDays,
+            ],
+            'fields' => [
+                'room_type' => $room->room_type ?? '-',
+                'floor_number' => $room->floor_number ?? '-',
+                'cabinet_level' => $room->cabinet_level ?? '-',
+                'material_category' => $room->material_category ?? '-',
+                'finish_option' => $room->finish_option ?? '-',
+                'pdf_page_number' => $room->pdf_page_number ?? '-',
+                'pdf_room_label' => $room->pdf_room_label ?? '-',
+                'pdf_detail_number' => $room->pdf_detail_number ?? '-',
+                'sort_order' => $room->sort_order ?? 0,
+                'quoted_price' => $room->quoted_price ? '$' . number_format($room->quoted_price, 2) : '-',
+                'notes' => $room->notes ?? '-',
+            ],
+            'children' => [
+                'count' => $locationCount,
+                'label' => 'Locations',
+            ],
+            'created_at' => $room->created_at?->format('M d, Y H:i'),
+            'updated_at' => $room->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format location entity details for display
+     */
+    protected function formatLocationDetails(RoomLocation $location): array
+    {
+        // Calculate stats from cabinets (LF trickles up from cabinet level)
+        $totalLinearFeet = 0;
+        $totalCabinets = 0;
+        $runCount = $location->cabinetRuns->count();
+
+        foreach ($location->cabinetRuns as $run) {
+            foreach ($run->cabinets as $cabinet) {
+                $totalLinearFeet += (float) ($cabinet->linear_feet ?? 0);
+                $totalCabinets++;
+            }
+        }
+
+        // Calculate production days from linear feet
+        $productionDays = $this->calculateProductionDays($totalLinearFeet);
+
+        return [
+            'id' => $location->id,
+            'type' => 'location',
+            'name' => $location->name,
+            'parent' => [
+                'type' => 'room',
+                'id' => $location->room_id,
+                'name' => $location->room?->name ?? 'Unknown',
+            ],
+            'stats' => [
+                'cabinets' => $totalCabinets,
+                'linear_feet' => round($totalLinearFeet, 1),
+                'production_days' => $productionDays,
+            ],
+            'fields' => [
+                'location_type' => $location->location_type ?? '-',
+                'sequence' => $location->sequence ?? '-',
+                'elevation_reference' => $location->elevation_reference ?? '-',
+                'cabinet_level' => $location->cabinet_level ?? '-',
+                'material_category' => $location->material_category ?? '-',
+                'finish_option' => $location->finish_option ?? '-',
+                'sort_order' => $location->sort_order ?? 0,
+                'notes' => $location->notes ?? '-',
+            ],
+            'children' => [
+                'count' => $runCount,
+                'label' => 'Cabinet Runs',
+            ],
+            'created_at' => $location->created_at?->format('M d, Y H:i'),
+            'updated_at' => $location->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format cabinet run entity details for display
+     */
+    protected function formatRunDetails(CabinetRun $run): array
+    {
+        // Calculate stats from cabinets (LF trickles up from cabinet level)
+        $totalLinearFeet = 0;
+        $cabinetCount = 0;
+
+        foreach ($run->cabinets as $cabinet) {
+            $totalLinearFeet += (float) ($cabinet->linear_feet ?? 0);
+            $cabinetCount++;
+        }
+
+        // Calculate production days from linear feet
+        $productionDays = $this->calculateProductionDays($totalLinearFeet);
+
+        return [
+            'id' => $run->id,
+            'type' => 'run',
+            'name' => $run->name,
+            'parent' => [
+                'type' => 'location',
+                'id' => $run->room_location_id,
+                'name' => $run->roomLocation?->name ?? 'Unknown',
+            ],
+            'stats' => [
+                'cabinets' => $cabinetCount,
+                'linear_feet' => round($totalLinearFeet, 1),
+                'production_days' => $productionDays,
+            ],
+            'fields' => [
+                'run_type' => $run->run_type ?? '-',
+                'total_linear_feet' => $run->total_linear_feet ? $run->total_linear_feet . ' LF' : '-',
+                'start_wall_measurement' => $run->start_wall_measurement ? $run->start_wall_measurement . '"' : '-',
+                'end_wall_measurement' => $run->end_wall_measurement ? $run->end_wall_measurement . '"' : '-',
+                'cabinet_level' => $run->cabinet_level ?? '-',
+                'material_category' => $run->material_category ?? '-',
+                'finish_option' => $run->finish_option ?? '-',
+                'hinges_count' => $run->hinges_count ?? 0,
+                'slides_count' => $run->slides_count ?? 0,
+                'sort_order' => $run->sort_order ?? 0,
+                'notes' => $run->notes ?? '-',
+            ],
+            'children' => [
+                'count' => $cabinetCount,
+                'label' => 'Cabinets',
+            ],
+            'created_at' => $run->created_at?->format('M d, Y H:i'),
+            'updated_at' => $run->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format cabinet entity details for display
+     */
+    protected function formatCabinetDetails(Cabinet $cabinet): array
+    {
+        // Use the stored linear_feet value from cabinet (source of truth for LF)
+        $linearFeet = round((float) ($cabinet->linear_feet ?? 0), 2);
+
+        // Calculate production days from linear feet
+        $productionDays = $this->calculateProductionDays($linearFeet);
+
+        return [
+            'id' => $cabinet->id,
+            'type' => 'cabinet',
+            'name' => $cabinet->name,
+            'parent' => [
+                'type' => 'run',
+                'id' => $cabinet->cabinet_run_id,
+                'name' => $cabinet->cabinetRun?->name ?? 'Unknown',
+            ],
+            'stats' => [
+                'linear_feet' => $linearFeet,
+                'production_days' => $productionDays,
+            ],
+            'fields' => [
+                'cabinet_number' => $cabinet->cabinet_number ?? '-',
+                'position_in_run' => $cabinet->position_in_run ?? '-',
+                'wall_position_start' => $cabinet->wall_position_start_inches ? $cabinet->wall_position_start_inches . '"' : '-',
+                'length_inches' => $cabinet->length_inches ? $cabinet->length_inches . '"' : '-',
+                'width_inches' => $cabinet->width_inches ? $cabinet->width_inches . '"' : '-',
+                'depth_inches' => $cabinet->depth_inches ? $cabinet->depth_inches . '"' : '-',
+                'height_inches' => $cabinet->height_inches ? $cabinet->height_inches . '"' : '-',
+                'linear_feet' => $cabinet->linear_feet ? $cabinet->linear_feet . ' LF' : '-',
+                'quantity' => $cabinet->quantity ?? 1,
+                'cabinet_level' => $cabinet->cabinet_level ?? '-',
+                'material_category' => $cabinet->material_category ?? '-',
+                'finish_option' => $cabinet->finish_option ?? '-',
+                'unit_price_per_lf' => $cabinet->unit_price_per_lf ? '$' . number_format($cabinet->unit_price_per_lf, 2) : '-',
+                'total_price' => $cabinet->total_price ? '$' . number_format($cabinet->total_price, 2) : '-',
+                'hardware_notes' => $cabinet->hardware_notes ?? '-',
+                'custom_modifications' => $cabinet->custom_modifications ?? '-',
+                'shop_notes' => $cabinet->shop_notes ?? '-',
+            ],
+            'children' => [
+                'count' => 0, // Cabinets don't have sections/components in current implementation
+                'label' => 'Components',
+            ],
+            'created_at' => $cabinet->created_at?->format('M d, Y H:i'),
+            'updated_at' => $cabinet->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format section entity details for display
+     */
+    protected function formatSectionDetails(CabinetSection $section): array
+    {
+        return [
+            'id' => $section->id,
+            'type' => 'section',
+            'name' => $section->name ?? 'Section ' . $section->section_number,
+            'parent' => [
+                'type' => 'cabinet',
+                'id' => $section->cabinet_id,
+                'name' => $section->cabinet?->name ?? 'Unknown Cabinet',
+            ],
+            'stats' => [],
+            'fields' => [
+                'section_type' => ucfirst($section->section_type ?? '-'),
+                'section_number' => $section->section_number ?? '-',
+                'width' => $section->width_inches ? $section->width_inches . '"' : '-',
+                'height' => $section->height_inches ? $section->height_inches . '"' : '-',
+                'position_from_left' => $section->position_from_left_inches ? $section->position_from_left_inches . '"' : '-',
+                'position_from_bottom' => $section->position_from_bottom_inches ? $section->position_from_bottom_inches . '"' : '-',
+                'component_count' => $section->component_count ?? '-',
+                'notes' => $section->notes ?? '-',
+            ],
+            'children' => [
+                'count' => $section->doors()->count() + $section->drawers()->count() + $section->shelves()->count() + $section->pullouts()->count(),
+                'label' => 'Components',
+            ],
+            'created_at' => $section->created_at?->format('M d, Y H:i'),
+            'updated_at' => $section->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format door entity details for display
+     */
+    protected function formatDoorDetails(Door $door): array
+    {
+        return [
+            'id' => $door->id,
+            'type' => 'door',
+            'name' => $door->door_name ?? 'Door ' . $door->door_number,
+            'parent' => [
+                'type' => 'section',
+                'id' => $door->section_id,
+                'name' => $door->section?->name ?? 'Unknown Section',
+            ],
+            'stats' => [],
+            'fields' => [
+                'door_number' => $door->door_number ?? '-',
+                'width' => $door->width_inches ? $door->width_inches . '"' : '-',
+                'height' => $door->height_inches ? $door->height_inches . '"' : '-',
+                'hinge_side' => ucfirst($door->hinge_side ?? '-'),
+                'has_glass' => $door->has_glass ? 'Yes' : 'No',
+                'finish_type' => $door->finish_type ?? '-',
+                'notes' => $door->notes ?? '-',
+            ],
+            'children' => [
+                'count' => 0,
+                'label' => 'None',
+            ],
+            'created_at' => $door->created_at?->format('M d, Y H:i'),
+            'updated_at' => $door->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format drawer entity details for display
+     */
+    protected function formatDrawerDetails(Drawer $drawer): array
+    {
+        return [
+            'id' => $drawer->id,
+            'type' => 'drawer',
+            'name' => $drawer->drawer_name ?? 'Drawer ' . $drawer->drawer_number,
+            'parent' => [
+                'type' => 'section',
+                'id' => $drawer->section_id,
+                'name' => $drawer->section?->name ?? 'Unknown Section',
+            ],
+            'stats' => [],
+            'fields' => [
+                'drawer_number' => $drawer->drawer_number ?? '-',
+                'width' => $drawer->width_inches ? $drawer->width_inches . '"' : '-',
+                'height' => $drawer->height_inches ? $drawer->height_inches . '"' : '-',
+                'depth' => $drawer->depth_inches ? $drawer->depth_inches . '"' : '-',
+                'drawer_box_type' => $drawer->drawer_box_type ?? '-',
+                'soft_close' => $drawer->soft_close ? 'Yes' : 'No',
+                'notes' => $drawer->notes ?? '-',
+            ],
+            'children' => [
+                'count' => 0,
+                'label' => 'None',
+            ],
+            'created_at' => $drawer->created_at?->format('M d, Y H:i'),
+            'updated_at' => $drawer->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format shelf entity details for display
+     */
+    protected function formatShelfDetails(Shelf $shelf): array
+    {
+        return [
+            'id' => $shelf->id,
+            'type' => 'shelf',
+            'name' => $shelf->shelf_name ?? 'Shelf ' . $shelf->shelf_number,
+            'parent' => [
+                'type' => 'section',
+                'id' => $shelf->section_id,
+                'name' => $shelf->section?->name ?? 'Unknown Section',
+            ],
+            'stats' => [],
+            'fields' => [
+                'shelf_number' => $shelf->shelf_number ?? '-',
+                'width' => $shelf->width_inches ? $shelf->width_inches . '"' : '-',
+                'depth' => $shelf->depth_inches ? $shelf->depth_inches . '"' : '-',
+                'thickness' => $shelf->thickness_inches ? $shelf->thickness_inches . '"' : '-',
+                'is_adjustable' => $shelf->is_adjustable ? 'Yes' : 'No',
+                'position_from_bottom' => $shelf->position_from_bottom_inches ? $shelf->position_from_bottom_inches . '"' : '-',
+                'notes' => $shelf->notes ?? '-',
+            ],
+            'children' => [
+                'count' => 0,
+                'label' => 'None',
+            ],
+            'created_at' => $shelf->created_at?->format('M d, Y H:i'),
+            'updated_at' => $shelf->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Format pullout entity details for display
+     */
+    protected function formatPulloutDetails(Pullout $pullout): array
+    {
+        return [
+            'id' => $pullout->id,
+            'type' => 'pullout',
+            'name' => $pullout->pullout_name ?? 'Pullout ' . $pullout->pullout_number,
+            'parent' => [
+                'type' => 'section',
+                'id' => $pullout->section_id,
+                'name' => $pullout->section?->name ?? 'Unknown Section',
+            ],
+            'stats' => [],
+            'fields' => [
+                'pullout_number' => $pullout->pullout_number ?? '-',
+                'pullout_type' => ucfirst($pullout->pullout_type ?? '-'),
+                'width' => $pullout->width_inches ? $pullout->width_inches . '"' : '-',
+                'height' => $pullout->height_inches ? $pullout->height_inches . '"' : '-',
+                'depth' => $pullout->depth_inches ? $pullout->depth_inches . '"' : '-',
+                'load_capacity_lbs' => $pullout->load_capacity_lbs ? $pullout->load_capacity_lbs . ' lbs' : '-',
+                'notes' => $pullout->notes ?? '-',
+            ],
+            'children' => [
+                'count' => 0,
+                'label' => 'None',
+            ],
+            'created_at' => $pullout->created_at?->format('M d, Y H:i'),
+            'updated_at' => $pullout->updated_at?->format('M d, Y H:i'),
+        ];
+    }
+
+    /**
+     * Get the default company's shop capacity per day
+     *
+     * @return float The shop capacity in linear feet per day (defaults to 20 if not set)
+     */
+    protected function getShopCapacityPerDay(): float
+    {
+        $company = Company::where('is_default', true)->first();
+
+        if ($company && $company->shop_capacity_per_day > 0) {
+            return (float) $company->shop_capacity_per_day;
+        }
+
+        // Default to 20 LF per day if not configured
+        return 20.0;
+    }
+
+    /**
+     * Calculate production days from linear feet based on shop capacity
+     *
+     * @param float $linearFeet Total linear feet
+     * @return float Production days (rounded to 1 decimal place)
+     */
+    protected function calculateProductionDays(float $linearFeet): float
+    {
+        $capacity = $this->getShopCapacityPerDay();
+
+        if ($capacity <= 0) {
+            return 0;
+        }
+
+        return round($linearFeet / $capacity, 1);
+    }
+
+    /**
+     * Delete an entity from the details panel
+     */
+    public function deleteHighlightedEntity(): void
+    {
+        if (!$this->highlightedEntityType || !$this->highlightedEntityId) {
+            Notification::make()
+                ->title('No Entity Selected')
+                ->body('Please select an entity to delete.')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $entityType = $this->highlightedEntityType;
+        $entityId = $this->highlightedEntityId;
+
+        // Delete the entity
+        $deleted = match ($entityType) {
+            'room' => Room::find($entityId)?->delete(),
+            'location' => RoomLocation::find($entityId)?->delete(),
+            'run' => CabinetRun::find($entityId)?->delete(),
+            'cabinet' => Cabinet::find($entityId)?->delete(),
+            default => false,
+        };
+
+        if ($deleted) {
+            Notification::make()
+                ->title('Entity Deleted')
+                ->body(ucfirst($entityType) . ' has been deleted successfully.')
+                ->success()
+                ->send();
+
+            // Clear selection
+            $this->clearHighlightedEntity();
+        } else {
+            Notification::make()
+                ->title('Delete Failed')
+                ->body('Could not delete the entity.')
+                ->danger()
+                ->send();
+        }
+    }
+
+    /**
+     * Edit the highlighted entity (switches to inline edit mode)
+     */
+    public function editHighlightedEntity(): void
+    {
+        if (!$this->highlightedEntityType || !$this->highlightedEntityId) {
+            Notification::make()
+                ->title('No Entity Selected')
+                ->body('Please select an entity to edit.')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        // Load entity data into inline edit form
+        $entity = match ($this->highlightedEntityType) {
+            'room' => Room::find($this->highlightedEntityId),
+            'location' => RoomLocation::find($this->highlightedEntityId),
+            'run' => CabinetRun::find($this->highlightedEntityId),
+            'cabinet' => Cabinet::find($this->highlightedEntityId),
+            'section' => CabinetSection::find($this->highlightedEntityId),
+            'door' => Door::find($this->highlightedEntityId),
+            'drawer' => Drawer::find($this->highlightedEntityId),
+            'shelf' => Shelf::find($this->highlightedEntityId),
+            'pullout' => Pullout::find($this->highlightedEntityId),
+            default => null,
+        };
+
+        if (!$entity) {
+            Notification::make()
+                ->title('Entity Not Found')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Populate inline edit data based on entity type
+        $this->inlineEditData = match ($this->highlightedEntityType) {
+            'room' => [
+                'name' => $entity->name,
+                'room_type' => $entity->room_type,
+                'floor_number' => $entity->floor_number ?? 1,
+                'pdf_page_number' => $entity->pdf_page_number,
+                'pdf_room_label' => $entity->pdf_room_label,
+                'pdf_detail_number' => $entity->pdf_detail_number,
+                'sort_order' => $entity->sort_order ?? 0,
+                'cabinet_level' => $entity->cabinet_level,
+                'material_category' => $entity->material_category,
+                'finish_option' => $entity->finish_option,
+                'quoted_price' => $entity->quoted_price,
+                'notes' => $entity->notes ?? '',
+            ],
+            'location' => [
+                'name' => $entity->name,
+                'location_type' => $entity->location_type ?? 'wall',
+                'sequence' => $entity->sequence,
+                'sort_order' => $entity->sort_order ?? 0,
+                'elevation_reference' => $entity->elevation_reference,
+                'cabinet_level' => $entity->cabinet_level,
+                'material_category' => $entity->material_category,
+                'finish_option' => $entity->finish_option,
+                'notes' => $entity->notes ?? '',
+            ],
+            'run' => [
+                'name' => $entity->name,
+                'run_type' => $entity->run_type ?? 'base',
+                'total_linear_feet' => $entity->total_linear_feet,
+                'start_wall_measurement' => $entity->start_wall_measurement,
+                'end_wall_measurement' => $entity->end_wall_measurement,
+                'cabinet_level' => $entity->cabinet_level,
+                'sort_order' => $entity->sort_order ?? 0,
+                'hinges_count' => $entity->hinges_count ?? 0,
+                'material_category' => $entity->material_category,
+                'finish_option' => $entity->finish_option,
+                'notes' => $entity->notes ?? '',
+            ],
+            'cabinet' => [
+                'cabinet_number' => $entity->cabinet_number,
+                'position_in_run' => $entity->position_in_run,
+                'length_inches' => $entity->length_inches,
+                'height_inches' => $entity->height_inches,
+                'depth_inches' => $entity->depth_inches,
+                'quantity' => $entity->quantity ?? 1,
+                'wall_position_start_inches' => $entity->wall_position_start_inches,
+                'cabinet_level' => $entity->cabinet_level,
+                'material_category' => $entity->material_category,
+                'finish_option' => $entity->finish_option,
+                'unit_price_per_lf' => $entity->unit_price_per_lf,
+                'total_price' => $entity->total_price,
+                // Door/Drawer Configuration
+                'door_style' => $entity->door_style ?? '',
+                'door_mounting' => $entity->door_mounting ?? '',
+                'door_count' => $entity->door_count ?? 0,
+                'drawer_count' => $entity->drawer_count ?? 0,
+                // Hardware from Products
+                'hinge_product_id' => $entity->hinge_product_id ?? '',
+                'hinge_quantity' => $entity->hinge_quantity ?? 0,
+                'slide_product_id' => $entity->slide_product_id ?? '',
+                'slide_quantity' => $entity->slide_quantity ?? 0,
+                // Notes
+                'hardware_notes' => $entity->hardware_notes ?? '',
+                'shop_notes' => $entity->shop_notes ?? '',
+            ],
+            'section' => [
+                'name' => $entity->name ?? '',
+                'section_type' => $entity->section_type ?? 'door',
+                'width_inches' => $entity->width_inches,
+                'height_inches' => $entity->height_inches,
+                'position_from_left_inches' => $entity->position_from_left_inches,
+                'position_from_bottom_inches' => $entity->position_from_bottom_inches,
+                'component_count' => $entity->component_count,
+                'notes' => $entity->notes ?? '',
+            ],
+            'door' => [
+                'door_number' => $entity->door_number ?? '',
+                'door_name' => $entity->door_name ?? '',
+                'width_inches' => $entity->width_inches,
+                'height_inches' => $entity->height_inches,
+                'hinge_side' => $entity->hinge_side ?? 'left',
+                'has_glass' => $entity->has_glass ?? false,
+                'finish_type' => $entity->finish_type ?? '',
+                'notes' => $entity->notes ?? '',
+                'hinge_product_id' => $entity->hinge_product_id ?? '',
+                'decorative_hardware_product_id' => $entity->decorative_hardware_product_id ?? '',
+            ],
+            'drawer' => [
+                'drawer_number' => $entity->drawer_number ?? '',
+                'drawer_name' => $entity->drawer_name ?? '',
+                'front_width_inches' => $entity->front_width_inches,
+                'front_height_inches' => $entity->front_height_inches,
+                'drawer_position' => $entity->drawer_position ?? 1,
+                'slide_type' => $entity->slide_type ?? '',
+                'soft_close' => $entity->soft_close ?? true,
+                'finish_type' => $entity->finish_type ?? '',
+                'notes' => $entity->notes ?? '',
+                'slide_product_id' => $entity->slide_product_id ?? '',
+                'decorative_hardware_product_id' => $entity->decorative_hardware_product_id ?? '',
+                'drawer_box_width_inches' => $entity->drawer_box_width_inches,
+                'drawer_box_height_inches' => $entity->drawer_box_height_inches,
+                'drawer_box_depth_inches' => $entity->drawer_box_depth_inches,
+            ],
+            'shelf' => [
+                'shelf_number' => $entity->shelf_number ?? '',
+                'shelf_name' => $entity->shelf_name ?? '',
+                'width_inches' => $entity->width_inches,
+                'depth_inches' => $entity->depth_inches,
+                'thickness_inches' => $entity->thickness_inches,
+                'shelf_type' => $entity->shelf_type ?? 'adjustable',
+                'material' => $entity->material ?? 'plywood',
+                'edge_treatment' => $entity->edge_treatment ?? '',
+                'finish_type' => $entity->finish_type ?? '',
+                'notes' => $entity->notes ?? '',
+                'slide_product_id' => $entity->slide_product_id ?? '',
+            ],
+            'pullout' => [
+                'pullout_number' => $entity->pullout_number ?? '',
+                'pullout_name' => $entity->pullout_name ?? '',
+                'pullout_type' => $entity->pullout_type ?? 'roll_out_tray',
+                'manufacturer' => $entity->manufacturer ?? '',
+                'model_number' => $entity->model_number ?? '',
+                'width_inches' => $entity->width_inches,
+                'height_inches' => $entity->height_inches,
+                'depth_inches' => $entity->depth_inches,
+                'soft_close' => $entity->soft_close ?? true,
+                'quantity' => $entity->quantity ?? 1,
+                'notes' => $entity->notes ?? '',
+                'product_id' => $entity->product_id ?? '',
+                'slide_product_id' => $entity->slide_product_id ?? '',
+            ],
+            default => [],
+        };
+
+        $this->isEditingInline = true;
+    }
+
+    /**
+     * Cancel inline editing
+     */
+    public function cancelInlineEdit(): void
+    {
+        $this->isEditingInline = false;
+        $this->inlineEditData = [];
+    }
+
+    /**
+     * Save inline edits
+     */
+    public function saveInlineEdit(): void
+    {
+        if (!$this->highlightedEntityType || !$this->highlightedEntityId) {
+            return;
+        }
+
+        $entity = match ($this->highlightedEntityType) {
+            'room' => Room::find($this->highlightedEntityId),
+            'location' => RoomLocation::find($this->highlightedEntityId),
+            'run' => CabinetRun::find($this->highlightedEntityId),
+            'cabinet' => Cabinet::find($this->highlightedEntityId),
+            'section' => CabinetSection::find($this->highlightedEntityId),
+            'door' => Door::find($this->highlightedEntityId),
+            'drawer' => Drawer::find($this->highlightedEntityId),
+            'shelf' => Shelf::find($this->highlightedEntityId),
+            'pullout' => Pullout::find($this->highlightedEntityId),
+            default => null,
+        };
+
+        if (!$entity) {
+            Notification::make()
+                ->title('Entity Not Found')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Update entity with inline edit data
+        $entity->fill($this->inlineEditData);
+        $entity->save();
+
+        // Refresh hierarchy cache after inline edit
+        $this->refreshHierarchyCache();
+
+        // Exit edit mode
+        $this->isEditingInline = false;
+        $this->inlineEditData = [];
+
+        // Refresh the entity tree by rebuilding rooms data
+        $existingRooms = $this->buildExistingRoomsData();
+        $this->data['rooms'] = $existingRooms;
+
+        Notification::make()
+            ->title('Saved')
+            ->body(ucfirst($this->highlightedEntityType) . ' updated successfully.')
+            ->success()
             ->send();
     }
 }

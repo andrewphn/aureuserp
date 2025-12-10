@@ -141,7 +141,11 @@ class EntityManagementService
             $entityData['quantity'] = $entityData['quantity'] ?? 1;
             $entityData['unit_price_per_lf'] = $entityData['unit_price_per_lf'] ?? 0;
             $entityData['total_price'] = $entityData['total_price'] ?? 0;
-            $entityData['product_variant_id'] = $entityData['product_variant_id'] ?? null;
+
+            // Auto-link to Cabinet product if not specified
+            if (empty($entityData['product_variant_id'])) {
+                $entityData['product_variant_id'] = $this->getCabinetProductId();
+            }
 
             // Log cabinet data for debugging
             \Log::info('Creating cabinet entity', [
@@ -317,5 +321,25 @@ class EntityManagementService
         }
 
         return $options;
+    }
+
+    /**
+     * Get the Cabinet (Configurable) product ID from Products module
+     *
+     * @return int|null The Cabinet product ID or null if not found
+     */
+    protected function getCabinetProductId(): ?int
+    {
+        try {
+            $product = \DB::table('products_products')
+                ->where('reference', 'CABINET')
+                ->first(['id']);
+
+            return $product?->id;
+        } catch (\Exception $e) {
+            \Log::warning('Could not find Cabinet product', ['error' => $e->getMessage()]);
+
+            return null;
+        }
     }
 }

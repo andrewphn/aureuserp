@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill of Materials | {{PROJECT_NAME}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                width: 100%;
+                max-width: 7.5in;
+                margin: 0;
+                padding: 0;
+                page-break-after: always;
+                box-shadow: none;
+            }
+
+            .page:last-child {
+                page-break-after: auto;
+            }
+
+            .no-print { display: none !important; }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.4;
+            color: #1c1917;
+            background: #f5f5f5;
+            font-size: 10pt;
+        }
+
+        .page {
+            width: 8.5in;
+            min-height: 11in;
+            max-width: 100%;
+            margin: 20px auto;
+            padding: 0.5in;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1c1917;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #d4a574 0%, #8b5a2b 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .company-text h1 {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .company-text .tagline {
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #78716c;
+        }
+
+        .report-info {
+            text-align: right;
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            font-size: 10px;
+            color: #78716c;
+        }
+
+        .report-date {
+            font-size: 9px;
+            color: #a8a29e;
+            margin-top: 4px;
+        }
+
+        /* Project Info Bar */
+        .project-bar {
+            background: #1c1917;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .project-bar-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .project-bar-number {
+            font-size: 10px;
+            font-family: monospace;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .project-bar-customer {
+            font-size: 11px;
+            color: #a8a29e;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1c1917;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d4a574;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-count {
+            font-size: 10px;
+            font-weight: 500;
+            color: #78716c;
+            background: #f5f5f4;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        .data-table th {
+            background: #f5f5f4;
+            border: 1px solid #e7e5e4;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #57534e;
+        }
+
+        .data-table td {
+            border: 1px solid #e7e5e4;
+            padding: 10px 12px;
+            vertical-align: middle;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #fafaf9;
+        }
+
+        .data-table .text-right {
+            text-align: right;
+        }
+
+        .data-table .text-center {
+            text-align: center;
+        }
+
+        .data-table .font-mono {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 9px;
+        }
+
+        .data-table .font-bold {
+            font-weight: 600;
+        }
+
+        .data-table .text-muted {
+            color: #78716c;
+        }
+
+        .data-table .subtotal-row {
+            background: #f5f5f4 !important;
+            font-weight: 600;
+        }
+
+        .data-table .total-row {
+            background: #1c1917 !important;
+            color: white;
+            font-weight: 700;
+        }
+
+        .data-table .total-row td {
+            border-color: #1c1917;
+        }
+
+        /* Material Badges */
+        .material-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .material-plywood { background: #fef3c7; color: #92400e; }
+        .material-hardwood { background: #d1fae5; color: #065f46; }
+        .material-mdf { background: #e0e7ff; color: #3730a3; }
+        .material-melamine { background: #dbeafe; color: #1e40af; }
+        .material-other { background: #e7e5e4; color: #57534e; }
+
+        /* Hardware Type Badges */
+        .hardware-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .hardware-hinge { background: #dbeafe; color: #1e40af; }
+        .hardware-slide { background: #d1fae5; color: #065f46; }
+        .hardware-pull { background: #fef3c7; color: #92400e; }
+        .hardware-knob { background: #ede9fe; color: #5b21b6; }
+        .hardware-other { background: #e7e5e4; color: #57534e; }
+
+        /* Quantity Highlight */
+        .qty-cell {
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .qty-unit {
+            font-size: 8px;
+            color: #78716c;
+            font-weight: 400;
+            margin-left: 2px;
+        }
+
+        /* Cost Cell */
+        .cost-cell {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 10px;
+        }
+
+        .cost-cell.positive {
+            color: #059669;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: #fafaf9;
+            border: 2px solid #e7e5e4;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .summary-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #78716c;
+            margin-bottom: 12px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1c1917;
+        }
+
+        .summary-value.money {
+            color: #059669;
+        }
+
+        .summary-label {
+            font-size: 9px;
+            color: #78716c;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        /* Cabinet Reference */
+        .cabinet-ref {
+            font-size: 8px;
+            color: #78716c;
+            margin-top: 4px;
+        }
+
+        .cabinet-ref code {
+            background: #f5f5f4;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-family: monospace;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 12px;
+            border-top: 1px solid #e7e5e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8px;
+            color: #a8a29e;
+        }
+
+        .footer-notes {
+            max-width: 70%;
+        }
+
+        .footer-notes ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-notes li {
+            margin-bottom: 2px;
+        }
+
+        .footer-notes li:before {
+            content: "• ";
+            color: #d4a574;
+        }
+
+        .page-number {
+            font-weight: 500;
+        }
+
+        /* Print Button */
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .print-btn {
+            background: #1c1917;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            background: #292524;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #78716c;
+            font-style: italic;
+            background: #fafaf9;
+            border-radius: 6px;
+            border: 1px dashed #d6d3d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls no-print">
+        <button class="print-btn" onclick="window.print()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print BOM
+        </button>
+    </div>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <div class="company-logo">TCS</div>
+                <div class="company-text">
+                    <h1>The Carpenter's Son</h1>
+                    <div class="tagline">Fine Custom Woodworking</div>
+                </div>
+            </div>
+            <div class="report-info">
+                <div class="report-title">Bill of Materials</div>
+                <div class="report-subtitle">Complete Material & Hardware List</div>
+                <div class="report-date">Generated: {{GENERATED_DATE}}</div>
+            </div>
+        </div>
+
+        <!-- Project Bar -->
+        <div class="project-bar">
+            <div class="project-bar-left">
+                <span class="project-bar-name">{{PROJECT_NAME}}</span>
+                <span class="project-bar-number">{{PROJECT_NUMBER}}</span>
+            </div>
+            <span class="project-bar-customer">{{CUSTOMER_NAME}}</span>
+        </div>
+
+        <!-- Materials Section -->
+        <div class="section">
+            <div class="section-header">
+                <span>Sheet Goods & Lumber</span>
+                <span class="section-count">{{MATERIAL_COUNT}} items</span>
+            </div>
+            {{MATERIALS_TABLE}}
+        </div>
+
+        <!-- Hardware Section -->
+        <div class="section">
+            <div class="section-header">
+                <span>Hardware Components</span>
+                <span class="section-count">{{HARDWARE_COUNT}} items</span>
+            </div>
+            {{HARDWARE_TABLE}}
+        </div>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <div class="summary-title">BOM Summary</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{TOTAL_SHEET_GOODS}}</div>
+                    <div class="summary-label">Sheet Goods</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{TOTAL_HARDWARE}}</div>
+                    <div class="summary-label">Hardware Pieces</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value money">{{TOTAL_COST}}</div>
+                    <div class="summary-label">Est. Material Cost</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-notes">
+                <ul>
+                    <li>Quantities include 10% waste factor where applicable</li>
+                    <li>Verify all dimensions before cutting</li>
+                    <li>Hardware counts based on standard cabinet configurations</li>
+                </ul>
+            </div>
+            <div class="page-number">Page 1 of 1</div>
+        </div>
+    </div>
+</body>
+</html>

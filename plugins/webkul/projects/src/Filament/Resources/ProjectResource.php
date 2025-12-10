@@ -378,7 +378,10 @@ class ProjectResource extends Resource
                                         ->options(function (callable $get) {
                                             $countryId = $get('project_address.country_id');
                                             if (!$countryId) {
-                                                return [];
+                                                // Default to US states if no country selected (fixes state showing as ID instead of name)
+                                                $usCountryId = \Webkul\Support\Models\Country::where('code', 'US')->first()?->id;
+                                                return \Webkul\Support\Models\State::where('country_id', $usCountryId)
+                                                    ->pluck('name', 'id');
                                             }
                                             return \Webkul\Support\Models\State::where('country_id', $countryId)
                                                 ->pluck('name', 'id');

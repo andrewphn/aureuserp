@@ -29,6 +29,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  * @property string|null $pdf_notes
  * @property string|null $notes
  * @property int $sort_order
+ * @property string|null $room_code
  * @property string|null $cabinet_level
  * @property string|null $material_category
  * @property string|null $finish_option
@@ -48,6 +49,7 @@ class Room extends Model
     protected $fillable = [
         'project_id',
         'name',
+        'room_code',
         'room_type',
         'floor_number',
         'pdf_page_number',
@@ -75,6 +77,7 @@ class Room extends Model
      */
     protected $logAttributes = [
         'name' => 'Room Name',
+        'room_code' => 'Room Code',
         'room_type' => 'Room Type',
         'floor_number' => 'Floor Number',
         'pdf_page_number' => 'PDF Page Number',
@@ -82,6 +85,104 @@ class Room extends Model
         'pdf_detail_number' => 'PDF Detail Number',
         'notes' => 'Notes',
     ];
+
+    /**
+     * Room type to code prefix mapping
+     */
+    protected static array $roomTypePrefixes = [
+        'kitchen' => 'K',
+        'bathroom' => 'BTH',
+        'laundry' => 'LAU',
+        'office' => 'OFF',
+        'pantry' => 'PAN',
+        'mudroom' => 'MUD',
+        'closet' => 'CLO',
+        'bedroom' => 'BED',
+        'living_room' => 'LR',
+        'dining_room' => 'DR',
+        'garage' => 'GAR',
+        'basement' => 'BSM',
+        'utility' => 'UTL',
+    ];
+
+    /**
+     * Boot the model - auto-generate room_code on saving
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($room) {
+            // Only auto-generate if room_code is empty
+            if (empty($room->room_code)) {
+                $room->room_code = $room->generateRoomCode();
+            }
+        });
+
+        // When room_code changes, regenerate all descendant full_codes
+        static::updated(function ($room) {
+            if ($room->isDirty('room_code')) {
+                $room->regenerateDescendantCodes();
+            }
+        });
+    }
+
+    /**
+     * Generate the room code based on room type and sequence
+     * Format: K1, BTH1, LAU1, etc.
+     */
+    public function generateRoomCode(): string
+    {
+        $prefix = static::$roomTypePrefixes[$this->room_type] ?? 'RM';
+
+        // Get the sequence number (count of rooms with same type in same project + 1)
+        $sequence = $this->sort_order ?? 1;
+
+        // If sort_order isn't set, count existing rooms of same type
+        if (!$this->sort_order && $this->project_id) {
+            $existingCount = static::where('project_id', $this->project_id)
+                ->where('room_type', $this->room_type)
+                ->where('id', '!=', $this->id ?? 0)
+                ->count();
+            $sequence = $existingCount + 1;
+        }
+
+        return $prefix . $sequence;
+    }
+
+    /**
+     * Regenerate full_codes for all descendant entities
+     * Called when room_code changes
+     */
+    public function regenerateDescendantCodes(): void
+    {
+        // Regenerate codes for all locations, runs, sections, and components
+        $this->load('locations.cabinetRuns.cabinets.sections');
+
+        foreach ($this->locations as $location) {
+            foreach ($location->cabinetRuns as $run) {
+                foreach ($run->cabinets as $cabinet) {
+                    $cabinet->full_code = $cabinet->generateFullCode();
+                    $cabinet->saveQuietly();
+
+                    foreach ($cabinet->sections as $section) {
+                        $section->full_code = $section->generateFullCode();
+                        $section->saveQuietly();
+
+                        // Regenerate component codes
+                        foreach (['doors', 'drawers', 'shelves', 'pullouts'] as $relation) {
+                            if ($section->relationLoaded($relation)) {
+                                foreach ($section->$relation as $component) {
+                                    $component->full_code = $component->generateFullCode();
+                                    $component->saveQuietly();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Relationships
@@ -99,6 +200,14 @@ class Room extends Model
     public function locations(): HasMany
     {
         return $this->hasMany(RoomLocation::class, 'room_id');
+    }
+
+    /**
+     * Hardware requirements for this room
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'room_id');
     }
 
     /**
@@ -127,10 +236,38 @@ class Room extends Model
 
     /**
      * Get total linear feet for all cabinets in this room
+     * Calculates from cabinets with quantity, rolling up through locations and runs
      */
     public function getTotalLinearFeetAttribute(): float
     {
+        // Roll up from locations -> runs -> cabinets (with quantity)
+        if ($this->relationLoaded('locations')) {
+            return $this->locations->sum(fn($loc) => $loc->total_linear_feet);
+        }
+
+        return $this->locations()
+            ->with('cabinetRuns.cabinets')
+            ->get()
+            ->sum(fn($loc) => $loc->total_linear_feet);
+    }
+
+    /**
+     * Get stored linear feet (sum of stored values, not calculated)
+     */
+    public function getStoredLinearFeetAttribute(): float
+    {
         return $this->cabinets()->sum('linear_feet') ?? 0;
+    }
+
+    /**
+     * Check if there's a discrepancy between stored and calculated linear feet
+     */
+    public function getHasLinearFeetDiscrepancyAttribute(): bool
+    {
+        $calculated = $this->total_linear_feet;
+        $stored = $this->stored_linear_feet;
+
+        return abs($calculated - $stored) > 0.1;
     }
 
     /**

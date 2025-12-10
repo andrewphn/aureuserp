@@ -5,17 +5,22 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasFullCode;
 
 /**
  * Pullout Model
  *
  * Represents a cabinet pullout/accessory component.
  * Hierarchy: Project -> Room -> Location -> Cabinet Run -> Cabinet -> Section -> Pullout
+ *
+ * @property string|null $full_code Hierarchical code (e.g., TCS-0554-15WSANKATY-K1-SW-B1-C-PULL1)
  */
 class Pullout extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasFullCode;
 
     protected $table = 'projects_pullouts';
 
@@ -25,6 +30,7 @@ class Pullout extends Model
         'section_id',
         'pullout_number',
         'pullout_name',
+        'full_code',
         'sort_order',
         'pullout_type',
         'manufacturer',
@@ -36,6 +42,7 @@ class Pullout extends Model
         'mounting_type',
         'slide_type',
         'slide_model',
+        'slide_product_id',
         'slide_length_inches',
         'slide_quantity',
         'soft_close',
@@ -100,6 +107,24 @@ class Pullout extends Model
         return $this->belongsTo(CabinetSection::class, 'section_id');
     }
 
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function slideProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'slide_product_id');
+    }
+
+    /**
+     * Additional hardware/products for this pullout
+     */
+    public function hardwareRequirements(): HasMany
+    {
+        return $this->hasMany(HardwareRequirement::class, 'pullout_id');
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order');
@@ -111,5 +136,14 @@ class Pullout extends Model
         $h = $this->height_inches ?? '?';
         $d = $this->depth_inches ?? '?';
         return "{$w}\"W x {$h}\"H x {$d}\"D";
+    }
+
+    /**
+     * Get the component code for this pullout
+     * Format: PULL1, PULL2, etc.
+     */
+    public function getComponentCode(): string
+    {
+        return 'PULL' . ($this->pullout_number ?? 1);
     }
 }
