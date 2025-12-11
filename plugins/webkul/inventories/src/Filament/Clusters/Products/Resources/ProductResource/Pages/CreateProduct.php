@@ -26,19 +26,68 @@ class CreateProduct extends BaseCreateProduct
     protected static string $resource = ProductResource::class;
 
     /**
-     * Stores AI-identified product data temporarily for confirmation flow
+     * Get pending AI data from session
      */
-    public ?array $pendingAiData = null;
+    protected function getPendingAiData(): ?array
+    {
+        return session('ai_pending_data');
+    }
 
     /**
-     * Stores similar product matches for confirmation
+     * Set pending AI data in session
      */
-    public ?array $similarProducts = null;
+    protected function setPendingAiData(?array $data): void
+    {
+        if ($data === null) {
+            session()->forget('ai_pending_data');
+        } else {
+            session(['ai_pending_data' => $data]);
+        }
+    }
 
     /**
-     * Stores the permanent image path from photo upload
+     * Get similar products from session
      */
-    public ?string $pendingImagePath = null;
+    protected function getSimilarProducts(): array
+    {
+        return session('ai_similar_products', []);
+    }
+
+    /**
+     * Set similar products in session
+     */
+    protected function setSimilarProducts(array $products): void
+    {
+        session(['ai_similar_products' => $products]);
+    }
+
+    /**
+     * Get pending image path from session
+     */
+    protected function getPendingImagePath(): ?string
+    {
+        return session('ai_pending_image_path');
+    }
+
+    /**
+     * Set pending image path in session
+     */
+    protected function setPendingImagePath(?string $path): void
+    {
+        if ($path === null) {
+            session()->forget('ai_pending_image_path');
+        } else {
+            session(['ai_pending_image_path' => $path]);
+        }
+    }
+
+    /**
+     * Clear all pending AI session data
+     */
+    protected function clearPendingAiSession(): void
+    {
+        session()->forget(['ai_pending_data', 'ai_similar_products', 'ai_pending_image_path']);
+    }
 
     protected function getHeaderActions(): array
     {
@@ -377,17 +426,17 @@ class CreateProduct extends BaseCreateProduct
                             );
                         }
 
-                        // Store the data for the confirmation step
-                        $this->pendingAiData = $aiData;
-                        $this->similarProducts = $similarProducts;
-                        $this->pendingImagePath = $permanentPath;
+                        // Store the data in session for the confirmation step
+                        $this->setPendingAiData($aiData);
+                        $this->setSimilarProducts($similarProducts);
+                        $this->setPendingImagePath($permanentPath);
 
                         Log::info('AI Photo Identify - Searching for matches', [
                             'identified_as' => $identifiedName,
                             'similar_count' => count($similarProducts),
                         ]);
 
-                        // Show the confirmation action
+                        // Show the confirmation action or apply directly
                         if (!empty($similarProducts)) {
                             // Dispatch the confirmation modal
                             $this->mountAction('confirmProductChoice');
@@ -413,9 +462,13 @@ class CreateProduct extends BaseCreateProduct
             Action::make('confirmProductChoice')
                 ->label('Choose Product')
                 ->modalHeading('Similar Products Found')
-                ->modalDescription(fn () => $this->pendingAiData
-                    ? "AI identified: **{$this->pendingAiData['identified_product_name']}**\n\nWe found existing products that might match. Select one to update, or create a new product."
-                    : 'Select an option')
+                ->modalDescription(function () {
+                    $pendingData = $this->getPendingAiData();
+                    if ($pendingData && !empty($pendingData['identified_product_name'])) {
+                        return "AI identified: **{$pendingData['identified_product_name']}**\n\nWe found existing products that might match. Select one to update, or create a new product.";
+                    }
+                    return 'Select an option';
+                })
                 ->modalWidth('lg')
                 ->form(fn () => [
                     Radio::make('product_choice')
@@ -483,11 +536,12 @@ class CreateProduct extends BaseCreateProduct
             'new' => '➕ Create as NEW product',
         ];
 
-        if (empty($this->similarProducts)) {
+        $similarProducts = $this->getSimilarProducts();
+        if (empty($similarProducts)) {
             return $options;
         }
 
-        foreach ($this->similarProducts as $product) {
+        foreach ($similarProducts as $product) {
             $label = $product['name'];
             if (!empty($product['reference'])) {
                 $label .= " (SKU: {$product['reference']})";
@@ -513,11 +567,12 @@ class CreateProduct extends BaseCreateProduct
             'new' => 'Create a brand new product entry with the AI-identified details',
         ];
 
-        if (empty($this->similarProducts)) {
+        $similarProducts = $this->getSimilarProducts();
+        if (empty($similarProducts)) {
             return $descriptions;
         }
 
-        foreach ($this->similarProducts as $product) {
+        foreach ($similarProducts as $product) {
             $confidence = $product['confidence'] ?? 0;
             $matchType = $product['match_type'] ?? 'fuzzy';
             $price = number_format($product['price'] ?? 0, 2);
@@ -548,11 +603,12 @@ class CreateProduct extends BaseCreateProduct
             'use_ai' => '➕ Create NEW variant using AI data',
         ];
 
-        if (empty($this->pendingAiData['_parent_id'])) {
+        $pendingData = $this->getPendingAiData();
+        if (empty($pendingData['_parent_id'])) {
             return $options;
         }
 
-        $variants = GeminiProductService::getProductVariants($this->pendingAiData['_parent_id']);
+        $variants = GeminiProductService::getProductVariants($pendingData['_parent_id']);
 
         foreach ($variants as $variant) {
             $attrStr = '';
@@ -578,11 +634,12 @@ class CreateProduct extends BaseCreateProduct
             'use_ai' => 'Create a new variant with the AI-identified details',
         ];
 
-        if (empty($this->pendingAiData['_parent_id'])) {
+        $pendingData = $this->getPendingAiData();
+        if (empty($pendingData['_parent_id'])) {
             return $descriptions;
         }
 
-        $variants = GeminiProductService::getProductVariants($this->pendingAiData['_parent_id']);
+        $variants = GeminiProductService::getProductVariants($pendingData['_parent_id']);
 
         foreach ($variants as $variant) {
             $price = number_format($variant['price'] ?? 0, 2);
@@ -597,8 +654,10 @@ class CreateProduct extends BaseCreateProduct
      */
     protected function showVariantSelection(int $parentId): void
     {
-        // Store parent ID for variant selection
-        $this->pendingAiData['_parent_id'] = $parentId;
+        // Store parent ID for variant selection in session
+        $pendingData = $this->getPendingAiData() ?? [];
+        $pendingData['_parent_id'] = $parentId;
+        $this->setPendingAiData($pendingData);
 
         // Mount the variant selection action
         $this->mountAction('selectVariant');
@@ -609,24 +668,29 @@ class CreateProduct extends BaseCreateProduct
      */
     protected function redirectToExistingProduct(int $productId): void
     {
+        $pendingImagePath = $this->getPendingImagePath();
+
         // Add the uploaded image to the existing product if we have one
-        if (!empty($this->pendingImagePath)) {
+        if (!empty($pendingImagePath)) {
             $product = Product::find($productId);
             if ($product) {
                 $images = $product->images ?? [];
                 if (!is_array($images)) {
                     $images = [];
                 }
-                $images[] = $this->pendingImagePath;
+                $images[] = $pendingImagePath;
                 $product->images = $images;
                 $product->save();
 
                 Log::info('Added uploaded image to existing product', [
                     'product_id' => $productId,
-                    'image_path' => $this->pendingImagePath,
+                    'image_path' => $pendingImagePath,
                 ]);
             }
         }
+
+        // Clear session data
+        $this->clearPendingAiSession();
 
         Notification::make()
             ->title('Redirecting to existing product')
@@ -643,7 +707,10 @@ class CreateProduct extends BaseCreateProduct
      */
     protected function applyAiDataToForm(): void
     {
-        if (empty($this->pendingAiData)) {
+        $aiData = $this->getPendingAiData();
+        $pendingImagePath = $this->getPendingImagePath();
+
+        if (empty($aiData)) {
             Notification::make()
                 ->title('No AI Data')
                 ->body('No pending AI data to apply.')
@@ -652,7 +719,6 @@ class CreateProduct extends BaseCreateProduct
             return;
         }
 
-        $aiData = $this->pendingAiData;
         $currentData = $this->form->getRawState();
         $updates = [];
 
@@ -750,8 +816,8 @@ class CreateProduct extends BaseCreateProduct
         if (!is_array($existingImages)) {
             $existingImages = [];
         }
-        if (!empty($this->pendingImagePath)) {
-            $existingImages[] = $this->pendingImagePath;
+        if (!empty($pendingImagePath)) {
+            $existingImages[] = $pendingImagePath;
         }
 
         // Also download AI-suggested product image if available
@@ -795,9 +861,7 @@ class CreateProduct extends BaseCreateProduct
             'updates' => array_keys($updates),
         ]);
 
-        // Clear pending data
-        $this->pendingAiData = null;
-        $this->similarProducts = null;
-        $this->pendingImagePath = null;
+        // Clear pending session data
+        $this->clearPendingAiSession();
     }
 }
