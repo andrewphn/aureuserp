@@ -12,8 +12,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#111827">
 
-    {{-- Vite CSS --}}
-    @vite(['resources/css/app.css'])
+    {{-- Standalone Kiosk CSS (bypasses Tailwind v4 build issues) --}}
+    <link rel="stylesheet" href="/css/time-clock-kiosk.css">
 
     {{-- Livewire Styles --}}
     @livewireStyles
