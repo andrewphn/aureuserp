@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Services\ClockingService;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Webkul\Employee\Models\Employee;
 use Webkul\Security\Models\User;
@@ -43,13 +44,16 @@ class TimeClockKiosk extends Component
     public string $statusMessage = '';
     public string $statusType = 'info'; // 'success', 'error', 'info'
 
-    // Available employees for selection
+    // Available employees for selection (locked to prevent checksum issues)
+    #[Locked]
     public array $employees = [];
 
-    // Available projects
+    // Available projects (locked to prevent checksum issues)
+    #[Locked]
     public array $projects = [];
 
-    // Today's attendance summary
+    // Today's attendance summary (locked to prevent checksum issues)
+    #[Locked]
     public array $todayAttendance = [];
 
     protected ClockingService $clockingService;
