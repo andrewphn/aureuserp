@@ -56,6 +56,7 @@ Route::middleware(['web', 'kiosk.ip'])->get('/clock', function () {
     return view('pages.time-clock-kiosk');
 })->name('time-clock.kiosk');
 
+
 // Beacon Positioning Routes (for iBeacon indoor positioning)
 Route::middleware(['auth', 'web'])->prefix('admin')->name('filament.admin.beacon.')->group(function () {
     Route::post('/beacon/add', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'add'])->name('add');
