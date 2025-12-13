@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Livewire\Attributes\On;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Fieldset;
@@ -519,6 +520,22 @@ class CreateProject extends Page implements HasForms
                 ])
                 ->compact(),
 
+            // Cabinet Spec Builder - Detailed hierarchical specification
+            Section::make('Detailed Cabinet Specification')
+                ->description('Optional: Build room-by-room cabinet spec with auto-calculated totals')
+                ->icon('heroicon-o-squares-2x2')
+                ->schema([
+                    Hidden::make('cabinet_spec_data')
+                        ->default('[]'),
+                    Placeholder::make('cabinet_spec_builder')
+                        ->label('')
+                        ->content(fn (callable $get) => view('webkul-project::filament.components.cabinet-spec-builder-wrapper', [
+                            'specData' => json_decode($get('cabinet_spec_data') ?? '[]', true) ?: [],
+                        ])),
+                ])
+                ->collapsible()
+                ->collapsed(),
+
             // Customer History Panel (when customer selected)
             Section::make('Customer History')
                 ->schema([
@@ -819,6 +836,14 @@ class CreateProject extends Page implements HasForms
             Cache::forget('project_tags_most_used');
         }
 
+        // Create entities from cabinet spec data
+        if (!empty($data['cabinet_spec_data'])) {
+            $specData = json_decode($data['cabinet_spec_data'], true);
+            if (!empty($specData)) {
+                $this->createEntitiesFromSpec($project, $specData);
+            }
+        }
+
         // Delete the draft
         if ($this->draft) {
             $this->draft->delete();
@@ -831,6 +856,16 @@ class CreateProject extends Page implements HasForms
             ->send();
 
         $this->redirect(ProjectResource::getUrl('view', ['record' => $project->id]));
+    }
+
+    /**
+     * Handle spec data updates from CabinetSpecBuilder component
+     */
+    #[On('spec-data-updated')]
+    public function handleSpecDataUpdate(array $data): void
+    {
+        $this->data['cabinet_spec_data'] = json_encode($data);
+        $this->saveDraft();
     }
 
     /**
@@ -961,6 +996,73 @@ class CreateProject extends Page implements HasForms
 
             $revisionNumber++;
         }
+    }
+
+    /**
+     * Create Room, RoomLocation, CabinetRun, and Cabinet entities from spec data
+     *
+     * @param Project $project The project to attach entities to
+     * @param array $specData The hierarchical spec data from CabinetSpecBuilder
+     */
+    protected function createEntitiesFromSpec(Project $project, array $specData): void
+    {
+        $sortOrder = 1;
+
+        foreach ($specData as $roomData) {
+            // Create Room
+            $room = $project->rooms()->create([
+                'name' => $roomData['name'] ?? 'Unnamed Room',
+                'room_type' => $roomData['room_type'] ?? 'other',
+                'floor_number' => $roomData['floor_number'] ?? 1,
+                'sort_order' => $sortOrder++,
+            ]);
+
+            $locationSort = 1;
+            foreach ($roomData['children'] ?? [] as $locationData) {
+                // Create Room Location
+                $location = $room->roomLocations()->create([
+                    'project_id' => $project->id,
+                    'name' => $locationData['name'] ?? 'Unnamed Location',
+                    'location_type' => $locationData['location_type'] ?? 'wall',
+                    'cabinet_level' => $locationData['cabinet_level'] ?? 2,
+                    'sort_order' => $locationSort++,
+                ]);
+
+                $runSort = 1;
+                foreach ($locationData['children'] ?? [] as $runData) {
+                    // Create Cabinet Run
+                    $run = $location->cabinetRuns()->create([
+                        'project_id' => $project->id,
+                        'room_id' => $room->id,
+                        'name' => $runData['name'] ?? 'Unnamed Run',
+                        'run_type' => $runData['run_type'] ?? 'base',
+                        'sort_order' => $runSort++,
+                    ]);
+
+                    $cabinetSort = 1;
+                    foreach ($runData['children'] ?? [] as $cabinetData) {
+                        // Create Cabinet Specification
+                        $run->cabinetSpecifications()->create([
+                            'project_id' => $project->id,
+                            'room_id' => $room->id,
+                            'room_location_id' => $location->id,
+                            'name' => $cabinetData['name'] ?? null,
+                            'cabinet_type' => $cabinetData['cabinet_type'] ?? 'base',
+                            'length_inches' => $cabinetData['length_inches'] ?? null,
+                            'depth_inches' => $cabinetData['depth_inches'] ?? null,
+                            'height_inches' => $cabinetData['height_inches'] ?? null,
+                            'quantity' => $cabinetData['quantity'] ?? 1,
+                            'sort_order' => $cabinetSort++,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        \Log::info('CabinetSpecBuilder: Created entities from spec', [
+            'project_id' => $project->id,
+            'rooms_count' => count($specData),
+        ]);
     }
 
     /**

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PdfAnnotationController;
+use App\Http\Controllers\Api\ClockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -294,4 +295,60 @@ Route::middleware(['web', 'auth:web'])->prefix('footer')->name('api.footer.')->g
     Route::post('/reset/{contextType}', [App\Http\Controllers\Api\FooterApiController::class, 'resetToDefaults'])
         ->name('reset')
         ->where('contextType', 'project|sale|inventory|production');
+});
+
+// Cabinet AI Assistant API Routes
+Route::middleware(['web', 'auth:web'])->prefix('cabinet-ai')->name('api.cabinet-ai.')->group(function () {
+    // Send message to AI assistant
+    Route::post('/message', [App\Http\Controllers\Api\CabinetAiController::class, 'sendMessage'])
+        ->middleware('throttle:30,1')
+        ->name('message');
+
+    // Analyze floor plan or cabinet image
+    Route::post('/image', [App\Http\Controllers\Api\CabinetAiController::class, 'analyzeImage'])
+        ->middleware('throttle:10,1')
+        ->name('image');
+
+    // Get conversation history
+    Route::get('/history/{sessionId}', [App\Http\Controllers\Api\CabinetAiController::class, 'getHistory'])
+        ->name('history');
+
+    // Clear conversation history
+    Route::delete('/history/{sessionId}', [App\Http\Controllers\Api\CabinetAiController::class, 'clearHistory'])
+        ->name('history.clear');
+
+    // Execute AI commands directly
+    Route::post('/execute', [App\Http\Controllers\Api\CabinetAiController::class, 'executeCommands'])
+        ->middleware('throttle:30,1')
+        ->name('execute');
+
+    // Get current spec data for a project
+    Route::get('/spec/{projectId}', [App\Http\Controllers\Api\CabinetAiController::class, 'getSpecData'])
+        ->name('spec');
+});
+
+// Clock API Routes - Time Clock System for TCS Employees
+Route::middleware(['web', 'auth:web'])->prefix('clock')->name('api.clock.')->group(function () {
+    // Authenticated user clock operations
+    Route::get('/status', [ClockController::class, 'status'])->name('status');
+    Route::post('/in', [ClockController::class, 'clockIn'])->name('in');
+    Route::post('/out', [ClockController::class, 'clockOut'])->name('out');
+    Route::post('/manual', [ClockController::class, 'addManualEntry'])->name('manual');
+    Route::get('/weekly', [ClockController::class, 'weeklySummary'])->name('weekly');
+
+    // Owner/Manager operations
+    Route::get('/attendance', [ClockController::class, 'todayAttendance'])->name('attendance');
+    Route::get('/status/{userId}', [ClockController::class, 'getUserStatus'])->name('user.status');
+    Route::post('/approve/{entryId}', [ClockController::class, 'approveEntry'])->name('approve');
+    Route::post('/assign-project/{entryId}', [ClockController::class, 'assignToProject'])->name('assign-project');
+
+    // Kiosk mode (shop floor tablet)
+    Route::post('/kiosk/in', [ClockController::class, 'kioskClockIn'])->name('kiosk.in');
+    Route::post('/kiosk/out', [ClockController::class, 'kioskClockOut'])->name('kiosk.out');
+
+    // Export operations
+    Route::get('/export/weekly', [ClockController::class, 'exportWeekly'])->name('export.weekly');
+    Route::get('/export/weekly/{userId}', [ClockController::class, 'exportUserWeekly'])->name('export.weekly.user');
+    Route::get('/export/team', [ClockController::class, 'exportTeamSummary'])->name('export.team');
+    Route::get('/export/payroll', [ClockController::class, 'exportPayroll'])->name('export.payroll');
 });

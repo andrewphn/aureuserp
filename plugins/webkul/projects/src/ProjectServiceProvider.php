@@ -149,6 +149,8 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('project-summary-sidebar', \Webkul\Project\Livewire\ProjectSummarySidebar::class);
         \Livewire\Livewire::component('inspiration-gallery', \Webkul\Project\Livewire\InspirationGalleryComponent::class);
         \Livewire\Livewire::component('pdf-document-manager', \Webkul\Project\Livewire\PdfDocumentManagerComponent::class);
+        \Livewire\Livewire::component('cabinet-spec-builder', \Webkul\Project\Livewire\CabinetSpecBuilder::class);
+        \Livewire\Livewire::component('cabinet-ai-assistant', \Webkul\Project\Livewire\CabinetAiAssistant::class);
 
         // Register event listeners for project stage changes
         Event::listen(ProjectStageChanged::class, HandleProjectStageChange::class);
