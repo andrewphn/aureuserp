@@ -330,6 +330,71 @@ body {
 }
 
 /* Footer */
+/* PIN Entry */
+.pin-display {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.pin-dot {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background-color: #374151;
+    border: 2px solid #6b7280;
+    transition: all 0.2s;
+}
+
+.pin-dot-filled {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+}
+
+/* Numpad */
+.numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.numpad-btn {
+    padding: 1.25rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    background-color: #374151;
+    border: none;
+    border-radius: 0.75rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.numpad-btn:hover {
+    background-color: #4b5563;
+}
+
+.numpad-btn:active {
+    background-color: #6b7280;
+    transform: scale(0.95);
+}
+
+.numpad-action {
+    font-size: 0.875rem;
+    background-color: #1f2937;
+}
+
+.numpad-action:hover {
+    background-color: #374151;
+}
+
+/* Footer */
 .kiosk-footer {
     position: fixed;
     bottom: 1rem;

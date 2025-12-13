@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register custom middleware aliases
         $middleware->alias([
             'validate.annotation.access' => \App\Http\Middleware\ValidateAnnotationAccess::class,
+            'kiosk.ip' => \App\Http\Middleware\KioskIpRestriction::class,
         ]);
 
         // Fix 419 CSRF errors with Livewire v3 + FilamentPHP v4

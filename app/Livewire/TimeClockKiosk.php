@@ -15,8 +15,11 @@ use Webkul\Security\Models\User;
  * Touch-friendly interface for employees to clock in/out
  * from a shared tablet in the shop.
  *
+ * Security Features:
+ * - IP restriction (middleware)
+ * - Employee PIN verification (4 digits)
+ *
  * Features:
- * - Employee PIN entry (4 digits)
  * - Clock in/out with single tap
  * - Lunch duration selection
  * - Project selection on clock out
@@ -24,19 +27,25 @@ use Webkul\Security\Models\User;
  */
 class TimeClockKiosk extends Component
 {
-    // Mode: 'select' (choose employee), 'clock' (clock in/out)
+    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out)
     public string $mode = 'select';
 
     // Currently selected user
     public ?int $selectedUserId = null;
     public ?string $selectedUserName = null;
+    public ?int $selectedEmployeeId = null;
+
+    // PIN verification
+    public string $pin = '';
+    public bool $pinVerified = false;
+    public int $pinAttempts = 0;
+    public const MAX_PIN_ATTEMPTS = 3;
 
     // Clock state
     public bool $isClockedIn = false;
     public ?string $clockedInAt = null;
 
     // Form inputs
-    public string $pin = '';
     public int $breakDurationMinutes = 60;
     public ?int $selectedProjectId = null;
 
@@ -71,6 +80,22 @@ class TimeClockKiosk extends Component
     }
 
     /**
+     * Check if PIN is required
+     */
+    public function isPinRequired(): bool
+    {
+        return config('kiosk.pin_required', true);
+    }
+
+    /**
+     * Get PIN length requirement
+     */
+    public function getPinLength(): int
+    {
+        return config('kiosk.pin_length', 4);
+    }
+
+    /**
      * Load active employees for kiosk selection
      */
     protected function loadEmployees(): void
@@ -85,6 +110,7 @@ class TimeClockKiosk extends Component
                 'id' => $emp->user_id,
                 'name' => $emp->name,
                 'employee_id' => $emp->id,
+                'has_pin' => !empty($emp->pin),
             ])
             ->toArray();
     }
@@ -114,22 +140,117 @@ class TimeClockKiosk extends Component
     /**
      * Select an employee from the list
      */
-    public function selectEmployee(int $userId, string $name): void
+    public function selectEmployee(int $userId, string $name, int $employeeId): void
     {
         $this->selectedUserId = $userId;
         $this->selectedUserName = $name;
-        $this->mode = 'clock';
-
-        // Check current clock status
-        $status = $this->clockingService->getStatus($userId);
-        $this->isClockedIn = $status['is_clocked_in'];
-        $this->clockedInAt = $status['clock_in_time'];
+        $this->selectedEmployeeId = $employeeId;
 
         // Reset form fields
         $this->pin = '';
+        $this->pinVerified = false;
+        $this->pinAttempts = 0;
         $this->breakDurationMinutes = 60;
         $this->selectedProjectId = null;
         $this->statusMessage = '';
+
+        // Check if PIN is required
+        if ($this->isPinRequired()) {
+            $employee = Employee::find($employeeId);
+
+            // If employee has no PIN set, show error
+            if (empty($employee?->pin)) {
+                $this->setStatus('No PIN set. Please ask your manager to set up your PIN.', 'error');
+                $this->mode = 'select';
+                return;
+            }
+
+            $this->mode = 'pin';
+        } else {
+            // Skip PIN, go directly to clock mode
+            $this->pinVerified = true;
+            $this->loadClockStatus();
+            $this->mode = 'clock';
+        }
+    }
+
+    /**
+     * Verify employee PIN
+     */
+    public function verifyPin(): void
+    {
+        if (!$this->selectedEmployeeId) {
+            $this->setStatus('No employee selected', 'error');
+            return;
+        }
+
+        $employee = Employee::find($this->selectedEmployeeId);
+
+        if (!$employee) {
+            $this->setStatus('Employee not found', 'error');
+            return;
+        }
+
+        // Check PIN
+        if ($employee->pin === $this->pin) {
+            $this->pinVerified = true;
+            $this->pinAttempts = 0;
+            $this->loadClockStatus();
+            $this->mode = 'clock';
+            $this->setStatus('', 'info');
+        } else {
+            $this->pinAttempts++;
+            $this->pin = '';
+
+            if ($this->pinAttempts >= self::MAX_PIN_ATTEMPTS) {
+                $this->setStatus('Too many attempts. Please try again later.', 'error');
+                $this->mode = 'select';
+                $this->selectedUserId = null;
+                $this->selectedUserName = null;
+                $this->selectedEmployeeId = null;
+            } else {
+                $remaining = self::MAX_PIN_ATTEMPTS - $this->pinAttempts;
+                $this->setStatus("Incorrect PIN. {$remaining} attempts remaining.", 'error');
+            }
+        }
+    }
+
+    /**
+     * Add digit to PIN
+     */
+    public function addPinDigit(string $digit): void
+    {
+        if (strlen($this->pin) < $this->getPinLength()) {
+            $this->pin .= $digit;
+        }
+    }
+
+    /**
+     * Remove last digit from PIN
+     */
+    public function removePinDigit(): void
+    {
+        $this->pin = substr($this->pin, 0, -1);
+    }
+
+    /**
+     * Clear PIN
+     */
+    public function clearPin(): void
+    {
+        $this->pin = '';
+    }
+
+    /**
+     * Load clock status for selected employee
+     */
+    protected function loadClockStatus(): void
+    {
+        if ($this->selectedUserId) {
+            $status = $this->clockingService->getStatus($this->selectedUserId);
+            $this->isClockedIn = $status['is_clocked_in'];
+            $this->clockedInAt = $status['clock_in_time'];
+        }
     }
 
     /**
@@ -140,9 +261,23 @@ class TimeClockKiosk extends Component
         $this->mode = 'select';
         $this->selectedUserId = null;
         $this->selectedUserName = null;
+        $this->selectedEmployeeId = null;
         $this->pin = '';
+        $this->pinVerified = false;
+        $this->pinAttempts = 0;
         $this->statusMessage = '';
         $this->loadTodayAttendance();
+    }
+
+    /**
+     * Go back to PIN entry
+     */
+    public function backToPin(): void
+    {
+        $this->mode = 'pin';
+        $this->pin = '';
+        $this->pinVerified = false;
+        $this->statusMessage = '';
     }
 
     /**
@@ -152,6 +287,12 @@ class TimeClockKiosk extends Component
     {
         if (!$this->selectedUserId) {
             $this->setStatus('No employee selected', 'error');
+            return;
+        }
+
+        if ($this->isPinRequired() && !$this->pinVerified) {
+            $this->setStatus('PIN verification required', 'error');
+            $this->mode = 'pin';
             return;
         }
 
@@ -174,6 +315,12 @@ class TimeClockKiosk extends Component
     {
         if (!$this->selectedUserId) {
             $this->setStatus('No employee selected', 'error');
+            return;
+        }
+
+        if ($this->isPinRequired() && !$this->pinVerified) {
+            $this->setStatus('PIN verification required', 'error');
+            $this->mode = 'pin';
             return;
         }
 
