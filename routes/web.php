@@ -51,7 +51,8 @@ Route::middleware(['auth', 'web'])->group(function () {
 
 // Time Clock Kiosk Route (Shop Floor Tablet)
 // Access: /clock - Touch-friendly interface for employees to clock in/out
-Route::middleware(['web', 'auth'])->get('/clock', function () {
+// NO AUTH - This is a shared tablet kiosk, employees select their name to clock in/out
+Route::middleware(['web'])->get('/clock', function () {
     return view('pages.time-clock-kiosk');
 })->name('time-clock.kiosk');
 
