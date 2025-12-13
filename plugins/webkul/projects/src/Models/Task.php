@@ -121,6 +121,11 @@ class Task extends Model implements Sortable
         'room_location_id',
         'cabinet_run_id',
         'cabinet_id',
+        // Task lifecycle tracking
+        'started_at',
+        'completed_at',
+        'started_by',
+        'completed_by',
     ];
 
     /**
@@ -142,6 +147,9 @@ class Task extends Model implements Sortable
         'total_hours_spent'   => 'float',
         'overtime'            => 'float',
         'state'               => TaskState::class,
+        // Task lifecycle tracking
+        'started_at'          => 'datetime',
+        'completed_at'        => 'datetime',
     ];
 
     protected array $logAttributes = [
@@ -245,6 +253,26 @@ class Task extends Model implements Sortable
     }
 
     /**
+     * User who started the task
+     *
+     * @return BelongsTo
+     */
+    public function startedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'started_by');
+    }
+
+    /**
+     * User who completed the task
+     *
+     * @return BelongsTo
+     */
+    public function completedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
+
+    /**
      * Users
      *
      * @return BelongsToMany
@@ -345,6 +373,35 @@ class Task extends Model implements Sortable
     protected static function boot()
     {
         parent::boot();
+
+        // Track state changes and set timestamps
+        static::updating(function ($task) {
+            $originalState = $task->getOriginal('state');
+            $newState = $task->state;
+
+            // If state is being changed
+            if ($originalState !== $newState) {
+                $userId = auth()->id();
+
+                // Started: When changing TO in_progress (and not already started)
+                if ($newState === TaskState::IN_PROGRESS && !$task->started_at) {
+                    $task->started_at = now();
+                    $task->started_by = $userId;
+                }
+
+                // Completed: When changing TO done
+                if ($newState === TaskState::DONE) {
+                    $task->completed_at = now();
+                    $task->completed_by = $userId;
+                }
+
+                // If re-opened (changed from done to something else), clear completed
+                if ($originalState === TaskState::DONE && $newState !== TaskState::DONE) {
+                    $task->completed_at = null;
+                    $task->completed_by = null;
+                }
+            }
+        });
 
         static::updated(function ($task) {
             $task->timesheets()->update([
