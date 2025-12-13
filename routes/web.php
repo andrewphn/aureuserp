@@ -48,3 +48,18 @@ Route::middleware(['auth', 'web'])->group(function () {
         }
     })->name('employee.intake-form');
 });
+
+// Time Clock Kiosk Route (Shop Floor Tablet)
+// Access: /clock - Touch-friendly interface for employees to clock in/out
+Route::middleware(['web', 'auth'])->get('/clock', function () {
+    return view('pages.time-clock-kiosk');
+})->name('time-clock.kiosk');
+
+// Beacon Positioning Routes (for iBeacon indoor positioning)
+Route::middleware(['auth', 'web'])->prefix('admin')->name('filament.admin.beacon.')->group(function () {
+    Route::post('/beacon/add', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'add'])->name('add');
+    Route::post('/beacon/remove', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'remove'])->name('remove');
+    Route::get('/beacon/config', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'config'])->name('config');
+    Route::get('/beacon/status', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'status'])->name('status');
+    Route::post('/beacon/calculate', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'calculatePosition'])->name('calculate');
+});

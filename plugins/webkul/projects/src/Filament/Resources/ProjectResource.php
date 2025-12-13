@@ -71,6 +71,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\RoomLocat
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRunsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\ProjectMediaRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetSpecTreeRelationManager;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
@@ -1234,6 +1235,11 @@ class ProjectResource extends Resource
                 CabinetsRelationManager::class,
             ])
                 ->icon('heroicon-o-cube'),
+
+            RelationGroup::make('Cabinet Spec (Tree)', [
+                CabinetSpecTreeRelationManager::class,
+            ])
+                ->icon('heroicon-o-rectangle-group'),
 
             RelationGroup::make('Assets & Documents', [
                 ProjectMediaRelationManager::class,
