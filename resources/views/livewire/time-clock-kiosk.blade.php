@@ -22,7 +22,7 @@
             <div class="employee-buttons">
                 @foreach($employees as $employee)
                     <button
-                        wire:click="selectEmployee({{ $employee['id'] }}, '{{ addslashes($employee['name']) }}')"
+                        wire:click="selectEmployee({{ $employee['id'] }}, '{{ addslashes($employee['name']) }}', {{ $employee['employee_id'] }})"
                         class="employee-btn"
                     >
                         {{ $employee['name'] }}
@@ -50,6 +50,54 @@
                     </div>
                 </div>
             @endif
+        </div>
+    @endif
+
+    {{-- PIN Entry Mode --}}
+    @if($mode === 'pin')
+        <div class="clock-panel">
+            <button wire:click="backToSelect" class="back-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to employee list
+            </button>
+
+            <div class="clock-card">
+                <h2 class="employee-name">{{ $selectedUserName }}</h2>
+                <p class="clock-status">Enter your {{ $this->getPinLength() }}-digit PIN</p>
+
+                {{-- PIN Display --}}
+                <div class="pin-display">
+                    @for($i = 0; $i < $this->getPinLength(); $i++)
+                        <div class="pin-dot {{ strlen($pin) > $i ? 'pin-dot-filled' : '' }}"></div>
+                    @endfor
+                </div>
+
+                {{-- Numpad --}}
+                <div class="numpad">
+                    @foreach([1,2,3,4,5,6,7,8,9] as $num)
+                        <button wire:click="addPinDigit('{{ $num }}')" class="numpad-btn">{{ $num }}</button>
+                    @endforeach
+                    <button wire:click="clearPin" class="numpad-btn numpad-action">Clear</button>
+                    <button wire:click="addPinDigit('0')" class="numpad-btn">0</button>
+                    <button wire:click="removePinDigit" class="numpad-btn numpad-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.5rem; height: 1.5rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Submit PIN --}}
+                <button
+                    wire:click="verifyPin"
+                    class="clock-in-btn"
+                    style="margin-top: 1.5rem;"
+                    {{ strlen($pin) < $this->getPinLength() ? 'disabled' : '' }}
+                >
+                    Continue
+                </button>
+            </div>
         </div>
     @endif
 
