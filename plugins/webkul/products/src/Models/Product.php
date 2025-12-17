@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Product\Database\Factories\ProductFactory;
@@ -64,9 +67,9 @@ use Webkul\Support\Models\UOM;
  * @property-read \Illuminate\Database\Eloquent\Collection $tags
  *
  */
-class Product extends Model implements Sortable
+class Product extends Model implements Sortable, HasMedia
 {
-    use HasChatter, HasFactory, HasLogActivity, SoftDeletes, SortableTrait;
+    use HasChatter, HasFactory, HasLogActivity, InteractsWithMedia, SoftDeletes, SortableTrait;
 
     /**
      * Table name.
@@ -312,5 +315,49 @@ class Product extends Model implements Sortable
     protected static function newFactory(): ProductFactory
     {
         return ProductFactory::new();
+    }
+
+    /**
+     * Register media collections for the product.
+     * Uses Spatie Media Library for organized image management.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('product-images')
+            ->useDisk('public')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+    }
+
+    /**
+     * Register media conversions for responsive images.
+     * Creates optimized versions: thumbnail (150px), small (300px), medium (600px), large (1200px)
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumbnail')
+            ->width(150)
+            ->height(150)
+            ->sharpen(10)
+            ->optimize()
+            ->nonQueued();
+
+        $this->addMediaConversion('small')
+            ->width(300)
+            ->height(300)
+            ->sharpen(10)
+            ->optimize()
+            ->nonQueued();
+
+        $this->addMediaConversion('medium')
+            ->width(600)
+            ->height(600)
+            ->optimize()
+            ->nonQueued();
+
+        $this->addMediaConversion('large')
+            ->width(1200)
+            ->height(1200)
+            ->optimize()
+            ->nonQueued();
     }
 }
