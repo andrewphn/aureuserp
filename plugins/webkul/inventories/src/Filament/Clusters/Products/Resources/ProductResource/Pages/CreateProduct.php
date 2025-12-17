@@ -438,8 +438,17 @@ class CreateProduct extends BaseCreateProduct
 
                         // Show the confirmation action or apply directly
                         if (!empty($similarProducts)) {
-                            // Dispatch the confirmation modal
-                            $this->mountAction('confirmProductChoice');
+                            // Show notification with options - user can click the confirmation action button
+                            $identifiedName = $aiData['identified_product_name'] ?? 'Unknown';
+                            Notification::make()
+                                ->title('Similar Products Found!')
+                                ->body("Identified: {$identifiedName}. Found " . count($similarProducts) . " similar product(s). Click 'Choose Product' button to select, or the form has been pre-filled - review and Create.")
+                                ->warning()
+                                ->persistent()
+                                ->send();
+
+                            // Also apply the AI data to form so user can just create if they want
+                            $this->applyAiDataToForm();
                         } else {
                             // No matches found, proceed directly
                             $this->applyAiDataToForm();

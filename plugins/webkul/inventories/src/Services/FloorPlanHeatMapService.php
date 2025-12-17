@@ -8,23 +8,43 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class FloorPlanHeatMapService
 {
-    // Factory floor reference point (from Polycam scan)
-    private const FACTORY_LAT = 41.518394;
-    private const FACTORY_LON = -74.007981;
+    // Factory floor corner coordinates
+    // UPDATED 12/10/2025: Based on Google Maps satellite measurement of full building
+    // Building dimensions: ~90 ft wide (E-W) x ~130 ft long (N-S)
+    // Conversion factors at lat 41.518°:
+    //   1 ft ≈ 0.00000275° latitude
+    //   1 ft ≈ 0.00000489° longitude
 
-    // Building dimensions in feet (from CSV)
-    private const BUILDING_WIDTH_FT = 87.66;  // 87' 7.9"
-    private const BUILDING_LENGTH_FT = 48.03; // 48' 0.2"
+    // Bottom left corner (SW) - user provided anchor point
+    private const BOTTOM_LEFT_LAT = 41.51832616862088;
+    private const BOTTOM_LEFT_LON = -74.00811882010751;
+
+    // Bottom right corner (SE) - anchor + 90ft east (90 × 0.00000489 = 0.00044° lon)
+    private const BOTTOM_RIGHT_LAT = 41.51832616862088;
+    private const BOTTOM_RIGHT_LON = -74.00767882010751;
+
+    // Top left corner (NW) - anchor + 130ft north (130 × 0.00000275 = 0.000358° lat)
+    private const TOP_LEFT_LAT = 41.51868416862088;
+    private const TOP_LEFT_LON = -74.00811882010751;
+
+    // Top right corner (NE)
+    private const TOP_RIGHT_LAT = 41.51868416862088;
+    private const TOP_RIGHT_LON = -74.00767882010751;
+
+    // Building dimensions in feet (from Google Maps measurement)
+    private const BUILDING_WIDTH_FT = 90.0;   // E-W dimension
+    private const BUILDING_LENGTH_FT = 130.0; // N-S dimension (full warehouse)
 
     // Floor plan image dimensions (PNG)
     private const IMAGE_WIDTH = 1702;
     private const IMAGE_HEIGHT = 3085;
 
-    // Floor plan content bounds (approximate pixels where the actual floor starts/ends)
-    private const FLOOR_LEFT = 65;
-    private const FLOOR_TOP = 95;
-    private const FLOOR_RIGHT = 1640;
-    private const FLOOR_BOTTOM = 2920;
+    // Floor plan content bounds (pixels where the building is drawn in the PNG)
+    // These are calibrated to match the Polycam floor plan export
+    private const FLOOR_LEFT = 40;
+    private const FLOOR_TOP = 160;
+    private const FLOOR_RIGHT = 290;
+    private const FLOOR_BOTTOM = 860;
 
     private string $floorPlanPath;
 
@@ -113,36 +133,46 @@ class FloorPlanHeatMapService
 
     /**
      * Convert GPS coordinates to floor plan pixel position
+     * Uses corner coordinates for accurate mapping
      */
     public function gpsToFloorPlanPosition(float $lat, float $lon): ?array
     {
-        // Calculate offset from factory reference point in meters
-        $latOffset = ($lat - self::FACTORY_LAT) * 111320; // ~111.32km per degree latitude
-        $lonOffset = ($lon - self::FACTORY_LON) * 111320 * cos(deg2rad(self::FACTORY_LAT));
+        // Building bounds from corner coordinates
+        $minLat = min(self::BOTTOM_LEFT_LAT, self::BOTTOM_RIGHT_LAT);
+        $maxLat = max(self::TOP_LEFT_LAT, self::TOP_RIGHT_LAT);
+        $minLon = min(self::BOTTOM_LEFT_LON, self::TOP_LEFT_LON);
+        $maxLon = max(self::BOTTOM_RIGHT_LON, self::TOP_RIGHT_LON);
 
-        // Convert meters to feet
-        $latOffsetFt = $latOffset * 3.28084;
-        $lonOffsetFt = $lonOffset * 3.28084;
+        // Add tolerance for GPS drift (about 20 meters = ~0.0002 degrees)
+        // Also accounts for interior photos being slightly outside calculated bounds
+        $tolerance = 0.0003;
 
-        // Check if point is within building bounds (with some tolerance)
-        $tolerance = 10; // feet
-        if (abs($latOffsetFt) > (self::BUILDING_LENGTH_FT / 2 + $tolerance) ||
-            abs($lonOffsetFt) > (self::BUILDING_WIDTH_FT / 2 + $tolerance)) {
+        // Check if point is within building bounds (with tolerance)
+        if ($lat < ($minLat - $tolerance) || $lat > ($maxLat + $tolerance) ||
+            $lon < ($minLon - $tolerance) || $lon > ($maxLon + $tolerance)) {
             return null; // Outside building
         }
 
-        // Map to floor plan pixels
-        // Note: The floor plan is oriented with North up
-        $floorWidth = self::FLOOR_RIGHT - self::FLOOR_LEFT;
-        $floorHeight = self::FLOOR_BOTTOM - self::FLOOR_TOP;
+        // Calculate normalized position (0-1 range)
+        $latRange = $maxLat - $minLat;
+        $lonRange = $maxLon - $minLon;
 
-        // Normalize position (0-1 range from building center)
-        $normalizedX = ($lonOffsetFt / self::BUILDING_WIDTH_FT) + 0.5;
-        $normalizedY = 0.5 - ($latOffsetFt / self::BUILDING_LENGTH_FT); // Invert Y
+        // X: longitude (left to right, west to east)
+        // Lon increases going east (right), so normalize directly
+        $normalizedX = ($lon - $minLon) / $lonRange;
+
+        // Y: latitude (top to bottom in image, but north is up)
+        // Higher latitude = north = top of building = top of floor plan image
+        // Floor plan Y increases downward, so invert
+        $normalizedY = 1 - (($lat - $minLat) / $latRange);
 
         // Clamp to valid range
         $normalizedX = max(0, min(1, $normalizedX));
         $normalizedY = max(0, min(1, $normalizedY));
+
+        // Map to floor plan pixels
+        $floorWidth = self::FLOOR_RIGHT - self::FLOOR_LEFT;
+        $floorHeight = self::FLOOR_BOTTOM - self::FLOOR_TOP;
 
         return [
             'x' => (int) (self::FLOOR_LEFT + ($normalizedX * $floorWidth)),
@@ -312,11 +342,11 @@ class FloorPlanHeatMapService
     {
         return [
             'address' => '392 N Montgomery St, Newburgh, NY',
-            'latitude' => self::FACTORY_LAT,
-            'longitude' => self::FACTORY_LON,
+            'latitude' => self::BOTTOM_LEFT_LAT,
+            'longitude' => self::BOTTOM_LEFT_LON,
             'width_ft' => self::BUILDING_WIDTH_FT,
             'length_ft' => self::BUILDING_LENGTH_FT,
-            'area_sqft' => 4252.2,
+            'area_sqft' => self::BUILDING_WIDTH_FT * self::BUILDING_LENGTH_FT,
             'floor_plan_image' => $this->floorPlanPath,
         ];
     }

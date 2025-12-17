@@ -14,11 +14,14 @@ enum ProductType: string implements HasLabel
 
     case SERVICE = 'service';
 
+    case CONSUMABLE = 'consumable';
+
     public function getLabel(): string
     {
         return match ($this) {
-            self::GOODS   => __('products::enums/product-type.goods'),
-            self::SERVICE => __('products::enums/product-type.service'),
+            self::GOODS      => __('products::enums/product-type.goods'),
+            self::SERVICE    => __('products::enums/product-type.service'),
+            self::CONSUMABLE => __('products::enums/product-type.consumable'),
         };
     }
 }

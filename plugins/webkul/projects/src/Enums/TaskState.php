@@ -10,6 +10,7 @@ use Filament\Support\Contracts;
  */
 enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contracts\HasLabel
 {
+    case PENDING = 'pending';
     case IN_PROGRESS = 'in_progress';
     case CHANGE_REQUESTED = 'change_requested';
     case APPROVED = 'approved';
@@ -39,6 +40,7 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
     public static function options(): array
     {
         return [
+            self::PENDING->value          => __('webkul-project::enums/task-state.pending'),
             self::IN_PROGRESS->value      => __('webkul-project::enums/task-state.in-progress'),
             self::CHANGE_REQUESTED->value => __('webkul-project::enums/task-state.change-requested'),
             self::APPROVED->value         => __('webkul-project::enums/task-state.approved'),
@@ -55,6 +57,7 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
     public static function icons(): array
     {
         return [
+            self::PENDING->value          => 'heroicon-o-clock',
             self::IN_PROGRESS->value      => 'heroicon-m-play-circle',
             self::CHANGE_REQUESTED->value => 'heroicon-s-exclamation-circle',
             self::APPROVED->value         => 'heroicon-o-check-circle',
@@ -71,6 +74,7 @@ enum TaskState: string implements Contracts\HasColor, Contracts\HasIcon, Contrac
     public static function colors(): array
     {
         return [
+            self::PENDING->value          => 'info',
             self::IN_PROGRESS->value      => 'gray',
             self::CHANGE_REQUESTED->value => 'warning',
             self::APPROVED->value         => 'success',
