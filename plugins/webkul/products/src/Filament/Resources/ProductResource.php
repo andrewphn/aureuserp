@@ -319,8 +319,7 @@ class ProductResource extends Resource
                                         return 'Enter box cost and units per box to calculate';
                                     }),
                             ])
-                            ->collapsible()
-                            ->collapsed(),
+                            ->collapsible(),
                     ])
                     ->columnSpan(['lg' => 1]),
             ])
