@@ -1050,8 +1050,8 @@ PROMPT;
             $slug = substr($slug, 0, 50); // Limit length
             $filename = $slug . '-' . time() . '-' . bin2hex(random_bytes(4)) . '.' . $extension;
 
-            // Ensure directory exists
-            $directory = storage_path('app/public/products/images');
+            // Ensure directory exists - use 'products/' to match FileUpload component
+            $directory = storage_path('app/public/products');
             if (!is_dir($directory)) {
                 mkdir($directory, 0755, true);
             }
@@ -1065,7 +1065,7 @@ PROMPT;
                 'saved_to' => $filename,
             ]);
 
-            return 'products/images/' . $filename;
+            return 'products/' . $filename;
 
         } catch (\Exception $e) {
             Log::error('GeminiProductService: Error downloading image', [
