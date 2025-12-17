@@ -3,7 +3,6 @@
 namespace Webkul\Timesheet\Filament\Widgets;
 
 use App\Services\ClockingService;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Webkul\Project\Models\Timesheet;
@@ -18,13 +17,19 @@ use Webkul\Project\Models\Timesheet;
  */
 class AttendanceStatsWidget extends BaseWidget
 {
-    use HasWidgetShield;
-
     protected static ?int $sort = 1;
 
     protected ?string $pollingInterval = '30s';
 
     protected int | string | array $columnSpan = 'full';
+
+    /**
+     * Determine if the widget can be viewed.
+     */
+    public static function canView(): bool
+    {
+        return true;
+    }
 
     protected function getHeading(): ?string
     {

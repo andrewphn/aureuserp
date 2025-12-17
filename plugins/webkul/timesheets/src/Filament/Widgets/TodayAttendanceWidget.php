@@ -3,7 +3,6 @@
 namespace Webkul\Timesheet\Filament\Widgets;
 
 use App\Services\ClockingService;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -18,13 +17,19 @@ use Webkul\Employee\Models\Employee;
  */
 class TodayAttendanceWidget extends BaseWidget
 {
-    use HasWidgetShield;
-
     protected static ?int $sort = 2;
 
     protected int | string | array $columnSpan = 'full';
 
     protected ?string $pollingInterval = '60s';
+
+    /**
+     * Determine if the widget can be viewed.
+     */
+    public static function canView(): bool
+    {
+        return true;
+    }
 
     public function getTableHeading(): ?string
     {
