@@ -671,12 +671,11 @@ class ProductResource extends Resource
 
                         Section::make(__('products::filament/resources/product.infolist.sections.images.title'))
                             ->schema([
-                                SpatieMediaLibraryImageEntry::make('product-images')
-                                    ->collection('product-images')
-                                    ->conversion('medium')
-                                    ->hiddenLabel(),
-                            ])
-                            ->visible(fn ($record): bool => $record->hasMedia('product-images')),
+                                SpatieMediaLibraryImageEntry::make('images')
+                                    ->allCollections()
+                                    ->label('Product images'),
+                            ]),
+                            // ->visible(fn ($record): bool => $record->hasMedia('product-images')),
 
                         Section::make(__('products::filament/resources/product.infolist.sections.inventory.title'))
                             ->schema([

@@ -28,6 +28,7 @@ class TimesheetServiceProvider extends PackageServiceProvider
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
+            ->hasViews()
             ->hasTranslations()
             ->hasDependencies([
                 'projects',
