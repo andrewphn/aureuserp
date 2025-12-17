@@ -1954,19 +1954,129 @@
         ],
         "status": "pending",
         "subtasks": []
+      },
+      {
+        "id": 56,
+        "title": "Create Weekly Hours Report Widget for Owner Dashboard",
+        "description": "Build a Filament TableWidget showing weekly hours per employee with daily breakdown (Mon-Thu), overtime highlighting, and missing punch alerts. This addresses US-3.2 for Bryan's quick weekly overview.",
+        "details": "Create WeeklyHoursReportWidget.php in plugins/webkul/timesheets/src/Filament/Widgets/. Use existing ClockingService::getWeeklySummary() method. Implementation: 1) Extend Filament\\Widgets\\TableWidget, 2) Query all active employees via Employee model, 3) For each employee call ClockingService->getWeeklySummary(), 4) Columns: Employee Name | Mon | Tue | Wed | Thu | Total | Overtime | Status, 5) Conditional coloring: red for overtime (>8h/day or >32h/week), yellow for missing punches, 6) Date range picker filter, 7) Export action button linking to ClockController::exportTeamSummary(), 8) 60-second polling for auto-refresh. Reference TodayAttendanceWidget.php pattern. Register in TimesheetPlugin.php widgets array.",
+        "testStrategy": "1. Verify widget appears on timesheet dashboard. 2. Test with multiple employees having varying hours. 3. Verify overtime highlighting for >8h/day and >32h/week. 4. Test date range filter. 5. Verify export button generates correct CSV. 6. Test auto-refresh updates data every 60 seconds.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 57,
+        "title": "Create Project Labor Hours Report Page",
+        "description": "Build a Filament Page showing total labor hours per project with employee breakdown, actual vs. estimated hours comparison, and cost analysis. This addresses US-3.3 for tracking job profitability.",
+        "details": "Create ProjectHoursReport.php as Filament Page in plugins/webkul/timesheets/src/Filament/Pages/. Query Timesheet model grouped by project_id, join with projects_projects for details. Calculate: SUM(unit_amount) grouped by project, employee, task. Display: Project Name | Total Hours | Allocated Hours | Variance | % Complete. Add drill-down table for per-employee breakdown. Include task-level breakdown if task_id populated. Date range filter. Calculate labor cost: hours x average hourly rate. Add navigation in TimesheetPlugin::getNavigation().",
+        "testStrategy": "1. Create test data with hours across multiple projects. 2. Verify totals match sum of individual entries. 3. Test variance calculation. 4. Verify drill-down shows employee breakdown. 5. Test date range filtering. 6. Test with projects having no time entries.",
+        "priority": "high",
+        "dependencies": ["56"],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 58,
+        "title": "Implement AI Time Clock Command Execution Handler",
+        "description": "Create handler service that executes time clock commands from AI responses (clock_in, clock_out, get_clock_status, etc.) by connecting GeminiCabinetAssistantService tool calls to ClockingService methods.",
+        "details": "Create TimeClockAiHandler.php in app/Services/. GeminiCabinetAssistantService already defines tools. Implementation: 1) Create handler with execute(array $command, ?int $currentUserId), 2) Resolve employee_name to user_id using Employee model, 3) Map commands: clock_in to clockIn(), clock_out to clockOut(), get_clock_status to getStatus(), get_weekly_hours to getWeeklySummary(), add_manual_entry to addManualEntry(), get_team_attendance to getTodayAttendance(), 4) Resolve project_name to project_id, 5) Return formatted response for AI. Integrate in CabinetAiAssistant Livewire handleAiCommand() method.",
+        "testStrategy": "1. Test 'clock me in' clocks in current user. 2. Test 'clock Ben out with 45 min lunch' works. 3. Test 'how many hours this week' returns summary. 4. Test 'who is in today' returns attendance. 5. Test manual entry creates correctly. 6. Test error handling for unknown employee names.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 59,
+        "title": "Add Training Time Tracking for Apprentices",
+        "description": "Extend Timesheet model and UI to track training vs. production time for apprentices. Includes time_type field, training categories, and mentor association. Addresses US-4.1.",
+        "details": "Migration: Add to analytic_records: time_type ENUM (production, training), training_category STRING nullable, mentor_id FK users. Timesheet model: Add scopeTraining(), scopeProduction(), belongsTo mentor(), getTrainingRatio(). Kiosk UI: Add time_type toggle on clock-out for apprentice role, training category dropdown, mentor selection. FilamentPHP form: Add time_type/training_category fields with conditional visibility. Add training report widget showing ratio.",
+        "testStrategy": "1. Verify migration adds columns. 2. Test kiosk shows training options only for apprentice role. 3. Verify training category dropdown appears. 4. Test training report shows correct ratio. 5. Verify mentor saves correctly. 6. Test filtering by time_type.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 60,
+        "title": "Create Punctuality and Late Arrival Report",
+        "description": "Build report showing early/late arrival patterns by employee with configurable on-time window. Helps Bryan identify attendance issues. Addresses US-5.3.",
+        "details": "Create PunctualityReportWidget.php in plugins/webkul/timesheets/src/Filament/Widgets/. Config: on-time window 7:45am-8:15am via env. Query clock entries, classify: early, on-time, late. Calculate per-employee: percent on-time, avg arrival time, late count. Display: Employee | On-Time Percent | Avg Arrival | Late Days | Early Days. Week/month filter. Highlight below 80 percent on-time in red. Extend Timesheet model with getArrivalStatus() method.",
+        "testStrategy": "1. Create test entries with various arrival times. 2. Verify classification works correctly. 3. Test percentage calculations. 4. Verify date range filter. 5. Test highlighting for low on-time percentage.",
+        "priority": "medium",
+        "dependencies": ["56"],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 61,
+        "title": "Implement Forgot to Clock Out Notification System",
+        "description": "Create scheduled job sending notifications at 5:30pm to employees still clocked in, and prompts for correction next day. Addresses US-5.1.",
+        "details": "Create SendClockOutReminders command: Find users clocked in after 5:15pm, send notification via Laravel notifications. Create ClockOutReminderNotification.php. Schedule in Kernel.php: weekdays at 17:15. Create MissedClockOutJob for next-day handling: Run at 7am, find incomplete entries, notify employee and supervisor, flag for correction. Add Filament notification bell integration.",
+        "testStrategy": "1. Test reminder finds only users still clocked in. 2. Verify notifications sent via configured channel. 3. Test next-day job flags entries. 4. Verify supervisor notification. 5. Test with no one clocked in. 6. Test timezone handling.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 62,
+        "title": "Add Mentor Check-In Feature for Apprentices",
+        "description": "Create end-of-day prompt for apprentices to record mentor check-ins with notes field. Visible to mentors and owner. Addresses US-4.2.",
+        "details": "Migration: Create apprentice_checkins table (id, apprentice_user_id, mentor_user_id, date, learnings, questions, mentor_verified, timestamps). Kiosk integration: On clock-out for apprentice, show optional check-in prompt with Yes/No/Skip, text field for learnings. FilamentPHP: Create ApprenticeCheckinResource, mentor dashboard widget, owner report. AI integration: Add log_training_activity execution to TimeClockAiHandler.",
+        "testStrategy": "1. Verify prompt shows only for apprentice role. 2. Test saving with/without notes. 3. Verify mentor sees apprentice check-ins. 4. Test owner views all check-ins. 5. Verify skip does not create record. 6. Test AI creates check-in.",
+        "priority": "low",
+        "dependencies": ["59"],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 63,
+        "title": "Create Kiosk Security and IP Restriction Middleware",
+        "description": "Enhance kiosk security with IP whitelisting middleware, configurable PIN requirements, and audit logging for all clock actions.",
+        "details": "Create KioskIpMiddleware.php: Check request IP against config whitelist, log denied access, abort 403 if not allowed. Config file config/kiosk.php: allowed_ips, pin_required, pin_length, session_timeout. Audit logging: Create clock_audit_logs table, log all actions with user_id, action, ip, user_agent, timestamp. Add ClockAuditListener. Register middleware as kiosk.ip in Kernel.php.",
+        "testStrategy": "1. Test access blocked from non-whitelisted IP. 2. Test access allowed from whitelisted IP. 3. Test empty whitelist allows all. 4. Verify audit log captures actions. 5. Test PIN requirement config. 6. Test session timeout.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 64,
+        "title": "Add Split Time Across Multiple Projects Feature",
+        "description": "Enable employees to split daily hours across multiple projects at clock-out time. Supports US-2.1 requirement for working on multiple jobs in one day.",
+        "details": "Kiosk blade: Add Split between projects toggle, dynamic form with Project selector plus Hours input, add row button, validate total equals worked hours. ClockingService::clockOut(): Accept array of project assignments, if multiple create one Timesheet entry per project with split hours. Livewire: Add projectSplits array, addProjectSplit()/removeProjectSplit() methods, validate totals.",
+        "testStrategy": "1. Test splitting 8 hours between 2 projects. 2. Test splitting between 3 projects. 3. Verify validation fails if hours do not sum. 4. Test single project still works. 5. Verify each project gets separate Timesheet entry. 6. Test AI command for splitting.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 65,
+        "title": "Implement Offline Support and PWA for Kiosk",
+        "description": "Add PWA capabilities to kiosk with offline queue for clock actions, auto-sync when connection restored, and installable app for shop tablets.",
+        "details": "PWA: Create manifest.json for TCS Time Clock, create service-worker.js to cache kiosk assets and intercept /api/clock/* requests. IndexedDB queue: Store offline clock actions with action, user_id, timestamp, data, synced flag. Sync logic: On reconnect process queue in order, update UI with sync status, handle conflicts. Update kiosk blade: Register service worker, show offline indicator, display pending sync count.",
+        "testStrategy": "1. Test kiosk loads while offline. 2. Test clock-in queues when offline. 3. Verify sync occurs on reconnect. 4. Test conflict handling. 5. Verify pending count displays. 6. Test PWA installable on tablet. 7. Test service worker updates.",
+        "priority": "low",
+        "dependencies": ["63"],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-28T21:08:38.401Z",
-      "taskCount": 55,
+      "lastModified": "2025-12-17T14:10:00.000Z",
+      "taskCount": 65,
       "completedCount": 24,
       "tags": [
         "master"
       ],
       "created": "2025-12-01T01:39:31.043Z",
       "description": "Tasks for master context",
-      "updated": "2025-12-01T01:39:31.044Z"
+      "updated": "2025-12-17T14:10:00.000Z"
     }
   }
 }
