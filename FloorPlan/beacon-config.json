@@ -1,0 +1,26 @@
+{
+    "uuid": null,
+    "beacons": {},
+    "measured_power": -59,
+    "path_loss_exponent": 2.5,
+    "updated_at": null,
+    "setup_guide": {
+        "step_1": "Find your beacon UUIDs using a beacon scanner app (iOS: Locate Beacon, Android: nRF Connect)",
+        "step_2": "Place beacons at 4 corners of the warehouse (or strategic locations)",
+        "step_3": "Register each beacon with its floor plan position using the setup page",
+        "step_4": "Test positioning by walking around with the scanner",
+        "recommended_apps": {
+            "ios": ["Locate Beacon", "Beacon Scanner"],
+            "android": ["nRF Connect", "Beacon Scanner", "BLE Scanner"]
+        }
+    },
+    "beacon_positions_guide": {
+        "description": "Suggested beacon placement for 90ft x 130ft warehouse",
+        "positions": [
+            {"name": "Front Left (SW)", "floor_x": 50, "floor_y": 800, "description": "Near main entrance"},
+            {"name": "Front Right (SE)", "floor_x": 250, "floor_y": 800, "description": "Near front office"},
+            {"name": "Back Left (NW)", "floor_x": 50, "floor_y": 200, "description": "Near back storage"},
+            {"name": "Back Right (NE)", "floor_x": 250, "floor_y": 200, "description": "Near CNC area"}
+        ]
+    }
+}
